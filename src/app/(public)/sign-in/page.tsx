@@ -26,7 +26,7 @@ export default function LoginScreen() {
     router.push('/')
   }
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-black text-white p-4">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-background text-white p-4">
       <div className="flex flex-col items-start gap-6">
         {/* Logo */}
         <div className="w-full flex justify-center">
@@ -60,7 +60,9 @@ export default function LoginScreen() {
             <Separator className="w-full text-stroke-100" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-black px-2 text-sm text-stroke-100">ou</span>
+            <span className="bg-background px-2 text-sm text-stroke-100">
+              ou
+            </span>
           </div>
         </div>
 

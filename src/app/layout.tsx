@@ -19,8 +19,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`dark ${dmSans.className} antialiased`}>{children}</body>
+    <html lang="pt-BR">
+      <body className={`dark ${dmSans.className} bg-backgrund antialiased`}>
+        {children}
+      </body>
     </html>
   )
 }

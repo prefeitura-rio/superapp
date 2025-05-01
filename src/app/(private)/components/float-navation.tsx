@@ -35,7 +35,7 @@ export function FloatNavigation() {
   return (
     <>
       <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
-        <nav className="flex items-center justify-center gap-3 rounded-full bg-black px-4 py-3 backdrop-blur-sm">
+        <nav className="flex items-center justify-center gap-3 rounded-full bg-background px-4 py-3 backdrop-blur-sm">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon

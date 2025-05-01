@@ -5,10 +5,10 @@ import Link from 'next/link'
 
 export default function PrivacyNotice() {
   return (
-    <div className="relative min-h-svh bg-black text-white flex justify-center">
+    <div className="relative min-h-svh bg-background text-white flex justify-center">
       <div className="w-full max-w-md">
         {/* Fixed header */}
-        <div className="max-w-md mx-auto fixed top-0 left-0 right-0 z-10 bg-black px-4 py-10  flex items-center justify-center">
+        <div className="max-w-md mx-auto fixed top-0 left-0 right-0 z-10 bg-background px-4 py-10  flex items-center justify-center">
           <div className="absolute left-4">
             <Link href="/sign-in">
               <ArrowLeft className="h-7 w-7 text-white cursor-pointer" />
