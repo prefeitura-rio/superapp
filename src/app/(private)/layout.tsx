@@ -1,3 +1,5 @@
+import { FloatNavigation } from './components/float-navation'
+
 export default function PrivateLayout({
   children,
 }: Readonly<{
@@ -5,8 +7,8 @@ export default function PrivateLayout({
 }>) {
   return (
     <div>
-      <h1>Private</h1>
       {children}
+      <FloatNavigation />
     </div>
   )
 }
