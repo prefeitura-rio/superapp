@@ -42,11 +42,11 @@ export default function MainHeader() {
     },
   ])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <header className="bg-background text-white px-4 py-3">
-      <div className="mx-auto flex max-w-md items-center justify-between">
+    <header className="fixed top-0 left-0 w-full z-50 bg-background text-white px-4 py-3 shadow">
+      <div className="mx-auto md:px-4 flex max-w-md items-center justify-between">
         <Link href="/user-profile" className="rounded-full bg-zinc-800 p-2">
           <User className="h-5 w-5" />
           {/* <span className="sr-only">User Settings</span> */}
@@ -86,7 +86,7 @@ export default function MainHeader() {
                   </DrawerTitle>
                 </DrawerHeader>
                 <div className="divide-y">
-                  {notifications.map((notification) => (
+                  {notifications.map(notification => (
                     <div
                       key={notification.id}
                       className={cn(

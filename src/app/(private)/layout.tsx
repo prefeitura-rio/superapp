@@ -9,7 +9,7 @@ export default function PrivateLayout({
   return (
     <div>
       <MainHeader />
-      {children}
+      <main className="pt-15">{children}</main>
       <FloatNavigation />
     </div>
   )
