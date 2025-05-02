@@ -1,3 +1,5 @@
+import bolsaFamilia from '@/assets/bolsaFamilia.svg'
+import icon1746 from '@/assets/icon1746.svg'
 import updateEmail from '@/assets/updateEmail.svg'
 import updateNumber from '@/assets/updateNumber.svg'
 import Image from 'next/image'
@@ -57,23 +59,56 @@ export default function Home() {
       <section className="px-5 mt-6">
         <h2 className="text-xl font-bold mb-4">Carteira</h2>
 
-        <div className="relative h-[410px] w-full">
+        <div className="relative h-[470px] w-full">
           {/* Overlapping cards */}
           <Link
             href="/wallet/chamados"
-            className="absolute top-[200px] left-0 right-0 h-[200px] bg-[#d0f7e6] rounded-3xl z-30 shadow-md"
+            className="absolute top-[180px] left-0 right-0 h-[200px] bg-[#d0f7e6] rounded-3xl z-30 shadow-md"
           >
-            <div className="p-6 text-black">
-              <h3 className="text-lg font-medium">Chamados do 1746</h3>
+            <div className="p-6 text-black h-full flex flex-col">
+              <div className="flex justify-between">
+                <h3 className="text-lg font-medium">Zeladoria</h3>
+                <Image
+                  src={icon1746} // Replace with your image path
+                  alt="Zeladoria"
+                  width={50}
+                  height={19}
+                  className="h-8 w-auto"
+                />
+              </div>
+              <div className="mt-auto">
+                <div className="flex gap-12">
+                  <div className="flex flex-col items-left">
+                    <span className="text-sm">Chamados</span>
+                    <span className="text-lg font-medium">29</span>
+                  </div>
+                  <div className="flex flex-col items-left">
+                    <span className="text-sm">Abertos</span>
+                    <span className="text-lg font-medium">3</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </Link>
 
           <Link
             href="/wallet/beneficios"
-            className="absolute top-[100px] left-0 right-0 h-[200px] bg-[#fff2cc] rounded-3xl z-20 shadow-md"
+            className="absolute top-[90px] left-0 right-0 h-[200px] bg-[#fff2cc] rounded-3xl z-20 shadow-md"
           >
-            <div className="p-6 text-black">
-              <h3 className="text-lg font-medium">Benefícios sociais</h3>
+            <div className="p-6 text-black h-full flex flex-col">
+              <div className="flex justify-between">
+                <div>
+                  <h1 className="text-md font-medium">Bolsa Família</h1>
+                  <h3 className="text-xl font-medium">6352 7758 4323</h3>
+                </div>
+                <Image
+                  src={bolsaFamilia} // Replace with your image path
+                  alt="Bolsa Família"
+                  width={60}
+                  height={60}
+                  className="h-12 w-auto"
+                />
+              </div>
             </div>
           </Link>
 
@@ -81,8 +116,24 @@ export default function Home() {
             href="/wallet/saude"
             className="absolute top-0 left-0 right-0 h-[200px] bg-[#d6e8ff] rounded-3xl z-10 shadow-md"
           >
-            <div className="p-6 text-black">
-              <h3 className="text-lg font-medium">Saúde</h3>
+            <div className="p-6 text-black h-full flex flex-col">
+              <div className="flex justify-between">
+                <div>
+                  <h1 className="text-md font-medium">Clínica da Família</h1>
+                  <h3 className="text-xl font-medium">Marina Sebastiana</h3>
+                </div>
+                {/* <Image
+                  src="/path-to-your-image.png" // Replace with your image path
+                  alt="Clínica da Família"
+                  width={60}
+                  height={60}
+                  className="h-12 w-auto"
+                /> */}
+              </div>
+              <div className="mt-auto">
+                <span className="text-sm">PROCEAMA</span>
+                <span className="text-sm block">Família</span>
+              </div>
             </div>
           </Link>
         </div>
