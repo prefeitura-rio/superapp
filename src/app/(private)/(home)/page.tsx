@@ -4,10 +4,12 @@ import updateEmail from '@/assets/updateEmail.svg'
 import updateNumber from '@/assets/updateNumber.svg'
 import Image from 'next/image'
 import Link from 'next/link'
+import MainHeader from '../components/main-header'
 
 export default function Home() {
   return (
-    <main className="flex max-w-md mx-auto flex-col bg-background text-white">
+    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
+      <MainHeader />
       {/* Header */}
       <header className="p-5">
         <h1 className="text-2xl font-bold">Olá, Marina</h1>
@@ -63,7 +65,7 @@ export default function Home() {
           {/* Overlapping cards */}
           <Link
             href="/wallet/chamados"
-            className="absolute top-[180px] left-0 right-0 h-[200px] bg-[#d0f7e6] rounded-3xl z-30 shadow-md"
+            className="absolute top-[180px] left-0 right-0 h-[200px] bg-green-100 rounded-3xl z-30 shadow-md"
           >
             <div className="p-6 text-black h-full flex flex-col">
               <div className="flex justify-between">
@@ -93,7 +95,7 @@ export default function Home() {
 
           <Link
             href="/wallet/beneficios"
-            className="absolute top-[90px] left-0 right-0 h-[200px] bg-[#fff2cc] rounded-3xl z-20 shadow-md"
+            className="absolute top-[90px] left-0 right-0 h-[200px] bg-yellow-100 rounded-3xl z-20 shadow-md"
           >
             <div className="p-6 text-black h-full flex flex-col">
               <div className="flex justify-between">
@@ -114,7 +116,7 @@ export default function Home() {
 
           <Link
             href="/wallet/saude"
-            className="absolute top-0 left-0 right-0 h-[200px] bg-[#d6e8ff] rounded-3xl z-10 shadow-md"
+            className="absolute top-0 left-0 right-0 h-[200px] bg-blue-100 rounded-3xl z-10 shadow-md"
           >
             <div className="p-6 text-black h-full flex flex-col">
               <div className="flex justify-between">

@@ -1,5 +1,4 @@
 import { FloatNavigation } from './components/float-navation'
-import MainHeader from './components/main-header'
 
 export default function PrivateLayout({
   children,
@@ -8,8 +7,7 @@ export default function PrivateLayout({
 }>) {
   return (
     <div>
-      <MainHeader />
-      <main className="pt-15">{children}</main>
+      <main>{children}</main>
       <FloatNavigation />
     </div>
   )
