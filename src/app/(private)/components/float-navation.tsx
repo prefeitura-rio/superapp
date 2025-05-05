@@ -1,6 +1,5 @@
 'use client'
 
-import { FlowType, usePageTransitions } from '@/app/page-transitions'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -13,7 +12,8 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import * as React from 'react'
 
 interface NavItem {
@@ -31,27 +31,20 @@ const navItems: NavItem[] = [
 export function FloatNavigation() {
   const pathname = usePathname()
   const [open, setOpen] = React.useState(false)
-  const transitions = usePageTransitions()
-  const router = useRouter()
-
-  function onRedirect(path: string) {
-    transitions.hide(FlowType.Next).then(() => router.push(path))
-  }
 
   return (
     <>
       <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
         <nav className="flex items-center justify-center gap-3 rounded-full bg-background px-4 py-3 backdrop-blur-sm">
-          {navItems.map(item => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
 
             return (
-              <button
+              <Link
                 key={item.href}
-                type="button"
-                onClick={() => onRedirect(item.href)}
-                className="group flex items-center justify-center focus:outline-none"
+                href={item.href}
+                className="group flex items-center justify-center"
                 aria-label={item.label}
               >
                 <div
@@ -69,7 +62,7 @@ export function FloatNavigation() {
                     )}
                   />
                 </div>
-              </button>
+              </Link>
             )
           })}
 

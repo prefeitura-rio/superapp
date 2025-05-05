@@ -1,23 +1,12 @@
-'use client'
-
-import { usePageTransitions } from '@/app/page-transitions'
 import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import icon1746 from '@/assets/icon1746.svg'
 import updateEmail from '@/assets/updateEmail.svg'
 import updateNumber from '@/assets/updateNumber.svg'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect } from 'react'
 import MainHeader from '../components/main-header'
 
 export default function Home() {
-  const transitions = usePageTransitions()
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    transitions.show()
-  }, [])
-
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
       <MainHeader />
