@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
 import './globals.css'
+import {
+  AnimationType,
+  type PageTransitionsConfiguration,
+  PageTransitionsProvider,
+} from './page-transitions'
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
@@ -18,10 +23,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const config: PageTransitionsConfiguration = {
+    animation: {
+      type: AnimationType.SlideHorizontally,
+      duration: 200,
+    },
+  }
   return (
     <html lang="pt-BR">
-      <body className={`dark ${dmSans.className} bg-backgrund antialiased`}>
-        {children}
+      <body className={`dark ${dmSans.className} bg-background antialiased`}>
+        <PageTransitionsProvider config={config}>
+          {children}
+        </PageTransitionsProvider>
       </body>
     </html>
   )

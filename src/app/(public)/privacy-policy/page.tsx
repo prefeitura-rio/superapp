@@ -1,18 +1,37 @@
 'use client'
 
+import { FlowType, usePageTransitions } from '@/app/page-transitions'
+import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function PrivacyNotice() {
+  const transitions = usePageTransitions()
+  const router = useRouter()
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    transitions.show()
+  }, [])
+
+  function onBack() {
+    transitions.hide(FlowType.Previous).then(() => router.push('/sign-in'))
+  }
+
+  function onNext() {
+    transitions.hide(FlowType.Next).then(() => router.push('/page3'))
+  }
   return (
     <div className="relative min-h-svh bg-background text-white flex justify-center">
       <div className="w-full max-w-md">
         {/* Fixed header */}
         <div className="max-w-md mx-auto fixed top-0 left-0 right-0 z-10 bg-background px-4 py-10  flex items-center justify-center">
           <div className="absolute left-4">
-            <Link href="/sign-in">
+            <Button variant="ghost" size="icon" onClick={onBack}>
               <ArrowLeft className="h-7 w-7 text-white cursor-pointer" />
-            </Link>
+            </Button>
           </div>
           <h1 className="text-white font-semibold text-base text-center">
             Aviso de privacidade

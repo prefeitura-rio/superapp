@@ -1,10 +1,20 @@
+'use client'
+import { usePageTransitions } from '@/app/page-transitions'
 import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import icon1746 from '@/assets/icon1746.svg'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect } from 'react'
 import MainHeader from '../components/main-header'
 
 export default function Wallet() {
+  const transitions = usePageTransitions()
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    transitions.show()
+  }, [])
+
   return (
     <>
       <MainHeader />

@@ -3,8 +3,9 @@
 import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import { FlowType, usePageTransitions } from '@/app/page-transitions'
 import govbr from '@/assets/govbr.svg'
 import prefeitura from '@/assets/prefeitura.svg'
 import { Button } from '@/components/ui/button'
@@ -15,7 +16,18 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false)
+  const transitions = usePageTransitions()
   const router = useRouter()
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    transitions.show()
+  }, [])
+
+  function onRedirect(path: string) {
+    transitions.hide(FlowType.Next).then(() => router.push(path))
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -23,7 +35,7 @@ export default function LoginScreen() {
     document.cookie = `token=fake-token-value; path=/; max-age=${60 * 60 * 24}`
 
     // Redirect to /services
-    router.push('/')
+    onRedirect('/')
   }
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background text-white p-4">
@@ -133,9 +145,13 @@ export default function LoginScreen() {
 
         {/* Privacy */}
         <div className="w-full text-center">
-          <Link href="/privacy-policy" className="text-xs text-gray-100">
+          <Button
+            variant="link"
+            onClick={() => onRedirect('/privacy-policy')}
+            className="text-xs text-gray-100"
+          >
             Aviso de privacidade
-          </Link>
+          </Button>
         </div>
       </div>
     </div>
