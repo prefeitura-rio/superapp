@@ -1,12 +1,22 @@
+'use client'
+
 import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import icon1746 from '@/assets/icon1746.svg'
 import updateEmail from '@/assets/updateEmail.svg'
 import updateNumber from '@/assets/updateNumber.svg'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect } from 'react'
 import MainHeader from '../components/main-header'
 
 export default function Home() {
+
+  useEffect(() => {
+    fetch('/api/protected', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => console.log('Dados protegidos:', data));
+  }, []);
+
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
       <MainHeader />

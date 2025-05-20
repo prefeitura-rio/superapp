@@ -55,7 +55,7 @@ export default function ProfilePage() {
           <MenuItem
             icon={<LogOut className="h-5 w-5" />}
             label="Sair"
-            href="/public/sign-in"
+            href="/api/auth/logout"
             isLast
           />
         </nav>
