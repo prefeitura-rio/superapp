@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { v4 as uuidv4 } from 'uuid'
 
 import govbr from '@/assets/govbr.svg'
 import prefeitura from '@/assets/prefeitura.svg'
@@ -9,8 +10,20 @@ import { Button } from '@/components/ui/button'
 
 export default function LoginScreen() {
   const handleGovbrLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_GOVBR_URL}/auth?client_id=${process.env.NEXT_PUBLIC_GOVBR_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_GOVBR_REDIRECT_URI}&response_type=code&scope=openid
-    `
+    const state = uuidv4()
+    const scope = `${encodeURIComponent('openid+profile+address+phone+roles')}`
+    const redirectUri = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI
+    const clientId = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
+    const idCariocaBaseUrl = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL
+
+    if (!redirectUri || !clientId || !idCariocaBaseUrl) {
+      console.error('Missing environment variables for GovBR login')
+      return
+    }
+
+    window.location.href = `${idCariocaBaseUrl}/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`
   }
 
   return (
