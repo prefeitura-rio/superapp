@@ -1,16 +1,19 @@
-import bolsaFamilia from "@/assets/bolsaFamilia.svg";
-import icon1746 from "@/assets/icon1746.svg";
-import Image from "next/image";
-import Link from "next/link";
+import bolsaFamilia from '@/assets/bolsaFamilia.svg'
+import icon1746 from '@/assets/icon1746.svg'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function CarteiraSection() {
   return (
     <section className="px-5 mt-6 pb-24">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-md font-medium">Carteira</h2>
-        <span className="text-md text-[#A2A2A2] cursor-pointer font-medium">
+        <Link
+          href="/wallet"
+          className="text-md text-[#A2A2A2] cursor-pointer font-medium"
+        >
           ver tudo
-        </span>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-4 w-full">
@@ -25,14 +28,16 @@ export default function CarteiraSection() {
                 <h3 className="text-xl font-medium">Marina Sebastiana</h3>
               </div>
             </div>
-           <div className="mt-auto">
+            <div className="mt-auto">
               <div className="flex gap-12">
                 <div className="flex flex-col items-left">
                   <span className="text-xs">Situação</span>
                   <span className="text-sm font-medium">Normal</span>
                 </div>
                 <div className="flex flex-col items-left">
-                  <span className="text-xs truncate max-w-[150px]">Horário de Atendimento </span>
+                  <span className="text-xs truncate max-w-[150px]">
+                    Horário de Atendimento{' '}
+                  </span>
                   <span className="text-sm font-medium">7h às 18h</span>
                 </div>
               </div>
@@ -58,14 +63,18 @@ export default function CarteiraSection() {
                 className="h-12 w-auto"
               />
             </div>
-             <div className="mt-auto">
+            <div className="mt-auto">
               <div className="flex gap-3">
                 <div className="flex flex-col items-left">
                   <span className="text-xs">Status</span>
-                <span className="text-sm font-medium truncate max-w-[150px]">Atualizar Cadastro</span>
+                  <span className="text-sm font-medium truncate max-w-[150px]">
+                    Atualizar Cadastro
+                  </span>
                 </div>
                 <div className="flex flex-col items-left">
-                  <span className="text-xs truncate max-w-[150px]">Data de recadastramento</span>
+                  <span className="text-xs truncate max-w-[150px]">
+                    Data de recadastramento
+                  </span>
                   <span className="text-sm font-medium">17.06.2025</span>
                 </div>
               </div>
@@ -104,5 +113,5 @@ export default function CarteiraSection() {
         </Link>
       </div>
     </section>
-  );
+  )
 }
