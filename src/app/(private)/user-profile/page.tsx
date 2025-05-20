@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import {
+  Briefcase,
   CheckCircle,
   ChevronRight,
   LogOut,
@@ -14,7 +15,7 @@ import { SecondaryHeader } from '../components/secondary-header'
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen pt-20 max-w-md mx-auto text-white flex flex-col">
+    <div className="pb-25 pt-20 max-w-md mx-auto text-white flex flex-col">
       {/* Header */}
       <SecondaryHeader title="Perfil" />
 
@@ -26,15 +27,21 @@ export default function ProfilePage() {
           </AvatarFallback>
         </Avatar>
         <h2 className="text-xl font-semibold mb-1">Marina Duarte</h2>
-        <p className="text-gray-400">408.567.553-13</p>
+        <p className="text-sm text-gray-500">408.567.553-13</p>
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 px-4">
+      <div className="flex-1 px-5">
         <nav className="space-y-1">
           <MenuItem
             icon={<User className="h-5 w-5" />}
             label="Informações pessoais"
+            href="/user-profile/user-personal-info"
+            isFirst={true}
+          />
+          <MenuItem
+            icon={<Briefcase className="h-5 w-5" />}
+            label="Trabalho"
             href="/user-profile/user-personal-info"
           />
           <MenuItem
@@ -56,7 +63,6 @@ export default function ProfilePage() {
             icon={<LogOut className="h-5 w-5" />}
             label="Sair"
             href="/api/auth/logout"
-            isLast
           />
         </nav>
       </div>
@@ -68,21 +74,21 @@ function MenuItem({
   icon,
   label,
   href = '#',
-  isLast = false,
-}: { icon: React.ReactNode; label: string; href?: string; isLast?: boolean }) {
+  isFirst = false,
+}: { icon: React.ReactNode; label: string; href?: string; isFirst?: boolean }) {
   return (
     <Link
       href={href}
       className={cn(
-        'flex items-center justify-between py-4 text-white',
-        !isLast && 'border-b border-gray-800'
+        'flex items-center justify-between py-5 text-white',
+        'border-b color-border', isFirst && 'border-t color-border',
       )}
     >
       <div className="flex items-center gap-3">
         {icon}
         <span>{label}</span>
       </div>
-      <ChevronRight className="h-5 w-5 text-gray-500" />
+      <ChevronRight className="h-5 w-5 text-primary" />
     </Link>
   )
 }
