@@ -2,6 +2,7 @@
 import { Card } from '@/components/ui/card'
 import { Briefcase, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
+import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
 
 export default function ServicesPage() {
@@ -35,6 +36,7 @@ export default function ServicesPage() {
           ))}
         </div>
       </div>
+      <FloatNavigation />
     </>
   )
 }

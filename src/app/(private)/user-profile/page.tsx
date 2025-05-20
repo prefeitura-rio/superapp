@@ -47,7 +47,8 @@ export default function ProfilePage() {
           <MenuItem
             icon={<MapIcon className="h-5 w-5" />}
             label="Endereço"
-            href="/user-profile/user-address"
+            // href="/user-profile/user-address"
+            href="/user-profile/"
           />
           <MenuItem
             icon={<CheckCircle className="h-5 w-5" />}
@@ -81,7 +82,8 @@ function MenuItem({
       href={href}
       className={cn(
         'flex items-center justify-between py-5 text-white',
-        'border-b color-border', isFirst && 'border-t color-border',
+        'border-b color-border',
+        isFirst && 'border-t color-border'
       )}
     >
       <div className="flex items-center gap-3">
