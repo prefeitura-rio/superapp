@@ -50,15 +50,17 @@ export function FloatNavigation() {
                 <div
                   className={cn(
                     'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
-                    isActive ? 'bg-gray-800' : 'bg-gray-200 hover:bg-zinc-700'
+                    isActive
+                      ? 'bg-muted'
+                      : 'bg-muted/30 hover:bg-muted'
                   )}
                 >
                   <Icon
                     className={cn(
                       'h-6 w-6 transition-colors',
                       isActive
-                        ? 'text-white'
-                        : 'text-gray-400 group-hover:text-white'
+                        ? 'text-card-foreground'
+                        : 'text-card-foreground/30 group-hover:text-white'
                     )}
                   />
                 </div>
@@ -69,7 +71,7 @@ export function FloatNavigation() {
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
           <div
             onClick={() => setOpen(true)}
-            className="group flex cursor-pointer h-12 w-12 items-center justify-center rounded-full bg-gray-200 hover:bg-zinc-700 transition-colors"
+            className="group flex cursor-pointer h-12 w-12 items-center justify-center rounded-full bg-muted/30 hover:bg-muted transition-colors"
           >
             <MessageCircle className="h-6 w-6 text-gray-400 group-hover:text-white" />
           </div>
