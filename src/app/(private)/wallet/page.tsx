@@ -3,6 +3,7 @@ import icon1746 from '@/assets/icon1746.svg'
 import Image from 'next/image'
 import Link from 'next/link'
 import MainHeader from '../components/main-header'
+import { FloatNavigation } from '../components/float-navation'
 
 export default function Wallet() {
   return (
@@ -114,6 +115,7 @@ export default function Wallet() {
             </Link>
           </div>
         </section>
+        <FloatNavigation />
       </main>
     </>
   )

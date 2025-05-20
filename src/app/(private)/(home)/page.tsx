@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { FloatNavigation } from "../components/float-navation";
 import MainHeader from "../components/main-header";
 import MostAccessedServiceCards from "../components/most-accessed-services-cards";
 import SuggestionCards from "../components/suggestion-cards";
@@ -29,6 +30,8 @@ export default function Home() {
 
       {/* Carteira section */}
       <CarteiraSection />
+
+      <FloatNavigation />
     </main>
   );
 }
