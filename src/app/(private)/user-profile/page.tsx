@@ -42,7 +42,7 @@ export default function ProfilePage() {
           <MenuItem
             icon={<Briefcase className="h-5 w-5" />}
             label="Trabalho"
-            href="/user-profile/user-personal-info"
+            href="/user-profile/user-job-info"
           />
           <MenuItem
             icon={<MapIcon className="h-5 w-5" />}
