@@ -1,7 +1,8 @@
-import boyStudying from "@/assets/boyStudying.svg";
-import smilingWoman from "@/assets/smilingWoman.svg";
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
+import boyStudying from '@/assets/boyStudying.svg'
+import businessMan from '@/assets/businessMan.svg'
+import smilingWoman from '@/assets/smilingWoman.svg'
+import { Badge } from '@/components/ui/badge'
+import Image from 'next/image'
 
 export default function SuggestionCards() {
   return (
@@ -33,7 +34,19 @@ export default function SuggestionCards() {
             className="h-36 w-auto absolute -bottom-4 -right-0 z-20"
           />
         </div>
+        <div className="w-[85vw] max-w-[350px] bg-red-100 h-[152px] rounded-lg overflow-hidden flex flex-col relative">
+          <p className="text-xl text-black font-medium z-10 absolute bottom-3 left-6">
+            Oportunidades
+            <br />
+            de <span className="font-bold">Emprego</span>
+          </p>
+          <Image
+            src={businessMan}
+            alt="Pessoa sentada em uma poltrona azul"
+            className="h-40 w-auto absolute -bottom-4 -right-0 z-20"
+          />
+        </div>
       </div>
     </div>
-  );
+  )
 }

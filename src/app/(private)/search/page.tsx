@@ -46,7 +46,7 @@ export default function Search() {
   ]
 
   return (
-    <div className="max-w-md mx-auto pt-10 flex flex-col space-y-6 pb-10">
+    <div className="max-w-md px-5 mx-auto pt-10 flex flex-col space-y-6 pb-10">
       <SearchInput
         placeholder="O que você precisa?"
         onBack={() => router.back()}
@@ -75,12 +75,12 @@ export default function Search() {
         <div className="grid grid-cols-3 gap-4">
           {categories.map((category, index) => (
             <div key={index} className="flex flex-col items-center">
-              <div className="relative bg-neutral-900 w-full aspect-square rounded-xl flex items-center justify-center hover:bg-neutral-800 transition">
+              <div className="relative bg-neutral-900 w-full aspect-square rounded-xl flex items-center justify-center hover:bg-neutral-800 transition border-2 border-gray-200">
                 <div className="flex items-center justify-center w-full h-full">
                   {category.icon}
                 </div>
                 {category.tag && (
-                  <span className="absolute left-1/2 -translate-x-1/2 bottom-3 text-xs text-white bg-orange-600 px-2 py-0.5 rounded-full">
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-2 text-xs text-white bg-orange-600 px-2 py-0.5 rounded-full">
                     {category.tag}
                   </span>
                 )}
