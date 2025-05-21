@@ -20,7 +20,7 @@ export default function Search() {
 
   return (
     <>
-      <div className="max-w-md px-5 mx-auto pt-10 flex flex-col space-y-6 pb-4">
+      <div className="max-w-md px-5 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         <SearchInput
           placeholder="O que você precisa?"
           onBack={() => router.back()}
