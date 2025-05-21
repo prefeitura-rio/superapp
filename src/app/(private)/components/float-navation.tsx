@@ -5,7 +5,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -36,7 +35,7 @@ export function FloatNavigation() {
     <>
       <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
         <nav className="flex items-center justify-center gap-3 rounded-full bg-background px-4 py-3 backdrop-blur-sm">
-          {navItems.map((item) => {
+          {navItems.map(item => {
             const isActive = pathname === item.href
             const Icon = item.icon
 
@@ -50,9 +49,7 @@ export function FloatNavigation() {
                 <div
                   className={cn(
                     'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
-                    isActive
-                      ? 'bg-muted'
-                      : 'bg-muted/30 hover:bg-muted'
+                    isActive ? 'bg-muted' : 'bg-muted/30 hover:bg-muted'
                   )}
                 >
                   <Icon
@@ -79,25 +76,29 @@ export function FloatNavigation() {
       </div>
 
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="p-6 pt-0">
-          <div className="mx-auto mb-4 mt-2 h-1.5 w-12 rounded-full bg-muted" />
-          <DrawerHeader>
-            <DrawerTitle>Você será direcionado</DrawerTitle>
-            <DrawerDescription>
-              para o Whatsapp da Prefeitura do Rio
-            </DrawerDescription>
+        <DrawerContent className="p-4 max-w-md! mx-auto rounded-t-3xl!">
+          <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          <DrawerHeader className="text-center px-4">
+            <DrawerTitle className="text-md">
+              Você será direcionado para o Whatsapp da Prefeitura do Rio
+            </DrawerTitle>
           </DrawerHeader>
-          <DrawerFooter className="flex justify-end gap-2">
+          <DrawerFooter className="flex-row gap-3 px-0 pt-6">
             <Button
               onClick={() =>
-                window.open('https://wa.me/552100000000', '_blank')
+                window.open('https://wa.me/5521991952121', '_blank')
               }
-              className="bg-blue-900 text-white"
+              className="flex-1 bg-foreground hover:bg-foreground/80 text-black"
             >
               Confirmar
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancelar</Button>
+              <Button
+                variant="outline"
+                className="flex-1 !bg-zinc-900 border-2 !border-gray-600"
+              >
+                Cancelar
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
