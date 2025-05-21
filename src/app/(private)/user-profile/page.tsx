@@ -1,3 +1,5 @@
+'use client'
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import {
@@ -63,7 +65,10 @@ export default function ProfilePage() {
           <MenuItem
             icon={<LogOut className="h-5 w-5" />}
             label="Sair"
-            href="/api/auth/logout"
+            onClick={async () => {
+              await fetch('/api/auth/logout')
+              window.location.href = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+            }}
           />
         </nav>
       </div>
@@ -75,11 +80,19 @@ function MenuItem({
   icon,
   label,
   href = '#',
+  onClick,
   isFirst = false,
-}: { icon: React.ReactNode; label: string; href?: string; isFirst?: boolean }) {
+}: {
+  icon: React.ReactNode
+  label: string
+  href?: string
+  onClick?: () => void
+  isFirst?: boolean
+}) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
         'flex items-center justify-between py-5 text-white',
         'border-b color-border',
