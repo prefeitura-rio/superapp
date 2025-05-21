@@ -1,5 +1,11 @@
-import { Badge } from "@/components/ui/badge";
-import { Calendar, CreditCard, MoveDiagonal } from "lucide-react";
+import { Badge } from '@/components/ui/badge'
+import {
+  Book,
+  Briefcase,
+  Calendar,
+  CreditCard,
+  MoveDiagonal,
+} from 'lucide-react'
 
 export default function MostAccessedServiceCards() {
   return (
@@ -13,10 +19,10 @@ export default function MostAccessedServiceCards() {
               <CreditCard className="w-8 h-8 text-white" />
             </div>
             <div>
-            <h3 className="text-xl font-semibold break-words">IPTU</h3>
-            <p className="text-zinc-400 text-sm break-words">
-              Pague com desconto no PIX
-            </p>
+              <h3 className="text-xl font-semibold break-words">IPTU</h3>
+              <p className="text-zinc-400 text-sm break-words">
+                Pague com desconto no PIX
+              </p>
             </div>
           </div>
 
@@ -29,10 +35,10 @@ export default function MostAccessedServiceCards() {
               </Badge>
             </div>
             <div>
-            <h3 className="text-xl font-semibold break-words">CAD Rio</h3>
-            <p className="text-zinc-400 text-sm break-words">
-              Agende seu cadastro único
-            </p>
+              <h3 className="text-xl font-semibold break-words">CAD Rio</h3>
+              <p className="text-zinc-400 text-sm break-words">
+                Agende seu cadastro único
+              </p>
             </div>
           </div>
 
@@ -41,15 +47,39 @@ export default function MostAccessedServiceCards() {
             <div className="mb-4">
               <MoveDiagonal className="w-8 h-8 text-white" />
             </div>
-          <div>
-            <h3 className="text-xl font-semibold break-words">ITBI</h3>
-            <p className="text-zinc-400 text-sm break-words">
-              Pague com desconto no PIX
-            </p>
+            <div>
+              <h3 className="text-xl font-semibold break-words">ITBI</h3>
+              <p className="text-zinc-400 text-sm break-words">
+                Pague com desconto no PIX
+              </p>
+            </div>
+          </div>
+          {/* Cursos Card */}
+          <div className="bg-zinc-900 rounded-lg p-3.5 hover:bg-zinc-800 transition-colors cursor-pointer flex flex-col items-start justify-between w-[150px] h-[150px] min-w-[150px] max-w-[150px] min-h-[150px] max-h-[150px] border border-muted">
+            <div className="mb-4">
+              <Book className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold break-words">Cursos</h3>
+              <p className="text-zinc-400 text-sm break-words">
+                Amplie suas habilidades
+              </p>
+            </div>
+          </div>
+          {/* Empregos Card */}
+          <div className="bg-zinc-900 rounded-lg p-3.5 hover:bg-zinc-800 transition-colors cursor-pointer flex flex-col items-start justify-between w-[150px] h-[150px] min-w-[150px] max-w-[150px] min-h-[150px] max-h-[150px] border border-muted">
+            <div className="mb-4">
+              <Briefcase className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold break-words">Empregos</h3>
+              <p className="text-zinc-400 text-sm break-words">
+                Oportunidades de trabalho
+              </p>
             </div>
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }
