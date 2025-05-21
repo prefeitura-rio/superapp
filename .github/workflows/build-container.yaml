@@ -41,11 +41,11 @@ jobs:
 
       - name: Build and Push Docker Image using Buildx
         run: |
-          export NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
-          export NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp.apps.rio.gov.br"
-          export NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.superapp.dados.rio/api/auth/callback/keycloak"
           docker buildx build \
             --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp.apps.rio.gov.br" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.superapp.dados.rio/api/auth/callback/keycloak" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .
