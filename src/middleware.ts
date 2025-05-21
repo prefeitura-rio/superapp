@@ -12,11 +12,11 @@ const publicRoutes = [
   { path: '/pricing', whenAuthenticated: 'next' },
 ] as const
 
-const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = '/sign-in'
+const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
-  const publicRoute = publicRoutes.find((route) => route.path === path)
+  const publicRoute = publicRoutes.find(route => route.path === path)
   const authToken = request.cookies.get('access_token')
 
   if (!authToken && publicRoute) {
@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
 
   if (!authToken && !publicRoute) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
+    redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
     return NextResponse.redirect(redirectUrl)
   }
 

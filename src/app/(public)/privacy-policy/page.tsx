@@ -10,7 +10,7 @@ export default function PrivacyNotice() {
         {/* Fixed header */}
         <div className="max-w-md mx-auto fixed top-0 left-0 right-0 z-10 bg-background px-4 py-10  flex items-center justify-center">
           <div className="absolute left-4">
-            <Link href="/sign-in">
+            <Link href="/">
               <ArrowLeft className="h-7 w-7 text-white cursor-pointer" />
             </Link>
           </div>
