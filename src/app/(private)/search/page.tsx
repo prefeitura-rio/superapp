@@ -43,7 +43,9 @@ export default function Search() {
           </ul>
         </div>
       </div>
-      <CategoryGrid title="Categorias" categories={categories} />
+      <div className="max-w-md mx-auto">
+        <CategoryGrid title="Categorias" categories={categories} />
+      </div>
     </>
   )
 }
