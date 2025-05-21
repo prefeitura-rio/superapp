@@ -1,42 +1,33 @@
-// app/services/page.tsx
-import { Card } from '@/components/ui/card'
-import { Briefcase, GraduationCap } from 'lucide-react'
-import Link from 'next/link'
+'use client'
+
+import { CategoryGrid } from '../components/category-grid'
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
+import MostAccessedServiceCards from '../components/most-accessed-services-cards'
+import { ServiceCategories } from '../components/service-categories'
+import SuggestionCards from '../components/suggestion-cards'
 
 export default function ServicesPage() {
-  const services = [
-    {
-      title: 'Cursos',
-      icon: <GraduationCap className="w-6 h-6" />,
-      href: '/services/courses',
-    },
-    {
-      title: 'Empregos',
-      icon: <Briefcase className="w-6 h-6" />,
-      href: '/services/jobs',
-    },
-  ]
+  const categories = ServiceCategories()
 
   return (
-    <>
+    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
       <MainHeader />
-      <div className="container min-h-lvh max-w-md mx-auto pt-20 px-5 pb-6">
-        <h1 className="text-2xl font-bold mb-6">Serviços</h1>
+      {/* Header */}
+      <header className="p-5">
+        <h1 className="text-2xl font-bold">Serviços</h1>
+      </header>
 
-        <div className="grid grid-cols-2 gap-6">
-          {services.map(service => (
-            <Link key={service.title} href={service.href}>
-              <Card className="p-6 h-34 flex flex-col justify-between hover:bg-gray-50 transition-colors">
-                <div>{service.icon}</div>
-                <h2 className="text-lg font-semibold">{service.title}</h2>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* Suggestion Cards*/}
+      <SuggestionCards order={[2, 0, 1]} />
+
+      {/* Most Accessed Service Cards*/}
+      <MostAccessedServiceCards />
+
+      {/* Carteira section */}
+      <CategoryGrid title="Todos" categories={categories} />
+
       <FloatNavigation />
-    </>
+    </main>
   )
 }

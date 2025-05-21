@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
-import { FloatNavigation } from "../components/float-navation";
-import MainHeader from "../components/main-header";
-import MostAccessedServiceCards from "../components/most-accessed-services-cards";
-import SuggestionCards from "../components/suggestion-cards";
-import CarteiraSection from "../components/wallet-section";
+import { useEffect } from 'react'
+import { FloatNavigation } from '../components/float-navation'
+import MainHeader from '../components/main-header'
+import MostAccessedServiceCards from '../components/most-accessed-services-cards'
+import SuggestionCards from '../components/suggestion-cards'
+import CarteiraSection from '../components/wallet-section'
 
 export default function Home() {
   useEffect(() => {
-    fetch("/api/protected", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => console.log("Dados protegidos:", data));
-  }, []);
+    fetch('/api/protected', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => console.log('Dados protegidos:', data))
+  }, [])
 
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
@@ -23,7 +23,7 @@ export default function Home() {
       </header>
 
       {/* Suggestion Cards*/}
-      <SuggestionCards />
+      <SuggestionCards order={[0, 2, 1]} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />
@@ -33,5 +33,5 @@ export default function Home() {
 
       <FloatNavigation />
     </main>
-  );
+  )
 }
