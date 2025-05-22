@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')
   const recaptchaToken = request.headers.get('x-recaptcha-token')
-
+  //TODO: ADD REAL RECAPTCHA TOKEN
   const headers = {
     ...(recaptchaToken
       ? { 'X-Recaptcha-Token': recaptchaToken }
