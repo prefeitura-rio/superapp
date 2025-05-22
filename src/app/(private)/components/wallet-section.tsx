@@ -18,7 +18,7 @@ export default function CarteiraSection() {
 
       <div className="flex flex-col gap-4 w-full">
         <WalletCard
-          href="/wallet/saude"
+          href="/wallet/health"
           title="Clínica da Família"
           name="Maria Sebastiana"
           statusLabel="Situação"
@@ -30,7 +30,7 @@ export default function CarteiraSection() {
 
         {/* Card 2: Bolsa Família */}
         <WalletCard
-          href="/wallet/beneficios"
+          href="/wallet/benefits"
           title="Bolsa Família"
           name="6352 7758 4323"
           statusLabel="Status"
@@ -44,7 +44,7 @@ export default function CarteiraSection() {
 
         {/* Card 3: Zeladoria */}
         <WalletCard
-          href="/wallet/chamados"
+          href="/wallet/calls"
           title="Zeladoria"
           statusLabel="Chamados"
           statusValue="29"
