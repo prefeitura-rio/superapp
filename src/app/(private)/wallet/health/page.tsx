@@ -60,7 +60,7 @@ export default function HealthCard() {
         />
         {/* WhatsApp Icon Buttons Row */}
         <div className="flex flex-row gap-5 justify-center mt-8">
-          {/* WhatsApp Button Example */}
+          {/* WhatsApp Button */}
           <div className="flex flex-col items-center">
             <Button
               variant="ghost"

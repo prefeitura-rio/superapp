@@ -30,7 +30,7 @@ export default function CarteiraSection() {
 
         {/* Card 2: Bolsa Família */}
         <WalletCard
-          href="/wallet/benefits"
+          href="/wallet/social-benefits"
           title="Bolsa Família"
           name="6352 7758 4323"
           statusLabel="Status"
