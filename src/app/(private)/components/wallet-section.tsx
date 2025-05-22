@@ -5,7 +5,7 @@ import { WalletCard } from './wallet-card' // ajuste o caminho se necessário
 
 export default function CarteiraSection() {
   return (
-    <section className="px-5 mt-6 pb-24">
+    <section className="px-5 mt-6 pb-30">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-md font-medium">Carteira</h2>
         <Link
