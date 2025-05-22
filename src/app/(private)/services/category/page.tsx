@@ -10,7 +10,7 @@ export default function CategoryPage() {
     <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Categorias de Serviços" />
       <div className="min-h-screen text-white">
-        <div className="container max-w-md mx-auto p-4 pb-20">
+        <div className="max-w-md mx-auto px-5 pt-4 pb-20">
           <h1 className="text-xl font-semibold pb-4">IPTU</h1>
           <Separator className="bg-zinc-800" />
 
@@ -39,23 +39,14 @@ export default function CategoryPage() {
               <span>Pagamento de IPTU dos anos anteriores</span>
             </MenuItem>
             <MenuItem href="/iptu/previous-years">
-              <span>Pagamento de IPTU dos anos anteriores</span>
-            </MenuItem>
-            <MenuItem href="/iptu/previous-years">
-              <span>Pagamento de IPTU dos anos anteriores</span>
-            </MenuItem>
-            <MenuItem href="/iptu/previous-years">
-              <span>Pagamento de IPTU dos anos anteriores</span>
-            </MenuItem>
-
-            <MenuItem href="/iptu/installments">
               <span>Parcelamento e emissão de boletos (DARM)</span>
             </MenuItem>
-
-            <MenuItem href="/iptu/property-info">
+            <MenuItem href="/iptu/previous-years">
+              <span>Pagamento de IPTU dos anos anteriores</span>
+            </MenuItem>
+            <MenuItem href="/iptu/previous-years">
               <span>Certidão de elementos cadastrais do imóvel</span>
             </MenuItem>
-
             <MenuItem href="/iptu/active-debt" disabled>
               <span>Dívida ativa consultar débitos de...</span>
               <Badge
@@ -83,7 +74,7 @@ function MenuItem({ href, children, disabled = false }: MenuItemProps) {
     <div
       className={`flex items-center justify-between py-5 ${disabled ? 'opacity-70' : ''}`}
     >
-      <div className="flex items-center justify-between flex-1 px-4">
+      <div className="flex items-center justify-between flex-1 pr-4">
         {children}
       </div>
       <ChevronRight className="h-5 w-5 text-primary" />
