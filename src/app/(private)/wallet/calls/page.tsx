@@ -79,7 +79,7 @@ function CallsPage() {
 
   return (
     <div className="text-white p-0 pb-5">
-      <h2 className="pb-4 px-5">Chamadoss</h2>
+      <h2 className="pb-4 px-5">Chamados</h2>
       {/* Scrollable Filters */}
       <div className="relative w-full overflow-x-auto px-5 pb-4 no-scrollbar">
         <div className="flex gap-3 min-w-max">
