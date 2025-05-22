@@ -51,7 +51,7 @@ function NotificationItem({
 
 export default function Notifications() {
   return (
-    <div className="max-w-md mx-auto pt-24 flex flex-col">
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col">
       <SecondaryHeader title="Notificações" />
 
       {notifications.map((notification, index) => (

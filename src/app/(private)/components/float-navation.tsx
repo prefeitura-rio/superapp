@@ -77,25 +77,25 @@ export function FloatNavigation() {
 
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent className="p-4 max-w-md! mx-auto rounded-t-3xl!">
-          <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-[#323232]" />
           <DrawerHeader className="text-center px-4">
             <DrawerTitle className="text-md">
-              Você será direcionado para o Whatsapp da Prefeitura do Rio
+              Você será direcionado <br /> para o Whatsapp da Prefeitura do Rio
             </DrawerTitle>
           </DrawerHeader>
-          <DrawerFooter className="flex-row gap-3 px-0 pt-6">
+          <DrawerFooter className="flex-row gap-3  pb-10 px-4 md:px-10">
             <Button
               onClick={() =>
                 window.open('https://wa.me/5521991952121', '_blank')
               }
-              className="flex-1 bg-foreground hover:bg-foreground/80 text-black"
+              className="flex-1 py-5 bg-foreground hover:bg-foreground/80 text-black"
             >
               Confirmar
             </Button>
             <DrawerClose asChild>
               <Button
                 variant="outline"
-                className="flex-1 !bg-zinc-900 border-2 !border-gray-600"
+                className="flex-1 py-5 !bg-zinc-900 border-2 !border-[#323232]"
               >
                 Cancelar
               </Button>
