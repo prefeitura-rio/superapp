@@ -4,11 +4,11 @@ import icon1746 from '@/assets/icon1746.svg'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Plus } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { WalletCard } from '../../components/wallet-card'
-import { Plus } from 'lucide-react'
 
 // Status color mapping
 const statusColor: Record<string, string> = {
@@ -78,8 +78,8 @@ function CallsPage() {
     selected === 'all' ? CALLS : CALLS.filter(call => call.status === selected)
 
   return (
-    <div className="text-white p-0">
-      <h2 className="pb-4 px-5">Chamados</h2>
+    <div className="text-white p-0 pb-5">
+      <h2 className="pb-4 px-5">Chamadoss</h2>
       {/* Scrollable Filters */}
       <div className="relative w-full overflow-x-auto px-5 pb-4 no-scrollbar">
         <div className="flex gap-3 min-w-max">
