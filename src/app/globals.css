@@ -6,6 +6,20 @@
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Hide vertical scrollbar for Chrome, Safari and Opera */
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+}
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+html {
+  /* Hide vertical scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
