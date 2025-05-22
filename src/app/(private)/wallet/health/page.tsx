@@ -44,7 +44,7 @@ function TeamPage() {
 
 export default function HealthCard() {
   return (
-    <div className="max-w-md mx-auto pt-26 pb-10">
+    <div className="min-h-dvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="px-5 z-50">
         <h2 className="pb-4">Saúde</h2>
