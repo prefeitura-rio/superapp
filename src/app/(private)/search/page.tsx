@@ -22,7 +22,7 @@ export default function Search() {
     <>
       <div className="max-w-md px-5 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         <SearchInput
-          placeholder="O que você precisa?"
+          placeholder="Do que você precisa?"
           onBack={() => router.back()}
           onClear={() => console.log('Search cleared')}
         />
