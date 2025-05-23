@@ -31,7 +31,7 @@ export default function CourseCard({
   workload,
   modality,
   provider = '',
-  color = '#01A9D8',
+  color = '#fff',
   icon = '',
   status,
   date,
@@ -112,7 +112,7 @@ export default function CourseCard({
         <div className="w-full">
           <div className="flex gap-1">
             <Badge className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-0.5 rounded-full">
-              {workload}
+              {workload}h
             </Badge>
             <Badge className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-0.5 rounded-full">
               {modality}
