@@ -120,7 +120,7 @@ export default function HealthCard() {
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
-        <h2 className="pb-4 px-5">Saúde</h2>
+        <h2 className="pb-4 px-5">Zeladoria</h2>
         <div className="px-5">
           <WalletCard
             href="/wallet/calls"
