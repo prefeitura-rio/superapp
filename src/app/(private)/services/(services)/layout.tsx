@@ -3,5 +3,9 @@ export default function ServicesLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <div className="">{children}</div>
+  return (
+    <div>
+      <main>{children}</main>
+    </div>
+  )
 }

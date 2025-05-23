@@ -23,7 +23,7 @@ export default function MainHeader() {
           <span className="absolute top-3 right-3 block h-3 w-3 rounded-full bg-primary border-2 border-zinc-800" />
         </Link>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           <Link href="/search" className="rounded-full bg-zinc-800 p-4">
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>

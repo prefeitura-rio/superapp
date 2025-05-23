@@ -1,0 +1,44 @@
+'use client'
+
+import { ChevronLeft, ListFilter, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+export default function CoursesHeader() {
+  const router = useRouter()
+  return (
+    <header className="fixed top-0 left-0 w-full z-50 bg-background text-white px-4 py-3 shadow">
+      <div className="mx-auto md:px-4 flex max-w-md items-center justify-between">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
+        >
+          <ChevronLeft className="h-5 w-5" />
+          <span className="sr-only">Notifications</span>
+        </button>
+
+        <div className="flex items-center space-x-2">
+          <button
+            disabled
+            type="button"
+            onClick={() => router.back()}
+            className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
+          >
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Search</span>
+          </button>
+
+          <button
+            disabled
+            type="button"
+            onClick={() => router.back()}
+            className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
+          >
+            <ListFilter className="h-5 w-5" />
+            <span className="sr-only">List Filters</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  )
+}
