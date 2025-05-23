@@ -69,14 +69,14 @@ export function CourseDrawer({
           style={{ backgroundColor: color }}
           className="p-6 text-white relative rounded-3xl flex flex-col items-center"
         >
-          <div className="absolute right-4 top-4">
+          <div className="absolute right-5 top-5">
             <button
               type="button"
               onClick={e => {
                 e.stopPropagation()
                 setIsBookmarked(!isBookmarked)
               }}
-              className="focus:outline-none"
+              className="focus:outline-none bg-white/30 p-3 rounded-lg"
             >
               <Bookmark
                 className="w-6 h-6 text-white transition-colors"
