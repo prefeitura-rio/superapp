@@ -15,6 +15,9 @@ interface Course {
   type: string
   recommended: boolean
   recentlyAdded: boolean
+  spots?: number
+  description?: string
+  requirements?: string[]
 }
 
 interface RecommendedCoursesCardsProps {
@@ -48,12 +51,21 @@ export default function RecommendedCoursesCards({
           {recommended.map(course => (
             <CourseCard
               key={course.id}
+              id={course.id}
               provider={course.provider}
               title={course.title}
               workload={course.workload}
               modality={course.modality}
               color={getCardColor(course.type)}
               icon={providerIcons[course.provider] || googleIcon}
+              status={course.status}
+              date={course.date}
+              type={course.type}
+              recommended={course.recommended}
+              recentlyAdded={course.recentlyAdded}
+              spots={course.spots}
+              description={course.description}
+              requirements={course.requirements}
             />
           ))}
         </div>
