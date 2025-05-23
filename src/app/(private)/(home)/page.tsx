@@ -23,7 +23,7 @@ export default function Home() {
       </header>
 
       {/* Suggestion Cards*/}
-      <SuggestionCards order={[0, 2, 1]} />
+      <SuggestionCards order={[0, 1, 2]} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />

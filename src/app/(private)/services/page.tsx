@@ -19,7 +19,7 @@ export default function ServicesPage() {
       </header>
 
       {/* Suggestion Cards*/}
-      <SuggestionCards order={[2, 0, 1]} />
+      <SuggestionCards order={[1, 2, 0]} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />
