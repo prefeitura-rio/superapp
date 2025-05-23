@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -65,10 +64,10 @@ export function CourseDrawer({
   return (
     <Drawer>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="max-w-md mx-auto !max-h-[calc(100vh-90px)] h-[calc(100vh-40px)] flex flex-col">
+      <DrawerContent className="bg-white border-t-background max-w-md mx-auto !rounded-3xl !max-h-[calc(100vh-90px)] h-[calc(100vh-40px)] flex flex-col">
         <div
           style={{ backgroundColor: color }}
-          className="p-6 text-white relative rounded-2xl flex flex-col items-center"
+          className="p-6 text-white relative rounded-3xl flex flex-col items-center"
         >
           <div className="absolute right-4 top-4">
             <button
@@ -85,7 +84,10 @@ export function CourseDrawer({
               />
             </button>
           </div>
-          <div className="flex flex-col items-center gap-2 mb-4">
+          <div className="absolute top-3">
+            <div className="w-7 h-1 rounded-md bg-white" />
+          </div>
+          <div className="flex flex-col items-center gap-2 mb-4 pt-4">
             <div className="bg-white rounded-full p-2 flex items-center justify-center w-16 h-16 mb-2">
               <Image
                 src={icon || '/placeholder.svg'}
@@ -98,13 +100,13 @@ export function CourseDrawer({
             <DrawerTitle className="text-xl font-medium text-white text-center">
               {course.title}
             </DrawerTitle>
-            <DrawerDescription className="text-white/80 text-center">
+            <DrawerDescription className="text-white text-center">
               {course.provider}
             </DrawerDescription>
           </div>
           <div className="flex flex-wrap gap-2 mt-2 justify-center w-full">
             <Badge className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full">
-              {course.workload}
+              {course.workload} horas
             </Badge>
             <Badge className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full">
               {course.modality}
@@ -124,18 +126,18 @@ export function CourseDrawer({
               display: none;
             }
           `}</style>
-          <h3 className="text-lg font-medium mb-2">Descrição do Curso</h3>
-          <p className="text-muted-foreground mb-6">{courseDescription}</p>
+          <h3 className="text-md text-black mb-2">Descrição do Curso</h3>
+          <p className="text-black/60 mb-6 text-sm">{courseDescription}</p>
 
-          <h3 className="text-lg font-medium mb-2">Requisitos</h3>
+          <h3 className="text-md text-black mb-2">Requisitos</h3>
           {courseRequirements.length > 0 ? (
-            <ul className="text-muted-foreground list-disc list-inside">
+            <ul className="text-black/60 list-disc list-inside text-sm">
               {courseRequirements.map((req, idx) => (
                 <li key={idx}>{req}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-muted-foreground">
+            <p className="text-black/80">
               Não há requisitos específicos para este curso.
             </p>
           )}
@@ -147,11 +149,11 @@ export function CourseDrawer({
           >
             Inscreva-se
           </Button>
-          <DrawerClose asChild>
+          {/* <DrawerClose asChild>
             <Button className="w-full py-6" variant="outline">
               Fechar
             </Button>
-          </DrawerClose>
+          </DrawerClose> */}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
