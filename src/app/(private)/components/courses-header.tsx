@@ -26,15 +26,10 @@ export default function CoursesHeader() {
             <span className="sr-only">Search</span>
           </Link>
 
-          <button
-            disabled
-            type="button"
-            onClick={() => router.back()}
-            className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
-          >
+          <Link href="courses/options" className="rounded-full bg-zinc-800 p-4">
             <ListFilter className="h-5 w-5" />
-            <span className="sr-only">List Filters</span>
-          </button>
+            <span className="sr-only">Search</span>
+          </Link>
         </div>
       </div>
     </header>
