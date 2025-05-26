@@ -26,9 +26,9 @@ export default function ProfilePage() {
   })
 
   return (
-    <main className="max-w-md mx-auto pt-15 text-white">
+    <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
       <ServicesHeader title="Buscador" />
-      <div className="min-h-lvh">
+      <div>
         <section className="relative pt-10 px-5">
           <ServicesSearchInput
             placeholder="Pesquise um curso"
