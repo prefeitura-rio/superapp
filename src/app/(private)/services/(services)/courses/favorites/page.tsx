@@ -1,7 +1,9 @@
+import { ServicesHeader } from '@/app/(private)/components/services-header'
+
 export default function FavoritesPage() {
   return (
-    <div className="pb-25 pt-20 max-w-md mx-auto text-white items-center flex flex-col">
-      Favorites
-    </div>
+    <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
+      <ServicesHeader title="Favorites" />
+    </main>
   )
 }
