@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronLeft, ListFilter, Search } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export default function CoursesHeader() {
@@ -11,22 +12,19 @@ export default function CoursesHeader() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
+          className="relative p-4 cursor-pointer rounded-full bg-zinc-800"
         >
-          <ChevronLeft className="h-5 w-5" />
-          <span className="sr-only">Notifications</span>
+          <span className="flex items-center justify-center bg-muted rounded-full">
+            <ChevronLeft className="h-5 w-5" />
+          </span>
+          <span className="sr-only">Back</span>
         </button>
 
         <div className="flex items-center space-x-2">
-          <button
-            disabled
-            type="button"
-            onClick={() => router.back()}
-            className="relative p-4 cursor-pointer  rounded-full bg-zinc-800"
-          >
+          <Link href="courses/search" className="rounded-full bg-zinc-800 p-4">
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>
-          </button>
+          </Link>
 
           <button
             disabled

@@ -1,42 +1,9 @@
-import googleIcon from '@/assets/google.svg'
-import prefeituraVertical from '@/assets/prefeituraVertical.svg'
-import senac from '@/assets/senac.svg'
-import senaiIcon from '@/assets/senai.svg'
+import type { Course } from '@/types/course'
 import CourseCard from './course-card'
-
-interface Course {
-  id: number
-  title: string
-  status: string
-  date: string
-  provider: string
-  workload: string
-  modality: string
-  type: string
-  recommended: boolean
-  recentlyAdded: boolean
-  spots?: number
-  description?: string
-  requirements?: string[]
-}
+import { getCardColor, providerIcons } from './utils'
 
 interface RecommendedCoursesCardsProps {
   courses: Course[]
-}
-
-const providerIcons: Record<string, string> = {
-  Google: googleIcon,
-  SENAI: senaiIcon,
-  Prefeitura: prefeituraVertical,
-  SENAC: senac,
-}
-
-function getCardColor(type: string) {
-  if (type === 'technology' || type === 'ai' || type === 'education')
-    return '#01A9D8'
-  if (type === 'construction') return '#44CC77'
-  if (type === 'environment') return '#EA5D6E'
-  return '#01A9D8'
 }
 
 export default function RecommendedCoursesCards({
@@ -57,7 +24,7 @@ export default function RecommendedCoursesCards({
               workload={course.workload}
               modality={course.modality}
               color={getCardColor(course.type)}
-              icon={providerIcons[course.provider] || googleIcon}
+              icon={providerIcons[course.provider]}
               status={course.status}
               date={course.date}
               type={course.type}
