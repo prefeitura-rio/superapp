@@ -28,7 +28,7 @@ export default function CoursesHeader() {
 
           <Link href="courses/options" className="rounded-full bg-zinc-800 p-4">
             <ListFilter className="h-5 w-5" />
-            <span className="sr-only">Search</span>
+            <span className="sr-only">Options</span>
           </Link>
         </div>
       </div>
