@@ -60,7 +60,7 @@ export default function AlertsPage() {
                     <h3 className="text-white font-medium">{option.label}</h3>
                   </div>
                   <div className="flex items-center gap-3">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-300">
                       {preferences[option.key] ? 'Ligado' : 'Desligado'}
                     </p>
                     <Switch
@@ -81,7 +81,7 @@ export default function AlertsPage() {
 
             {/* WhatsApp Section */}
             <div className="h-16 pt-16 flex flex-col justify-center">
-              <p className="text-gray-400 text-sm mb-1">
+              <p className="text-gray-300 text-sm mb-1">
                 Os alertas serão enviados para o Whatsapp do número
               </p>
               <div className="flex items-center justify-between">
