@@ -31,7 +31,7 @@ export default function CoursePage() {
       <main className="max-w-md mx-auto pt-15 text-white">
         <section className="relative">
           <h2 className="px-5 text-4xl font-medium mb-2 bg-background z-10 pt-7 pb-3">
-            Seu curso <br /> Começa aqui.
+            Seu curso <br /> Começa aqui
           </h2>
           {/* Scrollable Filters */}
           <div className="relative w-full overflow-x-auto px-5 pb-4 no-scrollbar">
