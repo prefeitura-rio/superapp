@@ -19,7 +19,7 @@ export default function Home() {
       <MainHeader />
       {/* Header */}
       <header className="p-5">
-        <h1 className="text-2xl font-bold">Marina Duarte</h1>
+        <h1 className="text-2xl font-bold">Marina Duart</h1>
       </header>
 
       {/* Suggestion Cards*/}
