@@ -1,31 +1,31 @@
 'use client'
 
 import googleIcon from '@/assets/google.svg'
-import { CourseDrawer } from '@/components/ui/custom/course-drawer'
-import type { Course } from '@/types/course'
+import { JobDrawer } from '@/components/ui/custom/job-drawer'
+import type { Job } from '@/types/job'
 import { BookmarkIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
-import { getCourseCardColor, providerIcons } from './utils'
+import { getJobCardColor, providerIcons } from './utils'
 
 
-export default function CourseCardSearchPage({
-  course,
+export default function JobCardSearchPage({
+  job,
   subscribed = false,
   favorite = false,
-}: { course: Course; subscribed?: boolean; favorite?: boolean }) {
-  const color = getCourseCardColor(course.type)
-  const icon = providerIcons[course.provider] || googleIcon
+}: { job: Job; subscribed?: boolean; favorite?: boolean }) {
+  const color = getJobCardColor(job.type)
+  const icon = providerIcons[job.provider] || googleIcon
   const [isSaved, setIsSaved] = useState(favorite)
 
   return (
-    <CourseDrawer
-      course={course}
+    <JobDrawer
+      job={job}
       color={color}
       icon={icon}
-      description={course.description}
-      spots={course.spots}
-      requirements={course.requirements}
+      description={job.description}
+      spots={job.spots}
+      requirements={job.requirements}
       subscribed={subscribed}
       favorite={favorite}
     >
@@ -37,7 +37,7 @@ export default function CourseCardSearchPage({
           <div className="bg-white rounded-lg p-1 flex items-center justify-center">
             <Image
               src={icon}
-              alt={course.provider}
+              alt={job.provider}
               className="w-7 h-7"
               width={28}
               height={28}
@@ -45,7 +45,7 @@ export default function CourseCardSearchPage({
             />
           </div>
           <span className="font-medium text-white flex-1">
-            {course.provider}
+            {job.provider}
           </span>
           <button
             type="button"
@@ -61,7 +61,7 @@ export default function CourseCardSearchPage({
           </button>
         </div>
         <div className="text-lg pt-2  text-white mb-6 line-clamp-2">
-          {course.title
+          {job.title
             .replace('para Iniciantes', 'Básico')
             .replace('Intermediário', 'Intermediário')}
         </div>
@@ -78,14 +78,14 @@ export default function CourseCardSearchPage({
         ) : (
           <div className="flex gap-2 mt-auto">
             <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
-              {course.workload}h
+              R${job.salary}
             </span>
             <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
-              {course.modality}
+              {job.modality}
             </span>
           </div>
         )}
       </div>
-    </CourseDrawer>
+    </JobDrawer>
   )
 }

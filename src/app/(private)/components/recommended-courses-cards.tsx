@@ -1,6 +1,6 @@
 import type { Course } from '@/types/course'
 import CourseCard from './course-card'
-import { getCardColor, providerIcons } from './utils'
+import { getCourseCardColor, providerIcons } from './utils'
 
 interface RecommendedCoursesCardsProps {
   courses: Course[]
@@ -23,7 +23,7 @@ export default function RecommendedCoursesCards({
               title={course.title}
               workload={course.workload}
               modality={course.modality}
-              color={getCardColor(course.type)}
+              color={getCourseCardColor(course.type)}
               icon={providerIcons[course.provider]}
               status={course.status}
               date={course.date}

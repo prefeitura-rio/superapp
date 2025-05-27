@@ -1,13 +1,11 @@
 'use client'
 
 import googleIcon from '@/assets/google.svg'
-import prefeituraVertical from '@/assets/prefeituraVertical.svg'
-import senac from '@/assets/senac.svg'
-import senaiIcon from '@/assets/senai.svg'
 import { CourseDrawer } from '@/components/ui/custom/course-drawer'
 
 import { Bookmark } from 'lucide-react'
 import Image from 'next/image'
+import { getCourseCardColor, providerIcons } from './utils'
 
 interface Course {
   id: number
@@ -29,20 +27,6 @@ interface RecentlyAddedCoursesProps {
   courses: Course[]
 }
 
-const providerIcons: Record<string, string> = {
-  Google: googleIcon,
-  SENAI: senaiIcon,
-  Prefeitura: prefeituraVertical,
-  SENAC: senac,
-}
-
-function getCardColor(type: string) {
-  if (type === 'technology' || type === 'ai' || type === 'education')
-    return '#01A9D8'
-  if (type === 'construction') return '#44CC77'
-  if (type === 'environment') return '#EA5D6E'
-  return '#01A9D8'
-}
 
 export default function RecentlyAddedCourses({
   courses,
@@ -57,7 +41,7 @@ export default function RecentlyAddedCourses({
           <CourseDrawer
             key={course.id}
             course={course}
-            color={getCardColor(course.type)}
+            color={getCourseCardColor(course.type)}
             icon={providerIcons[course.provider] || googleIcon}
             description={course.description}
             spots={course.spots}
