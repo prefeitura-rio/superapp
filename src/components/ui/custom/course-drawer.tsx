@@ -12,6 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+import confetti from 'canvas-confetti'
 import { Bookmark } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -56,6 +57,7 @@ export function CourseDrawer({
   favorite = false,
 }: CourseDrawerProps) {
   const [isBookmarked, setIsBookmarked] = useState(favorite)
+  const [isSubscribed, setIsSubscribed] = useState(subscribed)
 
   // Use props if provided, otherwise fallback to course object or default
   const courseDescription =
@@ -64,6 +66,21 @@ export function CourseDrawer({
     'O curso oferece uma oportunidade de aprendizado voltada para quem quer desenvolver habilidades essenciais na área. O conteúdo aborda noções fundamentais, com linguagem simples e prática, permitindo que cada pessoa aprenda no seu ritmo.'
   const courseSpots = spots ?? course.spots ?? 20
   const courseRequirements = requirements ?? course.requirements ?? []
+
+  const handleSubscribeClick = () => {
+    if (!isSubscribed) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.7 },
+      })
+      setIsSubscribed(true)
+      // Optionally, trigger any subscribe logic here
+    } else {
+      setIsSubscribed(false)
+      // Optionally, trigger any unsubscribe logic here
+    }
+  }
 
   return (
     <Drawer>
@@ -150,8 +167,9 @@ export function CourseDrawer({
           <Button
             className="w-full py-6"
             style={{ backgroundColor: color, color: 'white' }}
+            onClick={handleSubscribeClick}
           >
-            {subscribed ? 'Cancelar Inscrição' : 'Inscreva-se'}
+            {isSubscribed ? 'Cancelar Inscrição' : 'Inscreva-se'}
           </Button>
           {/* <DrawerClose asChild>
             <Button className="w-full py-6" variant="outline">
