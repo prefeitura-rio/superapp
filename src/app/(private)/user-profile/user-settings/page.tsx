@@ -10,7 +10,7 @@ export default function UserSettingsForm() {
       <SecondaryHeader title="Configurações" />
 
       <RadioGroup defaultValue="system" className="mx-6 divide-y divide-border">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
             <Sun className="size-6" />
             <label
@@ -22,7 +22,7 @@ export default function UserSettingsForm() {
           </div>
           <RadioGroupItem value="light" id="light" />
         </div>
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
             <Moon className="size-6" />
             <label
@@ -34,7 +34,7 @@ export default function UserSettingsForm() {
           </div>
           <RadioGroupItem value="dark" id="dark" />
         </div>
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
             <Smartphone className="size-7" />
             <div className="flex flex-col">
