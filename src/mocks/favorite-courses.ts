@@ -1,0 +1,46 @@
+export const favoritesCourses = [
+  {
+    id: 1,
+    title: 'Informática Básico para Iniciantes',
+    description:
+      'Aprenda os fundamentos da informática, como uso de computadores, internet e principais softwares.',
+    requirements: [
+      'Idade mínima de 14 anos',
+      'Ensino fundamental completo',
+      'Ensino fundamental completo',
+      'Ensino fundamental completo',
+      'Ensino fundamental completo',
+    ],
+    spots: 30,
+    status: 'Aberto',
+    date: '25.05.2024',
+    provider: 'Prefeitura',
+    workload: '40',
+    modality: 'Presencial',
+    type: 'technology',
+    recommended: true,
+    recentlyAdded: true,
+  },
+  {
+    id: 2,
+    title: 'Curso de Marcenaria Básica',
+    description:
+      'Introdução às técnicas de marcenaria com foco em segurança, ferramentas e montagem de móveis simples.',
+    requirements: [
+      'Idade mínima de 16 anos',
+      'Noções básicas de matemática',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+    ],
+    spots: 18,
+    status: 'Encerrado',
+    date: '13.04.2024',
+    provider: 'SENAC',
+    workload: '60',
+    modality: 'Presencial',
+    type: 'construction',
+    recommended: true,
+    recentlyAdded: true,
+  },
+]

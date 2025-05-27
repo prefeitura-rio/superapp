@@ -1,0 +1,46 @@
+export const subscribedCourses = [
+  {
+    id: 3,
+    title: 'Educação Ambiental nas Escolas',
+    description:
+      'Capacitação para promover práticas sustentáveis e educação ambiental no ambiente escolar.',
+    requirements: [
+      'Ser profissional da educação',
+      'Atuação em escolas públicas ou privadas',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+    ],
+    spots: 25,
+    status: 'Aberto',
+    date: '18.06.2024',
+    provider: 'Prefeitura',
+    workload: '25',
+    modality: 'Presencial',
+    type: 'environment',
+    recommended: true,
+    recentlyAdded: true,
+  },
+  {
+    id: 4,
+    title: 'Recapeamento/recuperação de asfalto',
+    description:
+      'Curso voltado à qualificação de profissionais na manutenção e recuperação de vias urbanas.',
+    requirements: [
+      'Ensino médio completo',
+      'Conhecimentos básicos em obras civis',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+      'Nenhum conhecimento prévio necessário',
+    ],
+    spots: 40,
+    status: 'Aberto',
+    date: '03.03.2024',
+    provider: 'Prefeitura',
+    workload: '50',
+    modality: 'Híbrido',
+    type: 'construction',
+    recommended: false,
+    recentlyAdded: false,
+  },
+]

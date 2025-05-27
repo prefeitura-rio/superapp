@@ -24,7 +24,7 @@ export default function ProfilePage() {
           <MenuItem
             icon={<Book className="h-5 w-5" />}
             label="Meus cursos"
-            href="/services/courses/my-courses"
+            href="/services/courses/subscribed-courses"
             isFirst={true}
           />
           <MenuItem

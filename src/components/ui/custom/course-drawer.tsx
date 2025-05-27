@@ -40,6 +40,8 @@ interface CourseDrawerProps {
   description?: string
   spots?: number
   requirements?: string[]
+  subscribed?: boolean
+  favorite?: boolean
 }
 
 export function CourseDrawer({
@@ -50,8 +52,10 @@ export function CourseDrawer({
   description,
   spots,
   requirements,
+  subscribed = false,
+  favorite = false,
 }: CourseDrawerProps) {
-  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(favorite)
 
   // Use props if provided, otherwise fallback to course object or default
   const courseDescription =
@@ -80,7 +84,7 @@ export function CourseDrawer({
             >
               <Bookmark
                 className="w-6 h-6 text-white transition-colors"
-                fill={isBookmarked ? 'white' : 'transparent'}
+                fill={isBookmarked || favorite ? 'white' : 'transparent'}
               />
             </button>
           </div>
@@ -147,7 +151,7 @@ export function CourseDrawer({
             className="w-full py-6"
             style={{ backgroundColor: color, color: 'white' }}
           >
-            Inscreva-se
+            {subscribed ? 'Cancelar Inscrição' : 'Inscreva-se'}
           </Button>
           {/* <DrawerClose asChild>
             <Button className="w-full py-6" variant="outline">

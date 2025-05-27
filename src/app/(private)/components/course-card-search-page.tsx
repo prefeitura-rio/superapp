@@ -18,10 +18,14 @@ const providerIcons: Record<string, string> = {
   SENAC: senac,
 }
 
-export default function CourseCardSearchPage({ course }: { course: Course }) {
+export default function CourseCardSearchPage({
+  course,
+  subscribed = false,
+  favorite = false,
+}: { course: Course; subscribed?: boolean; favorite?: boolean }) {
   const color = getCardColor(course.type)
   const icon = providerIcons[course.provider] || googleIcon
-  const [isSaved, setIsSaved] = useState(false)
+  const [isSaved, setIsSaved] = useState(favorite)
 
   return (
     <CourseDrawer
@@ -31,6 +35,8 @@ export default function CourseCardSearchPage({ course }: { course: Course }) {
       description={course.description}
       spots={course.spots}
       requirements={course.requirements}
+      subscribed={subscribed}
+      favorite={favorite}
     >
       <div
         className="rounded-3xl p-5 mb-5 relative overflow-hidden flex flex-col cursor-pointer"
@@ -59,23 +65,35 @@ export default function CourseCardSearchPage({ course }: { course: Course }) {
           >
             <BookmarkIcon
               className={`w-5 h-5 ${isSaved ? 'text-white' : 'text-white/70'} transition-colors`}
-              fill={isSaved ? 'white' : 'transparent'}
+              fill={isSaved || favorite ? 'white' : 'transparent'}
             />
           </button>
         </div>
-        <div className="text-lg pt-2 font-medium text-white mb-6 line-clamp-2">
+        <div className="text-lg pt-2  text-white mb-6 line-clamp-2">
           {course.title
             .replace('para Iniciantes', 'Básico')
             .replace('Intermediário', 'Intermediário')}
         </div>
-        <div className="flex gap-2 mt-auto">
-          <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
-            {course.workload}h
-          </span>
-          <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
-            {course.modality}
-          </span>
-        </div>
+        {subscribed ? (
+          <button
+            type="button"
+            className="bg-white text-black px-3 py-1.5 rounded-full text-sm font-medium w-fit mt-auto shadow cursor-pointer transition-colors hover:bg-black hover:text-white"
+            style={{ minWidth: 0 }}
+            // TODO: Add onClick logic to cancel subscription
+            onClick={e => e.stopPropagation()}
+          >
+            Cancelar inscrição
+          </button>
+        ) : (
+          <div className="flex gap-2 mt-auto">
+            <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
+              {course.workload}h
+            </span>
+            <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs font-medium">
+              {course.modality}
+            </span>
+          </div>
+        )}
       </div>
     </CourseDrawer>
   )
