@@ -11,6 +11,7 @@ import { Swiper, type SwiperRef, SwiperSlide } from 'swiper/react'
 import onBoardingFirstCard from '@/assets/onBoardingFirstCard.svg'
 import onBoardingSecondCard from '@/assets/onBoardingSecondCard.svg'
 import onBoardingThirdCard from '@/assets/onBoardingThirdCard.svg'
+import welcomeImage from '@/assets/welcome.svg'
 
 const slides = [
   {
@@ -33,10 +34,46 @@ const slides = [
   },
 ]
 
+function WelcomeMessage({
+  show,
+  fadeOut,
+}: { show: boolean; fadeOut: boolean }) {
+  return (
+    <div
+      className={`absolute inset-0 flex items-center justify-center transition-opacity duration-600 ${
+        show
+          ? fadeOut
+            ? 'opacity-0'
+            : 'opacity-100'
+          : 'opacity-0 pointer-events-none'
+      } bg-background`}
+    >
+      <div className="flex flex-col items-center justify-center w-full h-full">
+        <div className="mb-12">
+          <Image
+            src={welcomeImage}
+            alt="Família dando boas-vindas"
+            width={275}
+            height={275}
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+        </div>
+        <div className="text-center">
+          <p className="text-lg text-white">Seja bem vinda</p>
+          <p className="text-2xl font-bold text-white">Marina</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Onboarding() {
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFadingOut, setIsFadingOut] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [fadeOutWelcome, setFadeOutWelcome] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
 
   const handleNext = () => {
@@ -46,20 +83,35 @@ export default function Onboarding() {
   }
 
   const finish = () => {
-    // Set the cookie before redirecting
-    document.cookie = 'first_login_access=true; path=/; max-age=31536000' // Expires in 1 year
+    document.cookie = 'first_login_access=true; path=/; max-age=31536000' // 1 ano
+
+    // Inicia fade-out dos slides
     setIsFadingOut(true)
+
+    // Após fade-out dos slides, mostra o Welcome
     setTimeout(() => {
-      router.push('/')
+      setShowWelcome(true)
+
+      // Após 2 segundos, inicia fade-out do Welcome
+      setTimeout(() => {
+        setFadeOutWelcome(true)
+
+        // Após 600ms de fade-out do Welcome, redireciona
+        setTimeout(() => {
+          router.push('/')
+        }, 600)
+      }, 2000)
     }, 600)
   }
 
   return (
-    <div
-      className={`relative min-h-lvh max-w-md mx-auto px-5 py-5 bg-background text-white flex flex-col justify-center overflow-hidden transition-opacity duration-600 ${isFadingOut ? 'opacity-0' : 'opacity-100'}`}
-    >
-      {/* Slides */}
-      <div className="">
+    <div className="relative min-h-lvh max-w-md mx-auto px-5 py-5 bg-background text-white flex flex-col justify-center overflow-hidden">
+      {/* Slides container */}
+      <div
+        className={`transition-opacity duration-600 ${
+          isFadingOut ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
         <Swiper
           ref={swiperRef}
           spaceBetween={50}
@@ -102,6 +154,9 @@ export default function Onboarding() {
           </button>
         </div>
       </div>
+
+      {/* Welcome message with fade-in/out */}
+      <WelcomeMessage show={showWelcome} fadeOut={fadeOutWelcome} />
     </div>
   )
 }
