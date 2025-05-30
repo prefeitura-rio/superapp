@@ -12,6 +12,7 @@ import onBoardingFirstCard from '@/assets/onBoardingFirstCard.svg'
 import onBoardingSecondCard from '@/assets/onBoardingSecondCard.svg'
 import onBoardingThirdCard from '@/assets/onBoardingThirdCard.svg'
 import welcomeImage from '@/assets/welcome.svg'
+import { Button } from '@/components/ui/button'
 
 const slides = [
   {
@@ -146,12 +147,13 @@ export default function Onboarding() {
           ))}
         </Swiper>
         <div className="pt-10">
-          <button
-            className="w-full bg-blue-500 text-white px-8 py-3 rounded-lg shadow-md hover:bg-blue-600 transition"
+          <Button
+            className="w-full text-black px-8 py-3 rounded-lg shadow-md"
+            size="lg"
             onClick={currentIndex === slides.length - 1 ? finish : handleNext}
           >
             {currentIndex === slides.length - 1 ? 'Finalizar' : 'Próximo'}
-          </button>
+          </Button>
         </div>
       </div>
 
