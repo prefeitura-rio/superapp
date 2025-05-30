@@ -46,6 +46,8 @@ export default function Onboarding() {
   }
 
   const finish = () => {
+    // Set the cookie before redirecting
+    document.cookie = 'first_login_access=true; path=/; max-age=31536000' // Expires in 1 year
     setIsFadingOut(true)
     setTimeout(() => {
       router.push('/')
