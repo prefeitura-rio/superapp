@@ -157,6 +157,27 @@ export default function Onboarding() {
 
       {/* Welcome message with fade-in/out */}
       <WelcomeMessage show={showWelcome} fadeOut={fadeOutWelcome} />
+      {/* Custom Swiper pagination styles */}
+      <style jsx global>{`
+        .swiper-pagination {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+         
+        }
+        .swiper-pagination-bullet {
+          width: 16px;
+          height: 3px;
+          border-radius: 9999px;
+          background: #19191b;
+          opacity: 1;
+          transition: background 0.2s;
+          margin: 0 !important;
+        }
+        .swiper-pagination-bullet-active {
+          background: #8ecaff;
+        }
+      `}</style>
     </div>
   )
 }
