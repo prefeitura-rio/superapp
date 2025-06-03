@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
 import './globals.css'
@@ -19,9 +20,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={`dark ${dmSans.className} bg-backgrund antialiased`}>
-        {children}
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={`${dmSans.className} antialiased`}>
+      <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
       </body>
     </html>
   )

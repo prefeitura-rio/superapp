@@ -1,15 +1,23 @@
 'use client'
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Moon, Smartphone, Sun } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { SecondaryHeader } from '../../components/secondary-header';
 
 export default function UserSettingsForm() {
+  const { setTheme, theme } = useTheme();
+
+ 
   return (
     <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Configurações" />
 
-      <RadioGroup defaultValue="system" className="mx-6 divide-y divide-border">
+      <RadioGroup
+        value={theme}
+        onValueChange={setTheme}
+        className="mx-6 divide-y divide-border"
+      >
         <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
             <Sun className="size-6" />
@@ -34,7 +42,7 @@ export default function UserSettingsForm() {
           </div>
           <RadioGroupItem value="dark" id="dark" />
         </div>
-        <div className="flex items-center justify-between py-6">
+        {/* <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
             <Smartphone className="size-7" />
             <div className="flex flex-col">
@@ -50,7 +58,7 @@ export default function UserSettingsForm() {
             </div>
           </div>
           <RadioGroupItem value="system" id="system" />
-        </div>
+        </div> */}
       </RadioGroup>
     </div>
   )
