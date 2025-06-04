@@ -1,3 +1,4 @@
+import { jwtDecode } from 'jwt-decode'
 import {
   type MiddlewareConfig,
   type NextRequest,
@@ -13,6 +14,17 @@ const publicRoutes = [
 ] as const
 
 const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+
+function isJwtExpired(token: string): boolean {
+  try {
+    const decoded: { exp?: number } = jwtDecode(token)
+    if (!decoded.exp) return true // If no exp field, consider it expired
+    const now = Math.floor(Date.now() / 1000)
+    return decoded.exp < now
+  } catch {
+    return false
+  }
+}
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
@@ -57,8 +69,14 @@ export function middleware(request: NextRequest) {
 
   if (authToken && !publicRoute) {
     // Checar se o JWT está EXPIRADO
-    // Se sim, remover o cookie e redirecionar o usuário pro login
-    // Aplicar uma estratégia de refresh
+    if (isJwtExpired(authToken.value)) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
+      const response = NextResponse.redirect(redirectUrl)
+      response.cookies.set('access_token', '', { path: '/', httpOnly: true, maxAge: 0 })
+      response.cookies.set('refresh_token', '', { path: '/', httpOnly: true, maxAge: 0 })
+      return response
+    }
 
     return NextResponse.next()
   }
