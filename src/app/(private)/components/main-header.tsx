@@ -1,5 +1,3 @@
-'use client'
-
 import { Bell, Search, User } from 'lucide-react'
 import Link from 'next/link'
 

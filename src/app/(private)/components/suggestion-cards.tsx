@@ -1,3 +1,5 @@
+'use client'
+
 import boyStudying from '@/assets/boyStudying.svg'
 import businessMan from '@/assets/businessMan.svg'
 import smilingWoman from '@/assets/smilingWoman.svg'
