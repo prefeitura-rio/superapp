@@ -5,9 +5,9 @@ import SuggestionCards from '../components/suggestion-cards'
 import CarteiraSection from '../components/wallet-section'
 
 export default async function Home() {
-  const res = await fetch("http://localhost:3000/api/protected", { credentials: 'include' });
-  const data = await res.json();
-  console.log("User Data:", data);
+  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_ROOT}/api/protected`, { credentials: 'include' });
+  // const data = await res.json();
+  // console.log("User Data:", data);
 
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
