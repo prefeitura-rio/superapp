@@ -1,8 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import { Pagination } from 'swiper/modules'
@@ -38,7 +37,8 @@ const slides = [
 function WelcomeMessage({
   show,
   fadeOut,
-}: { show: boolean; fadeOut: boolean }) {
+  userInfo,
+}: { show: boolean; fadeOut: boolean, userInfo: { cpf: string, name:string } }) {
   return (
     <div
       className={`absolute inset-0 flex items-center justify-center transition-opacity duration-600 ${
@@ -61,21 +61,32 @@ function WelcomeMessage({
           />
         </div>
         <div className="text-center">
-          <p className="text-lg text-white">Seja bem vinda</p>
-          <p className="text-2xl font-bold text-white">Marina</p>
+          <p className="text-lg text-white">Seja bem vindo(a)</p>
+          <p className="text-2xl font-bold text-white">{userInfo.name}</p>
         </div>
       </div>
     </div>
   )
 }
 
-export default function Onboarding() {
-  const router = useRouter()
+interface OnboardingProps {
+  userInfo: {
+    cpf: string;
+    name: string;
+  }
+  setFirstLoginFalse: (cpf: string) => Promise<any>
+}
+
+export default function Onboarding({
+  userInfo,
+  setFirstLoginFalse,
+}: OnboardingProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFadingOut, setIsFadingOut] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
   const [fadeOutWelcome, setFadeOutWelcome] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
+  const [isPending, startTransition] = useTransition()
 
   const handleNext = () => {
     if (swiperRef.current) {
@@ -84,25 +95,20 @@ export default function Onboarding() {
   }
 
   const finish = () => {
-    document.cookie = 'first_login_access=true; path=/; max-age=31536000' // 1 ano
-
-    // Inicia fade-out dos slides
     setIsFadingOut(true)
-
-    // Após fade-out dos slides, mostra o Welcome
-    setTimeout(() => {
-      setShowWelcome(true)
-
-      // Após 2 segundos, inicia fade-out do Welcome
+    startTransition(async () => {
+      await setFirstLoginFalse(userInfo.cpf)
       setTimeout(() => {
-        setFadeOutWelcome(true)
-
-        // Após 600ms de fade-out do Welcome, redireciona
+        setShowWelcome(true)
         setTimeout(() => {
-          router.push('/')
-        }, 600)
-      }, 2000)
-    }, 600)
+          setFadeOutWelcome(true)
+          // After welcome message fades out, reload the page to show home content
+          setTimeout(() => {
+            window.location.reload()
+          }, 600)
+        }, 2000)
+      }, 600)
+    })
   }
 
   return (
@@ -153,6 +159,7 @@ export default function Onboarding() {
             className="w-full text-background px-8 py-3 rounded-lg shadow-md"
             size="lg"
             onClick={currentIndex === slides.length - 1 ? finish : handleNext}
+            disabled={isPending}
           >
             {currentIndex === slides.length - 1 ? 'Finalizar' : 'Próximo'}
           </Button>
@@ -160,14 +167,13 @@ export default function Onboarding() {
       </div>
 
       {/* Welcome message with fade-in/out */}
-      <WelcomeMessage show={showWelcome} fadeOut={fadeOutWelcome} />
+      <WelcomeMessage userInfo={userInfo} show={showWelcome} fadeOut={fadeOutWelcome} />
       {/* Custom Swiper pagination styles */}
       <style jsx global>{`
         .swiper-pagination {
           display: flex;
           justify-content: center;
           gap: 0.5rem;
-         
         }
         .swiper-pagination-bullet {
           width: 16px;

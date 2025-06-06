@@ -30,7 +30,6 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const publicRoute = publicRoutes.find(route => route.path === path)
   const authToken = request.cookies.get('access_token')
-  const hasCompletedOnboarding = request.cookies.get('first_login_access')
 
   if (!authToken && publicRoute) {
     return NextResponse.next()
@@ -40,20 +39,6 @@ export function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
     return NextResponse.redirect(redirectUrl)
-  }
-
-  // If user is authenticated but hasn't completed onboarding and not on onboarding page
-  if (authToken && !hasCompletedOnboarding && path !== '/on-boarding') {
-    const onboardingUrl = request.nextUrl.clone()
-    onboardingUrl.pathname = '/on-boarding'
-    return NextResponse.redirect(onboardingUrl)
-  }
-
-  // If user is authenticated and tries to access onboarding after completing it
-  if (authToken && hasCompletedOnboarding && path === '/on-boarding') {
-    const homeUrl = request.nextUrl.clone()
-    homeUrl.pathname = '/'
-    return NextResponse.redirect(homeUrl)
   }
 
   // Handle other authenticated cases
