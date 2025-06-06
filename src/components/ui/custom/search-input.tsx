@@ -36,7 +36,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cn(
-          'flex h-16 items-center rounded-lg bg-[#1a1a1a] border border-[#333333] px-4 shadow-sm',
+          'flex h-16 items-center rounded-lg bg-card border border-border px-4 shadow-sm',
           className
         )}
       >
@@ -51,7 +51,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
         <input
           ref={inputRef}
-          className="flex-1 bg-transparent border-0 text-gray-300 placeholder:text-gray-500 focus:outline-none focus:ring-0 text-base"
+          className="flex-1 bg-transparent border-0 text-muted-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 text-base"
           value={value}
           onChange={handleChange}
           {...props}
@@ -62,7 +62,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 hover:text-gray-300 p-1"
+              className="text-card-foreground hover:text-card-foreground/80 p-1"
               aria-label="Clear search"
             >
               <X className="h-5 w-5" />
@@ -70,7 +70,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           )}
           <button
             type="button"
-            className="text-gray-400 hover:text-gray-300 p-1 ml-1"
+            className="text-card-foreground hover:text-card-foreground p-1 ml-1"
             aria-label="Search"
           >
             <Search className="h-5 w-5" />

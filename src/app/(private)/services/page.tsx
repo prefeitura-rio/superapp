@@ -11,7 +11,7 @@ export default function ServicesPage() {
   const categories = ServiceCategories()
 
   return (
-    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
+    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
       <MainHeader />
       {/* Header */}
       <header className="p-5">

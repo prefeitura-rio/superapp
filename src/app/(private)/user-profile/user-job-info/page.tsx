@@ -15,7 +15,7 @@ export default function JobInfoForm() {
             <Input
               id="cnpj_mei"
               defaultValue="12.345.678/0001-90"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -26,7 +26,7 @@ export default function JobInfoForm() {
             <Input
               id="nome_empresarial"
               defaultValue="João da Silva Serviços Digitais MEI"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -39,7 +39,7 @@ export default function JobInfoForm() {
             <Input
               id="nome_fantasia"
               defaultValue="Silva Soluções Web"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -50,12 +50,12 @@ export default function JobInfoForm() {
             <Input
               id="atividade1"
               defaultValue="6201-5/01 – Desenvolvimento de programas de computador sob encomenda"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
             <Input
               id="atividade2"
               defaultValue="6311-9/00 – Tratamento de dados, provedores de serviços de aplicação e serviços de hospedagem na internet"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -66,7 +66,7 @@ export default function JobInfoForm() {
             <Input
               id="situacao_cadastral"
               defaultValue="Ativa"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function JobInfoForm() {
 Bairro Jardim das Flores
 CEP 01234-567
 Rio de Janeiro"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -90,7 +90,7 @@ Rio de Janeiro"
             <Input
               id="descricao"
               defaultValue="Forneça uma breve descrição"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -100,7 +100,7 @@ Rio de Janeiro"
             <Input
               id="portfolio"
               defaultValue="Insira o link do seu portifólio"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -110,7 +110,7 @@ Rio de Janeiro"
             <Input
               id="arquivos_upload"
               defaultValue="Selecione os arquivos para upload"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
         </div>

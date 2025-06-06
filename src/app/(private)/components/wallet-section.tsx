@@ -7,7 +7,7 @@ export default function CarteiraSection() {
   return (
     <section className="px-5 mt-6 pb-30">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-md font-medium">Carteira</h2>
+        <h2 className="text-md font-medium text-foreground">Carteira</h2>
         <Link
           href="/wallet"
           className="text-md text-[#A2A2A2] cursor-pointer font-medium"

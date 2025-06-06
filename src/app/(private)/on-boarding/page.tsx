@@ -106,7 +106,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="relative min-h-lvh max-w-md mx-auto px-5 py-5 bg-background text-white flex flex-col justify-center overflow-hidden">
+    <div className="relative min-h-lvh max-w-md mx-auto px-5 py-5 bg-background text-foreground flex flex-col justify-center overflow-hidden">
       {/* Slides container */}
       <div
         className={`transition-opacity duration-600 ${
@@ -138,8 +138,10 @@ export default function Onboarding() {
                     }}
                   />
                 </div>
-                <h2 className="text-xl font-semibold mb-2">{slide.title}</h2>
-                <p className="text-base text-gray-300 mb-6 pb-6">
+                <h2 className="text-xl text-foreground font-semibold mb-2">
+                  {slide.title}
+                </h2>
+                <p className="text-base text-muted-foreground mb-6 pb-6">
                   {slide.description}
                 </p>
               </div>
@@ -148,7 +150,7 @@ export default function Onboarding() {
         </Swiper>
         <div className="pt-10">
           <Button
-            className="w-full text-black px-8 py-3 rounded-lg shadow-md"
+            className="w-full text-background px-8 py-3 rounded-lg shadow-md"
             size="lg"
             onClick={currentIndex === slides.length - 1 ? finish : handleNext}
           >
