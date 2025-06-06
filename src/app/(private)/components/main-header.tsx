@@ -10,7 +10,7 @@ interface Notification {
 
 export default function MainHeader() {
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3 shadow">
+    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3">
       <div className="mx-auto md:px-4 flex max-w-md items-center justify-between">
         <Link
           href="/notifications"

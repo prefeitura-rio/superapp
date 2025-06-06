@@ -7,9 +7,6 @@ import 'swiper/css/pagination'
 import { Pagination } from 'swiper/modules'
 import { Swiper, type SwiperRef, SwiperSlide } from 'swiper/react'
 
-import onBoardingFirstCard from '@/assets/onBoardingFirstCard.svg'
-import onBoardingSecondCard from '@/assets/onBoardingSecondCard.svg'
-import onBoardingThirdCard from '@/assets/onBoardingThirdCard.svg'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
 
@@ -18,19 +15,19 @@ const slides = [
     title: 'Tudo em um só lugar',
     description:
       'Consulte IPTU, ITBI, certidões, agendamentos e muito mais – de forma simples e sem filas.',
-    image: onBoardingFirstCard,
+    video: "3d_test.mp4", 
   },
   {
     title: 'Oportunidades ao seu alcance',
     description:
       'Busque capacitação profissional e vagas atualizadas em toda a cidade.',
-    image: onBoardingSecondCard,
+      video: "3d_test.mp4",
   },
   {
     title: 'Sua carteira digital da cidadania',
     description:
       'Cartão Bolsa Família, Cartão Saúde, e Cartão Zeladoria - direto no celular.',
-    image: onBoardingThirdCard,
+      video: "3d_test.mp4",
   },
 ]
 
@@ -61,8 +58,8 @@ function WelcomeMessage({
           />
         </div>
         <div className="text-center">
-          <p className="text-lg text-white">Seja bem vindo(a)</p>
-          <p className="text-2xl font-bold text-white">{userInfo.name}</p>
+          <p className="text-lg text-foreground">Seja bem vindo(a)</p>
+          <p className="text-2xl font-bold text-foreground">{userInfo.name}</p>
         </div>
       </div>
     </div>
@@ -104,6 +101,7 @@ export default function Onboarding({
           setFadeOutWelcome(true)
           // After welcome message fades out, reload the page to show home content
           setTimeout(() => {
+            //todo: revalidate rather than reload
             window.location.reload()
           }, 600)
         }, 2000)
@@ -132,9 +130,8 @@ export default function Onboarding({
             <SwiperSlide key={idx}>
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <div className="mb-4" style={{ width: 350, height: 350 }}>
-                  <Image
-                    src={slide.image}
-                    alt="slide"
+                  <video
+                    src={slide.video}
                     width={350}
                     height={350}
                     style={{
@@ -142,6 +139,10 @@ export default function Onboarding({
                       width: '100%',
                       height: '100%',
                     }}
+                    loop
+                    autoPlay
+                    muted
+                    playsInline
                   />
                 </div>
                 <h2 className="text-xl text-foreground font-semibold mb-2">
