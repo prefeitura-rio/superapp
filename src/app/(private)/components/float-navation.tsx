@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
-import { useTheme } from 'next-themes'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -30,20 +30,8 @@ const navItems: NavItem[] = [
 
 export function FloatNavigation() {
   const pathname = usePathname()
-  const { theme } = useTheme()
+
   const [open, setOpen] = React.useState(false)
-
-  const getConfirmBtnClass = () => {
-    return theme === 'dark'
-      ? 'bg-white hover:bg-white/80 text-black'
-      : 'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white'
-  }
-
-  const getCloseBtnClass = () => {
-    return theme === 'dark'
-      ? 'bg-zinc-900 border-2 !border-[#323232] hover:text-white/80 text-white'
-      : 'bg-white border-2 hover:text-foreground/80 text-foreground'
-  }
 
   return (
     <>
@@ -102,14 +90,26 @@ export function FloatNavigation() {
               onClick={() =>
                 window.open('https://wa.me/5521991952121', '_blank')
               }
-              className={cn('flex-1 py-5', getConfirmBtnClass())}
+              className={
+                cn(
+                  'flex-1 py-5',
+                  'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white',
+                  'dark:bg-white dark:hover:bg-white/80 dark:text-black'
+                )
+              }
             >
               Confirmar
             </Button>
             <DrawerClose asChild>
               <Button
                 variant="outline"
-                className={cn('flex-1 py-5', getCloseBtnClass())}
+                className={
+                  cn(
+                    'flex-1 py-5',
+                    'bg-white border-2 hover:text-foreground/80 text-foreground',
+                    'dark:bg-zinc-900 dark:border-2 dark:!border-[#323232] dark:hover:text-white/80 dark:text-white'
+                  )
+                }
               >
                 Cancelar
               </Button>
