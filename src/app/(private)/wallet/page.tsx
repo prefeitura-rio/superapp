@@ -10,7 +10,7 @@ export default function Wallet() {
       <MainHeader />
       <main className="max-w-md mx-auto pt-15 text-white">
         <section className="px-5 relative h-full pb-30">
-          <h2 className="text-2xl font-bold mb-6 bg-background z-10 pt-5 pb-3">
+          <h2 className="text-2xl font-bold mb-6 bg-background z-10 pt-5 pb-3 text-foreground">
             Carteira
           </h2>
 

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -29,7 +30,20 @@ const navItems: NavItem[] = [
 
 export function FloatNavigation() {
   const pathname = usePathname()
+  const { theme } = useTheme()
   const [open, setOpen] = React.useState(false)
+
+  const getConfirmBtnClass = () => {
+    return theme === 'dark'
+      ? 'bg-white hover:bg-white/80 text-black'
+      : 'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white'
+  }
+
+  const getCloseBtnClass = () => {
+    return theme === 'dark'
+      ? 'bg-zinc-900 border-2 !border-[#323232] hover:text-white/80 text-white'
+      : 'bg-white border-2 hover:text-foreground/80 text-foreground'
+  }
 
   return (
     <>
@@ -49,7 +63,7 @@ export function FloatNavigation() {
                 <div
                   className={cn(
                     'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
-                    isActive ? 'bg-muted' : 'bg-muted/30 hover:bg-muted'
+                    isActive ? 'bg-card' : 'bg-card/30 hover:bg-card'
                   )}
                 >
                   <Icon
@@ -57,7 +71,7 @@ export function FloatNavigation() {
                       'h-6 w-6 transition-colors',
                       isActive
                         ? 'text-card-foreground'
-                        : 'text-card-foreground/30 group-hover:text-white'
+                        : 'text-card-foreground/30 group-hover:text-card-foreground/20'
                     )}
                   />
                 </div>
@@ -68,9 +82,9 @@ export function FloatNavigation() {
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
           <div
             onClick={() => setOpen(true)}
-            className="group flex cursor-pointer h-12 w-12 items-center justify-center rounded-full bg-muted/30 hover:bg-muted transition-colors"
+            className="group flex cursor-pointer h-12 w-12 items-center justify-center rounded-full bg-card/30 hover:bg-card transition-colors"
           >
-            <MessageCircle className="h-6 w-6 text-gray-400 group-hover:text-white" />
+            <MessageCircle className="h-6 w-6 text-card-foreground/30 group-hover:text-card-foreground/20" />
           </div>
         </nav>
       </div>
@@ -88,14 +102,14 @@ export function FloatNavigation() {
               onClick={() =>
                 window.open('https://wa.me/5521991952121', '_blank')
               }
-              className="flex-1 py-5 bg-foreground hover:bg-foreground/80 text-black"
+              className={cn('flex-1 py-5', getConfirmBtnClass())}
             >
               Confirmar
             </Button>
             <DrawerClose asChild>
               <Button
                 variant="outline"
-                className="flex-1 py-5 !bg-zinc-900 border-2 !border-[#323232]"
+                className={cn('flex-1 py-5', getCloseBtnClass())}
               >
                 Cancelar
               </Button>

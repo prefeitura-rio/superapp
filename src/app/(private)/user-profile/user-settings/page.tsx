@@ -1,14 +1,13 @@
 'use client'
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { SecondaryHeader } from '../../components/secondary-header';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { SecondaryHeader } from '../../components/secondary-header'
 
 export default function UserSettingsForm() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, theme } = useTheme()
 
- 
   return (
     <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Configurações" />
@@ -23,7 +22,7 @@ export default function UserSettingsForm() {
             <Sun className="size-6" />
             <label
               htmlFor="light"
-              className="text-md font-medium cursor-pointer select-none"
+              className="text-md font-medium cursor-pointer select-none text-foreground"
             >
               Modo Claro
             </label>
@@ -35,7 +34,7 @@ export default function UserSettingsForm() {
             <Moon className="size-6" />
             <label
               htmlFor="dark"
-              className="text-md font-medium cursor-pointer select-none"
+              className="text-md font-medium cursor-pointer select-none text-foreground"
             >
               Modo Escuro
             </label>

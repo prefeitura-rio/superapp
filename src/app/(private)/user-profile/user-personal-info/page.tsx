@@ -22,7 +22,7 @@ export default function PersonalInfoForm() {
             <Input
               id="cpf"
               defaultValue="123.456.789-12"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -33,7 +33,7 @@ export default function PersonalInfoForm() {
             <Input
               id="fullName"
               defaultValue="Marina Duarte"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -58,7 +58,7 @@ export default function PersonalInfoForm() {
             <Input
               id="socialName"
               defaultValue="Marina Duarte"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -69,7 +69,7 @@ export default function PersonalInfoForm() {
             <Input
               id="nationality"
               defaultValue="Brasileira"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function PersonalInfoForm() {
             <Input
               id="race"
               defaultValue="Branca"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
 
@@ -91,7 +91,7 @@ export default function PersonalInfoForm() {
             <Input
               id="birthDate"
               defaultValue="25/09/1992"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -101,7 +101,7 @@ export default function PersonalInfoForm() {
             <Input
               id="sexo"
               defaultValue="Feminino"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -111,7 +111,7 @@ export default function PersonalInfoForm() {
             <Input
               id="celular"
               defaultValue="(21) 98765-4321"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -121,7 +121,7 @@ export default function PersonalInfoForm() {
             <Input
               id="email"
               defaultValue="marina.duarte@gmail.com"
-              className="bg-transparent border-muted text-white"
+              className="bg-transparent border-muted text-foreground"
             />
           </div>
         </div>

@@ -15,11 +15,11 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-white">
+    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
       <MainHeader />
       {/* Header */}
       <header className="p-5">
-        <h1 className="text-2xl font-bold">Marina Duarte</h1>
+        <h1 className="text-2xl font-bold text-foreground">Marina Duarte</h1>
       </header>
 
       {/* Suggestion Cards*/}

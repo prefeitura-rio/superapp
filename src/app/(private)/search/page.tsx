@@ -193,7 +193,9 @@ export default function Search() {
             </div>
           ) : (
             <div>
-              <h2 className="text-lg font-semibold">Sugestões</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                Sugestões
+              </h2>
               <ul>
                 {suggestions.map((text, index) => (
                   <li
@@ -211,7 +213,7 @@ export default function Search() {
                     }}
                   >
                     <span>{text}</span>
-                    <ArrowRight className="text-white h-5 w-5" />
+                    <ArrowRight className="text-foreground h-5 w-5" />
                   </li>
                 ))}
               </ul>

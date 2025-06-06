@@ -11,22 +11,24 @@ export default function CategoryPage() {
       <SecondaryHeader title="Categorias de Serviços" />
       <div className="min-h-screen text-white">
         <div className="max-w-md mx-auto px-5 pt-4 pb-20">
-          <h1 className="text-xl font-semibold pb-4">IPTU</h1>
+          <h1 className="text-xl font-semibold pb-4 text-foreground">IPTU</h1>
           <Separator className="bg-zinc-800" />
 
           <nav className="flex flex-col">
             <MenuItem href="/iptu/payment">
-              <span>Pagamento de IPTU</span>
+              <span className="text-card-foreground">Pagamento de IPTU</span>
               <Badge
                 variant="outline"
-                className="bg-orange-600 text-white border-none text-xs"
+                className="bg-orange-600 text-card border-none text-xs"
               >
                 desconto no PIX
               </Badge>
             </MenuItem>
 
             <MenuItem href="/iptu/certificate">
-              <span>Certidão de situação fiscal e enfitêutica</span>
+              <span className="text-card-foreground">
+                Certidão de situação fiscal e enfitêutica
+              </span>
               <Badge
                 variant="outline"
                 className="bg-primary text-white border-none text-xs"
@@ -36,22 +38,32 @@ export default function CategoryPage() {
             </MenuItem>
 
             <MenuItem href="/iptu/previous-years">
-              <span>Pagamento de IPTU dos anos anteriores</span>
+              <span className="text-card-foreground">
+                Pagamento de IPTU dos anos anteriores
+              </span>
             </MenuItem>
             <MenuItem href="/iptu/previous-years">
-              <span>Parcelamento e emissão de boletos (DARM)</span>
+              <span className="text-card-foreground">
+                Parcelamento e emissão de boletos (DARM)
+              </span>
             </MenuItem>
             <MenuItem href="/iptu/previous-years">
-              <span>Pagamento de IPTU dos anos anteriores</span>
+              <span className="text-card-foreground">
+                Pagamento de IPTU dos anos anteriores
+              </span>
             </MenuItem>
             <MenuItem href="/iptu/previous-years">
-              <span>Certidão de elementos cadastrais do imóvel</span>
+              <span className="text-card-foreground">
+                Certidão de elementos cadastrais do imóvel
+              </span>
             </MenuItem>
             <MenuItem href="/iptu/active-debt" disabled>
-              <span>Dívida ativa consultar débitos de...</span>
+              <span className="text-card-foreground/20">
+                Dívida ativa consultar débitos de...
+              </span>
               <Badge
                 variant="outline"
-                className="bg-zinc-700 text-white border-none text-xs"
+                className="bg-terciary text-card-foreground border-none text-xs"
               >
                 em breve
               </Badge>
@@ -86,7 +98,7 @@ function MenuItem({ href, children, disabled = false }: MenuItemProps) {
       {disabled ? (
         <div className="cursor-not-allowed">{content}</div>
       ) : (
-        <Link href={href} className="hover:bg-zinc-900 transition-colors">
+        <Link href={href} className="hover:brightness-90 transition-colors">
           {content}
         </Link>
       )}

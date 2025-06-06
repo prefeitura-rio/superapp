@@ -17,19 +17,19 @@ import { SecondaryHeader } from '../components/secondary-header'
 
 export default function ProfilePage() {
   return (
-    <div className="pb-25 pt-20 max-w-md mx-auto text-white flex flex-col">
+    <div className="pb-25 pt-20 max-w-md mx-auto text-foreground flex flex-col">
       {/* Header */}
       <SecondaryHeader title="Perfil" />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
-        <Avatar className="h-24 w-24 mb-4 border-2 border-gray-700">
-          <AvatarFallback className="bg-gray-800 text-gray-400">
-            <User className="h-6 w-6 text-gray-100" />
+        <Avatar className="h-24 w-24 mb-4 border-2 border-border">
+          <AvatarFallback className="bg-background">
+            <User className="h-6 w-6 text-primary" />
           </AvatarFallback>
         </Avatar>
         <h2 className="text-xl font-semibold mb-1">Marina Duarte</h2>
-        <p className="text-sm text-gray-500">408.567.553-13</p>
+        <p className="text-sm text-primary">408.567.553-13</p>
       </div>
 
       {/* Menu Items */}
@@ -94,7 +94,7 @@ function MenuItem({
       href={href}
       onClick={onClick}
       className={cn(
-        'flex items-center justify-between py-5 text-white',
+        'flex items-center justify-between py-5 text-foreground',
         'border-b color-border',
         isFirst && 'border-t color-border'
       )}
