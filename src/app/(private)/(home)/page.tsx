@@ -23,7 +23,6 @@ export default async function Home() {
         console.error('Error fetching user data:', error)
       }
     }
-  
 
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">

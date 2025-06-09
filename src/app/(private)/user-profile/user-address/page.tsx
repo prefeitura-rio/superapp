@@ -1,8 +1,32 @@
-export default function UserAddress() {
+import { getCitizenCpf } from '@/http/citizen/citizen';
+import { getUserInfoFromToken } from '@/lib/user-info';
+import { AddressInfoCard } from '../../components/address-info-card';
+import { EmptyAddress } from '../../components/empty-address';
+import { SecondaryHeader } from '../../components/secondary-header';
+
+export default async function UserAddress() {
+
+  const userAuthInfo = await getUserInfoFromToken();
+  let userInfo;
+  let addressInfo = null;
+  if (userAuthInfo.cpf) {
+    try {
+      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+      if (response.status === 200) {
+        userInfo = response.data;
+        addressInfo = userInfo?.endereco?.principal || null;
+      } else {
+        console.error('Failed to fetch user data status:', response.data)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+    }
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full">
-      <h1 className="text-2xl font-bold">UserAddress</h1>
-      <p className="mt-4 text-lg">This is the UserAddress page.</p>
+    <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
+      <SecondaryHeader title="Endereço" />
+      {addressInfo ? <AddressInfoCard address={addressInfo} /> : <EmptyAddress />}
     </div>
   )
 }

@@ -50,7 +50,7 @@ export default async function ProfilePage() {
           <MenuItem
             icon={<MapIcon className="h-5 w-5" />}
             label="Endereço"
-            href="/user-profile/"
+            href="/user-profile/user-address"
           />
           <MenuItem
             icon={<CheckCircle className="h-5 w-5" />}
