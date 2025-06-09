@@ -3,11 +3,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { formatCpf } from '@/lib/format-cpf';
 import { getUserInfoFromToken } from '@/lib/user-info';
 import {
-  Briefcase,
   CheckCircle,
   MapIcon,
   Settings,
-  User,
+  User
 } from 'lucide-react';
 import { LogoutButton } from '../components/logout-button';
 import { MenuItem } from '../components/menu-item';
@@ -18,7 +17,7 @@ export default async function ProfilePage() {
   const userInfo = await getUserInfoFromToken();
 
   return (
-    <div className="pb-25 pt-20 max-w-md mx-auto text-foreground flex flex-col">
+    <div className="pt-20 max-w-md mx-auto text-foreground flex flex-col">
       {/* Header */}
       <SecondaryHeader title="Perfil" />
 
@@ -42,11 +41,11 @@ export default async function ProfilePage() {
             href="/user-profile/user-personal-info"
             isFirst={true}
           />
-          <MenuItem
+          {/* <MenuItem
             icon={<Briefcase className="h-5 w-5" />}
             label="Trabalho"
             href="/user-profile/user-job-info"
-          />
+          /> */}
           <MenuItem
             icon={<MapIcon className="h-5 w-5" />}
             label="Endereço"

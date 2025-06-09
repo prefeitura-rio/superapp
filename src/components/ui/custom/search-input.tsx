@@ -7,28 +7,45 @@ import * as React from 'react'
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onClear?: () => void
   onBack?: () => void
+  showIcons?: boolean // NEW PROP
 }
 
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ className, onClear, onBack, ...props }, ref) => {
+  (
+    {
+      className,
+      onClear,
+      onBack,
+      showIcons = true,
+      value: controlledValue,
+      onChange,
+      ...props
+    },
+    ref
+  ) => {
     const [value, setValue] = React.useState<string>(
-      (props.value as string) || ''
+      (controlledValue as string) || ''
     )
     const inputRef = React.useRef<HTMLInputElement>(null)
 
     React.useEffect(() => {
-      if (props.value !== undefined) {
-        setValue(props.value as string)
+      if (controlledValue !== undefined) {
+        setValue(controlledValue as string)
       }
-    }, [props.value])
+    }, [controlledValue])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value)
-      props.onChange?.(e)
+      onChange?.(e)
     }
 
     const handleClear = () => {
       setValue('')
+      // Fire a synthetic event to notify parent (for controlled input)
+      if (onChange) {
+        const event = { target: { value: '' } } as React.ChangeEvent<HTMLInputElement>
+        onChange(event)
+      }
       onClear?.()
       inputRef.current?.focus()
     }
@@ -40,14 +57,16 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           className
         )}
       >
-        <button
-          type="button"
-          onClick={onBack}
-          className="mr-3 text-gray-400 hover:text-gray-300"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        {showIcons && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mr-3 text-gray-400 hover:text-gray-300"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        )}
 
         <input
           ref={inputRef}
@@ -58,7 +77,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
         />
 
         <div className="flex items-center gap-1">
-          {value && (
+          {showIcons && value && (
             <button
               type="button"
               onClick={handleClear}
@@ -68,13 +87,15 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
               <X className="h-5 w-5" />
             </button>
           )}
-          <button
-            type="button"
-            className="text-card-foreground hover:text-card-foreground p-1 ml-1"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+          {showIcons && (
+            <button
+              type="button"
+              className="text-card-foreground hover:text-card-foreground p-1 ml-1"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
     )
@@ -84,3 +105,4 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 SearchInput.displayName = 'SearchInput'
 
 export { SearchInput }
+
