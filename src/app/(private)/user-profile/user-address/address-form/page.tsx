@@ -1,6 +1,9 @@
 'use client'
 import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
+import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/custom/search-input";
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Switch } from "@/components/ui/switch";
 import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +14,12 @@ export default function AddressForm() {
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [number, setNumber] = useState("");
+  const [noNumber, setNoNumber] = useState(false);
+  const [complement, setComplement] = useState("");
+  const [noComplement, setNoComplement] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -37,6 +46,20 @@ export default function AddressForm() {
       controller.abort();
     };
   }, [inputValue]);
+
+  const handleSuggestionClick = (item: any) => {
+    setSelectedAddress(item);
+    setDrawerOpen(true);
+  };
+
+  const handleSave = () => {
+    console.log({
+      address: selectedAddress,
+      number: noNumber ? "Sem número" : number,
+      complement: noComplement ? "Sem complemento" : complement,
+    });
+    setDrawerOpen(false);
+  };
 
   return (
     <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
@@ -67,7 +90,7 @@ export default function AddressForm() {
               <div className="flex flex-col">
                 {suggestions.map((item: any, idx: number) => (
                   <div key={item.place_id}>
-                    <div className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30">
+                    <div className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30" onClick={() => handleSuggestionClick(item)}>
                       <MapPin className="h-5 w-5" />
                       <div>
                         <div className="font-medium text-foreground leading-tight text-base">{item.main_text}</div>
@@ -87,6 +110,52 @@ export default function AddressForm() {
           </div>
         )}
       </div>
+
+      {/* Drawer for address details */}
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="max-w-md pt-5 pb-5 mx-auto rounded-t-2xl">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="text-lg font-semibold">
+              {selectedAddress?.main_text}
+            </DrawerTitle>
+            <div className="text-muted-foreground text-base">
+              {selectedAddress?.secondary_text}
+            </div>
+          </DrawerHeader>
+          <div className="px-4 flex flex-col gap-4">
+            <div className="bg-muted rounded-xl p-4 flex flex-col gap-2">
+              <input
+                className="bg-transparent outline-none border-none text-lg placeholder:text-muted-foreground"
+                placeholder="Escreva o número"
+                value={noNumber ? "" : number}
+                onChange={e => setNumber(e.target.value)}
+                disabled={noNumber}
+              />
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch checked={noNumber} onCheckedChange={setNoNumber} id="no-number" />
+              <label htmlFor="no-number" className="text-muted-foreground text-base select-none">Sem número</label>
+            </div>
+            <div className="bg-muted rounded-xl p-4 flex flex-col gap-2">
+              <input
+                className="bg-transparent outline-none border-none text-lg placeholder:text-muted-foreground"
+                placeholder="Escreva o complemento"
+                value={noComplement ? "" : complement}
+                onChange={e => setComplement(e.target.value)}
+                disabled={noComplement}
+              />
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch checked={noComplement} onCheckedChange={setNoComplement} id="no-complement" />
+              <label htmlFor="no-complement" className="text-muted-foreground text-base select-none">Sem complemento</label>
+            </div>
+          </div>
+          <DrawerFooter className="flex flex-row gap-3 px-4 pb-6 pt-5">
+            <Button className="flex-1 py-4 text-base" onClick={handleSave}>Salvar</Button>
+            <Button className="flex-1 py-4 text-base border" variant="outline" onClick={() => { setDrawerOpen(false); router.back(); }}>Cancelar</Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
     )
 }
