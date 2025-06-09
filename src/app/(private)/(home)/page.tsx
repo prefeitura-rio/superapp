@@ -1,33 +1,36 @@
-import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
-import { getUserInfoFromToken } from '@/lib/user-info'
 
-import { setFirstLoginFalse } from '@/http/actions/firstlogin'
+import { getCitizenCpf } from '@/http/citizen/citizen'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
-import Onboarding from '../components/on-boarding'
 import SuggestionCards from '../components/suggestion-cards'
 import CarteiraSection from '../components/wallet-section'
 
 export default async function Home() {
-  const userInfo = await getUserInfoFromToken() || { cpf: '', name: '' };
-  const { data, status } = await getCitizenCpfFirstlogin(userInfo.cpf);
-  const firstLogin = status === 200 && data.firstlogin;
-
-  if (firstLogin) {
-    return (
-      <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
-        <Onboarding userInfo={userInfo} setFirstLoginFalse={setFirstLoginFalse} />
-      </main>
-    )
-  }
+  
+  const userAuthInfo = await getUserInfoFromToken();
+  let userInfo ;
+  if (userAuthInfo.cpf) {
+      try {
+        const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+        if (response.status === 200) {
+          userInfo = response.data;
+        } else {
+          console.error('Failed to fetch user data status:', response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
+    }
+  
 
   return (
     <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
       <MainHeader />
       {/* Header */}
       <header className="p-5">
-        <h1 className="text-2xl font-bold text-foreground">Marina Duarte</h1>
+        <h1 className="text-2xl font-bold text-foreground">{userAuthInfo.name}</h1>
       </header>
 
       {/* Suggestion Cards*/}

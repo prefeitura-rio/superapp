@@ -38,5 +38,6 @@ export async function GET(req: NextRequest) {
     httpOnly: true,
     path: '/',
   })
+  
   return res
 }

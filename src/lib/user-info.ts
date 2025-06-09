@@ -6,19 +6,18 @@ export interface UserInfo {
   name: string;
 }
 
-export async function getUserInfoFromToken(): Promise<UserInfo | null> {
-  const cookieStore = cookies();
-  const accessToken = (await cookieStore).get('access_token')?.value;
-  if (!accessToken) return null;
+export async function getUserInfoFromToken(): Promise<UserInfo | { cpf: '', name: '' }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access_token')?.value;
+  if (!accessToken) return { cpf: '', name: '' };
 
   try {
     const decoded: any = jwtDecode(accessToken);
-    // Adjust these keys if your token uses different claim names
     const cpf = decoded.cpf || decoded.CPF || decoded.preferred_username;
     const name = decoded.name || decoded.NOME || '';
-    if (!cpf || !name) return null;
+    if (!cpf || !name) return { cpf: '', name: '' };
     return { cpf, name };
   } catch (e) {
-    return null;
+    return { cpf: '', name: '' };
   }
 }

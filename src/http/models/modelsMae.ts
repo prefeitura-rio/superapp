@@ -7,6 +7,6 @@
  */
 
 export interface ModelsMae {
-  cpf?: number
+  cpf?: string
   nome?: string
 }

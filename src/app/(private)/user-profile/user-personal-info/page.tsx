@@ -6,10 +6,35 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { getCitizenCpf } from '@/http/citizen/citizen'
+import { formatCpf } from '@/lib/format-cpf'
+import { formatPhone } from '@/lib/format-phone'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { InfoIcon } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
 
-export default function PersonalInfoForm() {
+export default async function PersonalInfoForm() {
+  const userAuthInfo = await getUserInfoFromToken();
+  let userInfo;
+  if (userAuthInfo.cpf) {
+    try {
+      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+      if (response.status === 200) {
+        userInfo = response.data;
+      } else {
+        console.error('Failed to fetch user data status:', response.data)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+    }
+  }
+
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('pt-BR');
+  };
+
   return (
     <>
       <div className="min-h-screen max-w-md mx-auto pt-24 pb-10 bg-background">
@@ -21,8 +46,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="cpf"
-              defaultValue="123.456.789-12"
+              defaultValue={formatCpf(userInfo?.cpf)}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
 
@@ -32,8 +58,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="fullName"
-              defaultValue="Marina Duarte"
+              defaultValue={userInfo?.nome || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
 
@@ -57,8 +84,9 @@ export default function PersonalInfoForm() {
             </div>
             <Input
               id="socialName"
-              defaultValue="Marina Duarte"
+              defaultValue={userInfo?.nome_social || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
 
@@ -68,8 +96,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="nationality"
-              defaultValue="Brasileira"
+              defaultValue={userInfo?.nascimento?.pais || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
 
@@ -79,8 +108,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="race"
-              defaultValue="Branca"
+              defaultValue={userInfo?.raca || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
 
@@ -90,8 +120,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="birthDate"
-              defaultValue="25/09/1992"
+              defaultValue={formatDate(userInfo?.nascimento?.data)}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
           <div className="space-y-2">
@@ -100,8 +131,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="sexo"
-              defaultValue="Feminino"
+              defaultValue={userInfo?.sexo || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
           <div className="space-y-2">
@@ -110,8 +142,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="celular"
-              defaultValue="(21) 98765-4321"
+              defaultValue={formatPhone(userInfo?.telefone?.principal?.ddi, userInfo?.telefone?.principal?.ddd, userInfo?.telefone?.principal?.valor)}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
           <div className="space-y-2">
@@ -120,8 +153,9 @@ export default function PersonalInfoForm() {
             </Label>
             <Input
               id="email"
-              defaultValue="marina.duarte@gmail.com"
+              defaultValue={userInfo?.email?.principal?.valor || ''}
               className="bg-transparent border-muted text-foreground"
+              readOnly
             />
           </div>
         </div>

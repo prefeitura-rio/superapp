@@ -1,21 +1,22 @@
-'use client'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { cn } from '@/lib/utils'
+import { formatCpf } from '@/lib/format-cpf';
+import { getUserInfoFromToken } from '@/lib/user-info';
 import {
   Briefcase,
   CheckCircle,
-  ChevronRight,
-  LogOut,
   MapIcon,
   Settings,
   User,
-} from 'lucide-react'
-import Link from 'next/link'
-import type React from 'react'
-import { SecondaryHeader } from '../components/secondary-header'
+} from 'lucide-react';
+import { LogoutButton } from '../components/logout-button';
+import { MenuItem } from '../components/menu-item';
+import { SecondaryHeader } from '../components/secondary-header';
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+
+  const userInfo = await getUserInfoFromToken();
+
   return (
     <div className="pb-25 pt-20 max-w-md mx-auto text-foreground flex flex-col">
       {/* Header */}
@@ -28,8 +29,8 @@ export default function ProfilePage() {
             <User className="h-6 w-6 text-primary" />
           </AvatarFallback>
         </Avatar>
-        <h2 className="text-xl font-semibold mb-1">Marina Duarte</h2>
-        <p className="text-sm text-primary">408.567.553-13</p>
+        <h2 className="text-xl font-semibold mb-1">{userInfo.name}</h2>
+        <p className="text-sm text-primary">{formatCpf(userInfo.cpf)}</p>
       </div>
 
       {/* Menu Items */}
@@ -49,7 +50,6 @@ export default function ProfilePage() {
           <MenuItem
             icon={<MapIcon className="h-5 w-5" />}
             label="Endereço"
-            // href="/user-profile/user-address"
             href="/user-profile/"
           />
           <MenuItem
@@ -62,48 +62,11 @@ export default function ProfilePage() {
             label="Configurações"
             href="/user-profile/user-settings"
           />
-          <MenuItem
-            icon={<LogOut className="h-5 w-5" />}
-            label="Sair"
-            onClick={async () => {
-              await fetch('/api/auth/logout')
-              window.location.href = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
-            }}
-          />
+
+          <LogoutButton />
         </nav>
       </div>
     </div>
   )
 }
 
-function MenuItem({
-  icon,
-  label,
-  href = '#',
-  onClick,
-  isFirst = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  href?: string
-  onClick?: () => void
-  isFirst?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={cn(
-        'flex items-center justify-between py-5 text-foreground',
-        'border-b color-border',
-        isFirst && 'border-t color-border'
-      )}
-    >
-      <div className="flex items-center gap-3">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <ChevronRight className="h-5 w-5 text-primary" />
-    </Link>
-  )
-}
