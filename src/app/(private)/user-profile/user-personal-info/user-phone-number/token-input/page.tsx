@@ -13,7 +13,7 @@ import {
 import { ModelsPhoneVerificationValidateRequest } from "@/http/models/modelsPhoneVerificationValidateRequest";
 import confetti from "canvas-confetti";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export default function TokenInputForm() {
@@ -22,15 +22,19 @@ export default function TokenInputForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const valor = searchParams.get("valor") || "";
+  const ddd = searchParams.get("ddd") || "";
+  const ddi = searchParams.get("ddi") || "";
 
   async function handleSave() {
     setError(null);
     startTransition(async () => {
       const result = await validateUserPhoneToken({
         code: token,
-        ddd: "21", // TODO: get from input or context
-        ddi: "+55", // TODO: get from input or context
-        valor: "123456", // TODO: get from input or context
+        ddd,
+        ddi,
+        valor,
       } as ModelsPhoneVerificationValidateRequest);
       if (result.success) {
         confetti({

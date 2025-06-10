@@ -25,13 +25,23 @@ export default function PhoneNumberForm() {
   async function handleSave() {
     setError(null);
     startTransition(async () => {
+      // Parse DDI, DDD, valor from phone input
+      const digits = phone.replace(/\D/g, "");
+      const ddi = "+55";
+      const ddd = digits.substring(0, 2);
+      const valor = digits.substring(2);
       const result = await updateUserPhone({
-        valor: phone,
-        ddd: "21", // TODO: get from input or parse phone
-        ddi: "+55", // TODO: get from input or parse phone
+        valor: valor,
+        ddd,
+        ddi,
       } as ModelsSelfDeclaredPhoneInput);
       if (result.success) {
-        router.push("/user-profile/user-personal-info/user-phone-number/token-input");
+        // Pass phone info in URL for next step
+        router.push(
+          `/user-profile/user-personal-info/user-phone-number/token-input?valor=${digits}&ddd=${ddd}&ddi=${encodeURIComponent(
+            ddi
+          )}`
+        );
       } else {
         setError(result.error || "Erro ao atualizar número");
       }
@@ -54,7 +64,7 @@ export default function PhoneNumberForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-       <PhoneInputForm value={phone} onChange={setPhone}/>
+        <PhoneInputForm value={phone} onChange={setPhone} />
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
