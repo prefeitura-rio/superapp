@@ -1,5 +1,5 @@
 "use client";
-import { updateUserEmail } from "@/actions/update-user-email";
+import { validateUserPhoneToken } from "@/actions/validate-user-phone-token";
 import PhoneInputTokenForm from "@/app/(private)/components/phone-input-token-form";
 import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
 import welcomeImage from "@/assets/welcome.svg";
@@ -10,14 +10,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { ModelsSelfDeclaredEmailInput } from "@/http/models/modelsSelfDeclaredEmailInput";
+import { ModelsPhoneVerificationValidateRequest } from "@/http/models/modelsPhoneVerificationValidateRequest";
 import confetti from "canvas-confetti";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export default function TokenInputForm() {
-  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +26,12 @@ export default function TokenInputForm() {
   async function handleSave() {
     setError(null);
     startTransition(async () => {
-      const result = await updateUserEmail({
-        valor: email,
-      } as ModelsSelfDeclaredEmailInput);
+      const result = await validateUserPhoneToken({
+        code: token,
+        ddd: "21", // TODO: get from input or context
+        ddi: "+55", // TODO: get from input or context
+        valor: "123456", // TODO: get from input or context
+      } as ModelsPhoneVerificationValidateRequest);
       if (result.success) {
         confetti({
           particleCount: 100,
@@ -37,7 +40,7 @@ export default function TokenInputForm() {
         });
         setDrawerOpen(true);
       } else {
-        setError(result.error || "Erro ao atualizar email");
+        setError(result.error || "Erro ao validar token");
       }
     });
   }
@@ -58,13 +61,13 @@ export default function TokenInputForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-       <PhoneInputTokenForm/>
+       <PhoneInputTokenForm value={token} onChange={setToken}/>
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={isPending || !email}
+          disabled={isPending || !token}
         >
           {isPending ? "Enviando..." : "Enviar"}
         </Button>
@@ -76,13 +79,13 @@ export default function TokenInputForm() {
           <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
             <DrawerHeader className="text-center">
               <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                Email <br />
+                Número <br />
                 atualizado!
               </DrawerTitle>
             </DrawerHeader>
             <Image
               src={welcomeImage}
-              alt="Email atualizado"
+              alt="Número atualizado"
               width={260}
               height={320}
               className="mx-auto mb-10"

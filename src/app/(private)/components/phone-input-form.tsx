@@ -5,9 +5,19 @@ import type React from "react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-export default function PhoneInputForm() {
-  const [countryCode, setCountryCode] = useState("55");
-  const [phoneNumber, setPhoneNumber] = useState("");
+interface PhoneInputFormProps {
+  value: string;
+  onChange: (value: string) => void;
+  countryCode?: string;
+  onCountryCodeChange?: (value: string) => void;
+}
+
+export default function PhoneInputForm({
+  value,
+  onChange,
+  countryCode = "55",
+  onCountryCodeChange,
+}: PhoneInputFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -38,17 +48,17 @@ export default function PhoneInputForm() {
 
     // If user deletes the opening parenthesis, clear the entire field
     if (inputValue === "" || inputValue === "(") {
-      setPhoneNumber("");
+      onChange("");
       return;
     }
 
     const formatted = formatPhoneNumber(inputValue);
-    setPhoneNumber(formatted);
+    onChange(formatted);
   };
 
   const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
-    setCountryCode(value);
+    if (onCountryCodeChange) onCountryCodeChange(value);
   };
 
   return (
@@ -67,9 +77,9 @@ export default function PhoneInputForm() {
           <Input
             id="phone"
             type="text"
-            value={phoneNumber}
+            value={value}
             onChange={handlePhoneChange}
-            placeholder="(21) 98765-4321"
+            placeholder="(21) 99999-9999"
             className="flex-1 bg-card border-border rounded-xl"
             maxLength={15}
           />

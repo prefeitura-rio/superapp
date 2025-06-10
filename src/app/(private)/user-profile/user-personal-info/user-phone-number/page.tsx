@@ -1,4 +1,5 @@
 "use client";
+import { updateUserPhone } from "@/actions/update-user-phone";
 import PhoneInputForm from "@/app/(private)/components/phone-input-form";
 import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
 import welcomeImage from "@/assets/welcome.svg";
@@ -9,12 +10,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ModelsSelfDeclaredPhoneInput } from "@/http/models/modelsSelfDeclaredPhoneInput";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export default function PhoneNumberForm() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +24,18 @@ export default function PhoneNumberForm() {
 
   async function handleSave() {
     setError(null);
+    startTransition(async () => {
+      const result = await updateUserPhone({
+        valor: phone,
+        ddd: "21", // TODO: get from input or parse phone
+        ddi: "+55", // TODO: get from input or parse phone
+      } as ModelsSelfDeclaredPhoneInput);
+      if (result.success) {
+        router.push("/user-profile/user-personal-info/user-phone-number/token-input");
+      } else {
+        setError(result.error || "Erro ao atualizar número");
+      }
+    });
   }
 
   function handleDrawerClose() {
@@ -40,13 +54,13 @@ export default function PhoneNumberForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-       <PhoneInputForm/>
+       <PhoneInputForm value={phone} onChange={setPhone}/>
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={isPending || !email}
+          disabled={isPending || !phone}
         >
           {isPending ? "Enviando..." : "Enviar"}
         </Button>

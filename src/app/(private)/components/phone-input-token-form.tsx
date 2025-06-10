@@ -1,16 +1,20 @@
 "use client";
 
-
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 
-export default function PhoneInputTokenForm() {
+interface PhoneInputTokenFormProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function PhoneInputTokenForm({ value, onChange }: PhoneInputTokenFormProps) {
 
 
   return (
     <>
       <form className="w-full flex flex-col gap-4">
-      <InputOTP className="w-full" maxLength={6}>
+      <InputOTP className="w-full" maxLength={6} value={value} onChange={onChange}>
       <InputOTPGroup>
         <InputOTPSlot index={0} />
         <InputOTPSlot index={1} />
