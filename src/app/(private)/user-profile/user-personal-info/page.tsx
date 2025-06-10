@@ -1,38 +1,42 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { getCitizenCpf } from '@/http/citizen/citizen'
-import { formatCpf } from '@/lib/format-cpf'
-import { formatPhone } from '@/lib/format-phone'
-import { getUserInfoFromToken } from '@/lib/user-info'
-import { InfoIcon } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
+} from "@/components/ui/tooltip";
+import { getCitizenCpf } from "@/http/citizen/citizen";
+import { formatCpf } from "@/lib/format-cpf";
+import { formatPhone } from "@/lib/format-phone";
+import { getUserInfoFromToken } from "@/lib/user-info";
+import { InfoIcon } from "lucide-react";
+import Link from "next/link";
+import { SecondaryHeader } from "../../components/secondary-header";
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken();
   let userInfo;
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+      const response = await getCitizenCpf(userAuthInfo.cpf, {
+        cache: "force-cache",
+        next: { tags: ["update-user-email"] },
+      });
       if (response.status === 200) {
         userInfo = response.data;
       } else {
-        console.error('Failed to fetch user data status:', response.data)
+        console.error("Failed to fetch user data status:", response.data);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error("Error fetching user data:", error);
     }
   }
 
   const formatDate = (dateStr: string | undefined) => {
-    if (!dateStr) return '';
+    if (!dateStr) return "";
     const d = new Date(dateStr);
-    return d.toLocaleDateString('pt-BR');
+    return d.toLocaleDateString("pt-BR");
   };
 
   return (
@@ -58,7 +62,7 @@ export default async function PersonalInfoForm() {
             </Label>
             <Input
               id="fullName"
-              defaultValue={userInfo?.nome || ''}
+              defaultValue={userInfo?.nome || ""}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -84,7 +88,7 @@ export default async function PersonalInfoForm() {
             </div>
             <Input
               id="socialName"
-              defaultValue={userInfo?.nome_social || ''}
+              defaultValue={userInfo?.nome_social || ""}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -96,7 +100,7 @@ export default async function PersonalInfoForm() {
             </Label>
             <Input
               id="nationality"
-              defaultValue={userInfo?.nascimento?.pais || ''}
+              defaultValue={userInfo?.nascimento?.pais || ""}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -108,7 +112,7 @@ export default async function PersonalInfoForm() {
             </Label>
             <Input
               id="race"
-              defaultValue={userInfo?.raca || ''}
+              defaultValue={userInfo?.raca || ""}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -131,7 +135,7 @@ export default async function PersonalInfoForm() {
             </Label>
             <Input
               id="sexo"
-              defaultValue={userInfo?.sexo || ''}
+              defaultValue={userInfo?.sexo || ""}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -142,7 +146,11 @@ export default async function PersonalInfoForm() {
             </Label>
             <Input
               id="celular"
-              defaultValue={formatPhone(userInfo?.telefone?.principal?.ddi, userInfo?.telefone?.principal?.ddd, userInfo?.telefone?.principal?.valor)}
+              defaultValue={formatPhone(
+                userInfo?.telefone?.principal?.ddi,
+                userInfo?.telefone?.principal?.ddd,
+                userInfo?.telefone?.principal?.valor
+              )}
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
@@ -151,15 +159,20 @@ export default async function PersonalInfoForm() {
             <Label htmlFor="email" className="text-primary">
               E-mail
             </Label>
-            <Input
-              id="email"
-              defaultValue={userInfo?.email?.principal?.valor || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
+            <Link
+              href="/user-profile/user-personal-info/user-email"
+              className=""
+            >
+              <Input
+                id="email"
+                defaultValue={userInfo?.email?.principal?.valor || ""}
+                className="bg-transparent border-muted text-foreground"
+                readOnly
+              />
+            </Link>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
