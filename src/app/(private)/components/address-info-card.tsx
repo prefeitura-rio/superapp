@@ -73,7 +73,7 @@ export function AddressInfoCard({ address, onEdit, onDelete }: AddressInfoCardPr
             </div>
           </div>
         </DrawerTrigger>
-        <DrawerContent className="px-4 max-w-md mx-auto pb-6 pt-4 rounded-t-2xl">
+        <DrawerContent className="px-4 max-w-md mx-auto pb-6 pt-4 !rounded-t-3xl">
           <div className="mx-auto w-12 h-1.5 bg-muted mb-6 rounded-full" />
           <DrawerHeader className="text-center p-0 mb-6">
             <DrawerTitle>{displayAddress}</DrawerTitle>

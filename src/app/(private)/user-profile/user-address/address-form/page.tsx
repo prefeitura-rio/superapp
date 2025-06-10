@@ -4,6 +4,8 @@ import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/custom/search-input";
 import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -137,7 +139,7 @@ export default function AddressForm() {
 
       {/* Drawer for address details */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-md pt-5 pb-5 mx-auto rounded-t-2xl">
+        <DrawerContent className="max-w-md pt-5 pb-5 mx-auto rounded-t-3xl!">
           <DrawerHeader className="text-center">
             <DrawerTitle className="text-lg font-semibold">
               {selectedAddress?.main_text}
@@ -146,37 +148,33 @@ export default function AddressForm() {
               {selectedAddress?.secondary_text}
             </div>
           </DrawerHeader>
-          <div className="px-4 flex flex-col gap-4">
-            <div className="bg-muted rounded-xl p-4 flex flex-col gap-2">
-              <input
-                className="bg-transparent outline-none border-none text-lg placeholder:text-muted-foreground"
+          <div className="px-4 flex flex-col pt-5 gap-4">
+              <Input
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
                 placeholder="Escreva o número"
                 value={noNumber ? "" : number}
                 onChange={e => setNumber(e.target.value)}
                 disabled={noNumber}
               />
-            </div>
             <div className="flex items-center gap-2 mb-2">
               <Switch checked={noNumber} onCheckedChange={setNoNumber} id="no-number" />
-              <label htmlFor="no-number" className="text-muted-foreground text-base select-none">Sem número</label>
+              <Label htmlFor="no-number" className="text-muted-foreground text-base select-none">Sem número</Label>
             </div>
-            <div className="bg-muted rounded-xl p-4 flex flex-col gap-2">
-              <input
-                className="bg-transparent outline-none border-none text-lg placeholder:text-muted-foreground"
+              <Input
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
                 placeholder="Escreva o complemento"
                 value={noComplement ? "" : complement}
                 onChange={e => setComplement(e.target.value)}
                 disabled={noComplement}
               />
-            </div>
             <div className="flex items-center gap-2 mb-2">
               <Switch checked={noComplement} onCheckedChange={setNoComplement} id="no-complement" />
-              <label htmlFor="no-complement" className="text-muted-foreground text-base select-none">Sem complemento</label>
+              <Label htmlFor="no-complement" className="text-muted-foreground text-base select-none">Sem complemento</Label>
             </div>
           </div>
-          <DrawerFooter className="flex flex-row gap-3 px-4 pb-6 pt-5">
-            <Button className="flex-1 py-4 text-base" onClick={handleSave}>Salvar</Button>
-            <Button className="flex-1 py-4 text-base border" variant="outline" onClick={() => { setDrawerOpen(false); router.back(); }}>Cancelar</Button>
+          <DrawerFooter className="flex flex-row gap-3 px-4 pb-6 pt-8">
+            <Button size="lg" className="flex-1 py-4 text-base" onClick={handleSave}>Salvar</Button>
+            <Button size="lg" className="flex-1 py-4 text-base border" variant="outline" onClick={() => { setDrawerOpen(false); router.back(); }}>Cancelar</Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
