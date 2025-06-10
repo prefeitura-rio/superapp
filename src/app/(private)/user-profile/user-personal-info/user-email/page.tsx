@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ModelsSelfDeclaredEmailInput } from "@/http/models/modelsSelfDeclaredEmailInput";
+import confetti from "canvas-confetti";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -29,6 +30,11 @@ export default function EmailForm() {
         valor: email,
       } as ModelsSelfDeclaredEmailInput);
       if (result.success) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.7 },
+        });
         setDrawerOpen(true);
       } else {
         setError(result.error || "Erro ao atualizar email");

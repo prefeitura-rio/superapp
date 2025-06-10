@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { zodResolver } from '@hookform/resolvers/zod';
+import confetti from "canvas-confetti";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -176,7 +177,11 @@ export default function AddressForm() {
       if (result.error) {
         console.error(result.error);
       } else {
-        console.log('Endereço atualizado com sucesso!');
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.7 },
+        });
         setDrawerOpen(false);
         setFeedbackDrawerOpen(true);
       }
