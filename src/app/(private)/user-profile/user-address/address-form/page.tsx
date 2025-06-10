@@ -18,8 +18,10 @@ import { z } from 'zod';
 const addressFormSchema = z.object({
   number: z.string().min(1, 'Número é obrigatório').optional().or(z.literal('')),
   complement: z.string().optional(),
+  cep: z.string().optional(),
   noNumber: z.boolean(),
   noComplement: z.boolean(),
+  noCep: z.boolean(),
 }).superRefine((data, ctx) => {
   if (!data.noNumber && !data.number) {
     ctx.addIssue({
@@ -33,6 +35,13 @@ const addressFormSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: 'Campo obrigatório',
       path: ['complement']
+    });
+  }
+  if (!data.noCep && (!data.cep || !/^\d{5}-\d{3}$/.test(data.cep))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'CEP inválido. Formato: 00000-000',
+      path: ['cep']
     });
   }
 });
@@ -62,13 +71,16 @@ export default function AddressForm() {
     defaultValues: {
       noNumber: false,
       noComplement: false,
+      noCep: false,
       number: '',
-      complement: ''
+      complement: '',
+      cep: ''
     }
   });
 
   const noNumber = watch('noNumber');
   const noComplement = watch('noComplement');
+  const noCep = watch('noCep');
 
   // Clear number input and error if 'noNumber' is checked
   useEffect(() => {
@@ -83,6 +95,13 @@ export default function AddressForm() {
       setValue('complement', '');
     }
   }, [noComplement, setValue]);
+
+  // Clear cep input and error if 'noCep' is checked
+  useEffect(() => {
+    if (noCep) {
+      setValue('cep', '');
+    }
+  }, [noCep, setValue]);
 
   // Animation classes
   const headerAnim = hasInteracted ? "-translate-y-20 opacity-0 pointer-events-none transition-all duration-500" : "transition-all duration-500";
@@ -124,8 +143,10 @@ export default function AddressForm() {
     reset({
       number: numero,
       complement: '',
+      cep: '',
       noNumber: false,
-      noComplement: false
+      noComplement: false,
+      noCep: false
     }); // reset form and prefill number if found
     setDrawerOpen(true);
   };
@@ -143,7 +164,7 @@ export default function AddressForm() {
       bairro: addressParts[0] || '',
       municipio: addressParts[1] || '',
       estado: addressParts[2] || '',
-      cep: ''
+      cep: data.noCep ? '' : data.cep || ''
     };
 
     try {
@@ -260,6 +281,26 @@ export default function AddressForm() {
                 id="no-complement" 
               />
               <Label htmlFor="no-complement" className="text-muted-foreground text-base select-none">Sem complemento</Label>
+            </div>
+            <div>
+              <Input
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
+                placeholder="Escreva o CEP"
+                {...register('cep')}
+                disabled={noCep}
+                maxLength={9}
+              />
+              {errors.cep && !noCep && (
+                <p className="text-red-500 text-sm mt-1">{errors.cep.message}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch 
+                checked={noCep} 
+                onCheckedChange={(checked) => setValue('noCep', checked)} 
+                id="no-cep" 
+              />
+              <Label htmlFor="no-cep" className="text-muted-foreground text-base select-none">Sem CEP</Label>
             </div>
             <DrawerFooter className="flex flex-row gap-3 px-0 pb-0 pt-8">
               <Button 
