@@ -65,13 +65,17 @@ export default function TokenInputForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-       <PhoneInputTokenForm value={token} onChange={setToken}/>
+       <PhoneInputTokenForm 
+         value={token} 
+         onChange={setToken}
+         resendParams={{ valor, ddd, ddi }}
+       />
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={isPending || !token}
+          disabled={isPending || !token || token.length < 6}
         >
           {isPending ? "Enviando..." : "Enviar"}
         </Button>
