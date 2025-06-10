@@ -317,7 +317,7 @@ export default function AddressForm() {
               <Button 
                 size="lg" 
                 className="flex-1 py-4 text-base border" 
-                variant="outline" 
+                variant="secondary" 
                 type="button"
                 onClick={() => { setDrawerOpen(false); router.back(); }}
               >
