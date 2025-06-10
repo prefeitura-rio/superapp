@@ -1,6 +1,7 @@
 'use client'
 import { updateAddress } from "@/actions/update-user-address";
 import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
+import welcomeImage from '@/assets/welcome.svg';
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/custom/search-input";
 import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MapPin } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from 'react-hook-form';
@@ -54,6 +56,7 @@ export default function AddressForm() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [feedbackDrawerOpen, setFeedbackDrawerOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -175,7 +178,7 @@ export default function AddressForm() {
       } else {
         console.log('Endereço atualizado com sucesso!');
         setDrawerOpen(false);
-        router.push('/user-profile/user-address/address-form/feedback');
+        setFeedbackDrawerOpen(true);
       }
     } catch (error) {
       console.error('Ocorreu um erro ao atualizar o endereço');
@@ -322,6 +325,35 @@ export default function AddressForm() {
               </Button>
             </DrawerFooter>
           </form>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Drawer for feedback after address update */}
+      <Drawer open={feedbackDrawerOpen} onOpenChange={setFeedbackDrawerOpen}>
+        <DrawerContent className="max-w-md mx-auto rounded-t-3xl! sm:min-h-[60vh]! min-h-[60vh] flex flex-col items-center justify-center">
+           <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+                <DrawerHeader className="text-center">
+                  <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                    Endereço <br/>atualizado!
+                  </DrawerTitle>
+                </DrawerHeader>
+                <Image
+                  src={welcomeImage}
+                  alt="Endereço atualizado"
+                  width={260}
+                  height={320}
+                  className="mx-auto mb-10"
+                  style={{ objectFit: 'contain', maxHeight: '320px' }}
+                  priority
+                />
+                <Button
+                  size="lg"
+                  className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+                  onClick={() => { setDrawerOpen(false); router.back(); }}
+                >
+                  Finalizar
+                </Button>
+              </div>
         </DrawerContent>
       </Drawer>
     </div>
