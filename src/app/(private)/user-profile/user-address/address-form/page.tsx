@@ -175,7 +175,7 @@ export default function AddressForm() {
       } else {
         console.log('Endereço atualizado com sucesso!');
         setDrawerOpen(false);
-        router.back();
+        router.push('/user-profile/user-address/address-form/feedback');
       }
     } catch (error) {
       console.error('Ocorreu um erro ao atualizar o endereço');

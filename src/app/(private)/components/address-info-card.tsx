@@ -1,13 +1,13 @@
 "use client"
 
+import { deleteUserAddress } from "@/actions/delete-user-address"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import type { ModelsEnderecoPrincipal } from "@/http/models/modelsEnderecoPrincipal"
 import { MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
-import { useState } from "react"
-// Import the additional drawer components
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import Link from "next/link"
+import { useState } from "react"
 
 interface AddressInfoCardProps {
   address: ModelsEnderecoPrincipal | null
@@ -46,10 +46,11 @@ export function AddressInfoCard({ address, onEdit, onDelete }: AddressInfoCardPr
     }
   }
 
-  const handleDelete = () => {
-    if (address && onDelete) {
-      onDelete(address)
-      setOpen(false)
+  const handleDelete = async () => {
+    if (address) {
+      console.log("Deleting address:", address)
+      await deleteUserAddress();
+      setOpen(false);
     }
   }
 
