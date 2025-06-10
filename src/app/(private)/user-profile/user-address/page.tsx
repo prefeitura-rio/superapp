@@ -11,7 +11,7 @@ export default async function UserAddress() {
   let addressInfo = null;
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache', next:{tags:['update-user-address']}})
       if (response.status === 200) {
         userInfo = response.data;
         addressInfo = userInfo?.endereco?.principal || null;

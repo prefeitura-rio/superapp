@@ -1,4 +1,5 @@
 'use client'
+import { updateAddress } from "@/actions/update-user-address";
 import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/custom/search-input";
@@ -22,6 +23,7 @@ export default function AddressForm() {
   const [noComplement, setNoComplement] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  
 
   // Animation classes
   const headerAnim = hasInteracted ? "-translate-y-20 opacity-0 pointer-events-none transition-all duration-500" : "transition-all duration-500";
@@ -52,13 +54,35 @@ export default function AddressForm() {
     setDrawerOpen(true);
   };
 
-  const handleSave = () => {
-    console.log({
-      address: selectedAddress,
-      number: noNumber ? "Sem número" : number,
-      complement: noComplement ? "Sem complemento" : complement,
-    });
-    setDrawerOpen(false);
+  const handleSave = async () => {
+    if (!selectedAddress) return;
+    
+    // Construct the address data from the form inputs
+    const addressParts = selectedAddress.secondary_text.split(', ');
+    const addressData = {
+      logradouro: selectedAddress.main_text,
+      tipo_logradouro: '', // Might need to extract this from the address
+      numero: noNumber ? 'S/N' : number,
+      complemento: noComplement ? '' : complement,
+      bairro: addressParts[0] || '', // Neighborhood is usually first part
+      municipio: addressParts[1] || '', // City is usually second part
+      estado: addressParts[2] || '', // State is usually third part
+      cep: '23013620' // Might need to get cep from another API or input
+    };
+
+    try {
+      const result = await updateAddress(addressData);
+      
+      if (result.error) {
+        console.error(result.error);
+      } else {
+        console.log('Endereço atualizado com sucesso!');
+        setDrawerOpen(false);
+        router.back();
+      }
+    } catch (error) {
+      console.error('Ocorreu um erro ao atualizar o endereço');
+    }
   };
 
   return (
