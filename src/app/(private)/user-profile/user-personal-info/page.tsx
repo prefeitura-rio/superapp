@@ -144,6 +144,9 @@ export default async function PersonalInfoForm() {
             <Label htmlFor="celular" className="text-primary">
               Celular
             </Label>
+          <Link
+              href="/user-profile/user-personal-info/user-phone-number"
+            >
             <Input
               id="celular"
               defaultValue={formatPhone(
@@ -154,6 +157,7 @@ export default async function PersonalInfoForm() {
               className="bg-transparent border-muted text-foreground"
               readOnly
             />
+          </Link>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email" className="text-primary">
@@ -161,7 +165,6 @@ export default async function PersonalInfoForm() {
             </Label>
             <Link
               href="/user-profile/user-personal-info/user-email"
-              className=""
             >
               <Input
                 id="email"
