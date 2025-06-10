@@ -234,7 +234,7 @@ export default function AddressForm() {
 
       {/* Drawer for address details */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-md pt-5 pb-5 mx-auto rounded-t-3xl!">
+        <DrawerContent className="max-w-md mx-auto rounded-t-3xl! sm:min-h-[80vh]! min-h-[85vh] flex flex-col">
           <DrawerHeader className="text-center">
             <DrawerTitle className="text-lg font-semibold">
               {selectedAddress?.main_text}
@@ -243,7 +243,7 @@ export default function AddressForm() {
               {selectedAddress?.secondary_text}
             </div>
           </DrawerHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="px-4 flex flex-col pt-5 gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="px-4 flex-1 flex flex-col pt-5 gap-4 overflow-y-auto">
             <div>
               <Input
                 className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
@@ -302,7 +302,7 @@ export default function AddressForm() {
               />
               <Label htmlFor="no-cep" className="text-muted-foreground text-base select-none">Sem CEP</Label>
             </div>
-            <DrawerFooter className="flex flex-row gap-3 px-0 pb-0 pt-8">
+            <DrawerFooter className="flex flex-row gap-3 px-0">
               <Button 
                 size="lg" 
                 className="flex-1 py-4 text-base" 
