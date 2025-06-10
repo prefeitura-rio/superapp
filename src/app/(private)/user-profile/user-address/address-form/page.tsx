@@ -7,10 +7,37 @@ import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { zodResolver } from '@hookform/resolvers/zod';
 import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
+// Define the schema for address validation
+const addressFormSchema = z.object({
+  number: z.string().min(1, 'Número é obrigatório').optional().or(z.literal('')),
+  complement: z.string().optional(),
+  noNumber: z.boolean(),
+  noComplement: z.boolean(),
+}).superRefine((data, ctx) => {
+  if (!data.noNumber && !data.number) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Número é obrigatório',
+      path: ['number']
+    });
+  }
+  if (!data.noComplement && (!data.complement || data.complement.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Campo obrigatório',
+      path: ['complement']
+    });
+  }
+});
+
+type AddressFormSchema = z.infer<typeof addressFormSchema>
 
 export default function AddressForm() {
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -19,13 +46,43 @@ export default function AddressForm() {
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [number, setNumber] = useState("");
-  const [noNumber, setNoNumber] = useState(false);
-  const [complement, setComplement] = useState("");
-  const [noComplement, setNoComplement] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  
+
+  // Initialize react-hook-form
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<AddressFormSchema>({
+    resolver: zodResolver(addressFormSchema),
+    defaultValues: {
+      noNumber: false,
+      noComplement: false,
+      number: '',
+      complement: ''
+    }
+  });
+
+  const noNumber = watch('noNumber');
+  const noComplement = watch('noComplement');
+
+  // Clear number input and error if 'noNumber' is checked
+  useEffect(() => {
+    if (noNumber) {
+      setValue('number', '');
+    }
+  }, [noNumber, setValue]);
+
+  // Clear complement input and error if 'noComplement' is checked
+  useEffect(() => {
+    if (noComplement) {
+      setValue('complement', '');
+    }
+  }, [noComplement, setValue]);
 
   // Animation classes
   const headerAnim = hasInteracted ? "-translate-y-20 opacity-0 pointer-events-none transition-all duration-500" : "transition-all duration-500";
@@ -44,7 +101,7 @@ export default function AddressForm() {
         .then(data => setSuggestions(data.results || []))
         .catch(() => setSuggestions([]))
         .finally(() => setLoading(false));
-    }, 400); // 400ms debounce
+    }, 400);
     return () => {
       clearTimeout(debounce);
       controller.abort();
@@ -53,23 +110,40 @@ export default function AddressForm() {
 
   const handleSuggestionClick = (item: any) => {
     setSelectedAddress(item);
+    // extracts 'numero' from the address if it exists
+    let numero = '';
+    if (item.numero) {
+      numero = item.numero;
+    } else if (item.main_text) {
+      // extracts a number from the main_text (e.g., 'Rua X, 123')
+      const match = item.main_text.match(/\b\d{1,6}\b/);
+      if (match) {
+        numero = match[0];
+      }
+    }
+    reset({
+      number: numero,
+      complement: '',
+      noNumber: false,
+      noComplement: false
+    }); // reset form and prefill number if found
     setDrawerOpen(true);
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data: AddressFormSchema) => {
     if (!selectedAddress) return;
     
     // Construct the address data from the form inputs
     const addressParts = selectedAddress.secondary_text.split(', ');
     const addressData = {
       logradouro: selectedAddress.main_text,
-      tipo_logradouro: '', // Might need to extract this from the address
-      numero: noNumber ? 'S/N' : number,
-      complemento: noComplement ? '' : complement,
-      bairro: addressParts[0] || '', // Neighborhood is usually first part
-      municipio: addressParts[1] || '', // City is usually second part
-      estado: addressParts[2] || '', // State is usually third part
-      cep: '23013620' // Might need to get cep from another API or input
+      tipo_logradouro: '',
+      numero: data.noNumber ? 'S/N' : data.number || '',
+      complemento: data.noComplement ? '' : data.complement || '',
+      bairro: addressParts[0] || '',
+      municipio: addressParts[1] || '',
+      estado: addressParts[2] || '',
+      cep: ''
     };
 
     try {
@@ -148,36 +222,67 @@ export default function AddressForm() {
               {selectedAddress?.secondary_text}
             </div>
           </DrawerHeader>
-          <div className="px-4 flex flex-col pt-5 gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="px-4 flex flex-col pt-5 gap-4">
+            <div>
               <Input
                 className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
                 placeholder="Escreva o número"
-                value={noNumber ? "" : number}
-                onChange={e => setNumber(e.target.value)}
+                {...register('number')}
                 disabled={noNumber}
               />
+              {errors.number && !noNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.number.message}</p>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-2">
-              <Switch checked={noNumber} onCheckedChange={setNoNumber} id="no-number" />
+              <Switch 
+                checked={noNumber} 
+                onCheckedChange={(checked) => setValue('noNumber', checked)} 
+                id="no-number" 
+              />
               <Label htmlFor="no-number" className="text-muted-foreground text-base select-none">Sem número</Label>
             </div>
+            <div>
               <Input
                 className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
                 placeholder="Escreva o complemento"
-                value={noComplement ? "" : complement}
-                onChange={e => setComplement(e.target.value)}
+                {...register('complement')}
                 disabled={noComplement}
               />
+              {errors.complement && !noComplement && (
+                <p className="text-red-500 text-sm mt-1">{errors.complement.message}</p>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-2">
-              <Switch checked={noComplement} onCheckedChange={setNoComplement} id="no-complement" />
+              <Switch 
+                checked={noComplement} 
+                onCheckedChange={(checked) => setValue('noComplement', checked)} 
+                id="no-complement" 
+              />
               <Label htmlFor="no-complement" className="text-muted-foreground text-base select-none">Sem complemento</Label>
             </div>
-          </div>
-          <DrawerFooter className="flex flex-row gap-3 px-4 pb-6 pt-8">
-            <Button size="lg" className="flex-1 py-4 text-base" onClick={handleSave}>Salvar</Button>
-            <Button size="lg" className="flex-1 py-4 text-base border" variant="outline" onClick={() => { setDrawerOpen(false); router.back(); }}>Cancelar</Button>
-          </DrawerFooter>
+            <DrawerFooter className="flex flex-row gap-3 px-0 pb-0 pt-8">
+              <Button 
+                size="lg" 
+                className="flex-1 py-4 text-base" 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </Button>
+              <Button 
+                size="lg" 
+                className="flex-1 py-4 text-base border" 
+                variant="outline" 
+                type="button"
+                onClick={() => { setDrawerOpen(false); router.back(); }}
+              >
+                Cancelar
+              </Button>
+            </DrawerFooter>
+          </form>
         </DrawerContent>
       </Drawer>
     </div>
-    )
+  )
 }

@@ -19,9 +19,21 @@ export function AddressInfoCard({ address, onEdit, onDelete }: AddressInfoCardPr
   const [open, setOpen] = useState(false)
 
   // Helper to format address string
-  const mainLine = address
-    ? `${address.tipo_logradouro || ""} ${address.logradouro || ""}, ${address.numero || ""}`.trim()
-    : "Endereço não disponível"
+  let mainLine = "Endereço não disponível"
+  if (address) {
+    // Remove trailing comma/space and avoid duplicate number
+    const logradouro = address.logradouro || ""
+    const numero = address.numero || ""
+    const tipo = address.tipo_logradouro || ""
+    // Check if logradouro already ends with the number (with or without comma)
+    const logradouroTrimmed = logradouro.trim().replace(/,$/, "")
+    const numeroTrimmed = numero.trim()
+    let showNumero = true
+    if (numeroTrimmed && logradouroTrimmed.match(new RegExp(`\\b${numeroTrimmed}$`))) {
+      showNumero = false
+    }
+    mainLine = `${tipo} ${logradouroTrimmed}${showNumero && numeroTrimmed ? ", " + numeroTrimmed : ""}`.trim()
+  }
   const complemento = address?.complemento
   const bairroCidade = address
     ? `${address.bairro || ""}${address.bairro && address.municipio ? ", " : ""}${address.municipio || ""}${address.estado ? ", " + address.estado : ""}`.trim()
