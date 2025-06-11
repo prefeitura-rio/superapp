@@ -1,31 +1,23 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { getCitizenCpf } from '@/http/citizen/citizen'
-import { formatCpf } from '@/lib/format-cpf'
-import { formatPhone } from '@/lib/format-phone'
-import { getUserInfoFromToken } from '@/lib/user-info'
-import { InfoIcon } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
+import { CustomInput } from '@/components/ui/custom/custom-input';
+import { getCitizenCpf } from '@/http/citizen/citizen';
+import { formatCpf } from '@/lib/format-cpf';
+import { formatPhone } from '@/lib/format-phone';
+import { getUserInfoFromToken } from '@/lib/user-info';
+import { SecondaryHeader } from '../../components/secondary-header';
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken();
   let userInfo;
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' })
+      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' });
       if (response.status === 200) {
         userInfo = response.data;
       } else {
-        console.error('Failed to fetch user data status:', response.data)
+        console.error('Failed to fetch user data status:', response.data);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('Error fetching user data:', error);
     }
   }
 
@@ -40,126 +32,60 @@ export default async function PersonalInfoForm() {
       <div className="min-h-screen max-w-md mx-auto pt-24 pb-10 bg-background">
         <SecondaryHeader title="Informações pessoais" />
         <div className="space-y-6 p-4">
-          <div className="space-y-2">
-            <Label htmlFor="cpf" className="text-primary">
-              CPF
-            </Label>
-            <Input
-              id="cpf"
-              defaultValue={formatCpf(userInfo?.cpf)}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput id="cpf" label="CPF" defaultValue={formatCpf(userInfo?.cpf)} readOnly />
 
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-primary">
-              Nome completo
-            </Label>
-            <Input
-              id="fullName"
-              defaultValue={userInfo?.nome || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput
+            id="fullName"
+            label="Nome completo"
+            defaultValue={userInfo?.nome || ''}
+            readOnly
+          />
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="socialName" className="text-primary">
-                Nome social
-              </Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-primary" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      Nome pelo qual a pessoa prefere ser chamada socialmente
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Input
-              id="socialName"
-              defaultValue={userInfo?.nome_social || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput
+            id="socialName"
+            label="Nome social"
+            tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
+            defaultValue={userInfo?.nome_social || ''}
+            readOnly
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="nationality" className="text-primary">
-              Nacionalidade
-            </Label>
-            <Input
-              id="nationality"
-              defaultValue={userInfo?.nascimento?.pais || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput
+            id="nationality"
+            label="Nacionalidade"
+            defaultValue={userInfo?.nascimento?.pais || ''}
+            readOnly
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="race" className="text-primary">
-              Raça / cor
-            </Label>
-            <Input
-              id="race"
-              defaultValue={userInfo?.raca || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput id="race" label="Raça / cor" defaultValue={userInfo?.raca || ''} readOnly />
 
-          <div className="space-y-2">
-            <Label htmlFor="birthDate" className="text-primary">
-              Data de nascimento
-            </Label>
-            <Input
-              id="birthDate"
-              defaultValue={formatDate(userInfo?.nascimento?.data)}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="sexo" className="text-primary">
-              Sexo
-            </Label>
-            <Input
-              id="sexo"
-              defaultValue={userInfo?.sexo || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="celular" className="text-primary">
-              Celular
-            </Label>
-            <Input
-              id="celular"
-              defaultValue={formatPhone(userInfo?.telefone?.principal?.ddi, userInfo?.telefone?.principal?.ddd, userInfo?.telefone?.principal?.valor)}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-primary">
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              defaultValue={userInfo?.email?.principal?.valor || ''}
-              className="bg-transparent border-muted text-foreground"
-              readOnly
-            />
-          </div>
+          <CustomInput
+            id="birthDate"
+            label="Data de nascimento"
+            defaultValue={formatDate(userInfo?.nascimento?.data)}
+            readOnly
+          />
+
+          <CustomInput id="sexo" label="Sexo" defaultValue={userInfo?.sexo || ''} readOnly />
+
+          <CustomInput
+            id="celular"
+            label="Celular"
+            defaultValue={formatPhone(
+              userInfo?.telefone?.principal?.ddi,
+              userInfo?.telefone?.principal?.ddd,
+              userInfo?.telefone?.principal?.valor
+            )}
+            readOnly
+          />
+
+          <CustomInput
+            id="email"
+            label="E-mail"
+            defaultValue={userInfo?.email?.principal?.valor || ''}
+            readOnly
+          />
         </div>
       </div>
     </>
-  )
+  );
 }
