@@ -19,10 +19,7 @@ export const applicationJobs = [
     title: 'Atendente de Telemarketing',
     description:
       'Atendimento ao cliente via telefone, registro de informações e resolução de dúvidas.',
-    requirements: [
-      'Boa dicção',
-      'Conhecimento básico de informática',
-    ],
+    requirements: ['Boa dicção', 'Conhecimento básico de informática'],
     status: 'Aberto',
     provider: 'Google',
     modality: 'Remoto',
@@ -31,5 +28,5 @@ export const applicationJobs = [
     recentlyAdded: true,
     salary: 1600,
     publishedAt: '2025-05-28',
-  }
+  },
 ]

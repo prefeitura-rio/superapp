@@ -115,12 +115,16 @@ export default function Search() {
         <div className="text-white space-y-3">
           {loading || isSearching ? (
             <div>
-              <h2 className="text-lg font-semibold">Resultados da Pesquisa</h2>
+              <h2 className="text-lg text-foreground font-semibold">
+                Resultados da Pesquisa
+              </h2>
               <SearchResultSkeleton />
             </div>
           ) : query.length > 2 ? (
             <div>
-              <h2 className="text-lg font-semibold">Resultados da Pesquisa</h2>
+              <h2 className="text-lg text-foreground font-semibold">
+                Resultados da Pesquisa
+              </h2>
               {results && results.length > 0 ? (
                 <ul>
                   {results
@@ -143,7 +147,9 @@ export default function Search() {
                         }}
                       >
                         <div className="flex-1">
-                          <div className="text-white mb-1">{item.titulo}</div>
+                          <div className="text-foreground mb-1">
+                            {item.titulo}
+                          </div>
                           <div className="flex flex-wrap items-center gap-1 text-xs text-[#008FBE]">
                             <span className="font-bold">
                               {displayTipo(item.tipo)}
@@ -186,7 +192,7 @@ export default function Search() {
                     ))}
                 </ul>
               ) : (
-                <div className="text-gray-500 text-center mt-4">
+                <div className="text-foreground text-center mt-4">
                   Nenhum resultado encontrado
                 </div>
               )}

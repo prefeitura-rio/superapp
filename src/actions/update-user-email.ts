@@ -1,28 +1,22 @@
-// app/actions/update-address.ts
 'use server'
 
-import { putCitizenCpfAddress } from '@/http/citizen/citizen'
-import type {
-  HandlersErrorResponse,
-  ModelsSelfDeclaredAddressInput,
-} from '@/http/models'
+import { putCitizenCpfEmail } from '@/http/citizen/citizen'
+import type { HandlersErrorResponse } from '@/http/models'
+import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { revalidateTag } from 'next/cache'
 
-export async function updateAddress(
-  addressData: ModelsSelfDeclaredAddressInput
-) {
+export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
   const userAuthInfo = await getUserInfoFromToken()
   try {
-    const response = await putCitizenCpfAddress(userAuthInfo.cpf, addressData)
-
+    const response = await putCitizenCpfEmail(userAuthInfo.cpf, emailData)
     if (response.status !== 200) {
       return {
-        error: response.data.error || 'Failed to update address',
+        error: response.data.error || 'Failed to update email',
         status: response.status,
       }
     }
-    revalidateTag('update-user-address')
+    revalidateTag('update-user-email')
     return { success: true, data: response.data }
   } catch (error: unknown) {
     const err = error as HandlersErrorResponse

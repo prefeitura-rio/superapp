@@ -58,8 +58,16 @@ export function middleware(request: NextRequest) {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
       const response = NextResponse.redirect(redirectUrl)
-      response.cookies.set('access_token', '', { path: '/', httpOnly: true, maxAge: 0 })
-      response.cookies.set('refresh_token', '', { path: '/', httpOnly: true, maxAge: 0 })
+      response.cookies.set('access_token', '', {
+        path: '/',
+        httpOnly: true,
+        maxAge: 0,
+      })
+      response.cookies.set('refresh_token', '', {
+        path: '/',
+        httpOnly: true,
+        maxAge: 0,
+      })
       return response
     }
 

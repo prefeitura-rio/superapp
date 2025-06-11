@@ -56,10 +56,7 @@ export const JOBS = [
     title: 'Atendente de Telemarketing',
     description:
       'Atendimento ao cliente via telefone, registro de informações e resolução de dúvidas.',
-    requirements: [
-      'Boa dicção',
-      'Conhecimento básico de informática',
-    ],
+    requirements: ['Boa dicção', 'Conhecimento básico de informática'],
     status: 'Aberto',
     provider: 'Google',
     modality: 'Remoto',
@@ -74,10 +71,7 @@ export const JOBS = [
     title: 'Assistente Administrativo',
     description:
       'Auxiliar nas rotinas administrativas, organização de documentos e atendimento interno.',
-    requirements: [
-      'Ensino médio completo',
-      'Conhecimento em pacote Office',
-    ],
+    requirements: ['Ensino médio completo', 'Conhecimento em pacote Office'],
     status: 'Aberto',
     provider: 'SENAC',
     modality: 'Presencial',
@@ -128,10 +122,7 @@ export const JOBS = [
     title: 'Prefeitura',
     description:
       'Auxiliar na manutenção de sistemas e suporte técnico aos usuários.',
-    requirements: [
-      'Cursando ensino superior em TI',
-      'Vontade de aprender',
-    ],
+    requirements: ['Cursando ensino superior em TI', 'Vontade de aprender'],
     status: 'Aberto',
     provider: 'Empresa Gama',
     modality: 'Presencial',

@@ -115,7 +115,7 @@ export default function JobCard({
               {modality}
             </Badge>
             <Badge className="bg-white/20 hover:bg-white/30 text-white text-xs px-2 py-0.5 rounded-full">
-             R$ {salary}
+              R$ {salary}
             </Badge>
           </div>
         </div>

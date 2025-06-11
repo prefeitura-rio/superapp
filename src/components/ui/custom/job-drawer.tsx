@@ -131,7 +131,7 @@ export function JobDrawer({
           </div>
           <div className="flex flex-wrap gap-2 mt-2 justify-center w-full">
             <Badge className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full">
-             R$ {job.salary} 
+              R$ {job.salary}
             </Badge>
             <Badge className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full">
               {job.modality}

@@ -27,7 +27,6 @@ interface RecentlyAddedCoursesProps {
   courses: Course[]
 }
 
-
 export default function RecentlyAddedCourses({
   courses,
 }: RecentlyAddedCoursesProps) {

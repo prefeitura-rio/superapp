@@ -27,7 +27,6 @@ interface RecentlyAddedJobsProps {
   jobs: Job[]
 }
 
-
 const TYPE_LABELS: Record<string, string> = {
   construction: 'Construção',
   sales: 'Vendas',
@@ -45,9 +44,7 @@ function getJobCardColor(type: string) {
   return '#01A9D8'
 }
 
-export default function RecentlyAddedJobs({
-  jobs,
-}: RecentlyAddedJobsProps) {
+export default function RecentlyAddedJobs({ jobs }: RecentlyAddedJobsProps) {
   const recentJobs = jobs.filter(job => job.recentlyAdded)
 
   return (
@@ -81,9 +78,7 @@ export default function RecentlyAddedJobs({
               <div className="flex-1">
                 <h3 className="text-md mb-2 line-clamp-2 pr-4 leading-5 text-white">
                   {job.title} <br />
-                  <span className="text-zinc-400 text-xs">
-                    {job.provider}
-                  </span>
+                  <span className="text-zinc-400 text-xs">{job.provider}</span>
                 </h3>
                 <div className="flex flex-wrap gap-1">
                   <span className="bg-zinc-800 text-zinc-300 px-3 py-1 rounded-full text-xs">

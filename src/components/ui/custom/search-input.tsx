@@ -43,7 +43,9 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       setValue('')
       // Fire a synthetic event to notify parent (for controlled input)
       if (onChange) {
-        const event = { target: { value: '' } } as React.ChangeEvent<HTMLInputElement>
+        const event = {
+          target: { value: '' },
+        } as React.ChangeEvent<HTMLInputElement>
         onChange(event)
       }
       onClear?.()
@@ -105,4 +107,3 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 SearchInput.displayName = 'SearchInput'
 
 export { SearchInput }
-

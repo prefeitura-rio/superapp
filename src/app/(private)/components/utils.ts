@@ -14,7 +14,7 @@ export function getCourseCardColor(type: string) {
 export function getJobCardColor(type: string) {
   if (type === 'technology' || type === 'administration' || type === 'sales')
     return '#01A9D8'
-  if (type ==='financial') return '#44CC77'
+  if (type === 'financial') return '#44CC77'
   if (type === 'construction') return '#EA5D6E'
   return '#01A9D8'
 }

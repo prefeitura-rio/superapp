@@ -6,13 +6,16 @@ import { getUserInfoFromToken } from '@/lib/user-info';
 import { SecondaryHeader } from '../../components/secondary-header';
 
 export default async function PersonalInfoForm() {
-  const userAuthInfo = await getUserInfoFromToken();
-  let userInfo;
+  const userAuthInfo = await getUserInfoFromToken()
+  let userInfo
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, { cache: 'force-cache' });
+      const response = await getCitizenCpf(userAuthInfo.cpf, {
+        cache: 'force-cache',
+        next: { tags: ['update-user-email', 'update-user-phone-number'] },
+      })
       if (response.status === 200) {
-        userInfo = response.data;
+        userInfo = response.data
       } else {
         console.error('Failed to fetch user data status:', response.data);
       }
@@ -22,10 +25,10 @@ export default async function PersonalInfoForm() {
   }
 
   const formatDate = (dateStr: string | undefined) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('pt-BR');
-  };
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('pt-BR')
+  }
 
   return (
     <>
@@ -57,7 +60,6 @@ export default async function PersonalInfoForm() {
           />
 
           <CustomInput id="race" label="Raça / cor" defaultValue={userInfo?.raca || ''} readOnly />
-
           <CustomInput
             id="birthDate"
             label="Data de nascimento"

@@ -23,8 +23,8 @@ export default async function ConsentForm() {
       <SecondaryHeader title="Autorizações" />
       <div className="space-y-4 mx-4 ">
         <h1 className="text-xl font-medium text-primary">
-          Você autoriza receber comunicações diretas pelos canais da
-          Prefeitura do Rio?
+          Você autoriza receber comunicações diretas pelos canais da Prefeitura
+          do Rio?
         </h1>
         <p className="text-foreground text-sm leading-relaxed">
           Ao ativar as comunicações da Prefeitura do Rio via WhatsApp, você

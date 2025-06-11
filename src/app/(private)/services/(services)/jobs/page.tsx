@@ -22,9 +22,7 @@ export default function JobsPage() {
   const [selected, setSelected] = useState('all')
 
   const filteredJobs =
-    selected === 'all'
-      ? JOBS
-      : JOBS.filter(job => job.type === selected)
+    selected === 'all' ? JOBS : JOBS.filter(job => job.type === selected)
 
   return (
     <div className="min-h-lvh">
