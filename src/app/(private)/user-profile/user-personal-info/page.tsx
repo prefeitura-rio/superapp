@@ -3,6 +3,8 @@ import { getCitizenCpf } from '@/http/citizen/citizen'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { Pen } from 'lucide-react'
+import { ActionDiv } from '../../components/input-like-div'
 import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function PersonalInfoForm() {
@@ -63,13 +65,14 @@ export default async function PersonalInfoForm() {
             defaultValue={userInfo?.nascimento?.pais || ''}
             readOnly
           />
-
-          <CustomInput
-            id="race"
-            label="Raça / cor"
-            defaultValue={userInfo?.raca || ''}
-            readOnly
+          <ActionDiv
+            label="Cor / Raça"
+            content={userInfo?.raca || ''}
+            variant="default"
+            disabled
+            rightIcon={<Pen />}
           />
+
           <CustomInput
             id="birthDate"
             label="Data de nascimento"
@@ -83,23 +86,27 @@ export default async function PersonalInfoForm() {
             defaultValue={userInfo?.sexo || ''}
             readOnly
           />
-          <CustomInput
-            id="celular"
+
+          <ActionDiv
             label="Celular"
-            redirectLink="/user-profile/user-personal-info/user-phone-number"
-            defaultValue={formatPhone(
+            content={formatPhone(
               userInfo?.telefone?.principal?.ddi,
               userInfo?.telefone?.principal?.ddd,
               userInfo?.telefone?.principal?.valor
             )}
-            readOnly
+            variant="default"
+            disabled
+            rightIcon={<Pen />}
+            redirectLink="/user-profile/user-personal-info/user-phone-number"
           />
-          <CustomInput
-            id="email"
+
+          <ActionDiv
             label="E-mail"
+            content={userInfo?.email?.principal?.valor || ''}
+            variant="default"
+            disabled
+            rightIcon={<Pen />}
             redirectLink="/user-profile/user-personal-info/user-email"
-            defaultValue={userInfo?.email?.principal?.valor || ''}
-            readOnly
           />
         </div>
       </div>
