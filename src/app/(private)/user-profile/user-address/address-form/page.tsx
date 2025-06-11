@@ -244,7 +244,7 @@ export default function AddressForm() {
                   <div key={item.place_id}>
                     <div
                       className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30"
-                      onKeyDown={() => handleSuggestionClick(item)}
+                      onClick={() => handleSuggestionClick(item)}
                     >
                       <MapPin className="h-5 w-5" />
                       <div>

@@ -19,7 +19,7 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     id: 'endereco',
     icon: <MapIcon className="h-5 w-5" />,
     label: 'Endereço',
-    href: '/user-profile/',
+    href: '/user-profile/user-address',
   },
   {
     id: 'trabalho',
