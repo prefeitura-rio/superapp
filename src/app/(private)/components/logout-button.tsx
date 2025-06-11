@@ -1,7 +1,7 @@
 'use client'
 
-import { LogOut } from 'lucide-react';
-import { MenuItem } from './menu-item';
+import { LogOut } from 'lucide-react'
+import { MenuItem } from './menu-item'
 
 export function LogoutButton() {
   const handleLogout = async () => {

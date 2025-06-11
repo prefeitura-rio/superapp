@@ -16,7 +16,6 @@ export function MenuItem({
   onClick?: () => void
   isFirst?: boolean
 }) {
-
   return (
     <Link
       href={href}
@@ -24,7 +23,7 @@ export function MenuItem({
       className={cn(
         'flex items-center justify-between py-5 text-foreground',
         'border-b color-border',
-        isFirst && 'border-t color-border',
+        isFirst && 'border-t color-border'
       )}
     >
       <div className="flex items-center gap-3">

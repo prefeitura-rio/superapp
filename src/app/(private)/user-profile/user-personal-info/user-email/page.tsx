@@ -1,50 +1,50 @@
-"use client";
-import { updateUserEmail } from "@/actions/update-user-email";
-import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
-import welcomeImage from "@/assets/welcome.svg";
-import { Button } from "@/components/ui/button";
+'use client'
+import { updateUserEmail } from '@/actions/update-user-email'
+import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import welcomeImage from '@/assets/welcome.svg'
+import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { ModelsSelfDeclaredEmailInput } from "@/http/models/modelsSelfDeclaredEmailInput";
-import confetti from "canvas-confetti";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+} from '@/components/ui/drawer'
+import { Input } from '@/components/ui/input'
+import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
+import confetti from 'canvas-confetti'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
 
 export default function EmailForm() {
-  const [email, setEmail] = useState("");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   async function handleSave() {
-    setError(null);
+    setError(null)
     startTransition(async () => {
       const result = await updateUserEmail({
         valor: email,
-      } as ModelsSelfDeclaredEmailInput);
+      } as ModelsSelfDeclaredEmailInput)
       if (result.success) {
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.7 },
-        });
-        setDrawerOpen(true);
+        })
+        setDrawerOpen(true)
       } else {
-        setError(result.error || "Erro ao atualizar email");
+        setError(result.error || 'Erro ao atualizar email')
       }
-    });
+    })
   }
 
   function handleDrawerClose() {
-    setDrawerOpen(false);
-    router.back();
+    setDrawerOpen(false)
+    router.back()
   }
 
   return (
@@ -61,7 +61,7 @@ export default function EmailForm() {
         <Input
           className="text-card-foreground text-sm bg-card border-border rounded-xl"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           type="email"
           placeholder="Digite seu email"
           disabled={isPending}
@@ -73,7 +73,7 @@ export default function EmailForm() {
           onClick={handleSave}
           disabled={isPending || !email}
         >
-          {isPending ? "Salvando..." : "Salvar"}
+          {isPending ? 'Salvando...' : 'Salvar'}
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export default function EmailForm() {
               width={260}
               height={320}
               className="mx-auto mb-10"
-              style={{ objectFit: "contain", maxHeight: "320px" }}
+              style={{ objectFit: 'contain', maxHeight: '320px' }}
               priority
             />
             <Button
@@ -107,5 +107,5 @@ export default function EmailForm() {
         </DrawerContent>
       </Drawer>
     </div>
-  );
+  )
 }

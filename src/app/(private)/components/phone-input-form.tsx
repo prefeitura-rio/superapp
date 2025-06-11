@@ -1,65 +1,65 @@
-"use client";
+'use client'
 
-import type React from "react";
+import type React from 'react'
 
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Input } from '@/components/ui/input'
+import { useState } from 'react'
 
 interface PhoneInputFormProps {
-  value: string;
-  onChange: (value: string) => void;
-  countryCode?: string;
-  onCountryCodeChange?: (value: string) => void;
+  value: string
+  onChange: (value: string) => void
+  countryCode?: string
+  onCountryCodeChange?: (value: string) => void
 }
 
 export default function PhoneInputForm({
   value,
   onChange,
-  countryCode = "55",
+  countryCode = '55',
   onCountryCodeChange,
 }: PhoneInputFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
-    const digits = value.replace(/\D/g, "");
+    const digits = value.replace(/\D/g, '')
 
     // If no digits, return empty string
     if (digits.length === 0) {
-      return "";
+      return ''
     }
 
     // Format as (XX) XXXXX-XXXX
     if (digits.length <= 2) {
-      return `(${digits}`;
-    } else if (digits.length <= 7) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
-        7,
-        11
-      )}`;
+      return `(${digits}`
     }
-  };
+    if (digits.length <= 7) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+    }
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
+      7,
+      11
+    )}`
+  }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const inputValue = e.target.value
 
     // If user deletes the opening parenthesis, clear the entire field
-    if (inputValue === "" || inputValue === "(") {
-      onChange("");
-      return;
+    if (inputValue === '' || inputValue === '(') {
+      onChange('')
+      return
     }
 
-    const formatted = formatPhoneNumber(inputValue);
-    onChange(formatted);
-  };
+    const formatted = formatPhoneNumber(inputValue)
+    onChange(formatted)
+  }
 
   const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (onCountryCodeChange) onCountryCodeChange(value);
-  };
+    const value = e.target.value.replace(/\D/g, '')
+    if (onCountryCodeChange) onCountryCodeChange(value)
+  }
 
   return (
     <>
@@ -89,5 +89,5 @@ export default function PhoneInputForm({
         </span>
       </form>
     </>
-  );
+  )
 }

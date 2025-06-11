@@ -1,20 +1,14 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
-import { formatCpf } from '@/lib/format-cpf';
-import { getUserInfoFromToken } from '@/lib/user-info';
-import {
-  CheckCircle,
-  MapIcon,
-  Settings,
-  User
-} from 'lucide-react';
-import { LogoutButton } from '../components/logout-button';
-import { MenuItem } from '../components/menu-item';
-import { SecondaryHeader } from '../components/secondary-header';
+import { formatCpf } from '@/lib/format-cpf'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { CheckCircle, MapIcon, Settings, User } from 'lucide-react'
+import { LogoutButton } from '../components/logout-button'
+import { MenuItem } from '../components/menu-item'
+import { SecondaryHeader } from '../components/secondary-header'
 
 export default async function ProfilePage() {
-
-  const userInfo = await getUserInfoFromToken();
+  const userInfo = await getUserInfoFromToken()
 
   return (
     <div className="pt-20 max-w-md mx-auto text-foreground flex flex-col">
@@ -68,4 +62,3 @@ export default async function ProfilePage() {
     </div>
   )
 }
-

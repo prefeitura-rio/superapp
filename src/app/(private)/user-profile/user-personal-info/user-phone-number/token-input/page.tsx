@@ -1,57 +1,57 @@
-"use client";
-import { validateUserPhoneToken } from "@/actions/validate-user-phone-token";
-import PhoneInputTokenForm from "@/app/(private)/components/phone-input-token-form";
-import { SecondaryHeader } from "@/app/(private)/components/secondary-header";
-import welcomeImage from "@/assets/welcome.svg";
-import { Button } from "@/components/ui/button";
+'use client'
+import { validateUserPhoneToken } from '@/actions/validate-user-phone-token'
+import PhoneInputTokenForm from '@/app/(private)/components/phone-input-token-form'
+import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import welcomeImage from '@/assets/welcome.svg'
+import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer";
-import { ModelsPhoneVerificationValidateRequest } from "@/http/models/modelsPhoneVerificationValidateRequest";
-import confetti from "canvas-confetti";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+} from '@/components/ui/drawer'
+import type { ModelsPhoneVerificationValidateRequest } from '@/http/models/modelsPhoneVerificationValidateRequest'
+import confetti from 'canvas-confetti'
+import Image from 'next/image'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useTransition } from 'react'
 
 export default function TokenInputForm() {
-  const [token, setToken] = useState("");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const valor = searchParams.get("valor") || "";
-  const ddd = searchParams.get("ddd") || "";
-  const ddi = searchParams.get("ddi") || "";
+  const [token, setToken] = useState('')
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const valor = searchParams.get('valor') || ''
+  const ddd = searchParams.get('ddd') || ''
+  const ddi = searchParams.get('ddi') || ''
 
   async function handleSave() {
-    setError(null);
+    setError(null)
     startTransition(async () => {
       const result = await validateUserPhoneToken({
         code: token,
         ddd,
         ddi,
         valor,
-      } as ModelsPhoneVerificationValidateRequest);
+      } as ModelsPhoneVerificationValidateRequest)
       if (result.success) {
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.7 },
-        });
-        setDrawerOpen(true);
+        })
+        setDrawerOpen(true)
       } else {
-        setError(result.error || "Erro ao validar token");
+        setError(result.error || 'Erro ao validar token')
       }
-    });
+    })
   }
 
   function handleDrawerClose() {
-    setDrawerOpen(false);
-    router.back();
+    setDrawerOpen(false)
+    router.back()
   }
 
   return (
@@ -65,11 +65,11 @@ export default function TokenInputForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-       <PhoneInputTokenForm 
-         value={token} 
-         onChange={setToken}
-         resendParams={{ valor, ddd, ddi }}
-       />
+        <PhoneInputTokenForm
+          value={token}
+          onChange={setToken}
+          resendParams={{ valor, ddd, ddi }}
+        />
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
@@ -77,7 +77,7 @@ export default function TokenInputForm() {
           onClick={handleSave}
           disabled={isPending || !token || token.length < 6}
         >
-          {isPending ? "Enviando..." : "Enviar"}
+          {isPending ? 'Enviando...' : 'Enviar'}
         </Button>
       </div>
 
@@ -97,7 +97,7 @@ export default function TokenInputForm() {
               width={260}
               height={320}
               className="mx-auto mb-10"
-              style={{ objectFit: "contain", maxHeight: "320px" }}
+              style={{ objectFit: 'contain', maxHeight: '320px' }}
               priority
             />
             <Button
@@ -111,5 +111,5 @@ export default function TokenInputForm() {
         </DrawerContent>
       </Drawer>
     </div>
-  );
+  )
 }

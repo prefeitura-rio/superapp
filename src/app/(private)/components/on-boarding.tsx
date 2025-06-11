@@ -15,19 +15,19 @@ const slides = [
     title: 'Tudo em um só lugar',
     description:
       'Consulte IPTU, ITBI, certidões, agendamentos e muito mais – de forma simples e sem filas.',
-    video: "3d_test.mp4", 
+    video: '3d_test.mp4',
   },
   {
     title: 'Oportunidades ao seu alcance',
     description:
       'Busque capacitação profissional e vagas atualizadas em toda a cidade.',
-      video: "3d_test.mp4",
+    video: '3d_test.mp4',
   },
   {
     title: 'Sua carteira digital da cidadania',
     description:
       'Cartão Bolsa Família, Cartão Saúde, e Cartão Zeladoria - direto no celular.',
-      video: "3d_test.mp4",
+    video: '3d_test.mp4',
   },
 ]
 
@@ -35,7 +35,11 @@ function WelcomeMessage({
   show,
   fadeOut,
   userInfo,
-}: { show: boolean; fadeOut: boolean, userInfo: { cpf: string, name:string } }) {
+}: {
+  show: boolean
+  fadeOut: boolean
+  userInfo: { cpf: string; name: string }
+}) {
   return (
     <div
       className={`absolute inset-0 flex items-center justify-center transition-opacity duration-600 ${
@@ -68,8 +72,8 @@ function WelcomeMessage({
 
 interface OnboardingProps {
   userInfo: {
-    cpf: string;
-    name: string;
+    cpf: string
+    name: string
   }
   setFirstLoginFalse: (cpf: string) => Promise<any>
 }
@@ -168,7 +172,11 @@ export default function Onboarding({
       </div>
 
       {/* Welcome message with fade-in/out */}
-      <WelcomeMessage userInfo={userInfo} show={showWelcome} fadeOut={fadeOutWelcome} />
+      <WelcomeMessage
+        userInfo={userInfo}
+        show={showWelcome}
+        fadeOut={fadeOutWelcome}
+      />
       {/* Custom Swiper pagination styles */}
       <style jsx global>{`
         .swiper-pagination {

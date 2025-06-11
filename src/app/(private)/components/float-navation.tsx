@@ -90,26 +90,22 @@ export function FloatNavigation() {
               onClick={() =>
                 window.open('https://wa.me/5521991952121', '_blank')
               }
-              className={
-                cn(
-                  'flex-1 py-5',
-                  'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white',
-                  'dark:bg-white dark:hover:bg-white/80 dark:text-black'
-                )
-              }
+              className={cn(
+                'flex-1 py-5',
+                'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white',
+                'dark:bg-white dark:hover:bg-white/80 dark:text-black'
+              )}
             >
               Confirmar
             </Button>
             <DrawerClose asChild>
               <Button
                 variant="outline"
-                className={
-                  cn(
-                    'flex-1 py-5',
-                    'bg-white border-2 hover:text-foreground/80 text-foreground',
-                    'dark:bg-zinc-900 dark:border-2 dark:!border-[#323232] dark:hover:text-white/80 dark:text-white'
-                  )
-                }
+                className={cn(
+                  'flex-1 py-5',
+                  'bg-white border-2 hover:text-foreground/80 text-foreground',
+                  'dark:bg-zinc-900 dark:border-2 dark:!border-[#323232] dark:hover:text-white/80 dark:text-white'
+                )}
               >
                 Cancelar
               </Button>

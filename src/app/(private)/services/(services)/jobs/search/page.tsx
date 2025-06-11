@@ -1,6 +1,5 @@
 'use client'
 
-
 import JobCardSearchPage from '@/app/(private)/components/job-card-search-page'
 import { ServicesHeader } from '@/app/(private)/components/services-header'
 import { Badge } from '@/components/ui/badge'

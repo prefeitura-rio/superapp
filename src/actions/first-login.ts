@@ -1,7 +1,7 @@
-'use server';
+'use server'
 
-import { putCitizenCpfFirstlogin } from "@/http/citizen/citizen";
+import { putCitizenCpfFirstlogin } from '@/http/citizen/citizen'
 
 export async function setFirstLoginFalse(cpf: string) {
-  return putCitizenCpfFirstlogin(cpf);
+  return putCitizenCpfFirstlogin(cpf)
 }

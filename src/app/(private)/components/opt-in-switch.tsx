@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useTransition } from 'react'
 
-
 export function OptInSwitch({ authorized }: { authorized: boolean }) {
   const [isPending, startTransition] = useTransition()
 

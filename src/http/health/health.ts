@@ -32,7 +32,7 @@ export type getHealthResponse = getHealthResponseComposite & {
 }
 
 export const getGetHealthUrl = () => {
-  return `/health`
+  return '/health'
 }
 
 export const getHealth = async (

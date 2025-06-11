@@ -8,7 +8,6 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { getCourseCardColor, providerIcons } from './utils'
 
-
 export default function CourseCardSearchPage({
   course,
   subscribed = false,

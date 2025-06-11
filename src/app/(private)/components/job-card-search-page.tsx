@@ -8,7 +8,6 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { getJobCardColor, providerIcons } from './utils'
 
-
 export default function JobCardSearchPage({
   job,
   subscribed = false,
@@ -44,9 +43,7 @@ export default function JobCardSearchPage({
               style={{ objectFit: 'contain', maxHeight: 28, maxWidth: 28 }}
             />
           </div>
-          <span className="font-medium text-white flex-1">
-            {job.provider}
-          </span>
+          <span className="font-medium text-white flex-1">{job.provider}</span>
           <button
             type="button"
             onClick={e => {
