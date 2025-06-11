@@ -14,7 +14,9 @@ export function OptInSwitch({ authorized }: { authorized: boolean }) {
         id="consent-switch"
         checked={authorized}
         onCheckedChange={checked => {
-          startTransition(() => updateOptInStatus(checked))
+          startTransition(() => {
+            updateOptInStatus(checked)
+          })
         }}
         className="data-[state=checked]:bg-primary"
         disabled={isPending}
