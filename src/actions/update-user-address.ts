@@ -2,7 +2,10 @@
 'use server'
 
 import { putCitizenCpfAddress } from '@/http/citizen/citizen'
-import type { ModelsSelfDeclaredAddressInput } from '@/http/models'
+import type {
+  HandlersErrorResponse,
+  ModelsSelfDeclaredAddressInput,
+} from '@/http/models'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { revalidateTag } from 'next/cache'
 
@@ -21,10 +24,8 @@ export async function updateAddress(
     }
     revalidateTag('update-user-address')
     return { success: true, data: response.data }
-  } catch (error) {
-    return {
-      error: 'An unexpected error occurred while updating the address',
-      status: 500,
-    }
+  } catch (error: unknown) {
+    const err = error as HandlersErrorResponse
+    return { success: false, error: err?.error || 'Erro desconhecido' }
   }
 }

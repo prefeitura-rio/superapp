@@ -1,5 +1,6 @@
 'use server'
 import { postCitizenCpfPhoneValidate } from '@/http/citizen/citizen'
+import type { HandlersErrorResponse } from '@/http/models'
 import type { ModelsPhoneVerificationValidateRequest } from '@/http/models/modelsPhoneVerificationValidateRequest'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -16,7 +17,8 @@ export async function validateUserPhoneToken(
       return { success: true }
     }
     return { success: false, error: response.data?.error || 'Token inválido' }
-  } catch (error: any) {
-    return { success: false, error: error?.message || 'Erro desconhecido' }
+  } catch (error: unknown) {
+    const err = error as HandlersErrorResponse
+    return { success: false, error: err?.error || 'Erro desconhecido' }
   }
 }

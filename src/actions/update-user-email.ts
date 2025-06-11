@@ -1,6 +1,7 @@
 'use server'
 
 import { putCitizenCpfEmail } from '@/http/citizen/citizen'
+import type { HandlersErrorResponse } from '@/http/models'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { revalidateTag } from 'next/cache'
@@ -17,10 +18,8 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
     }
     revalidateTag('update-user-email')
     return { success: true, data: response.data }
-  } catch (error) {
-    return {
-      error: 'An unexpected error occurred while updating the email',
-      status: 500,
-    }
+  } catch (error: unknown) {
+    const err = error as HandlersErrorResponse
+    return { success: false, error: err?.error || 'Erro desconhecido' }
   }
 }

@@ -1,5 +1,6 @@
 'use server'
 import { putCitizenCpfPhone } from '@/http/citizen/citizen'
+import type { HandlersErrorResponse } from '@/http/models/handlersErrorResponse'
 import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDeclaredPhoneInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { revalidateTag } from 'next/cache'
@@ -19,7 +20,8 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
       success: false,
       error: response.data?.error || 'Erro ao atualizar número',
     }
-  } catch (error: any) {
-    return { success: false, error: error?.message || 'Erro desconhecido' }
+  } catch (error: unknown) {
+    const err = error as HandlersErrorResponse
+    return { success: false, error: err?.error || 'Erro desconhecido' }
   }
 }

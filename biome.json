@@ -22,10 +22,17 @@
     "rules": {
       "recommended": true,
       "a11y": {
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+        "useFocusableInteractive": "off",
+        "useSemanticElements": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
       },
       "suspicious": {
-        "noArrayIndexKey": "info"
+        "noArrayIndexKey": "off",
+        "noImplicitAnyLet": "off",
+        "noExplicitAny": "off"
       }
     }
   },

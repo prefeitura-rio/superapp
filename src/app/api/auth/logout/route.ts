@@ -9,19 +9,29 @@ export async function GET() {
   // Call Keycloak logout endpoint if refresh token exists
   if (refreshToken) {
     const logoutUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/logout`
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID!,
-      client_secret: process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET!,
-      refresh_token: refreshToken,
-    })
-    try {
-      await fetch(logoutUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params,
+    const clientId = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
+    const clientSecret = process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET
+
+    if (!clientId || !clientSecret) {
+      console.error('Missing Keycloak client ID or secret')
+      // Optionally, return a specific error response to the client
+      // return new NextResponse('Server configuration error', { status: 500 })
+      // For now, we'll proceed to clear cookies as a fallback
+    } else {
+      const params = new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
       })
-    } catch (e) {
-      console.error('Error logging out from Keycloak:', e)
+      try {
+        await fetch(logoutUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params,
+        })
+      } catch (e) {
+        console.error('Error logging out from Keycloak:', e)
+      }
     }
   }
 
