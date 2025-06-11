@@ -1,9 +1,9 @@
-import { CustomInput } from '@/components/ui/custom/custom-input';
-import { getCitizenCpf } from '@/http/citizen/citizen';
-import { formatCpf } from '@/lib/format-cpf';
-import { formatPhone } from '@/lib/format-phone';
-import { getUserInfoFromToken } from '@/lib/user-info';
-import { SecondaryHeader } from '../../components/secondary-header';
+import { CustomInput } from '@/components/ui/custom/custom-input'
+import { getCitizenCpf } from '@/http/citizen/citizen'
+import { formatCpf } from '@/lib/format-cpf'
+import { formatPhone } from '@/lib/format-phone'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -17,10 +17,10 @@ export default async function PersonalInfoForm() {
       if (response.status === 200) {
         userInfo = response.data
       } else {
-        console.error('Failed to fetch user data status:', response.data);
+        console.error('Failed to fetch user data status:', response.data)
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user data:', error)
     }
   }
 
@@ -35,7 +35,12 @@ export default async function PersonalInfoForm() {
       <div className="min-h-screen max-w-md mx-auto pt-24 pb-10 bg-background">
         <SecondaryHeader title="Informações pessoais" />
         <div className="space-y-6 p-4">
-          <CustomInput id="cpf" label="CPF" defaultValue={formatCpf(userInfo?.cpf)} readOnly />
+          <CustomInput
+            id="cpf"
+            label="CPF"
+            defaultValue={formatCpf(userInfo?.cpf)}
+            readOnly
+          />
 
           <CustomInput
             id="fullName"
@@ -59,7 +64,12 @@ export default async function PersonalInfoForm() {
             readOnly
           />
 
-          <CustomInput id="race" label="Raça / cor" defaultValue={userInfo?.raca || ''} readOnly />
+          <CustomInput
+            id="race"
+            label="Raça / cor"
+            defaultValue={userInfo?.raca || ''}
+            readOnly
+          />
           <CustomInput
             id="birthDate"
             label="Data de nascimento"
@@ -67,11 +77,16 @@ export default async function PersonalInfoForm() {
             readOnly
           />
 
-          <CustomInput id="sexo" label="Sexo" defaultValue={userInfo?.sexo || ''} readOnly />
-
+          <CustomInput
+            id="sexo"
+            label="Sexo"
+            defaultValue={userInfo?.sexo || ''}
+            readOnly
+          />
           <CustomInput
             id="celular"
             label="Celular"
+            redirectLink="/user-profile/user-personal-info/user-phone-number"
             defaultValue={formatPhone(
               userInfo?.telefone?.principal?.ddi,
               userInfo?.telefone?.principal?.ddd,
@@ -79,15 +94,15 @@ export default async function PersonalInfoForm() {
             )}
             readOnly
           />
-
           <CustomInput
             id="email"
             label="E-mail"
+            redirectLink="/user-profile/user-personal-info/user-email"
             defaultValue={userInfo?.email?.principal?.valor || ''}
             readOnly
           />
         </div>
       </div>
     </>
-  );
+  )
 }

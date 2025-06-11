@@ -3,9 +3,11 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Info } from 'lucide-react'
+import Link from 'next/link'
 import { forwardRef, useState } from 'react'
 
-interface CustomInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+interface CustomInputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string
   tooltip?: string
   leftIcon?: React.ReactNode
@@ -16,6 +18,7 @@ interface CustomInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   labelClassName?: string
   optionalLabel?: string
   hint?: string
+  redirectLink?: string
   optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
 }
 
@@ -49,6 +52,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
       label,
       tooltip,
       leftIcon,
+      redirectLink,
       rightIcon,
       variant = 'default',
       size = 'md',
@@ -67,13 +71,77 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
     const inputId = id
     const [showTooltip, setShowTooltip] = useState(false)
 
+    const InputContent = (
+      <div className="relative group cursor-pointer">
+        {leftIcon && (
+          <div
+            className={cn(
+              'absolute left-5 top-1/2 transform -translate-y-1/2',
+              iconVariantStyles[variant]
+            )}
+          >
+            {leftIcon}
+          </div>
+        )}
+
+        <input
+          ref={ref}
+          id={inputId}
+          disabled={disabled}
+          tabIndex={redirectLink ? -1 : undefined}
+          readOnly={redirectLink ? true : props.readOnly}
+          className={cn(
+            'flex w-full rounded-md border-[1.4px] bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
+            'file:border-0 file:bg-transparent file:text-sm file:font-medium',
+            'placeholder:text-muted-foreground',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            sizeStyles[size],
+            leftIcon && 'pl-15',
+            rightIcon && 'pr-10',
+            optionalLabel && !rightIcon && 'pr-[80px]',
+            optionalLabel && rightIcon && 'pr-[140px]',
+            redirectLink && 'pointer-events-none group-hover:bg-accent/40',
+            className
+          )}
+          {...props}
+        />
+
+        {optionalLabel && (
+          <Badge
+            variant="destructive"
+            className={cn(
+              'absolute top-1/2 transform -translate-y-1/2 text-xs',
+              rightIcon ? 'right-[60px]' : 'right-4'
+            )}
+          >
+            {optionalLabel}
+          </Badge>
+        )}
+
+        {rightIcon && (
+          <div
+            className={cn(
+              'absolute right-5 top-1/2 transform -translate-y-1/2',
+              iconVariantStyles[variant]
+            )}
+          >
+            {rightIcon}
+          </div>
+        )}
+      </div>
+    )
+
     return (
       <div className={cn('space-y-2', containerClassName)}>
         {label && (
           <div className="flex items-center gap-2">
             <label
               htmlFor={inputId}
-              className={cn('text-sm font-normal', labelVariantStyles[variant], labelClassName)}
+              className={cn(
+                'text-sm font-normal',
+                labelVariantStyles[variant],
+                labelClassName
+              )}
             >
               {label}
             </label>
@@ -81,7 +149,10 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             {tooltip && (
               <div className="relative">
                 <Info
-                  className={cn('h-4 w-4 cursor-help', tooltipIconVariantStyles[variant])}
+                  className={cn(
+                    'h-4 w-4 cursor-help',
+                    tooltipIconVariantStyles[variant]
+                  )}
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
                 />
@@ -89,8 +160,10 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
                 {showTooltip && (
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
                     <div className="bg-popover border border-border rounded-md px-3 py-2 shadow-md max-w-xs">
-                      <p className="text-sm text-popover-foreground">{tooltip}</p>
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover"></div>
+                      <p className="text-sm text-popover-foreground">
+                        {tooltip}
+                      </p>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover" />
                     </div>
                   </div>
                 )}
@@ -98,62 +171,11 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             )}
           </div>
         )}
-
-        <div className="relative">
-          {leftIcon && (
-            <div
-              className={cn(
-                'absolute left-5 top-1/2 transform -translate-y-1/2',
-                iconVariantStyles[variant]
-              )}
-            >
-              {leftIcon}
-            </div>
-          )}
-
-          <input
-            ref={ref}
-            id={inputId}
-            disabled={disabled}
-            className={cn(
-              'flex w-full rounded-md border-[1.4px] bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
-              'file:border-0 file:bg-transparent file:text-sm file:font-medium',
-              'placeholder:text-muted-foreground',
-              'disabled:cursor-not-allowed disabled:opacity-50',
-              sizeStyles[size],
-              leftIcon && 'pl-15',
-              rightIcon && 'pr-10',
-              optionalLabel && !rightIcon && 'pr-[80px]',
-              optionalLabel && rightIcon && 'pr-[140px]',
-              className
-            )}
-            {...props}
-          />
-
-          {optionalLabel && (
-            <Badge
-              variant="destructive"
-              className={cn(
-                'absolute top-1/2 transform -translate-y-1/2 text-xs',
-                rightIcon ? 'right-[60px]' : 'right-4'
-              )}
-            >
-              {optionalLabel}
-            </Badge>
-          )}
-
-          {rightIcon && (
-            <div
-              className={cn(
-                'absolute right-5 top-1/2 transform -translate-y-1/2',
-                iconVariantStyles[variant]
-              )}
-            >
-              {rightIcon}
-            </div>
-          )}
-        </div>
-
+        {redirectLink ? (
+          <Link href={redirectLink}>{InputContent}</Link>
+        ) : (
+          InputContent
+        )}
         {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </div>
     )
