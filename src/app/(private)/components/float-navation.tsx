@@ -1,20 +1,17 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
 
-import Link from 'next/link'
+import Link from 'next/link';
 import { usePathname } from 'next/navigation'
-import * as React from 'react'
+import * as React from 'react';
+import {
+  BottomSheet,
+  BottomSheetClose,
+  BottomSheetFooter,
+} from '../../../components/ui/custom/bottom-sheet'
 
 interface NavItem {
   href: string
@@ -77,46 +74,40 @@ export function FloatNavigation() {
         </nav>
       </div>
 
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="p-4 max-w-md! mx-auto rounded-t-3xl!">
-          <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-[#323232]" />
-          <DrawerHeader className="text-center px-4">
-            <DrawerTitle className="text-md">
-              Você será direcionado <br /> para o Whatsapp da Prefeitura do Rio
-            </DrawerTitle>
-          </DrawerHeader>
-          <DrawerFooter className="flex-row gap-3  pb-10 px-4 md:px-10">
+      <BottomSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={
+          <>
+            Você será direcionado <br /> para o Whatsapp da Prefeitura do Rio
+          </>
+        }
+      >
+        <BottomSheetFooter>
+          <Button
+            onClick={() => window.open('https://wa.me/5521991952121', '_blank')}
+            className={cn(
+              'flex-1 py-5',
+              'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white',
+              'dark:bg-white dark:hover:bg-white/80 dark:text-black'
+            )}
+          >
+            Confirmar
+          </Button>
+          <BottomSheetClose asChild>
             <Button
-              onClick={() =>
-                window.open('https://wa.me/5521991952121', '_blank')
-              }
-              className={
-                cn(
-                  'flex-1 py-5',
-                  'bg-[#1447E6] hover:bg-[#1447E6]/80 text-white',
-                  'dark:bg-white dark:hover:bg-white/80 dark:text-black'
-                )
-              }
+              variant="outline"
+              className={cn(
+                'flex-1 py-5',
+                'bg-white border-2 hover:text-foreground/80 text-foreground',
+                'dark:bg-zinc-900 dark:border-2 dark:!border-[#323232] dark:hover:text-white/80 dark:text-white'
+              )}
             >
-              Confirmar
+              Cancelar
             </Button>
-            <DrawerClose asChild>
-              <Button
-                variant="outline"
-                className={
-                  cn(
-                    'flex-1 py-5',
-                    'bg-white border-2 hover:text-foreground/80 text-foreground',
-                    'dark:bg-zinc-900 dark:border-2 dark:!border-[#323232] dark:hover:text-white/80 dark:text-white'
-                  )
-                }
-              >
-                Cancelar
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+          </BottomSheetClose>
+        </BottomSheetFooter>
+      </BottomSheet>
     </>
-  )
+  );
 }
