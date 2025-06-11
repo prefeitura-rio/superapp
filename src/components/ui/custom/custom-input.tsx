@@ -1,47 +1,47 @@
-'use client';
+'use client'
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { Info } from 'lucide-react';
-import { forwardRef, useState } from 'react';
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import { Info } from 'lucide-react'
+import { forwardRef, useState } from 'react'
 
 interface CustomInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label?: string;
-  tooltip?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  variant?: 'default' | 'error' | 'success';
-  size?: 'sm' | 'md' | 'lg';
-  containerClassName?: string;
-  labelClassName?: string;
-  optionalLabel?: string;
-  hint?: string;
-  optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  label?: string
+  tooltip?: string
+  leftIcon?: React.ReactNode
+  rightIcon?: React.ReactNode
+  variant?: 'default' | 'error' | 'success'
+  size?: 'sm' | 'md' | 'lg'
+  containerClassName?: string
+  labelClassName?: string
+  optionalLabel?: string
+  hint?: string
+  optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
 }
 
 const labelVariantStyles = {
   default: 'text-primary',
   error: 'text-destructive',
   success: 'text-success',
-} as const;
+} as const
 
 const tooltipIconVariantStyles = {
   default: 'text-primary',
   error: 'text-destructive',
   success: 'text-success',
-} as const;
+} as const
 
 const iconVariantStyles = {
   default: 'text-muted-foreground',
   error: 'text-destructive',
   success: 'text-success',
-} as const;
+} as const
 
 const sizeStyles = {
   sm: 'h-12 px-3 text-sm',
   md: 'h-16 px-3',
   lg: 'h-18 px-4 text-lg',
-} as const;
+} as const
 
 export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
   (
@@ -64,8 +64,8 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
     },
     ref
   ) => {
-    const inputId = id;
-    const [showTooltip, setShowTooltip] = useState(false);
+    const inputId = id
+    const [showTooltip, setShowTooltip] = useState(false)
 
     return (
       <div className={cn('space-y-2', containerClassName)}>
@@ -156,8 +156,8 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
 
         {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </div>
-    );
+    )
   }
-);
+)
 
-CustomInput.displayName = 'CustomInput';
+CustomInput.displayName = 'CustomInput'
