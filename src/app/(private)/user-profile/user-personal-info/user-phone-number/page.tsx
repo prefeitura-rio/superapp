@@ -27,7 +27,7 @@ export default function PhoneNumberForm() {
     startTransition(async () => {
       // Parse DDI, DDD, valor from phone input
       const digits = phone.replace(/\D/g, "");
-      const ddi = "+55";
+      const ddi = "55";
       const ddd = digits.substring(0, 2);
       const valor = digits.substring(2);
       const result = await updateUserPhone({
@@ -38,7 +38,7 @@ export default function PhoneNumberForm() {
       if (result.success) {
         // Pass phone info in URL for next step
         router.push(
-          `/user-profile/user-personal-info/user-phone-number/token-input?valor=${digits}&ddd=${ddd}&ddi=${encodeURIComponent(
+          `/user-profile/user-personal-info/user-phone-number/token-input?valor=${valor}&ddd=${ddd}&ddi=${encodeURIComponent(
             ddi
           )}`
         );

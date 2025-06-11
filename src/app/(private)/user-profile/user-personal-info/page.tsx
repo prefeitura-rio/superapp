@@ -21,7 +21,7 @@ export default async function PersonalInfoForm() {
     try {
       const response = await getCitizenCpf(userAuthInfo.cpf, {
         cache: "force-cache",
-        next: { tags: ["update-user-email"] },
+        next: { tags: ["update-user-email", "update-user-phone-number"] },
       });
       if (response.status === 200) {
         userInfo = response.data;
