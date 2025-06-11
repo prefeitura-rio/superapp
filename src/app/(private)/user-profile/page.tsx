@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { CheckCircle, MapIcon, Settings, User } from 'lucide-react'
+import { User } from 'lucide-react'
+import { MenuItem } from '../../../components/ui/custom/menu-item'
+import { USER_PROFILE_MENU_ITEMS } from '../../../constants/user-profile-menu-items'
 import { LogoutButton } from '../components/logout-button'
-import { MenuItem } from '../components/menu-item'
 import { SecondaryHeader } from '../components/secondary-header'
 
 export default async function ProfilePage() {
@@ -29,32 +29,17 @@ export default async function ProfilePage() {
       {/* Menu Items */}
       <div className="flex-1 px-5">
         <nav className="space-y-1">
-          <MenuItem
-            icon={<User className="h-5 w-5" />}
-            label="Informações pessoais"
-            href="/user-profile/user-personal-info"
-            isFirst={true}
-          />
-          {/* <MenuItem
-            icon={<Briefcase className="h-5 w-5" />}
-            label="Trabalho"
-            href="/user-profile/user-job-info"
-          /> */}
-          <MenuItem
-            icon={<MapIcon className="h-5 w-5" />}
-            label="Endereço"
-            href="/user-profile/user-address"
-          />
-          <MenuItem
-            icon={<CheckCircle className="h-5 w-5" />}
-            label="Autorizações"
-            href="/user-profile/user-authorizations"
-          />
-          <MenuItem
-            icon={<Settings className="h-5 w-5" />}
-            label="Configurações"
-            href="/user-profile/user-settings"
-          />
+          {USER_PROFILE_MENU_ITEMS.map((item, index) => (
+            <MenuItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              href={item.href}
+              variant={item.variant}
+              isFirst={index === 0}
+              isLast={false}
+            />
+          ))}
 
           <LogoutButton />
         </nav>
