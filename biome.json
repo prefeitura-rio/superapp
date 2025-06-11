@@ -30,6 +30,12 @@
     }
   },
   "files": {
-    "ignore": ["node_modules"]
+    "ignore": [
+      ".next/**",
+      "next.config.js",
+      "next-env.d.ts",
+      "node_modules/**",
+      "package-lock.json"
+    ]
   }
 }
