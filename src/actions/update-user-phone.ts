@@ -20,7 +20,7 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
       success: false,
       error: response.data?.error || 'Erro ao atualizar número',
     }
-  } catch (error: unknown) {
+  } catch (error: any) {
     const err = error as HandlersErrorResponse
     return { success: false, error: err?.error || 'Erro desconhecido' }
   }

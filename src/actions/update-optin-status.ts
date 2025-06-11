@@ -15,7 +15,7 @@ export async function updateOptInStatus(optin: boolean) {
     await putCitizenCpfOptin(user.cpf, { optin })
     revalidatePath('/(private)/user-profile/user-authorizations')
     return { success: true }
-  } catch (error: unknown) {
+  } catch (error: any) {
     const err = error as HandlersErrorResponse
     return { success: false, error: err?.error || 'Erro desconhecido' }
   }

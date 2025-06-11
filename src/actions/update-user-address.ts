@@ -24,7 +24,7 @@ export async function updateAddress(
     }
     revalidateTag('update-user-address')
     return { success: true, data: response.data }
-  } catch (error: unknown) {
+  } catch (error: any) {
     const err = error as HandlersErrorResponse
     return { success: false, error: err?.error || 'Erro desconhecido' }
   }

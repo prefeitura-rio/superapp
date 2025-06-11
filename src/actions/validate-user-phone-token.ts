@@ -17,7 +17,7 @@ export async function validateUserPhoneToken(
       return { success: true }
     }
     return { success: false, error: response.data?.error || 'Token inválido' }
-  } catch (error: unknown) {
+  } catch (error: any) {
     const err = error as HandlersErrorResponse
     return { success: false, error: err?.error || 'Erro desconhecido' }
   }

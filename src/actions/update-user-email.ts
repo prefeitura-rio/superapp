@@ -18,7 +18,7 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
     }
     revalidateTag('update-user-email')
     return { success: true, data: response.data }
-  } catch (error: unknown) {
+  } catch (error: any) {
     const err = error as HandlersErrorResponse
     return { success: false, error: err?.error || 'Erro desconhecido' }
   }

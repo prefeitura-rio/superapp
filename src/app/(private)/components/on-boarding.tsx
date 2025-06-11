@@ -75,7 +75,7 @@ interface OnboardingProps {
     cpf: string
     name: string
   }
-  setFirstLoginFalse: (cpf: string) => Promise<boolean>
+  setFirstLoginFalse: (cpf: string) => Promise<any>
 }
 
 export default function Onboarding({
