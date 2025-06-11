@@ -6,13 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsSelfDeclaredAddressInput {
-  bairro: string
-  cep: string
-  complemento?: string
-  estado: string
-  logradouro: string
-  municipio: string
-  numero: string
-  tipo_logradouro?: string
+export interface ModelsSelfDeclaredRacaInput {
+  valor: string
 }

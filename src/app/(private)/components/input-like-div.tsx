@@ -1,10 +1,16 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { Info } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 interface ActionDivProps {
   label?: string
@@ -22,6 +28,8 @@ interface ActionDivProps {
   className?: string
   content?: React.ReactNode
   disabled?: boolean
+  drawerContent?: React.ReactNode
+  drawerTitle?: string
 }
 
 const labelVariantStyles = {
@@ -64,8 +72,18 @@ export const ActionDiv = ({
   hint,
   redirectLink,
   content,
+  drawerContent,
+  drawerTitle,
 }: ActionDivProps) => {
   const [showTooltip, setShowTooltip] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (drawerContent) {
+      e.preventDefault()
+      setOpen(true)
+    }
+  }
 
   const Content = (
     <div
@@ -80,6 +98,7 @@ export const ActionDiv = ({
         redirectLink && 'pointer-events-none',
         className
       )}
+      onClick={handleClick}
     >
       {leftIcon && (
         <div
@@ -120,44 +139,71 @@ export const ActionDiv = ({
   )
 
   return (
-    <div className={cn('space-y-2', containerClassName)}>
-      {label && (
-        <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              'text-sm font-normal',
-              labelVariantStyles[variant],
-              labelClassName
-            )}
-          >
-            {label}
-          </div>
-
-          {tooltip && (
-            <div className="relative">
-              <Info
-                className={cn(
-                  'h-4 w-4 cursor-help',
-                  tooltipIconVariantStyles[variant]
-                )}
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-              />
-              {showTooltip && (
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
-                  <div className="bg-popover border border-border rounded-md px-3 py-2 shadow-md max-w-xs">
-                    <p className="text-sm text-popover-foreground">{tooltip}</p>
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover" />
-                  </div>
-                </div>
+    <>
+      <div className={cn('space-y-2', containerClassName)}>
+        {label && (
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'text-sm font-normal',
+                labelVariantStyles[variant],
+                labelClassName
               )}
+            >
+              {label}
             </div>
-          )}
-        </div>
+
+            {tooltip && (
+              <div className="relative">
+                <Info
+                  className={cn(
+                    'h-4 w-4 cursor-help',
+                    tooltipIconVariantStyles[variant]
+                  )}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                />
+                {showTooltip && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+                    <div className="bg-popover border border-border rounded-md px-3 py-2 shadow-md max-w-xs">
+                      <p className="text-sm text-popover-foreground">
+                        {tooltip}
+                      </p>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {redirectLink && !drawerContent ? (
+          <Link href={redirectLink}>{Content}</Link>
+        ) : (
+          Content
+        )}
+        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+      </div>
+      {drawerContent && (
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="p-8 max-w-md mx-auto !rounded-t-3xl">
+            <div className="flex justify-center pt-0 pb-1">
+              <div className="w-8.5 h-1 -mt-2 rounded-full bg-popover-line" />
+            </div>
+            {drawerTitle && (
+              <DrawerHeader className="sr-only">
+                <DrawerTitle>{drawerTitle}</DrawerTitle>
+              </DrawerHeader>
+            )}
+            {React.isValidElement(drawerContent)
+              ? React.cloneElement(drawerContent as React.ReactElement<any>, {
+                  onClose: () => setOpen(false),
+                })
+              : drawerContent}
+          </DrawerContent>
+        </Drawer>
       )}
-      {redirectLink ? <Link href={redirectLink}>{Content}</Link> : Content}
-      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-    </div>
+    </>
   )
 }
 

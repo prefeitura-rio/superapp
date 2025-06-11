@@ -2,9 +2,11 @@ import { CustomInput } from '@/components/ui/custom/custom-input'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
+import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Pen } from 'lucide-react'
 import { ActionDiv } from '../../components/input-like-div'
+import { RaceDrawerContent } from '../../components/race-drawer-content'
 import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function PersonalInfoForm() {
@@ -14,7 +16,13 @@ export default async function PersonalInfoForm() {
     try {
       const response = await getCitizenCpf(userAuthInfo.cpf, {
         cache: 'force-cache',
-        next: { tags: ['update-user-email', 'update-user-phone-number'] },
+        next: {
+          tags: [
+            'update-user-email',
+            'update-user-phone-number',
+            'update-user-race',
+          ],
+        },
       })
       if (response.status === 200) {
         userInfo = response.data
@@ -67,10 +75,12 @@ export default async function PersonalInfoForm() {
           />
           <ActionDiv
             label="Cor / Raça"
-            content={userInfo?.raca || ''}
+            content={formatRace(userInfo?.raca) || ''}
             variant="default"
             disabled
             rightIcon={<Pen />}
+            drawerTitle="Cor / Raça"
+            drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
           />
 
           <CustomInput
