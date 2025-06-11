@@ -1,4 +1,4 @@
-import { Briefcase, CheckCircle, MapIcon, Settings, User } from 'lucide-react'
+import { CheckCircle, MapIcon, Settings, User } from 'lucide-react'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -21,12 +21,12 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     label: 'Endereço',
     href: '/user-profile/user-address',
   },
-  {
-    id: 'trabalho',
-    icon: <Briefcase className="h-5 w-5" />,
-    label: 'Trabalho',
-    href: '/user-profile/user-job-info',
-  },
+  // {
+  //   id: 'trabalho',
+  //   icon: <Briefcase className="h-5 w-5" />,
+  //   label: 'Trabalho',
+  //   href: '/user-profile/user-job-info',
+  // },
   {
     id: 'autorizacoes',
     icon: <CheckCircle className="h-5 w-5" />,
