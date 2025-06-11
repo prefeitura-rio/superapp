@@ -84,6 +84,7 @@ export default function AddressForm() {
     watch,
     setValue,
     reset,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<AddressFormSchema>({
     resolver: zodResolver(addressFormSchema),
@@ -176,11 +177,28 @@ export default function AddressForm() {
     setDrawerOpen(true)
   }
 
+  // CEP input formatting handler
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '') // Remove non-digits
+    if (value.length > 8) value = value.slice(0, 8)
+    if (value.length > 5) {
+      value = `${value.slice(0, 5)}-${value.slice(5)}`
+    }
+    setValue('cep', value)
+    trigger('cep') // Trigger validation on change
+  }
+
   const onSubmit = async (data: AddressFormSchema) => {
     if (!selectedAddress) return
 
     // Construct the address data from the form inputs
     const addressParts = selectedAddress.secondary_text.split(', ')
+    let cepToSend = ''
+    if (data.noCep) {
+      cepToSend = 'Não informado'
+    } else if (data.cep) {
+      cepToSend = data.cep.replace(/\D/g, '')
+    }
     const addressData = {
       logradouro: selectedAddress.main_text,
       tipo_logradouro: '',
@@ -189,7 +207,7 @@ export default function AddressForm() {
       bairro: addressParts[0] || '',
       municipio: addressParts[1] || '',
       estado: addressParts[2] || '',
-      cep: data.noCep ? '' : data.cep || '',
+      cep: cepToSend,
     }
 
     try {
@@ -293,6 +311,15 @@ export default function AddressForm() {
                 placeholder="Escreva o número"
                 {...register('number')}
                 disabled={noNumber}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onChange={e => {
+                  // Only allow digits
+                  const value = e.target.value.replace(/\D/g, '')
+                  setValue('number', value)
+                  trigger('number')
+                }}
+                value={watch('number')}
               />
               {errors.number && !noNumber && (
                 <p className="text-red-500 text-sm mt-1">
@@ -346,6 +373,8 @@ export default function AddressForm() {
                 {...register('cep')}
                 disabled={noCep}
                 maxLength={9}
+                onChange={handleCepChange}
+                value={watch('cep')}
               />
               {errors.cep && !noCep && (
                 <p className="text-red-500 text-sm mt-1">
