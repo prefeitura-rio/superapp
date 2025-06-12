@@ -43,7 +43,7 @@ export function RaceDrawerContent({
   return (
     <div className="py-2 -mb-2">
       <RadioGroup
-        className="space-y-2"
+        className="space-y-1"
         value={selectedRace}
         onValueChange={handleRaceChange}
         disabled={isLoading}
