@@ -15,7 +15,7 @@ interface PhoneInputFormProps {
 export default function PhoneInputForm({
   value,
   onChange,
-  countryCode = '55',
+  countryCode = '+55',
   onCountryCodeChange,
 }: PhoneInputFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -71,8 +71,8 @@ export default function PhoneInputForm({
             value={countryCode}
             onChange={handleCountryCodeChange}
             placeholder="55"
-            className="w-19 pl-7 bg-card border-border rounded-xl"
-            maxLength={2}
+            className="w-19 pl-6 bg-card border-border rounded-xl"
+            maxLength={3}
           />
           <Input
             id="phone"
