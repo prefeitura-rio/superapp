@@ -5,7 +5,7 @@ import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Pen } from 'lucide-react'
-import { ActionDiv } from '../../components/input-like-div'
+import { ActionDiv } from '../../components/action-div'
 import { RaceDrawerContent } from '../../components/race-drawer-content'
 import { SecondaryHeader } from '../../components/secondary-header'
 
@@ -99,6 +99,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="Celular"
+            optionalLabelVariant="destructive"
+            optionalLabel="Atualizar"
             content={formatPhone(
               userInfo?.telefone?.principal?.ddi,
               userInfo?.telefone?.principal?.ddd,
@@ -112,6 +114,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="E-mail"
+            optionalLabelVariant="destructive"
+            optionalLabel="Atualizar"
             content={userInfo?.email?.principal?.valor || ''}
             variant="default"
             disabled

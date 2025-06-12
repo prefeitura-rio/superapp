@@ -111,7 +111,9 @@ export const ActionDiv = ({
         </div>
       )}
 
-      <div className="flex items-center h-full w-full">{content}</div>
+      <div className="flex items-center h-full w-full">
+        <span className="truncate block flex-1 min-w-0">{content}</span>
+      </div>
 
       {optionalLabel && (
         <Badge
