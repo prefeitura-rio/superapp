@@ -51,7 +51,7 @@ export default function TokenInputForm() {
 
   function handleDrawerClose() {
     setDrawerOpen(false)
-    router.back()
+    router.push('/user-profile/user-personal-info')
   }
 
   return (
