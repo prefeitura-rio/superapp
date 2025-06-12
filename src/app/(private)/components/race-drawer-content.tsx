@@ -2,7 +2,8 @@
 
 import { updateUserEthnicity } from '@/actions/update-user-ethnicity'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useState } from 'react'
+import { RACE_API_TO_DISPLAY } from '@/lib/format-race'
+import { useEffect, useState } from 'react'
 
 const RACES = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outra']
 
@@ -15,8 +16,22 @@ export function RaceDrawerContent({
   currentRace,
   onClose,
 }: RaceDrawerContentProps) {
-  const [selectedRace, setSelectedRace] = useState(currentRace || '')
+  // Map API value to display value for initial selection
+  const initialDisplayRace =
+    currentRace && RACE_API_TO_DISPLAY[currentRace.toLowerCase()]
+      ? RACE_API_TO_DISPLAY[currentRace.toLowerCase()]
+      : ''
+  const [selectedRace, setSelectedRace] = useState(initialDisplayRace)
   const [isLoading, setIsLoading] = useState(false)
+
+  // If currentRace changes while open, update selectedRace
+  useEffect(() => {
+    const mapped =
+      currentRace && RACE_API_TO_DISPLAY[currentRace.toLowerCase()]
+        ? RACE_API_TO_DISPLAY[currentRace.toLowerCase()]
+        : ''
+    setSelectedRace(mapped)
+  }, [currentRace])
 
   const handleRaceChange = async (race: string) => {
     setSelectedRace(race)
