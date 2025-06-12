@@ -71,7 +71,7 @@ export function AddressInfoCard({
   const displayAddress = address ? mainLine : 'Endereço não disponível'
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="p-4">
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <div className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/50 transition-colors">

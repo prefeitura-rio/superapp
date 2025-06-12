@@ -54,7 +54,7 @@ export default function PhoneNumberForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
         <SecondaryHeader title="" />
         <section className="relative">
