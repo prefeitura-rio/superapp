@@ -49,14 +49,14 @@ export default async function PersonalInfoForm() {
             id="cpf"
             label="CPF"
             defaultValue={formatCpf(userInfo?.cpf)}
-            readOnly
+            isEditable={false}
           />
 
           <CustomInput
             id="fullName"
             label="Nome completo"
             defaultValue={userInfo?.nome || ''}
-            readOnly
+            isEditable={false}
           />
 
           <CustomInput
@@ -64,14 +64,14 @@ export default async function PersonalInfoForm() {
             label="Nome social"
             tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
             defaultValue={userInfo?.nome_social || ''}
-            readOnly
+            isEditable={false}
           />
 
           <CustomInput
             id="nationality"
             label="Nacionalidade"
             defaultValue={userInfo?.nascimento?.pais || ''}
-            readOnly
+            isEditable={false}
           />
           <ActionDiv
             label="Cor / Raça"
@@ -87,14 +87,14 @@ export default async function PersonalInfoForm() {
             id="birthDate"
             label="Data de nascimento"
             defaultValue={formatDate(userInfo?.nascimento?.data)}
-            readOnly
+            isEditable={false}
           />
 
           <CustomInput
             id="sexo"
             label="Sexo"
             defaultValue={userInfo?.sexo || ''}
-            readOnly
+            isEditable={false}
           />
 
           <ActionDiv

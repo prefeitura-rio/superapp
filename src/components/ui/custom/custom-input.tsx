@@ -18,6 +18,7 @@ interface CustomInputProps
   optionalLabel?: string
   hint?: string
   optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
+  isEditable?: boolean
 }
 
 const labelVariantStyles = {
@@ -54,6 +55,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
       variant = 'default',
       size = 'md',
       disabled = false,
+      isEditable = true,
       className,
       containerClassName,
       labelClassName,
@@ -125,6 +127,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
+            readOnly={!isEditable}
             className={cn(
               'flex w-full rounded-md border-[1.4px] bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
@@ -135,6 +138,8 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
               rightIcon && 'pr-10',
               optionalLabel && !rightIcon && 'pr-[80px]',
               optionalLabel && rightIcon && 'pr-[140px]',
+              !isEditable &&
+                'focus:outline-none focus:bg-transparent focus:border-border',
               className
             )}
             {...props}
