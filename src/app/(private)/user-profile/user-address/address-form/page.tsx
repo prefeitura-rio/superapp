@@ -230,7 +230,7 @@ export default function AddressForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div className={headerAnim}>
         <SecondaryHeader title="" />
         <section className="relative">
