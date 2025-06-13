@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button'
+import { Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { MenuItem } from './menu-item'
 
 const InstallPwaButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null)
@@ -34,9 +35,11 @@ const InstallPwaButton = () => {
   return (
     <>
       {isInstallable && (
-        <Button onClick={handleInstallClick} className="bg-black">
-          Install App
-        </Button>
+        <MenuItem
+          icon={<Download className="h-5 w-5" />}
+          label="Instalar App"
+          onClick={handleInstallClick}
+        />
       )}
     </>
   )
