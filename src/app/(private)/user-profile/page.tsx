@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import InstallPWAButtonClient from '@/components/ui/install-pwa-button-client'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { User } from 'lucide-react'
@@ -40,6 +41,9 @@ export default async function ProfilePage() {
               isLast={false}
             />
           ))}
+
+          {/* //Option to install the PWA */}
+          <InstallPWAButtonClient />
 
           <LogoutButton />
         </nav>
