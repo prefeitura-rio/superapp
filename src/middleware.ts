@@ -11,6 +11,7 @@ const publicRoutes = [
   { path: '/forgot-password', whenAuthenticated: 'redirect' },
   { path: '/privacy-policy', whenAuthenticated: 'redirect' },
   { path: '/pricing', whenAuthenticated: 'next' },
+  { path: '/manifest.webmanifest', whenAuthenticated: 'next' },
 ] as const
 
 const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
