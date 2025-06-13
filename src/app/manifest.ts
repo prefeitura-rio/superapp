@@ -14,13 +14,28 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/web-app-manifest-192x192.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'maskable',
+        purpose: 'any',
       },
       {
         src: '/web-app-manifest-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
+      },
+    ],
+    screenshots: [
+      {
+        src: '/screenshot-wide.png',
+        sizes: '800x400',
+        type: 'image/png',
+        form_factor: 'wide',
+        label: 'App Home Wide',
+      },
+      {
+        src: '/screenshot-mobile.png',
+        sizes: '400x800',
+        type: 'image/png',
+        label: 'App Home Mobile',
       },
     ],
   }
