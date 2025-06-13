@@ -1,11 +1,12 @@
 'use client'
 import { MenuItem } from '@/app/(private)/components/menu-item'
 import { Download } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function InstallPWAButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<null | any>(null)
+  const deferredPrompt = useRef<any>(null)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [canInstall, setCanInstall] = useState(false)
 
   useEffect(() => {
     // Check if app is already installed
@@ -27,7 +28,8 @@ export function InstallPWAButton() {
   useEffect(() => {
     const handler = (e: any) => {
       e.preventDefault()
-      setDeferredPrompt(e)
+      deferredPrompt.current = e
+      setCanInstall(true)
     }
     window.addEventListener('beforeinstallprompt', handler)
     return () => {
@@ -36,15 +38,16 @@ export function InstallPWAButton() {
   }, [])
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return
-    deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
+    if (!deferredPrompt.current) return
+    deferredPrompt.current.prompt()
+    const { outcome } = await deferredPrompt.current.userChoice
     if (outcome === 'accepted') {
-      setDeferredPrompt(null)
+      deferredPrompt.current = null
+      setCanInstall(false)
     }
   }
 
-  if (isInstalled || !deferredPrompt) return null
+  if (isInstalled || !canInstall) return null
 
   return (
     <MenuItem
