@@ -1,11 +1,12 @@
-import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Download } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import { Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { MenuItem } from './menu-item'
 
 const iosSlides = [
   {
@@ -69,10 +70,9 @@ const InstallPwaButton = () => {
   return (
     <>
       {isInstallable && (
-        <Button
-          // className="w-full mb-4"
-          // icon={<Download className="h-5 w-5" />}
-          // label="Instalar App"
+        <MenuItem
+          icon={<Download className="h-5 w-5" />}
+          label="Instalar App"
           onClick={handleInstallClick}
         />
       )}
