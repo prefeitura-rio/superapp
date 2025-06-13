@@ -47,14 +47,18 @@ export function InstallPWAButton() {
     }
   }, [])
 
-  const handleInstall = async () => {
+  // Use a direct user gesture and do not update state until after prompt resolves
+  const handleInstall = () => {
     if (!deferredPrompt.current) return
     deferredPrompt.current.prompt()
-    const { outcome } = await deferredPrompt.current.userChoice
-    if (outcome === 'accepted') {
-      deferredPrompt.current = null
-      setCanInstall(false)
-    }
+    deferredPrompt.current.userChoice.then(({ outcome }: any) => {
+      if (outcome === 'accepted') {
+        setTimeout(() => {
+          deferredPrompt.current = null
+          setCanInstall(false)
+        }, 1000) // Delay state update to avoid closing dialog
+      }
+    })
   }
 
   if (isInstalled) return null
