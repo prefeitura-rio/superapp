@@ -8,112 +8,107 @@ function isIOS() {
   return /iPhone|iPad|iPod/i.test(window.navigator.userAgent)
 }
 
-function isFirefox() {
-  if (typeof window === 'undefined') return false
-  return /firefox/i.test(window.navigator.userAgent)
+function isStandalone() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone
+  )
 }
 
 export function InstallPWAButton() {
-  const deferredPrompt = useRef<any>(null)
-  const [isInstalled, setIsInstalled] = useState(false)
-  const [canInstall, setCanInstall] = useState(false)
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
+  const [showInstallButton, setShowInstallButton] = useState(false)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Check if app is already installed
-    const checkInstalled = () => {
-      if (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone
-      ) {
-        setIsInstalled(true)
-      }
-    }
-
-    checkInstalled()
-
-    const installedListener = () => setIsInstalled(true)
-    window.addEventListener('appinstalled', installedListener)
-
-    return () => {
-      window.removeEventListener('appinstalled', installedListener)
-    }
-  }, [])
+  // Type for the BeforeInstallPromptEvent
+  interface BeforeInstallPromptEvent extends Event {
+    readonly platforms: string[]
+    readonly userChoice: Promise<{
+      outcome: 'accepted' | 'dismissed'
+      platform: string
+    }>
+    prompt(): Promise<void>
+  }
 
   useEffect(() => {
+    // Check if already installed
+    if (isStandalone()) {
+      setIsInstalled(true)
+      return
+    }
+
+    // iOS specific handling
     if (isIOS()) {
       setShowIOSInstructions(true)
       return
     }
 
-    const handler = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later
-      deferredPrompt.current = e
-      // Update UI to notify the user they can install the PWA
-      setCanInstall(true)
+      deferredPrompt.current = e as BeforeInstallPromptEvent
+      setShowInstallButton(true)
     }
 
-    window.addEventListener('beforeinstallprompt', handler)
+    const handleAppInstalled = () => {
+      setIsInstalled(true)
+      setShowInstallButton(false)
+    }
 
-    // For Firefox, we need to check if the PWA meets installation criteria
-    if (isFirefox()) {
-      // Firefox may not trigger beforeinstallprompt, so we check directly
-      const checkInstallable = async () => {
-        try {
-          // @ts-ignore - Firefox has this method
-          const result = await window.navigator.getInstalledRelatedApps()
-          if (result.length === 0) {
-            setCanInstall(true)
-          }
-        } catch (error) {
-          console.log('Firefox install check failed', error)
-          // If the check fails, we'll still show the button
-          setCanInstall(true)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    // For browsers that don't support beforeinstallprompt but might be installable
+    const timer = setTimeout(() => {
+      if (!deferredPrompt.current && !isStandalone() && !isIOS()) {
+        // Check if we meet PWA criteria
+        if (
+          window.matchMedia('(display-mode: standalone)').matches ||
+          (window.navigator as any).standalone
+        ) {
+          setIsInstalled(true)
+        } else {
+          // Last chance - some browsers might not fire the event immediately
+          setShowInstallButton(true)
         }
       }
-      checkInstallable()
-    }
+    }, 3000)
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      )
+      window.removeEventListener('appinstalled', handleAppInstalled)
+      clearTimeout(timer)
     }
   }, [])
 
-  const handleInstall = async () => {
+  const handleInstallClick = async () => {
     if (!deferredPrompt.current) {
-      // For browsers that don't support beforeinstallprompt
-      // or when the event isn't fired (like Firefox sometimes)
-      if (isFirefox()) {
-        // Firefox has its own installation prompt
-        // @ts-ignore
-        window.navigator.mozApps?.install()
-        return
-      }
+      console.log('No deferred prompt available')
       return
     }
 
     setIsLoading(true)
     try {
+      console.log('Showing install prompt')
       // Show the install prompt
-      deferredPrompt.current.prompt()
+      await deferredPrompt.current.prompt()
 
       // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.current.userChoice
 
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt')
-      } else {
-        console.log('User dismissed the install prompt')
-      }
+      console.log(`User response to the install prompt: ${outcome}`)
 
       // We've used the prompt, and can't use it again
       deferredPrompt.current = null
-      setCanInstall(false)
+      setShowInstallButton(false)
     } catch (error) {
-      console.error('Error during installation:', error)
+      console.error('Error showing install prompt:', error)
     } finally {
       setIsLoading(false)
     }
@@ -148,14 +143,13 @@ export function InstallPWAButton() {
     )
   }
 
-  if (!canInstall) return null
+  if (!showInstallButton) return null
 
   return (
     <MenuItem
       icon={<Download className="h-5 w-5" />}
       label="Instalar aplicativo"
-      onClick={handleInstall}
-      // disabled={isLoading}
+      onClick={handleInstallClick}
     />
   )
 }
