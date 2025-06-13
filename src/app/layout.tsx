@@ -21,6 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <meta name="apple-mobile-web-app-title" content="Portal do Cidadão" />
       <body className={`${dmSans.className} antialiased`}>
         <ThemeProvider
           attribute="class"
