@@ -17,6 +17,7 @@ import { useState, useTransition } from 'react'
 
 export default function PhoneNumberForm() {
   const [phone, setPhone] = useState('')
+  const [countryCode, setCountryCode] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +28,7 @@ export default function PhoneNumberForm() {
     startTransition(async () => {
       // Parse DDI, DDD, valor from phone input
       const digits = phone.replace(/\D/g, '')
-      const ddi = '55'
+      const ddi = countryCode.replace(/\D/g, '')
       const ddd = digits.substring(0, 2)
       const valor = digits.substring(2)
       const result = await updateUserPhone({
@@ -64,13 +65,22 @@ export default function PhoneNumberForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-        <PhoneInputForm value={phone} onChange={setPhone} />
+        <PhoneInputForm
+          value={phone}
+          onChange={setPhone}
+          countryCode={countryCode}
+          onCountryCodeChange={setCountryCode}
+        />
         {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={isPending || phone.replace(/\D/g, '').length < 11}
+          disabled={
+            isPending ||
+            phone.replace(/\D/g, '').length < 11 ||
+            countryCode.length < 3
+          }
         >
           {isPending ? 'Enviando...' : 'Enviar'}
         </Button>
