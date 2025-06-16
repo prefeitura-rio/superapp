@@ -25,3 +25,17 @@ export const providerIcons: Record<string, string> = {
   Prefeitura: prefeituraVertical,
   SENAC: senac,
 }
+
+export function getStatusBgClass(color: string): string {
+  switch (color) {
+    case 'verde':
+      return 'card-3'
+    case 'amarelo':
+    case 'laranja':
+      return 'card-5'
+    case 'vermelho':
+      return 'destructive'
+    default:
+      return ''
+  }
+}

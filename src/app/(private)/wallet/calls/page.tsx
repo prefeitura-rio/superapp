@@ -115,7 +115,7 @@ function CallsPage() {
   )
 }
 
-export default function HealthCard() {
+export default function ZeladoriaCardDetail() {
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />

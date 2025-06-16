@@ -26,7 +26,7 @@ export function SecondaryHeader({ title }: SecondaryHeaderProps) {
         </h1>
       </header>
 
-      <div className="fixed top-16 w-full max-w-md mx-auto h-15 z-40 pointer-events-none">
+      {/* <div className="fixed top-16 w-full max-w-md mx-auto h-15 z-40 pointer-events-none">
         <div
           className="w-full h-full bg-background backdrop-blur-lg"
           style={{
@@ -35,7 +35,7 @@ export function SecondaryHeader({ title }: SecondaryHeaderProps) {
             maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
           }}
         />
-      </div>
+      </div> */}
     </>
   )
 }

@@ -3,6 +3,7 @@ import icon1746 from '@/assets/icon1746.svg'
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
 import { WalletCard } from '../components/wallet-card'
+import { WalletHealthCard } from '../components/wallet-health-card'
 
 export default function Wallet() {
   return (
@@ -16,7 +17,7 @@ export default function Wallet() {
 
           <div className="flex flex-col gap-4 overflow-y-auto h-full pt-2 -mt-4">
             {/* Card 1: Clínica da Família */}
-            <WalletCard
+            <WalletHealthCard
               href="/wallet/health"
               title="Clínica da Família"
               name="Maria Sebastiana"

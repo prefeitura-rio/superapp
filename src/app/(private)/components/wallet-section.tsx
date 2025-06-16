@@ -1,7 +1,8 @@
 import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import icon1746 from '@/assets/icon1746.svg'
 import Link from 'next/link'
-import { WalletCard } from './wallet-card' // ajuste o caminho se necessário
+import { WalletCard } from './wallet-card'
+import { WalletHealthCard } from './wallet-health-card'
 
 export default function CarteiraSection() {
   return (
@@ -17,12 +18,12 @@ export default function CarteiraSection() {
       </div>
 
       <div className="flex flex-col gap-4 w-full">
-        <WalletCard
+        <WalletHealthCard
           href="/wallet/health"
           title="Clínica da Família"
           name="Maria Sebastiana"
           statusLabel="Situação"
-          statusValue="Normal"
+          statusValue="Aberto"
           extraLabel="Horário de atendimento"
           extraValue="7h às 18h"
           bgClass="bg-blue-100"
