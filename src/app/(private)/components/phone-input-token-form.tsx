@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { useEffect, useRef, useState } from 'react'
@@ -75,13 +74,20 @@ export default function PhoneInputTokenForm({
         >
           <InputOTPGroup>
             <InputOTPSlot index={0} />
+          </InputOTPGroup>
+          <InputOTPGroup>
             <InputOTPSlot index={1} />
+          </InputOTPGroup>
+          <InputOTPGroup>
             <InputOTPSlot index={2} />
           </InputOTPGroup>
-          <InputOTPSeparator />
           <InputOTPGroup>
             <InputOTPSlot index={3} />
+          </InputOTPGroup>
+          <InputOTPGroup>
             <InputOTPSlot index={4} />
+          </InputOTPGroup>
+          <InputOTPGroup>
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
