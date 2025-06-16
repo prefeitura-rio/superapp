@@ -70,7 +70,7 @@ export default function PhoneNumberForm() {
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={isPending || !phone}
+          disabled={isPending || phone.replace(/\D/g, '').length < 11}
         >
           {isPending ? 'Enviando...' : 'Enviar'}
         </Button>
