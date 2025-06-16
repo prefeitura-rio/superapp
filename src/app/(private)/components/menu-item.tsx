@@ -21,7 +21,8 @@ export function MenuItem({
     'border-b color-border',
     isFirst && 'border-t color-border'
   )
-  const contentClass = 'flex items-center justify-between w-full px-0 py-5 text-foreground'
+  const contentClass =
+    'flex items-center justify-between w-full px-0 py-5 text-foreground'
 
   if (isButton) {
     return (
@@ -29,7 +30,7 @@ export function MenuItem({
         <button
           type="button"
           onClick={onClick}
-          className={contentClass + ' cursor-pointer'}
+          className={`${contentClass} cursor-pointer`}
           style={{ width: '100%' }}
         >
           <div className="flex items-center gap-3">
@@ -47,7 +48,7 @@ export function MenuItem({
       <Link
         href={href}
         onClick={onClick}
-        className={contentClass + ' cursor-pointer'}
+        className={`${contentClass} cursor-pointer`}
         style={{ width: '100%' }}
       >
         <div className="flex items-center gap-3">
