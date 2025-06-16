@@ -10,7 +10,7 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Portal do Cidadão',
+  title: 'Super App',
   description: 'Acesso a serviços públicos e informações.',
 }
 

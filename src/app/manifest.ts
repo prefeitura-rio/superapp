@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Portal do Cidadão',
-    short_name: 'Portal',
+    name: 'Super App',
+    short_name: 'SuperApp',
     description: 'Acesso a serviços públicos e informações.',
     start_url: '/',
     display: 'standalone',
