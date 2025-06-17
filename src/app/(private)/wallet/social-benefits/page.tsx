@@ -1,9 +1,8 @@
-import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import { Button } from '@/components/ui/button'
 
 import { Plus } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletCard } from '../../components/wallet-card'
+import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
 
 export default function SocialBenefitsCardDetails() {
   return (
@@ -11,7 +10,7 @@ export default function SocialBenefitsCardDetails() {
       <SecondaryHeader title="Carteira" />
       <div className="px-5 z-50">
         <h2 className="pb-4">Bolsa Família</h2>
-        <WalletCard
+        <WalletCaretakerCard
           href="/wallet/social-benefits"
           title="Bolsa Família"
           name="6352 7758 4323"
@@ -19,8 +18,6 @@ export default function SocialBenefitsCardDetails() {
           statusValue="Atualizar cadastro"
           extraLabel="Data de recadastramento"
           extraValue="17.06.2025"
-          bgClass="bg-yellow-100"
-          icon={{ src: bolsaFamilia, alt: 'Bolsa Família' }}
           gapClass="gap-2.5 sm:gap-8"
         />
 

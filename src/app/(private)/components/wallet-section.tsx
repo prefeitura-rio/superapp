@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
 import { WalletHealthCard } from './wallet-health-card'
 import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
@@ -47,6 +48,17 @@ export default function CarteiraSection() {
           statusValue="Atualizar"
           extraLabel="Data de recadastramento"
           extraValue="18.12.2025"
+        />
+
+        {/* Card 3: Zeladoria */}
+        <WalletCaretakerCard
+          href="/wallet/caretaker"
+          title="CUIDADOS COM A CIDADE"
+          name="3 chamados em aberto"
+          statusLabel="Total de chamados"
+          statusValue="27"
+          extraLabel="Fechados"
+          extraValue="24"
         />
       </div>
     </section>
