@@ -12,7 +12,7 @@ import { EyeIcon, InfoIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { getStatusBgClass } from './utils'
+import { capitalizeFirstLetter } from './utils'
 
 interface WalletHealthCardProps {
   href: string
@@ -29,6 +29,19 @@ interface WalletHealthCardProps {
   showEyeButton?: boolean
   showInfoButton?: boolean
   color?: string
+}
+
+const statusBgClassMap: Record<string, string> = {
+  verde: 'bg-card-3',
+  amarelo: 'bg-card-5',
+  laranja: 'bg-card-5',
+  vermelho: 'bg-destructive',
+}
+const statusTextClassMap: Record<string, string> = {
+  verde: 'text-card-3',
+  amarelo: 'text-card-5',
+  laranja: 'text-card-5',
+  vermelho: 'text-destructive',
 }
 
 export function WalletHealthCard({
@@ -101,14 +114,12 @@ export function WalletHealthCard({
                               </DrawerHeader>
                               <div className="flex items-center gap-2 mb-2">
                                 <span
-                                  className={`inline-block w-4 h-4 rounded-full bg-${getStatusBgClass(color ?? '')} border-3 border-card shadow" `}
+                                  className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-3 border-background/60`}
                                 />
                                 <span
-                                  className={`text-${getStatusBgClass(color ?? '')} font-medium text-lg`}
+                                  className={`${statusTextClassMap[color ?? ''] || ''} font-medium text-lg`}
                                 >
-                                  {color &&
-                                    color.charAt(0).toUpperCase() +
-                                      color.slice(1)}
+                                  {color && capitalizeFirstLetter(color)}
                                 </span>
                               </div>
                               <div className="text-base text-black mt-2">
@@ -128,7 +139,7 @@ export function WalletHealthCard({
                       <div className="flex items-center gap-1 mt-1">
                         {showStatusIcon && (
                           <span
-                            className={`w-2.5 h-2.5 rounded-full bg-${getStatusBgClass(color ?? '')} border-2 border-card`}
+                            className={`w-2.5 h-2.5 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-2 border-card`}
                           />
                         )}
                         <span className="text-sm font-normal">
