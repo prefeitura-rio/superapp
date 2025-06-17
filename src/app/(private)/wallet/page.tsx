@@ -1,5 +1,6 @@
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
+import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
 import { WalletEducationCard } from '../components/wallet-education-card'
 import { WalletHealthCard } from '../components/wallet-health-card'
 import { WalletSocialAssistanceCard } from '../components/wallet-social-assistance-card'
@@ -46,6 +47,16 @@ export default function Wallet() {
               statusValue="Atualizar"
               extraLabel="Data de recadastramento"
               extraValue="18.12.2025"
+            />
+
+            <WalletCaretakerCard
+              href="/wallet/caretaker"
+              title="CUIDADOS COM A CIDADE"
+              name="3 chamados em aberto"
+              statusLabel="Total de chamados"
+              statusValue="27"
+              extraLabel="Fechados"
+              extraValue="24"
             />
           </div>
         </section>
