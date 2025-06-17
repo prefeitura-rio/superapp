@@ -19,7 +19,7 @@ export default function Wallet() {
             {/* Card 1: Clínica da Família */}
             <WalletHealthCard
               href="/wallet/health"
-              title="Clínica da Família"
+              title="CLÍNICA DA FAMÍLIA"
               name="Maria Sebastiana"
               statusLabel="Situação"
               statusValue="Normal"

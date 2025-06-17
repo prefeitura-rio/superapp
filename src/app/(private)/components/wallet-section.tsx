@@ -20,7 +20,7 @@ export default function CarteiraSection() {
       <div className="flex flex-col gap-3 w-full">
         <WalletHealthCard
           href="/wallet/health"
-          title="Clínica da Família"
+          title="CLÍNICA DA FAMÍLIA"
           name="Maria Sebastiana"
           statusLabel="Situação"
           statusValue="Aberto"
@@ -32,7 +32,7 @@ export default function CarteiraSection() {
         {/* Card 2: Educação */}
         <WalletEducationCard
           href="/wallet/education"
-          title="Clínica da Família"
+          title="ESCOLA"
           name="Maria Sebastiana"
           statusLabel="Situação"
           statusValue="Aberto"

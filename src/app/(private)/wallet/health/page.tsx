@@ -52,7 +52,7 @@ export default function HealthCardDetail() {
         <div className="px-5">
           <WalletHealthCard
             href="#"
-            title="Clínica da Família"
+            title="CLÍNICA DA FAMÍLIA"
             name="Maria Sebastiana"
             statusLabel="Situação"
             statusValue="Aberto"

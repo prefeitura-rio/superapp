@@ -72,7 +72,7 @@ export function WalletHealthCard({
                 <div className="flex h-full min-h-[140px] flex-col justify-between">
                   <div className="flex h-[70px] justify-between items-start">
                     <div>
-                      <h3 className="text-sm font-medium">{title}</h3>
+                      <h3 className="text-xs font-normal">{title}</h3>
                       {name && <h2 className="text-lg font-medium">{name}</h2>}
                     </div>
                     {icon && (
