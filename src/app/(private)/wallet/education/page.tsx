@@ -56,7 +56,7 @@ export default function EducationCardDetail() {
         <div className="px-5">
           <WalletEducationCard
             href="#"
-            title="Escola"
+            title="ESCOLA"
             name="Escola Municipal Geyner EleuThério Rodrigues"
             statusLabel="Status"
             statusValue="Atualizar"

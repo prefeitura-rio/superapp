@@ -30,7 +30,7 @@ export default function Wallet() {
             {/* Card 2: Educação */}
             <WalletEducationCard
               href="/wallet/education"
-              title="Escola"
+              title="ESCOLA"
               name="Escola Municipal Geyner EleuThério Rodrigues"
               statusLabel="Status"
               statusValue="Atualizar"
