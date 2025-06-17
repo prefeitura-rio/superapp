@@ -5,20 +5,20 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from '@/components/ui/drawer';
-import { cn } from '@/lib/utils';
-import { forwardRef } from 'react';
+} from '@/components/ui/drawer'
+import { cn } from '@/lib/utils'
+import { forwardRef } from 'react'
 
 interface BottomSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  children: React.ReactNode;
-  title?: React.ReactNode;
-  showHandle?: boolean;
-  className?: string;
-  contentClassName?: string;
-  headerClassName?: string;
-  footerClassName?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  children: React.ReactNode
+  title?: React.ReactNode
+  showHandle?: boolean
+  className?: string
+  contentClassName?: string
+  headerClassName?: string
+  footerClassName?: string
 }
 
 export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
@@ -41,11 +41,16 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
           ref={ref}
-          className={cn('p-4 max-w-md mx-auto !rounded-t-3xl', contentClassName)}
+          className={cn(
+            'p-4 max-w-md mx-auto !rounded-t-3xl',
+            contentClassName
+          )}
           {...props}
         >
           {/* Handle */}
-          {showHandle && <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-[#323232]" />}
+          {showHandle && (
+            <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-popover-line" />
+          )}
 
           {/* Header */}
           {title && (
@@ -58,20 +63,23 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
           <div className={cn('flex-1', className)}>{children}</div>
         </DrawerContent>
       </Drawer>
-    );
+    )
   }
-);
+)
 
-BottomSheet.displayName = 'BottomSheet';
+BottomSheet.displayName = 'BottomSheet'
 
 export const BottomSheetFooter = ({
   className,
   children,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <DrawerFooter className={cn('flex-row gap-3 pb-10 px-4 md:px-10', className)} {...props}>
+  <DrawerFooter
+    className={cn('flex-row gap-3 pb-10 px-4 md:px-10', className)}
+    {...props}
+  >
     {children}
   </DrawerFooter>
-);
+)
 
-export const BottomSheetClose = DrawerClose;
+export const BottomSheetClose = DrawerClose

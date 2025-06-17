@@ -83,10 +83,10 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={handleClear}
-              className="text-card-foreground hover:text-card-foreground/80 p-1"
+              className="text-white hover:text-white/80 p-1 bg-foreground rounded-full"
               aria-label="Clear search"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           )}
           {showIcons && (

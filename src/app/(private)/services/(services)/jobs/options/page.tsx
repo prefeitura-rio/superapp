@@ -1,16 +1,8 @@
 'use client'
 
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
-import { cn } from '@/lib/utils'
-import {
-  Bell,
-  Book,
-  ChevronRight,
-  MessageCircleQuestion,
-  Star,
-} from 'lucide-react'
-import Link from 'next/link'
-import type React from 'react'
+import { Bell, Book, MessageCircleQuestion, Star } from 'lucide-react'
+import { MenuItem } from '../../../../../../components/ui/custom/menu-item'
 
 export default function ProfilePage() {
   return (
@@ -46,37 +38,5 @@ export default function ProfilePage() {
         </nav>
       </div>
     </div>
-  )
-}
-
-function MenuItem({
-  icon,
-  label,
-  href = '#',
-  onClick,
-  isFirst = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  href?: string
-  onClick?: () => void
-  isFirst?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={cn(
-        'flex items-center justify-between py-5 text-white',
-        'border-b color-border',
-        isFirst && 'border-t color-border'
-      )}
-    >
-      <div className="flex items-center gap-3">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <ChevronRight className="h-5 w-5 text-primary" />
-    </Link>
   )
 }

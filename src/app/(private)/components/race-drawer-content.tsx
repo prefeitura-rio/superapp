@@ -1,9 +1,9 @@
 'use client'
 
 import { updateUserEthnicity } from '@/actions/update-user-ethnicity'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { RACE_API_TO_DISPLAY } from '@/lib/format-race'
 import { useEffect, useState } from 'react'
+import { RadioList } from '../../../components/ui/custom/radio-list'
 
 const RACES = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outra']
 
@@ -57,27 +57,13 @@ export function RaceDrawerContent({
 
   return (
     <div className="py-2 -mb-2">
-      <RadioGroup
-        className="space-y-1"
+      <RadioList
+        options={RACES}
         value={selectedRace}
         onValueChange={handleRaceChange}
         disabled={isLoading}
-      >
-        {RACES.map(race => (
-          <label
-            key={race}
-            className={`flex items-center justify-between cursor-pointer px-2 py-2 rounded-md transition-colors hover:bg-accent/40 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            htmlFor={`race-${race}`}
-          >
-            <span>{race}</span>
-            <RadioGroupItem
-              id={`race-${race}`}
-              value={race}
-              disabled={isLoading}
-            />
-          </label>
-        ))}
-      </RadioGroup>
+        name="race"
+      />
     </div>
   )
 }

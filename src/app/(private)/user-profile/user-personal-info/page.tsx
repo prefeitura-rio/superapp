@@ -78,7 +78,7 @@ export default async function PersonalInfoForm() {
             content={formatRace(userInfo?.raca) || ''}
             variant="default"
             disabled
-            rightIcon={<Pen />}
+            rightIcon={<Pen className="text-foreground" />}
             drawerTitle="Cor / Raça"
             drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
           />
@@ -108,7 +108,7 @@ export default async function PersonalInfoForm() {
             )}
             variant="default"
             disabled
-            rightIcon={<Pen />}
+            rightIcon={<Pen className="text-foreground" />}
             redirectLink="/user-profile/user-personal-info/user-phone-number"
           />
 
@@ -119,7 +119,7 @@ export default async function PersonalInfoForm() {
             content={userInfo?.email?.principal?.valor || ''}
             variant="default"
             disabled
-            rightIcon={<Pen />}
+            rightIcon={<Pen className="text-foreground" />}
             redirectLink="/user-profile/user-personal-info/user-email"
           />
         </div>

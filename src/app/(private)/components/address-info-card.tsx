@@ -2,7 +2,6 @@
 
 import { deleteUserAddress } from '@/actions/delete-user-address'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerContent,
@@ -14,17 +13,22 @@ import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrinci
 import { MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { CustomButton } from '../../../components/ui/custom/custom-button'
 
 interface AddressInfoCardProps {
   address: ModelsEnderecoPrincipal | null
   onEdit?: (address: ModelsEnderecoPrincipal) => void
   onDelete?: (address: ModelsEnderecoPrincipal) => void
+  showBadge?: boolean
+  badgeText?: string
 }
 
 export function AddressInfoCard({
   address,
   onEdit,
   onDelete,
+  showBadge = false,
+  badgeText = 'Atualizar',
 }: AddressInfoCardProps) {
   const [open, setOpen] = useState(false)
 
@@ -77,7 +81,7 @@ export function AddressInfoCard({
           <div className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/50 transition-colors">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 pt-1">
-                <MapPin className="w-6 h-6 text-gray-600" />
+                <MapPin className="w-6 h-6 text-card-foreground" />
               </div>
 
               <div className="flex-1 space-y-1">
@@ -89,14 +93,16 @@ export function AddressInfoCard({
                 )}
                 <p className="text-foreground-light text-sm">{bairroCidade}</p>
 
-                <div className="pt-4">
-                  <Badge
-                    variant="destructive"
-                    className="px-3 py-0.5 text-sm rounded-full"
-                  >
-                    Atualizar
-                  </Badge>
-                </div>
+                {showBadge && (
+                  <div className="pt-4">
+                    <Badge
+                      variant="destructive"
+                      className="px-3 py-0.5 text-sm rounded-full"
+                    >
+                      {badgeText}
+                    </Badge>
+                  </div>
+                )}
               </div>
 
               <div className="flex-shrink-0">
@@ -113,26 +119,27 @@ export function AddressInfoCard({
             <DrawerTitle>{displayAddress}</DrawerTitle>
           </DrawerHeader>
           <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
-            <Button
-              size="lg"
-              asChild
-              className="flex items-center justify-center gap-2 py-6"
-              onClick={handleEdit}
-            >
-              <Link href={'/user-profile/user-address/address-form'}>
-                <Pencil className="w-5 h-5" />
+            <Link href="/user-profile/user-address/address-form">
+              <CustomButton
+                variant="primary"
+                size="lg"
+                icon={Pencil}
+                className="py-6 w-full"
+                onClick={handleEdit}
+              >
                 Editar
-              </Link>
-            </Button>
-            <Button
+              </CustomButton>
+            </Link>
+
+            <CustomButton
               variant="secondary"
               size="lg"
-              className="flex items-center justify-center gap-2 py-6"
+              icon={Trash2}
+              className="py-6"
               onClick={handleDelete}
             >
-              <Trash2 className="w-5 h-5" />
               Excluir
-            </Button>
+            </CustomButton>
           </div>
         </DrawerContent>
       </Drawer>

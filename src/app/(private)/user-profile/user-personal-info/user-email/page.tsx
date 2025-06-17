@@ -2,22 +2,23 @@
 import { updateUserEmail } from '@/actions/update-user-email'
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
-import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import confetti from 'canvas-confetti'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { CustomButton } from '../../../../../components/ui/custom/custom-button'
+import { InputField } from '../../../../../components/ui/custom/input-field'
 
 export default function EmailForm() {
   const [email, setEmail] = useState('')
+  const [emailStateInput, setEmailStateInput] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +48,18 @@ export default function EmailForm() {
     router.back()
   }
 
+  // mock function to validate email format on emailStateInput change
+  const handleValidity = value => {
+    const isValidEmail = value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+
+    if (isValidEmail) {
+      setEmailStateInput('success')
+    } else {
+      setEmailStateInput('error')
+    }
+    setEmail(value)
+  }
+
   return (
     <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
@@ -58,23 +71,24 @@ export default function EmailForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-        <Input
-          className="text-card-foreground text-sm bg-card border-border rounded-xl"
+        <InputField
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={e => handleValidity(e.target.value)}
           type="email"
           placeholder="Digite seu email"
-          disabled={isPending}
+          onClear={() => setEmail('')}
+          state={emailStateInput}
+          showClearButton
         />
         {error && <span className="text-red-500 text-sm">{error}</span>}
-        <Button
-          size="lg"
-          className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
+        <CustomButton
+          size="xl"
+          fullWidth
           onClick={handleSave}
           disabled={isPending || !email}
         >
           {isPending ? 'Salvando...' : 'Salvar'}
-        </Button>
+        </CustomButton>
       </div>
 
       {/* Drawer for feedback after email update */}
@@ -96,13 +110,9 @@ export default function EmailForm() {
               style={{ objectFit: 'contain', maxHeight: '320px' }}
               priority
             />
-            <Button
-              size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
-              onClick={handleDrawerClose}
-            >
+            <CustomButton size="xl" fullWidth onClick={handleDrawerClose}>
               Finalizar
-            </Button>
+            </CustomButton>
           </div>
         </DrawerContent>
       </Drawer>
