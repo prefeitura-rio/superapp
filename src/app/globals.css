@@ -22,6 +22,46 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+/* CARD FLIP  */
+.card__flip__container {
+  width: 100%;
+  height: 190px;
+  perspective: 1000px;
+  /* margin-top: 10px; */
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.card-front,
+.card-back {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  background-color: transparent;
+}
+
+.card-front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
@@ -77,6 +117,14 @@ html::-webkit-scrollbar {
   --color-card-3: var(--card-3);
   --color-card-4: var(--card-4);
   --color-card-5: var(--card-5);
+  --color-wallet-1: var(--wallet-1);
+  --color-wallet-1b: var(--wallet-1b);
+  --color-wallet-2: var(--wallet-2);
+  --color-wallet-2b: var(--wallet-2b);
+  --color-wallet-3: var(--wallet-3);
+  --color-wallet-3b: var(--wallet-3b);
+  --color-wallet-4: var(--wallet-4);
+  --color-wallet-4b: var(--wallet-4b);
 
   /* custom variables */
   --color-stroke-100: var(--stroke-100);
@@ -102,7 +150,7 @@ html::-webkit-scrollbar {
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #09090b;
-  --foreground-light: #52525c;
+  --foreground-light: #71717B;
   --card: #f3f4f6;
   --card-foreground: #020618;
   --popover: #fafafa;
@@ -143,6 +191,15 @@ html::-webkit-scrollbar {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
+  
+  --wallet-1: #6993C2;
+  --wallet-1b: #4A7CB5;
+  --wallet-2: #5CA08C;
+  --wallet-2b: #54927F;
+  --wallet-3: #6F64B6;
+  --wallet-3b: #5E52AD;
+  --wallet-4: #C76E7D;
+  --wallet-4b: #C0596A;
 
   /* custom theme for light mode */
   --stroke-100: #d0d0d0;
@@ -164,6 +221,7 @@ html::-webkit-scrollbar {
 .dark {
   --background: #09090b;
   --foreground: #f8fafc;
+  --foreground-light: #E2E8F0;
   --card: #18181b;
   --card-foreground: #ffffff;
   --popover: #18181b;
@@ -204,6 +262,15 @@ html::-webkit-scrollbar {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
+
+  --wallet-1: #6993C2;
+  --wallet-1b: #4A7CB5;
+  --wallet-2: #5CA08C;
+  --wallet-2b: #54927F;
+  --wallet-3: #6F64B6;
+  --wallet-3b: #5E52AD;
+  --wallet-4: #C76E7D;
+  --wallet-4b: #C0596A;
 
   /* custom theme for dark mode */
   --stroke-100: #4d4d4d;

@@ -1,7 +1,7 @@
-import bolsaFamilia from '@/assets/bolsaFamilia.svg'
-import icon1746 from '@/assets/icon1746.svg'
 import Link from 'next/link'
-import { WalletCard } from './wallet-card' // ajuste o caminho se necessário
+import { WalletEducationCard } from './wallet-education-card'
+import { WalletHealthCard } from './wallet-health-card'
+import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
 
 export default function CarteiraSection() {
   return (
@@ -16,42 +16,37 @@ export default function CarteiraSection() {
         </Link>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
-        <WalletCard
+      <div className="flex flex-col gap-3 w-full">
+        <WalletHealthCard
           href="/wallet/health"
-          title="Clínica da Família"
+          title="CLÍNICA DA FAMÍLIA"
           name="Maria Sebastiana"
           statusLabel="Situação"
-          statusValue="Normal"
+          statusValue="Aberto"
           extraLabel="Horário de atendimento"
           extraValue="7h às 18h"
-          bgClass="bg-blue-100"
         />
 
-        {/* Card 2: Bolsa Família */}
-        <WalletCard
-          href="/wallet/social-benefits"
-          title="Bolsa Família"
-          name="6352 7758 4323"
-          statusLabel="Status"
-          statusValue="Atualizar cadastro"
+        {/* Card 2: Educação */}
+        <WalletEducationCard
+          href="/wallet/education"
+          title="ESCOLA"
+          name="Maria Sebastiana"
+          statusLabel="Situação"
+          statusValue="Aberto"
+          extraLabel="Horário de atendimento"
+          extraValue="7h às 18h"
+        />
+
+        {/* Card 3: Assistência social */}
+        <WalletSocialAssistanceCard
+          href="/wallet/social-assistance"
+          title="CADÚNICO"
+          name="2653 1337 6854"
+          statusLabel="Situação"
+          statusValue="Atualizar"
           extraLabel="Data de recadastramento"
-          extraValue="17.06.2025"
-          bgClass="bg-yellow-100"
-          icon={{ src: bolsaFamilia, alt: 'Bolsa Família' }}
-          gapClass="gap-2.5 sm:gap-8"
-        />
-
-        {/* Card 3: Zeladoria */}
-        <WalletCard
-          href="/wallet/calls"
-          title="Zeladoria"
-          statusLabel="Chamados"
-          statusValue="29"
-          extraLabel="Abertos"
-          extraValue="3"
-          bgClass="bg-green-100"
-          icon={{ src: icon1746, alt: 'Zeladoria' }}
+          extraValue="18.12.2025"
         />
       </div>
     </section>

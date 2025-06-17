@@ -15,7 +15,7 @@ interface PhoneInputFormProps {
 export default function PhoneInputForm({
   value,
   onChange,
-  countryCode = '+55',
+  countryCode,
   onCountryCodeChange,
 }: PhoneInputFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -57,7 +57,18 @@ export default function PhoneInputForm({
   }
 
   const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '')
+    let value = e.target.value
+    // Always start with '+'
+    if (!value.startsWith('+')) {
+      value = `+${value.replace(/[^\d]/g, '')}`
+    } else {
+      value = `+${value.slice(1).replace(/[^\d]/g, '')}`
+    }
+    // Prevent removing the '+'
+    if (value === '+') {
+      if (onCountryCodeChange) onCountryCodeChange('')
+      return
+    }
     if (onCountryCodeChange) onCountryCodeChange(value)
   }
 
@@ -68,11 +79,31 @@ export default function PhoneInputForm({
           <Input
             id="country-code"
             type="text"
-            value={countryCode}
+            value={
+              countryCode
+                ? countryCode.startsWith('+')
+                  ? countryCode
+                  : `+${countryCode}`
+                : ''
+            }
             onChange={handleCountryCodeChange}
-            placeholder="55"
-            className="w-19 pl-6 bg-card border-border rounded-xl"
-            maxLength={3}
+            placeholder="+55"
+            className={`w-19 ${
+              countryCode && countryCode.length === 4 ? 'pl-4.5' : 'pl-5.5'
+            } bg-card border-border rounded-xl`}
+            maxLength={4}
+            // Prevent cursor before '+'
+            onKeyDown={e => {
+              // Prevent deleting or moving before the '+'
+              if (
+                e.currentTarget.selectionStart === 0 &&
+                (e.key === 'Backspace' ||
+                  e.key === 'Delete' ||
+                  e.key === 'ArrowLeft')
+              ) {
+                e.preventDefault()
+              }
+            }}
           />
           <Input
             id="phone"
