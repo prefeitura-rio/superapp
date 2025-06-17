@@ -94,7 +94,7 @@ export function AddressInfoCard({
                     variant="destructive"
                     className="px-3 py-0.5 text-sm rounded-full"
                   >
-                    Desatualizado
+                    Atualizar
                   </Badge>
                 </div>
               </div>

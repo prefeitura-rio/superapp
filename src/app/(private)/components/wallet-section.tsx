@@ -1,8 +1,7 @@
-import icon1746 from '@/assets/icon1746.svg'
 import Link from 'next/link'
-import { WalletCard } from './wallet-card'
 import { WalletEducationCard } from './wallet-education-card'
 import { WalletHealthCard } from './wallet-health-card'
+import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
 
 export default function CarteiraSection() {
   return (
@@ -26,7 +25,6 @@ export default function CarteiraSection() {
           statusValue="Aberto"
           extraLabel="Horário de atendimento"
           extraValue="7h às 18h"
-          bgClass="bg-blue-100"
         />
 
         {/* Card 2: Educação */}
@@ -38,19 +36,17 @@ export default function CarteiraSection() {
           statusValue="Aberto"
           extraLabel="Horário de atendimento"
           extraValue="7h às 18h"
-          bgClass="bg-blue-100"
         />
 
-        {/* Card 3: Zeladoria */}
-        <WalletCard
-          href="/wallet/calls"
-          title="Zeladoria"
-          statusLabel="Chamados"
-          statusValue="29"
-          extraLabel="Abertos"
-          extraValue="3"
-          bgClass="bg-green-100"
-          icon={{ src: icon1746, alt: 'Zeladoria' }}
+        {/* Card 3: Assistência social */}
+        <WalletSocialAssistanceCard
+          href="/wallet/social-assistance"
+          title="CADÚNICO"
+          name="2653 1337 6854"
+          statusLabel="Situação"
+          statusValue="Atualizar"
+          extraLabel="Data de recadastramento"
+          extraValue="18.12.2025"
         />
       </div>
     </section>

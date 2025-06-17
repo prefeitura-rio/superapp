@@ -1,9 +1,8 @@
-import icon1746 from '@/assets/icon1746.svg'
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
-import { WalletCard } from '../components/wallet-card'
 import { WalletEducationCard } from '../components/wallet-education-card'
 import { WalletHealthCard } from '../components/wallet-health-card'
+import { WalletSocialAssistanceCard } from '../components/wallet-social-assistance-card'
 
 export default function Wallet() {
   return (
@@ -39,15 +38,14 @@ export default function Wallet() {
             />
 
             {/* Card 3: Zeladoria */}
-            <WalletCard
-              href="/wallet/calls"
-              title="Zeladoria"
-              statusLabel="Chamados"
-              statusValue="29"
-              extraLabel="Abertos"
-              extraValue="3"
-              bgClass="bg-green-100"
-              icon={{ src: icon1746, alt: 'Zeladoria' }}
+            <WalletSocialAssistanceCard
+              href="/wallet/social-assistance"
+              title="CADÚNICO"
+              name="2653 1337 6854"
+              statusLabel="Situação"
+              statusValue="Atualizar"
+              extraLabel="Data de recadastramento"
+              extraValue="18.12.2025"
             />
           </div>
         </section>

@@ -59,7 +59,7 @@ export default function EducationCardDetail() {
             title="ESCOLA"
             name="Escola Municipal Geyner EleuThério Rodrigues"
             statusLabel="Status"
-            statusValue="Atualizar"
+            statusValue="atualizar"
             extraLabel="Horário de atendimento"
             extraValue="7h às 18h"
             showEyeButton={true}
