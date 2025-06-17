@@ -1,48 +1,8 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Globe, Phone } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
+import { Globe, Phone } from "lucide-react"
+import Calls from "../../components/calls"
+import { SecondaryHeader } from "../../components/secondary-header"
+import { WalletCaretakerCard } from "../../components/wallet-caretaker-card"
 
-function TeamPage() {
-  return (
-    <div className="p-6">
-      <div className="">
-        <h2 className="text-base pb-4">Equipe Monteiro Lobato</h2>
-
-        <Card className="rounded-xl border-0 shadow-none">
-          <CardContent className="px-0">
-            {/* Doctors Section */}
-            <div className="space-y-1 px-5">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Médicos e médicas
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
-              </div>
-            </div>
-
-            {/* Full width separator that touches borders */}
-            <Separator className="my-4" />
-
-            <div className="space-y-1 px-5">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Enfermeiros e Enfermeiras
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
 
 export default function CaretakerCardDetail() {
   return (
@@ -68,12 +28,8 @@ export default function CaretakerCardDetail() {
                 <Phone className="h-5" />
               </div>
               <div className="flex flex-col items-center">
-                <span className="mt-2 text-foreground text-sm font-normal">
-                  Chamado
-                </span>
-                <span className=" text-gray-300 text-xs font-normal">
-                  whatsapp
-                </span>
+                <span className="mt-2 text-foreground text-sm font-normal">Chamado</span>
+                <span className=" text-gray-300 text-xs font-normal">whatsapp</span>
               </div>
             </a>
             <a
@@ -86,18 +42,14 @@ export default function CaretakerCardDetail() {
                 <Globe className="h-5" />
               </div>
               <div className="flex flex-col items-center">
-                <span className="mt-2 text-foreground text-sm font-normal">
-                  Chamado
-                </span>
-                <span className="text-gray-300 text-xs font-normal">
-                  website
-                </span>
+                <span className="mt-2 text-foreground text-sm font-normal">Chamado</span>
+                <span className="text-gray-300 text-xs font-normal">website</span>
               </div>
             </a>
           </div>
         </div>
       </div>
-      {/* <TeamPage /> */}
+      <Calls />
     </div>
   )
 }
