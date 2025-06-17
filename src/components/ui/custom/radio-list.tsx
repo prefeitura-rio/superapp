@@ -1,7 +1,6 @@
 import { cn } from '../../../lib/utils'
 import { RadioGroup, RadioGroupItem } from '../radio-group'
 
-// components/ui/radio-list.tsx
 interface RadioListProps {
   options: string[] | { label: string; value: string }[]
   value?: string

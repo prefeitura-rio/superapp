@@ -131,7 +131,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             disabled={disabled}
             readOnly={!isEditable}
             className={cn(
-              'flex w-full rounded-md border-[1.4px] bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
+              'flex w-full rounded-md border-[1.4px] border-border bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               'placeholder:text-muted-foreground',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -141,7 +141,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
               optionalLabel && !rightIcon && 'pr-[80px]',
               optionalLabel && rightIcon && 'pr-[140px]',
               !isEditable &&
-                'focus:outline-none focus:bg-transparent focus:border-border',
+                'focus:!outline-none focus:!bg-transparent focus:!border-border focus:!ring-0 focus:!ring-offset-0',
               className
             )}
             {...props}
