@@ -8,5 +8,4 @@ export interface MenuItemProps {
   isLast?: boolean
   disabled?: boolean
   className?: string
-  'data-testid'?: string
 }
