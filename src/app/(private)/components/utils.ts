@@ -44,3 +44,12 @@ export function capitalizeFirstLetter(str: string): string {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+export function getFrequenciaEscolarTextClass(
+  frequenciaEscolar: string | number
+): string {
+  const freq = Number(frequenciaEscolar)
+  if (freq > 85) return 'text-card-3'
+  if (freq >= 75) return 'text-card-5'
+  return 'text-card-4'
+}

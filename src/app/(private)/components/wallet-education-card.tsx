@@ -1,20 +1,12 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
-import { EyeIcon, InfoIcon } from 'lucide-react'
+import { EyeIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { capitalizeFirstLetter } from './utils'
 
-interface WalletHealthCardProps {
+interface WalletEducationCardProps {
   href: string
   title: string
   name?: string
@@ -44,7 +36,7 @@ const statusTextClassMap: Record<string, string> = {
   vermelho: 'text-destructive',
 }
 
-export function WalletHealthCard({
+export function WalletEducationCard({
   href,
   title,
   name,
@@ -54,12 +46,9 @@ export function WalletHealthCard({
   extraValue,
   bgClass,
   icon,
-  showStatusIcon = false,
   showEyeButton = false,
-  showInfoButton = false,
-  color,
   gapClass = `${showEyeButton ? 'gap-0' : 'gap-8'}`,
-}: WalletHealthCardProps) {
+}: WalletEducationCardProps) {
   const [showDetails, setShowDetails] = useState(false)
 
   return (
@@ -67,7 +56,7 @@ export function WalletHealthCard({
       <div className="card__flip__container">
         <div className={`card${showDetails ? ' flipped' : ''}`} id="card">
           <div className="card-front">
-            <div className="block w-full bg-wallet-1 rounded-3xl shadow-md text-white">
+            <div className="block w-full bg-wallet-4 rounded-3xl shadow-md text-white">
               <div className="p-6 justify-between flex flex-col">
                 <div className="flex h-full min-h-[140px] flex-col justify-between">
                   <div className="flex h-[70px] justify-between items-start">
@@ -93,55 +82,8 @@ export function WalletHealthCard({
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1">
                         <span className="text-xs block">{statusLabel}</span>
-                        {showInfoButton && (
-                          <Drawer>
-                            <DrawerTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Status Info"
-                                className="hover:bg-transparent hover:cursor-pointer"
-                              >
-                                <InfoIcon className="h-4 w-4" />
-                              </Button>
-                            </DrawerTrigger>
-                            <DrawerContent className="p-8 max-w-md mx-auto !rounded-t-3xl">
-                              <div className="flex justify-center pt-0 pb-1">
-                                <div className="w-8.5 h-1 -mt-2 rounded-full bg-popover-line" />
-                              </div>
-                              <DrawerHeader className="sr-only">
-                                <DrawerTitle>título</DrawerTitle>
-                              </DrawerHeader>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span
-                                  className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-3 border-background/60`}
-                                />
-                                <span
-                                  className={`${statusTextClassMap[color ?? ''] || ''} font-medium text-lg`}
-                                >
-                                  {color && capitalizeFirstLetter(color)}
-                                </span>
-                              </div>
-                              <div className="text-base text-black mt-2">
-                                {color === 'verde' &&
-                                  'Área de risco baixo, onde as operações da unidade de saúde podem prosseguir normalmente sem restrições adicionais.'}
-                                {color === 'amarelo' &&
-                                  'Área de risco moderado. Nessas condições, é recomendado que os profissionais de saúde mantenham o trabalho internamente, evitando visitas domiciliares nas microáreas sinalizadas.'}
-                                {color === 'laranja' &&
-                                  'Área de risco em reavaliação após um período de risco grave. Durante essa fase, é preconizada a manutenção do trabalho interno, sem visitas domiciliares.'}
-                                {color === 'vermelho' &&
-                                  'Área de risco grave. Nessa situação, a orientação é para a saída segura dos usuários e profissionais, seguido pelo fechamento temporário da unidade de saúde.'}
-                              </div>
-                            </DrawerContent>
-                          </Drawer>
-                        )}
                       </div>
                       <div className="flex items-center gap-1 mt-1">
-                        {showStatusIcon && (
-                          <span
-                            className={`w-2.5 h-2.5 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-2 border-card`}
-                          />
-                        )}
                         <span className="text-sm font-normal">
                           {statusValue}
                         </span>
@@ -162,7 +104,7 @@ export function WalletHealthCard({
                     </div>
                     {showEyeButton && (
                       <Button
-                        className="rounded-full bg-wallet-1b size-10 hover:bg-wallet-1b hover:cursor-pointer"
+                        className="rounded-full bg-wallet-4b size-10 hover:bg-wallet-4b hover:cursor-pointer"
                         onClick={() => setShowDetails(true)}
                       >
                         <EyeIcon className="h-6 w-6 [&_svg]:size-6" />
@@ -174,7 +116,7 @@ export function WalletHealthCard({
             </div>
           </div>
           <div className="card-back">
-            <div className="block w-full bg-wallet-1 rounded-3xl shadow-md text-white">
+            <div className="block w-full bg-wallet-4 rounded-3xl shadow-md text-white">
               <div className="p-6 justify-between flex flex-col">
                 <div className="flex h-full min-h-[140px] flex-col justify-between">
                   <div>
@@ -197,7 +139,7 @@ export function WalletHealthCard({
                       <span className="text-sm block">cmsmjf@gmail.com</span>
                     </div>
                     <Button
-                      className="rounded-full bg-wallet-1b size-10 hover:bg-wallet-1b hover:cursor-pointer"
+                      className="rounded-full bg-wallet-4b size-10 hover:bg-wallet-4b hover:cursor-pointer"
                       onClick={() => setShowDetails(false)}
                     >
                       <EyeIcon className="h-6 w-6 [&_svg]:size-6" />

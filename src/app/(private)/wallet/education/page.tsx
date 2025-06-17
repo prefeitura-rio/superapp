@@ -1,26 +1,28 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Calendar, MapPin, Phone } from 'lucide-react'
+import { MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletHealthCard } from '../../components/wallet-health-card'
+import { getFrequenciaEscolarTextClass } from '../../components/utils'
+import { WalletEducationCard } from '../../components/wallet-education-card'
 
-function TeamPage() {
+const frequenciaEscolar = '85,32'
+const conceito = 'Muito Bom'
+
+function DesempenhoSection() {
   return (
     <div className="p-6">
       <div className="">
-        <h2 className="text-base pb-4">Equipe Monteiro Lobato</h2>
+        <h2 className="text-base pb-4">Desempenho</h2>
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
             {/* Doctors Section */}
             <div className="space-y-1 px-5">
               <h3 className="text-xs font-medium text-foreground-light">
-                Médicos e médicas
+                Conceito
               </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+              <div className="space-y-1 text-foreground">
+                <p className="text-sm font-medium">{conceito}</p>
               </div>
             </div>
 
@@ -29,12 +31,14 @@ function TeamPage() {
 
             <div className="space-y-1 px-5">
               <h3 className="text-xs font-medium text-foreground-light">
-                Enfermeiros e Enfermeiras
+                Frequência escolar
               </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+              <div className="space-y-1 text-foreground">
+                <p
+                  className={`text-sm font-medium ${getFrequenciaEscolarTextClass(frequenciaEscolar)}`}
+                >
+                  {frequenciaEscolar}%
+                </p>
               </div>
             </div>
           </CardContent>
@@ -44,22 +48,20 @@ function TeamPage() {
   )
 }
 
-export default function HealthCardDetail() {
+export default function EducationCardDetail() {
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-5">
-          <WalletHealthCard
+          <WalletEducationCard
             href="#"
-            title="Clínica da Família"
-            name="Maria Sebastiana"
-            statusLabel="Situação"
-            statusValue="Aberto"
-            extraLabel="Data de recadastramento"
-            extraValue="18.12.2025"
-            bgClass="bg-blue-100"
-            color="verde"
+            title="Escola"
+            name="Escola Municipal Geyner EleuThério Rodrigues"
+            statusLabel="Status"
+            statusValue="Atualizar"
+            extraLabel="Horário de atendimento"
+            extraValue="7h às 18h"
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
@@ -114,25 +116,10 @@ export default function HealthCardDetail() {
                 </span>
               </div>
             </a>
-            <a
-              href="https://web2.smsrio.org/portalPaciente/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center"
-            >
-              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Calendar className="h-5" />
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="mt-2 text-foreground text-sm font-normal">
-                  Agendar
-                </span>
-              </div>
-            </a>
           </div>
         </div>
       </div>
-      <TeamPage />
+      <DesempenhoSection />
     </div>
   )
 }

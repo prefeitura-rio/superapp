@@ -1,7 +1,7 @@
-import bolsaFamilia from '@/assets/bolsaFamilia.svg'
 import icon1746 from '@/assets/icon1746.svg'
 import Link from 'next/link'
 import { WalletCard } from './wallet-card'
+import { WalletEducationCard } from './wallet-education-card'
 import { WalletHealthCard } from './wallet-health-card'
 
 export default function CarteiraSection() {
@@ -17,7 +17,7 @@ export default function CarteiraSection() {
         </Link>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-3 w-full">
         <WalletHealthCard
           href="/wallet/health"
           title="Clínica da Família"
@@ -29,18 +29,16 @@ export default function CarteiraSection() {
           bgClass="bg-blue-100"
         />
 
-        {/* Card 2: Bolsa Família */}
-        <WalletCard
-          href="/wallet/social-benefits"
-          title="Bolsa Família"
-          name="6352 7758 4323"
-          statusLabel="Status"
-          statusValue="Atualizar cadastro"
-          extraLabel="Data de recadastramento"
-          extraValue="17.06.2025"
-          bgClass="bg-yellow-100"
-          icon={{ src: bolsaFamilia, alt: 'Bolsa Família' }}
-          gapClass="gap-2.5 sm:gap-8"
+        {/* Card 2: Educação */}
+        <WalletEducationCard
+          href="/wallet/education"
+          title="Clínica da Família"
+          name="Maria Sebastiana"
+          statusLabel="Situação"
+          statusValue="Aberto"
+          extraLabel="Horário de atendimento"
+          extraValue="7h às 18h"
+          bgClass="bg-blue-100"
         />
 
         {/* Card 3: Zeladoria */}
