@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Info } from 'lucide-react'
 import { forwardRef, useState } from 'react'
+import { Input } from '../input'
 
 interface CustomInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -94,6 +95,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
                   )}
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
+                  onClick={() => setShowTooltip(!showTooltip)}
                 />
 
                 {showTooltip && (
@@ -123,7 +125,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             </div>
           )}
 
-          <input
+          <Input
             ref={ref}
             id={inputId}
             disabled={disabled}
