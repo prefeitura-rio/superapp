@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const code = searchParams.get('code')
-  if (!code) return NextResponse.redirect('/sign-in')
+  if (!code) return NextResponse.redirect('/')
 
   const tokenUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/token`
   const params = new URLSearchParams({
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     body: params,
   })
 
-  if (!response.ok) return NextResponse.redirect('/sign-in')
+  if (!response.ok) return NextResponse.redirect('/')
 
   const data = await response.json()
   const redirectUri = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI!

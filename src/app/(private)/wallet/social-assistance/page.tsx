@@ -11,7 +11,7 @@ export default function SocialAssistanceCardDetail() {
           <WalletSocialAssistanceCard
             href="#"
             title="CADÚNICO"
-            name="2653 1337 6854"
+            name="CRAS Elis Regina"
             statusLabel="Status"
             statusValue="Atualizar"
             extraLabel="Data de recadastramento"
