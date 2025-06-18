@@ -18,7 +18,9 @@ import { InputField } from '../../../../../components/ui/custom/input-field'
 
 export default function EmailForm() {
   const [email, setEmail] = useState('')
-  const [emailStateInput, setEmailStateInput] = useState('')
+  const [emailStateInput, setEmailStateInput] = useState<
+    'success' | 'error' | 'default'
+  >('default')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +51,7 @@ export default function EmailForm() {
   }
 
   // mock function to validate email format on emailStateInput change
-  const handleValidity = value => {
+  const handleValidity = (value: string) => {
     const isValidEmail = value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
     if (isValidEmail) {

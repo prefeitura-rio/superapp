@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
-import React from 'react'
+import type React from 'react'
 import { Input } from '../input'
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
