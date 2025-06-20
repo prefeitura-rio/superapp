@@ -58,7 +58,14 @@ export function CountryCodeDrawerContent({
     return filteredCountries.map(country => ({
       label: (
         <div className="flex items-center justify-between font-normal text-base w-full">
-          <span className="text-card-foreground">{country.name}</span>
+          <div className="flex items-center gap-3">
+            <img
+              src={`https://flagcdn.com/h20/${country.id}.png`}
+              alt={`${country.name} flag`}
+              className="w-6 h-4 object-cover flex-shrink-0 rounded-sm"
+            />
+            <span className="text-card-foreground">{country.name}</span>
+          </div>
           <span className="text-muted-foreground ml-4">{country.code}</span>
         </div>
       ),
