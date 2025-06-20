@@ -18,7 +18,7 @@ import toast from 'react-hot-toast'
 
 export default function PhoneNumberForm() {
   const [phone, setPhone] = useState('')
-  const [countryCode, setCountryCode] = useState('')
+  const [countryCode, setCountryCode] = useState('+55')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
