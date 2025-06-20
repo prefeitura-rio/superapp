@@ -2,8 +2,10 @@
 
 import type React from 'react'
 
-import { Input } from '@/components/ui/input'
+import { CustomInput } from '@/components/ui/custom/custom-input'
 import { useState } from 'react'
+import { ActionDiv } from './action-div'
+import { CountryCodeDrawerContent } from './country-code-drawer-content'
 
 interface PhoneInputFormProps {
   value: string
@@ -56,62 +58,33 @@ export default function PhoneInputForm({
     onChange(formatted)
   }
 
-  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
-    // Always start with '+'
-    if (!value.startsWith('+')) {
-      value = `+${value.replace(/[^\d]/g, '')}`
-    } else {
-      value = `+${value.slice(1).replace(/[^\d]/g, '')}`
-    }
-    // Prevent removing the '+'
-    if (value === '+') {
-      if (onCountryCodeChange) onCountryCodeChange('')
-      return
-    }
-    if (onCountryCodeChange) onCountryCodeChange(value)
-  }
-
   return (
     <>
       <form className="w-full flex flex-col gap-4">
         <div className="w-full flex row gap-4">
-          <Input
-            id="country-code"
-            type="text"
-            value={
-              countryCode
-                ? countryCode.startsWith('+')
-                  ? countryCode
-                  : `+${countryCode}`
-                : ''
+          <ActionDiv
+            className={`w-19 ${countryCode && countryCode.length === 4 ? 'pl-4.5' : 'pl-5.5'}`}
+            content={
+              <span className="text-card-foreground">
+                {countryCode || '+55'}
+              </span>
             }
-            onChange={handleCountryCodeChange}
-            placeholder="+55"
-            className={`w-19 ${
-              countryCode && countryCode.length === 4 ? 'pl-4.5' : 'pl-5.5'
-            } bg-card border-border rounded-xl`}
-            maxLength={4}
-            // Prevent cursor before '+'
-            onKeyDown={e => {
-              // Prevent deleting or moving before the '+'
-              if (
-                e.currentTarget.selectionStart === 0 &&
-                (e.key === 'Backspace' ||
-                  e.key === 'Delete' ||
-                  e.key === 'ArrowLeft')
-              ) {
-                e.preventDefault()
-              }
-            }}
+            drawerContent={
+              <CountryCodeDrawerContent
+                currentCountryCode={countryCode || '+55'}
+                onCountryCodeSelect={onCountryCodeChange}
+              />
+            }
+            drawerTitle="Selecionar código do país"
           />
-          <Input
+          <CustomInput
             id="phone"
             type="text"
             value={value}
             onChange={handlePhoneChange}
             placeholder="(21) 99999-9999"
-            className="flex-1 bg-card border-border rounded-xl"
+            containerClassName="flex-1"
+            className="w-full"
             maxLength={15}
           />
         </div>
