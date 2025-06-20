@@ -11,6 +11,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDeclaredPhoneInput'
+import { isValidPhoneLength } from '@/lib/format-phone-worldwide'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -23,18 +24,31 @@ export default function PhoneNumberForm() {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
+  const isPhoneValid = isValidPhoneLength(phone, countryCode)
+
   async function handleSave() {
     startTransition(async () => {
-      // Parse DDI, DDD, valor from phone input
+      // Parse DDI, DDD, valor from phone input based on country
       const digits = phone.replace(/\D/g, '')
       const ddi = countryCode.replace(/\D/g, '')
-      const ddd = digits.substring(0, 2)
-      const valor = digits.substring(2)
+
+      // For Brazil, extract DDD (area code) and valor (number)
+      // For other countries, treat the entire number as valor
+      let ddd = ''
+      let valor = digits
+
+      if (countryCode === '+55' && digits.length === 11) {
+        // Brazil: first 2 digits are DDD (area code)
+        ddd = digits.substring(0, 2)
+        valor = digits.substring(2)
+      }
+
       const result = await updateUserPhone({
         valor: valor,
         ddd,
         ddi,
       } as ModelsSelfDeclaredPhoneInput)
+
       if (result.success) {
         // Pass phone info in URL for next step
         router.push(
@@ -79,11 +93,7 @@ export default function PhoneNumberForm() {
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={
-            isPending ||
-            phone.replace(/\D/g, '').length < 11 ||
-            countryCode.length < 3
-          }
+          disabled={isPending || !isPhoneValid || !countryCode.startsWith('+')}
         >
           {isPending ? 'Enviando...' : 'Enviar'}
         </Button>
