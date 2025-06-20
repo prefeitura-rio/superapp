@@ -44,7 +44,11 @@ export default function PhoneNumberForm() {
         )
         toast.success('Token enviado')
       } else {
-        toast.error('Erro')
+        const errorMessage =
+          result.error === 'No change: phone matches current data'
+            ? 'Esse já é o seu número'
+            : 'Erro'
+        toast.error(errorMessage)
       }
     })
   }
