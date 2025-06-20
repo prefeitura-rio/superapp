@@ -14,17 +14,16 @@ import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDecla
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
 
 export default function PhoneNumberForm() {
   const [phone, setPhone] = useState('')
   const [countryCode, setCountryCode] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleSave() {
-    setError(null)
     startTransition(async () => {
       // Parse DDI, DDD, valor from phone input
       const digits = phone.replace(/\D/g, '')
@@ -43,8 +42,9 @@ export default function PhoneNumberForm() {
             ddi
           )}`
         )
+        toast.success('Token enviado')
       } else {
-        setError(result.error || 'Erro ao atualizar número')
+        toast.error('Erro')
       }
     })
   }
@@ -71,7 +71,6 @@ export default function PhoneNumberForm() {
           countryCode={countryCode}
           onCountryCodeChange={setCountryCode}
         />
-        {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"

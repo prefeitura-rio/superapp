@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
+import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -34,6 +35,25 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              className:
+                'rounded-full! bg-secondary! text-foreground! py-3! px-5! text-sm! font-normal! shadow-none!',
+              success: {
+                iconTheme: {
+                  primary: 'var(--success) !important',
+                  secondary: 'var(--background) !important',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: 'var(--foreground) !important',
+                  secondary: 'var(--background) !important',
+                },
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
