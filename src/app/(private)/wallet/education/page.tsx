@@ -10,17 +10,13 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { InfoIcon, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
-import {
-  getFrequenciaEscolarConceito,
-  getFrequenciaEscolarTextClass,
-} from '../../components/utils'
+import { getFrequenciaEscolarTextClass } from '../../components/utils'
 import { WalletEducationCard } from '../../components/wallet-education-card'
 
 const frequenciaEscolar = '85,32'
+const conceito = 'Muito Bom'
 
 function DesempenhoSection() {
-  const conceito = getFrequenciaEscolarConceito(frequenciaEscolar)
-
   return (
     <div className="p-6">
       <div className="">

@@ -59,19 +59,3 @@ export function getFrequenciaEscolarTextClass(
   if (freq >= 75) return 'text-card-5'
   return 'text-card-4'
 }
-
-export function getFrequenciaEscolarConceito(
-  frequenciaEscolar: string | number
-): string {
-  // Handle comma decimal separator by replacing with dot
-  const normalizedValue =
-    typeof frequenciaEscolar === 'string'
-      ? frequenciaEscolar.replace(',', '.')
-      : frequenciaEscolar.toString()
-
-  const freq = Number(normalizedValue)
-  if (freq >= 95) return 'Muito Bom'
-  if (freq >= 85) return 'Bom'
-  if (freq >= 75) return 'Regular'
-  return 'Irregular'
-}
