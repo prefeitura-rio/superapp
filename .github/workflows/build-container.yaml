@@ -48,6 +48,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_API_BUSCA_ROOT_URL="https://services.staging.app.dados.rio/busca" \
             --build-arg NEXT_PUBLIC_BASE_API_URL="https://services.staging.app.dados.rio/rmi/v1/" \
+            --build-arg IDENTIDADE_CARIOCA_CLIENT_SECRET="IDENTIDADE_CARIOCA_CLIENT_SECRET" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg HOTJAR_ID="6442311" \
             --build-arg GOOGLE_ANALYTICS_ID="G-0970HR3V20" \

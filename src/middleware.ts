@@ -5,6 +5,15 @@ import {
   NextResponse,
 } from 'next/server'
 
+// NOTE: Middleware runs in Edge Runtime and cannot use Node.js APIs like the getEnv() function from server.ts
+// However, we ensure these environment variables match the ones validated in server.ts
+const NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL =
+  process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL
+const NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID =
+  process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
+const NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI =
+  process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI
+
 const publicRoutes = [
   { path: '/sign-in', whenAuthenticated: 'redirect' },
   { path: '/sign-up', whenAuthenticated: 'redirect' },
@@ -14,7 +23,7 @@ const publicRoutes = [
   { path: '/manifest.json', whenAuthenticated: 'next' },
 ] as const
 
-const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
 
 function isJwtExpired(token: string): boolean {
   try {

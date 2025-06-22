@@ -1,3 +1,4 @@
+import { getEnv } from '@/env/server'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -6,13 +7,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ results: [] })
   }
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'Missing Google Maps API key' },
-      { status: 500 }
-    )
-  }
+  const env = await getEnv()
+  const apiKey = env.GOOGLE_MAPS_API_KEY
 
   const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=address&language=pt_BR&components=country:br&key=${apiKey}`
 
