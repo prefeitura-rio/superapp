@@ -15,7 +15,7 @@ export async function handleLogout() {
   if (refreshToken) {
     const logoutUrl = `${env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/logout`
     const clientId = env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
-    const clientSecret = env.IDENTIDADE_CARIOCA_CLIENT_SECRET
+    const clientSecret = process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET!
 
     const params = new URLSearchParams({
       client_id: clientId,
