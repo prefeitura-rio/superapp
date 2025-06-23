@@ -31,21 +31,24 @@ export function middleware(request: NextRequest) {
   // Generate nonce for CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
-  // Define CSP header
+  // Define CSP header with nonce support
+  // Note: In development, we need 'unsafe-inline' for styles due to libraries like react-hot-toast and vaul
+  const isDevelopment = process.env.NODE_ENV === 'development'
+
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com;
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDevelopment ? " 'unsafe-eval'" : ''};
+    style-src 'self' ${isDevelopment ? " 'unsafe-inline'" : ''} https://fonts.googleapis.com;
+    img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
     font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
-    connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com wss://*.hotjar.com;
-    frame-src 'self' https://www.googletagmanager.com https://vars.hotjar.com;
+    connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net;
+    frame-src 'self' https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
-  `
+    ${!isDevelopment ? 'upgrade-insecure-requests;' : ''}
+  `.trim()
 
   // Clean up CSP header
   const contentSecurityPolicyHeaderValue = cspHeader

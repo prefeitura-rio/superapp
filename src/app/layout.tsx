@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
