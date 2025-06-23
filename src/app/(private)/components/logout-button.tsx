@@ -1,19 +1,20 @@
 'use client'
 
-import { handleLogout } from '@/actions/logout'
 import { LogOut } from 'lucide-react'
 import { MenuItem } from './menu-item'
 
 export function LogoutButton() {
-  const onLogout = async () => {
-    await handleLogout()
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout')
+    const redirectUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+    window.location.href = redirectUrl
   }
 
   return (
     <MenuItem
       icon={<LogOut className="h-5 w-5" />}
       label="Sair"
-      onClick={onLogout}
+      onClick={handleLogout}
     />
   )
 }

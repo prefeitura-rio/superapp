@@ -1,16 +1,9 @@
 import { z } from 'zod'
 
 const serverEnvSchema = z.object({
-  NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL: z.string(),
-  NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID: z.string(),
-  NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: z.string(),
-  NEXT_PUBLIC_BASE_API_URL: z.string(),
-  GOOGLE_MAPS_API_KEY: z.string(),
-  NEXT_PUBLIC_API_BUSCA_ROOT_URL: z.string(),
-  // IDENTIDADE_CARIOCA_CLIENT_SECRET: z.string(),
-  HOTJAR_ID: z.string(),
-  GOOGLE_ANALYTICS_ID: z.string(),
-  GOOGLE_TAG_MANAGER_ID: z.string(),
+  NEXT_PUBLIC_GOVBR_URL: z.string(),
+  NEXT_PUBLIC_GOVBR_CLIENT_ID: z.string(),
+  NEXT_PUBLIC_GOVBR_REDIRECT_URI: z.string(),
 })
 
 export async function getEnv() {
