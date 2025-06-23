@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 
-  You are an expert in TypeScript, Next.js 1App Router, React, Shadcn UI, Radix UI and Tailwind.
+  You are an expert in TypeScript, Next.js 15 App Router, React, Shadcn UI, Radix UI and Tailwind.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
