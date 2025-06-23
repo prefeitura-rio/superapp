@@ -3,7 +3,9 @@
 import type React from 'react'
 
 import { Input } from '@/components/ui/input'
+import { useInputValidation } from '@/hooks/useInputValidation'
 import { useState } from 'react'
+import { InputField } from '../../../components/ui/custom/input-field'
 
 interface PhoneInputFormProps {
   value: string
@@ -20,6 +22,18 @@ export default function PhoneInputForm({
 }: PhoneInputFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+
+  const isValidPhone = (formattedPhone: string) => {
+    const digitsOnly = formattedPhone.replace(/\D/g, '')
+    return digitsOnly.length === 11
+  }
+
+  const phoneState = useInputValidation({
+    value,
+    validate: isValidPhone,
+    debounceMs: 500,
+    minLength: 11,
+  })
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
@@ -105,14 +119,17 @@ export default function PhoneInputForm({
               }
             }}
           />
-          <Input
+          <InputField
             id="phone"
-            type="text"
+            type="tel"
             value={value}
             onChange={handlePhoneChange}
             placeholder="(21) 99999-9999"
             className="flex-1 bg-card border-border rounded-xl"
             maxLength={15}
+            showClearButton
+            onClear={() => onChange('')}
+            state={phoneState}
           />
         </div>
         <span className="text-sm text-card-foreground mt-1 block text-left">
