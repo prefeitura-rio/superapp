@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
+import { headers } from 'next/headers'
 import Script from 'next/script'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
@@ -16,11 +17,13 @@ export const metadata: Metadata = {
   description: 'Acesso a serviços públicos e informações.',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Note: Nonce is generated in middleware but not enforced in current CSP policy
+  const nonce = (await headers()).get('x-nonce') ?? undefined
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
@@ -31,6 +34,7 @@ export default function RootLayout({
         <Script
           id="hotjar"
           strategy="afterInteractive"
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               (function(h,o,t,j,a,r){
@@ -47,11 +51,13 @@ export default function RootLayout({
         {/* Google Analytics Data Stream */}
         <Script
           strategy="afterInteractive" // Ensures script runs after the page is interactive
+          nonce={nonce}
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS_ID}`}
         />
         <Script
-          id="google-analytics"
+          id="google-analytics-config"
           strategy="afterInteractive"
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -65,8 +71,9 @@ export default function RootLayout({
 
         {/* Google Tag Manager */}
         <Script
-          id="google-analytics"
+          id="google-tag-manager"
           strategy="afterInteractive"
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

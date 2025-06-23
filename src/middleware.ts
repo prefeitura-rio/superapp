@@ -28,18 +28,64 @@ function isJwtExpired(token: string): boolean {
 }
 
 export function middleware(request: NextRequest) {
+  // Generate nonce for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+
+  // Define CSP header
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com;
+    font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
+    connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com wss://*.hotjar.com;
+    frame-src 'self' https://www.googletagmanager.com https://vars.hotjar.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  `
+
+  // Clean up CSP header
+  const contentSecurityPolicyHeaderValue = cspHeader
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
   const path = request.nextUrl.pathname
   const publicRoute = publicRoutes.find(route => route.path === path)
   const authToken = request.cookies.get('access_token')
 
+  // Set up request headers with nonce and CSP
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-nonce', nonce)
+  requestHeaders.set(
+    'Content-Security-Policy',
+    contentSecurityPolicyHeaderValue
+  )
+
   if (!authToken && publicRoute) {
-    return NextResponse.next()
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
   }
 
   if (!authToken && !publicRoute) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
-    return NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
   }
 
   // Handle other authenticated cases
@@ -50,7 +96,12 @@ export function middleware(request: NextRequest) {
   ) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/'
-    return NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
   }
 
   if (authToken && !publicRoute) {
@@ -69,10 +120,23 @@ export function middleware(request: NextRequest) {
         httpOnly: true,
         maxAge: 0,
       })
+      response.headers.set(
+        'Content-Security-Policy',
+        contentSecurityPolicyHeaderValue
+      )
       return response
     }
 
-    return NextResponse.next()
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
   }
 }
 
@@ -85,6 +149,13 @@ export const config: MiddlewareConfig = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    {
+      source:
+        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+      missing: [
+        { type: 'header', key: 'next-router-prefetch' },
+        { type: 'header', key: 'purpose', value: 'prefetch' },
+      ],
+    },
   ],
 }
