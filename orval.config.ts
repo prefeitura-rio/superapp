@@ -1,7 +1,5 @@
 import { defineConfig } from 'orval'
 
-// NOTE: Orval config runs at build time and cannot use runtime functions like getEnv() from server.ts
-// However, we ensure this environment variable matches the one validated in server.ts
 export default defineConfig({
   api: {
     input: './openapi.yaml',

@@ -1,4 +1,3 @@
-import { getEnv } from '@/env/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -12,8 +11,7 @@ export async function GET(request: Request) {
       : { 'X-Recaptcha-Token': 'mockada' }),
   }
 
-  const env = await getEnv()
-  const rootUrl = env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
+  const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
 
   try {
     const response = await fetch(

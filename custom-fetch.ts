@@ -1,4 +1,3 @@
-import { getEnv } from '@/env/server'
 import { cookies } from 'next/headers'
 
 // NOTE: Supports cases where `content-type` is other than `json`
@@ -17,9 +16,12 @@ const getBody = <T>(c: Response | Request): Promise<T> => {
 }
 
 // NOTE: Update just base url
-const getUrl = async (contextUrl: string): Promise<string> => {
-  const env = await getEnv()
-  const baseUrl = env.NEXT_PUBLIC_BASE_API_URL
+const getUrl = (contextUrl: string): string => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL
+
+  if (!baseUrl) {
+    throw new Error('NEXT_PUBLIC_BASE_API_URL environment variable is not set.')
+  }
 
   // Ensure baseUrl ends with '/' and contextUrl doesn't start with '/'
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
@@ -48,7 +50,7 @@ export const customFetch = async <T>(
   url: string,
   options: RequestInit
 ): Promise<T> => {
-  const requestUrl = await getUrl(url)
+  const requestUrl = getUrl(url)
   const requestHeaders = await getHeaders(options.headers)
 
   const requestInit: RequestInit = {
