@@ -2,7 +2,9 @@
 
 import type React from 'react'
 
-import { CustomInput } from '@/components/ui/custom/custom-input'
+import { useInputValidation } from '@/hooks/useInputValidation'
+import { InputField } from '../../../components/ui/custom/input-field'
+
 import {
   formatPhoneNumber,
   getPhonePlaceholder,
@@ -26,6 +28,19 @@ export default function PhoneInputForm({
 }: PhoneInputFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+
+  //
+  const isValidPhone = (formattedPhone: string) => {
+    const digitsOnly = formattedPhone.replace(/\D/g, '')
+    return digitsOnly.length === 11
+  }
+
+  const phoneState = useInputValidation({
+    value,
+    validate: isValidPhone,
+    debounceMs: 500,
+    minLength: 11,
+  })
 
   const currentCountryCode = countryCode || '+55'
 
@@ -60,14 +75,17 @@ export default function PhoneInputForm({
             }
             drawerTitle="Selecionar código do país"
           />
-          <CustomInput
+          <InputField
             id="phone"
-            type="text"
+            type="tel"
             value={value}
             onChange={handlePhoneChange}
+            className="flex-1 bg-card border-border rounded-xl"
+            maxLength={15}
+            showClearButton
+            onClear={() => onChange('')}
+            state={phoneState}
             placeholder={getPhonePlaceholder(currentCountryCode)}
-            containerClassName="flex-1"
-            className="w-full"
           />
         </div>
         <span className="text-sm text-card-foreground mt-1 block text-left">

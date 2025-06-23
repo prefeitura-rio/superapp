@@ -45,13 +45,13 @@ export function InputField({
         {...props}
       />
 
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
+      <div className="absolute right-5 top-1/2 transform -translate-y-1/2 flex items-center">
         {showClear && (
           <button
             type="button"
             onClick={handleOnClear}
             className={cn(
-              'p-1 rounded-full transition-colors',
+              'p-0.5 rounded-full transition-colors',
               iconStyles[state]
             )}
           >
