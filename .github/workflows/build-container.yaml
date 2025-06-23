@@ -49,6 +49,9 @@ jobs:
             --build-arg NEXT_PUBLIC_API_BUSCA_ROOT_URL="https://services.staging.app.dados.rio/busca" \
             --build-arg NEXT_PUBLIC_BASE_API_URL="https://services.staging.app.dados.rio/rmi/v1/" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
+            --build-arg HOTJAR_ID="6442311" \
+            --build-arg GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
+            --build-arg GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .
