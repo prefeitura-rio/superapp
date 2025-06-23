@@ -36,7 +36,7 @@ export default function CarteiraSection() {
             href="/wallet/education"
             title="ESCOLA"
             name="Maria Sebastiana"
-            statusLabel="Situação"
+            statusLabel="Status"
             statusValue="Aberto"
             extraLabel="Horário de atendimento"
             extraValue="7h às 18h"

@@ -1,8 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { LucideIcon } from 'lucide-react'
-import React from 'react'
+import type { LucideIcon } from 'lucide-react'
+import type React from 'react'
 import { Button } from '../button'
 
 export interface CustomButtonProps

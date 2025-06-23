@@ -124,13 +124,13 @@ export function WalletHealthCard({
                               </div>
                               <div className="text-base text-black mt-2">
                                 {color === 'verde' &&
-                                  'Área de risco baixo, onde as operações da unidade de saúde podem prosseguir normalmente sem restrições adicionais.'}
+                                  'A Clínica está funcionando normalmente. Os atendimentos seguem como de costume, com todos os serviços.'}
                                 {color === 'amarelo' &&
-                                  'Área de risco moderado. Nessas condições, é recomendado que os profissionais de saúde mantenham o trabalho internamente, evitando visitas domiciliares nas microáreas sinalizadas.'}
+                                  'Essa área está com risco moderado. A equipe de saúde continuará trabalhando, mas não realizará visitas domiciliares.'}
                                 {color === 'laranja' &&
-                                  'Área de risco em reavaliação após um período de risco grave. Durante essa fase, é preconizada a manutenção do trabalho interno, sem visitas domiciliares.'}
+                                  'Essa área estava em situação de risco alto, e passa por reavaliação de segurança. Os atendimentos seguem somente dentro da unidade.'}
                                 {color === 'vermelho' &&
-                                  'Área de risco grave. Nessa situação, a orientação é para a saída segura dos usuários e profissionais, seguido pelo fechamento temporário da unidade de saúde.'}
+                                  'Essa área está em situação de risco grave. A unidade será fechada por segurança. Consulte a situação da unidade dentro de algumas horas.'}
                               </div>
                             </DrawerContent>
                           </Drawer>

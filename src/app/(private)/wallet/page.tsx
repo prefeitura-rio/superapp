@@ -34,9 +34,9 @@ export default function Wallet() {
                 href="/wallet/education"
                 title="ESCOLA"
                 name="Maria Sebastiana"
-                statusLabel="Situação"
+                statusLabel="Status"
                 statusValue="Aberto"
-                extraLabel="Horário de atendimento"
+                extraLabel="Horário de Atendimento"
                 extraValue="7h às 18h"
               />
             </div>

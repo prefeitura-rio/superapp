@@ -2,10 +2,16 @@
 
 import type React from 'react'
 
-import { Input } from '@/components/ui/input'
 import { useInputValidation } from '@/hooks/useInputValidation'
-import { useState } from 'react'
 import { InputField } from '../../../components/ui/custom/input-field'
+
+import {
+  formatPhoneNumber,
+  getPhonePlaceholder,
+} from '@/lib/format-phone-worldwide'
+import { useState } from 'react'
+import { ActionDiv } from './action-div'
+import { CountryCodeDrawerContent } from './country-code-drawer-content'
 
 interface PhoneInputFormProps {
   value: string
@@ -23,6 +29,7 @@ export default function PhoneInputForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
 
+  //
   const isValidPhone = (formattedPhone: string) => {
     const digitsOnly = formattedPhone.replace(/\D/g, '')
     return digitsOnly.length === 11
@@ -35,101 +42,50 @@ export default function PhoneInputForm({
     minLength: 11,
   })
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '')
-
-    // If no digits, return empty string
-    if (digits.length === 0) {
-      return ''
-    }
-
-    // Format as (XX) XXXXX-XXXX
-    if (digits.length <= 2) {
-      return `(${digits}`
-    }
-    if (digits.length <= 7) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-    }
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
-      7,
-      11
-    )}`
-  }
+  const currentCountryCode = countryCode || '+55'
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
 
-    // If user deletes the opening parenthesis, clear the entire field
-    if (inputValue === '' || inputValue === '(') {
+    // If user deletes everything, clear the field
+    if (inputValue === '') {
       onChange('')
       return
     }
 
-    const formatted = formatPhoneNumber(inputValue)
+    // Format based on selected country
+    const formatted = formatPhoneNumber(inputValue, currentCountryCode)
     onChange(formatted)
-  }
-
-  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
-    // Always start with '+'
-    if (!value.startsWith('+')) {
-      value = `+${value.replace(/[^\d]/g, '')}`
-    } else {
-      value = `+${value.slice(1).replace(/[^\d]/g, '')}`
-    }
-    // Prevent removing the '+'
-    if (value === '+') {
-      if (onCountryCodeChange) onCountryCodeChange('')
-      return
-    }
-    if (onCountryCodeChange) onCountryCodeChange(value)
   }
 
   return (
     <>
       <form className="w-full flex flex-col gap-4">
         <div className="w-full flex row gap-4">
-          <Input
-            id="country-code"
-            type="text"
-            value={
-              countryCode
-                ? countryCode.startsWith('+')
-                  ? countryCode
-                  : `+${countryCode}`
-                : ''
+          <ActionDiv
+            className={`w-19 ${currentCountryCode && currentCountryCode.length === 2 ? 'pl-7' : currentCountryCode.length === 4 ? 'pl-4' : 'pl-5'}`}
+            content={
+              <span className="text-card-foreground">{currentCountryCode}</span>
             }
-            onChange={handleCountryCodeChange}
-            placeholder="+55"
-            className={`w-19 ${
-              countryCode && countryCode.length === 4 ? 'pl-4.5' : 'pl-5.5'
-            } bg-card border-border rounded-xl`}
-            maxLength={4}
-            // Prevent cursor before '+'
-            onKeyDown={e => {
-              // Prevent deleting or moving before the '+'
-              if (
-                e.currentTarget.selectionStart === 0 &&
-                (e.key === 'Backspace' ||
-                  e.key === 'Delete' ||
-                  e.key === 'ArrowLeft')
-              ) {
-                e.preventDefault()
-              }
-            }}
+            drawerContent={
+              <CountryCodeDrawerContent
+                currentCountryCode={currentCountryCode}
+                onCountryCodeSelect={onCountryCodeChange}
+              />
+            }
+            drawerTitle="Selecionar código do país"
           />
           <InputField
             id="phone"
             type="tel"
             value={value}
             onChange={handlePhoneChange}
-            placeholder="(21) 99999-9999"
             className="flex-1 bg-card border-border rounded-xl"
             maxLength={15}
             showClearButton
             onClear={() => onChange('')}
             state={phoneState}
+            placeholder={getPhonePlaceholder(currentCountryCode)}
           />
         </div>
         <span className="text-sm text-card-foreground mt-1 block text-left">

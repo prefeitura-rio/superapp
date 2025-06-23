@@ -11,31 +11,44 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDeclaredPhoneInput'
+import { isValidPhoneLength } from '@/lib/format-phone-worldwide'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
 
 export default function PhoneNumberForm() {
   const [phone, setPhone] = useState('')
-  const [countryCode, setCountryCode] = useState('')
+  const [countryCode, setCountryCode] = useState('+55')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
+  const isPhoneValid = isValidPhoneLength(phone, countryCode)
+
   async function handleSave() {
-    setError(null)
     startTransition(async () => {
-      // Parse DDI, DDD, valor from phone input
+      // Parse DDI, DDD, valor from phone input based on country
       const digits = phone.replace(/\D/g, '')
       const ddi = countryCode.replace(/\D/g, '')
-      const ddd = digits.substring(0, 2)
-      const valor = digits.substring(2)
+
+      // For Brazil, extract DDD (area code) and valor (number)
+      // For other countries, treat the entire number as valor
+      let ddd = ''
+      let valor = digits
+
+      if (countryCode === '+55' && digits.length === 11) {
+        // Brazil: first 2 digits are DDD (area code)
+        ddd = digits.substring(0, 2)
+        valor = digits.substring(2)
+      }
+
       const result = await updateUserPhone({
         valor: valor,
         ddd,
         ddi,
       } as ModelsSelfDeclaredPhoneInput)
+
       if (result.success) {
         // Pass phone info in URL for next step
         router.push(
@@ -43,8 +56,13 @@ export default function PhoneNumberForm() {
             ddi
           )}`
         )
+        toast.success('Token enviado')
       } else {
-        setError(result.error || 'Erro ao atualizar número')
+        const errorMessage =
+          result.error === 'No change: phone matches current data'
+            ? 'Esse já é o seu número'
+            : 'Erro'
+        toast.error(errorMessage)
       }
     })
   }
@@ -71,16 +89,11 @@ export default function PhoneNumberForm() {
           countryCode={countryCode}
           onCountryCodeChange={setCountryCode}
         />
-        {error && <span className="text-red-500 text-sm">{error}</span>}
         <Button
           size="lg"
           className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
           onClick={handleSave}
-          disabled={
-            isPending ||
-            phone.replace(/\D/g, '').length < 11 ||
-            countryCode.length < 3
-          }
+          disabled={isPending || !isPhoneValid || !countryCode.startsWith('+')}
         >
           {isPending ? 'Enviando...' : 'Enviar'}
         </Button>

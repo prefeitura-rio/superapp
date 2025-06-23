@@ -48,7 +48,13 @@ export function capitalizeFirstLetter(str: string): string {
 export function getFrequenciaEscolarTextClass(
   frequenciaEscolar: string | number
 ): string {
-  const freq = Number(frequenciaEscolar)
+  // Handle comma decimal separator by replacing with dot
+  const normalizedValue =
+    typeof frequenciaEscolar === 'string'
+      ? frequenciaEscolar.replace(',', '.')
+      : frequenciaEscolar.toString()
+
+  const freq = Number(normalizedValue)
   if (freq > 85) return 'text-card-3'
   if (freq >= 75) return 'text-card-5'
   return 'text-card-4'
