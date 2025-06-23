@@ -8,6 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { useInputValidation } from '@/hooks/useInputValidation'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import confetti from 'canvas-confetti'
 import Image from 'next/image'
@@ -18,13 +19,17 @@ import { InputField } from '../../../../../components/ui/custom/input-field'
 
 export default function EmailForm() {
   const [email, setEmail] = useState('')
-  const [emailStateInput, setEmailStateInput] = useState<
-    'success' | 'error' | 'default'
-  >('default')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  const emailStateInput = useInputValidation({
+    value: email,
+    validate: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+    debounceMs: 800,
+    minLength: 5,
+  })
 
   async function handleSave() {
     setError(null)
@@ -50,16 +55,8 @@ export default function EmailForm() {
     router.back()
   }
 
-  // mock function to validate email format on emailStateInput change
-  const handleValidity = (value: string) => {
-    const isValidEmail = value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-
-    if (isValidEmail) {
-      setEmailStateInput('success')
-    } else {
-      setEmailStateInput('error')
-    }
-    setEmail(value)
+  const clearEmail = () => {
+    setEmail('')
   }
 
   return (
@@ -75,10 +72,10 @@ export default function EmailForm() {
       <div className="flex flex-col gap-14 px-4 items-center">
         <InputField
           value={email}
-          onChange={e => handleValidity(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           type="email"
           placeholder="Digite seu email"
-          onClear={() => setEmail('')}
+          onClear={clearEmail}
           state={emailStateInput}
           showClearButton
         />
@@ -87,7 +84,7 @@ export default function EmailForm() {
           size="xl"
           fullWidth
           onClick={handleSave}
-          disabled={isPending || !email}
+          disabled={isPending || emailStateInput !== 'success'}
         >
           {isPending ? 'Salvando...' : 'Salvar'}
         </CustomButton>
