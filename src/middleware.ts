@@ -34,9 +34,23 @@ export function middleware(request: NextRequest) {
   // Define CSP header with nonce support
   const isDevelopment = process.env.NODE_ENV === 'development'
 
+  // SHA256 hashes for inline scripts
+  const scriptHashes = [
+    'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
+    'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
+  ]
+
+  const scriptSrcDirectives = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    ...scriptHashes.map(hash => `'${hash}'`),
+    ...(isDevelopment ? ["'unsafe-eval'"] : []),
+  ]
+
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=' 'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=' ${isDevelopment ? "'unsafe-eval'" : ''};
+    script-src ${scriptSrcDirectives.join(' ')};
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
     font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
