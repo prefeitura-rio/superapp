@@ -37,8 +37,8 @@ export function middleware(request: NextRequest) {
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDevelopment ? " 'unsafe-eval'" : ''};
-    style-src 'self' ${isDevelopment ? " 'unsafe-inline'" : ''} https://fonts.googleapis.com;
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDevelopment ? " 'unsafe-eval'" : ''} 'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=';
+    style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
     font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
     connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net;
