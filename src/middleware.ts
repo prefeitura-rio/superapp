@@ -32,12 +32,11 @@ export function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
   // Define CSP header with nonce support
-  // Note: In development, we need 'unsafe-inline' for styles due to libraries like react-hot-toast and vaul
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDevelopment ? " 'unsafe-eval'" : ''} 'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=' 'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=' ${isDevelopment ? "'unsafe-eval'" : ''};
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
     font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
@@ -47,7 +46,7 @@ export function middleware(request: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    ${!isDevelopment ? 'upgrade-insecure-requests;' : ''}
+    upgrade-insecure-requests;
   `.trim()
 
   // Clean up CSP header
