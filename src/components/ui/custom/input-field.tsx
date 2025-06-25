@@ -37,8 +37,10 @@ export function InputField({
   return (
     <div className="relative w-full">
       <Input
+        style={{ borderWidth: 'var(--border-width)' }}
         className={cn(
-          'text-card-foreground text-sm bg-card border-border rounded-xl',
+          'text-card-foreground text-sm bg-card rounded-xl border-border',
+          'focus:border-ring',
           className
         )}
         value={value}
