@@ -42,11 +42,20 @@ const InstallPwaButton = () => {
       setShowIosDialog(true)
       return
     }
+
     if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      clearPrompt()
-      console.log(`User response to the install prompt: ${outcome}`)
+      try {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        console.log(`Manual install prompt result: ${outcome}`)
+        if (outcome === 'accepted') {
+          clearPrompt()
+        }
+      } catch (error) {
+        console.error('Error showing install prompt:', error)
+        // If there's an error with the deferred prompt, clear it
+        clearPrompt()
+      }
     }
   }
 
