@@ -30,19 +30,19 @@
     },
     {
       "src": "/icons/login-screenshot.png",
-      "sizes": "400x800",
+      "sizes": "360x740",
       "type": "image/png",
       "label": "App Home Mobile"
     },
     {
       "src": "/icons/onboarding-screenshot.png",
-      "sizes": "400x800",
+      "sizes": "360x740",
       "type": "image/png",
       "label": "App Home Mobile"
     },
     {
       "src": "/icons/wallet-screenshot.png",
-      "sizes": "400x800",
+      "sizes": "360x740",
       "type": "image/png",
       "label": "App Home Mobile"
     }
