@@ -30,21 +30,21 @@
     },
     {
       "src": "/icons/login_screenshot.png",
-      "sizes": "400x822",
+      "sizes": "400x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "App Home Wide"
     },
     {
       "src": "/icons/onboarding_screenshot.png",
-      "sizes": "400x822",
+      "sizes": "400x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "App Home Wide"
     },
     {
       "src": "/icons/wallet_screenshot.png",
-      "sizes": "400x822",
+      "sizes": "400x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "App Home Wide"
