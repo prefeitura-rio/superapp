@@ -1,12 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { v4 as uuidv4 } from 'uuid'
 
 import govbr from '@/assets/govbr.svg'
 import prefeitura from '@/assets/prefeitura.svg'
 import { Button } from '@/components/ui/button'
+import { TransitionLink } from '@/components/ui/transition-link'
 
 export default function LoginScreen() {
   const handleGovbrLogin = () => {
@@ -60,9 +60,12 @@ export default function LoginScreen() {
 
         {/* Privacy */}
         <div className="w-full text-center">
-          <Link href="/privacy-policy" className="text-xs text-gray-100">
+          <TransitionLink
+            href="/privacy-policy"
+            className="text-xs text-gray-100"
+          >
             Aviso de privacidade
-          </Link>
+          </TransitionLink>
         </div>
       </div>
     </div>

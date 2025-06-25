@@ -1,6 +1,6 @@
+import { TransitionLink } from '@/components/ui/transition-link'
 import { cn } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 import type React from 'react'
 
 export function MenuItem({
@@ -45,7 +45,7 @@ export function MenuItem({
 
   return (
     <div className={borderClass}>
-      <Link
+      <TransitionLink
         href={href}
         onClick={onClick}
         className={`${contentClass} cursor-pointer`}
@@ -56,7 +56,7 @@ export function MenuItem({
           <span>{label}</span>
         </div>
         <ChevronRight className="h-5 w-5 text-primary" />
-      </Link>
+      </TransitionLink>
     </div>
   )
 }

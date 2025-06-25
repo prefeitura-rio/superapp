@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/drawer'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
 import { MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
 import { CustomButton } from '../../../components/ui/custom/custom-button'
+import { TransitionLink } from '../../../components/ui/transition-link'
 
 interface AddressInfoCardProps {
   address: ModelsEnderecoPrincipal | null
@@ -119,7 +119,7 @@ export function AddressInfoCard({
             <DrawerTitle>{displayAddress}</DrawerTitle>
           </DrawerHeader>
           <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
-            <Link href="/user-profile/user-address/address-form">
+            <TransitionLink href="/user-profile/user-address/address-form">
               <CustomButton
                 variant="primary"
                 size="lg"
@@ -129,7 +129,7 @@ export function AddressInfoCard({
               >
                 Editar
               </CustomButton>
-            </Link>
+            </TransitionLink>
 
             <CustomButton
               variant="secondary"
