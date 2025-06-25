@@ -1,3 +1,4 @@
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { FloatNavigation } from '../components/float-navation'
 import MainHeader from '../components/main-header'
 import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
@@ -7,7 +8,7 @@ import { WalletSocialAssistanceCard } from '../components/wallet-social-assistan
 
 export default function Wallet() {
   return (
-    <>
+    <PageFadeInWrapper>
       <MainHeader />
       <main className="max-w-md mx-auto pt-15 text-white">
         <section className="px-5 relative h-full pb-24">
@@ -70,6 +71,6 @@ export default function Wallet() {
         </section>
         <FloatNavigation />
       </main>
-    </>
+    </PageFadeInWrapper>
   )
 }

@@ -1,7 +1,8 @@
 import { Badge } from '@/components/ui/badge'
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { Separator } from '@/components/ui/separator'
+import { TransitionLink } from '@/components/ui/transition-link'
 import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 import type React from 'react'
 import { SecondaryHeader } from '../../components/secondary-header'
 
@@ -94,15 +95,18 @@ function MenuItem({ href, children, disabled = false }: MenuItemProps) {
   )
 
   return (
-    <>
+    <PageFadeInWrapper>
       {disabled ? (
         <div className="cursor-not-allowed">{content}</div>
       ) : (
-        <Link href={href} className="hover:brightness-90 transition-colors">
+        <TransitionLink
+          href={href}
+          className="hover:brightness-90 transition-colors"
+        >
           {content}
-        </Link>
+        </TransitionLink>
       )}
       <Separator className="bg-zinc-800" />
-    </>
+    </PageFadeInWrapper>
   )
 }

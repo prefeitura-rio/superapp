@@ -1,5 +1,6 @@
 'use client'
 
+import { TransitionLink } from '@/components/ui/transition-link'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
@@ -10,9 +11,9 @@ export default function PrivacyNotice() {
         {/* Fixed header */}
         <div className="max-w-md mx-auto fixed top-0 left-0 right-0 z-10 bg-background px-4 py-10  flex items-center justify-center">
           <div className="absolute left-4">
-            <Link href="/">
+            <TransitionLink href="/">
               <ArrowLeft className="h-7 w-7 text-foreground cursor-pointer" />
-            </Link>
+            </TransitionLink>
           </div>
           <h1 className="text-foreground font-semibold text-base text-center">
             Aviso de privacidade
