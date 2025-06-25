@@ -144,6 +144,9 @@ html::-webkit-scrollbar {
 
   /* font */
   --font-sans: var(--font-dm-sans);
+
+  /* custom border width */
+  --border-width: var(--border-width);
 }
 
 :root {
@@ -191,7 +194,7 @@ html::-webkit-scrollbar {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
-  
+
   --wallet-1: #6993C2;
   --wallet-1b: #4A7CB5;
   --wallet-2: #5CA08C;
@@ -216,6 +219,9 @@ html::-webkit-scrollbar {
   --red-200: #a93333;
   --purple-100: #e6cef6;
   --orange-100: #f5d7b8;
+
+  /* custom border width */
+  --border-width: 1.4px;
 }
 
 .dark {
@@ -287,6 +293,9 @@ html::-webkit-scrollbar {
   --red-200: #ff6b6b;
   --purple-100: #e6d6ff;
   --orange-100: #ffe5b4;
+
+  /* custom border width */
+  --border-width: 1.4px;
 }
 
 @layer base {

@@ -63,9 +63,11 @@ export default function PhoneInputForm({
       <form className="w-full flex flex-col gap-4">
         <div className="w-full flex row gap-4">
           <ActionDiv
-            className={`w-19 ${currentCountryCode && currentCountryCode.length === 2 ? 'pl-7' : currentCountryCode.length === 4 ? 'pl-4' : 'pl-5'}`}
+            className={`w-19 bg-card border-border ${currentCountryCode && currentCountryCode.length === 2 ? 'pl-7' : currentCountryCode.length === 4 ? 'pl-4' : 'pl-5'}`}
             content={
-              <span className="text-card-foreground">{currentCountryCode}</span>
+              <span className="text-muted-foreground">
+                {currentCountryCode}
+              </span>
             }
             drawerContent={
               <CountryCodeDrawerContent

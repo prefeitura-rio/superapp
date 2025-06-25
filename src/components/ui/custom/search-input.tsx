@@ -78,7 +78,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           {...props}
         />
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
           {showIcons && value && (
             <button
               type="button"
@@ -92,10 +92,10 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           {showIcons && (
             <button
               type="button"
-              className="text-card-foreground hover:text-card-foreground p-1 ml-1"
+              className="text-card-foreground hover:text-card-foreground"
               aria-label="Search"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-6 w-6" />
             </button>
           )}
         </div>
