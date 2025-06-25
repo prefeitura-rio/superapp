@@ -86,8 +86,8 @@ export function CountryCodeDrawerContent({
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Pesquisar"
-          className="w-full"
-          leftIcon={<Search />}
+          className="w-full bg-card"
+          leftIcon={<Search className="text-card-foreground" />}
         />
       </div>
 
