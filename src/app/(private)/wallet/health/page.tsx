@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { Separator } from '@/components/ui/separator'
 import { Calendar, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
@@ -6,41 +7,43 @@ import { WalletHealthCard } from '../../components/wallet-health-card'
 
 function TeamPage() {
   return (
-    <div className="p-6">
-      <div className="">
-        <h2 className="text-base pb-4">Equipe Monteiro Lobato</h2>
+    <PageFadeInWrapper>
+      <div className="p-6">
+        <div className="">
+          <h2 className="text-base pb-4">Equipe Monteiro Lobato</h2>
 
-        <Card className="rounded-xl border-0 shadow-none">
-          <CardContent className="px-0">
-            {/* Doctors Section */}
-            <div className="space-y-1 px-5">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Médicos e médicas
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+          <Card className="rounded-xl border-0 shadow-none">
+            <CardContent className="px-0">
+              {/* Doctors Section */}
+              <div className="space-y-1 px-5">
+                <h3 className="text-xs font-medium text-foreground-light">
+                  Médicos e médicas
+                </h3>
+                <div className="text-sm space-y-1 text-foreground">
+                  <p className="font-medium">Beatriz Camargo</p>
+                  <p className="font-medium">Luana Tavares Quintanilha</p>
+                  <p className="font-medium">Felipe Antunes Bastos</p>
+                </div>
               </div>
-            </div>
 
-            {/* Full width separator that touches borders */}
-            <Separator className="my-4" />
+              {/* Full width separator that touches borders */}
+              <Separator className="my-4" />
 
-            <div className="space-y-1 px-5">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Enfermeiros e Enfermeiras
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+              <div className="space-y-1 px-5">
+                <h3 className="text-xs font-medium text-foreground-light">
+                  Enfermeiros e Enfermeiras
+                </h3>
+                <div className="text-sm space-y-1 text-foreground">
+                  <p className="font-medium">Beatriz Camargo</p>
+                  <p className="font-medium">Luana Tavares Quintanilha</p>
+                  <p className="font-medium">Felipe Antunes Bastos</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </PageFadeInWrapper>
   )
 }
 
