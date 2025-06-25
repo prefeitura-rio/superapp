@@ -1,6 +1,6 @@
 {
   "name": "Super App",
-  "short_name": "SuperApp",
+  "short_name": "Super App",
   "description": "Acesso a serviços públicos e informações.",
   "start_url": "/",
   "display": "standalone",
