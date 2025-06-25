@@ -46,18 +46,35 @@ export function formatPhoneNumber(value: string, countryCode: string): string {
     return ''
   }
 
+  // Limit digits to maxLength for the country
+  const limitedDigits = digits.substring(0, format.maxLength)
+
   // Apply formatting based on country format
   let formatted = ''
   let digitIndex = 0
 
-  for (let i = 0; i < format.format.length && digitIndex < digits.length; i++) {
+  // First, apply the format pattern
+  for (
+    let i = 0;
+    i < format.format.length && digitIndex < limitedDigits.length;
+    i++
+  ) {
     const char = format.format[i]
     if (char === 'X') {
-      formatted += digits[digitIndex]
+      formatted += limitedDigits[digitIndex]
       digitIndex++
     } else {
       formatted += char
     }
+  }
+
+  // If there are remaining digits after the format pattern is exhausted,
+  // append them with a space separator
+  if (digitIndex < limitedDigits.length) {
+    if (formatted.length > 0 && !formatted.endsWith(' ')) {
+      formatted += ' '
+    }
+    formatted += limitedDigits.substring(digitIndex)
   }
 
   return formatted

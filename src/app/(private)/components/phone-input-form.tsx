@@ -7,7 +7,9 @@ import { InputField } from '../../../components/ui/custom/input-field'
 
 import {
   formatPhoneNumber,
+  getPhoneFormatForCountry,
   getPhonePlaceholder,
+  isValidPhoneLength,
 } from '@/lib/format-phone-worldwide'
 import { useState } from 'react'
 import { ActionDiv } from './action-div'
@@ -29,20 +31,22 @@ export default function PhoneInputForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
 
-  //
+  const currentCountryCode = countryCode || '+55'
+
+  // Use country-specific validation instead of hardcoded 11 digits
   const isValidPhone = (formattedPhone: string) => {
-    const digitsOnly = formattedPhone.replace(/\D/g, '')
-    return digitsOnly.length === 11
+    return isValidPhoneLength(formattedPhone, currentCountryCode)
   }
+
+  // Get country-specific minLength for useInputValidation
+  const countryFormat = getPhoneFormatForCountry(currentCountryCode)
 
   const phoneState = useInputValidation({
     value,
     validate: isValidPhone,
     debounceMs: 500,
-    minLength: 11,
+    minLength: countryFormat.minLength,
   })
-
-  const currentCountryCode = countryCode || '+55'
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
