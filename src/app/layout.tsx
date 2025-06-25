@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
@@ -95,6 +96,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <ThemeColorMeta />
           <Toaster
             position="bottom-center"
             toastOptions={{
