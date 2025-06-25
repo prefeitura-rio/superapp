@@ -22,7 +22,21 @@
   ],
   "screenshots": [
     {
-      "src": "/icons/screenshot-wide.png",
+      "src": "/icons/login_screenshot.png",
+      "sizes": "800x400",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "App Home Wide"
+    },
+    {
+      "src": "/icons/onboarding_screenshot.png",
+      "sizes": "800x400",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "App Home Wide"
+    },
+    {
+      "src": "/icons/wallet_screenshot.png",
       "sizes": "800x400",
       "type": "image/png",
       "form_factor": "wide",
