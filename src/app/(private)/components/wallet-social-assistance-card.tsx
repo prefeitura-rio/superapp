@@ -2,9 +2,9 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { TransitionLink } from '@/components/ui/transition-link'
 import { EyeIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
-import Link from 'next/link'
 import { useState } from 'react'
 
 interface WalletSocialAssistanceCardProps {
@@ -40,7 +40,7 @@ export function WalletSocialAssistanceCard({
   const [showDetails, setShowDetails] = useState(false)
 
   return (
-    <Link href={href}>
+    <TransitionLink href={href}>
       <div className="card__flip__container">
         <div className={`card${showDetails ? ' flipped' : ''}`} id="card">
           <div className="card-front">
@@ -137,6 +137,6 @@ export function WalletSocialAssistanceCard({
           </div>
         </div>
       </div>
-    </Link>
+    </TransitionLink>
   )
 }

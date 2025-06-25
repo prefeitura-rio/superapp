@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { usePWA } from '@/providers/pwa-provider'
 import { Download } from 'lucide-react'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import { Pagination } from 'swiper/modules'
@@ -33,43 +34,37 @@ const isIOS = () => {
 }
 
 const InstallPwaButton = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null)
-  const [isInstallable, setIsInstallable] = useState(false)
+  const { deferredPrompt, isInstallable, clearPrompt } = usePWA()
   const [showIosDialog, setShowIosDialog] = useState(false)
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-      setIsInstallable(true)
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-
-    return () =>
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt
-      )
-  }, [])
 
   const handleInstallClick = async () => {
     if (isIOS()) {
       setShowIosDialog(true)
       return
     }
+
     if (deferredPrompt) {
-      ;(deferredPrompt as any).prompt()
-      const { outcome } = await (deferredPrompt as any).userChoice
-      setDeferredPrompt(null)
-      setIsInstallable(false)
-      console.log(`User response to the install prompt: ${outcome}`)
+      try {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        console.log(`Manual install prompt result: ${outcome}`)
+        if (outcome === 'accepted') {
+          clearPrompt()
+        }
+      } catch (error) {
+        console.error('Error showing install prompt:', error)
+        // If there's an error with the deferred prompt, clear it
+        clearPrompt()
+      }
     }
   }
 
+  // Show install button if installable or if on iOS
+  const shouldShowButton = isInstallable || isIOS()
+
   return (
     <>
-      {isInstallable && (
+      {shouldShowButton && (
         <MenuItem
           icon={<Download className="h-5 w-5" />}
           label="Instalar App"

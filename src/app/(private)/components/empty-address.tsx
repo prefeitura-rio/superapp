@@ -4,7 +4,7 @@ import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { TransitionLink } from '../../../components/ui/transition-link'
 
 export function EmptyAddress() {
   return (
@@ -34,10 +34,10 @@ export function EmptyAddress() {
           className="bg-primary hover:bg-primary/90 rounded-lg flex items-center gap-2 mt-4"
           onClick={() => {}}
         >
-          <Link href={'/user-profile/user-address/address-form'}>
+          <TransitionLink href={'/user-profile/user-address/address-form'}>
             <Plus className="w-4 h-4" />
             Adicionar
-          </Link>
+          </TransitionLink>
         </Button>
       </div>
     </div>

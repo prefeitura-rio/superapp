@@ -1,6 +1,6 @@
 {
   "name": "Super App",
-  "short_name": "SuperApp",
+  "short_name": "Super App",
   "description": "Acesso a serviços públicos e informações.",
   "start_url": "/",
   "display": "standalone",
@@ -29,8 +29,20 @@
       "label": "App Home Wide"
     },
     {
-      "src": "/icons/screenshot-mobile.png",
-      "sizes": "400x800",
+      "src": "/icons/login-screenshot.png",
+      "sizes": "360x740",
+      "type": "image/png",
+      "label": "App Home Mobile"
+    },
+    {
+      "src": "/icons/onboarding-screenshot.png",
+      "sizes": "360x740",
+      "type": "image/png",
+      "label": "App Home Mobile"
+    },
+    {
+      "src": "/icons/wallet-screenshot.png",
+      "sizes": "360x740",
       "type": "image/png",
       "label": "App Home Mobile"
     }

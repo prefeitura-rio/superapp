@@ -1,6 +1,7 @@
 'use client'
 
 import { SearchInput } from '@/components/ui/custom/search-input'
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { ArrowRight, ArrowRightIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
@@ -101,7 +102,7 @@ export default function Search() {
   }
 
   return (
-    <>
+    <PageFadeInWrapper>
       <div className="max-w-md px-5 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         <SearchInput
           placeholder="Do que você precisa?"
@@ -234,6 +235,6 @@ export default function Search() {
           <CategoryGrid title="Categorias" categories={categories} />
         </div>
       )}
-    </>
+    </PageFadeInWrapper>
   )
 }

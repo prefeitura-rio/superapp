@@ -1,8 +1,8 @@
 'use client'
 
 import { ChevronLeft, ListFilter, Search } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { TransitionLink } from '../../../components/ui/transition-link'
 
 export default function CoursesHeader() {
   const router = useRouter()
@@ -21,15 +21,21 @@ export default function CoursesHeader() {
         </button>
 
         <div className="flex items-center space-x-2">
-          <Link href="courses/search" className="rounded-full bg-card p-4">
+          <TransitionLink
+            href="courses/search"
+            className="rounded-full bg-card p-4"
+          >
             <Search className="h-5 w-5 text-foreground" />
             <span className="sr-only">Search</span>
-          </Link>
+          </TransitionLink>
 
-          <Link href="courses/options" className="rounded-full bg-card p-4">
+          <TransitionLink
+            href="courses/options"
+            className="rounded-full bg-card p-4"
+          >
             <ListFilter className="h-5 w-5 text-foreground" />
             <span className="sr-only">Options</span>
-          </Link>
+          </TransitionLink>
         </div>
       </div>
     </header>

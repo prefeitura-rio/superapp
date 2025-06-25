@@ -1,11 +1,13 @@
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
+
 export default function ServicesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <div>
+    <PageFadeInWrapper>
       <main>{children}</main>
-    </div>
+    </PageFadeInWrapper>
   )
 }

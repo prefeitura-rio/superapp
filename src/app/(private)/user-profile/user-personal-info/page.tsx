@@ -1,4 +1,5 @@
 import { CustomInput } from '@/components/ui/custom/custom-input'
+import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
@@ -41,7 +42,7 @@ export default async function PersonalInfoForm() {
   }
 
   return (
-    <>
+    <PageFadeInWrapper>
       <div className="min-h-screen max-w-md mx-auto pt-24 pb-10 bg-background">
         <SecondaryHeader title="Informações pessoais" />
         <div className="space-y-6 p-4">
@@ -124,6 +125,6 @@ export default async function PersonalInfoForm() {
           />
         </div>
       </div>
-    </>
+    </PageFadeInWrapper>
   )
 }

@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { Info } from 'lucide-react'
-import Link from 'next/link'
 import React, { useState } from 'react'
+import { TransitionLink } from '../../../components/ui/transition-link'
 
 interface ActionDivProps {
   label?: string
@@ -180,7 +180,7 @@ export const ActionDiv = ({
           </div>
         )}
         {redirectLink && !drawerContent ? (
-          <Link href={redirectLink}>{Content}</Link>
+          <TransitionLink href={redirectLink}>{Content}</TransitionLink>
         ) : (
           Content
         )}
