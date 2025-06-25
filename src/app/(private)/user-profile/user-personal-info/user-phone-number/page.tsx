@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/drawer'
 import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDeclaredPhoneInput'
-import { isValidPhoneLength } from '@/lib/format-phone-worldwide'
+import { isValidPhone, parsePhoneNumberForApi } from '@/lib/phone-utils'
+import type { CountryCode } from 'libphonenumber-js/max'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -20,41 +21,29 @@ import toast from 'react-hot-toast'
 
 export default function PhoneNumberForm() {
   const [phone, setPhone] = useState('')
-  const [countryCode, setCountryCode] = useState('+55')
+  const [country, setCountry] = useState<CountryCode>('BR')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const isPhoneValid = isValidPhoneLength(phone, countryCode)
+  const isPhoneValid = isValidPhone(phone, country)
 
   async function handleSave() {
     startTransition(async () => {
-      // Parse DDI, DDD, valor from phone input based on country
-      const digits = phone.replace(/\D/g, '')
-      const ddi = countryCode.replace(/\D/g, '')
-
-      // For Brazil, extract DDD (area code) and valor (number)
-      // For other countries, treat the entire number as valor
-      let ddd = ''
-      let valor = digits
-
-      if (countryCode === '+55' && digits.length === 11) {
-        // Brazil: first 2 digits are DDD (area code)
-        ddd = digits.substring(0, 2)
-        valor = digits.substring(2)
+      const parsedPhone = parsePhoneNumberForApi(phone, country)
+      if (!parsedPhone) {
+        toast.error('Número de telefone inválido.')
+        return
       }
 
-      const result = await updateUserPhone({
-        valor: valor,
-        ddd,
-        ddi,
-      } as ModelsSelfDeclaredPhoneInput)
+      const result = await updateUserPhone(
+        parsedPhone as ModelsSelfDeclaredPhoneInput
+      )
 
       if (result.success) {
-        // Pass phone info in URL for next step
         router.push(
-          `/user-profile/user-personal-info/user-phone-number/token-input?valor=${valor}&ddd=${ddd}&ddi=${encodeURIComponent(
-            ddi
+          `/user-profile/user-personal-info/user-phone-number/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
+            parsedPhone.ddi
           )}`
         )
         toast.success('Token enviado')
@@ -88,14 +77,14 @@ export default function PhoneNumberForm() {
           <PhoneInputForm
             value={phone}
             onChange={setPhone}
-            countryCode={countryCode}
-            onCountryCodeChange={setCountryCode}
+            country={country}
+            onCountryChange={setCountry}
           />
           <Button
             size="lg"
             className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
             onClick={handleSave}
-          disabled={isPending || !isPhoneValid || !countryCode.startsWith('+')}
+            disabled={isPending || !isPhoneValid}
           >
             {isPending ? 'Enviando...' : 'Enviar'}
           </Button>

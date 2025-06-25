@@ -2,46 +2,46 @@
 
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { RadioList } from '@/components/ui/custom/radio-list'
-import { COUNTRY_CODES } from '@/constants/country-codes'
+import { getCountryOptions } from '@/lib/phone-utils'
+import type { CountryCode } from 'libphonenumber-js/max'
 import { Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 interface CountryCodeDrawerContentProps {
-  currentCountryCode?: string
-  onCountryCodeSelect?: (countryCode: string) => void
+  currentCountry: CountryCode
+  onCountrySelect: (countryCode: CountryCode) => void
   onClose?: () => void
 }
 
+const countryOptions = getCountryOptions()
+
 export function CountryCodeDrawerContent({
-  currentCountryCode,
-  onCountryCodeSelect,
+  currentCountry,
+  onCountrySelect,
   onClose,
 }: CountryCodeDrawerContentProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
-  // Normalize current country code for proper matching
-  const normalizedCurrentCode = currentCountryCode?.startsWith('+')
-    ? currentCountryCode
-    : currentCountryCode
-      ? `+${currentCountryCode}`
-      : '+55'
+  const handleImageError = useCallback((countryId: string) => {
+    setImageErrors(prev => ({ ...prev, [countryId]: true }))
+  }, [])
 
-  // Filter countries based on search query
   const filteredCountries = useMemo(() => {
     if (!searchQuery.trim()) {
-      return COUNTRY_CODES
+      return countryOptions
     }
 
     const normalizeString = (str: string) =>
       str
         .toLowerCase()
         .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '') // Remove accents
+        .replace(/\p{Diacritic}/gu, '')
         .trim()
 
     const normalizedQuery = normalizeString(searchQuery)
 
-    return COUNTRY_CODES.filter(country => {
+    return countryOptions.filter(country => {
       const normalizedName = normalizeString(country.name)
       const normalizedCode = country.code.replace('+', '')
 
@@ -53,29 +53,33 @@ export function CountryCodeDrawerContent({
     })
   }, [searchQuery])
 
-  // Format options for RadioList with unique keys
   const radioOptions = useMemo(() => {
     return filteredCountries.map(country => ({
       label: (
         <div className="flex items-center justify-between font-normal text-base w-full">
           <div className="flex items-center gap-3">
-            <img
-              src={`https://flagcdn.com/h20/${country.id}.png`}
-              alt={`${country.name} flag`}
-              className="w-6 h-4 object-cover flex-shrink-0 rounded-sm"
-            />
+            {imageErrors[country.id] ? (
+              <div className="w-6 h-4 bg-muted rounded-sm flex-shrink-0" />
+            ) : (
+              <img
+                src={`https://flagcdn.com/h20/${country.id.toLowerCase()}.png`}
+                alt={`${country.name} flag`}
+                className="w-6 h-4 object-cover flex-shrink-0 rounded-sm"
+                onError={() => handleImageError(country.id)}
+              />
+            )}
             <span className="text-card-foreground">{country.name}</span>
           </div>
           <span className="text-muted-foreground ml-4">{country.code}</span>
         </div>
       ),
-      value: country.code,
-      key: country.id, // Use unique ID as key
+      value: country.id,
+      key: country.id,
     }))
-  }, [filteredCountries])
+  }, [filteredCountries, imageErrors, handleImageError])
 
-  const handleCountryCodeChange = (code: string) => {
-    onCountryCodeSelect?.(code)
+  const handleCountrySelect = (code: string) => {
+    onCountrySelect(code as CountryCode)
     onClose?.()
   }
 
@@ -99,8 +103,8 @@ export function CountryCodeDrawerContent({
         ) : (
           <RadioList
             options={radioOptions}
-            value={normalizedCurrentCode}
-            onValueChange={handleCountryCodeChange}
+            value={currentCountry}
+            onValueChange={handleCountrySelect}
             name="country-code"
           />
         )}

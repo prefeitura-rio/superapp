@@ -2,81 +2,63 @@
 
 import type React from 'react'
 
+import { InputField } from '@/components/ui/custom/input-field'
 import { useInputValidation } from '@/hooks/useInputValidation'
-import { InputField } from '../../../components/ui/custom/input-field'
-
 import {
   formatPhoneNumber,
-  getPhoneFormatForCountry,
   getPhonePlaceholder,
-  isValidPhoneLength,
-} from '@/lib/format-phone-worldwide'
-import { useState } from 'react'
+  isValidPhone,
+} from '@/lib/phone-utils'
+import { type CountryCode, getCountryCallingCode } from 'libphonenumber-js/max'
 import { ActionDiv } from './action-div'
 import { CountryCodeDrawerContent } from './country-code-drawer-content'
 
 interface PhoneInputFormProps {
   value: string
   onChange: (value: string) => void
-  countryCode?: string
-  onCountryCodeChange?: (value: string) => void
+  country: CountryCode
+  onCountryChange: (value: CountryCode) => void
 }
 
 export default function PhoneInputForm({
   value,
   onChange,
-  countryCode,
-  onCountryCodeChange,
+  country,
+  onCountryChange,
 }: PhoneInputFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-
-  const currentCountryCode = countryCode || '+55'
-
-  // Use country-specific validation instead of hardcoded 11 digits
-  const isValidPhone = (formattedPhone: string) => {
-    return isValidPhoneLength(formattedPhone, currentCountryCode)
-  }
-
-  // Get country-specific minLength for useInputValidation
-  const countryFormat = getPhoneFormatForCountry(currentCountryCode)
-
   const phoneState = useInputValidation({
     value,
-    validate: isValidPhone,
+    validate: phone => isValidPhone(phone, country),
     debounceMs: 500,
-    minLength: countryFormat.minLength,
   })
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
 
-    // If user deletes everything, clear the field
-    if (inputValue === '') {
-      onChange('')
+    // Prevent adding more characters if the number is already valid
+    if (isValidPhone(value, country) && inputValue.length > value.length) {
       return
     }
 
-    // Format based on selected country
-    const formatted = formatPhoneNumber(inputValue, currentCountryCode)
+    const formatted = formatPhoneNumber(inputValue, country)
     onChange(formatted)
   }
+
+  const callingCode = `+${getCountryCallingCode(country)}`
 
   return (
     <>
       <form className="w-full flex flex-col gap-4">
         <div className="w-full flex row gap-4">
           <ActionDiv
-            className={`w-19 bg-card border-border ${currentCountryCode && currentCountryCode.length === 2 ? 'pl-7' : currentCountryCode.length === 4 ? 'pl-4' : 'pl-5'}`}
+            className={`w-19 bg-card border-border ${callingCode && callingCode.length === 2 ? 'pl-7' : callingCode.length === 4 ? 'pl-4' : 'pl-5'}`}
             content={
-              <span className="text-muted-foreground">
-                {currentCountryCode}
-              </span>
+              <span className="text-muted-foreground">{callingCode}</span>
             }
             drawerContent={
               <CountryCodeDrawerContent
-                currentCountryCode={currentCountryCode}
-                onCountryCodeSelect={onCountryCodeChange}
+                currentCountry={country}
+                onCountrySelect={onCountryChange}
               />
             }
             drawerTitle="Selecionar código do país"
@@ -87,11 +69,10 @@ export default function PhoneInputForm({
             value={value}
             onChange={handlePhoneChange}
             className="flex-1 bg-card border-border rounded-xl"
-            maxLength={15}
             showClearButton
             onClear={() => onChange('')}
             state={phoneState}
-            placeholder={getPhonePlaceholder(currentCountryCode)}
+            placeholder={getPhonePlaceholder(country)}
           />
         </div>
         <span className="text-sm text-card-foreground mt-1 block text-left">
