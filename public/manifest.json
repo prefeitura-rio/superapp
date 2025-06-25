@@ -29,25 +29,22 @@
       "label": "App Home Wide"
     },
     {
-      "src": "/icons/login_screenshot.png",
+      "src": "/icons/login-screenshot.png",
       "sizes": "400x800",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "App Home Wide"
+      "label": "App Home Mobile"
     },
     {
-      "src": "/icons/onboarding_screenshot.png",
+      "src": "/icons/onboarding-screenshot.png",
       "sizes": "400x800",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "App Home Wide"
+      "label": "App Home Mobile"
     },
     {
-      "src": "/icons/wallet_screenshot.png",
+      "src": "/icons/wallet-screenshot.png",
       "sizes": "400x800",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "App Home Wide"
+      "label": "App Home Mobile"
     }
   ]
 }
