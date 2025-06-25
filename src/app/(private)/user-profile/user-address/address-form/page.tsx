@@ -3,6 +3,7 @@ import { updateAddress } from '@/actions/update-user-address'
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
+import { InputField } from '@/components/ui/custom/input-field'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import {
   Drawer,
@@ -11,7 +12,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -306,13 +306,15 @@ export default function AddressForm() {
             className="px-4 flex-1 flex flex-col pt-5 gap-4 overflow-y-auto"
           >
             <div>
-              <Input
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
-                placeholder="Escreva o número"
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
+                placeholder={noNumber ? 'Sem número' : 'Escreva o número'}
                 {...register('number')}
                 disabled={noNumber}
                 inputMode="numeric"
                 pattern="[0-9]*"
+                showClearButton={!noNumber}
+                onClear={() => setValue('number', '')}
                 onChange={e => {
                   // Only allow digits
                   const value = e.target.value.replace(/\D/g, '')
@@ -335,16 +337,26 @@ export default function AddressForm() {
               />
               <Label
                 htmlFor="no-number"
-                className="text-muted-foreground text-base select-none"
+                className={`text-muted-foreground font-normal text-base select-none ${noNumber && 'text-foreground'}`}
               >
                 Sem número
               </Label>
             </div>
             <div>
-              <Input
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
-                placeholder="Escreva o complemento"
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
                 {...register('complement')}
+                placeholder={
+                  noComplement ? 'Sem complemento' : 'Escreva o complemento'
+                }
+                onClear={() => setValue('complement', '')}
+                state="default"
+                showClearButton={!noComplement}
+                value={watch('complement')}
+                onChange={e => {
+                  setValue('complement', e.target.value)
+                  trigger('complement')
+                }}
                 disabled={noComplement}
               />
               {errors.complement && !noComplement && (
@@ -361,17 +373,20 @@ export default function AddressForm() {
               />
               <Label
                 htmlFor="no-complement"
-                className="text-muted-foreground text-base select-none"
+                className={`text-muted-foreground font-normal text-base select-none ${noComplement && 'text-foreground'}`}
               >
                 Sem complemento
               </Label>
             </div>
             <div>
-              <Input
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground"
-                placeholder="Escreva o CEP"
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
+                placeholder={noCep ? 'Sem CEP' : 'Escreva o CEP'}
                 {...register('cep')}
                 disabled={noCep}
+                showClearButton={!noCep}
+                onClear={() => setValue('cep', '')}
+                state="default"
                 maxLength={9}
                 onChange={handleCepChange}
                 value={watch('cep')}
@@ -390,7 +405,7 @@ export default function AddressForm() {
               />
               <Label
                 htmlFor="no-cep"
-                className="text-muted-foreground text-base select-none"
+                className={`text-muted-foreground font-normal text-base select-none ${noCep && 'text-foreground'}`}
               >
                 Sem CEP
               </Label>
