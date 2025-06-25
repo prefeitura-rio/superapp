@@ -39,43 +39,29 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Check if we want to show automatically and haven't shown yet
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+
+      if (!hasShownAutoPrompt && !isIOS) {
+        // Don't prevent default, let the browser show it automatically
+        setHasShownAutoPrompt(true)
+        setIsInstallable(true)
+        console.log('Allowing browser to show automatic install prompt')
+        return
+      }
+
+      // For subsequent times or manual control, prevent default and store
       e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallable(true)
-
-      // Automatically show install prompt after a short delay
-      // Only if we haven't shown it automatically yet in this session
-      if (!hasShownAutoPrompt) {
-        setTimeout(() => {
-          if (!hasShownAutoPrompt) {
-            setHasShownAutoPrompt(true)
-
-            // Check if we're on iOS
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
-
-            if (!isIOS && e && typeof (e as any).prompt === 'function') {
-              // Show native install prompt for supported browsers
-              ;(e as any).prompt()
-              ;(e as any).userChoice.then((choiceResult: any) => {
-                console.log(
-                  `Auto-install prompt result: ${choiceResult.outcome}`
-                )
-                if (choiceResult.outcome === 'accepted') {
-                  setDeferredPrompt(null)
-                  setIsInstallable(false)
-                }
-              })
-            }
-            // For iOS, we'll let the manual button handle the custom dialog
-          }
-        }, 2000) // Show after 2 seconds
-      }
+      console.log('Install prompt deferred for manual triggering')
     }
 
     const handleAppInstalled = () => {
       setDeferredPrompt(null)
       setIsInstallable(false)
       setHasShownAutoPrompt(true)
+      console.log('App installed successfully')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
