@@ -34,24 +34,6 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icons/web-app-manifest-192x192.png" />
         <meta name="theme-color" content="#ffffff" />
-        {/* Hotjar */}
-        <Script
-          id="hotjar"
-          strategy="afterInteractive"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(h,o,t,j,a,r){
-                h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-                h._hjSettings={hjid:${process.env.NEXT_PUBLIC_HOTJAR_ID},hjsv:6};
-                a=o.getElementsByTagName('head')[0];
-                r=o.createElement('script');r.async=1;
-                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-                a.appendChild(r);
-              })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-            `,
-          }}
-        />
         {/* Google Analytics Data Stream */}
         <Script
           strategy="afterInteractive" // Ensures script runs after the page is interactive
