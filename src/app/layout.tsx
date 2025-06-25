@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
@@ -95,7 +96,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <PWAProvider>{children}</PWAProvider>
           <ThemeColorMeta />
           <Toaster
             position="bottom-center"
