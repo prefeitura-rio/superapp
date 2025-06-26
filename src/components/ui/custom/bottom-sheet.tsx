@@ -49,7 +49,9 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
         >
           {/* Handle */}
           {showHandle && (
-            <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-popover-line" />
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-8.5 h-1 -mt-2 rounded-full bg-popover-line" />
+            </div>
           )}
 
           {/* Header */}
