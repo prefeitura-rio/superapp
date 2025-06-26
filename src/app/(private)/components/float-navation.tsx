@@ -1,17 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
+import { Home, LayoutGrid, Wallet } from 'lucide-react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
-import {
-  BottomSheet,
-  BottomSheetClose,
-  BottomSheetFooter,
-} from '../../../components/ui/custom/bottom-sheet'
 
 interface NavItem {
   href: string
@@ -65,16 +59,16 @@ export function FloatNavigation() {
           })}
 
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-          <div
+          {/* <div
             onClick={() => setOpen(true)}
             className="group flex cursor-pointer h-12 w-12 items-center justify-center rounded-full bg-card/30 hover:bg-card transition-colors"
           >
             <MessageCircle className="h-6 w-6 text-card-foreground/30 group-hover:text-card-foreground/20" />
-          </div>
+          </div> */}
         </nav>
       </div>
 
-      <BottomSheet
+      {/* <BottomSheet
         open={open}
         onOpenChange={setOpen}
         title={
@@ -107,7 +101,7 @@ export function FloatNavigation() {
             </Button>
           </BottomSheetClose>
         </BottomSheetFooter>
-      </BottomSheet>
+      </BottomSheet> */}
     </>
   )
 }
