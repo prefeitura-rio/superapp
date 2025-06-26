@@ -3,17 +3,13 @@ import { updateAddress } from '@/actions/update-user-address'
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
-import { InputField } from '@/components/ui/custom/input-field'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import {
   Drawer,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
 import { MapPin } from 'lucide-react'
@@ -22,6 +18,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { AddressDetailsDrawerContent } from '../../../components/drawer-contents/address-details-drawer-content'
 
 // Define the schema for address validation
 const addressFormSchema = z
@@ -64,7 +61,7 @@ const addressFormSchema = z
     }
   })
 
-type AddressFormSchema = z.infer<typeof addressFormSchema>
+export type AddressFormSchema = z.infer<typeof addressFormSchema>
 
 export default function AddressForm() {
   const [hasInteracted, setHasInteracted] = useState(false)
@@ -78,15 +75,7 @@ export default function AddressForm() {
   const router = useRouter()
 
   // Initialize react-hook-form
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    trigger,
-    formState: { errors, isSubmitting },
-  } = useForm<AddressFormSchema>({
+  const form = useForm<AddressFormSchema>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
       noNumber: false,
@@ -97,6 +86,8 @@ export default function AddressForm() {
       cep: '',
     },
   })
+
+  const { setValue, watch, reset, trigger } = form
 
   const noNumber = watch('noNumber')
   const noComplement = watch('noComplement')
@@ -291,150 +282,14 @@ export default function AddressForm() {
       </div>
 
       {/* Drawer for address details */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-md mx-auto rounded-t-3xl! sm:min-h-[80vh]! min-h-[85vh] flex flex-col">
-          <DrawerHeader className="text-center">
-            <DrawerTitle className="text-lg font-semibold">
-              {selectedAddress?.main_text}
-            </DrawerTitle>
-            <div className="text-muted-foreground text-base">
-              {selectedAddress?.secondary_text}
-            </div>
-          </DrawerHeader>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="px-4 flex-1 flex flex-col pt-5 gap-4 overflow-y-auto"
-          >
-            <div>
-              <InputField
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                placeholder={noNumber ? 'Sem número' : 'Escreva o número'}
-                {...register('number')}
-                disabled={noNumber}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                showClearButton={!noNumber}
-                onClear={() => setValue('number', '')}
-                onChange={e => {
-                  // Only allow digits
-                  const value = e.target.value.replace(/\D/g, '')
-                  setValue('number', value)
-                  trigger('number')
-                }}
-                value={watch('number')}
-              />
-              {errors.number && !noNumber && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.number.message}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <Switch
-                checked={noNumber}
-                onCheckedChange={checked => setValue('noNumber', checked)}
-                id="no-number"
-              />
-              <Label
-                htmlFor="no-number"
-                className={`text-muted-foreground font-normal text-base select-none ${noNumber && 'text-foreground'}`}
-              >
-                Sem número
-              </Label>
-            </div>
-            <div>
-              <InputField
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                {...register('complement')}
-                placeholder={
-                  noComplement ? 'Sem complemento' : 'Escreva o complemento'
-                }
-                onClear={() => setValue('complement', '')}
-                state="default"
-                showClearButton={!noComplement}
-                value={watch('complement')}
-                onChange={e => {
-                  setValue('complement', e.target.value)
-                  trigger('complement')
-                }}
-                disabled={noComplement}
-              />
-              {errors.complement && !noComplement && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.complement.message}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <Switch
-                checked={noComplement}
-                onCheckedChange={checked => setValue('noComplement', checked)}
-                id="no-complement"
-              />
-              <Label
-                htmlFor="no-complement"
-                className={`text-muted-foreground font-normal text-base select-none ${noComplement && 'text-foreground'}`}
-              >
-                Sem complemento
-              </Label>
-            </div>
-            <div>
-              <InputField
-                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                placeholder={noCep ? 'Sem CEP' : 'Escreva o CEP'}
-                {...register('cep')}
-                disabled={noCep}
-                showClearButton={!noCep}
-                onClear={() => setValue('cep', '')}
-                state="default"
-                maxLength={9}
-                onChange={handleCepChange}
-                value={watch('cep')}
-              />
-              {errors.cep && !noCep && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.cep.message}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <Switch
-                checked={noCep}
-                onCheckedChange={checked => setValue('noCep', checked)}
-                id="no-cep"
-              />
-              <Label
-                htmlFor="no-cep"
-                className={`text-muted-foreground font-normal text-base select-none ${noCep && 'text-foreground'}`}
-              >
-                Sem CEP
-              </Label>
-            </div>
-            <DrawerFooter className="flex flex-row gap-3 px-0">
-              <Button
-                size="lg"
-                className="flex-1 py-4 text-base"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
-              </Button>
-              <Button
-                size="lg"
-                className="flex-1 py-4 text-base border"
-                variant="secondary"
-                type="button"
-                onClick={() => {
-                  setDrawerOpen(false)
-                  router.back()
-                }}
-              >
-                Cancelar
-              </Button>
-            </DrawerFooter>
-          </form>
-        </DrawerContent>
-      </Drawer>
+      <AddressDetailsDrawerContent
+        selectedAddress={selectedAddress}
+        form={form}
+        onSubmit={onSubmit}
+        drawerOpen={drawerOpen}
+        setDrawerOpen={setDrawerOpen}
+        handleCepChange={handleCepChange}
+      />
 
       {/* Drawer for feedback after address update */}
       <Drawer open={feedbackDrawerOpen} onOpenChange={setFeedbackDrawerOpen}>
