@@ -6,12 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsClinicaFamilia {
-  email?: string
-  endereco?: string
-  horario_atendimento?: string
-  id_cnes?: string
+export interface ModelsAluno {
+  conceito?: string
+  frequencia?: number
   indicador?: boolean
-  nome?: string
-  telefone?: string
 }

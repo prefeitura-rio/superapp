@@ -7,8 +7,10 @@
  */
 
 export interface ModelsEquipeSaudeFamilia {
+  enfermeiros?: string[]
   id_ine?: string
   indicador?: boolean
+  medicos?: string[]
   nome?: string
   telefone?: string
 }

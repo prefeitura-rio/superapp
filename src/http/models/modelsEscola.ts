@@ -6,12 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsClinicaFamilia {
+export interface ModelsEscola {
   email?: string
   endereco?: string
-  horario_atendimento?: string
-  id_cnes?: string
-  indicador?: boolean
+  horario_funcionamento?: string
   nome?: string
   telefone?: string
+  whatsapp?: string
 }

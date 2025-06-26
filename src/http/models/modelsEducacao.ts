@@ -5,13 +5,10 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsAluno } from './modelsAluno'
+import type { ModelsEscola } from './modelsEscola'
 
-export interface ModelsClinicaFamilia {
-  email?: string
-  endereco?: string
-  horario_atendimento?: string
-  id_cnes?: string
-  indicador?: boolean
-  nome?: string
-  telefone?: string
+export interface ModelsEducacao {
+  aluno?: ModelsAluno
+  escola?: ModelsEscola
 }

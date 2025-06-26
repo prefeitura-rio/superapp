@@ -6,12 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsClinicaFamilia {
-  email?: string
-  endereco?: string
-  horario_atendimento?: string
-  id_cnes?: string
+export interface ModelsCadUnico {
+  data_cadastro?: string
+  data_limite_cadastro_atual?: string
+  data_ultima_atualizacao?: string
   indicador?: boolean
-  nome?: string
-  telefone?: string
+  status_cadastral?: string
 }

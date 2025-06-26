@@ -1304,6 +1304,65 @@
           }
         }
       },
+      "models.Aluno": {
+        "type": "object",
+        "properties": {
+          "conceito": {
+            "type": "string"
+          },
+          "frequencia": {
+            "type": "number"
+          },
+          "indicador": {
+            "type": "boolean"
+          }
+        }
+      },
+      "models.AssistenciaSocial": {
+        "type": "object",
+        "properties": {
+          "cadunico": {
+            "$ref": "#/components/schemas/models.CadUnico"
+          },
+          "cras": {
+            "$ref": "#/components/schemas/models.CRAS"
+          }
+        }
+      },
+      "models.CRAS": {
+        "type": "object",
+        "properties": {
+          "endereco": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "telefone": {
+            "type": "string"
+          }
+        }
+      },
+      "models.CadUnico": {
+        "type": "object",
+        "properties": {
+          "data_cadastro": {
+            "type": "string"
+          },
+          "data_limite_cadastro_atual": {
+            "type": "string"
+          },
+          "data_ultima_atualizacao": {
+            "type": "string"
+          },
+          "indicador": {
+            "type": "boolean"
+          },
+          "status_cadastral": {
+            "type": "string"
+          }
+        }
+      },
       "models.Citizen": {
         "type": "object",
         "properties": {
@@ -1348,11 +1407,17 @@
       "models.CitizenWallet": {
         "type": "object",
         "properties": {
+          "assistencia_social": {
+            "$ref": "#/components/schemas/models.AssistenciaSocial"
+          },
           "cpf": {
             "type": "string"
           },
           "documentos": {
             "$ref": "#/components/schemas/models.Documentos"
+          },
+          "educacao": {
+            "$ref": "#/components/schemas/models.Educacao"
           },
           "saude": {
             "$ref": "#/components/schemas/models.Saude"
@@ -1362,6 +1427,15 @@
       "models.ClinicaFamilia": {
         "type": "object",
         "properties": {
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "horario_atendimento": {
+            "type": "string"
+          },
           "id_cnes": {
             "type": "string"
           },
@@ -1384,6 +1458,17 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "models.Educacao": {
+        "type": "object",
+        "properties": {
+          "aluno": {
+            "$ref": "#/components/schemas/models.Aluno"
+          },
+          "escola": {
+            "$ref": "#/components/schemas/models.Escola"
           }
         }
       },
@@ -1473,16 +1558,51 @@
       "models.EquipeSaudeFamilia": {
         "type": "object",
         "properties": {
+          "enfermeiros": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "id_ine": {
             "type": "string"
           },
           "indicador": {
             "type": "boolean"
           },
+          "medicos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "nome": {
             "type": "string"
           },
           "telefone": {
+            "type": "string"
+          }
+        }
+      },
+      "models.Escola": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "horario_funcionamento": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
             "type": "string"
           }
         }

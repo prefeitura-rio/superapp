@@ -5,11 +5,15 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsAssistenciaSocial } from './modelsAssistenciaSocial'
 import type { ModelsDocumentos } from './modelsDocumentos'
+import type { ModelsEducacao } from './modelsEducacao'
 import type { ModelsSaude } from './modelsSaude'
 
 export interface ModelsCitizenWallet {
+  assistencia_social?: ModelsAssistenciaSocial
   cpf?: string
   documentos?: ModelsDocumentos
+  educacao?: ModelsEducacao
   saude?: ModelsSaude
 }
