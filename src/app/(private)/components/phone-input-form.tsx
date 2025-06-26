@@ -11,7 +11,7 @@ import {
 } from '@/lib/phone-utils'
 import { type CountryCode, getCountryCallingCode } from 'libphonenumber-js/max'
 import { ActionDiv } from './action-div'
-import { CountryCodeDrawerContent } from './country-code-drawer-content'
+import { CountryCodeDrawerContent } from './drawer-contents/country-code-drawer-content'
 
 interface PhoneInputFormProps {
   value: string
@@ -61,7 +61,6 @@ export default function PhoneInputForm({
                 onCountrySelect={onCountryChange}
               />
             }
-            drawerTitle="Selecionar código do país"
           />
           <InputField
             id="phone"
