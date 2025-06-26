@@ -3,7 +3,7 @@
 import { updateUserEthnicity } from '@/actions/update-user-ethnicity'
 import { RACE_API_TO_DISPLAY } from '@/lib/format-race'
 import { useEffect, useState } from 'react'
-import { RadioList } from '../../../components/ui/custom/radio-list'
+import { RadioList } from '../../../../components/ui/custom/radio-list'
 
 const RACES = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outra']
 
