@@ -2,17 +2,11 @@
 
 import { deleteUserAddress } from '@/actions/delete-user-address'
 import { Badge } from '@/components/ui/badge'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
 import { MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { BottomSheet } from '../../../components/ui/custom/bottom-sheet'
 import { CustomButton } from '../../../components/ui/custom/custom-button'
 
 interface AddressInfoCardProps {
@@ -76,73 +70,76 @@ export function AddressInfoCard({
 
   return (
     <div className="p-4">
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerTrigger asChild>
-          <div className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 pt-1">
-                <MapPin className="w-6 h-6 text-card-foreground" />
-              </div>
+      <div
+        onClick={() => setOpen(true)}
+        className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 pt-1">
+            <MapPin className="w-6 h-6 text-card-foreground" />
+          </div>
 
-              <div className="flex-1 space-y-1">
-                <h2 className="font-medium text-card-foreground text-base">
-                  {mainLine}
-                </h2>
-                {complemento && (
-                  <p className="text-foreground-light text-sm">{complemento}</p>
-                )}
-                <p className="text-foreground-light text-sm">{bairroCidade}</p>
+          <div className="flex-1 space-y-1">
+            <h2 className="font-medium text-card-foreground text-base">
+              {mainLine}
+            </h2>
+            {complemento && (
+              <p className="text-foreground-light text-sm">{complemento}</p>
+            )}
+            <p className="text-foreground-light text-sm">{bairroCidade}</p>
 
-                {showBadge && (
-                  <div className="pt-4">
-                    <Badge
-                      variant="destructive"
-                      className="px-3 py-0.5 text-sm rounded-full"
-                    >
-                      {badgeText}
-                    </Badge>
-                  </div>
-                )}
+            {showBadge && (
+              <div className="pt-4">
+                <Badge
+                  variant="destructive"
+                  className="px-3 py-0.5 text-sm rounded-full"
+                >
+                  {badgeText}
+                </Badge>
               </div>
+            )}
+          </div>
 
-              <div className="flex-shrink-0">
-                <div className="hover:text-gray-700 transition-colors">
-                  <MoreVertical className="w-5 h-5" />
-                </div>
-              </div>
+          <div className="flex-shrink-0">
+            <div className="hover:text-gray-700 transition-colors">
+              <MoreVertical className="w-5 h-5" />
             </div>
           </div>
-        </DrawerTrigger>
-        <DrawerContent className="px-4 max-w-md mx-auto pb-6 pt-4 !rounded-t-3xl">
-          <div className="mx-auto w-12 h-1.5 bg-muted mb-6 rounded-full" />
-          <DrawerHeader className="text-center p-0 mb-6">
-            <DrawerTitle>{displayAddress}</DrawerTitle>
-          </DrawerHeader>
-          <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
-            <Link href="/user-profile/user-address/address-form">
-              <CustomButton
-                variant="primary"
-                size="lg"
-                icon={Pencil}
-                className="py-6 w-full"
-                onClick={handleEdit}
-              >
-                Editar
-              </CustomButton>
-            </Link>
+        </div>
+      </div>
 
+      <BottomSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={displayAddress}
+        showHandle
+        contentClassName="px-4 max-w-md mx-auto pb-6 pt-4 !rounded-t-3xl"
+        headerClassName="text-center p-0 mb-6"
+      >
+        <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
+          <Link href="/user-profile/user-address/address-form">
             <CustomButton
-              variant="secondary"
+              variant="primary"
               size="lg"
-              icon={Trash2}
-              className="py-6"
-              onClick={handleDelete}
+              icon={Pencil}
+              className="py-6 w-full"
+              onClick={handleEdit}
             >
-              Excluir
+              Editar
             </CustomButton>
-          </div>
-        </DrawerContent>
-      </Drawer>
+          </Link>
+
+          <CustomButton
+            variant="secondary"
+            size="lg"
+            icon={Trash2}
+            className="py-6"
+            onClick={handleDelete}
+          >
+            Excluir
+          </CustomButton>
+        </div>
+      </BottomSheet>
     </div>
   )
 }
