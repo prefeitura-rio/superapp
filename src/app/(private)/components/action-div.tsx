@@ -88,7 +88,7 @@ export const ActionDiv = ({
   const Content = (
     <div
       className={cn(
-        'relative group cursor-pointer border-[1.4px] rounded-md text-card-foreground font-normal truncate transition-colors',
+        'relative group cursor-pointer border-2 border-border rounded-xl text-card-foreground font-normal truncate transition-colors',
         disabled ? 'bg-card' : 'bg-transparent hover:bg-accent/40',
         sizeStyles[size],
         leftIcon && 'pl-15',

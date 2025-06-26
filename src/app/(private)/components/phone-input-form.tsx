@@ -51,7 +51,7 @@ export default function PhoneInputForm({
       <form className="w-full flex flex-col gap-4">
         <div className="w-full flex row gap-4">
           <ActionDiv
-            className={`w-19 bg-card border-border ${callingCode && callingCode.length === 2 ? 'pl-7' : callingCode.length === 4 ? 'pl-4' : 'pl-5'}`}
+            className={`w-19 bg-card ${callingCode && callingCode.length === 2 ? 'pl-7' : callingCode.length === 4 ? 'pl-4' : 'pl-5'}`}
             content={
               <span className="text-muted-foreground">{callingCode}</span>
             }
@@ -68,7 +68,7 @@ export default function PhoneInputForm({
             type="tel"
             value={value}
             onChange={handlePhoneChange}
-            className="flex-1 bg-card border-border rounded-xl"
+            className="flex-1 bg-card rounded-xl"
             showClearButton
             onClear={() => onChange('')}
             state={phoneState}
