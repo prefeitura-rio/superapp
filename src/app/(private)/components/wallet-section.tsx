@@ -11,7 +11,7 @@ export default function CarteiraSection() {
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
         <Link
           href="/wallet"
-          className="text-md text-[#A2A2A2] cursor-pointer font-medium"
+          className="text-md text-muted-foreground cursor-pointer font-medium"
         >
           ver tudo
         </Link>
