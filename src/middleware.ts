@@ -54,7 +54,7 @@ export function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
     font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com;
-    connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net;
+    connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net;
     frame-src 'self' https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net;
     object-src 'none';
     base-uri 'self';
