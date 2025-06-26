@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsSelfDeclaredPhoneInput {
-  /** DDD é obrigatório somente quando o DDI é 55 (Brasil) */
-  ddd?: string
-  ddi: string
-  valor: string
+export type ModelsPaginatedMaintenanceRequestsPagination = {
+  page?: number
+  per_page?: number
+  total?: number
+  total_pages?: number
 }

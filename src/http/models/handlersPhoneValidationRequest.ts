@@ -6,9 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsSelfDeclaredPhoneInput {
-  /** DDD é obrigatório somente quando o DDI é 55 (Brasil) */
-  ddd?: string
-  ddi: string
-  valor: string
+/**
+ * Estrutura de entrada contendo o número de telefone a ser validado.
+ */
+export interface HandlersPhoneValidationRequest {
+  /** Número de telefone em formato internacional ou nacional.
+example: "+55 11 99988-7766" */
+  phone: string
 }

@@ -6,6 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsDatalake {
-  last_updated?: string
+export type GetCitizenCpfMaintenanceRequestParams = {
+  /**
+   * Número da página (padrão: 1)
+   */
+  page?: number
+  /**
+   * Itens por página (padrão: 10, máximo: 100)
+   */
+  per_page?: number
 }

@@ -6,9 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetCitizenCpfMaintenanceRequestParams,
   HandlersErrorResponse,
   HandlersSuccessResponse,
   ModelsCitizen,
+  ModelsCitizenWallet,
+  ModelsPaginatedMaintenanceRequests,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
   ModelsSelfDeclaredEmailInput,
@@ -304,6 +307,62 @@ export const putCitizenCpfFirstlogin = async (
 }
 
 /**
+ * Recupera os chamados do 1746 de um cidadão por CPF com paginação.
+ * @summary Obter chamados do 1746 do cidadão
+ */
+export type getCitizenCpfMaintenanceRequestResponse200 = {
+  data: ModelsPaginatedMaintenanceRequests
+  status: 200
+}
+
+export type getCitizenCpfMaintenanceRequestResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfMaintenanceRequestResponseComposite =
+  | getCitizenCpfMaintenanceRequestResponse200
+  | getCitizenCpfMaintenanceRequestResponse400
+
+export type getCitizenCpfMaintenanceRequestResponse =
+  getCitizenCpfMaintenanceRequestResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfMaintenanceRequestUrl = (
+  cpf: string,
+  params?: GetCitizenCpfMaintenanceRequestParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/citizen/${cpf}/maintenance-request?${stringifiedParams}`
+    : `/citizen/${cpf}/maintenance-request`
+}
+
+export const getCitizenCpfMaintenanceRequest = async (
+  cpf: string,
+  params?: GetCitizenCpfMaintenanceRequestParams,
+  options?: RequestInit
+): Promise<getCitizenCpfMaintenanceRequestResponse> => {
+  return customFetch<getCitizenCpfMaintenanceRequestResponse>(
+    getGetCitizenCpfMaintenanceRequestUrl(cpf, params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
  * Verifica se o usuário optou por receber notificações
  * @summary Obter status de opt-in
  */
@@ -465,6 +524,46 @@ export const postCitizenCpfPhoneValidate = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(modelsPhoneVerificationValidateRequest),
+    }
+  )
+}
+
+/**
+ * Recupera os dados da carteira do cidadão por CPF, incluindo informações de saúde e outros dados da carteira.
+ * @summary Obter dados da carteira do cidadão
+ */
+export type getCitizenCpfWalletResponse200 = {
+  data: ModelsCitizenWallet
+  status: 200
+}
+
+export type getCitizenCpfWalletResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfWalletResponseComposite =
+  | getCitizenCpfWalletResponse200
+  | getCitizenCpfWalletResponse400
+
+export type getCitizenCpfWalletResponse =
+  getCitizenCpfWalletResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfWalletUrl = (cpf: string) => {
+  return `/citizen/${cpf}/wallet`
+}
+
+export const getCitizenCpfWallet = async (
+  cpf: string,
+  options?: RequestInit
+): Promise<getCitizenCpfWalletResponse> => {
+  return customFetch<getCitizenCpfWalletResponse>(
+    getGetCitizenCpfWalletUrl(cpf),
+    {
+      ...options,
+      method: 'GET',
     }
   )
 }

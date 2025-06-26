@@ -590,6 +590,104 @@
         }
       }
     },
+    "/citizen/{cpf}/maintenance-request": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Recupera os chamados do 1746 de um cidadão por CPF com paginação.",
+        "tags": [
+          "citizen"
+        ],
+        "summary": "Obter chamados do 1746 do cidadão",
+        "parameters": [
+          {
+            "description": "CPF do cidadão (11 dígitos)",
+            "name": "cpf",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 11,
+              "maxLength": 11
+            }
+          },
+          {
+            "description": "Número da página (padrão: 1)",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "description": "Itens por página (padrão: 10, máximo: 100)",
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de chamados do 1746",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.PaginatedMaintenanceRequests"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de CPF inválido ou parâmetros de paginação inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autenticação não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/citizen/{cpf}/optin": {
       "get": {
         "security": [
@@ -929,6 +1027,95 @@
         }
       }
     },
+    "/citizen/{cpf}/wallet": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Recupera os dados da carteira do cidadão por CPF, incluindo informações de saúde e outros dados da carteira.",
+        "tags": [
+          "citizen"
+        ],
+        "summary": "Obter dados da carteira do cidadão",
+        "parameters": [
+          {
+            "description": "CPF do cidadão (11 dígitos)",
+            "name": "cpf",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 11,
+              "maxLength": 11
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados da carteira do cidadão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.CitizenWallet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de CPF inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autenticação não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cidadão não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "description": "Verifica a saúde da API e suas dependências (MongoDB e Redis). Retorna status detalhado para cada serviço.",
@@ -953,6 +1140,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/handlers.HealthResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/validate/phone": {
+      "post": {
+        "description": "Valida DDI, DDD e número para qualquer telefone internacional.",
+        "tags": [
+          "validation"
+        ],
+        "summary": "Valida número de telefone",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/handlers.PhoneValidationRequest"
+              }
+            }
+          },
+          "description": "Telefone a ser validado",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.PhoneValidationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
                 }
               }
             }
@@ -1015,6 +1249,53 @@
           }
         }
       },
+      "handlers.PhoneValidationRequest": {
+        "description": "Estrutura de entrada contendo o número de telefone a ser validado.",
+        "type": "object",
+        "required": [
+          "phone"
+        ],
+        "properties": {
+          "phone": {
+            "description": "Número de telefone em formato internacional ou nacional.\nexample: \"+55 11 99988-7766\"",
+            "type": "string"
+          }
+        }
+      },
+      "handlers.PhoneValidationResponse": {
+        "description": "Resultado da validação, contendo a decomposição (DDI, DDD, número) quando válida.",
+        "type": "object",
+        "properties": {
+          "ddd": {
+            "description": "DDD (código de área)",
+            "type": "string"
+          },
+          "ddi": {
+            "description": "DDI (código do país)",
+            "type": "string"
+          },
+          "e164": {
+            "description": "Representação E.164 do número",
+            "type": "string"
+          },
+          "message": {
+            "description": "Mensagem de retorno.",
+            "type": "string"
+          },
+          "numero": {
+            "description": "Número do assinante",
+            "type": "string"
+          },
+          "region": {
+            "description": "Região ISO 3166-1 alpha-2",
+            "type": "string"
+          },
+          "valid": {
+            "description": "Indica se o número é válido.",
+            "type": "boolean"
+          }
+        }
+      },
       "handlers.SuccessResponse": {
         "type": "object",
         "properties": {
@@ -1028,15 +1309,6 @@
         "properties": {
           "cpf": {
             "type": "string"
-          },
-          "cpf_particao": {
-            "type": "integer"
-          },
-          "datalake": {
-            "$ref": "#/components/schemas/models.Datalake"
-          },
-          "documentos": {
-            "$ref": "#/components/schemas/models.Documentos"
           },
           "email": {
             "$ref": "#/components/schemas/models.Email"
@@ -1065,17 +1337,25 @@
           "raca": {
             "type": "string"
           },
-          "row_number": {
-            "type": "integer"
-          },
-          "saude": {
-            "$ref": "#/components/schemas/models.Saude"
-          },
           "sexo": {
             "type": "string"
           },
           "telefone": {
             "$ref": "#/components/schemas/models.Telefone"
+          }
+        }
+      },
+      "models.CitizenWallet": {
+        "type": "object",
+        "properties": {
+          "cpf": {
+            "type": "string"
+          },
+          "documentos": {
+            "$ref": "#/components/schemas/models.Documentos"
+          },
+          "saude": {
+            "$ref": "#/components/schemas/models.Saude"
           }
         }
       },
@@ -1092,14 +1372,6 @@
             "type": "string"
           },
           "telefone": {
-            "type": "string"
-          }
-        }
-      },
-      "models.Datalake": {
-        "type": "object",
-        "properties": {
-          "last_updated": {
             "type": "string"
           }
         }
@@ -1226,6 +1498,116 @@
           }
         }
       },
+      "models.MaintenanceRequest": {
+        "type": "object",
+        "properties": {
+          "categoria": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "data_alvo_diagnostico": {
+            "type": "string"
+          },
+          "data_alvo_finalizacao": {
+            "type": "string"
+          },
+          "data_fim": {
+            "type": "string"
+          },
+          "data_inicio": {
+            "type": "string"
+          },
+          "data_real_diagnostico": {
+            "type": "string"
+          },
+          "dentro_prazo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "id_bairro": {
+            "type": "string"
+          },
+          "id_chamado": {
+            "type": "string"
+          },
+          "id_logradouro": {
+            "type": "string"
+          },
+          "id_origem_ocorrencia": {
+            "type": "string"
+          },
+          "id_subtipo": {
+            "type": "string"
+          },
+          "id_territorialidade": {
+            "type": "string"
+          },
+          "id_tipo": {
+            "type": "string"
+          },
+          "id_unidade_organizacional": {
+            "type": "string"
+          },
+          "id_unidade_organizacional_mae": {
+            "type": "string"
+          },
+          "justificativa_status": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "nome_unidade_organizacional": {
+            "type": "string"
+          },
+          "numero_logradouro": {
+            "type": "integer"
+          },
+          "origem_ocorrencia": {
+            "type": "string"
+          },
+          "prazo_tipo": {
+            "type": "string"
+          },
+          "prazo_unidade": {
+            "type": "string"
+          },
+          "reclamacoes": {
+            "type": "integer"
+          },
+          "situacao": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subtipo": {
+            "type": "string"
+          },
+          "tempo_prazo": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tipo_situacao": {
+            "type": "string"
+          },
+          "unidade_organizacional_ouvidoria": {
+            "type": "string"
+          }
+        }
+      },
       "models.Nascimento": {
         "type": "object",
         "properties": {
@@ -1257,6 +1639,34 @@
           },
           "indicador": {
             "type": "boolean"
+          }
+        }
+      },
+      "models.PaginatedMaintenanceRequests": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/models.MaintenanceRequest"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer"
+              },
+              "per_page": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "total_pages": {
+                "type": "integer"
+              }
+            }
           }
         }
       },
@@ -1345,12 +1755,12 @@
       "models.SelfDeclaredPhoneInput": {
         "type": "object",
         "required": [
-          "ddd",
           "ddi",
           "valor"
         ],
         "properties": {
           "ddd": {
+            "description": "DDD é obrigatório somente quando o DDI é 55 (Brasil)",
             "type": "string"
           },
           "ddi": {

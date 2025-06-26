@@ -5,10 +5,11 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsDocumentos } from './modelsDocumentos'
+import type { ModelsSaude } from './modelsSaude'
 
-export interface ModelsSelfDeclaredPhoneInput {
-  /** DDD é obrigatório somente quando o DDI é 55 (Brasil) */
-  ddd?: string
-  ddi: string
-  valor: string
+export interface ModelsCitizenWallet {
+  cpf?: string
+  documentos?: ModelsDocumentos
+  saude?: ModelsSaude
 }
