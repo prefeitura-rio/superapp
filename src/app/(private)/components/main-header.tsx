@@ -1,5 +1,5 @@
 import { Search, User } from 'lucide-react'
-import { TransitionLink } from '../../../components/ui/transition-link'
+import Link from 'next/link'
 
 interface Notification {
   id: string
@@ -22,18 +22,15 @@ export default function MainHeader() {
         </Link> */}
 
         <div className="flex items-center space-x-2">
-          <TransitionLink href="/search" className="rounded-full bg-card p-4">
+          <Link href="/search" className="rounded-full bg-card p-4">
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>
-          </TransitionLink>
+          </Link>
 
-          <TransitionLink
-            href="/user-profile"
-            className="rounded-full bg-card p-4"
-          >
+          <Link href="/user-profile" className="rounded-full bg-card p-4">
             <User className="h-5 w-5" />
             <span className="sr-only">User Settings</span>
-          </TransitionLink>
+          </Link>
         </div>
       </div>
     </header>

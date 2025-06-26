@@ -1,11 +1,10 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { SecondaryHeader } from '../../components/secondary-header'
 
 export default function JobInfoForm() {
   return (
-    <PageFadeInWrapper>
+    <>
       <div className="min-h-screen max-w-md mx-auto pt-24 pb-10 bg-background">
         <SecondaryHeader title="Trabalho" />
         <div className="space-y-6 p-4">
@@ -116,6 +115,6 @@ Rio de Janeiro"
           </div>
         </div>
       </div>
-    </PageFadeInWrapper>
+    </>
   )
 }

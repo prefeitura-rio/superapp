@@ -1,4 +1,3 @@
-import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navation'
@@ -26,28 +25,24 @@ export default async function Home() {
   }
 
   return (
-    <>
-      <PageFadeInWrapper>
-        <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
-          <MainHeader />
-          {/* Header */}
-          <header className="p-5">
-            <h1 className="text-2xl font-bold text-foreground">
-              {userAuthInfo.name}
-            </h1>
-          </header>
+    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
+      <MainHeader />
+      {/* Header */}
+      <header className="p-5">
+        <h1 className="text-2xl font-bold text-foreground">
+          {userAuthInfo.name}
+        </h1>
+      </header>
 
-          {/* Suggestion Cards*/}
-          <SuggestionCards order={[0, 1, 2]} />
+      {/* Suggestion Cards*/}
+      <SuggestionCards order={[0, 1, 2]} />
 
-          {/* Most Accessed Service Cards*/}
-          <MostAccessedServiceCards />
+      {/* Most Accessed Service Cards*/}
+      <MostAccessedServiceCards />
 
-          {/* Carteira section */}
-          <CarteiraSection />
-        </main>
-      </PageFadeInWrapper>
+      {/* Carteira section */}
+      <CarteiraSection />
       <FloatNavigation />
-    </>
+    </main>
   )
 }

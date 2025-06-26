@@ -8,9 +8,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
-import { TransitionLink } from '@/components/ui/transition-link'
 import { EyeIcon, InfoIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
 import { capitalizeFirstLetter } from './utils'
 
@@ -63,7 +63,7 @@ export function WalletHealthCard({
   const [showDetails, setShowDetails] = useState(false)
 
   return (
-    <TransitionLink href={href}>
+    <Link href={href}>
       <div className="card__flip__container">
         <div className={`card${showDetails ? ' flipped' : ''}`} id="card">
           <div className="card-front">
@@ -209,6 +209,6 @@ export function WalletHealthCard({
           </div>
         </div>
       </div>
-    </TransitionLink>
+    </Link>
   )
 }

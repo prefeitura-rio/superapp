@@ -9,7 +9,6 @@ import { headers } from 'next/headers'
 import Script from 'next/script'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
-import { PageTransitionProvider } from '../contexts/page-transition-context'
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
@@ -79,9 +78,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <PageTransitionProvider>
-            <PWAProvider>{children}</PWAProvider>
-          </PageTransitionProvider>
+          <PWAProvider>{children}</PWAProvider>
           <ThemeColorMeta />
           <Toaster
             position="bottom-center"
