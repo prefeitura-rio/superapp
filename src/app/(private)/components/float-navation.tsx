@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Home, LayoutGrid, MessageCircle, Wallet } from 'lucide-react'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
 import {
@@ -11,7 +12,6 @@ import {
   BottomSheetClose,
   BottomSheetFooter,
 } from '../../../components/ui/custom/bottom-sheet'
-import { TransitionLink } from '../../../components/ui/transition-link'
 
 interface NavItem {
   href: string
@@ -39,7 +39,7 @@ export function FloatNavigation() {
             const Icon = item.icon
 
             return (
-              <TransitionLink
+              <Link
                 key={item.href}
                 href={item.href}
                 className="group flex items-center justify-center"
@@ -60,7 +60,7 @@ export function FloatNavigation() {
                     )}
                   />
                 </div>
-              </TransitionLink>
+              </Link>
             )
           })}
 

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import govbr from '@/assets/govbr.svg'
 import prefeitura from '@/assets/prefeitura.svg'
 import { Button } from '@/components/ui/button'
-import { TransitionLink } from '@/components/ui/transition-link'
+import Link from 'next/link'
 
 export default function LoginScreen() {
   const handleGovbrLogin = () => {
@@ -60,12 +60,9 @@ export default function LoginScreen() {
 
         {/* Privacy */}
         <div className="w-full text-center">
-          <TransitionLink
-            href="/privacy-policy"
-            className="text-xs text-gray-100"
-          >
+          <Link href="/privacy-policy" className="text-xs text-gray-100">
             Aviso de privacidade
-          </TransitionLink>
+          </Link>
         </div>
       </div>
     </div>

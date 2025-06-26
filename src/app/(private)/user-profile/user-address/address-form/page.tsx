@@ -13,7 +13,6 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
-import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { Switch } from '@/components/ui/switch'
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
@@ -231,246 +230,244 @@ export default function AddressForm() {
   }
 
   return (
-    <PageFadeInWrapper>
-      <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-        <div className={headerAnim}>
-          <SecondaryHeader title="" />
-          <section className="relative">
-            <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-              Escreva seu <br /> endereço
-            </h2>
-          </section>
-        </div>
-        <div className={`px-4 ${inputAnim}`}>
-          <SearchInput
-            ref={inputRef}
-            placeholder="Digite o seu endereço"
-            showIcons={hasInteracted}
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onFocus={() => setHasInteracted(true)}
-            onBack={() => router.back()}
-          />
-          {hasInteracted && inputValue.length > 0 && (
-            <div className="bg-transparent mt-2">
-              {loading && (
-                <div className="p-4 pt-10 text-muted-foreground text-center text-sm">
-                  Carregando...
-                </div>
-              )}
-              {!loading && suggestions.length > 0 && (
-                <div className="flex flex-col">
-                  {suggestions.map((item: any, idx: number) => (
-                    <div key={item.place_id}>
-                      <div
-                        className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30"
-                        onClick={() => handleSuggestionClick(item)}
-                      >
-                        <MapPin className="h-5 w-5" />
-                        <div>
-                          <div className="font-medium text-foreground leading-tight text-base">
-                            {item.main_text}
-                          </div>
-                          <div className="text-sm text-muted-foreground leading-tight">
-                            {item.secondary_text}
-                          </div>
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+      <div className={headerAnim}>
+        <SecondaryHeader title="" />
+        <section className="relative">
+          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+            Escreva seu <br /> endereço
+          </h2>
+        </section>
+      </div>
+      <div className={`px-4 ${inputAnim}`}>
+        <SearchInput
+          ref={inputRef}
+          placeholder="Digite o seu endereço"
+          showIcons={hasInteracted}
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          onFocus={() => setHasInteracted(true)}
+          onBack={() => router.back()}
+        />
+        {hasInteracted && inputValue.length > 0 && (
+          <div className="bg-transparent mt-2">
+            {loading && (
+              <div className="p-4 pt-10 text-muted-foreground text-center text-sm">
+                Carregando...
+              </div>
+            )}
+            {!loading && suggestions.length > 0 && (
+              <div className="flex flex-col">
+                {suggestions.map((item: any, idx: number) => (
+                  <div key={item.place_id}>
+                    <div
+                      className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30"
+                      onClick={() => handleSuggestionClick(item)}
+                    >
+                      <MapPin className="h-5 w-5" />
+                      <div>
+                        <div className="font-medium text-foreground leading-tight text-base">
+                          {item.main_text}
+                        </div>
+                        <div className="text-sm text-muted-foreground leading-tight">
+                          {item.secondary_text}
                         </div>
                       </div>
-                      {idx !== suggestions.length - 1 && (
-                        <div className="border-b border-border mx-4" />
-                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-            {!loading && suggestions.length === 0 && inputValue.length > 2 && (
-                  <div className="p-4 pt-10 text-muted-foreground text-center text-sm">
-                    Nenhum endereço encontrado.
+                    {idx !== suggestions.length - 1 && (
+                      <div className="border-b border-border mx-4" />
+                    )}
                   </div>
-                )}
+                ))}
+              </div>
+            )}
+            {!loading && suggestions.length === 0 && inputValue.length > 2 && (
+              <div className="p-4 pt-10 text-muted-foreground text-center text-sm">
+                Nenhum endereço encontrado.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Drawer for address details */}
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="max-w-md mx-auto rounded-t-3xl! sm:min-h-[80vh]! min-h-[85vh] flex flex-col">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="text-lg font-semibold">
+              {selectedAddress?.main_text}
+            </DrawerTitle>
+            <div className="text-muted-foreground text-base">
+              {selectedAddress?.secondary_text}
             </div>
-          )}
-        </div>
-
-        {/* Drawer for address details */}
-        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <DrawerContent className="max-w-md mx-auto rounded-t-3xl! sm:min-h-[80vh]! min-h-[85vh] flex flex-col">
-            <DrawerHeader className="text-center">
-              <DrawerTitle className="text-lg font-semibold">
-                {selectedAddress?.main_text}
-              </DrawerTitle>
-              <div className="text-muted-foreground text-base">
-                {selectedAddress?.secondary_text}
-              </div>
-            </DrawerHeader>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="px-4 flex-1 flex flex-col pt-5 gap-4 overflow-y-auto"
-            >
-              <div>
-                <InputField
-                  className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                  placeholder={noNumber ? 'Sem número' : 'Escreva o número'}
-                  {...register('number')}
-                  disabled={noNumber}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  showClearButton={!noNumber}
-                  onClear={() => setValue('number', '')}
-                  onChange={e => {
-                    // Only allow digits
-                    const value = e.target.value.replace(/\D/g, '')
-                    setValue('number', value)
-                    trigger('number')
-                  }}
-                  value={watch('number')}
-                />
-                {errors.number && !noNumber && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.number.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <Switch
-                  checked={noNumber}
-                  onCheckedChange={checked => setValue('noNumber', checked)}
-                  id="no-number"
-                />
-                <Label
-                  htmlFor="no-number"
-                  className={`text-muted-foreground font-normal text-base select-none ${noNumber && 'text-foreground'}`}
-                >
-                  Sem número
-                </Label>
-              </div>
-              <div>
-                <InputField
-                  className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                  {...register('complement')}
-                  placeholder={
-                    noComplement ? 'Sem complemento' : 'Escreva o complemento'
-                  }
-                  onClear={() => setValue('complement', '')}
-                  state="default"
-                  showClearButton={!noComplement}
-                  value={watch('complement')}
-                  onChange={e => {
-                    setValue('complement', e.target.value)
-                    trigger('complement')
-                  }}
-                  disabled={noComplement}
-                />
-                {errors.complement && !noComplement && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.complement.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <Switch
-                  checked={noComplement}
-                  onCheckedChange={checked => setValue('noComplement', checked)}
-                  id="no-complement"
-                />
-                <Label
-                  htmlFor="no-complement"
-                  className={`text-muted-foreground font-normal text-base select-none ${noComplement && 'text-foreground'}`}
-                >
-                  Sem complemento
-                </Label>
-              </div>
-              <div>
-                <InputField
-                  className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-                  placeholder={noCep ? 'Sem CEP' : 'Escreva o CEP'}
-                  {...register('cep')}
-                  disabled={noCep}
-                  showClearButton={!noCep}
-                  onClear={() => setValue('cep', '')}
-                  state="default"
-                  maxLength={9}
-                  onChange={handleCepChange}
-                  value={watch('cep')}
-                />
-                {errors.cep && !noCep && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.cep.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <Switch
-                  checked={noCep}
-                  onCheckedChange={checked => setValue('noCep', checked)}
-                  id="no-cep"
-                />
-                <Label
-                  htmlFor="no-cep"
-                  className={`text-muted-foreground font-normal text-base select-none ${noCep && 'text-foreground'}`}
-                >
-                  Sem CEP
-                </Label>
-              </div>
-              <DrawerFooter className="flex flex-row gap-3 px-0">
-                <Button
-                  size="lg"
-                  className="flex-1 py-4 text-base"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Salvando...' : 'Salvar'}
-                </Button>
-                <Button
-                  size="lg"
-                  className="flex-1 py-4 text-base border"
-                  variant="secondary"
-                  type="button"
-                  onClick={() => {
-                    setDrawerOpen(false)
-                    router.back()
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </DrawerFooter>
-            </form>
-          </DrawerContent>
-        </Drawer>
-
-        {/* Drawer for feedback after address update */}
-        <Drawer open={feedbackDrawerOpen} onOpenChange={setFeedbackDrawerOpen}>
-          <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
-            <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
-              <DrawerHeader className="text-center">
-                <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                  Endereço <br />
-                  atualizado!
-                </DrawerTitle>
-              </DrawerHeader>
-              <Image
-                src={welcomeImage}
-                alt="Endereço atualizado"
-                width={260}
-                height={320}
-                className="mx-auto mb-10"
-                style={{ objectFit: 'contain', maxHeight: '320px' }}
-                priority
+          </DrawerHeader>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="px-4 flex-1 flex flex-col pt-5 gap-4 overflow-y-auto"
+          >
+            <div>
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
+                placeholder={noNumber ? 'Sem número' : 'Escreva o número'}
+                {...register('number')}
+                disabled={noNumber}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                showClearButton={!noNumber}
+                onClear={() => setValue('number', '')}
+                onChange={e => {
+                  // Only allow digits
+                  const value = e.target.value.replace(/\D/g, '')
+                  setValue('number', value)
+                  trigger('number')
+                }}
+                value={watch('number')}
               />
+              {errors.number && !noNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.number.message}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch
+                checked={noNumber}
+                onCheckedChange={checked => setValue('noNumber', checked)}
+                id="no-number"
+              />
+              <Label
+                htmlFor="no-number"
+                className={`text-muted-foreground font-normal text-base select-none ${noNumber && 'text-foreground'}`}
+              >
+                Sem número
+              </Label>
+            </div>
+            <div>
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
+                {...register('complement')}
+                placeholder={
+                  noComplement ? 'Sem complemento' : 'Escreva o complemento'
+                }
+                onClear={() => setValue('complement', '')}
+                state="default"
+                showClearButton={!noComplement}
+                value={watch('complement')}
+                onChange={e => {
+                  setValue('complement', e.target.value)
+                  trigger('complement')
+                }}
+                disabled={noComplement}
+              />
+              {errors.complement && !noComplement && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.complement.message}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch
+                checked={noComplement}
+                onCheckedChange={checked => setValue('noComplement', checked)}
+                id="no-complement"
+              />
+              <Label
+                htmlFor="no-complement"
+                className={`text-muted-foreground font-normal text-base select-none ${noComplement && 'text-foreground'}`}
+              >
+                Sem complemento
+              </Label>
+            </div>
+            <div>
+              <InputField
+                className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
+                placeholder={noCep ? 'Sem CEP' : 'Escreva o CEP'}
+                {...register('cep')}
+                disabled={noCep}
+                showClearButton={!noCep}
+                onClear={() => setValue('cep', '')}
+                state="default"
+                maxLength={9}
+                onChange={handleCepChange}
+                value={watch('cep')}
+              />
+              {errors.cep && !noCep && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.cep.message}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch
+                checked={noCep}
+                onCheckedChange={checked => setValue('noCep', checked)}
+                id="no-cep"
+              />
+              <Label
+                htmlFor="no-cep"
+                className={`text-muted-foreground font-normal text-base select-none ${noCep && 'text-foreground'}`}
+              >
+                Sem CEP
+              </Label>
+            </div>
+            <DrawerFooter className="flex flex-row gap-3 px-0">
               <Button
                 size="lg"
-                className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+                className="flex-1 py-4 text-base"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1 py-4 text-base border"
+                variant="secondary"
+                type="button"
                 onClick={() => {
                   setDrawerOpen(false)
                   router.back()
                 }}
               >
-                Finalizar
+                Cancelar
               </Button>
-            </div>
-          </DrawerContent>
-        </Drawer>
-      </div>
-    </PageFadeInWrapper>
+            </DrawerFooter>
+          </form>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Drawer for feedback after address update */}
+      <Drawer open={feedbackDrawerOpen} onOpenChange={setFeedbackDrawerOpen}>
+        <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+          <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+            <DrawerHeader className="text-center">
+              <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                Endereço <br />
+                atualizado!
+              </DrawerTitle>
+            </DrawerHeader>
+            <Image
+              src={welcomeImage}
+              alt="Endereço atualizado"
+              width={260}
+              height={320}
+              className="mx-auto mb-10"
+              style={{ objectFit: 'contain', maxHeight: '320px' }}
+              priority
+            />
+            <Button
+              size="lg"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+              onClick={() => {
+                setDrawerOpen(false)
+                router.back()
+              }}
+            >
+              Finalizar
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
   )
 }

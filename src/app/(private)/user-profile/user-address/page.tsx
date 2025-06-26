@@ -1,4 +1,3 @@
-import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { AddressInfoCard } from '../../components/address-info-card'
@@ -27,15 +26,13 @@ export default async function UserAddress() {
   }
 
   return (
-    <PageFadeInWrapper>
-      <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-        <SecondaryHeader title="Endereço" />
-        {addressInfo?.bairro !== 'null' ? (
-          <AddressInfoCard address={addressInfo} showBadge />
-        ) : (
-          <EmptyAddress />
-        )}
-      </div>
-    </PageFadeInWrapper>
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+      <SecondaryHeader title="Endereço" />
+      {addressInfo?.bairro !== 'null' ? (
+        <AddressInfoCard address={addressInfo} showBadge />
+      ) : (
+        <EmptyAddress />
+      )}
+    </div>
   )
 }

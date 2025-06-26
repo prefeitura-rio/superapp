@@ -1,4 +1,4 @@
-import { TransitionLink } from '@/components/ui/transition-link'
+import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
 import { WalletHealthCard } from './wallet-health-card'
@@ -9,12 +9,12 @@ export default function CarteiraSection() {
     <section className="px-5 mt-6 pb-24">
       <div className="sticky top-20 flex items-center justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
-        <TransitionLink
+        <Link
           href="/wallet"
           className="text-md text-[#A2A2A2] cursor-pointer font-medium"
         >
           ver tudo
-        </TransitionLink>
+        </Link>
       </div>
 
       <div className="grid w-full gap-3">

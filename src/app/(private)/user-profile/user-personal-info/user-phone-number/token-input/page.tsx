@@ -10,7 +10,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { PageFadeInWrapper } from '@/components/ui/page-fade-in'
 import type { ModelsPhoneVerificationValidateRequest } from '@/http/models/modelsPhoneVerificationValidateRequest'
 import confetti from 'canvas-confetti'
 import Image from 'next/image'
@@ -56,63 +55,61 @@ export default function TokenInputForm() {
   }
 
   return (
-    <PageFadeInWrapper>
-      <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-        <div>
-          <SecondaryHeader title="" />
-          <section className="relative">
-            <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-              Escreva os <br /> 6 dígitos
-            </h2>
-          </section>
-        </div>
-        <div className="flex flex-col gap-14 px-4 items-center">
-          <PhoneInputTokenForm
-            value={token}
-            onChange={setToken}
-            resendParams={{ valor, ddd, ddi }}
-          />
-          {error && <span className="text-red-500 text-sm">{error}</span>}
-          <Button
-            size="lg"
-            className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
-            onClick={handleSave}
-            disabled={isPending || !token || token.length < 6}
-          >
-            {isPending ? 'Enviando...' : 'Enviar'}
-          </Button>
-        </div>
-
-        {/* Drawer for feedback after email update */}
-        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
-            <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
-              <DrawerHeader className="text-center">
-                <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                  Número <br />
-                  atualizado!
-                </DrawerTitle>
-              </DrawerHeader>
-              <Image
-                src={welcomeImage}
-                alt="Número atualizado"
-                width={260}
-                height={320}
-                className="mx-auto mb-10"
-                style={{ objectFit: 'contain', maxHeight: '320px' }}
-                priority
-              />
-              <Button
-                size="lg"
-                className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
-                onClick={handleDrawerClose}
-              >
-                Finalizar
-              </Button>
-            </div>
-          </DrawerContent>
-        </Drawer>
+    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+      <div>
+        <SecondaryHeader title="" />
+        <section className="relative">
+          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+            Escreva os <br /> 6 dígitos
+          </h2>
+        </section>
       </div>
-    </PageFadeInWrapper>
+      <div className="flex flex-col gap-14 px-4 items-center">
+        <PhoneInputTokenForm
+          value={token}
+          onChange={setToken}
+          resendParams={{ valor, ddd, ddi }}
+        />
+        {error && <span className="text-red-500 text-sm">{error}</span>}
+        <Button
+          size="lg"
+          className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
+          onClick={handleSave}
+          disabled={isPending || !token || token.length < 6}
+        >
+          {isPending ? 'Enviando...' : 'Enviar'}
+        </Button>
+      </div>
+
+      {/* Drawer for feedback after email update */}
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+          <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+            <DrawerHeader className="text-center">
+              <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                Número <br />
+                atualizado!
+              </DrawerTitle>
+            </DrawerHeader>
+            <Image
+              src={welcomeImage}
+              alt="Número atualizado"
+              width={260}
+              height={320}
+              className="mx-auto mb-10"
+              style={{ objectFit: 'contain', maxHeight: '320px' }}
+              priority
+            />
+            <Button
+              size="lg"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+              onClick={handleDrawerClose}
+            >
+              Finalizar
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
   )
 }

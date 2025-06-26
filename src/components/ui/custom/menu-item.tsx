@@ -2,9 +2,9 @@
 
 import { cn } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { forwardRef } from 'react'
 import type { MenuItemProps } from '../../../types/menu-items'
-import { TransitionLink } from '../transition-link'
 
 const variantStyles = {
   default: '',
@@ -27,7 +27,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
     ref
   ) => {
     return (
-      <TransitionLink
+      <Link
         ref={ref}
         href={disabled ? '#' : href}
         className={cn(
@@ -47,7 +47,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
           <span>{label}</span>
         </div>
         <ChevronRight className="h-5 w-5 text-primary" />
-      </TransitionLink>
+      </Link>
     )
   }
 )
