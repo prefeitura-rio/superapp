@@ -117,7 +117,7 @@ export function AddressInfoCard({
         <div className="text-center p-4">
           <h2 className="text-md">{displayAddress}</h2>
         </div>
-        <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
+        <div className="grid w-full grid-cols-2 gap-2 max-w-md mx-auto">
           <Link href="/user-profile/user-address/address-form">
             <CustomButton
               variant="primary"
