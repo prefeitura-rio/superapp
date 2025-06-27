@@ -176,7 +176,6 @@ export const ActionDiv = ({
         <BottomSheet
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
-          contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
           title={drawerTitle}
           showHandle
         >

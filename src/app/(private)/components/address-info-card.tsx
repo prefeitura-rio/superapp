@@ -112,7 +112,6 @@ export function AddressInfoCard({
         open={open}
         onOpenChange={setOpen}
         title={displayAddress}
-        contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
         headerClassName="text-center p-0 mb-6"
       >
         <div className="text-center p-4">
