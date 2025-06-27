@@ -23,8 +23,8 @@ export function InputField({
   const showClear = showClearButton && hasValue
 
   const iconStyles = {
-    error: 'bg-destructive',
-    default: 'bg-foreground',
+    error: 'bg-destructive text-white',
+    default: 'bg-foreground text-background',
     success: 'bg-success',
   }
 
@@ -60,7 +60,7 @@ export function InputField({
             {state === 'success' ? (
               <Check className="w-4 h-4 text-white" />
             ) : (
-              <X className="w-4 h-4 text-white" />
+              <X className="w-4 h-4" />
             )}
           </button>
         )}
