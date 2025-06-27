@@ -4,6 +4,7 @@ import PhoneInputTokenForm from '@/app/(private)/components/phone-input-token-fo
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import {
   Drawer,
   DrawerContent,
@@ -71,14 +72,15 @@ export default function TokenInputForm() {
           resendParams={{ valor, ddd, ddi }}
         />
         {error && <span className="text-red-500 text-sm">{error}</span>}
-        <Button
-          size="lg"
-          className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
+        <CustomButton
+          size="xl"
+          fullWidth
+          variant="primary"
           onClick={handleSave}
           disabled={isPending || !token || token.length < 6}
         >
           {isPending ? 'Enviando...' : 'Enviar'}
-        </Button>
+        </CustomButton>
       </div>
 
       {/* Drawer for feedback after email update */}

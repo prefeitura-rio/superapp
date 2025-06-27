@@ -81,8 +81,8 @@ export default function PhoneNumberForm() {
         />
         <CustomButton
           size="xl"
-          className="bg-primary hover:bg-primary/90"
           onClick={handleSave}
+          variant="primary"
           fullWidth
           disabled={isPending || !isPhoneValid}
         >
