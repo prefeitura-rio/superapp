@@ -2,7 +2,6 @@
 
 import { capitalizeFirstLetter } from '@/app/(private)/components/utils'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
-import { DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 
 interface WalletHealthStatusDrawerContentProps {
   open: boolean
@@ -30,16 +29,7 @@ export function WalletHealthStatusDrawerContent({
   color,
 }: WalletHealthStatusDrawerContentProps) {
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
-      showHandle
-    >
-      <DrawerHeader className="sr-only">
-        <DrawerTitle>Status</DrawerTitle>
-      </DrawerHeader>
-
+    <BottomSheet open={open} onOpenChange={onOpenChange} title="Status">
       <div className="flex items-center gap-2 mb-2">
         <span
           className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color] || ''} border-3 border-background/60`}

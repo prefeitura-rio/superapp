@@ -1,7 +1,6 @@
 'use client'
 
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
-import { DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 
 interface EducationFrequencyInfoDrawerContentProps {
   open: boolean
@@ -16,13 +15,8 @@ export function EducationFrequencyInfoDrawerContent({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
-      showHandle
+      title="Frequência Escolar"
     >
-      <DrawerHeader className="sr-only">
-        <DrawerTitle>Frequência Escolar</DrawerTitle>
-      </DrawerHeader>
-
       <div className="text-sm text-popover-foreground">
         <p className="mt-3">
           Frequência escolar do aluno no último trimestre letivo.
