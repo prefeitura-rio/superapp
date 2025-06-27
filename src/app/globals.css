@@ -159,7 +159,7 @@ html::-webkit-scrollbar {
   --popover: #fafafa;
   --popover-foreground: #020618;
   --popover-line: #d4d4d8;
-  --primary: #1447e6;
+  --primary: #13335A;
   --primary-foreground: #f8fafc;
   --secondary: #e4e4e7;
   --secondary-foreground: #0f172b;
@@ -233,7 +233,7 @@ html::-webkit-scrollbar {
   --popover: #18181b;
   --popover-foreground: #f8fafc;
   --popover-line: #3f3f46;
-  --primary: #8ec5ff;
+  --primary: #8EC5FF;
   --primary-foreground: #f8fafc;
   --secondary: #27272a;
   --secondary-foreground: #0f172b;
