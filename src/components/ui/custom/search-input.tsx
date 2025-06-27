@@ -72,7 +72,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
         <input
           ref={inputRef}
-          className="flex-1 bg-transparent border-0 text-muted-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 text-base"
+          className="flex-1 bg-transparent border-0 text-muted-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 text-base truncate pr-3"
           value={value}
           onChange={handleChange}
           {...props}
