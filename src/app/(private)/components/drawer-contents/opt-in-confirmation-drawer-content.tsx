@@ -24,6 +24,7 @@ export function OptInConfirmationDrawerContent({
       onOpenChange={onOpenChange}
       showHandle
       contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
+      title={<p>Desativar Comunicações da Prefeitura do Rio</p>}
     >
       <div className="flex flex-col gap-6 pt-4">
         <div className="space-y-4">

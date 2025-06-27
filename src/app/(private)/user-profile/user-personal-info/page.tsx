@@ -65,6 +65,7 @@ export default async function PersonalInfoForm() {
             tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
             content={userInfo?.nome_social || ''}
             drawerContent={<SocialNameDrawerContent />}
+            drawerTitle="Nome social"
           />
 
           <CustomInput
@@ -81,6 +82,7 @@ export default async function PersonalInfoForm() {
             disabled
             rightIcon={<Pen className="text-foreground" />}
             drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
+            drawerTitle="Cor / Raça"
           />
 
           <CustomInput
