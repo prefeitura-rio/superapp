@@ -1,0 +1,160 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "back": "Voltar",
+    "search": "Buscar",
+    "exit": "Sair",
+    "yes": "Sim",
+    "no": "Não",
+    "ok": "OK",
+    "close": "Fechar",
+    "open": "Aberto",
+    "closed": "Fechado",
+    "hours": "horas",
+    "spots": "vagas"
+  },
+  "navigation": {
+    "home": "Início",
+    "services": "Serviços",
+    "profile": "Perfil",
+    "wallet": "Carteira",
+    "notifications": "Notificações",
+    "settings": "Configurações"
+  },
+  "auth": {
+    "signIn": "Fazer Login",
+    "signOut": "Sair",
+    "signUp": "Cadastrar",
+    "forgotPassword": "Esqueci a senha",
+    "loginMessage": "Faça login com a sua conta Gov.br para acessar os serviços da Prefeitura do Rio de Janeiro.",
+    "accessWith": "Acessar com"
+  },
+  "onboarding": {
+    "welcome": "Seja bem vindo(a)",
+    "slide1": {
+      "title": "Tudo em um só lugar",
+      "description": "Acesse todos os serviços da cidade em um só aplicativo. Simples, rápido e seguro."
+    },
+    "slide2": {
+      "title": "Oportunidades ao seu alcance",
+      "description": "Encontre cursos, empregos e oportunidades que podem transformar sua vida."
+    },
+    "slide3": {
+      "title": "Sua carteira digital da cidadania",
+      "description": "Todos os seus documentos e informações importantes em um só lugar."
+    }
+  },
+  "services": {
+    "mostAccessed": "Mais acessados",
+    "categories": "Categorias",
+    "iptu": {
+      "title": "IPTU",
+      "description": "Pague com desconto no PIX"
+    },
+    "cadRio": {
+      "title": "CAD Rio",
+      "description": "Agende seu cadastro único"
+    },
+    "itbi": {
+      "title": "ITBI",
+      "description": "Pague com desconto no PIX"
+    },
+    "courses": {
+      "title": "Cursos",
+      "description": "Amplie suas habilidades",
+      "header": "Seu curso Começa aqui",
+      "courseDescription": "Descrição do Curso",
+      "requirements": "Requisitos",
+      "subscribe": "Inscreva-se",
+      "unsubscribe": "Cancelar Inscrição",
+      "filters": {
+        "all": "Todos",
+        "ai": "IA",
+        "technology": "Tecnologia",
+        "construction": "Construção",
+        "environment": "Meio Ambiente",
+        "education": "Educação"
+      }
+    },
+    "jobs": {
+      "title": "Empregos",
+      "description": "Oportunidades de trabalho",
+      "header": "Seu emprego Começa aqui",
+      "filters": {
+        "all": "Todos",
+        "sales": "Vendas",
+        "service": "Atendimento",
+        "administration": "Administração",
+        "financial": "Financeiro"
+      }
+    }
+  },
+  "forms": {
+    "required": "Campo obrigatório",
+    "phone": {
+      "selectCountryCode": "Selecionar código do país",
+      "whatsappMessage": "Você irá receber um código via Whatsapp",
+      "numberRequired": "Número é obrigatório",
+      "didNotReceive": "Não recebeu o código?",
+      "resend": "Reenviar",
+      "resending": "Reenviando..."
+    },
+    "address": {
+      "enterAddress": "Digite o seu endereço",
+      "enterNumber": "Escreva o número",
+      "enterComplement": "Escreva o complemento",
+      "enterZipCode": "Escreva o CEP",
+      "noNumber": "Sem número",
+      "noComplement": "Sem complemento",
+      "noZipCode": "Sem CEP",
+      "zipCodeInvalid": "CEP inválido. Formato: 00000-000",
+      "noAddressFound": "Nenhum endereço encontrado.",
+      "addressUpdated": "Endereço atualizado!"
+    }
+  },
+  "profile": {
+    "myData": "Meus dados",
+    "address": "Endereço",
+    "authorizations": "Autorizações",
+    "jobInfo": "Informações de trabalho",
+    "personalInfo": "Informações pessoais",
+    "email": "E-mail",
+    "phoneNumber": "Número de telefone",
+    "settings": "Configurações"
+  },
+  "wallet": {
+    "title": "Carteira",
+    "familyClinic": {
+      "title": "CLÍNICA DA FAMÍLIA",
+      "status": "Situação",
+      "schedule": "Horário de atendimento"
+    },
+    "school": {
+      "title": "ESCOLA",
+      "status": "Status"
+    },
+    "cadUnico": {
+      "title": "CADÚNICO",
+      "status": "Situação",
+      "update": "Atualizar",
+      "reregistrationDate": "Data de recadastramento"
+    },
+    "cityCare": {
+      "title": "CUIDADOS COM A CIDADE",
+      "openCalls": "chamados em aberto",
+      "totalCalls": "Total de chamados",
+      "closedCalls": "Fechados"
+    }
+  },
+  "metadata": {
+    "title": "Super App",
+    "description": "Acesso a serviços públicos e informações."
+  },
+  "privacy": {
+    "title": "Aviso de privacidade"
+  }
+}

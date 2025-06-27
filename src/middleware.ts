@@ -4,6 +4,8 @@ import {
   type NextRequest,
   NextResponse,
 } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
 
 const publicRoutes = [
   { path: '/sign-in', whenAuthenticated: 'redirect' },
@@ -27,7 +29,35 @@ function isJwtExpired(token: string): boolean {
   }
 }
 
+// Create the internationalization middleware
+const intlMiddleware = createMiddleware(routing)
+
 export function middleware(request: NextRequest) {
+  // Handle internationalization first
+  const pathname = request.nextUrl.pathname
+  
+  // Skip i18n middleware for API routes and static assets
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.includes('.')
+  ) {
+    return authMiddleware(request)
+  }
+
+  // Apply i18n middleware
+  const response = intlMiddleware(request)
+  
+  // If i18n middleware redirected, return that response
+  if (response && response.status !== 200) {
+    return response
+  }
+
+  // Continue with auth middleware
+  return authMiddleware(request)
+}
+
+function authMiddleware(request: NextRequest) {
   // Generate nonce for CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
@@ -69,7 +99,9 @@ export function middleware(request: NextRequest) {
     .trim()
 
   const path = request.nextUrl.pathname
-  const publicRoute = publicRoutes.find(route => route.path === path)
+  // Remove locale prefix when checking for public routes
+  const pathWithoutLocale = path.replace(/^\/[a-z]{2}/, '') || '/'
+  const publicRoute = publicRoutes.find(route => route.path === pathWithoutLocale)
   const authToken = request.cookies.get('access_token')
 
   // Set up request headers with nonce and CSP
@@ -158,20 +190,15 @@ export function middleware(request: NextRequest) {
 
 export const config: MiddlewareConfig = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    {
-      source:
-        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
-    },
+    // Enable a redirect to a matching locale at the root
+    '/',
+    
+    // Set a cookie to remember the previous locale for
+    // all requests that have a locale prefix
+    '/(pt|en)/:path*',
+    
+    // Enable redirects that add missing locales
+    // (e.g. `/pathnames` -> `/en/pathnames`)
+    '/((?!_next|_vercel|.*\\..*).*)'
   ],
 }

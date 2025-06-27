@@ -1,0 +1,160 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "finish": "Finish",
+    "back": "Back",
+    "search": "Search",
+    "exit": "Exit",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "close": "Close",
+    "open": "Open",
+    "closed": "Closed",
+    "hours": "hours",
+    "spots": "spots"
+  },
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "profile": "Profile",
+    "wallet": "Wallet",
+    "notifications": "Notifications",
+    "settings": "Settings"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password",
+    "loginMessage": "Sign in with your Gov.br account to access Rio de Janeiro City Hall services.",
+    "accessWith": "Access with"
+  },
+  "onboarding": {
+    "welcome": "Welcome",
+    "slide1": {
+      "title": "Everything in one place",
+      "description": "Access all city services in one app. Simple, fast and secure."
+    },
+    "slide2": {
+      "title": "Opportunities within reach",
+      "description": "Find courses, jobs and opportunities that can transform your life."
+    },
+    "slide3": {
+      "title": "Your digital citizenship wallet",
+      "description": "All your important documents and information in one place."
+    }
+  },
+  "services": {
+    "mostAccessed": "Most Accessed",
+    "categories": "Categories",
+    "iptu": {
+      "title": "Property Tax",
+      "description": "Pay with PIX discount"
+    },
+    "cadRio": {
+      "title": "CAD Rio",
+      "description": "Schedule your unique registration"
+    },
+    "itbi": {
+      "title": "ITBI",
+      "description": "Pay with PIX discount"
+    },
+    "courses": {
+      "title": "Courses",
+      "description": "Expand your skills",
+      "header": "Your course starts here",
+      "courseDescription": "Course Description",
+      "requirements": "Requirements",
+      "subscribe": "Subscribe",
+      "unsubscribe": "Unsubscribe",
+      "filters": {
+        "all": "All",
+        "ai": "AI",
+        "technology": "Technology",
+        "construction": "Construction",
+        "environment": "Environment",
+        "education": "Education"
+      }
+    },
+    "jobs": {
+      "title": "Jobs",
+      "description": "Job opportunities",
+      "header": "Your job starts here",
+      "filters": {
+        "all": "All",
+        "sales": "Sales",
+        "service": "Customer Service",
+        "administration": "Administration",
+        "financial": "Financial"
+      }
+    }
+  },
+  "forms": {
+    "required": "Required field",
+    "phone": {
+      "selectCountryCode": "Select country code",
+      "whatsappMessage": "You will receive a code via WhatsApp",
+      "numberRequired": "Number is required",
+      "didNotReceive": "Didn't receive the code?",
+      "resend": "Resend",
+      "resending": "Resending..."
+    },
+    "address": {
+      "enterAddress": "Enter your address",
+      "enterNumber": "Enter the number",
+      "enterComplement": "Enter complement",
+      "enterZipCode": "Enter ZIP code",
+      "noNumber": "No number",
+      "noComplement": "No complement",
+      "noZipCode": "No ZIP code",
+      "zipCodeInvalid": "Invalid ZIP code. Format: 00000-000",
+      "noAddressFound": "No address found.",
+      "addressUpdated": "Address updated!"
+    }
+  },
+  "profile": {
+    "myData": "My Data",
+    "address": "Address",
+    "authorizations": "Authorizations",
+    "jobInfo": "Job Information",
+    "personalInfo": "Personal Information",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "settings": "Settings"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "familyClinic": {
+      "title": "FAMILY CLINIC",
+      "status": "Status",
+      "schedule": "Service hours"
+    },
+    "school": {
+      "title": "SCHOOL",
+      "status": "Status"
+    },
+    "cadUnico": {
+      "title": "SINGLE REGISTRY",
+      "status": "Status",
+      "update": "Update",
+      "reregistrationDate": "Re-registration date"
+    },
+    "cityCare": {
+      "title": "CITY CARE",
+      "openCalls": "open calls",
+      "totalCalls": "Total calls",
+      "closedCalls": "Closed"
+    }
+  },
+  "metadata": {
+    "title": "Super App",
+    "description": "Access to public services and information."
+  },
+  "privacy": {
+    "title": "Privacy Notice"
+  }
+}
