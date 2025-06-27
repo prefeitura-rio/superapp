@@ -1,0 +1,45 @@
+{
+  "nav": {
+    "home": "Início",
+    "services": "Serviços",
+    "wallet": "Carteira",
+    "notifications": "Notificações",
+    "profile": "Perfil",
+    "logout": "Sair",
+    "search": "Pesquisar"
+  },
+  "search": {
+    "placeholder": "Pesquisar por curso...",
+    "findCourse": "Encontre seu curso",
+    "noResults": "Nenhum resultado encontrado",
+    "loading": "Carregando..."
+  },
+  "services": {
+    "mostAccessed": "Mais acessados",
+    "viewAll": "Ver tudo",
+    "payWithPix": "Pague com desconto no PIX",
+    "whatsappRedirect": "Você será direcionado para o Whatsapp da Prefeitura do Rio",
+    "new": "novo",
+    "scheduleUniqueCadastro": "Agende seu cadastro único"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Cadastrar-se",
+    "logout": "Sair",
+    "profile": "Meu Perfil"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior"
+  }
+}

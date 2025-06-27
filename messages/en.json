@@ -1,0 +1,45 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "wallet": "Wallet",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "logout": "Logout",
+    "search": "Search"
+  },
+  "search": {
+    "placeholder": "Search for course...",
+    "findCourse": "Find your course",
+    "noResults": "No results found",
+    "loading": "Loading..."
+  },
+  "services": {
+    "mostAccessed": "Most accessed",
+    "viewAll": "View all",
+    "payWithPix": "Pay with PIX discount",
+    "whatsappRedirect": "You will be redirected to Rio City Hall's WhatsApp",
+    "new": "new",
+    "scheduleUniqueCadastro": "Schedule your unique registration"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "My Profile"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}

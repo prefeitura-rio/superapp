@@ -1,10 +1,15 @@
+'use client'
+
 import { Badge } from "@/components/ui/badge";
 import { Calendar, CreditCard, MoveDiagonal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function MostAccessedServiceCards() {
+  const t = useTranslations('services');
+
   return (
     <>
-      <h2 className="text-md font-medium mb-4 px-5 pt-4">Mais acessados</h2>
+      <h2 className="text-md font-medium mb-4 px-5 pt-4">{t('mostAccessed')}</h2>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-4 px-5 w-max">
           {/* IPTU Card */}
@@ -15,7 +20,7 @@ export default function MostAccessedServiceCards() {
             <div>
             <h3 className="text-xl font-semibold break-words">IPTU</h3>
             <p className="text-zinc-400 text-sm break-words">
-              Pague com desconto no PIX
+              {t('payWithPix')}
             </p>
             </div>
           </div>
@@ -25,13 +30,13 @@ export default function MostAccessedServiceCards() {
             <div className="mb-4 flex justify-between w-full">
               <Calendar className="w-8 h-8 text-white" />
               <Badge className="bg-[#A0BFF9] text-black text-xs px-3 py-0 rounded-full font-medium ml-2">
-                novo
+                {t('new')}
               </Badge>
             </div>
             <div>
             <h3 className="text-xl font-semibold break-words">CAD Rio</h3>
             <p className="text-zinc-400 text-sm break-words">
-              Agende seu cadastro único
+              {t('scheduleUniqueCadastro')}
             </p>
             </div>
           </div>
@@ -44,7 +49,7 @@ export default function MostAccessedServiceCards() {
           <div>
             <h3 className="text-xl font-semibold break-words">ITBI</h3>
             <p className="text-zinc-400 text-sm break-words">
-              Pague com desconto no PIX
+              {t('payWithPix')}
             </p>
             </div>
           </div>
