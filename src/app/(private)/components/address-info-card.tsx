@@ -112,10 +112,12 @@ export function AddressInfoCard({
         open={open}
         onOpenChange={setOpen}
         title={displayAddress}
-        showHandle
-        contentClassName="px-4 max-w-md mx-auto pb-6 pt-4 !rounded-t-3xl"
+        contentClassName="p-8 max-w-md mx-auto !rounded-t-3xl"
         headerClassName="text-center p-0 mb-6"
       >
+        <div className="text-center p-4">
+          <h2 className="text-md">{displayAddress}</h2>
+        </div>
         <div className="grid w-full px-10 grid-cols-2 gap-4 max-w-md mx-auto">
           <Link href="/user-profile/user-address/address-form">
             <CustomButton
