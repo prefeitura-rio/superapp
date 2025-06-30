@@ -77,7 +77,7 @@ export const BottomSheetFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <DrawerFooter
-    className={cn('flex-row gap-3 pb-10 px-4 md:px-10', className)}
+    className={cn('flex-row gap-3 pb-4 px-4 md:px-10', className)}
     {...props}
   >
     {children}
