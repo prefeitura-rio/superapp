@@ -42,20 +42,22 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
         <DrawerContent
           ref={ref}
           className={cn(
-            'p-4 max-w-md mx-auto !rounded-t-3xl',
+            'p-6 max-w-md mx-auto !rounded-t-3xl',
             contentClassName
           )}
           {...props}
         >
           {/* Handle */}
           {showHandle && (
-            <div className="mx-auto mb-4 h-1 w-6 rounded-full bg-popover-line" />
+            <div className="flex justify-center  pb-1">
+              <div className="w-8.5 h-1 rounded-full bg-popover-line" />
+            </div>
           )}
 
           {/* Header */}
           {title && (
-            <DrawerHeader className={cn('text-center px-4', headerClassName)}>
-              <DrawerTitle className="text-md">{title}</DrawerTitle>
+            <DrawerHeader className={cn('sr-only', headerClassName)}>
+              <DrawerTitle className="sr-only">{title}</DrawerTitle>
             </DrawerHeader>
           )}
 

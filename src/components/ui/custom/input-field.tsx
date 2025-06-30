@@ -38,8 +38,9 @@ export function InputField({
     <div className="relative w-full">
       <Input
         className={cn(
-          'text-card-foreground text-sm border-2 bg-card rounded-xl border-border',
+          'text-card-foreground text-sm border-2 bg-card rounded-xl border-border truncate',
           'focus:border-ring',
+          showClear && 'pr-12',
           className
         )}
         value={value}

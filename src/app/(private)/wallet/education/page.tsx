@@ -1,14 +1,11 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
 import { Separator } from '@/components/ui/separator'
 import { InfoIcon, MapPin, Phone } from 'lucide-react'
+import { useState } from 'react'
+import { EducationFrequencyInfoDrawerContent } from '../../components/drawer-contents/education-frequency-info-drawer-content'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { getFrequenciaEscolarTextClass } from '../../components/utils'
 import { WalletEducationCard } from '../../components/wallet-education-card'
@@ -17,6 +14,8 @@ const frequenciaEscolar = '85,32'
 const conceito = 'Muito Bom'
 
 function DesempenhoSection() {
+  const [showFrequencySheet, setShowFrequencySheet] = useState(false)
+
   return (
     <div className="p-6">
       <div className="">
@@ -42,31 +41,20 @@ function DesempenhoSection() {
                 <h3 className="text-xs font-medium text-foreground-light">
                   Frequência escolar
                 </h3>
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Frequência Escolar Info"
-                      className="hover:bg-transparent hover:cursor-pointer h-4 w-4 p-0"
-                    >
-                      <InfoIcon className="h-3 w-3 text-foreground-light" />
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent className="p-8 max-w-md mx-auto !rounded-t-3xl">
-                    <div className="flex justify-center pt-0 pb-1">
-                      <div className="w-8.5 h-1 -mt-2 rounded-full bg-popover-line" />
-                    </div>
-                    <DrawerHeader className="sr-only">
-                      <DrawerTitle>Frequência Escolar</DrawerTitle>
-                    </DrawerHeader>
-                    <div className="text-sm text-popover-foreground">
-                      <p className="mt-3">
-                        Frequência escolar do aluno no último trimestre letivo.
-                      </p>
-                    </div>
-                  </DrawerContent>
-                </Drawer>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Frequência Escolar Info"
+                  className="hover:bg-transparent hover:cursor-pointer h-4 w-4 p-0"
+                  onClick={() => setShowFrequencySheet(true)}
+                >
+                  <InfoIcon className="h-3 w-3 text-foreground-light" />
+                </Button>
+
+                <EducationFrequencyInfoDrawerContent
+                  open={showFrequencySheet}
+                  onOpenChange={setShowFrequencySheet}
+                />
               </div>
               <div className="space-y-1 text-foreground">
                 <p

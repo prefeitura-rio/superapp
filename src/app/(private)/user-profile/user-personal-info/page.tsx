@@ -6,7 +6,8 @@ import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Pen } from 'lucide-react'
 import { ActionDiv } from '../../components/action-div'
-import { RaceDrawerContent } from '../../components/race-drawer-content'
+import { RaceDrawerContent } from '../../components/drawer-contents/race-drawer-content'
+import { SocialNameDrawerContent } from '../../components/drawer-contents/social-name-drawer-content'
 import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function PersonalInfoForm() {
@@ -59,12 +60,12 @@ export default async function PersonalInfoForm() {
             isEditable={false}
           />
 
-          <CustomInput
-            id="socialName"
+          <ActionDiv
             label="Nome social"
             tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
-            defaultValue={userInfo?.nome_social || ''}
-            isEditable={false}
+            content={userInfo?.nome_social || ''}
+            drawerContent={<SocialNameDrawerContent />}
+            drawerTitle="Nome social"
           />
 
           <CustomInput
@@ -73,14 +74,15 @@ export default async function PersonalInfoForm() {
             defaultValue={userInfo?.nascimento?.pais || ''}
             isEditable={false}
           />
+
           <ActionDiv
             label="Cor / Raça"
             content={formatRace(userInfo?.raca) || ''}
             variant="default"
             disabled
             rightIcon={<Pen className="text-foreground" />}
-            drawerTitle="Cor / Raça"
             drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
+            drawerTitle="Cor / Raça"
           />
 
           <CustomInput

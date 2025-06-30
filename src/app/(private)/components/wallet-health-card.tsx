@@ -1,18 +1,11 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
 import { EyeIcon, InfoIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { capitalizeFirstLetter } from './utils'
+import { WalletHealthStatusDrawerContent } from './drawer-contents/wallet-health-status-drawer-content'
 
 interface WalletHealthCardProps {
   href: string
@@ -61,6 +54,7 @@ export function WalletHealthCard({
   gapClass = `${showEyeButton ? 'gap-0' : 'gap-8'}`,
 }: WalletHealthCardProps) {
   const [showDetails, setShowDetails] = useState(false)
+  const [showStatusSheet, setShowStatusSheet] = useState(false)
 
   return (
     <Link href={href}>
@@ -94,46 +88,23 @@ export function WalletHealthCard({
                       <div className="flex items-center gap-1">
                         <span className="text-xs block">{statusLabel}</span>
                         {showInfoButton && (
-                          <Drawer>
-                            <DrawerTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Status Info"
-                                className="hover:bg-transparent hover:cursor-pointer"
-                              >
-                                <InfoIcon className="h-4 w-4" />
-                              </Button>
-                            </DrawerTrigger>
-                            <DrawerContent className="p-8 max-w-md mx-auto !rounded-t-3xl">
-                              <div className="flex justify-center pt-0 pb-1">
-                                <div className="w-8.5 h-1 -mt-2 rounded-full bg-popover-line" />
-                              </div>
-                              <DrawerHeader className="sr-only">
-                                <DrawerTitle>título</DrawerTitle>
-                              </DrawerHeader>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span
-                                  className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-3 border-background/60`}
-                                />
-                                <span
-                                  className={`${statusTextClassMap[color ?? ''] || ''} font-medium text-lg`}
-                                >
-                                  {color && capitalizeFirstLetter(color)}
-                                </span>
-                              </div>
-                              <div className="text-base text-black mt-2">
-                                {color === 'verde' &&
-                                  'A Clínica está funcionando normalmente. Os atendimentos seguem como de costume, com todos os serviços.'}
-                                {color === 'amarelo' &&
-                                  'Essa área está com risco moderado. A equipe de saúde continuará trabalhando, mas não realizará visitas domiciliares.'}
-                                {color === 'laranja' &&
-                                  'Essa área estava em situação de risco alto, e passa por reavaliação de segurança. Os atendimentos seguem somente dentro da unidade.'}
-                                {color === 'vermelho' &&
-                                  'Essa área está em situação de risco grave. A unidade será fechada por segurança. Consulte a situação da unidade dentro de algumas horas.'}
-                              </div>
-                            </DrawerContent>
-                          </Drawer>
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Status Info"
+                              className="hover:bg-transparent hover:cursor-pointer"
+                              onClick={() => setShowStatusSheet(true)}
+                            >
+                              <InfoIcon className="h-4 w-4" />
+                            </Button>
+
+                            <WalletHealthStatusDrawerContent
+                              open={showStatusSheet}
+                              onOpenChange={setShowStatusSheet}
+                              color={color ?? ''}
+                            />
+                          </>
                         )}
                       </div>
                       <div className="flex items-center gap-1 mt-1">
