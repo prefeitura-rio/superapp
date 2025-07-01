@@ -4,6 +4,7 @@ import PhoneInputForm from '@/app/(private)/components/phone-input-form'
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import {
   Drawer,
   DrawerContent,
@@ -78,14 +79,15 @@ export default function PhoneNumberForm() {
           country={country}
           onCountryChange={setCountry}
         />
-        <Button
-          size="lg"
-          className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 rounded-lg font-normal"
+        <CustomButton
+          size="xl"
           onClick={handleSave}
+          variant="primary"
+          fullWidth
           disabled={isPending || !isPhoneValid}
         >
           {isPending ? 'Enviando...' : 'Enviar'}
-        </Button>
+        </CustomButton>
       </div>
 
       {/* Drawer for feedback after email update */}

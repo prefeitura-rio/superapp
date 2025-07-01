@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import {
   BottomSheet,
   BottomSheetFooter,
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useRouter } from 'next/navigation'
 import type { UseFormReturn } from 'react-hook-form'
+import { CustomButton } from '../../../../components/ui/custom/custom-button'
 import type { AddressFormSchema } from '../../user-profile/user-address/address-form/page'
 
 interface AddressDetailsDrawerContentProps {
@@ -164,19 +164,20 @@ export function AddressDetailsDrawerContent({
               Sem CEP
             </Label>
           </div>
-          <BottomSheetFooter>
-            <Button
+          <BottomSheetFooter className="px-0 gap-1.5">
+            <CustomButton
               size="lg"
-              className="flex-1 py-4 text-base"
+              className="flex-1 py-2 text-sm font-normal"
               type="submit"
               disabled={isSubmitting}
+              loading={isSubmitting}
             >
               {isSubmitting ? 'Salvando...' : 'Salvar'}
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               size="lg"
-              className="flex-1 py-4 text-base border"
-              variant="secondary"
+              className="flex-1 py-2 text-sm font-normal"
+              variant="outline"
               type="button"
               onClick={() => {
                 setDrawerOpen(false)
@@ -184,7 +185,7 @@ export function AddressDetailsDrawerContent({
               }}
             >
               Cancelar
-            </Button>
+            </CustomButton>
           </BottomSheetFooter>
         </form>
       </div>
