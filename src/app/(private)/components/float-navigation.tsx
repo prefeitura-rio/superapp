@@ -26,7 +26,7 @@ export function FloatNavigation() {
 
   return (
     <>
-      <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
         <nav className="flex items-center shadow-md justify-center gap-2 rounded-full bg-background px-2 py-2 backdrop-blur-sm">
           {navItems.map(item => {
             const isActive = pathname === item.href
@@ -41,7 +41,7 @@ export function FloatNavigation() {
               >
                 <div
                   className={cn(
-                    'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
+                    'flex h-14 w-14 items-center justify-center rounded-full transition-colors',
                     isActive ? 'bg-primary' : 'hover:bg-card'
                   )}
                 >
