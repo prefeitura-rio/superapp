@@ -1,5 +1,5 @@
+import { ChevronRightIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import type React from 'react'
 
@@ -37,7 +37,7 @@ export function MenuItem({
             {icon}
             <span>{label}</span>
           </div>
-          <ChevronRight className="h-5 w-5 text-primary" />
+          <ChevronRightIcon className="h-5 w-5 text-primary" />
         </button>
       </div>
     )
@@ -55,7 +55,7 @@ export function MenuItem({
           {icon}
           <span>{label}</span>
         </div>
-        <ChevronRight className="h-5 w-5 text-primary" />
+        <ChevronRightIcon className="h-5 w-5 text-primary" />
       </Link>
     </div>
   )
