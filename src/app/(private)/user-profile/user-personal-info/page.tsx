@@ -1,10 +1,10 @@
+import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { Pen } from 'lucide-react'
 import { ActionDiv } from '../../components/action-div'
 import { RaceDrawerContent } from '../../components/drawer-contents/race-drawer-content'
 import { SocialNameDrawerContent } from '../../components/drawer-contents/social-name-drawer-content'
@@ -80,7 +80,7 @@ export default async function PersonalInfoForm() {
             content={formatRace(userInfo?.raca) || ''}
             variant="default"
             disabled
-            rightIcon={<Pen className="text-foreground" />}
+            rightIcon={<EditIcon />}
             drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
             drawerTitle="Cor / Raça"
           />
@@ -110,7 +110,7 @@ export default async function PersonalInfoForm() {
             )}
             variant="default"
             disabled
-            rightIcon={<Pen className="text-foreground" />}
+            rightIcon={<EditIcon />}
             redirectLink="/user-profile/user-personal-info/user-phone-number"
           />
 
@@ -121,7 +121,7 @@ export default async function PersonalInfoForm() {
             content={userInfo?.email?.principal?.valor || ''}
             variant="default"
             disabled
-            rightIcon={<Pen className="text-foreground" />}
+            rightIcon={<EditIcon />}
             redirectLink="/user-profile/user-personal-info/user-email"
           />
         </div>
