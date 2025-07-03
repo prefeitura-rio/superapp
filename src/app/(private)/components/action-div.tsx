@@ -1,8 +1,8 @@
 'use client'
 
+import { InfoIcon } from '@/assets/icons/info-icon'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { Info } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { BottomSheet } from '../../../components/ui/custom/bottom-sheet'
@@ -154,9 +154,9 @@ export const ActionDiv = ({
 
             {tooltip && (
               <div className="relative">
-                <Info
+                <InfoIcon
                   className={cn(
-                    'h-4 w-4 cursor-help',
+                    'h-5 w-5 cursor-help',
                     tooltipIconVariantStyles[variant]
                   )}
                   onClick={handleDrawerOpen('tooltip')}
