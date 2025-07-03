@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `${rootUrl}/search/multi?q=${q}&llm_reorder=false&cs=carioca-digital,1746,pref-rio`,
+      `${rootUrl}?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=10`,
       {
         headers,
       }
@@ -26,7 +26,13 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json()
-    return NextResponse.json(data)
+
+    // Transform the new format to the old format expected by the frontend
+    const transformedData = {
+      result: data.hits ? data.hits.map((hit: any) => hit.document) : [],
+    }
+
+    return NextResponse.json(transformedData)
   } catch (error) {
     console.error('Error fetching data:', error)
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
