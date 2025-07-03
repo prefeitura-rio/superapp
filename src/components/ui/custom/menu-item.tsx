@@ -1,7 +1,7 @@
 'use-client'
 
+import { ChevronRightIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { forwardRef } from 'react'
 import type { MenuItemProps } from '../../../types/menu-items'
@@ -46,7 +46,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
           {icon}
           <span>{label}</span>
         </div>
-        <ChevronRight className="h-5 w-5 text-primary" />
+        <ChevronRightIcon className="h-5 w-5 text-primary" />
       </Link>
     )
   }
