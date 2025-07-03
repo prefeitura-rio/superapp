@@ -1,6 +1,6 @@
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { FloatNavigation } from '../components/float-navation'
+import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
 import SuggestionCards from '../components/suggestion-cards'

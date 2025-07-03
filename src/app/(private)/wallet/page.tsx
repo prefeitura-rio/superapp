@@ -1,4 +1,4 @@
-import { FloatNavigation } from '../components/float-navation'
+import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
 import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
 import { WalletEducationCard } from '../components/wallet-education-card'

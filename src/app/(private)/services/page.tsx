@@ -1,7 +1,7 @@
 'use client'
 
 import { CategoryGrid } from '../components/category-grid'
-import { FloatNavigation } from '../components/float-navation'
+import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
 import { ServiceCategories } from '../components/service-categories'
