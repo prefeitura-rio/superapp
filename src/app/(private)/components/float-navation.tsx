@@ -1,8 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Home, LayoutGrid, Wallet } from 'lucide-react'
 
+import { HomeIcon, ServicesIcon, WalletIcon } from '@/assets/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -14,9 +14,9 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/services', icon: LayoutGrid, label: 'Dashboard' },
-  { href: '/wallet', icon: Wallet, label: 'Wallet' },
+  { href: '/', icon: HomeIcon, label: 'Home' },
+  { href: '/services', icon: ServicesIcon, label: 'Dashboard' },
+  { href: '/wallet', icon: WalletIcon, label: 'Wallet' },
 ]
 
 export function FloatNavigation() {
@@ -47,10 +47,8 @@ export function FloatNavigation() {
                 >
                   <Icon
                     className={cn(
-                      'h-6 w-6 transition-colors',
-                      isActive
-                        ? 'text-background'
-                        : 'text-foreground'
+                      'h-6 w-6 transition-colors text-foreground',
+                      isActive && 'text-background'
                     )}
                   />
                 </div>
