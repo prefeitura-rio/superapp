@@ -1,4 +1,4 @@
-import { Search, User } from 'lucide-react'
+import { SearchIcon, UserIcon } from '@/assets/icons'
 import Link from 'next/link'
 
 interface Notification {
@@ -23,12 +23,12 @@ export default function MainHeader() {
 
         <div className="flex items-center space-x-2">
           <Link href="/search" className="rounded-full bg-card p-4">
-            <Search className="h-5 w-5" />
+            <SearchIcon className="text-foreground h-5 w-5" />
             <span className="sr-only">Search</span>
           </Link>
 
           <Link href="/user-profile" className="rounded-full bg-card p-4">
-            <User className="h-5 w-5" />
+            <UserIcon className="h-5 w-5" />
             <span className="sr-only">User Settings</span>
           </Link>
         </div>
