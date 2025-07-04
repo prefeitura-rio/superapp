@@ -70,7 +70,6 @@ export default function CarteiraSection({
         {/* Card 3: Assistência social */}
         <div className="sticky top-30">
           <WalletSocialAssistanceCard
-            showEyeButton={true}
             href="/wallet/social-assistance"
             title="CADÚNICO"
             name={

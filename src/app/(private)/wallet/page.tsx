@@ -1,3 +1,6 @@
+import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
 import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
@@ -5,7 +8,28 @@ import { WalletEducationCard } from '../components/wallet-education-card'
 import { WalletHealthCard } from '../components/wallet-health-card'
 import { WalletSocialAssistanceCard } from '../components/wallet-social-assistance-card'
 
-export default function Wallet() {
+export default async function Wallet() {
+  const userAuthInfo = await getUserInfoFromToken()
+  let walletData
+
+  if (userAuthInfo.cpf) {
+    try {
+      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
+        cache: 'force-cache',
+      })
+      if (walletResponse.status === 200) {
+        walletData = walletResponse.data
+      } else {
+        console.error(
+          'Failed to fetch wallet data status:',
+          walletResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
+    }
+  }
+
   return (
     <>
       <MainHeader />
@@ -20,11 +44,21 @@ export default function Wallet() {
               <WalletHealthCard
                 href="/wallet/health"
                 title="CLÍNICA DA FAMÍLIA"
-                name="Maria Sebastiana"
+                name={
+                  walletData?.saude?.clinica_familia?.nome || 'Não disponível'
+                }
                 statusLabel="Situação"
-                statusValue="Aberto"
+                statusValue={getOperatingStatus(
+                  walletData?.saude?.clinica_familia?.horario_atendimento
+                )}
                 extraLabel="Horário de atendimento"
-                extraValue="7h às 18h"
+                extraValue={
+                  walletData?.saude?.clinica_familia?.horario_atendimento ||
+                  'Não informado'
+                }
+                address={walletData?.saude?.clinica_familia?.endereco}
+                phone={walletData?.saude?.clinica_familia?.telefone}
+                email={walletData?.saude?.clinica_familia?.email}
               />
             </div>
 
@@ -33,11 +67,19 @@ export default function Wallet() {
               <WalletEducationCard
                 href="/wallet/education"
                 title="ESCOLA"
-                name="Maria Sebastiana"
+                name={walletData?.educacao?.escola?.nome || 'Não disponível'}
                 statusLabel="Status"
-                statusValue="Aberto"
+                statusValue={getOperatingStatus(
+                  walletData?.educacao?.escola?.horario_funcionamento
+                )}
                 extraLabel="Horário de Atendimento"
-                extraValue="7h às 18h"
+                extraValue={
+                  walletData?.educacao?.escola?.horario_funcionamento ||
+                  'Não informado'
+                }
+                address={walletData?.educacao?.escola?.endereco}
+                phone={walletData?.educacao?.escola?.telefone}
+                email={walletData?.educacao?.escola?.email}
               />
             </div>
 
@@ -46,11 +88,16 @@ export default function Wallet() {
               <WalletSocialAssistanceCard
                 href="/wallet/social-assistance"
                 title="CADÚNICO"
-                name="2653 1337 6854"
+                name={
+                  walletData?.assistencia_social?.cras?.nome || 'Não disponível'
+                }
                 statusLabel="Situação"
                 statusValue="Atualizar"
                 extraLabel="Data de recadastramento"
                 extraValue="18.12.2025"
+                crasName={walletData?.assistencia_social?.cras?.nome}
+                address={walletData?.assistencia_social?.cras?.endereco}
+                phone={walletData?.assistencia_social?.cras?.telefone}
               />
             </div>
 
