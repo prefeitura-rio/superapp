@@ -1,20 +1,28 @@
-'use client'
-
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { InfoIcon, MapPin, Phone } from 'lucide-react'
-import { useState } from 'react'
-import { EducationFrequencyInfoDrawerContent } from '../../components/drawer-contents/education-frequency-info-drawer-content'
+import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { MapPin, Phone } from 'lucide-react'
+import { FrequencyInfoButton } from '../../components/frequency-info-button'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { getFrequenciaEscolarTextClass } from '../../components/utils'
 import { WalletEducationCard } from '../../components/wallet-education-card'
 
-const frequenciaEscolar = '85,32'
-const conceito = 'Muito Bom'
+interface DesempenhoSectionProps {
+  educationData?: {
+    aluno?: {
+      conceito?: string
+      frequencia?: number
+    }
+  }
+}
 
-function DesempenhoSection() {
-  const [showFrequencySheet, setShowFrequencySheet] = useState(false)
+function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
+  const conceito = educationData?.aluno?.conceito || 'Não disponível'
+  const frequencia = educationData?.aluno?.frequencia
+    ? (educationData.aluno.frequencia * 100).toFixed(2)
+    : '0'
 
   return (
     <div className="p-6">
@@ -23,7 +31,7 @@ function DesempenhoSection() {
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
-            {/* Doctors Section */}
+            {/* Conceito Section */}
             <div className="space-y-1 px-5">
               <h3 className="text-xs font-medium text-foreground-light">
                 Conceito
@@ -41,26 +49,13 @@ function DesempenhoSection() {
                 <h3 className="text-xs font-medium text-foreground-light">
                   Frequência escolar
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Frequência Escolar Info"
-                  className="hover:bg-transparent hover:cursor-pointer h-4 w-4 p-0"
-                  onClick={() => setShowFrequencySheet(true)}
-                >
-                  <InfoIcon className="h-3 w-3 text-foreground-light" />
-                </Button>
-
-                <EducationFrequencyInfoDrawerContent
-                  open={showFrequencySheet}
-                  onOpenChange={setShowFrequencySheet}
-                />
+                <FrequencyInfoButton />
               </div>
               <div className="space-y-1 text-foreground">
                 <p
-                  className={`text-sm font-medium ${getFrequenciaEscolarTextClass(frequenciaEscolar)}`}
+                  className={`text-sm font-medium ${getFrequenciaEscolarTextClass(frequencia)}`}
                 >
-                  {frequenciaEscolar}%
+                  {frequencia}%
                 </p>
               </div>
             </div>
@@ -71,7 +66,40 @@ function DesempenhoSection() {
   )
 }
 
-export default function EducationCardDetail() {
+export default async function EducationCardDetail() {
+  const userAuthInfo = await getUserInfoFromToken()
+  let walletData
+
+  if (userAuthInfo.cpf) {
+    try {
+      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
+        cache: 'force-cache',
+      })
+      if (walletResponse.status === 200) {
+        walletData = walletResponse.data
+      } else {
+        console.error(
+          'Failed to fetch wallet data status:',
+          walletResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
+    }
+  }
+
+  const educationData = walletData?.educacao
+  const escola = educationData?.escola
+
+  // Build dynamic links with real data
+  const phoneUrl = escola?.telefone ? `tel:${escola.telefone}` : '#'
+  const whatsappUrl = escola?.whatsapp
+    ? `https://wa.me/${escola.whatsapp.replace(/\D/g, '')}`
+    : '#'
+  const mapUrl = escola?.endereco
+    ? `https://www.google.com/maps?q=${encodeURIComponent(escola.endereco)}`
+    : '#'
+
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
@@ -80,11 +108,14 @@ export default function EducationCardDetail() {
           <WalletEducationCard
             href="#"
             title="ESCOLA"
-            name="Escola Municipal Geyner EleuThério Rodrigues"
+            name={escola?.nome || 'Não disponível'}
             statusLabel="Status"
-            statusValue="Atualizar"
+            statusValue={getOperatingStatus(escola?.horario_funcionamento)}
             extraLabel="Horário de Atendimento"
-            extraValue="7h às 18h"
+            extraValue={escola?.horario_funcionamento || 'Não informado'}
+            address={escola?.endereco}
+            phone={escola?.telefone}
+            email={escola?.email}
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
@@ -93,7 +124,7 @@ export default function EducationCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href="tel:(21)997015128" className="flex flex-col items-center">
+            <a href={phoneUrl} className="flex flex-col items-center">
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
                 <Phone className="h-5" />
               </div>
@@ -107,7 +138,7 @@ export default function EducationCardDetail() {
               </div>
             </a>
             <a
-              href="https://wa.me/+5521997015128"
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -120,12 +151,12 @@ export default function EducationCardDetail() {
                   Whatsapp
                 </span>
                 <span className="text-gray-300 text-xs font-normal">
-                  equipe
+                  escola
                 </span>
               </div>
             </a>
             <a
-              href="https://www.google.com/maps?q='rua lucio de mendonça 17'"
+              href={mapUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -142,7 +173,7 @@ export default function EducationCardDetail() {
           </div>
         </div>
       </div>
-      <DesempenhoSection />
+      <DesempenhoSection educationData={educationData} />
     </div>
   )
 }

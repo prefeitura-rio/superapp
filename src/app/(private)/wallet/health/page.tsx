@@ -1,14 +1,35 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { WalletHealthCard } from '../../components/wallet-health-card'
 
-function TeamPage() {
+interface TeamPageProps {
+  healthData?: {
+    clinica_familia?: {
+      nome?: string
+    }
+    equipe_saude_familia?: {
+      nome?: string
+      medicos?: Array<{ id_profissional_sus: string; nome: string }>
+      enfermeiros?: Array<{ id_profissional_sus: string; nome: string }>
+    }
+  }
+}
+
+function TeamPage({ healthData }: TeamPageProps) {
+  const medicos = healthData?.equipe_saude_familia?.medicos || []
+  const enfermeiros = healthData?.equipe_saude_familia?.enfermeiros || []
+  const teamName =
+    healthData?.equipe_saude_familia?.nome || 'Equipe não disponível'
+
   return (
     <div className="p-6">
       <div className="">
-        <h2 className="text-base pb-4">Equipe Monteiro Lobato</h2>
+        <h2 className="text-base pb-4">{teamName}</h2>
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
@@ -18,9 +39,15 @@ function TeamPage() {
                 Médicos e médicas
               </h3>
               <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+                {medicos.length > 0 ? (
+                  medicos.map((medico, index) => (
+                    <p key={index} className="font-medium">
+                      {medico.nome}
+                    </p>
+                  ))
+                ) : (
+                  <p className="font-medium text-gray-400">Não disponível</p>
+                )}
               </div>
             </div>
 
@@ -32,9 +59,15 @@ function TeamPage() {
                 Enfermeiros e Enfermeiras
               </h3>
               <div className="text-sm space-y-1 text-foreground">
-                <p className="font-medium">Beatriz Camargo</p>
-                <p className="font-medium">Luana Tavares Quintanilha</p>
-                <p className="font-medium">Felipe Antunes Bastos</p>
+                {enfermeiros.length > 0 ? (
+                  enfermeiros.map((enfermeiro, index) => (
+                    <p key={index} className="font-medium">
+                      {enfermeiro.nome}
+                    </p>
+                  ))
+                ) : (
+                  <p className="font-medium text-gray-400">Não disponível</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -44,7 +77,37 @@ function TeamPage() {
   )
 }
 
-export default function HealthCardDetail() {
+export default async function HealthCardDetail() {
+  const userAuthInfo = await getUserInfoFromToken()
+  let walletData
+
+  if (userAuthInfo.cpf) {
+    try {
+      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
+        cache: 'force-cache',
+      })
+      if (walletResponse.status === 200) {
+        walletData = walletResponse.data
+      } else {
+        console.error(
+          'Failed to fetch wallet data status:',
+          walletResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
+    }
+  }
+
+  const healthData = walletData?.saude
+  const clinica = healthData?.clinica_familia
+
+  // Build dynamic links with real data
+  const phoneUrl = clinica?.telefone ? `tel:${clinica.telefone}` : '#'
+  const mapUrl = clinica?.endereco
+    ? `https://www.google.com/maps?q=${encodeURIComponent(clinica.endereco)}`
+    : '#'
+
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
@@ -53,11 +116,14 @@ export default function HealthCardDetail() {
           <WalletHealthCard
             href="#"
             title="CLÍNICA DA FAMÍLIA"
-            name="Maria Sebastiana"
+            name={clinica?.nome || 'Não disponível'}
             statusLabel="Situação"
-            statusValue="Aberto"
-            extraLabel="Data de recadastramento"
-            extraValue="18.12.2025"
+            statusValue={getOperatingStatus(clinica?.horario_atendimento)}
+            extraLabel="Horário de atendimento"
+            extraValue={clinica?.horario_atendimento || 'Não informado'}
+            address={clinica?.endereco}
+            phone={clinica?.telefone}
+            email={clinica?.email}
             bgClass="bg-blue-100"
             color="verde"
             showEyeButton={true}
@@ -68,7 +134,7 @@ export default function HealthCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href="tel:(21)997015128" className="flex flex-col items-center">
+            <a href={phoneUrl} className="flex flex-col items-center">
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
                 <Phone className="h-5" />
               </div>
@@ -82,7 +148,11 @@ export default function HealthCardDetail() {
               </div>
             </a>
             <a
-              href="https://wa.me/+5521997015128"
+              href={
+                clinica?.telefone
+                  ? `https://wa.me/${clinica.telefone.replace(/\D/g, '')}`
+                  : '#'
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -100,7 +170,7 @@ export default function HealthCardDetail() {
               </div>
             </a>
             <a
-              href="https://www.google.com/maps?q='rua lucio de mendonça 17'"
+              href={mapUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -132,7 +202,7 @@ export default function HealthCardDetail() {
           </div>
         </div>
       </div>
-      <TeamPage />
+      <TeamPage healthData={healthData as any} />
     </div>
   )
 }

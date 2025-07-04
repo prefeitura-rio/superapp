@@ -1,4 +1,8 @@
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import {
+  formatRecadastramentoDate,
+  getCadUnicoStatus,
+} from '@/lib/cadunico-utils'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
@@ -92,9 +96,14 @@ export default async function Wallet() {
                   walletData?.assistencia_social?.cras?.nome || 'Não disponível'
                 }
                 statusLabel="Situação"
-                statusValue="Atualizar"
+                statusValue={getCadUnicoStatus(
+                  walletData?.assistencia_social?.cadunico
+                )}
                 extraLabel="Data de recadastramento"
-                extraValue="18.12.2025"
+                extraValue={formatRecadastramentoDate(
+                  walletData?.assistencia_social?.cadunico
+                    ?.data_limite_cadastro_atual
+                )}
                 crasName={walletData?.assistencia_social?.cras?.nome}
                 address={walletData?.assistencia_social?.cras?.endereco}
                 phone={walletData?.assistencia_social?.cras?.telefone}
