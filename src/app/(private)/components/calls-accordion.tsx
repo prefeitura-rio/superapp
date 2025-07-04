@@ -55,63 +55,65 @@ export function CallsAccordion({ requests }: CallsAccordionProps) {
               </div>
             ) : null}
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   Tipo de chamado
                 </span>
-                <span className="text-card-foreground font-medium">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.tipo || '-'}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   Subtipo do chamado
                 </span>
-                <span className="text-card-foreground font-medium text-right">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.subtipo || '-'}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   {getMaintenanceRequestDateLabel(request.status || '')}
                 </span>
-                <span className="text-card-foreground font-medium">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {getMaintenanceRequestDateValue(request)}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">Órgão</span>
-                <span className="text-card-foreground font-medium">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
+                  Órgão
+                </span>
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.nome_unidade_organizacional || '-'}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   Status do chamado
                 </span>
-                <span className="text-card-foreground font-medium">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {getMaintenanceRequestDisplayStatus(request.status || '')}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   Origem do chamado
                 </span>
-                <span className="text-card-foreground font-medium">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.origem_ocorrencia || '-'}
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-foreground-light pr-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-foreground-light whitespace-nowrap">
                   Endereço da solicitação
                 </span>
-                <span className="text-card-foreground font-medium text-right max-w-[60%]">
+                <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.id_bairro || 'Não informado'}
                 </span>
               </div>
