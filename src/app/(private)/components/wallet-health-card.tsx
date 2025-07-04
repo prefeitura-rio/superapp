@@ -33,12 +33,6 @@ const statusBgClassMap: Record<string, string> = {
   laranja: 'bg-card-5',
   vermelho: 'bg-destructive',
 }
-const statusTextClassMap: Record<string, string> = {
-  verde: 'text-card-3',
-  amarelo: 'text-card-5',
-  laranja: 'text-card-5',
-  vermelho: 'text-destructive',
-}
 
 export function WalletHealthCard({
   href,
@@ -109,6 +103,7 @@ export function WalletHealthCard({
                               open={showStatusSheet}
                               onOpenChange={setShowStatusSheet}
                               color={color ?? ''}
+                              statusValue={statusValue}
                             />
                           </>
                         )}

@@ -7,6 +7,7 @@ interface WalletHealthStatusDrawerContentProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   color: string
+  statusValue?: string
 }
 
 const statusBgClassMap: Record<string, string> = {
@@ -27,7 +28,10 @@ export function WalletHealthStatusDrawerContent({
   open,
   onOpenChange,
   color,
+  statusValue,
 }: WalletHealthStatusDrawerContentProps) {
+  const displayStatus = statusValue || capitalizeFirstLetter(color)
+
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Status">
       <div className="flex items-center gap-2 mb-2">
@@ -37,19 +41,15 @@ export function WalletHealthStatusDrawerContent({
         <span
           className={`${statusTextClassMap[color] || ''} font-medium text-lg`}
         >
-          {capitalizeFirstLetter(color)}
+          {displayStatus}
         </span>
       </div>
 
       <div className="text-base text-foreground">
-        {color === 'verde' &&
-          'A Clínica está funcionando normalmente. Os atendimentos seguem como de costume, com todos os serviços.'}
-        {color === 'amarelo' &&
-          'Essa área está com risco moderado. A equipe de saúde continuará trabalhando, mas não realizará visitas domiciliares.'}
-        {color === 'laranja' &&
-          'Essa área estava em situação de risco alto, e passa por reavaliação de segurança. Os atendimentos seguem somente dentro da unidade.'}
-        {color === 'vermelho' &&
-          'Essa área está em situação de risco grave. A unidade será fechada por segurança. Consulte a situação da unidade dentro de algumas horas.'}
+        {(statusValue === 'Aberto' || color === 'verde') &&
+          'A Clínica está funcionando normalmente. Consulte a unidade para mais informações. Finais de semana e feriados podem ter horários diferentes.'}
+        {(statusValue === 'Fechado' || color === 'vermelho') &&
+          'A Clínica está fechada. Consulte a unidade para mais informações. Finais de semana e feriados podem ter horários diferentes.'}
       </div>
     </BottomSheet>
   )

@@ -102,6 +102,21 @@ export default async function HealthCardDetail() {
   const healthData = walletData?.saude
   const clinica = healthData?.clinica_familia
 
+  // Get the operating status
+  const statusValue = getOperatingStatus(clinica?.horario_atendimento)
+
+  // Map status to color
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'Aberto':
+        return 'verde'
+      case 'Fechado':
+        return 'vermelho'
+      default:
+        return 'vermelho'
+    }
+  }
+
   // Build dynamic links with real data
   const phoneUrl = clinica?.telefone ? `tel:${clinica.telefone}` : '#'
   const mapUrl = clinica?.endereco
@@ -118,14 +133,14 @@ export default async function HealthCardDetail() {
             title="CLÍNICA DA FAMÍLIA"
             name={clinica?.nome || 'Não disponível'}
             statusLabel="Situação"
-            statusValue={getOperatingStatus(clinica?.horario_atendimento)}
+            statusValue={statusValue}
             extraLabel="Horário de atendimento"
             extraValue={clinica?.horario_atendimento || 'Não informado'}
             address={clinica?.endereco}
             phone={clinica?.telefone}
             email={clinica?.email}
             bgClass="bg-blue-100"
-            color="verde"
+            color={getStatusColor(statusValue)}
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
