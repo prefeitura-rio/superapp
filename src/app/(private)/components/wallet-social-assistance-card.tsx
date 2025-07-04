@@ -22,6 +22,10 @@ interface WalletSocialAssistanceCardProps {
   showEyeButton?: boolean
   showInfoButton?: boolean
   color?: string
+  // Additional props for CRAS data
+  crasName?: string
+  address?: string
+  phone?: string
 }
 
 export function WalletSocialAssistanceCard({
@@ -35,6 +39,9 @@ export function WalletSocialAssistanceCard({
   bgClass,
   icon,
   showEyeButton = false,
+  crasName,
+  address,
+  phone,
   gapClass = `${showEyeButton ? 'gap-0' : 'gap-8'}`,
 }: WalletSocialAssistanceCardProps) {
   const [showDetails, setShowDetails] = useState(false)
@@ -106,7 +113,9 @@ export function WalletSocialAssistanceCard({
               <div className="p-6 justify-between flex flex-col">
                 <div className="flex h-full min-h-[140px] flex-col justify-between">
                   <div>
-                    <span className="text-sm block">CRAS ELIS REGINA</span>
+                    <span className="text-sm block">
+                      {crasName || 'CRAS não disponível'}
+                    </span>
                     <span className="text-sm block">
                       {/* Rua Silveira Martins 161 */}
                     </span>
@@ -114,7 +123,7 @@ export function WalletSocialAssistanceCard({
                   <div>
                     <span className="text-sm opacity-60 block">Endereço</span>
                     <span className="text-sm block">
-                      Rua Edgard Werneck, 1565, Freguesia (Jacarepaguá)
+                      {address || 'Endereço não disponível'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -122,7 +131,9 @@ export function WalletSocialAssistanceCard({
                       <span className="text-sm opacity-60 block">
                         Telefone da unidade
                       </span>
-                      <span className="text-sm block">(21) 3613-8346</span>
+                      <span className="text-sm block">
+                        {phone || 'Telefone não disponível'}
+                      </span>
                     </div>
                     <Button
                       className="rounded-full bg-wallet-2b size-10 hover:bg-wallet-2b hover:cursor-pointer"

@@ -1,4 +1,4 @@
-import { getCitizenCpf } from '@/http/citizen/citizen'
+import { getCitizenCpf, getCitizenCpfWallet } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
@@ -9,6 +9,8 @@ import CarteiraSection from '../components/wallet-section'
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
   let userInfo
+  let walletData
+
   if (userAuthInfo.cpf) {
     try {
       const response = await getCitizenCpf(userAuthInfo.cpf, {
@@ -21,6 +23,23 @@ export default async function Home() {
       }
     } catch (error) {
       console.error('Error fetching user data:', error)
+    }
+
+    // Fetch wallet data
+    try {
+      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
+        cache: 'force-cache',
+      })
+      if (walletResponse.status === 200) {
+        walletData = walletResponse.data
+      } else {
+        console.error(
+          'Failed to fetch wallet data status:',
+          walletResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
     }
   }
 
@@ -41,7 +60,7 @@ export default async function Home() {
       <MostAccessedServiceCards />
 
       {/* Carteira section */}
-      <CarteiraSection />
+      <CarteiraSection walletData={walletData} />
       <FloatNavigation />
     </main>
   )

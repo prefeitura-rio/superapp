@@ -1,10 +1,18 @@
+import type { ModelsCitizenWallet } from '@/http/models'
+import { getOperatingStatus } from '@/lib/clinic-operating-status'
 import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
 import { WalletHealthCard } from './wallet-health-card'
 import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
 
-export default function CarteiraSection() {
+interface CartereiraSectionProps {
+  walletData?: ModelsCitizenWallet
+}
+
+export default function CarteiraSection({
+  walletData,
+}: CartereiraSectionProps) {
   return (
     <section className="px-5 mt-6 pb-24">
       <div className="sticky top-20 flex items-center justify-between mb-4">
@@ -22,11 +30,19 @@ export default function CarteiraSection() {
           <WalletHealthCard
             href="/wallet/health"
             title="CLÍNICA DA FAMÍLIA"
-            name="Maria Sebastiana"
+            name={walletData?.saude?.clinica_familia?.nome || 'Não disponível'}
             statusLabel="Situação"
-            statusValue="Aberto"
+            statusValue={getOperatingStatus(
+              walletData?.saude?.clinica_familia?.horario_atendimento
+            )}
             extraLabel="Horário de atendimento"
-            extraValue="7h às 18h"
+            extraValue={
+              walletData?.saude?.clinica_familia?.horario_atendimento ||
+              'Não informado'
+            }
+            address={walletData?.saude?.clinica_familia?.endereco}
+            phone={walletData?.saude?.clinica_familia?.telefone}
+            email={walletData?.saude?.clinica_familia?.email}
           />
         </div>
 
@@ -35,24 +51,38 @@ export default function CarteiraSection() {
           <WalletEducationCard
             href="/wallet/education"
             title="ESCOLA"
-            name="Maria Sebastiana"
+            name={walletData?.educacao?.escola?.nome || 'Não disponível'}
             statusLabel="Status"
-            statusValue="Aberto"
+            statusValue={getOperatingStatus(
+              walletData?.educacao?.escola?.horario_funcionamento
+            )}
             extraLabel="Horário de atendimento"
-            extraValue="7h às 18h"
+            extraValue={
+              walletData?.educacao?.escola?.horario_funcionamento ||
+              'Não informado'
+            }
+            address={walletData?.educacao?.escola?.endereco}
+            phone={walletData?.educacao?.escola?.telefone}
+            email={walletData?.educacao?.escola?.email}
           />
         </div>
 
         {/* Card 3: Assistência social */}
         <div className="sticky top-30">
           <WalletSocialAssistanceCard
+            showEyeButton={true}
             href="/wallet/social-assistance"
             title="CADÚNICO"
-            name="2653 1337 6854"
+            name={
+              walletData?.assistencia_social?.cras?.nome || 'Não disponível'
+            }
             statusLabel="Situação"
             statusValue="Atualizar"
             extraLabel="Data de recadastramento"
             extraValue="18.12.2025"
+            crasName={walletData?.assistencia_social?.cras?.nome}
+            address={walletData?.assistencia_social?.cras?.endereco}
+            phone={walletData?.assistencia_social?.cras?.telefone}
           />
         </div>
 

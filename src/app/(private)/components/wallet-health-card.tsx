@@ -22,6 +22,9 @@ interface WalletHealthCardProps {
   showEyeButton?: boolean
   showInfoButton?: boolean
   color?: string
+  address?: string
+  phone?: string
+  email?: string
 }
 
 const statusBgClassMap: Record<string, string> = {
@@ -51,6 +54,9 @@ export function WalletHealthCard({
   showEyeButton = false,
   showInfoButton = false,
   color,
+  address,
+  phone,
+  email,
   gapClass = `${showEyeButton ? 'gap-0' : 'gap-8'}`,
 }: WalletHealthCardProps) {
   const [showDetails, setShowDetails] = useState(false)
@@ -151,21 +157,25 @@ export function WalletHealthCard({
                   <div>
                     <span className="text-sm opacity-70 block">Endereço</span>
                     <span className="text-sm block">
-                      Rua Silveira Martins 161
+                      {address || 'Endereço não disponível'}
                     </span>
                   </div>
                   <div>
                     <span className="text-sm opacity-70 block">
                       Telefone da unidade
                     </span>
-                    <span className="text-sm block">(21) 3613-8346</span>
+                    <span className="text-sm block">
+                      {phone || 'Telefone não disponível'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-sm opacity-70 block">
                         Email da unidade
                       </span>
-                      <span className="text-sm block">cmsmjf@gmail.com</span>
+                      <span className="text-sm block">
+                        {email || 'Email não disponível'}
+                      </span>
                     </div>
                     <Button
                       className="rounded-full bg-wallet-1b size-10 hover:bg-wallet-1b hover:cursor-pointer"
