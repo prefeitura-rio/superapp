@@ -1,9 +1,43 @@
+import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
+import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { Globe, Phone } from 'lucide-react'
 import Calls from '../../components/calls'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
 
-export default function CaretakerCardDetail() {
+export default async function CaretakerCardDetail() {
+  const userAuthInfo = await getUserInfoFromToken()
+  let maintenanceRequests
+
+  if (userAuthInfo.cpf) {
+    try {
+      const maintenanceResponse = await getCitizenCpfMaintenanceRequest(
+        userAuthInfo.cpf,
+        {
+          page: 1,
+          per_page: 100, // Get all requests : TODO: paginate
+        },
+        {
+          cache: 'force-cache',
+        }
+      )
+      if (maintenanceResponse.status === 200) {
+        maintenanceRequests = maintenanceResponse.data.data
+      } else {
+        console.error(
+          'Failed to fetch maintenance requests status:',
+          maintenanceResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error)
+    }
+  }
+
+  // Calculate maintenance requests statistics
+  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
+
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
@@ -12,17 +46,17 @@ export default function CaretakerCardDetail() {
           <WalletCaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name="3 chamados em aberto"
+            name={`${maintenanceStats.aberto} chamados em aberto`}
             statusLabel="Total de chamados"
-            statusValue="27"
+            statusValue={maintenanceStats.total.toString()}
             extraLabel="Fechados"
-            extraValue="24"
+            extraValue={maintenanceStats.fechados.toString()}
           />
         </div>
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href="tel:(21)997015128" className="flex flex-col items-center">
+            <a href="tel:1746" className="flex flex-col items-center">
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
                 <Phone className="h-5" />
               </div>
@@ -31,12 +65,12 @@ export default function CaretakerCardDetail() {
                   Chamado
                 </span>
                 <span className=" text-gray-300 text-xs font-normal">
-                  whatsapp
+                  telefone
                 </span>
               </div>
             </a>
             <a
-              href="https://wa.me/+5521997015128"
+              href="https://1746.rio/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -56,7 +90,7 @@ export default function CaretakerCardDetail() {
           </div>
         </div>
       </div>
-      <Calls />
+      <Calls maintenanceRequests={maintenanceRequests} />
     </div>
   )
 }

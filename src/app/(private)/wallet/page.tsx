@@ -1,9 +1,13 @@
-import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import {
+  getCitizenCpfMaintenanceRequest,
+  getCitizenCpfWallet,
+} from '@/http/citizen/citizen'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
@@ -15,6 +19,7 @@ import { WalletSocialAssistanceCard } from '../components/wallet-social-assistan
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
   let walletData
+  let maintenanceRequests
 
   if (userAuthInfo.cpf) {
     try {
@@ -32,7 +37,34 @@ export default async function Wallet() {
     } catch (error) {
       console.error('Error fetching wallet data:', error)
     }
+
+    // Fetch maintenance requests data
+    try {
+      const maintenanceResponse = await getCitizenCpfMaintenanceRequest(
+        userAuthInfo.cpf,
+        {
+          page: 1,
+          per_page: 100, // Get all requests: TODO: paginate
+        },
+        {
+          cache: 'force-cache',
+        }
+      )
+      if (maintenanceResponse.status === 200) {
+        maintenanceRequests = maintenanceResponse.data.data
+      } else {
+        console.error(
+          'Failed to fetch maintenance requests status:',
+          maintenanceResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error)
+    }
   }
+
+  // Calculate maintenance requests statistics
+  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
   return (
     <>
@@ -110,16 +142,16 @@ export default async function Wallet() {
               />
             </div>
 
-            {/* Card 3: Zeladoria */}
+            {/* Card 4: Cuidados com a Cidade (1746) */}
             <div className="sticky top-34">
               <WalletCaretakerCard
                 href="/wallet/caretaker"
                 title="CUIDADOS COM A CIDADE"
-                name="3 chamados em aberto"
+                name={`${maintenanceStats.aberto} chamados em aberto`}
                 statusLabel="Total de chamados"
-                statusValue="27"
+                statusValue={maintenanceStats.total.toString()}
                 extraLabel="Fechados"
-                extraValue="24"
+                extraValue={maintenanceStats.fechados.toString()}
               />
             </div>
           </div>

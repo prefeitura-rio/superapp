@@ -1,4 +1,8 @@
-import { getCitizenCpf, getCitizenCpfWallet } from '@/http/citizen/citizen'
+import {
+  getCitizenCpf,
+  getCitizenCpfMaintenanceRequest,
+  getCitizenCpfWallet,
+} from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
@@ -10,6 +14,7 @@ export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
   let userInfo
   let walletData
+  let maintenanceRequests
 
   if (userAuthInfo.cpf) {
     try {
@@ -41,6 +46,30 @@ export default async function Home() {
     } catch (error) {
       console.error('Error fetching wallet data:', error)
     }
+
+    // Fetch maintenance requests data
+    try {
+      const maintenanceResponse = await getCitizenCpfMaintenanceRequest(
+        userAuthInfo.cpf,
+        {
+          page: 1,
+          per_page: 100, // Get all requests for counting : TODO: paginate
+        },
+        {
+          cache: 'force-cache',
+        }
+      )
+      if (maintenanceResponse.status === 200) {
+        maintenanceRequests = maintenanceResponse.data.data
+      } else {
+        console.error(
+          'Failed to fetch maintenance requests status:',
+          maintenanceResponse.data
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error)
+    }
   }
 
   return (
@@ -60,7 +89,10 @@ export default async function Home() {
       <MostAccessedServiceCards />
 
       {/* Carteira section */}
-      <CarteiraSection walletData={walletData} />
+      <CarteiraSection
+        walletData={walletData}
+        maintenanceRequests={maintenanceRequests}
+      />
       <FloatNavigation />
     </main>
   )

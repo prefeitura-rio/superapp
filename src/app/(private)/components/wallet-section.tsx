@@ -1,9 +1,13 @@
-import type { ModelsCitizenWallet } from '@/http/models'
+import type {
+  ModelsCitizenWallet,
+  ModelsMaintenanceRequest,
+} from '@/http/models'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
@@ -12,11 +16,16 @@ import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
 
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
+  maintenanceRequests?: ModelsMaintenanceRequest[]
 }
 
 export default function CarteiraSection({
   walletData,
+  maintenanceRequests,
 }: CartereiraSectionProps) {
+  // Calculate maintenance requests statistics
+  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
+
   return (
     <section className="px-5 mt-6 pb-24">
       <div className="sticky top-20 flex items-center justify-between mb-4">
@@ -94,16 +103,16 @@ export default function CarteiraSection({
           />
         </div>
 
-        {/* Card 3: Zeladoria */}
+        {/* Card 4: Cuidados com a Cidade (1746) */}
         <div className="sticky top-30">
           <WalletCaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name="3 chamados em aberto"
+            name={`${maintenanceStats.aberto} chamados em aberto`}
             statusLabel="Total de chamados"
-            statusValue="27"
+            statusValue={maintenanceStats.total.toString()}
             extraLabel="Fechados"
-            extraValue="24"
+            extraValue={maintenanceStats.fechados.toString()}
           />
         </div>
       </div>
