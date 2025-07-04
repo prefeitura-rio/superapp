@@ -22,7 +22,11 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
   const conceito = educationData?.aluno?.conceito || 'Não disponível'
   const frequencia = educationData?.aluno?.frequencia
     ? (educationData.aluno.frequencia * 100).toFixed(2)
-    : '0'
+    : null
+
+  // Capitalize first letter of conceito
+  const conceitoCapitalized =
+    conceito.charAt(0).toUpperCase() + conceito.slice(1).toLowerCase()
 
   return (
     <div className="p-6">
@@ -37,7 +41,7 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
                 Conceito
               </h3>
               <div className="space-y-1 text-foreground">
-                <p className="text-sm font-medium">{conceito}</p>
+                <p className="text-sm font-medium">{conceitoCapitalized}</p>
               </div>
             </div>
 
@@ -53,9 +57,9 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
               </div>
               <div className="space-y-1 text-foreground">
                 <p
-                  className={`text-sm font-medium ${getFrequenciaEscolarTextClass(frequencia)}`}
+                  className={`text-sm font-medium ${frequencia ? getFrequenciaEscolarTextClass(frequencia) : ''}`}
                 >
-                  {frequencia}%
+                  {frequencia ? `${frequencia}%` : 'Não informado'}
                 </p>
               </div>
             </div>
@@ -124,9 +128,14 @@ export default async function EducationCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href={phoneUrl} className="flex flex-col items-center">
+            <a
+              href={phoneUrl !== '#' ? phoneUrl : undefined}
+              className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
+            >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone className="h-5" />
+                <Phone
+                  className={`h-5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
@@ -138,13 +147,15 @@ export default async function EducationCardDetail() {
               </div>
             </a>
             <a
-              href={whatsappUrl}
+              href={whatsappUrl !== '#' ? whatsappUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone className="h-5" />
+                <Phone
+                  className={`h-5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
@@ -156,13 +167,15 @@ export default async function EducationCardDetail() {
               </div>
             </a>
             <a
-              href={mapUrl}
+              href={mapUrl !== '#' ? mapUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className={`flex flex-col items-center ${mapUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <MapPin className="h-5" />
+                <MapPin
+                  className={`h-5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">

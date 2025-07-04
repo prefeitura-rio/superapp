@@ -46,7 +46,7 @@ function TeamPage({ healthData }: TeamPageProps) {
                     </p>
                   ))
                 ) : (
-                  <p className="font-medium text-gray-400">Não disponível</p>
+                  <p className="font-medium text-foreground">Não disponível</p>
                 )}
               </div>
             </div>
@@ -66,7 +66,7 @@ function TeamPage({ healthData }: TeamPageProps) {
                     </p>
                   ))
                 ) : (
-                  <p className="font-medium text-gray-400">Não disponível</p>
+                  <p className="font-medium text-foreground">Não disponível</p>
                 )}
               </div>
             </div>
@@ -134,9 +134,14 @@ export default async function HealthCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href={phoneUrl} className="flex flex-col items-center">
+            <a
+              href={phoneUrl !== '#' ? phoneUrl : undefined}
+              className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
+            >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone className="h-5" />
+                <Phone
+                  className={`h-5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
@@ -151,14 +156,16 @@ export default async function HealthCardDetail() {
               href={
                 clinica?.telefone
                   ? `https://wa.me/${clinica.telefone.replace(/\D/g, '')}`
-                  : '#'
+                  : undefined
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className={`flex flex-col items-center ${!clinica?.telefone ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone className="h-5" />
+                <Phone
+                  className={`h-5 ${!clinica?.telefone ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
@@ -170,13 +177,15 @@ export default async function HealthCardDetail() {
               </div>
             </a>
             <a
-              href={mapUrl}
+              href={mapUrl !== '#' ? mapUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className={`flex flex-col items-center ${mapUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <MapPin className="h-5" />
+                <MapPin
+                  className={`h-5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">

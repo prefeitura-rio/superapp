@@ -64,42 +64,41 @@ export default async function SocialAssistanceCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            {cras?.telefone && (
-              <a href={phoneUrl} className="flex flex-col items-center">
-                <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                  <Phone className="h-5" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="mt-2 text-foreground text-sm font-normal">
-                    Telefone
-                  </span>
-                  <span className="text-gray-300 text-xs font-normal">
-                    CRAS
-                  </span>
-                </div>
-              </a>
-            )}
+            <a
+              href={phoneUrl !== '#' ? phoneUrl : undefined}
+              className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
+            >
+              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                <Phone
+                  className={`h-5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="mt-2 text-foreground text-sm font-normal">
+                  Telefone
+                </span>
+                <span className="text-gray-300 text-xs font-normal">CRAS</span>
+              </div>
+            </a>
 
-            {cras?.endereco && (
-              <a
-                href={mapUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center"
-              >
-                <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                  <MapPin className="h-5" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="mt-2 text-foreground text-sm font-normal">
-                    Endereço
-                  </span>
-                  <span className="text-gray-300 text-xs font-normal">
-                    CRAS
-                  </span>
-                </div>
-              </a>
-            )}
+            <a
+              href={mapUrl !== '#' ? mapUrl : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex flex-col items-center ${mapUrl === '#' ? 'pointer-events-none' : ''}`}
+            >
+              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                <MapPin
+                  className={`h-5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="mt-2 text-foreground text-sm font-normal">
+                  Endereço
+                </span>
+                <span className="text-gray-300 text-xs font-normal">CRAS</span>
+              </div>
+            </a>
 
             <a
               href="https://cadunico.rio/"
