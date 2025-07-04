@@ -7,7 +7,10 @@ import {
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
-import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import {
+  formatMaintenanceRequestsCount,
+  getMaintenanceRequestStats,
+} from '@/lib/maintenance-requests-utils'
 import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
@@ -108,7 +111,7 @@ export default function CarteiraSection({
           <WalletCaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name={`${maintenanceStats.aberto} chamados em aberto`}
+            name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
             statusLabel="Total de chamados"
             statusValue={maintenanceStats.total.toString()}
             extraLabel="Fechados"

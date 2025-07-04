@@ -112,3 +112,14 @@ export function getMaintenanceRequestDateValue(
   }
   return formatMaintenanceRequestDate(request.data_alvo_finalizacao)
 }
+
+/**
+ * Formats the maintenance requests count with proper singular/plural handling
+ * @param count - Number of open maintenance requests
+ * @returns Formatted string with proper singular/plural
+ */
+export function formatMaintenanceRequestsCount(count: number): string {
+  if (count === 0) return 'Nenhum chamado em aberto'
+  if (count === 1) return '1 chamado em aberto'
+  return `${count} chamados em aberto`
+}

@@ -7,7 +7,10 @@ import {
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
-import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import {
+  formatMaintenanceRequestsCount,
+  getMaintenanceRequestStats,
+} from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import MainHeader from '../components/main-header'
@@ -147,7 +150,7 @@ export default async function Wallet() {
               <WalletCaretakerCard
                 href="/wallet/caretaker"
                 title="CUIDADOS COM A CIDADE"
-                name={`${maintenanceStats.aberto} chamados em aberto`}
+                name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
                 statusLabel="Total de chamados"
                 statusValue={maintenanceStats.total.toString()}
                 extraLabel="Fechados"

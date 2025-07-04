@@ -1,5 +1,8 @@
 import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
-import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import {
+  formatMaintenanceRequestsCount,
+  getMaintenanceRequestStats,
+} from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Globe, Phone } from 'lucide-react'
 import Calls from '../../components/calls'
@@ -46,7 +49,7 @@ export default async function CaretakerCardDetail() {
           <WalletCaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name={`${maintenanceStats.aberto} chamados em aberto`}
+            name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
             statusLabel="Total de chamados"
             statusValue={maintenanceStats.total.toString()}
             extraLabel="Fechados"
