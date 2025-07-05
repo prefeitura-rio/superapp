@@ -11,6 +11,7 @@ import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
+  await new Promise(resolve => setTimeout(resolve, 5000))
   let maintenanceRequests
 
   if (userAuthInfo.cpf) {

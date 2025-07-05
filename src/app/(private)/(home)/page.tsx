@@ -1,5 +1,4 @@
 import {
-  getCitizenCpf,
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
@@ -12,24 +11,10 @@ import CarteiraSection from '../components/wallet-section'
 
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
-  let userInfo
   let walletData
   let maintenanceRequests
 
   if (userAuthInfo.cpf) {
-    try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, {
-        cache: 'force-cache',
-      })
-      if (response.status === 200) {
-        userInfo = response.data
-      } else {
-        console.error('Failed to fetch user data status:', response.data)
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error)
-    }
-
     // Fetch wallet data
     try {
       const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
