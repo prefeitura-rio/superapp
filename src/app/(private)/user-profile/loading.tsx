@@ -15,21 +15,74 @@ export default function UserProfileLoading() {
       </div>
 
       {/* Menu Items Skeleton */}
-      <div className="flex-1 px-5 pt-4">
-        <nav className="space-y-2">
-          {/* Menu Item Skeletons*/}
-          <Skeleton className="h-16 w-full rounded-xl " />
-          <Skeleton className="h-16 w-full rounded-xl " />
-          <Skeleton className="h-16 w-full rounded-xl " />
-          <Skeleton className="h-16 w-full rounded-xl " />
-          <Skeleton className="h-16 w-full rounded-xl " />
-          <Skeleton className="h-16 w-full rounded-xl " />
+      <div className="flex-1 px-5">
+        <nav className="divide-y divide-border">
+          {/* Menu Item Skeletons */}
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
+
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-28" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
+
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
+
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-36" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
+
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-30" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
+
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-28" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
 
           {/* Install PWA Button Skeleton */}
-          <Skeleton className="h-16 w-full rounded-xl " />
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
 
           {/* Logout Button Skeleton */}
-          <Skeleton className="h-16 w-full rounded-xl " />
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-6 rounded" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <Skeleton className="h-5 w-5 rounded-full" />
+          </div>
         </nav>
       </div>
     </div>
