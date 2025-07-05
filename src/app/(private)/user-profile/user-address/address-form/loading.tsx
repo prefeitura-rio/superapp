@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function UserEmailLoading() {
+export default function AddressFormLoading() {
   return (
     <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
@@ -17,12 +17,15 @@ export default function UserEmailLoading() {
           </div>
         </section>
       </div>
-      <div className="flex flex-col gap-14 px-4 items-center">
-        {/* Input field skeleton */}
+
+      <div className="px-4">
+        {/* Search input skeleton */}
         <Skeleton className="h-16 w-full rounded-xl" />
 
-        {/* Save button skeleton */}
-        <Skeleton className="h-16 w-full rounded-xl" />
+        {/* Suggestions skeleton */}
+        <div className="mt-4 space-y-3">
+          <Skeleton className="h-16 w-full rounded-lg" />
+        </div>
       </div>
     </div>
   )
