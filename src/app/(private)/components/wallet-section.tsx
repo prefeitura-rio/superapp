@@ -6,11 +6,11 @@ import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
-import { getOperatingStatus } from '@/lib/clinic-operating-status'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
+import { getOperatingStatus } from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'

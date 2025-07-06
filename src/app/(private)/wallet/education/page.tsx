@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getOperatingStatus } from '@/lib/clinic-operating-status'
+import { getOperatingStatus } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { MapPin, Phone } from 'lucide-react'
 import { FrequencyInfoButton } from '../../components/frequency-info-button'

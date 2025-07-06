@@ -20,9 +20,14 @@ export function getOperatingStatus(
     }
 
     const [, startHour, startMinute, endHour, endMinute] = match
+
+    // Get current time in São Paulo, Brazil timezone
     const now = new Date()
-    const currentHour = now.getHours()
-    const currentMinute = now.getMinutes()
+    const saoPauloTime = new Date(
+      now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
+    )
+    const currentHour = saoPauloTime.getHours()
+    const currentMinute = saoPauloTime.getMinutes()
 
     const startTime =
       Number.parseInt(startHour) * 60 + Number.parseInt(startMinute)
