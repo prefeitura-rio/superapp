@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { SecondaryHeader } from '../../components/secondary-header'
+import { SecondaryHeader } from '../../../components/secondary-header'
 
 export default function WalletHealthLoading() {
   return (

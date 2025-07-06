@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { FloatNavigation } from '../components/float-navigation'
-import MainHeader from '../components/main-header'
+import { FloatNavigation } from '../../components/float-navigation'
+import MainHeader from '../../components/main-header'
 
 export default function WalletLoading() {
   return (

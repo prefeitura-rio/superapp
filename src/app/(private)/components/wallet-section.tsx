@@ -64,7 +64,7 @@ export default function CarteiraSection({
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
               <WalletHealthCard
-                href="/wallet/health"
+                href="/wallet/details/health"
                 title="CLÍNICA DA FAMÍLIA"
                 name={
                   walletData?.saude?.clinica_familia?.nome || 'Não disponível'
@@ -92,7 +92,7 @@ export default function CarteiraSection({
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
               <WalletEducationCard
-                href="/wallet/education"
+                href="/wallet/details/education"
                 title="ESCOLA"
                 name={walletData?.educacao?.escola?.nome || 'Não disponível'}
                 statusLabel="Status"
@@ -118,7 +118,7 @@ export default function CarteiraSection({
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
               <WalletSocialAssistanceCard
-                href="/wallet/social-assistance"
+                href="/wallet/details/social-assistance"
                 title="CADÚNICO"
                 name={
                   walletData?.assistencia_social?.cras?.nome || 'Não disponível'
@@ -146,7 +146,7 @@ export default function CarteiraSection({
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
               <WalletCaretakerCard
-                href="/wallet/caretaker"
+                href="/wallet/details/caretaker"
                 title="CUIDADOS COM A CIDADE"
                 name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
                 statusLabel="Total de chamados"

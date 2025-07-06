@@ -5,8 +5,8 @@ import {
 } from '@/lib/cadunico-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletSocialAssistanceCard } from '../../components/wallet-social-assistance-card'
+import { SecondaryHeader } from '../../../components/secondary-header'
+import { WalletSocialAssistanceCard } from '../../../components/wallet-social-assistance-card'
 
 export default async function SocialAssistanceCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()

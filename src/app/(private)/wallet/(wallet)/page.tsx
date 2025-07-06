@@ -13,11 +13,11 @@ import {
 } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
-import { FloatNavigation } from '../components/float-navigation'
-import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
-import { WalletEducationCard } from '../components/wallet-education-card'
-import { WalletHealthCard } from '../components/wallet-health-card'
-import { WalletSocialAssistanceCard } from '../components/wallet-social-assistance-card'
+import { FloatNavigation } from '../../components/float-navigation'
+import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
+import { WalletEducationCard } from '../../components/wallet-education-card'
+import { WalletHealthCard } from '../../components/wallet-health-card'
+import { WalletSocialAssistanceCard } from '../../components/wallet-social-assistance-card'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -98,7 +98,7 @@ export default async function Wallet() {
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
                   <WalletHealthCard
-                    href="/wallet/health"
+                    href="/wallet/details/health"
                     title="CLÍNICA DA FAMÍLIA"
                     name={
                       walletData?.saude?.clinica_familia?.nome ||
@@ -127,7 +127,7 @@ export default async function Wallet() {
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
                   <WalletEducationCard
-                    href="/wallet/education"
+                    href="/wallet/details/education"
                     title="ESCOLA"
                     name={
                       walletData?.educacao?.escola?.nome || 'Não disponível'
@@ -155,7 +155,7 @@ export default async function Wallet() {
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
                   <WalletSocialAssistanceCard
-                    href="/wallet/social-assistance"
+                    href="/wallet/details/social-assistance"
                     title="CADÚNICO"
                     name={
                       walletData?.assistencia_social?.cras?.nome ||
@@ -184,7 +184,7 @@ export default async function Wallet() {
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
                   <WalletCaretakerCard
-                    href="/wallet/caretaker"
+                    href="/wallet/details/caretaker"
                     title="CUIDADOS COM A CIDADE"
                     name={formatMaintenanceRequestsCount(
                       maintenanceStats.aberto

@@ -5,9 +5,9 @@ import {
 } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Globe, Phone } from 'lucide-react'
-import Calls from '../../components/calls'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
+import Calls from '../../../components/calls'
+import { SecondaryHeader } from '../../../components/secondary-header'
+import { WalletCaretakerCard } from '../../../components/wallet-caretaker-card'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -48,7 +48,7 @@ export default async function CaretakerCardDetail() {
       <div className="z-50">
         <div className="px-5">
           <WalletCaretakerCard
-            href="/wallet/caretaker"
+            href="/wallet/details/caretaker"
             title="CUIDADOS COM A CIDADE"
             name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
             statusLabel="Total de chamados"
