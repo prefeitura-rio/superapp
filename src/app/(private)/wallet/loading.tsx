@@ -9,7 +9,7 @@ export default function WalletLoading() {
       <main className="max-w-md mx-auto pt-15 text-white">
         <section className="px-5 relative h-full pb-24">
           <h2 className="sticky top-16 text-2xl font-bold mb-6 bg-background z-10 pt-5 text-foreground">
-            Carteira
+            <Skeleton className="h-6 w-30" />
           </h2>
 
           <div className="grid w-full gap-3">

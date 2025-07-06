@@ -11,7 +11,7 @@ import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
-import { hasWalletData } from '@/lib/wallet-utils'
+import { getWalletDataInfo } from '@/lib/wallet-utils'
 import Link from 'next/link'
 import { WalletCaretakerCard } from './wallet-caretaker-card'
 import { WalletEducationCard } from './wallet-education-card'
@@ -30,14 +30,14 @@ export default function CarteiraSection({
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
-  // Check if any wallet cards have data
-  const hasData = hasWalletData(walletData, maintenanceStats.total)
+  // Get wallet data info (count and hasData)
+  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
   return (
     <section className="px-5 mt-6 pb-24">
       <div className="sticky top-20 flex items-center justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
-        {hasData && (
+        {walletInfo.hasData && (
           <Link
             href="/wallet"
             className="text-md text-muted-foreground cursor-pointer font-medium"
@@ -47,7 +47,7 @@ export default function CarteiraSection({
         )}
       </div>
 
-      {hasData ? (
+      {walletInfo.hasData ? (
         <div className="grid w-full gap-3">
           {walletData?.saude?.clinica_familia?.nome && (
             <div className="sticky top-30">

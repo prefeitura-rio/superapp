@@ -12,9 +12,8 @@ import {
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { hasWalletData } from '@/lib/wallet-utils'
+import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { FloatNavigation } from '../components/float-navigation'
-import MainHeader from '../components/main-header'
 import { WalletCaretakerCard } from '../components/wallet-caretaker-card'
 import { WalletEducationCard } from '../components/wallet-education-card'
 import { WalletHealthCard } from '../components/wallet-health-card'
@@ -70,22 +69,27 @@ export default async function Wallet() {
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
-  // Check if any wallet cards have data
-  const hasData = hasWalletData(walletData, maintenanceStats.total)
+  // Get wallet data info (count and hasData)
+  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+
+  // Track current card index for dynamic positioning
+  let cardIndex = 0
 
   return (
     <>
-      <MainHeader />
-      <main className="max-w-md mx-auto pt-15 text-white">
-        <section className="px-5 relative h-full pb-24">
-          <h2 className="sticky top-16 text-2xl font-bold mb-6 bg-background z-10 pt-5 text-foreground">
+      {/* <MainHeader /> */}
+      <main className="max-w-md mx-auto text-white">
+        <section className="px-5 relative h-full ">
+          <h2 className="sticky top-6 text-2xl font-bold mb-6 bg-background z-10 text-foreground">
             Carteira
           </h2>
 
-          {hasData ? (
-            <div className="grid w-full gap-3">
+          {walletInfo.hasData ? (
+            <div
+              className={`grid w-full gap-2 pt-6 mb-[calc(100vh-(80px+188px+calc((${walletInfo.count}-1)*80px)))]`}
+            >
               {walletData?.saude?.clinica_familia?.nome && (
-                <div className="sticky top-34">
+                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
                   <WalletHealthCard
                     href="/wallet/health"
                     title="CLÍNICA DA FAMÍLIA"
@@ -111,7 +115,7 @@ export default async function Wallet() {
 
               {/* Card 2: Educação */}
               {walletData?.educacao?.escola?.nome && (
-                <div className="sticky top-34">
+                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
                   <WalletEducationCard
                     href="/wallet/education"
                     title="ESCOLA"
@@ -136,7 +140,7 @@ export default async function Wallet() {
 
               {/* Card 3: Assistência social */}
               {walletData?.assistencia_social?.cras?.nome && (
-                <div className="sticky top-34">
+                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
                   <WalletSocialAssistanceCard
                     href="/wallet/social-assistance"
                     title="CADÚNICO"
@@ -162,7 +166,7 @@ export default async function Wallet() {
 
               {/* Card 4: Cuidados com a Cidade (1746) */}
               {maintenanceStats.total > 0 && (
-                <div className="sticky top-34">
+                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
                   <WalletCaretakerCard
                     href="/wallet/caretaker"
                     title="CUIDADOS COM A CIDADE"
