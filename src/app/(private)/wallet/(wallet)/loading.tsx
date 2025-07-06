@@ -4,7 +4,7 @@ import { FloatNavigation } from '../../components/float-navigation'
 export default function WalletLoading() {
   // Hard-coded 4 cards as requested
   const cardCount = 4
-  const dynamicMarginBottom = `calc(100dvh - (80px + 188px + ${(cardCount - 1) * 80}px))`
+  const dynamicMarginBottom = `calc(100lvh - (80px + 188px + ${(cardCount - 1) * 80}px))`
 
   return (
     <>
