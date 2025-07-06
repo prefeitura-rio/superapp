@@ -72,6 +72,9 @@ export default async function Wallet() {
   // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
+  // Calculate dynamic margin-bottom based on wallet count
+  const dynamicMarginBottom = `calc(100vh - (80px + 188px + ${(walletInfo.count - 1) * 80}px))`
+
   // Track current card index for dynamic positioning
   let cardIndex = 0
 
@@ -86,10 +89,14 @@ export default async function Wallet() {
 
           {walletInfo.hasData ? (
             <div
-              className={`grid w-full gap-2 pt-6 mb-[calc(100vh-(80px+188px+calc((${walletInfo.count}-1)*80px)))]`}
+              className="grid w-full gap-2 pt-6"
+              style={{ marginBottom: dynamicMarginBottom }}
             >
               {walletData?.saude?.clinica_familia?.nome && (
-                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
+                <div
+                  className="sticky"
+                  style={{ top: `${80 + cardIndex++ * 80}px` }}
+                >
                   <WalletHealthCard
                     href="/wallet/health"
                     title="CLÍNICA DA FAMÍLIA"
@@ -115,7 +122,10 @@ export default async function Wallet() {
 
               {/* Card 2: Educação */}
               {walletData?.educacao?.escola?.nome && (
-                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
+                <div
+                  className="sticky"
+                  style={{ top: `${80 + cardIndex++ * 80}px` }}
+                >
                   <WalletEducationCard
                     href="/wallet/education"
                     title="ESCOLA"
@@ -140,7 +150,10 @@ export default async function Wallet() {
 
               {/* Card 3: Assistência social */}
               {walletData?.assistencia_social?.cras?.nome && (
-                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
+                <div
+                  className="sticky"
+                  style={{ top: `${80 + cardIndex++ * 80}px` }}
+                >
                   <WalletSocialAssistanceCard
                     href="/wallet/social-assistance"
                     title="CADÚNICO"
@@ -166,7 +179,10 @@ export default async function Wallet() {
 
               {/* Card 4: Cuidados com a Cidade (1746) */}
               {maintenanceStats.total > 0 && (
-                <div className={`sticky top-${20 + cardIndex++ * 20}`}>
+                <div
+                  className="sticky"
+                  style={{ top: `${80 + cardIndex++ * 80}px` }}
+                >
                   <WalletCaretakerCard
                     href="/wallet/caretaker"
                     title="CUIDADOS COM A CIDADE"
