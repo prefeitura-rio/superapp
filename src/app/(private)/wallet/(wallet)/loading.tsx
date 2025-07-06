@@ -1,28 +1,40 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatNavigation } from '../../components/float-navigation'
-import MainHeader from '../../components/main-header'
 
 export default function WalletLoading() {
+  // Hard-coded 4 cards as requested
+  const cardCount = 4
+  const dynamicMarginBottom = `calc(100vh - (80px + 188px + ${(cardCount - 1) * 80}px))`
+
   return (
     <>
-      <MainHeader />
-      <main className="max-w-md mx-auto pt-15 text-white">
-        <section className="px-5 relative h-full pb-24">
-          <h2 className="sticky top-16 text-2xl font-bold mb-6 bg-background z-10 pt-5 text-foreground">
-            <Skeleton className="h-6 w-30" />
+      <main className="max-w-md mx-auto text-white">
+        <section className="px-5 relative h-full">
+          <h2 className="sticky top-6 text-2xl font-bold mb-6 bg-background z-10 text-foreground">
+            <Skeleton className="h-8 w-32" />
           </h2>
 
-          <div className="grid w-full gap-3">
-            <div className="sticky top-34">
+          <div
+            className="grid w-full gap-2 pt-6"
+            style={{ marginBottom: dynamicMarginBottom }}
+          >
+            {/* Card 1: Health */}
+            <div className="sticky" style={{ top: `${80 + 0 * 80}px` }}>
               <Skeleton className="w-full h-[190px] rounded-3xl" />
             </div>
-            <div className="sticky top-34">
+
+            {/* Card 2: Education */}
+            <div className="sticky" style={{ top: `${80 + 1 * 80}px` }}>
               <Skeleton className="w-full h-[190px] rounded-3xl" />
             </div>
-            <div className="sticky top-34">
+
+            {/* Card 3: Social Assistance */}
+            <div className="sticky" style={{ top: `${80 + 2 * 80}px` }}>
               <Skeleton className="w-full h-[190px] rounded-3xl" />
             </div>
-            <div className="sticky top-34">
+
+            {/* Card 4: Caretaker */}
+            <div className="sticky" style={{ top: `${80 + 3 * 80}px` }}>
               <Skeleton className="w-full h-[190px] rounded-3xl" />
             </div>
           </div>
