@@ -52,7 +52,7 @@ export function WalletSocialAssistanceCard({
         <div className={`card${showDetails ? ' flipped' : ''}`} id="card">
           <div className="card-front">
             <div className="block w-full bg-wallet-2 rounded-3xl shadow-md text-white">
-              <div className="p-6 justify-between flex flex-col">
+              <div className="px-6 py-5 justify-between flex flex-col">
                 <div className="flex h-full min-h-[140px] flex-col justify-between">
                   <div className="flex h-[70px] justify-between items-start">
                     <div className="w-full">
