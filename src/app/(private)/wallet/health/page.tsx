@@ -3,45 +3,51 @@ import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import { getOperatingStatus } from '@/lib/clinic-operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { MapPin, Phone } from 'lucide-react'
-import { FrequencyInfoButton } from '../../../components/frequency-info-button'
-import { SecondaryHeader } from '../../../components/secondary-header'
-import { getFrequenciaEscolarTextClass } from '../../../components/utils'
-import { WalletEducationCard } from '../../../components/wallet-education-card'
+import { Calendar, MapPin, Phone } from 'lucide-react'
+import { SecondaryHeader } from '../../components/secondary-header'
+import { WalletHealthCard } from '../../components/wallet-health-card'
 
-interface DesempenhoSectionProps {
-  educationData?: {
-    aluno?: {
-      conceito?: string
-      frequencia?: number
+interface TeamPageProps {
+  healthData?: {
+    clinica_familia?: {
+      nome?: string
+    }
+    equipe_saude_familia?: {
+      nome?: string
+      medicos?: Array<{ id_profissional_sus: string; nome: string }>
+      enfermeiros?: Array<{ id_profissional_sus: string; nome: string }>
     }
   }
 }
 
-function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
-  const conceito = educationData?.aluno?.conceito || 'Não disponível'
-  const frequencia = educationData?.aluno?.frequencia
-    ? (educationData.aluno.frequencia * 100).toFixed(2)
-    : null
-
-  // Capitalize first letter of conceito
-  const conceitoCapitalized =
-    conceito.charAt(0).toUpperCase() + conceito.slice(1).toLowerCase()
+function TeamPage({ healthData }: TeamPageProps) {
+  const medicos = healthData?.equipe_saude_familia?.medicos || []
+  const enfermeiros = healthData?.equipe_saude_familia?.enfermeiros || []
+  const teamName =
+    healthData?.equipe_saude_familia?.nome || 'Equipe não disponível'
 
   return (
     <div className="p-6">
       <div className="">
-        <h2 className="text-base pb-4">Desempenho</h2>
+        <h2 className="text-base pb-4">{teamName}</h2>
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
-            {/* Conceito Section */}
+            {/* Doctors Section */}
             <div className="space-y-1 px-5">
               <h3 className="text-xs font-medium text-foreground-light">
-                Conceito
+                Médicos e médicas
               </h3>
-              <div className="space-y-1 text-foreground">
-                <p className="text-sm font-medium">{conceitoCapitalized}</p>
+              <div className="text-sm space-y-1 text-foreground">
+                {medicos.length > 0 ? (
+                  medicos.map((medico, index) => (
+                    <p key={index} className="font-medium">
+                      {medico.nome}
+                    </p>
+                  ))
+                ) : (
+                  <p className="font-medium text-foreground">Não disponível</p>
+                )}
               </div>
             </div>
 
@@ -49,18 +55,19 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
             <Separator className="my-4" />
 
             <div className="space-y-1 px-5">
-              <div className="flex items-center gap-1">
-                <h3 className="text-xs font-medium text-foreground-light">
-                  Frequência escolar
-                </h3>
-                <FrequencyInfoButton />
-              </div>
-              <div className="space-y-1 text-foreground">
-                <p
-                  className={`text-sm font-medium ${frequencia ? getFrequenciaEscolarTextClass(frequencia) : ''}`}
-                >
-                  {frequencia ? `${frequencia}%` : 'Não informado'}
-                </p>
+              <h3 className="text-xs font-medium text-foreground-light">
+                Enfermeiros e Enfermeiras
+              </h3>
+              <div className="text-sm space-y-1 text-foreground">
+                {enfermeiros.length > 0 ? (
+                  enfermeiros.map((enfermeiro, index) => (
+                    <p key={index} className="font-medium">
+                      {enfermeiro.nome}
+                    </p>
+                  ))
+                ) : (
+                  <p className="font-medium text-foreground">Não disponível</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -70,7 +77,7 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
   )
 }
 
-export default async function EducationCardDetail() {
+export default async function HealthCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
   let walletData
 
@@ -92,16 +99,28 @@ export default async function EducationCardDetail() {
     }
   }
 
-  const educationData = walletData?.educacao
-  const escola = educationData?.escola
+  const healthData = walletData?.saude
+  const clinica = healthData?.clinica_familia
+
+  // Get the operating status
+  const statusValue = getOperatingStatus(clinica?.horario_atendimento)
+
+  // Map status to color
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'Aberto':
+        return 'verde'
+      case 'Fechado':
+        return 'vermelho'
+      default:
+        return 'vermelho'
+    }
+  }
 
   // Build dynamic links with real data
-  const phoneUrl = escola?.telefone ? `tel:${escola.telefone}` : '#'
-  const whatsappUrl = escola?.whatsapp
-    ? `https://wa.me/${escola.whatsapp.replace(/\D/g, '')}`
-    : '#'
-  const mapUrl = escola?.endereco
-    ? `https://www.google.com/maps?q=${encodeURIComponent(escola.endereco)}`
+  const phoneUrl = clinica?.telefone ? `tel:${clinica.telefone}` : '#'
+  const mapUrl = clinica?.endereco
+    ? `https://www.google.com/maps?q=${encodeURIComponent(clinica.endereco)}`
     : '#'
 
   return (
@@ -109,17 +128,19 @@ export default async function EducationCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-5">
-          <WalletEducationCard
+          <WalletHealthCard
             href="#"
-            title="ESCOLA"
-            name={escola?.nome || 'Não disponível'}
-            statusLabel="Status"
-            statusValue={getOperatingStatus(escola?.horario_funcionamento)}
-            extraLabel="Horário de Atendimento"
-            extraValue={escola?.horario_funcionamento || 'Não informado'}
-            address={escola?.endereco}
-            phone={escola?.telefone}
-            email={escola?.email}
+            title="CLÍNICA DA FAMÍLIA"
+            name={clinica?.nome || 'Não disponível'}
+            statusLabel="Situação"
+            statusValue={statusValue}
+            extraLabel="Horário de atendimento"
+            extraValue={clinica?.horario_atendimento || 'Não informado'}
+            address={clinica?.endereco}
+            phone={clinica?.telefone}
+            email={clinica?.email}
+            bgClass="bg-blue-100"
+            color={getStatusColor(statusValue)}
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
@@ -147,14 +168,18 @@ export default async function EducationCardDetail() {
               </div>
             </a>
             <a
-              href={whatsappUrl !== '#' ? whatsappUrl : undefined}
+              href={
+                clinica?.telefone
+                  ? `https://wa.me/${clinica.telefone.replace(/\D/g, '')}`
+                  : undefined
+              }
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
+              className={`flex flex-col items-center ${!clinica?.telefone ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
                 <Phone
-                  className={`h-5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
+                  className={`h-5 ${!clinica?.telefone ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -162,7 +187,7 @@ export default async function EducationCardDetail() {
                   Whatsapp
                 </span>
                 <span className="text-gray-300 text-xs font-normal">
-                  escola
+                  equipe
                 </span>
               </div>
             </a>
@@ -183,10 +208,25 @@ export default async function EducationCardDetail() {
                 </span>
               </div>
             </a>
+            <a
+              href="https://web2.smsrio.org/portalPaciente/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center"
+            >
+              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                <Calendar className="h-5" />
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="mt-2 text-foreground text-sm font-normal">
+                  Agendar
+                </span>
+              </div>
+            </a>
           </div>
         </div>
       </div>
-      <DesempenhoSection educationData={educationData} />
+      <TeamPage healthData={healthData as any} />
     </div>
   )
 }
