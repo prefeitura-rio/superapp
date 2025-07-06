@@ -73,7 +73,7 @@ export default async function Wallet() {
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
   // Calculate dynamic margin-bottom based on wallet count
-  const dynamicMarginBottom = `calc(100vh - (80px + 188px + ${(walletInfo.count - 1) * 80}px))`
+  const dynamicMarginBottom = `calc(100lvh - (80px + 188px + ${(walletInfo.count - 1) * 80}px))`
 
   // Track current card index for dynamic positioning
   let cardIndex = 0
