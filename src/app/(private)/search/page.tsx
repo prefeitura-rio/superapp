@@ -1,10 +1,9 @@
 'use client'
 
 import { SearchInput } from '@/components/ui/custom/search-input'
-import { ArrowRight, ArrowRightIcon } from 'lucide-react'
+import { ArrowRight, ArrowRightIcon, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
-import { CategoryGrid } from '../components/category-grid'
+import { useEffect, useRef, useState } from 'react'
 import { SearchResultSkeleton } from '../components/search-result-skeleton'
 import { ServiceCategories } from '../components/service-categories'
 
@@ -24,20 +23,62 @@ interface ApiResponse {
   result: SearchResultItem[]
 }
 
+const SEARCH_HISTORY_KEY = 'search-history'
+const MAX_HISTORY_ITEMS = 10
+
 export default function Search() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResultItem[]>([])
   const [loading, setLoading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
 
-  const suggestions = [
-    'Quero pagar meu IPTU',
-    'Matricular meu filho na escola',
-    'Procurar emprego',
-    'Cadastrar evento',
-  ]
+  // Load search history from localStorage on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory)
+        setSearchHistory(parsedHistory)
+      } catch (error) {
+        console.error('Error parsing search history:', error)
+        localStorage.removeItem(SEARCH_HISTORY_KEY)
+      }
+    }
+  }, [])
+
+  // Save search history to localStorage
+  const saveSearchToHistory = (searchQuery: string) => {
+    if (!searchQuery.trim() || searchQuery.length <= 2) return
+
+    const trimmedQuery = searchQuery.trim()
+
+    setSearchHistory(prevHistory => {
+      // Remove the query if it already exists (to avoid duplicates)
+      const filteredHistory = prevHistory.filter(item => item !== trimmedQuery)
+      // Add the new query at the beginning
+      const newHistory = [trimmedQuery, ...filteredHistory].slice(
+        0,
+        MAX_HISTORY_ITEMS
+      )
+
+      // Save to localStorage
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+
+      return newHistory
+    })
+  }
+
+  // Remove item from search history
+  const removeFromHistory = (itemToRemove: string) => {
+    setSearchHistory(prevHistory => {
+      const newHistory = prevHistory.filter(item => item !== itemToRemove)
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+      return newHistory
+    })
+  }
 
   const categories = ServiceCategories()
 
@@ -50,6 +91,9 @@ export default function Search() {
       }
       const data: ApiResponse = await response.json()
       setResults(data.result || [])
+
+      // Save to search history after successful search
+      saveSearchToHistory(query)
     } catch (error) {
       console.error('Error fetching search results:', error)
       setResults([])
@@ -102,7 +146,7 @@ export default function Search() {
 
   return (
     <>
-      <div className="max-w-md px-5 mx-auto pt-5 flex flex-col space-y-6 pb-4">
+      <div className="max-w-md px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         <SearchInput
           placeholder="Do que você precisa?"
           value={query}
@@ -199,14 +243,19 @@ export default function Search() {
             </div>
           ) : (
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
-                Sugestões
+              <h2 className="text-base font-medium text-foreground">
+                Mais pesquisados
               </h2>
               <ul>
-                {suggestions.map((text, index) => (
+                {[
+                  'Quero pagar meu IPTU',
+                  'Matricular meu filho na escola',
+                  'Procurar emprego',
+                  'Cadastrar evento',
+                ].map((text, index) => (
                   <li
                     key={index}
-                    className="text-sm text-gray-300 flex justify-between items-center py-4 border-b border-neutral-800 cursor-pointer"
+                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
                     onClick={() => {
                       setQuery(text)
                       handleSearch(text)
@@ -219,7 +268,7 @@ export default function Search() {
                     }}
                   >
                     <span>{text}</span>
-                    <ArrowRight className="text-foreground h-5 w-5" />
+                    <ArrowRight className="text-primary h-5 w-5" />
                   </li>
                 ))}
               </ul>
@@ -228,10 +277,47 @@ export default function Search() {
         </div>
       </div>
 
-      {/* Hide CategoryGrid when searching */}
-      {query.length <= 2 && (
-        <div className="max-w-md mx-auto">
-          <CategoryGrid title="Categorias" categories={categories} />
+      {/* Show search history only if there are items and not searching */}
+      {query.length <= 2 && searchHistory.length > 0 && (
+        <div className="max-w-md px-4 mx-auto pt-4 flex flex-col pb-4">
+          <h2 className="text-base font-medium text-foreground">
+            Pesquisados por você
+          </h2>
+          <ul>
+            {searchHistory.map((text, index) => (
+              <li
+                key={index}
+                className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
+              >
+                <span
+                  className="flex-1"
+                  onClick={() => {
+                    setQuery(text)
+                    handleSearch(text)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setQuery(text)
+                      handleSearch(text)
+                    }
+                  }}
+                >
+                  {text}
+                </span>
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    removeFromHistory(text)
+                  }}
+                  className="text-primary h-5 w-5 hover:text-red-500 transition-colors"
+                  aria-label={`Remove "${text}" from search history`}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </>
