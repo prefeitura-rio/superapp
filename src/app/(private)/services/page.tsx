@@ -12,12 +12,12 @@ export default function ServicesPage() {
     <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
       {/* <MainHeader /> */}
       {/* Header */}
-      <header className="p-5">
+      <header className="pt-5 px-4 pb-2">
         <h1 className="text-2xl font-bold">Serviços</h1>
       </header>
 
       {/* Most Accessed Service Cards*/}
-      <MostAccessedServiceCards />
+      <MostAccessedServiceCards showMore={false} />
 
       {/* Carteira section */}
       <CategoryGrid title="Todos" categories={categories} />

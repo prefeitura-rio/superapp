@@ -69,7 +69,7 @@ export default async function Home() {
       <HomeServicesGrid />
 
       {/* Most Accessed Service Cards*/}
-      <MostAccessedServiceCards />
+      <MostAccessedServiceCards showMore={true} />
 
       {/* Carteira section */}
       <CarteiraSection

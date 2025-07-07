@@ -8,17 +8,21 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function MostAccessedServiceCards() {
+export default function MostAccessedServiceCards({
+  showMore,
+}: { showMore: boolean }) {
   return (
     <>
       <div className="flex items-center justify-between mb-4 px-4 pt-5 ">
         <h2 className="text-md font-medium text-foreground"> Mais acessados</h2>
-        <Link
-          href="/services"
-          className="text-md text-muted-foreground cursor-pointer font-normal"
-        >
-          Ver mais
-        </Link>
+        {showMore && (
+          <Link
+            href="/services"
+            className="text-md text-muted-foreground cursor-pointer font-normal"
+          >
+            Ver mais
+          </Link>
+        )}
       </div>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-4 px-4 w-max">
