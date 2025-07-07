@@ -46,9 +46,9 @@ export default function CarteiraSection({
         {walletInfo.hasData && (
           <Link
             href="/wallet"
-            className="text-md text-muted-foreground cursor-pointer font-medium"
+            className="text-md text-muted-foreground cursor-pointer font-normal"
           >
-            ver tudo
+            Ver mais
           </Link>
         )}
       </div>

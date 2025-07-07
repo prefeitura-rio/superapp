@@ -11,8 +11,8 @@ export default function MainHeader({
   showSearchIcon = false,
 }: MainHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-4">
-      <div className="mx-auto md:px-4 flex max-w-md items-center justify-between">
+    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground py-4">
+      <div className="mx-auto px-4 flex max-w-md items-center justify-between">
         {/* Left side - User info with icon */}
         <Link href="/user-profile" className="flex items-center space-x-3">
           <div className="rounded-full bg-card p-4">

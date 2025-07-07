@@ -6,13 +6,20 @@ import {
   CreditCard,
   MoveDiagonal,
 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function MostAccessedServiceCards() {
   return (
     <>
-      <h2 className="text-md font-medium mb-4 px-4 pt-4 text-foreground">
-        Mais acessados
-      </h2>
+      <div className="flex items-center justify-between mb-4 px-4 pt-5 ">
+        <h2 className="text-md font-medium text-foreground"> Mais acessados</h2>
+        <Link
+          href="/services"
+          className="text-md text-muted-foreground cursor-pointer font-normal"
+        >
+          Ver mais
+        </Link>
+      </div>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-4 px-4 w-max">
           {/* IPTU Card */}

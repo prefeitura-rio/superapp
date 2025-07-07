@@ -87,7 +87,7 @@ export default function SuggestionCards({
 }: SuggestionCardsProps) {
   const router = useRouter()
   return (
-    <div className="relative w-full overflow-x-auto pb-4 no-scrollbar">
+    <div className="relative w-full overflow-x-auto pb-6 no-scrollbar">
       <div className="flex gap-4 px-4 w-max">
         {order.map(idx => {
           const card = cards[idx]

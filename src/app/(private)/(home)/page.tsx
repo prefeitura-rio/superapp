@@ -4,6 +4,7 @@ import {
 } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
+import HomeServicesGrid from '../components/home-services-grid'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
 import ScrollAwareHeader from '../components/scroll-aware-header'
 import SuggestionCards from '../components/suggestion-cards'
@@ -63,6 +64,9 @@ export default async function Home() {
 
       {/* Suggestion Cards*/}
       <SuggestionCards order={[1, 0]} />
+
+      {/* Home Services Grid*/}
+      <HomeServicesGrid />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />
