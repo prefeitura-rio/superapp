@@ -66,7 +66,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             className="mr-3 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
             aria-label="Back"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-6 w-6" />
           </button>
         )}
 

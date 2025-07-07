@@ -310,7 +310,7 @@ export default function Search() {
                     e.stopPropagation()
                     removeFromHistory(text)
                   }}
-                  className="text-primary h-5 w-5 hover:text-red-500 transition-colors"
+                  className="text-primary h-5 w-5 hover:text-destructive transition-colors"
                   aria-label={`Remove "${text}" from search history`}
                 >
                   <X className="h-5 w-5" />
