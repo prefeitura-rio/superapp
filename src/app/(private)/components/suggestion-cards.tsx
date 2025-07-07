@@ -1,7 +1,7 @@
 'use client'
 
 import boyStudying from '@/assets/boyStudying.png'
-import smilingWoman from '@/assets/smilingWoman.svg'
+import smilingWoman from '@/assets/smilingWoman.png'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'

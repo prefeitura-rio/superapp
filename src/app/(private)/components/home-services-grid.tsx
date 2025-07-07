@@ -255,7 +255,7 @@ export default function HomeServicesGrid() {
           rows: 2,
           fill: 'row',
         }}
-        spaceBetween={12}
+        spaceBetween={8}
         pagination={{
           clickable: true,
           dynamicBullets: true,
