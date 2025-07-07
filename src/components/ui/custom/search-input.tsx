@@ -28,6 +28,19 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     )
     const inputRef = React.useRef<HTMLInputElement>(null)
 
+    // Merge refs to support both internal ref and forwarded ref
+    const mergedRef = React.useCallback(
+      (node: HTMLInputElement | null) => {
+        inputRef.current = node
+        if (typeof ref === 'function') {
+          ref(node)
+        } else if (ref) {
+          ref.current = node
+        }
+      },
+      [ref]
+    )
+
     React.useEffect(() => {
       if (controlledValue !== undefined) {
         setValue(controlledValue as string)
@@ -63,7 +76,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           <button
             type="button"
             onClick={onBack}
-            className="mr-3 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
+            className="mr-4 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
             aria-label="Back"
           >
             <ArrowLeft className="h-6 w-6" />
@@ -71,7 +84,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
         )}
 
         <input
-          ref={inputRef}
+          ref={mergedRef}
           className="flex-1 bg-transparent border-0 text-muted-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 truncate pr-3"
           value={value}
           onChange={handleChange}

@@ -34,6 +34,7 @@ export default function Search() {
   const [isSearching, setIsSearching] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Load search history from localStorage on mount
   useEffect(() => {
@@ -46,6 +47,13 @@ export default function Search() {
         console.error('Error parsing search history:', error)
         localStorage.removeItem(SEARCH_HISTORY_KEY)
       }
+    }
+  }, [])
+
+  // Auto-focus the search input when component mounts
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus()
     }
   }, [])
 
@@ -148,6 +156,7 @@ export default function Search() {
     <>
       <div className="max-w-md px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         <SearchInput
+          ref={searchInputRef}
           placeholder="Do que você precisa?"
           value={query}
           onChange={e => onQueryChange(e.target.value)}

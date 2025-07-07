@@ -4,8 +4,8 @@ import {
 } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
-import MainHeader from '../components/main-header'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
+import ScrollAwareHeader from '../components/scroll-aware-header'
 import SuggestionCards from '../components/suggestion-cards'
 import CarteiraSection from '../components/wallet-section'
 
@@ -58,14 +58,8 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex max-w-md mx-auto pt-15 flex-col bg-background text-foreground">
-      <MainHeader />
-      {/* Header */}
-      <header className="p-5">
-        <h1 className="text-2xl font-bold text-foreground">
-          {userAuthInfo.name}
-        </h1>
-      </header>
+    <main className="flex max-w-md mx-auto pt-21 flex-col bg-background text-foreground">
+      <ScrollAwareHeader userName={userAuthInfo.name} />
 
       {/* Suggestion Cards*/}
       <SuggestionCards order={[0, 1, 2]} />
