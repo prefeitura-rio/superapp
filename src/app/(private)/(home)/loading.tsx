@@ -33,7 +33,7 @@ export default function HomeLoading() {
 
       {/* Home Services Grid Skeleton */}
       <div className="px-4">
-        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="grid grid-cols-4 gap-2">
           {/* First row */}
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={`row1-${i}`} className="flex flex-col items-center">
@@ -60,7 +60,7 @@ export default function HomeLoading() {
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="flex gap-4 px-4 w-max">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-[150px] h-[150px] min-w-[150px]">
+              <div key={i} className="w-[140px] h-[140px] min-w-[140px]">
                 <Skeleton className="w-full h-full rounded-lg" />
               </div>
             ))}

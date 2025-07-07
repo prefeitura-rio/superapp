@@ -1,7 +1,9 @@
 'use client'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Grid, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
@@ -247,8 +249,37 @@ const services: ServiceItem[] = [
 ]
 
 export default function HomeServicesGrid() {
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
+
+  if (!isLoaded) {
+    return (
+      <div className="px-4">
+        <div className="grid grid-cols-4 gap-2">
+          {/* First row */}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={`row1-${i}`} className="flex flex-col items-center">
+              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
+              <Skeleton className="h-3 w-8 sm:w-12" />
+            </div>
+          ))}
+          {/* Second row */}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={`row2-${i}`} className="flex flex-col items-center">
+              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
+              <Skeleton className="h-3 w-8 sm:w-12" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="px-4">
+    <div className="px-4 min-h-[200px]">
       <Swiper
         slidesPerView={4}
         grid={{
@@ -261,7 +292,7 @@ export default function HomeServicesGrid() {
           dynamicBullets: true,
         }}
         modules={[Grid, Pagination]}
-        className="home-services-swiper"
+        className="home-services-swiper animate-fade-in"
       >
         {services.map(service => (
           <SwiperSlide key={service.id}>
@@ -278,6 +309,8 @@ export default function HomeServicesGrid() {
       </Swiper>
 
       <style jsx global>{`
+       
+        
         .home-services-swiper .swiper-slide {
           height: calc((100% - 12px) / 2) !important;
         }
@@ -294,6 +327,15 @@ export default function HomeServicesGrid() {
         .home-services-swiper .swiper-pagination-bullet-active {
           background-color: hsl(var(--primary)) !important;
           opacity: 1 !important;
+        }
+
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-in-out;
         }
       `}</style>
     </div>
