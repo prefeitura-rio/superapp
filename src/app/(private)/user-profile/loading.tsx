@@ -15,7 +15,7 @@ export default function UserProfileLoading() {
       </div>
 
       {/* Menu Items Skeleton */}
-      <div className="flex-1 px-5">
+      <div className="flex-1 px-4">
         <nav className="divide-y divide-border">
           {/* Menu Item Skeletons */}
           <div className="flex items-center justify-between py-6">

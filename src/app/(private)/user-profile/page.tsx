@@ -29,7 +29,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 px-5">
+      <div className="flex-1 px-4">
         <nav className="space-y-1">
           {USER_PROFILE_MENU_ITEMS.map((item, index) => (
             <MenuItem

@@ -29,7 +29,7 @@ export default function ProfilePage() {
     <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
       <ServicesHeader title="Buscador" />
       <div>
-        <section className="relative pt-10 px-5">
+        <section className="relative pt-10 px-4">
           <ServicesSearchInput
             placeholder="Pesquise um curso"
             value={query}
@@ -38,7 +38,7 @@ export default function ProfilePage() {
           />
         </section>
 
-        <div className="relative px-5 pt-2 w-full overflow-x-auto pb-4 no-scrollbar">
+        <div className="relative px-4 pt-2 w-full overflow-x-auto pb-4 no-scrollbar">
           <div className="flex gap-3 min-w-max pt-3">
             {FILTERS.map(filter => (
               <Badge
@@ -58,7 +58,7 @@ export default function ProfilePage() {
             ))}
           </div>
         </div>
-        <div className="px-5">
+        <div className="px-4">
           <h2 className="text-md pt-4 font-semibold">Resultado</h2>
           <div className="pt-4">
             {filtered.length === 0 && (

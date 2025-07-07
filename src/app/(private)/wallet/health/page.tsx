@@ -34,7 +34,7 @@ function TeamPage({ healthData }: TeamPageProps) {
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
             {/* Doctors Section */}
-            <div className="space-y-1 px-5">
+            <div className="space-y-1 px-4">
               <h3 className="text-xs font-medium text-foreground-light">
                 Médicos e médicas
               </h3>
@@ -54,7 +54,7 @@ function TeamPage({ healthData }: TeamPageProps) {
             {/* Full width separator that touches borders */}
             <Separator className="my-4" />
 
-            <div className="space-y-1 px-5">
+            <div className="space-y-1 px-4">
               <h3 className="text-xs font-medium text-foreground-light">
                 Enfermeiros e Enfermeiras
               </h3>
@@ -127,7 +127,7 @@ export default async function HealthCardDetail() {
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
-        <div className="px-5">
+        <div className="px-4">
           <WalletHealthCard
             href="#"
             title="CLÍNICA DA FAMÍLIA"

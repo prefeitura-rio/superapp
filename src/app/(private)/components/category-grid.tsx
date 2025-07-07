@@ -16,7 +16,7 @@ interface CategoryGridProps {
 export function CategoryGrid({ title, categories }: CategoryGridProps) {
   const router = useRouter()
   return (
-    <div className="text-foreground space-y-4 px-5 pt-4 pb-24">
+    <div className="text-foreground space-y-4 px-4 pt-4 pb-24">
       <h2 className="text-md font-medium">{title}</h2>
       <div className="grid grid-cols-3 gap-4">
         {categories.map((category, index) => (

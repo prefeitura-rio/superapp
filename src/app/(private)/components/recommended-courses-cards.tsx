@@ -12,9 +12,9 @@ export default function RecommendedCoursesCards({
   const recommended = courses.filter(course => course.recommended)
   return (
     <>
-      <h2 className="text-md font-medium mb-4 px-5 pt-4">Recomendados</h2>
+      <h2 className="text-md font-medium mb-4 px-4 pt-4">Recomendados</h2>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-4 px-5 w-max">
+        <div className="flex gap-4 px-4 w-max">
           {recommended.map(course => (
             <CourseCard
               key={course.id}

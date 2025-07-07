@@ -44,7 +44,7 @@ export default async function SocialAssistanceCardDetail() {
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
-        <div className="px-5">
+        <div className="px-4">
           <WalletSocialAssistanceCard
             href="#"
             title="CADÚNICO"

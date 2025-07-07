@@ -6,7 +6,7 @@ export default function WalletEducationLoading() {
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
-        <div className="px-5">
+        <div className="px-4">
           {/* Wallet Education Card Skeleton */}
           <div className="sticky top-34">
             <Skeleton className="w-full h-[190px] rounded-3xl" />

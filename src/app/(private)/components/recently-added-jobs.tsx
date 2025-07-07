@@ -49,8 +49,8 @@ export default function RecentlyAddedJobs({ jobs }: RecentlyAddedJobsProps) {
 
   return (
     <>
-      <h2 className="text-md font-medium mb-4 px-5 pt-6">Recentes</h2>
-      <div className="flex flex-col gap-4 px-5 pb-8">
+      <h2 className="text-md font-medium mb-4 px-4 pt-6">Recentes</h2>
+      <div className="flex flex-col gap-4 px-4 pb-8">
         {recentJobs.map(job => (
           <JobDrawer
             key={job.id}

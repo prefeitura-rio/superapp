@@ -10,7 +10,7 @@ export default function CategoryPage() {
     <div className="max-w-md mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Categorias de Serviços" />
       <div className="min-h-screen text-white">
-        <div className="max-w-md mx-auto px-5 pt-4 pb-20">
+        <div className="max-w-md mx-auto px-4 pt-4 pb-20">
           <h1 className="text-xl font-semibold pb-4 text-foreground">IPTU</h1>
           <Separator className="bg-zinc-800" />
 

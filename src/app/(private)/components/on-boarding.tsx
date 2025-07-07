@@ -114,7 +114,7 @@ export default function Onboarding({
   }
 
   return (
-    <div className="relative min-h-lvh max-w-md mx-auto px-5 py-5 bg-background text-foreground flex flex-col justify-center overflow-hidden">
+    <div className="relative min-h-lvh max-w-md mx-auto px-4 py-5 bg-background text-foreground flex flex-col justify-center overflow-hidden">
       {/* Slides container */}
       <div
         className={`transition-opacity duration-600 ${

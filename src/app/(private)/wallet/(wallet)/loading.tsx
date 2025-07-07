@@ -9,7 +9,7 @@ export default function WalletLoading() {
   return (
     <>
       <main className="max-w-md mx-auto text-white">
-        <section className="px-5 relative h-full">
+        <section className="px-4 relative h-full">
           <h2 className="sticky top-6 text-2xl font-bold mb-6 bg-background z-10 text-foreground">
             <Skeleton className="h-8 w-32" />
           </h2>

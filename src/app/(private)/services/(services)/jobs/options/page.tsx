@@ -11,7 +11,7 @@ export default function ProfilePage() {
       <SecondaryHeader title="" />
 
       {/* Menu Items */}
-      <div className="flex-1 px-5">
+      <div className="flex-1 px-4">
         <nav className="space-y-1">
           <MenuItem
             icon={<Book className="h-5 w-5" />}

@@ -6,7 +6,7 @@ export default function FavoritesPage() {
   return (
     <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
       <ServicesHeader title="Favorites" />
-      <div className="px-5">
+      <div className="px-4">
         <h2 className="text-md pt-4 font-semibold">Resultado</h2>
         <div className="pt-4">
           {favoritesCourses.length === 0 && (

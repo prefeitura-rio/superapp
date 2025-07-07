@@ -10,11 +10,11 @@ import {
 export default function MostAccessedServiceCards() {
   return (
     <>
-      <h2 className="text-md font-medium mb-4 px-5 pt-4 text-foreground">
+      <h2 className="text-md font-medium mb-4 px-4 pt-4 text-foreground">
         Mais acessados
       </h2>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-4 px-5 w-max">
+        <div className="flex gap-4 px-4 w-max">
           {/* IPTU Card */}
           <div className="bg-card/45 rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[150px] h-[150px] min-w-[150px] max-w-[150px] min-h-[150px] max-h-[150px] border-2 border-card">
             <div className="mb-4">

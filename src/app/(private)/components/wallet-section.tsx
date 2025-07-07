@@ -40,7 +40,7 @@ export default function CarteiraSection({
   let cardIndex = 0
 
   return (
-    <section className="px-5 mt-6 ">
+    <section className="px-4 mt-6 ">
       <div className="sticky top-20 flex items-center justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
         {walletInfo.hasData && (
