@@ -159,14 +159,14 @@ export default function Search() {
         <div className="text-white space-y-3">
           {loading || isSearching ? (
             <div>
-              <h2 className="text-lg text-foreground font-semibold">
+              <h2 className="text-base text-foreground font-medium">
                 Resultados da Pesquisa
               </h2>
               <SearchResultSkeleton />
             </div>
           ) : query.length > 2 ? (
             <div>
-              <h2 className="text-lg text-foreground font-semibold">
+              <h2 className="text-base text-foreground font-medium">
                 Resultados da Pesquisa
               </h2>
               {results && results.length > 0 ? (
