@@ -1,7 +1,6 @@
 'use client'
 
-import boyStudying from '@/assets/boyStudying.svg'
-import businessMan from '@/assets/businessMan.svg'
+import boyStudying from '@/assets/boyStudying.png'
 import smilingWoman from '@/assets/smilingWoman.svg'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
@@ -14,71 +13,77 @@ interface SuggestionCardsProps {
 const cards = [
   {
     key: 'iptu',
-    bg: 'bg-[#A0BFF9]',
+    bg: 'bg-[#6A93D2]',
     route: '/services/iptu',
     badge: (
-      <Badge className="bg-[#F65600] font-normal text-white z-10 absolute top-5 left-6">
-        com desconto
+      <Badge className="bg-secondary font-normal text-foreground z-10 absolute top-4 left-5">
+        IPTU
       </Badge>
     ),
     text: (
-      <p className="text-xl font-medium z-10 absolute bottom-3 text-black left-6">
-        Pague seu <br />
-        <span className="font-bold">IPTU</span> no PIX
-      </p>
+      <>
+        <p className="text-xs leading-5 text-background font-normal z-10 absolute bottom-8 left-5">
+          com desconto
+        </p>
+        <p className="text-xl leading-5 text-background font-medium z-10 absolute bottom-3 left-5">
+          Pague no PIX
+        </p>
+      </>
     ),
     image: (
       <Image
         src={smilingWoman}
         alt="Pessoa sentada em uma poltrona azul"
-        className="h-38 w-auto absolute -bottom-4 -right-4 z-20"
+        className="h-26 w-auto absolute -bottom-4 -right-4 z-20"
       />
     ),
   },
   {
     key: 'curso',
-    bg: 'bg-[#B3DDE9]',
+    bg: 'bg-[#3DB58F]',
     route: '/services/courses',
-    badge: null,
+    badge: (
+      <Badge className="bg-[#64C4A5] font-normal text-white z-10 absolute top-4 left-5">
+        Inscrições gratuitas
+      </Badge>
+    ),
     text: (
-      <p className="text-xl text-black font-medium z-10 absolute bottom-3 left-6">
-        Encontre
-        <br />
-        seu <span className="font-bold">Curso</span>
+      <p className="text-xl leading-5 max-[385px]:max-w-[100px] sm:max-w-[186px] text-background font-medium z-10 absolute bottom-3 left-5">
+        Encontre seu Curso
       </p>
     ),
     image: (
       <Image
         src={boyStudying}
         alt="Pessoa sentada em uma poltrona azul"
-        className="h-36 w-auto absolute -bottom-4 -right-0 z-20"
+        className="h-26 w-auto absolute -bottom-0 right-0 z-20"
       />
     ),
   },
-  {
-    key: 'emprego',
-    bg: 'bg-red-100',
-    route: '/services/jobs',
-    badge: null,
-    text: (
-      <p className="text-xl text-black font-medium z-10 absolute bottom-3 left-6">
-        Oportunidades
-        <br />
-        de <span className="font-bold">Emprego</span>
-      </p>
-    ),
-    image: (
-      <Image
-        src={businessMan}
-        alt="Pessoa sentada em uma poltrona azul"
-        className="h-40 w-auto absolute -bottom-4 -right-0 z-20"
-      />
-    ),
-  },
+  // {
+  //   key: 'emprego',
+  //   bg: 'bg-red-100',
+  //   route: '/services/jobs',
+  //   badge: null,
+  //   text: (
+  //     <p className="text-xl text-black font-medium z-10 absolute bottom-3 left-6">
+  //       Oportunidades
+  //       <br />
+  //       de <span className="font-bold">Emprego</span>
+  //     </p>
+  //   ),
+  //   image: (
+  //     <Image
+  //       src={businessMan}
+  //       alt="Pessoa sentada em uma poltrona azul"
+  //       className="h-26 w-auto absolute -bottom-4 -right-0 z-20"
+  //     />
+  //   ),
+  // },
 ]
 
 export default function SuggestionCards({
-  order = [0, 1, 2],
+  order = [0, 1],
 }: SuggestionCardsProps) {
   const router = useRouter()
   return (
@@ -89,7 +94,7 @@ export default function SuggestionCards({
           return (
             <div
               key={card.key}
-              className={`w-[85vw] max-w-[350px] h-[152px] ${card.bg} rounded-lg overflow-hidden flex flex-col relative`}
+              className={`w-[85vw] max-w-[350px] h-[104px] ${card.bg} rounded-2xl overflow-hidden flex flex-col relative`}
               onClick={() => card.route && router.push(card.route)}
               style={{ cursor: 'pointer' }}
               onKeyDown={e => {

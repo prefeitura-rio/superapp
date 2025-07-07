@@ -4,7 +4,6 @@ import { CategoryGrid } from '../components/category-grid'
 import { FloatNavigation } from '../components/float-navigation'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
 import { ServiceCategories } from '../components/service-categories'
-import SuggestionCards from '../components/suggestion-cards'
 
 export default function ServicesPage() {
   const categories = ServiceCategories()
@@ -16,9 +15,6 @@ export default function ServicesPage() {
       <header className="p-5">
         <h1 className="text-2xl font-bold">Serviços</h1>
       </header>
-
-      {/* Suggestion Cards*/}
-      <SuggestionCards order={[1, 2, 0]} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />

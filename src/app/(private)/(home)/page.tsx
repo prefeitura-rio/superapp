@@ -62,7 +62,7 @@ export default async function Home() {
       <ScrollAwareHeader userName={userAuthInfo.name} />
 
       {/* Suggestion Cards*/}
-      <SuggestionCards order={[0, 1, 2]} />
+      <SuggestionCards order={[1, 0]} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards />
