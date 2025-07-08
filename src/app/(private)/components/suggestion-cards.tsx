@@ -95,12 +95,12 @@ export default function SuggestionCards({
             <div
               key={card.key}
               className={`w-[85vw] max-w-[350px] h-[104px] ${card.bg} rounded-2xl overflow-hidden flex flex-col relative`}
-              onClick={() => card.route && router.push(card.route)}
+              // onClick={() => card.route && router.push(card.route)}
               style={{ cursor: 'pointer' }}
-              onKeyDown={e => {
-                if ((e.key === 'Enter' || e.key === ' ') && card.route)
-                  router.push(card.route)
-              }}
+              // onKeyDown={e => {
+              //   if ((e.key === 'Enter' || e.key === ' ') && card.route)
+              //     router.push(card.route)
+              // }}
             >
               {card.badge}
               {card.text}

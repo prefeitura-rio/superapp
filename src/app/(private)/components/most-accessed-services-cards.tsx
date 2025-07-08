@@ -26,7 +26,7 @@ export default function MostAccessedServiceCards({
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-2 px-4 w-max">
           {/* IPTU Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img src={iptuIcon.src} alt="IPTU" className="w-10 h-10" />
             </div>
@@ -41,7 +41,7 @@ export default function MostAccessedServiceCards({
           </div>
 
           {/* CAD Rio Card */}
-          <div className="bg-card  rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer relative flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card  rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer relative flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4 flex justify-between w-full">
               <img src={cadrioIcon.src} alt="CAD Rio" className="w-10 h-10" />
               {/* <Badge className="bg-[#A0BFF9] text-black text-xs px-2 py-1 rounded-full font-medium ml-2 w-[44px] h-[20px]">
@@ -59,7 +59,7 @@ export default function MostAccessedServiceCards({
           </div>
 
           {/* Multas Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img src={multasIcon.src} alt="Multas" className="w-10 h-10" />
             </div>
@@ -73,7 +73,7 @@ export default function MostAccessedServiceCards({
             </div>
           </div>
           {/* Alvará Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img src={alvaraIcon.src} alt="Alvará" className="w-10 h-10" />
             </div>
@@ -87,7 +87,7 @@ export default function MostAccessedServiceCards({
             </div>
           </div>
           {/* Licença sanitária Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img
                 src={licencasanitariaIcon.src}
@@ -105,7 +105,7 @@ export default function MostAccessedServiceCards({
             </div>
           </div>
           {/* Cadúnico Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img
                 src={cadunicoIcon.src}
@@ -123,7 +123,7 @@ export default function MostAccessedServiceCards({
             </div>
           </div>
           {/* Dívida ativa Card */}
-          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] border-2 border-border">
+          <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
             <div className="mb-4">
               <img
                 src={dividaativaIcon.src}

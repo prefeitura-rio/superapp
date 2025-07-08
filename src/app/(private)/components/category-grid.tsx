@@ -21,7 +21,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
       <div className="grid grid-cols-3 gap-2">
         {categories.map((category, index) => (
           <div key={index} className="flex flex-col items-center">
-            <div className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition border-2 border-brder">
+            <div className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition">
               <div className="flex items-center justify-center w-full h-full text-foreground">
                 {category.icon}
               </div>
