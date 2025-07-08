@@ -12,7 +12,7 @@ export default function ServicesPage() {
     <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
       {/* <MainHeader /> */}
       {/* Header */}
-      <header className="pt-5 px-4 pb-2">
+      <header className="px-4 py-6">
         <h1 className="text-2xl font-bold">Serviços</h1>
       </header>
 
@@ -20,7 +20,7 @@ export default function ServicesPage() {
       <MostAccessedServiceCards showMore={false} />
 
       {/* Carteira section */}
-      <CategoryGrid title="Todos" categories={categories} />
+      <CategoryGrid title="Categorias" categories={categories} />
       <FloatNavigation />
     </main>
   )

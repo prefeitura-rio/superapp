@@ -16,13 +16,13 @@ interface CategoryGridProps {
 export function CategoryGrid({ title, categories }: CategoryGridProps) {
   const router = useRouter()
   return (
-    <div className="text-foreground space-y-4 px-4 pt-4 pb-24">
+    <div className="text-foreground space-y-2 px-4 pt-8 pb-24">
       <h2 className="text-md font-medium">{title}</h2>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2">
         {categories.map((category, index) => (
           <div key={index} className="flex flex-col items-center">
             <div
-              className="relative bg-card/45 w-full aspect-square rounded-xl flex items-center justify-center hover:bg-card/30 transition border-2 border-card"
+              className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition border-2 border-brder"
               {...(index === 0
                 ? {
                     onClick: () => router.push('/services/category'),

@@ -279,63 +279,51 @@ export default function HomeServicesGrid() {
   }
 
   return (
-    <div className="px-4 min-h-[200px]">
-      <Swiper
-        slidesPerView={4}
-        grid={{
-          rows: 2,
-          fill: 'row',
-        }}
-        spaceBetween={8}
-        pagination={{
-          clickable: true,
-          dynamicBullets: true,
-        }}
-        modules={[Grid, Pagination]}
-        className="home-services-swiper animate-fade-in"
-      >
-        {services.map(service => (
-          <SwiperSlide key={service.id}>
-            <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
-              <div className="flex items-center justify-center text-3xl mb-1">
-                {typeof service.icon === 'string' ? service.icon : service.icon}
+    <div className="px-4 pb-4">
+      <div className="pb-0">
+        <Swiper
+          slidesPerView={4}
+          grid={{
+            rows: 2,
+            fill: 'row',
+          }}
+          spaceBetween={8}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          modules={[Grid, Pagination]}
+          className="home-services-swiper animate-fade-in"
+        >
+          {services.map(service => (
+            <SwiperSlide key={service.id}>
+              <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
+                <div className="flex items-center justify-center text-3xl mb-1">
+                  {typeof service.icon === 'string'
+                    ? service.icon
+                    : service.icon}
+                </div>
               </div>
-            </div>
-            <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-              {service.title}
-            </span>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+              <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                {service.title}
+              </span>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
 
       <style jsx global>{`
-       
-        
-        .home-services-swiper .swiper-slide {
-          height: calc((100% - 12px) / 2) !important;
-        }
-        
         .home-services-swiper .swiper-pagination {
-          bottom: 0 !important;
+          position: relative !important;
+          bottom: auto !important;
+          margin-top: 1rem !important;
         }
-        
-        .home-services-swiper .swiper-pagination-bullet {
-          background-color: hsl(var(--muted-foreground)) !important;
-          opacity: 0.5 !important;
+        .swiper-pagination-bullet { 
+          background: var(--muted-foreground);
+          opacity: 1;
         }
-        
-        .home-services-swiper .swiper-pagination-bullet-active {
-          background-color: hsl(var(--primary)) !important;
-          opacity: 1 !important;
-        }
-
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-in-out;
+        .swiper-pagination-bullet-active {
+          background: var(--primary);
         }
       `}</style>
     </div>
