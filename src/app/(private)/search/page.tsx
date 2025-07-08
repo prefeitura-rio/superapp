@@ -153,142 +153,140 @@ export default function Search() {
   }
 
   return (
-    <>
-      <div className="max-w-md px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
-        <SearchInput
-          ref={searchInputRef}
-          placeholder="Do que você precisa?"
-          value={query}
-          onChange={e => onQueryChange(e.target.value)}
-          onBack={() => router.back()}
-          onClear={clearSearch}
-        />
+    <div className="min-h-lvh max-w-md px-4 mx-auto pt-5 flex flex-col pb-4">
+      <SearchInput
+        ref={searchInputRef}
+        placeholder="Do que você precisa?"
+        value={query}
+        onChange={e => onQueryChange(e.target.value)}
+        onBack={() => router.back()}
+        onClear={clearSearch}
+      />
 
-        {/* Results or Suggestions */}
-        <div className="text-white space-y-3">
-          {loading || isSearching ? (
-            <div>
-              <h2 className="text-base text-foreground font-medium">
-                Resultados da Pesquisa
-              </h2>
-              <SearchResultSkeleton />
-            </div>
-          ) : query.length > 2 ? (
-            <div>
-              <h2 className="text-base text-foreground font-medium">
-                Resultados da Pesquisa
-              </h2>
-              {results && results.length > 0 ? (
-                <ul>
-                  {results
-                    .filter(item => item.tipo !== 'noticia')
-                    .map((item, index) => (
-                      <li
-                        key={index}
-                        className="text-sm text-gray-300 flex justify-between items-center py-4 border-b border-neutral-800 cursor-pointer"
-                        onClick={() => {
+      {/* Results or Suggestions */}
+      <div className="text-white space-y-3 mt-6">
+        {loading || isSearching ? (
+          <div>
+            <h2 className="text-base text-foreground font-medium">
+              Resultados da Pesquisa
+            </h2>
+            <SearchResultSkeleton />
+          </div>
+        ) : query.length > 2 ? (
+          <div>
+            <h2 className="text-base text-foreground font-medium">
+              Resultados da Pesquisa
+            </h2>
+            {results && results.length > 0 ? (
+              <ul>
+                {results
+                  .filter(item => item.tipo !== 'noticia')
+                  .map((item, index) => (
+                    <li
+                      key={index}
+                      className="text-sm text-gray-300 flex justify-between items-center py-4 border-b border-neutral-800 cursor-pointer"
+                      onClick={() => {
+                        if (item.url) {
+                          window.open(item.url, '_blank')
+                        }
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
                           if (item.url) {
                             window.open(item.url, '_blank')
                           }
-                        }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            if (item.url) {
-                              window.open(item.url, '_blank')
-                            }
-                          }
-                        }}
-                      >
-                        <div className="flex-1">
-                          <div className="text-foreground mb-1">
-                            {item.titulo}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-1 text-xs text-[#008FBE]">
-                            <span className="font-bold">
-                              {displayTipo(item.tipo)}
-                            </span>
-                            {item.category?.macro && (
-                              <>
-                                <span className="text-gray-500">{'>'}</span>
-                                <span className="text-gray-500">
-                                  {item.category.macro}
-                                </span>
-                              </>
-                            )}
-                            {item.category?.micro && (
-                              <>
-                                <span className="text-gray-500">{'>'}</span>
-                                <span className="text-gray-500">
-                                  {item.category.micro}
-                                </span>
-                              </>
-                            )}
-                            {item.category?.specific && (
-                              <>
-                                <span className="text-gray-500">{'>'}</span>
-                                <span className="text-gray-500">
-                                  {item.category.specific}
-                                </span>
-                              </>
-                            )}
-                            {item.collection && (
-                              <span className="bg-gray-200 rounded-xl text-xs text-gray-500 px-2 py-0.5">
-                                {displayBreadCrumbCollection(item.collection)}
-                              </span>
-                            )}
-                          </div>
+                        }
+                      }}
+                    >
+                      <div className="flex-1">
+                        <div className="text-foreground mb-1">
+                          {item.titulo}
                         </div>
-                        {item.url && (
-                          <ArrowRightIcon className="text-white h-5 w-5" />
-                        )}
-                      </li>
-                    ))}
-                </ul>
-              ) : (
-                <div className="text-foreground text-center mt-4">
-                  Nenhum resultado encontrado
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <h2 className="text-base font-medium text-foreground">
-                Mais pesquisados
-              </h2>
-              <ul>
-                {[
-                  'Quero pagar meu IPTU',
-                  'Matricular meu filho na escola',
-                  'Procurar emprego',
-                  'Cadastrar evento',
-                ].map((text, index) => (
-                  <li
-                    key={index}
-                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
-                    onClick={() => {
+                        <div className="flex flex-wrap items-center gap-1 text-xs text-[#008FBE]">
+                          <span className="font-bold">
+                            {displayTipo(item.tipo)}
+                          </span>
+                          {item.category?.macro && (
+                            <>
+                              <span className="text-gray-500">{'>'}</span>
+                              <span className="text-gray-500">
+                                {item.category.macro}
+                              </span>
+                            </>
+                          )}
+                          {item.category?.micro && (
+                            <>
+                              <span className="text-gray-500">{'>'}</span>
+                              <span className="text-gray-500">
+                                {item.category.micro}
+                              </span>
+                            </>
+                          )}
+                          {item.category?.specific && (
+                            <>
+                              <span className="text-gray-500">{'>'}</span>
+                              <span className="text-gray-500">
+                                {item.category.specific}
+                              </span>
+                            </>
+                          )}
+                          {item.collection && (
+                            <span className="bg-gray-200 rounded-xl text-xs text-gray-500 px-2 py-0.5">
+                              {displayBreadCrumbCollection(item.collection)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {item.url && (
+                        <ArrowRightIcon className="text-white h-5 w-5" />
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <div className="text-foreground text-center mt-4">
+                Nenhum resultado encontrado
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-base font-medium text-foreground">
+              Mais pesquisados
+            </h2>
+            <ul>
+              {[
+                'Quero pagar meu IPTU',
+                'Matricular meu filho na escola',
+                'Procurar emprego',
+                'Cadastrar evento',
+              ].map((text, index) => (
+                <li
+                  key={index}
+                  className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                  onClick={() => {
+                    setQuery(text)
+                    handleSearch(text)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
                       setQuery(text)
                       handleSearch(text)
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setQuery(text)
-                        handleSearch(text)
-                      }
-                    }}
-                  >
-                    <span>{text}</span>
-                    <ArrowRight className="text-primary h-5 w-5" />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+                    }
+                  }}
+                >
+                  <span>{text}</span>
+                  <ArrowRight className="text-primary h-5 w-5" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Show search history only if there are items and not searching */}
       {query.length <= 2 && searchHistory.length > 0 && (
-        <div className="max-w-md px-4 mx-auto pt-4 flex flex-col pb-4">
+        <div className="pt-6 flex flex-col">
           <h2 className="text-base font-medium text-foreground">
             Pesquisados por você
           </h2>
@@ -329,6 +327,6 @@ export default function Search() {
           </ul>
         </div>
       )}
-    </>
+    </div>
   )
 }
