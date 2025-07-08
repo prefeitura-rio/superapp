@@ -45,11 +45,6 @@ export function ServiceCategories() {
       categorySlug: 'ambiente',
     },
     {
-      name: 'Impostos',
-      icon: <Image src={impostoIcon} alt="Impostos" />,
-      categorySlug: 'impostos',
-    },
-    {
       name: 'Cidadania',
       icon: <Image src={cidadaniaIcon} alt="Cidadania" />,
       categorySlug: 'cidadania',
@@ -93,6 +88,11 @@ export function ServiceCategories() {
       name: 'Esportes',
       icon: <Image src={esporteIcon} alt="Esportes" />,
       categorySlug: 'esportes',
+    },
+    {
+      name: 'Impostos',
+      icon: <Image src={impostoIcon} alt="Impostos" />,
+      categorySlug: 'impostos',
     },
     {
       name: 'Animais',
