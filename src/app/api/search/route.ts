@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `${rootUrl}?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=10`,
+      `${rootUrl}/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=10`,
       {
         headers,
       }

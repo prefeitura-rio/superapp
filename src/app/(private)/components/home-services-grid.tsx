@@ -2,6 +2,7 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { Grid, Pagination } from 'swiper/modules'
@@ -53,11 +54,11 @@ const services: ServiceItem[] = [
   },
   {
     id: '2',
-    title: 'Impostos',
+    title: 'Cidade',
     icon: (
       <Image
-        src={impostosIcon}
-        alt="Impostos"
+        src={cidadeIcon}
+        alt="Cidade"
         width={48}
         height={48}
         className="w-12 h-12"
@@ -170,11 +171,11 @@ const services: ServiceItem[] = [
   },
   {
     id: '11',
-    title: 'Esporte',
+    title: 'Esportes',
     icon: (
       <Image
         src={esporteIcon}
-        alt="Esporte"
+        alt="Esportes"
         width={48}
         height={48}
         className="w-12 h-12"
@@ -209,11 +210,11 @@ const services: ServiceItem[] = [
   },
   {
     id: '14',
-    title: 'Tecnologia',
+    title: 'Servidor',
     icon: (
       <Image
         src={servidorIcon}
-        alt="Tecnologia"
+        alt="Servidor"
         width={48}
         height={48}
         className="w-12 h-12"
@@ -222,11 +223,11 @@ const services: ServiceItem[] = [
   },
   {
     id: '15',
-    title: 'Cidade',
+    title: 'Impostos',
     icon: (
       <Image
-        src={cidadeIcon}
-        alt="Cidade"
+        src={impostosIcon}
+        alt="Impostos"
         width={48}
         height={48}
         className="w-12 h-12"
@@ -306,16 +307,18 @@ export default function HomeServicesGrid() {
         >
           {services.map(service => (
             <SwiperSlide key={service.id}>
-              <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
-                <div className="flex items-center justify-center text-3xl mb-1">
-                  {typeof service.icon === 'string'
-                    ? service.icon
-                    : service.icon}
+              <Link href={`/services/category/${service.title}`}>
+                <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
+                  <div className="flex items-center justify-center text-3xl mb-1">
+                    {typeof service.icon === 'string'
+                      ? service.icon
+                      : service.icon}
+                  </div>
                 </div>
-              </div>
-              <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                {service.title}
-              </span>
+                <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                  {service.title}
+                </span>
+              </Link>
             </SwiperSlide>
           ))}
         </Swiper>
