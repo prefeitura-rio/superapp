@@ -79,7 +79,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             className="mr-4 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
             aria-label="Back"
           >
-            <ArrowLeft className="h-6 w-6" />
+            <ArrowLeft className="h-5 w-5" />
           </button>
         )}
 
@@ -91,15 +91,15 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           {...props}
         />
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {showIcons && value && (
             <button
               type="button"
               onClick={handleClear}
-              className="text-white hover:text-white/80 p-0.5 bg-foreground rounded-full"
+              className="text-card-foreground  rounded-full"
               aria-label="Clear search"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           )}
           {showIcons && (
@@ -108,7 +108,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
               className="text-card-foreground hover:text-card-foreground"
               aria-label="Search"
             >
-              <Search className="h-6 w-6" />
+              <Search className="h-5 w-5" />
             </button>
           )}
         </div>

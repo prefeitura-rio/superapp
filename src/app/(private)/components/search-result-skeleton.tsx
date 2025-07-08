@@ -1,19 +1,22 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
 export function SearchResultSkeleton() {
   return (
-    <div className="space-y-5 pt-5">
-      {[...Array(10)].map((_, index) => (
-        <div key={index} className="animate-pulse">
-          <div className="h-5 bg-gray-700 rounded w-[95%] mb-2" />
-          <div className="flex gap-2 items-center">
-            <div className="h-3 bg-gray-700 rounded w-1/4" />
-            <span className="text-gray-500 text-xs">{'>'}</span>
-            <div className="h-3 bg-gray-700 rounded w-1/4" />
-            <span className="text-gray-500 text-xs">{'>'}</span>
-            <div className="h-3 bg-gray-700 rounded w-1/4" />
+    <ul className="space-y-2 pt-4">
+      {[...Array(5)].map((_, index) => (
+        <li
+          key={index}
+          className="flex justify-between items-center p-4 bg-card rounded-lg"
+        >
+          <div className="flex-1">
+            <Skeleton className="bg-card-foreground/10 h-5 w-[85%] mb-2" />
+            <div className="pt-1">
+              <Skeleton className="bg-card-foreground/10 h-4 w-full mb-1" />
+              <Skeleton className="bg-card-foreground/10 h-4 w-[70%]" />
+            </div>
           </div>
-          {index < 2 && <div className="border-b border-neutral-800 my-4" />}
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { SearchInput } from '@/components/ui/custom/search-input'
-import { ArrowRight, ArrowRightIcon, X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { SearchResultSkeleton } from '../components/search-result-skeleton'
@@ -11,12 +11,11 @@ interface SearchResultItem {
   titulo: string
   tipo: string
   url?: string
-  category?: {
-    macro: string
-    micro: string
-    specific: string
-  }
+  descricao?: string
+  category?: string
   collection?: string
+  id?: string
+  slug?: string
 }
 
 interface ApiResponse {
@@ -178,68 +177,42 @@ export default function Search() {
               Resultados da Pesquisa
             </h2>
             {results && results.length > 0 ? (
-              <ul>
+              <ul className="space-y-2 pt-4">
                 {results
                   .filter(item => item.tipo !== 'noticia')
                   .map((item, index) => (
                     <li
                       key={index}
-                      className="text-sm text-gray-300 flex justify-between items-center py-4 border-b border-neutral-800 cursor-pointer"
+                      className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card rounded-lg cursor-pointer"
                       onClick={() => {
-                        if (item.url) {
+                        if (item.category && item.id && item.collection) {
+                          router.push(
+                            `/services/category/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
+                          )
+                        } else if (item.url) {
                           window.open(item.url, '_blank')
                         }
                       }}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                          if (item.url) {
+                          if (item.category && item.id && item.collection) {
+                            router.push(
+                              `/services/category/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
+                            )
+                          } else if (item.url) {
                             window.open(item.url, '_blank')
                           }
                         }
                       }}
                     >
                       <div className="flex-1">
-                        <div className="text-foreground mb-1">
+                        <div className="text-card-foreground text-sm font-normal leading-5">
                           {item.titulo}
                         </div>
-                        <div className="flex flex-wrap items-center gap-1 text-xs text-[#008FBE]">
-                          <span className="font-bold">
-                            {displayTipo(item.tipo)}
-                          </span>
-                          {item.category?.macro && (
-                            <>
-                              <span className="text-gray-500">{'>'}</span>
-                              <span className="text-gray-500">
-                                {item.category.macro}
-                              </span>
-                            </>
-                          )}
-                          {item.category?.micro && (
-                            <>
-                              <span className="text-gray-500">{'>'}</span>
-                              <span className="text-gray-500">
-                                {item.category.micro}
-                              </span>
-                            </>
-                          )}
-                          {item.category?.specific && (
-                            <>
-                              <span className="text-gray-500">{'>'}</span>
-                              <span className="text-gray-500">
-                                {item.category.specific}
-                              </span>
-                            </>
-                          )}
-                          {item.collection && (
-                            <span className="bg-gray-200 rounded-xl text-xs text-gray-500 px-2 py-0.5">
-                              {displayBreadCrumbCollection(item.collection)}
-                            </span>
-                          )}
+                        <div className="pt-1 line-clamp-2 text-muted-foreground text-xs font-normal leading-4">
+                          {item.descricao}
                         </div>
                       </div>
-                      {item.url && (
-                        <ArrowRightIcon className="text-white h-5 w-5" />
-                      )}
                     </li>
                   ))}
               </ul>
