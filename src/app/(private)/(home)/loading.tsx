@@ -49,11 +49,18 @@ export default function HomeLoading() {
             </div>
           ))}
         </div>
+        {/* Skeleton pagination bullets */}
+        <div className="flex justify-center items-center h-12">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="w-4 h-2 rounded-full" />
+            <Skeleton className="w-2 h-2 rounded-full" />
+          </div>
+        </div>
       </div>
 
       {/* Most Accessed Services Skeleton */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4 px-4 pt-5">
+        <div className="flex items-center justify-between mb-4 px-4 pt-0">
           <Skeleton className="h-5 w-28" />
           <Skeleton className="h-5 w-16" />
         </div>
