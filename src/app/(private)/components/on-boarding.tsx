@@ -10,6 +10,7 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { Button } from '@/components/ui/button'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { onboardingSlides } from '@/constants/onboarding-slides'
+import { useViewportHeight } from '../../../hooks/useViewportHeight'
 import { WelcomeMessage } from './welcome-message'
 
 interface OnboardingProps {
@@ -36,6 +37,8 @@ export default function Onboarding({
   const [fadeOutWelcome, setFadeOutWelcome] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
+
+  const { isSmallHeight, isHydrated } = useViewportHeight(765)
 
   const handleNext = () => {
     swiperRef.current?.swiper?.slideNext()
@@ -118,7 +121,7 @@ export default function Onboarding({
                           objectFit: 'contain',
                           width: '100%',
                           height: '100%',
-                          marginTop: '24px',
+                          marginTop: isSmallHeight && isHydrated ? '24px' : 0,
                         }}
                         loop
                         autoPlay
