@@ -13,7 +13,7 @@ export default async function CategoryPage({
   params: Promise<{ 'category-slug': string }>
 }) {
   const { 'category-slug': categorySlug } = await params
-  const categoryName = getCategoryNameBySlug(categorySlug)
+  const categoryName = await getCategoryNameBySlug(categorySlug)
 
   // Fetch services data from API
   const servicesData = await fetchServicesByCategory(categorySlug)
