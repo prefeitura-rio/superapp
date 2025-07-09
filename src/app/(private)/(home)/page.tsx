@@ -2,6 +2,7 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
+import { fetchCategories } from '@/lib/categories'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import HomeCategoriesGrid from '../components/home-categories-grid'
@@ -58,6 +59,8 @@ export default async function Home() {
     }
   }
 
+  const categories = await fetchCategories()
+
   return (
     <main className="flex max-w-md mx-auto pt-21 flex-col bg-background text-foreground">
       <ScrollAwareHeader userName={userAuthInfo.name} />
@@ -66,7 +69,7 @@ export default async function Home() {
       <SuggestionCards order={[1, 0]} />
 
       {/* Home Categories Grid*/}
-      <HomeCategoriesGrid />
+      <HomeCategoriesGrid categories={categories} />
 
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards showMore={true} />

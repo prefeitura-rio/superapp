@@ -5,7 +5,6 @@ import { ArrowRight, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { SearchResultSkeleton } from '../components/search-result-skeleton'
-import { ServiceCategories } from '../components/service-categories'
 
 interface SearchResultItem {
   titulo: string
@@ -86,8 +85,6 @@ export default function Search() {
       return newHistory
     })
   }
-
-  const categories = ServiceCategories()
 
   const handleSearch = async (query: string) => {
     try {

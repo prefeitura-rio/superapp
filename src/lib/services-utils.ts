@@ -1,13 +1,15 @@
-import { ServiceCategories } from '@/app/(private)/components/service-categories'
 import type { ServiceDocument, ServicesApiResponse } from '@/types/service'
+import { fetchCategories } from './categories'
 
 const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
 
-export function getCategoryNameBySlug(categorySlug: string): string {
+export async function getCategoryNameBySlug(
+  categorySlug: string
+): Promise<string> {
   // Decode the URL-encoded category slug
   const decodedSlug = decodeURIComponent(categorySlug)
 
-  const categories = ServiceCategories()
+  const categories = await fetchCategories()
   const category = categories.find(cat => cat.categorySlug === decodedSlug)
   return (
     category?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
@@ -24,7 +26,7 @@ export async function fetchServicesByCategory(
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 86400 }, // Revalidate every 1 day
     })
 
     if (!response.ok) {

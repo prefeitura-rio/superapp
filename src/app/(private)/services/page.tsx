@@ -1,10 +1,10 @@
+import { fetchCategories } from '@/lib/categories'
 import { CategoryGrid } from '../components/category-grid'
 import { FloatNavigation } from '../components/float-navigation'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
-import { ServiceCategories } from '../components/service-categories'
 
 export default async function ServicesPage() {
-  const categories = ServiceCategories()
+  const categories = await fetchCategories()
 
   return (
     <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">

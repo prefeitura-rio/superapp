@@ -1,13 +1,7 @@
 'use client'
+import type { Category } from '@/lib/categories'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
-
-interface Category {
-  name: string
-  icon: React.ReactNode
-  categorySlug: string
-  tag?: string
-}
 
 interface CategoryGridProps {
   title: React.ReactNode
@@ -17,8 +11,8 @@ interface CategoryGridProps {
 export function CategoryGrid({ title, categories }: CategoryGridProps) {
   const router = useRouter()
 
-  const handleCategoryClick = (name: string) => {
-    router.push(`/services/category/${name}`)
+  const handleCategoryClick = (slug: string) => {
+    router.push(`/services/category/${slug}`)
   }
 
   return (
@@ -26,20 +20,18 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
       <h2 className="text-md font-medium">{title}</h2>
       <div className="grid grid-cols-3 gap-2">
         {categories.map((category, index) => (
-          <div key={index} className="flex flex-col items-center">
+          <div
+            key={category.categorySlug}
+            className="flex flex-col items-center"
+          >
             <button
               type="button"
-              onClick={() => handleCategoryClick(category.name)}
+              onClick={() => handleCategoryClick(category.categorySlug)}
               className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition cursor-pointer"
             >
               <div className="flex items-center justify-center w-full h-full text-foreground">
                 {category.icon}
               </div>
-              {category.tag && (
-                <span className="absolute left-1/2 -translate-x-1/2 bottom-2 text-xs text-white bg-orange-600 px-2 py-0.5 rounded-full">
-                  {category.tag}
-                </span>
-              )}
             </button>
             <span className="mt-2 text-sm text-center text-foreground">
               {category.name}
