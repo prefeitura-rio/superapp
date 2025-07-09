@@ -71,19 +71,21 @@ export default function Onboarding({
   const showSkipButton = currentIndex < onboardingSlides.length - 1
 
   return (
-    <div className="relative min-h-lvh w-full mx-auto px-4 py-5 bg-white text-foreground flex flex-col justify-center overflow-hidden">
+    <div className="relative min-h-lvh w-full mx-auto px-4 py-4 bg-white text-foreground flex flex-col justify-center overflow-hidden">
       {/* Slides container - shows first */}
       {showSlides && (
         <>
-          {showBackButton && (
-            <CustomButton
-              className="absolute top-4 left-4 z-10 bg-[#F1F1F4] text-muted-foreground rounded-full w-11 h-11 hover:bg-[#F1F1F4]/80 outline-none focus:ring-0"
-              onClick={handleBack}
-              disabled={isPending}
-            >
-              <ChevronLeftIcon className="text-black" />
-            </CustomButton>
-          )}
+          <CustomButton
+            className={`absolute top-4 left-4 z-10 bg-[#F1F1F4] text-muted-foreground rounded-full w-11 h-11 hover:bg-[#F1F1F4]/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
+              showBackButton
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 -translate-x-2 pointer-events-none'
+            }`}
+            onClick={handleBack}
+            disabled={isPending}
+          >
+            <ChevronLeftIcon className="text-black" />
+          </CustomButton>
           <div
             className={`transition-opacity duration-600 ${
               slidesFadingOut ? 'opacity-0' : 'opacity-100'
@@ -106,16 +108,17 @@ export default function Onboarding({
             >
               {onboardingSlides.map((slide, idx) => (
                 <SwiperSlide key={idx}>
-                  <div className="flex flex-col items-start justify-center text-left h-full">
-                    <div className="mb-4" style={{ width: 350, height: 350 }}>
+                  <div className="flex flex-col items-center justify-center text-left max-h-[510px] mt-5">
+                    <div className="mb-4" style={{ width: 260, height: 280 }}>
                       <video
                         src={slide.video}
-                        width={350}
-                        height={350}
+                        width={260}
+                        height={280}
                         style={{
                           objectFit: 'contain',
                           width: '100%',
                           height: '100%',
+                          marginTop: '24px',
                         }}
                         loop
                         autoPlay
@@ -126,14 +129,14 @@ export default function Onboarding({
                     <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left">
                       {slide.title}
                     </h2>
-                    <p className="text-left text-[#A1A1A1] mb-6 pb-6 text-sm">
+                    <p className="text-left text-[#A1A1A1] text-sm mb-8">
                       {slide.description}
                     </p>
                   </div>
                 </SwiperSlide>
               ))}
             </Swiper>
-            <div className="pt-16">
+            <div className="pt-15">
               <CustomButton
                 className="w-full text-white px-8 py-3 rounded-full shadow-md bg-[#13335A] hover:bg-[#13335A]/80"
                 size="lg"
