@@ -5,9 +5,8 @@ import type { Category } from '@/lib/categories'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import 'swiper/css'
-import 'swiper/css/grid'
 import 'swiper/css/pagination'
-import { Grid, Pagination } from 'swiper/modules'
+import { Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
 interface HomeCategoriesGridProps {
@@ -57,34 +56,50 @@ export default function HomeCategoriesGrid({
     <div className="px-4 pb-4">
       <div className="pb-0">
         <Swiper
-          slidesPerView={4}
-          slidesPerGroup={8}
-          grid={{
-            rows: 2,
-            fill: 'row',
-          }}
+          slidesPerView={1}
+          slidesPerGroup={1}
           spaceBetween={8}
           pagination={{
             clickable: true,
             dynamicBullets: true,
           }}
-          modules={[Grid, Pagination]}
+          modules={[Pagination]}
           className="home-categories-swiper animate-fade-in"
         >
-          {categories?.map(category => (
-            <SwiperSlide key={category.categorySlug}>
-              <Link href={`/services/category/${category.categorySlug}`}>
-                <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
-                  <div className="flex items-center justify-center text-3xl mb-1">
-                    {category.icon}
-                  </div>
-                </div>
-                <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                  {category.name}
-                </span>
-              </Link>
-            </SwiperSlide>
-          ))}
+          {categories &&
+            Array.from(
+              { length: Math.ceil(categories.length / 8) },
+              (_, slideIndex) => {
+                const startIndex = slideIndex * 8
+                const slideCategories = categories.slice(
+                  startIndex,
+                  startIndex + 8
+                )
+
+                return (
+                  <SwiperSlide key={`slide-${slideIndex}`}>
+                    <div className="grid grid-cols-4 gap-2">
+                      {slideCategories.map((category, index) => (
+                        <Link
+                          key={category.categorySlug}
+                          href={`/services/category/${category.categorySlug}`}
+                          className="flex flex-col items-center"
+                        >
+                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full">
+                            <div className="flex items-center justify-center text-3xl mb-1">
+                              {category.icon}
+                            </div>
+                          </div>
+                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                            {category.name}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </SwiperSlide>
+                )
+              }
+            )}
         </Swiper>
       </div>
       <style jsx global>{`
