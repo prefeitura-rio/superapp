@@ -31,14 +31,14 @@ import servidorIcon from '@/assets/icons/png/servidor-icon.png'
 import trabalhoIcon from '@/assets/icons/png/trabalho-icon.png'
 import transporteIcon from '@/assets/icons/png/transporte-icon.png'
 
-interface ServiceItem {
+interface CategoryItem {
   id: string
   title: string
   icon: string | ReactNode
   route?: string
 }
 
-const services: ServiceItem[] = [
+const categories: CategoryItem[] = [
   {
     id: '1',
     title: 'Transporte',
@@ -249,7 +249,7 @@ const services: ServiceItem[] = [
   },
 ]
 
-export default function HomeServicesGrid() {
+export default function HomecategoriesGrid() {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -303,20 +303,20 @@ export default function HomeServicesGrid() {
             dynamicBullets: true,
           }}
           modules={[Grid, Pagination]}
-          className="home-services-swiper animate-fade-in"
+          className="home-categories-swiper animate-fade-in"
         >
-          {services.map(service => (
-            <SwiperSlide key={service.id}>
-              <Link href={`/services/category/${service.title}`}>
+          {categories.map(category => (
+            <SwiperSlide key={category.id}>
+              <Link href={`/services/category/${category.title}`}>
                 <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors">
                   <div className="flex items-center justify-center text-3xl mb-1">
-                    {typeof service.icon === 'string'
-                      ? service.icon
-                      : service.icon}
+                    {typeof category.icon === 'string'
+                      ? category.icon
+                      : category.icon}
                   </div>
                 </div>
                 <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                  {service.title}
+                  {category.title}
                 </span>
               </Link>
             </SwiperSlide>
@@ -331,7 +331,7 @@ export default function HomeServicesGrid() {
           align-items: center;
           height: 10px;
         }
-        .home-services-swiper .swiper-pagination {
+        .home-categories-swiper .swiper-pagination {
           position: relative !important;
           bottom: auto !important;
           margin-top: 1rem !important;
