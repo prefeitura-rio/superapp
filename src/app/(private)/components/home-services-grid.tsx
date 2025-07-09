@@ -223,11 +223,11 @@ const services: ServiceItem[] = [
   },
   {
     id: '15',
-    title: 'Impostos',
+    title: 'Taxas',
     icon: (
       <Image
         src={impostosIcon}
-        alt="Impostos"
+        alt="Taxas"
         width={48}
         height={48}
         className="w-12 h-12"

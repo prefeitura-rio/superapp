@@ -90,9 +90,9 @@ export function ServiceCategories() {
       categorySlug: 'esportes',
     },
     {
-      name: 'Impostos',
-      icon: <Image src={impostoIcon} alt="Impostos" />,
-      categorySlug: 'impostos',
+      name: 'Taxas',
+      icon: <Image src={impostoIcon} alt="Taxas" />,
+      categorySlug: 'taxas',
     },
     {
       name: 'Animais',
