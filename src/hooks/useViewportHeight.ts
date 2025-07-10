@@ -5,13 +5,16 @@ export const useViewportHeight = (breakpoint = 765) => {
     if (typeof window === 'undefined') return 0
     return window?.visualViewport?.height ?? window?.innerHeight ?? 0
   }
+
   const [isHydrated, setIsHydrated] = useState(false)
   const [height, setHeight] = useState(0)
 
-  // hydration mismatch
-  const isSmallHeight = isHydrated ? height < breakpoint : false
+  const isBelowBreakpoint = isHydrated ? height < breakpoint : false
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // Hydration check - to ensure the hook is only active after the component has mounted
+  const isBelowBreakpointHydrated = isBelowBreakpoint && isHydrated
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
   useEffect(() => {
     setIsHydrated(true)
     const updateHeight = () => setHeight(getViewportHeight())
@@ -26,5 +29,8 @@ export const useViewportHeight = (breakpoint = 765) => {
     }
   }, [breakpoint])
 
-  return { height, isSmallHeight, isHydrated }
+  return {
+    height,
+    isBelowBreakpoint: isBelowBreakpointHydrated,
+  }
 }
