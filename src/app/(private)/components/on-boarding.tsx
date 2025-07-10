@@ -26,6 +26,8 @@ const TRANSITIONS = {
   WELCOME: 4000,
 } as const
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 export default function Onboarding({
   userInfo,
   setFirstLoginFalse,
@@ -38,7 +40,7 @@ export default function Onboarding({
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
 
-  const { isSmallHeight, isHydrated } = useViewportHeight(765)
+  const { isBelowBreakpoint } = useViewportHeight(648)
 
   const handleNext = () => {
     swiperRef.current?.swiper?.slideNext()
@@ -49,24 +51,23 @@ export default function Onboarding({
   }
 
   // Shows slides, then fades it out and show WelcomeMessage for 4 seconds
-  const goToWelcome = () => {
+  const goToWelcome = async () => {
     setSlidesFadingOut(true)
 
-    setTimeout(() => {
-      setShowSlides(false)
-      setShowWelcome(true)
+    await delay(TRANSITIONS.FADE)
+    setShowSlides(false)
+    setShowWelcome(true)
 
-      setTimeout(() => {
-        setFadeOutWelcome(true)
-        setTimeout(() => {
-          startTransition(async () => {
-            await setFirstLoginFalse(userInfo.cpf)
-            // TODO: revalidate rather than reload
-            setTimeout(() => window.location.reload(), TRANSITIONS.FADE)
-          })
-        }, TRANSITIONS.FADE)
-      }, TRANSITIONS.WELCOME)
-    }, TRANSITIONS.FADE)
+    await delay(TRANSITIONS.WELCOME)
+    setFadeOutWelcome(true)
+
+    await delay(TRANSITIONS.FADE)
+    startTransition(async () => {
+      await setFirstLoginFalse(userInfo.cpf)
+      // TODO: revalidate rather than reload
+      await delay(TRANSITIONS.FADE)
+      window.location.reload()
+    })
   }
 
   const showBackButton = currentIndex > 0
@@ -115,13 +116,11 @@ export default function Onboarding({
                     <div className="mb-4" style={{ width: 260, height: 280 }}>
                       <video
                         src={slide.video}
-                        width={260}
-                        height={280}
                         style={{
                           objectFit: 'contain',
                           width: '100%',
                           height: '100%',
-                          marginTop: isSmallHeight && isHydrated ? '24px' : 0,
+                          marginTop: isBelowBreakpoint ? '24px' : 0,
                         }}
                         loop
                         autoPlay
@@ -129,7 +128,7 @@ export default function Onboarding({
                         playsInline
                       />
                     </div>
-                    <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left">
+                    <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left leading-10 tracking-tight">
                       {slide.title}
                     </h2>
                     <p className="text-left text-[#A1A1A1] text-sm mb-8">
@@ -139,9 +138,9 @@ export default function Onboarding({
                 </SwiperSlide>
               ))}
             </Swiper>
-            <div className="pt-15">
+            <div className={`${isBelowBreakpoint ? 'pt-7' : 'pt-15'}`}>
               <CustomButton
-                className="w-full text-white px-8 py-3 rounded-full shadow-md bg-[#13335A] hover:bg-[#13335A]/80"
+                className="w-full text-white px-8 py-3 rounded-full shadow-md bg-[#13335A] hover:bg-[#13335A]/80 md:h-[500]"
                 size="lg"
                 onClick={showFinishButton ? goToWelcome : handleNext}
                 variant="primary"
@@ -150,7 +149,7 @@ export default function Onboarding({
                 {showFinishButton ? 'Concluir' : 'Próximo'}
               </CustomButton>
               <Button
-                className={`w-full text-muted-foreground bg-transparent px-8 py-3 rounded-lg shadow-none cursor-pointer hover:bg-transparent transition-opacity duration-300 ${
+                className={`w-full text-muted-foreground bg-transparent px-8 py-4 rounded-lg shadow-none cursor-pointer hover:bg-transparent transition-opacity duration-300 ${
                   showSkipButton
                     ? 'opacity-100'
                     : 'opacity-0 pointer-events-none'
