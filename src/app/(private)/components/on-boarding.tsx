@@ -112,15 +112,22 @@ export default function Onboarding({
             >
               {onboardingSlides.map((slide, idx) => (
                 <SwiperSlide key={idx}>
-                  <div className="flex flex-col items-center justify-center text-left max-h-[510px] mt-5">
-                    <div className="mb-4" style={{ width: 260, height: 280 }}>
+                  <div
+                    className={`flex flex-col items-center justify-cente text-left max-h-lvh mt-5 md:mt-0 md:gap-14 ${isBelowBreakpoint && 'max-h-[510px]'}`}
+                  >
+                    <div
+                      className="mb-4"
+                      style={{
+                        width: 'clamp(160px, 40%, 260px)',
+                        height: 'clamp(280px, 40%, 460px)',
+                      }}
+                    >
                       <video
                         src={slide.video}
                         style={{
                           objectFit: 'contain',
                           width: '100%',
                           height: '100%',
-                          marginTop: isBelowBreakpoint ? '24px' : 0,
                         }}
                         loop
                         autoPlay
@@ -128,12 +135,15 @@ export default function Onboarding({
                         playsInline
                       />
                     </div>
-                    <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left leading-10 tracking-tight">
-                      {slide.title}
-                    </h2>
-                    <p className="text-left text-[#A1A1A1] text-sm mb-8">
-                      {slide.description}
-                    </p>
+
+                    <div className="text-left w-full">
+                      <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left leading-10 tracking-tight">
+                        {slide.title}
+                      </h2>
+                      <p className="text-left text-[#A1A1A1] text-sm mb-8">
+                        {slide.description}
+                      </p>
+                    </div>
                   </div>
                 </SwiperSlide>
               ))}
