@@ -14,33 +14,44 @@ import {
   getMaintenanceRequestDisplayStatus,
   getMaintenanceRequestStatusColor,
 } from '@/lib/maintenance-requests-utils'
+import { useState } from 'react'
 
 interface CallsAccordionProps {
   requests: ModelsMaintenanceRequest[]
 }
 
 export function CallsAccordion({ requests }: CallsAccordionProps) {
+  const [openItem, setOpenItem] = useState<string>('')
+
   return (
-    <Accordion type="single" collapsible className="space-y-2">
+    <Accordion
+      type="single"
+      collapsible
+      className="space-y-2"
+      value={openItem}
+      onValueChange={setOpenItem}
+    >
       {requests.map(request => (
         <AccordionItem
           key={request.id}
           value={request.id || ''}
           className="rounded-lg bg-card px-4"
         >
-          <AccordionTrigger className="hover:no-underline pt-4 pb-4">
-            <div className="flex flex-col items-start text-left w-full">
-              <div className="flex items-center justify-between w-full mb-2">
+          <AccordionTrigger className="hover:no-underline pt-4 pb-4 items-start">
+            <div className="flex flex-col items-start text-left w-0 flex-1">
+              <div className="flex items-center mb-2">
                 <Badge
                   className={`${getMaintenanceRequestStatusColor(request.status || '')} text-white`}
                 >
                   {getMaintenanceRequestDisplayStatus(request.status || '')}
                 </Badge>
               </div>
-              <h3 className="text-sm font-normal text-card-foreground">
-                {request.subtipo || 'Sem descrição'}
+              <h3
+                className={`text-sm font-normal text-card-foreground break-words w-full ${openItem === (request.id || '') ? '' : 'line-clamp-2'}`}
+              >
+                {request.descricao || 'Sem descrição'}
               </h3>
-              <p className="text-sm font-normal text-muted-foreground">
+              <p className="text-sm font-normal text-muted-foreground w-full">
                 Aberto em {formatMaintenanceRequestDate(request.data_inicio)}
               </p>
             </div>

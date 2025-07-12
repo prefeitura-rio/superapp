@@ -11,7 +11,7 @@ export default function Calls({ maintenanceRequests }: CallsProps) {
     return (
       <div className="p-6">
         <div className="mb-2">
-          <h2 className="font-medium text-foreground">Meus chamados</h2>
+          <h2 className="font-medium text-foreground">Meus pedidos</h2>
         </div>
         <div className="text-center py-8">
           <p className="text-muted-foreground text-sm">
@@ -32,7 +32,7 @@ export default function Calls({ maintenanceRequests }: CallsProps) {
   return (
     <div className="p-6">
       <div className="mb-2">
-        <h2 className="font-medium text-foreground">Meus chamados</h2>
+        <h2 className="font-medium text-foreground">Meus pedidos</h2>
       </div>
       <CallsAccordion requests={sortedRequests} />
     </div>
