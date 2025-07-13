@@ -128,7 +128,7 @@ export function CariocaDigitalServiceComponent({
                             href={etapa.link_solicitacao}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-primary hover:text-primary/80 inline-block"
+                            className="text-sm text-primary inline-block"
                           >
                             Acesse aqui
                           </Link>
