@@ -11,9 +11,15 @@ export function applyContentRules(text: string): string {
   if (!text) return text
 
   // Rule 1: Replace "campo "ACESSAR O SERVIÇO" ao lado" with "botão "Acessar serviço""
-  const transformedText = text.replace(
+  let transformedText = text.replace(
     /campo "ACESSAR O SERVIÇO" ao lado/g,
     'botão "Acessar serviço"'
+  )
+
+  // Rule 2: Replace ""ACESSAR O SERVIÇO" ao lado." with "Acessar serviço"
+  transformedText = transformedText.replace(
+    /"ACESSAR O SERVIÇO" ao lado\./g,
+    'Acessar serviço.'
   )
 
   return transformedText
