@@ -1,4 +1,6 @@
-import type { ServiceDocument, ServicesApiResponse } from '@/types/service'
+import type { Service1746 } from '@/types/1746'
+import type { CariocaDigitalService } from '@/types/carioca-digital'
+import type { ServicesApiResponse } from '@/types/service'
 import { fetchCategories } from './categories'
 
 const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
@@ -43,7 +45,7 @@ export async function fetchServicesByCategory(
 export async function fetchServiceById(
   collection: string,
   id: string
-): Promise<ServiceDocument | null> {
+): Promise<CariocaDigitalService | Service1746 | null> {
   try {
     const url = `${rootUrl}/documento/${collection}/${id}`
 
