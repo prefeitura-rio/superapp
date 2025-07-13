@@ -1,4 +1,7 @@
 import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { applyCategoriaRules, applyEtapaRules } from '@/lib/content-rules'
 import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -30,169 +33,643 @@ export default async function ServicePage({
   return (
     <div className="min-h-lvh max-w-md mx-auto flex flex-col">
       <SecondaryHeader title="Descrição do Serviço" />
-      <div className="min-h-screen text-white">
-        <div className="max-w-md mx-auto pt-20 px-4 pb-20">
-          <div className="space-y-6">
-            {/* Service Header */}
-            <div className="space-y-2">
-              <h1 className="text-xl font-semibold text-card-foreground">
-                {serviceData.titulo}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                <strong>Categoria:</strong> {categoryName}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <strong>Órgão:</strong> {serviceData.orgao_responsavel}
-              </p>
-            </div>
 
-            {/* Service Description */}
-            <div className="bg-card p-4 rounded-lg">
-              <h2 className="font-semibold mb-2 text-card-foreground">
-                Descrição
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 pt-20 pb-20">
+          {/* Service Title */}
+          <h1 className="text-2xl font-semibold text-foreground leading-8 mb-2">
+            {serviceData.titulo}
+          </h1>
+
+          {/* Service Description */}
+          <p className="text-sm text-foreground-light leading-5 mb-6">
+            {serviceData.descricao}
+          </p>
+
+          {/* Expected Timeframe Section */}
+          {((collection === 'carioca-digital' && serviceData.prazo_esperado) ||
+            (collection === '1746' &&
+              (serviceData.prazo_execucao ||
+                serviceData.prazo_atendimento))) && (
+            <div className="mb-4">
+              <h2 className="text-base font-medium text-foreground leading-5 mb-1">
+                Prazo esperado
               </h2>
-              <p className="text-card-foreground text-sm">
-                {serviceData.descricao}
+              <p className="text-sm text-foreground-light leading-5">
+                {collection === 'carioca-digital'
+                  ? serviceData.prazo_esperado
+                  : serviceData.prazo_execucao || serviceData.prazo_atendimento}
               </p>
             </div>
+          )}
 
-            {/* How to Request */}
-            {serviceData.como_solicitar && (
-              <div className="bg-card p-4 rounded-lg">
-                <h2 className="font-semibold mb-2 text-card-foreground">
-                  Como Solicitar
+          {/* Access Service Button */}
+          {serviceData.link_acesso && (
+            <Button
+              asChild
+              variant="default"
+              size="lg"
+              className="mb-6 rounded-full"
+            >
+              <Link
+                href={serviceData.link_acesso}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Acessar serviço
+              </Link>
+            </Button>
+          )}
+
+          {/* Divider */}
+          <div className="border-b border-border mb-6" />
+
+          {/* Related Services Section */}
+          {serviceData.palavras_chave &&
+            serviceData.palavras_chave.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                  Palavras-chave
                 </h2>
-                <p className="text-card-foreground text-sm">
-                  {serviceData.como_solicitar}
-                </p>
+                <div className="flex flex-wrap gap-1">
+                  {serviceData.palavras_chave.map((keyword, index) => (
+                    <Badge
+                      variant="secondary"
+                      key={index}
+                      className="py-1.5 bg-card"
+                    >
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Service Details */}
-            <div className="bg-card p-4 rounded-lg">
-              <h2 className="font-semibold mb-3 text-card-foreground">
-                Detalhes do Serviço
+          {/* Divider */}
+          <div className="border-b border-border mb-6" />
+
+          {/* How to Request Section */}
+          {serviceData.como_solicitar && (
+            <div className="mb-6">
+              <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                Como solicitar
               </h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Custo:</span>
-                  <span className="text-card-foreground capitalize">
-                    {serviceData.custo_servico}
-                  </span>
+              <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
+                {serviceData.como_solicitar}
+              </div>
+            </div>
+          )}
+
+          {/* Collection-specific sections */}
+          {collection === 'carioca-digital' && (
+            <>
+              {/* Responsible Agency for Carioca Digital */}
+              {serviceData.orgao_gestor && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Órgão Gestor
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.orgao_gestor}
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Complexidade:</span>
-                  <span className="text-card-foreground capitalize">
-                    {serviceData.complexidade}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Urgência:</span>
-                  <span className="text-card-foreground capitalize">
-                    {serviceData.urgencia}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Público Alvo:</span>
-                  <span className="text-card-foreground capitalize">
-                    {serviceData.publico_alvo}
-                  </span>
-                </div>
-                {serviceData.prazo_execucao && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Prazo:</span>
-                    <span className="text-card-foreground">
-                      {serviceData.prazo_execucao}
-                    </span>
+              )}
+
+              {/* Detailed Steps */}
+              {serviceData.etapas_detalhadas &&
+                serviceData.etapas_detalhadas.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Etapas
+                    </h2>
+                    <div className="space-y-4">
+                      {serviceData.etapas_detalhadas.map((etapa, index) => (
+                        <div key={index} className="bg-card p-4 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm text-card-foreground leading-5 font-medium">
+                              {etapa.ordem || index + 1}.
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-sm text-card-foreground leading-5">
+                                {applyEtapaRules(etapa.descricao)}
+                              </p>
+                              {etapa.tem_link && etapa.link_solicitacao && (
+                                <Button
+                                  asChild
+                                  variant="default"
+                                  size="lg"
+                                  className="mt-2 rounded-full"
+                                >
+                                  <Link
+                                    href={etapa.link_solicitacao}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-primary hover:text-primary/80 inline-block"
+                                  >
+                                    Acesse aqui
+                                  </Link>
+                                </Button>
+                              )}
+                              {etapa.em_manutencao && (
+                                <span className="text-xs text-orange-600 font-medium mt-1 block">
+                                  Em manutenção
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-              </div>
-            </div>
 
-            {/* What doesn't serve */}
-            {serviceData.o_que_nao_atende && (
-              <div className="bg-card p-4 rounded-lg">
-                <h2 className="font-semibold mb-2 text-card-foreground">
-                  O que não atende
-                </h2>
-                <p className="text-card-foreground text-sm">
-                  {serviceData.o_que_nao_atende}
-                </p>
-              </div>
-            )}
+              {/* Detailed Documents */}
+              {serviceData.documentos_detalhados &&
+                serviceData.documentos_detalhados.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Documentos
+                    </h2>
+                    <div className="space-y-3">
+                      {serviceData.documentos_detalhados.map((doc, index) => {
+                        // Check if permite_upload is an object with URL
+                        const documentUrl =
+                          typeof doc.permite_upload === 'object' &&
+                          doc.permite_upload?.url
+                            ? doc.permite_upload.url
+                            : doc.tem_url && doc.url
+                              ? doc.url
+                              : null
 
-            {/* Requirements */}
-            {serviceData.requisitos && (
-              <div className="bg-card p-4 rounded-lg">
-                <h2 className="font-semibold mb-2 text-card-foreground">
-                  Requisitos
-                </h2>
-                <p className="text-card-foreground text-sm">
-                  {serviceData.requisitos}
-                </p>
-              </div>
-            )}
-
-            {/* Keywords */}
-            {serviceData.palavras_chave &&
-              serviceData.palavras_chave.length > 0 && (
-                <div className="bg-card p-4 rounded-lg">
-                  <h2 className="font-semibold mb-2 text-card-foreground">
-                    Palavras-chave
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {serviceData.palavras_chave.map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
+                        return (
+                          <div key={index} className="bg-card p-4 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <span className="text-sm text-card-foreground leading-5 font-medium mt-0.5">
+                                •
+                              </span>
+                              <div className="flex-1">
+                                <p className="text-sm text-card-foreground leading-5">
+                                  {doc.descricao}
+                                </p>
+                                {documentUrl && (
+                                  <Link
+                                    href={documentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-primary hover:text-primary/80 underline mt-2 inline-block"
+                                  >
+                                    Download/Acessar documento
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
+                )}
+
+              {/* Legislation */}
+              {serviceData.legislacao && serviceData.legislacao.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Legislação
+                  </h2>
+                  <ul className="space-y-1">
+                    {serviceData.legislacao.map((lei, index) => (
+                      <li
+                        key={index}
+                        className="text-sm text-foreground-light leading-5"
+                      >
+                        • {lei}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
-            {/* External Link */}
-            {serviceData.url && (
-              <div className="bg-card p-4 rounded-lg">
-                <h2 className="font-semibold mb-2 text-card-foreground">
-                  Link Oficial
-                </h2>
-                <Link
-                  href={serviceData.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm"
-                >
-                  Acessar página oficial do serviço
-                </Link>
-              </div>
-            )}
-
-            {/* Related Links */}
-            {serviceData.link_relacionados &&
-              serviceData.link_relacionados.length > 0 && (
-                <div className="bg-card p-4 rounded-lg">
-                  <h2 className="font-semibold mb-2 text-card-foreground">
-                    Links Relacionados
+              {/* Service Cost */}
+              {serviceData.custo_do_servico && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Custo do Serviço
                   </h2>
-                  <div className="space-y-1">
-                    {serviceData.link_relacionados.map((link, index) => (
+                  <p className="text-sm text-foreground-light leading-5">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs capitalize bg-card"
+                    >
+                      {serviceData.custo_do_servico}
+                    </Badge>
+                    {serviceData.valor_a_ser_pago && (
+                      <span className="block mt-1 font-medium">
+                        Valor: {serviceData.valor_a_ser_pago}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {/* What this service doesn't cover */}
+              {serviceData.este_servico_nao_cobre && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Este serviço não cobre
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.este_servico_nao_cobre}
+                  </p>
+                </div>
+              )}
+
+              {/* Special Procedures */}
+              {serviceData.procedimentos_especiais && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Procedimentos Especiais
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.procedimentos_especiais}
+                  </p>
+                </div>
+              )}
+
+              {/* Additional Information */}
+              {serviceData.informacoes_complementares && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Informações Complementares
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.informacoes_complementares}
+                  </p>
+                </div>
+              )}
+
+              {/* App Information */}
+              {serviceData.disponivel_app && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Disponível em App
+                  </h2>
+                  <div className="space-y-2">
+                    <p className="text-sm text-foreground-light leading-5">
+                      Aplicativo 1746 Rio O Aplicativo 1746 conecta o cidadão à
+                      Prefeitura do Rio. Você poderá solicitar mais de mil tipos
+                      de informação e serviços públicos municipais, além de
+                      poder acompanhar o andamento das suas solicitações.
+                    </p>
+                    {serviceData.app_android && (
                       <Link
-                        key={index}
-                        href={link}
+                        href="https://play.google.com/store/apps/details?id=br.com.datametrica.canal1746&hl=pt_BR"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm block"
+                        className="text-sm text-primary hover:text-primary/80 underline block"
                       >
-                        {link}
+                        Download para Android
                       </Link>
-                    ))}
+                    )}
+                    {serviceData.app_ios && (
+                      <Link
+                        href={serviceData.app_ios}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:text-primary/80 underline block"
+                      >
+                        Download para iOS
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
-          </div>
+
+              {/* In-Person Service */}
+              {serviceData.atendimento_presencial &&
+                serviceData.local_presencial && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Atendimento Presencial
+                    </h2>
+                    <p className="text-sm text-foreground-light leading-5">
+                      {serviceData.local_presencial}
+                    </p>
+                  </div>
+                )}
+            </>
+          )}
+
+          {collection === '1746' && (
+            <>
+              {/* Responsible Agency for 1746 */}
+              {serviceData.orgao_responsavel && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Órgão Responsável
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.orgao_responsavel}
+                  </p>
+                </div>
+              )}
+
+              {/* Objective */}
+              {serviceData.objetivo && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Objetivo
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.objetivo}
+                  </p>
+                </div>
+              )}
+
+              {/* Process Steps */}
+              {serviceData.etapas_processo &&
+                serviceData.etapas_processo.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Etapas
+                    </h2>
+                    <div className="space-y-4">
+                      {serviceData.etapas_processo.map((step, index) => (
+                        <div key={index} className="bg-card p-4 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm text-card-foreground leading-5 font-medium">
+                              {index + 1}.
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-sm text-card-foreground leading-5">
+                                {step}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Requirements */}
+              {serviceData.requisitos && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Requisitos
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.requisitos}
+                  </p>
+                </div>
+              )}
+
+              {/* Required Documents */}
+              {serviceData.documentos_necessarios &&
+                serviceData.documentos_necessarios.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Documentos Necessários
+                    </h2>
+                    <ul className="space-y-1">
+                      {serviceData.documentos_necessarios.map((doc, index) => (
+                        <li
+                          key={index}
+                          className="text-sm text-foreground-light leading-5"
+                        >
+                          • {doc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+              {/* Mandatory Documents */}
+              {/* {serviceData.documentos_obrigatorios &&
+                serviceData.documentos_obrigatorios.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Documentos Obrigatórios
+                    </h2>
+                    <ul className="space-y-1">
+                      {serviceData.documentos_obrigatorios.map((doc, index) => (
+                        <li
+                          key={index}
+                          className="text-sm text-foreground-light leading-5"
+                        >
+                          • {doc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )} */}
+
+              {/* Optional Documents */}
+              {serviceData.documentos_opcionais &&
+                serviceData.documentos_opcionais.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Documentos Opcionais
+                    </h2>
+                    <ul className="space-y-1">
+                      {serviceData.documentos_opcionais.map((doc, index) => (
+                        <li
+                          key={index}
+                          className="text-sm text-foreground-light leading-5"
+                        >
+                          • {doc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+              {/* Service Details */}
+              <div className="mb-6">
+                <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                  Detalhes do Serviço
+                </h2>
+                <div className="space-y-2">
+                  {serviceData.custo_servico && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground-light">
+                        Custo:
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs capitalize bg-card"
+                      >
+                        {serviceData.custo_servico}
+                      </Badge>
+                    </div>
+                  )}
+                  {/* {serviceData.tipo_servico && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground">Tipo:</span>
+                      <span className="text-sm text-foreground capitalize">
+                        {serviceData.tipo_servico}
+                      </span>
+                    </div>
+                  )} */}
+                  {serviceData.categoria_servico && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground-light">
+                        Categoria:
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs capitalize bg-card"
+                      >
+                        {applyCategoriaRules(serviceData.categoria_servico)}
+                      </Badge>
+                    </div>
+                  )}
+                  {serviceData.publico_alvo && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground-light">
+                        Público Alvo:
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs capitalize bg-card"
+                      >
+                        {serviceData.publico_alvo}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              {(serviceData.enderecos_atendimento.length > 0 ||
+                serviceData.telefones_contato.length > 0) && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Informações de Contato
+                  </h2>
+                  <div className="space-y-2">
+                    {serviceData.enderecos_atendimento &&
+                      serviceData.enderecos_atendimento.length > 0 && (
+                        <div>
+                          <span className="text-sm text-foreground-light font-medium">
+                            Endereços:
+                          </span>
+                          <ul className="mt-1 space-y-1">
+                            {serviceData.enderecos_atendimento.map(
+                              (endereco, index) => (
+                                <li
+                                  key={index}
+                                  className="text-sm text-foreground-light leading-5"
+                                >
+                                  • {endereco}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    {serviceData.telefones_contato &&
+                      serviceData.telefones_contato.length > 0 && (
+                        <div>
+                          <ul className="mt-1 space-y-1">
+                            {serviceData.telefones_contato.map(
+                              (telefone, index) => (
+                                <li
+                                  key={index}
+                                  className="text-sm text-foreground-light leading-5"
+                                >
+                                  • {telefone}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              )}
+
+              {/* What doesn't serve */}
+              {serviceData.o_que_nao_atende && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    O que não atende
+                  </h2>
+                  <p className="text-sm text-foreground-light leading-5">
+                    {serviceData.o_que_nao_atende}
+                  </p>
+                </div>
+              )}
+
+              {/* Limitations */}
+              {serviceData.limitacoes && serviceData.limitacoes.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Limitações
+                  </h2>
+                  <ul className="space-y-1">
+                    {serviceData.limitacoes.map((limitacao, index) => (
+                      <li
+                        key={index}
+                        className="text-sm text-foreground-light leading-5"
+                      >
+                        • {limitacao}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Related Legislation */}
+              {serviceData.legislacao_relacionada &&
+                serviceData.legislacao_relacionada.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                      Legislação Relacionada
+                    </h2>
+                    <ul className="space-y-1">
+                      {serviceData.legislacao_relacionada.map((lei, index) => (
+                        <li
+                          key={index}
+                          className="text-sm text-foreground-light leading-5"
+                        >
+                          • {lei}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+              {/* Additional Information */}
+              {(serviceData.informacoes_complementares ||
+                serviceData.horario_funcionamento ||
+                serviceData.como_orgao_atua) && (
+                <div className="mb-6">
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    Informações Complementares
+                  </h2>
+                  {serviceData.informacoes_complementares && (
+                    <p className="text-sm text-foreground-light leading-5 mb-2">
+                      {serviceData.informacoes_complementares}
+                    </p>
+                  )}
+                  {serviceData.horario_funcionamento && (
+                    <p className="text-sm text-foreground-light leading-5 mb-2">
+                      <span className="font-medium">
+                        Horário de Funcionamento:{' '}
+                      </span>
+                      {serviceData.horario_funcionamento}
+                    </p>
+                  )}
+                  {serviceData.como_orgao_atua && (
+                    <p className="text-sm text-foreground-light leading-5">
+                      <span className="font-medium">Como o Órgão Atua: </span>
+                      {serviceData.como_orgao_atua}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
