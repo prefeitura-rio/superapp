@@ -55,7 +55,7 @@ export function Service1746Component({ serviceData }: Service1746Props) {
       <div className="border-b border-border mb-6" />
 
       {/* Related Services Section */}
-      {serviceData.palavras_chave && serviceData.palavras_chave.length > 0 && (
+      {/* {serviceData.palavras_chave && serviceData.palavras_chave.length > 0 && (
         <div className="mb-6">
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Palavras-chave
@@ -68,10 +68,10 @@ export function Service1746Component({ serviceData }: Service1746Props) {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Divider */}
-      <div className="border-b border-border mb-6" />
+      {/* <div className="border-b border-border mb-6" /> */}
 
       {/* How to Request Section */}
       {serviceData.como_solicitar && (
@@ -82,18 +82,6 @@ export function Service1746Component({ serviceData }: Service1746Props) {
           <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
             {serviceData.como_solicitar}
           </div>
-        </div>
-      )}
-
-      {/* Responsible Agency for 1746 */}
-      {serviceData.orgao_responsavel && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Órgão Responsável
-          </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            {serviceData.orgao_responsavel}
-          </p>
         </div>
       )}
 
@@ -347,6 +335,17 @@ export function Service1746Component({ serviceData }: Service1746Props) {
               {serviceData.como_orgao_atua}
             </p>
           )}
+        </div>
+      )}
+      {/* Responsible Agency for 1746 */}
+      {serviceData.orgao_responsavel && (
+        <div className="mb-6">
+          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+            Órgão Responsável
+          </h2>
+          <p className="text-sm text-foreground-light leading-5">
+            {serviceData.orgao_responsavel}
+          </p>
         </div>
       )}
     </>

@@ -57,7 +57,7 @@ export function CariocaDigitalServiceComponent({
       <div className="border-b border-border mb-6" />
 
       {/* Related Services Section */}
-      {serviceData.palavras_chave && serviceData.palavras_chave.length > 0 && (
+      {/* {serviceData.palavras_chave && serviceData.palavras_chave.length > 0 && (
         <div className="mb-6">
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Palavras-chave
@@ -70,10 +70,10 @@ export function CariocaDigitalServiceComponent({
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Divider */}
-      <div className="border-b border-border mb-6" />
+      {/* <div className="border-b border-border mb-6" /> */}
 
       {/* How to Request Section */}
       {serviceData.como_solicitar && (
@@ -84,18 +84,6 @@ export function CariocaDigitalServiceComponent({
           <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
             {serviceData.como_solicitar}
           </div>
-        </div>
-      )}
-
-      {/* Responsible Agency for Carioca Digital */}
-      {serviceData.orgao_gestor && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Órgão Gestor
-          </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            {serviceData.orgao_gestor}
-          </p>
         </div>
       )}
 
@@ -329,6 +317,18 @@ export function CariocaDigitalServiceComponent({
           </h2>
           <p className="text-sm text-foreground-light leading-5">
             {serviceData.local_presencial}
+          </p>
+        </div>
+      )}
+
+      {/* Responsible Agency for Carioca Digital */}
+      {serviceData.orgao_gestor && (
+        <div className="mb-6">
+          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+            Órgão Gestor
+          </h2>
+          <p className="text-sm text-foreground-light leading-5">
+            {serviceData.orgao_gestor}
           </p>
         </div>
       )}
