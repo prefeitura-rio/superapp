@@ -66,7 +66,9 @@ export const OnboardingSlider = forwardRef<SwiperRef, OnboardingSliderProps>(
                   >
                     <div>
                       <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
-                        <span className="text-gray-500 text-xl">▶</span>
+                        <span className="text-gray-500 text-xl ml-1 -mt-1">
+                          ▶
+                        </span>
                       </div>
                       <p className="text-gray-500 text-xs">
                         Vídeo indisponível
