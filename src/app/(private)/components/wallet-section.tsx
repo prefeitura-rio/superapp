@@ -21,11 +21,25 @@ import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
+  healthCardData?: {
+    href: string
+    title: string
+    name?: string
+    statusLabel: string
+    statusValue: string
+    extraLabel: string
+    extraValue: string
+    address?: string
+    phone?: string
+    email?: string
+    risco?: string
+  }
 }
 
 export default function CarteiraSection({
   walletData,
   maintenanceRequests,
+  healthCardData,
 }: CartereiraSectionProps) {
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
@@ -34,7 +48,7 @@ export default function CarteiraSection({
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
   // Calculate dynamic margin-bottom based on wallet count
-  const dynamicMarginBottom = `calc(100lvh - (116px + 188px + ${(walletInfo.count - 1) * 80}px))`
+  const dynamicMarginBottom = `calc(100lvh - (116px + 188px + ${(walletInfo.count - 1) * 80}px)`
 
   // Track current card index for dynamic positioning
   let cardIndex = 0
@@ -58,29 +72,32 @@ export default function CarteiraSection({
           className="grid w-full gap-2"
           style={{ marginBottom: dynamicMarginBottom }}
         >
-          {walletData?.saude?.clinica_familia?.nome && (
+          {(healthCardData || walletData?.saude?.clinica_familia?.nome) && (
             <div
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
               <WalletHealthCard
-                href="/wallet/health"
-                title="CLÍNICA DA FAMÍLIA"
-                name={
-                  walletData?.saude?.clinica_familia?.nome || 'Não disponível'
-                }
-                statusLabel="Situação"
-                statusValue={getOperatingStatus(
-                  walletData?.saude?.clinica_familia?.horario_atendimento
-                )}
-                extraLabel="Horário de atendimento"
-                extraValue={
-                  walletData?.saude?.clinica_familia?.horario_atendimento ||
-                  'Não informado'
-                }
-                address={walletData?.saude?.clinica_familia?.endereco}
-                phone={walletData?.saude?.clinica_familia?.telefone}
-                email={walletData?.saude?.clinica_familia?.email}
+                {...(healthCardData
+                  ? healthCardData
+                  : {
+                      href: '/wallet/health',
+                      title: 'CLÍNICA DA FAMÍLIA',
+                      name:
+                        walletData?.saude?.clinica_familia?.nome ||
+                        'Não disponível',
+                      statusLabel: 'Status',
+                      statusValue: getOperatingStatus(
+                        walletData?.saude?.clinica_familia?.horario_atendimento
+                      ),
+                      extraLabel: 'Horário de atendimento',
+                      extraValue:
+                        walletData?.saude?.clinica_familia
+                          ?.horario_atendimento || 'Não informado',
+                      address: walletData?.saude?.clinica_familia?.endereco,
+                      phone: walletData?.saude?.clinica_familia?.telefone,
+                      email: walletData?.saude?.clinica_familia?.email,
+                    })}
               />
             </div>
           )}
@@ -123,7 +140,7 @@ export default function CarteiraSection({
                 name={
                   walletData?.assistencia_social?.cras?.nome || 'Não disponível'
                 }
-                statusLabel="Situação"
+                statusLabel="Status"
                 statusValue={getCadUnicoStatus(
                   walletData?.assistencia_social?.cadunico
                 )}

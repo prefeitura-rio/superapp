@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { mapRiskToColor } from '@/lib/health-unit-utils'
 import { EyeIcon, InfoIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
@@ -21,7 +22,7 @@ interface WalletHealthCardProps {
   showStatusIcon?: boolean
   showEyeButton?: boolean
   showInfoButton?: boolean
-  color?: string
+  risco?: string
   address?: string
   phone?: string
   email?: string
@@ -42,12 +43,11 @@ export function WalletHealthCard({
   statusValue,
   extraLabel,
   extraValue,
-  bgClass,
   icon,
   showStatusIcon = false,
   showEyeButton = false,
   showInfoButton = false,
-  color,
+  risco,
   address,
   phone,
   email,
@@ -102,16 +102,16 @@ export function WalletHealthCard({
                             <WalletHealthStatusDrawerContent
                               open={showStatusSheet}
                               onOpenChange={setShowStatusSheet}
-                              color={color ?? ''}
                               statusValue={statusValue}
+                              risco={risco}
                             />
                           </>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 mt-1">
-                        {showStatusIcon && (
+                      <div className="flex items-center mt-1">
+                        {showStatusIcon && statusValue !== 'Fechado' && (
                           <span
-                            className={`w-2.5 h-2.5 rounded-full ${statusBgClassMap[color ?? ''] || ''} border-2 border-card`}
+                            className={`w-2.5 h-2.5 mr-1 rounded-full ${statusBgClassMap[mapRiskToColor(risco ?? '')] || ''} border-2 border-card`}
                           />
                         )}
                         <span className="text-sm font-normal">

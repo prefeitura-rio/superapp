@@ -1,7 +1,15 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getOperatingStatus } from '@/lib/operating-status'
+import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
+import {
+  formatAddress,
+  formatOperatingHours,
+  getCurrentOperatingStatus,
+  getHealthUnitRiskStatus,
+  getPrimaryPhone,
+  getWhatsAppPhone,
+} from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
@@ -80,6 +88,8 @@ function TeamPage({ healthData }: TeamPageProps) {
 export default async function HealthCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
   let walletData
+  let healthUnitData
+  let healthUnitRiskData
 
   if (userAuthInfo.cpf) {
     try {
@@ -97,31 +107,94 @@ export default async function HealthCardDetail() {
     } catch (error) {
       console.error('Error fetching wallet data:', error)
     }
-  }
 
-  const healthData = walletData?.saude
-  const clinica = healthData?.clinica_familia
+    // Get CNES from wallet data and fetch health unit information
+    const cnes = walletData?.saude?.clinica_familia?.id_cnes
+    if (cnes) {
+      console.log('cnes', cnes)
+      try {
+        const [unitResponse, riskResponse] = await Promise.all([
+          getHealthUnitInfo(cnes, {
+            cache: 'force-cache',
+            next: { revalidate: 3600 },
+          }),
+          getHealthUnitRisk(cnes),
+        ])
 
-  // Get the operating status
-  const statusValue = getOperatingStatus(clinica?.horario_atendimento)
+        if (unitResponse.status === 200) {
+          healthUnitData = unitResponse.data
+        } else {
+          console.error('Failed to fetch health unit data:', unitResponse.data)
+        }
 
-  // Map status to color
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Aberto':
-        return 'verde'
-      case 'Fechado':
-        return 'vermelho'
-      default:
-        return 'vermelho'
+        if (riskResponse.status === 200) {
+          healthUnitRiskData = riskResponse.data
+        } else {
+          console.error(
+            'Failed to fetch health unit risk data:',
+            riskResponse.data
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching health unit data:', error)
+      }
     }
   }
 
+  const healthData = walletData?.saude
+
+  // Use new API data if available, fallback to wallet data
+  const unitName =
+    healthUnitData?.nome ||
+    healthData?.clinica_familia?.nome ||
+    'Não disponível'
+  const operatingHours = healthUnitData
+    ? formatOperatingHours(
+        healthUnitData.funcionamento_dia_util,
+        healthUnitData.funcionamento_sabado
+      )
+    : healthData?.clinica_familia?.horario_atendimento || 'Não informado'
+
+  // Get risk status data
+  const riskStatus =
+    healthUnitData && healthUnitRiskData
+      ? getHealthUnitRiskStatus(healthUnitRiskData)
+      : null
+
+  // Status value should be "Aberto" or "Fechado" based on operating hours
+  const statusValue = healthUnitData
+    ? getCurrentOperatingStatus(
+        healthUnitData.funcionamento_dia_util,
+        healthUnitData.funcionamento_sabado
+      )
+    : getCurrentOperatingStatus(
+        { inicio: 8, fim: 17 }, // Default hours if no data
+        null
+      )
+
+  const address = healthUnitData
+    ? formatAddress(healthUnitData)
+    : healthData?.clinica_familia?.endereco || 'Endereço não disponível'
+
+  const phone = healthUnitData
+    ? getPrimaryPhone(healthUnitData) || undefined
+    : healthData?.clinica_familia?.telefone
+
+  const whatsappPhone = healthUnitData
+    ? getWhatsAppPhone(healthUnitData) || undefined
+    : healthData?.clinica_familia?.telefone
+
+  const email = healthData?.clinica_familia?.email
+
   // Build dynamic links with real data
-  const phoneUrl = clinica?.telefone ? `tel:${clinica.telefone}` : '#'
-  const mapUrl = clinica?.endereco
-    ? `https://www.google.com/maps?q=${encodeURIComponent(clinica.endereco)}`
+  const phoneUrl = phone ? `tel:${phone}` : '#'
+  const whatsappUrl = whatsappPhone
+    ? `https://wa.me/${whatsappPhone.replace(/\D/g, '')}`
     : '#'
+  const mapUrl =
+    address && address !== 'Endereço não disponível'
+      ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
+      : '#'
 
   return (
     <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
@@ -131,16 +204,16 @@ export default async function HealthCardDetail() {
           <WalletHealthCard
             href="#"
             title="CLÍNICA DA FAMÍLIA"
-            name={clinica?.nome || 'Não disponível'}
-            statusLabel="Situação"
+            name={unitName}
+            statusLabel="Status"
             statusValue={statusValue}
             extraLabel="Horário de atendimento"
-            extraValue={clinica?.horario_atendimento || 'Não informado'}
-            address={clinica?.endereco}
-            phone={clinica?.telefone}
-            email={clinica?.email}
+            extraValue={operatingHours}
+            address={address}
+            phone={phone}
+            email={email}
             bgClass="bg-blue-100"
-            color={getStatusColor(statusValue)}
+            risco={riskStatus?.risco}
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
@@ -168,18 +241,14 @@ export default async function HealthCardDetail() {
               </div>
             </a>
             <a
-              href={
-                clinica?.telefone
-                  ? `https://wa.me/${clinica.telefone.replace(/\D/g, '')}`
-                  : undefined
-              }
+              href={whatsappUrl !== '#' ? whatsappUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex flex-col items-center ${!clinica?.telefone ? 'pointer-events-none' : ''}`}
+              className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
                 <Phone
-                  className={`h-5 ${!clinica?.telefone ? 'text-muted-foreground' : ''}`}
+                  className={`h-5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">

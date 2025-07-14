@@ -1,13 +1,13 @@
 'use client'
 
-import { capitalizeFirstLetter } from '@/app/(private)/components/utils'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import { mapRiskToColor } from '@/lib/health-unit-utils'
 
 interface WalletHealthStatusDrawerContentProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  color: string
   statusValue?: string
+  risco?: string
 }
 
 const statusBgClassMap: Record<string, string> = {
@@ -15,6 +15,7 @@ const statusBgClassMap: Record<string, string> = {
   amarelo: 'bg-card-5',
   laranja: 'bg-card-5',
   vermelho: 'bg-destructive',
+  cinza: 'bg-card-foreground/40',
 }
 
 const statusTextClassMap: Record<string, string> = {
@@ -27,29 +28,50 @@ const statusTextClassMap: Record<string, string> = {
 export function WalletHealthStatusDrawerContent({
   open,
   onOpenChange,
-  color,
   statusValue,
+  risco,
 }: WalletHealthStatusDrawerContentProps) {
-  const displayStatus = statusValue || capitalizeFirstLetter(color)
+  // Check if risco is a valid risk level
+  const validRiskLevels = ['Verde', 'Amarelo', 'Laranja', 'Vermelho']
+  const isValidRisk = risco && validRiskLevels.includes(risco)
+
+  const color = isValidRisk ? mapRiskToColor(risco) : 'cinza'
+  const displayRisk = isValidRisk ? risco : 'Status indisponível'
+
+  const getRiskDescription = (riskLevel: string): string => {
+    switch (riskLevel) {
+      case 'Verde':
+        return 'A Clínica está funcionando normalmente. Os atendimentos seguem como de costume, com todos os serviços.'
+      case 'Amarelo':
+        return 'Essa área está com risco moderado. A equipe de saúde continuará trabalhando, mas não realizará visitas domiciliares.'
+      case 'Laranja':
+        return 'Essa área estava em situação de risco alto, e passa por reavaliação de segurança. Os atendimentos seguem somente dentro da unidade.'
+      case 'Vermelho':
+        return 'Essa área está em situação de risco grave. A unidade será fechada por segurança. Consulte a situação da unidade dentro de algumas horas.'
+      default:
+        return 'Não há informações disponíveis. Consulte a unidade para mais informações. Finais de semana e feriados podem ter horários diferentes.'
+    }
+  }
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Status">
       <div className="flex items-center gap-2 mb-2">
         <span
-          className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color] || ''} border-3 border-background/60`}
+          className={`inline-block w-4 h-4 rounded-full ${statusBgClassMap[color] || 'bg-gray-400'} border-3 border-background/60`}
         />
         <span
-          className={`${statusTextClassMap[color] || ''} font-medium text-lg`}
+          className={`${statusTextClassMap[color] || 'text-foreground-light'} font-medium text-lg`}
         >
-          {displayStatus}
+          {displayRisk}
         </span>
       </div>
 
       <div className="text-base text-foreground">
-        {(statusValue === 'Aberto' || color === 'verde') &&
-          'A Clínica está funcionando normalmente. Consulte a unidade para mais informações. Finais de semana e feriados podem ter horários diferentes.'}
-        {(statusValue === 'Fechado' || color === 'vermelho') &&
-          'A Clínica está fechada. Consulte a unidade para mais informações. Finais de semana e feriados podem ter horários diferentes.'}
+        {isValidRisk ? getRiskDescription(risco!) : getRiskDescription('')}
+      </div>
+      <div className="text-sm pt-2 text-foreground-light">
+        Consulte a unidade para mais informações. Finais de semana e feriados
+        podem ter horários diferentes.
       </div>
     </BottomSheet>
   )

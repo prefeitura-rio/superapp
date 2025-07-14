@@ -3,6 +3,14 @@ import {
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
 import { fetchCategories } from '@/lib/categories'
+import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
+import {
+  formatAddress,
+  formatOperatingHours,
+  getCurrentOperatingStatus,
+  getHealthUnitRiskStatus,
+  getPrimaryPhone,
+} from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
 import HomeCategoriesGrid from '../components/home-categories-grid'
@@ -15,6 +23,8 @@ export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
   let walletData
   let maintenanceRequests
+  let healthUnitData
+  let healthUnitRiskData
 
   if (userAuthInfo.cpf) {
     // Fetch wallet data
@@ -32,6 +42,35 @@ export default async function Home() {
       }
     } catch (error) {
       console.error('Error fetching wallet data:', error)
+    }
+
+    // Fetch health unit info and risk if CNES is available
+    const cnes = walletData?.saude?.clinica_familia?.id_cnes
+    if (cnes) {
+      try {
+        const [unitResponse, riskResponse] = await Promise.all([
+          getHealthUnitInfo(cnes, {
+            cache: 'force-cache',
+            next: { revalidate: 3600 },
+          }),
+          getHealthUnitRisk(cnes),
+        ])
+        if (unitResponse.status === 200) {
+          healthUnitData = unitResponse.data
+        } else {
+          console.error('Failed to fetch health unit data:', unitResponse.data)
+        }
+        if (riskResponse.status === 200) {
+          healthUnitRiskData = riskResponse.data
+        } else {
+          console.error(
+            'Failed to fetch health unit risk data:',
+            riskResponse.data
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching health unit data:', error)
+      }
     }
 
     // Fetch maintenance requests data
@@ -59,6 +98,55 @@ export default async function Home() {
     }
   }
 
+  // Prepare healthCardData
+  let healthCardData = undefined
+  if (walletData?.saude?.clinica_familia) {
+    // Use new API data if available, fallback to wallet data
+    const unitName =
+      healthUnitData?.nome ||
+      walletData.saude.clinica_familia.nome ||
+      'Não disponível'
+    const operatingHours = healthUnitData
+      ? formatOperatingHours(
+          healthUnitData.funcionamento_dia_util,
+          healthUnitData.funcionamento_sabado
+        )
+      : walletData.saude.clinica_familia.horario_atendimento || 'Não informado'
+    const riskStatus =
+      healthUnitData && healthUnitRiskData
+        ? getHealthUnitRiskStatus(healthUnitRiskData)
+        : null
+    const statusValue = healthUnitData
+      ? getCurrentOperatingStatus(
+          healthUnitData.funcionamento_dia_util,
+          healthUnitData.funcionamento_sabado
+        )
+      : getCurrentOperatingStatus(
+          { inicio: 8, fim: 17 }, // Default hours if no data
+          null
+        )
+    const address = healthUnitData
+      ? formatAddress(healthUnitData)
+      : walletData.saude.clinica_familia.endereco || 'Endereço não disponível'
+    const phone = healthUnitData
+      ? getPrimaryPhone(healthUnitData) || undefined
+      : walletData.saude.clinica_familia.telefone
+    const email = walletData.saude.clinica_familia.email
+    healthCardData = {
+      href: '/wallet/health',
+      title: 'CLÍNICA DA FAMÍLIA',
+      name: unitName,
+      statusLabel: 'Status',
+      statusValue,
+      extraLabel: 'Horário de atendimento',
+      extraValue: operatingHours,
+      address,
+      phone,
+      email,
+      risco: riskStatus?.risco,
+    }
+  }
+
   const categories = await fetchCategories()
 
   return (
@@ -78,6 +166,7 @@ export default async function Home() {
       <CarteiraSection
         walletData={walletData}
         maintenanceRequests={maintenanceRequests}
+        healthCardData={healthCardData}
       />
       <FloatNavigation />
     </main>

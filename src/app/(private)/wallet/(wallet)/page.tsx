@@ -6,6 +6,14 @@ import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
+import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
+import {
+  formatAddress,
+  formatOperatingHours,
+  getCurrentOperatingStatus,
+  getHealthUnitRiskStatus,
+  getPrimaryPhone,
+} from '@/lib/health-unit-utils'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
@@ -23,6 +31,8 @@ export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
   let walletData
   let maintenanceRequests
+  let healthUnitData
+  let healthUnitRiskData
 
   if (userAuthInfo.cpf) {
     try {
@@ -39,6 +49,37 @@ export default async function Wallet() {
       }
     } catch (error) {
       console.error('Error fetching wallet data:', error)
+    }
+
+    // Fetch health unit data if CNES is available
+    const cnes = walletData?.saude?.clinica_familia?.id_cnes
+    if (cnes) {
+      try {
+        const [unitResponse, riskResponse] = await Promise.all([
+          getHealthUnitInfo(cnes, {
+            cache: 'force-cache',
+            next: { revalidate: 3600 },
+          }),
+          getHealthUnitRisk(cnes),
+        ])
+
+        if (unitResponse.status === 200) {
+          healthUnitData = unitResponse.data
+        } else {
+          console.error('Failed to fetch health unit data:', unitResponse.data)
+        }
+
+        if (riskResponse.status === 200) {
+          healthUnitRiskData = riskResponse.data
+        } else {
+          console.error(
+            'Failed to fetch health unit risk data:',
+            riskResponse.data
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching health unit data:', error)
+      }
     }
 
     // Fetch maintenance requests data
@@ -78,6 +119,45 @@ export default async function Wallet() {
   // Track current card index for dynamic positioning
   let cardIndex = 0
 
+  // Prepare health card data
+  const hasHealthData =
+    healthUnitData || walletData?.saude?.clinica_familia?.nome
+
+  // Get risk status data
+  const riskStatus =
+    healthUnitData && healthUnitRiskData
+      ? getHealthUnitRiskStatus(healthUnitRiskData)
+      : null
+
+  const healthName =
+    healthUnitData?.nome ||
+    walletData?.saude?.clinica_familia?.nome ||
+    'Não disponível'
+
+  // Status value should be "Aberto" or "Fechado" based on operating hours
+  const healthStatusValue = healthUnitData
+    ? getCurrentOperatingStatus(
+        healthUnitData.funcionamento_dia_util,
+        healthUnitData.funcionamento_sabado
+      )
+    : getOperatingStatus(
+        walletData?.saude?.clinica_familia?.horario_atendimento
+      )
+
+  const healthOperatingHours = healthUnitData
+    ? formatOperatingHours(
+        healthUnitData.funcionamento_dia_util,
+        healthUnitData.funcionamento_sabado
+      )
+    : walletData?.saude?.clinica_familia?.horario_atendimento || 'Não informado'
+  const healthAddress = healthUnitData
+    ? formatAddress(healthUnitData)
+    : walletData?.saude?.clinica_familia?.endereco
+  const healthPhone = healthUnitData
+    ? getPrimaryPhone(healthUnitData) || undefined
+    : walletData?.saude?.clinica_familia?.telefone
+  const healthEmail = walletData?.saude?.clinica_familia?.email
+
   return (
     <>
       {/* <MainHeader /> */}
@@ -92,7 +172,7 @@ export default async function Wallet() {
               className="grid w-full gap-2 pt-6"
               style={{ marginBottom: dynamicMarginBottom }}
             >
-              {walletData?.saude?.clinica_familia?.nome && (
+              {hasHealthData && (
                 <div
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
@@ -100,22 +180,15 @@ export default async function Wallet() {
                   <WalletHealthCard
                     href="/wallet/health"
                     title="CLÍNICA DA FAMÍLIA"
-                    name={
-                      walletData?.saude?.clinica_familia?.nome ||
-                      'Não disponível'
-                    }
-                    statusLabel="Situação"
-                    statusValue={getOperatingStatus(
-                      walletData?.saude?.clinica_familia?.horario_atendimento
-                    )}
+                    name={healthName}
+                    statusLabel="Status"
+                    statusValue={healthStatusValue}
                     extraLabel="Horário de atendimento"
-                    extraValue={
-                      walletData?.saude?.clinica_familia?.horario_atendimento ||
-                      'Não informado'
-                    }
-                    address={walletData?.saude?.clinica_familia?.endereco}
-                    phone={walletData?.saude?.clinica_familia?.telefone}
-                    email={walletData?.saude?.clinica_familia?.email}
+                    extraValue={healthOperatingHours}
+                    address={healthAddress}
+                    phone={healthPhone}
+                    email={healthEmail}
+                    risco={riskStatus?.risco}
                   />
                 </div>
               )}
@@ -161,7 +234,7 @@ export default async function Wallet() {
                       walletData?.assistencia_social?.cras?.nome ||
                       'Não disponível'
                     }
-                    statusLabel="Situação"
+                    statusLabel="Status"
                     statusValue={getCadUnicoStatus(
                       walletData?.assistencia_social?.cadunico
                     )}
