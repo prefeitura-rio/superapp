@@ -28,7 +28,7 @@ export default async function PrivateLayout({
 
   if (firstLogin && userInfo.cpf) {
     return (
-      <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
+      <main className="flex max-w-[600px] mx-auto flex-col bg-background text-foreground">
         <Onboarding
           userInfo={userInfo}
           setFirstLoginFalse={setFirstLoginFalse}
