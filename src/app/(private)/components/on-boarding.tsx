@@ -3,14 +3,14 @@
 import { useRef, useState, useTransition } from 'react'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
-import { Swiper, type SwiperRef, SwiperSlide } from 'swiper/react'
+import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
-import { Button } from '@/components/ui/button'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { onboardingSlides } from '@/constants/onboarding-slides'
 import { useViewportHeight } from '../../../hooks/useViewportHeight'
+import { OnboardingControls } from './onboarding-controls'
+import { OnboardingSlider } from './onboarding-slider'
 import { WelcomeMessage } from './welcome-message'
 
 interface OnboardingProps {
@@ -75,21 +75,24 @@ export default function Onboarding({
   const showSkipButton = currentIndex < onboardingSlides.length - 1
 
   return (
-    <div className="relative min-h-lvh w-full mx-auto px-4 py-4 bg-white text-foreground flex flex-col justify-center overflow-hidden">
-      {/* Slides container - shows first */}
-      {showSlides && (
-        <>
-          <CustomButton
-            className={`absolute top-4 left-4 z-10 bg-[#F1F1F4] text-muted-foreground rounded-full w-11 h-11 hover:bg-[#F1F1F4]/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
-              showBackButton
-                ? 'opacity-100 translate-x-0'
-                : 'opacity-0 -translate-x-2 pointer-events-none'
-            }`}
-            onClick={handleBack}
-            disabled={isPending}
-          >
-            <ChevronLeftIcon className="text-black" />
-          </CustomButton>
+    <div className="relative min-h-lvh w-full px-4 mx-auto justify-center bg-white text-foreground flex flex-col overflow-hidden">
+      <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start w-full flex items-center">
+        <CustomButton
+          className={` bg-[#F1F1F4] text-muted-foreground rounded-full w-11 h-11 hover:bg-[#F1F1F4]/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
+            showBackButton
+              ? 'opacity-100 translate-x-0'
+              : 'opacity-0 -translate-x-2 pointer-events-none'
+          }`}
+          onClick={handleBack}
+          disabled={isPending}
+        >
+          <ChevronLeftIcon className="text-black" />
+        </CustomButton>
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center">
+        {/* Slides container - shows first */}
+        {showSlides && (
           <div
             className={`transition-opacity duration-600 ${
               slidesFadingOut ? 'opacity-0' : 'opacity-100'
@@ -101,119 +104,32 @@ export default function Onboarding({
                   : undefined,
             }}
           >
-            <Swiper
+            <OnboardingSlider
               ref={swiperRef}
-              spaceBetween={50}
-              slidesPerView={1}
-              onSlideChange={swiper => setCurrentIndex(swiper.activeIndex)}
-              pagination={{ clickable: true }}
-              modules={[Pagination]}
-              className="h-full"
-            >
-              {onboardingSlides.map((slide, idx) => (
-                <SwiperSlide key={idx}>
-                  <div
-                    className={`flex flex-col items-center justify-cente text-left max-h-lvh mt-5 md:mt-0 md:gap-14 ${isBelowBreakpoint && 'max-h-[510px]'}`}
-                  >
-                    <div
-                      className="mb-4"
-                      style={{
-                        width: 'clamp(160px, 40%, 260px)',
-                        height: 'clamp(280px, 40%, 460px)',
-                      }}
-                    >
-                      <video
-                        src={slide.video}
-                        style={{
-                          objectFit: 'contain',
-                          width: '100%',
-                          height: '100%',
-                        }}
-                        loop
-                        autoPlay
-                        muted
-                        playsInline
-                      />
-                    </div>
+              slides={onboardingSlides}
+              onSlideChange={index => setCurrentIndex(index)}
+              isBelowBreakpoint={isBelowBreakpoint}
+            />
 
-                    <div className="text-left w-full">
-                      <h2 className="text-4xl text-[#09090B] font-medium mb-2 text-left leading-10 tracking-tight">
-                        {slide.title}
-                      </h2>
-                      <p className="text-left text-[#A1A1A1] text-sm mb-8">
-                        {slide.description}
-                      </p>
-                    </div>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-            <div className={`${isBelowBreakpoint ? 'pt-7' : 'pt-15'}`}>
-              <CustomButton
-                className="w-full text-white px-8 py-3 rounded-full shadow-md bg-[#13335A] hover:bg-[#13335A]/80"
-                size="lg"
-                onClick={showFinishButton ? goToWelcome : handleNext}
-                variant="primary"
-                disabled={isPending}
-              >
-                {showFinishButton ? 'Concluir' : 'Próximo'}
-              </CustomButton>
-              <Button
-                className={`w-full text-muted-foreground bg-transparent px-8 py-4 rounded-lg shadow-none cursor-pointer hover:bg-transparent transition-opacity duration-300 ${
-                  showSkipButton
-                    ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none'
-                }`}
-                size="lg"
-                onClick={goToWelcome}
-                disabled={isPending}
-              >
-                Pular
-              </Button>
-            </div>
+            <OnboardingControls
+              showFinishButton={showFinishButton}
+              showSkipButton={showSkipButton}
+              onNext={handleNext}
+              onFinish={goToWelcome}
+              onSkip={goToWelcome}
+              isBelowBreakpoint={isBelowBreakpoint}
+              disabled={isPending}
+            />
           </div>
-        </>
-      )}
+        )}
 
-      {/* Welcome message - shows after slides */}
-      <WelcomeMessage
-        userInfo={userInfo}
-        show={showWelcome}
-        fadeOut={fadeOutWelcome}
-      />
-
-      {/* Custom Swiper pagination styles */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .swiper-pagination {
-          display: flex;
-          justify-content: left;
-          gap: 0.5rem;
-        }
-        .swiper-pagination-bullet {
-          width: 6px;
-          height: 6px;
-          border-radius: 9999px;
-          background: #D4D4D8;
-          opacity: 1;
-          transition: background 0.2s;
-          margin: 0 !important;
-        }
-        .swiper-pagination-bullet-active {
-          background: #09090B;
-          width: 24px;
-        }
-      `}</style>
+        {/* Welcome message - shows after slides */}
+        <WelcomeMessage
+          userInfo={userInfo}
+          show={showWelcome}
+          fadeOut={fadeOutWelcome}
+        />
+      </div>
     </div>
   )
 }
