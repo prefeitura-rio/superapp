@@ -35,7 +35,7 @@ export default async function ServicePage({
 
   return (
     <div className="min-h-lvh max-w-md mx-auto flex flex-col">
-      <SecondaryHeader title="Descrição do Serviço" />
+      <SecondaryHeader title="Descrição do Serviço" showSearchButton />
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pt-20 pb-20">
