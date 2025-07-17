@@ -20,7 +20,7 @@ export default async function CategoryPage({
 
   return (
     <div className="min-h-lvh max-w-md mx-auto flex flex-col">
-      <SecondaryHeader title={categoryName} />
+      <SecondaryHeader title={categoryName} showSearchButton />
       <div className="min-h-screen text-white">
         <div className="max-w-md mx-auto pt-20 px-4 pb-20">
           <nav className="flex flex-col">

@@ -22,7 +22,7 @@ export function IconButton({
       )}
       {...props}
     >
-      <span className="flex items-center justify-center bg-card rounded-full w-12 h-12">
+      <span className="flex items-center justify-center bg-card rounded-full w-11 h-11">
         <Icon className="h-5 w-5 text-foreground" />
       </span>
     </button>

@@ -22,6 +22,7 @@ import { getOperatingStatus } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { FloatNavigation } from '../../components/float-navigation'
+import { SearchButton } from '../../components/search-button'
 import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
 import { WalletEducationCard } from '../../components/wallet-education-card'
 import { WalletHealthCard } from '../../components/wallet-health-card'
@@ -163,9 +164,13 @@ export default async function Wallet() {
       {/* <MainHeader /> */}
       <main className="max-w-md mx-auto text-white">
         <section className="px-4 relative h-full ">
-          <h2 className="sticky top-6 text-2xl font-bold mb-6 bg-background z-10 text-foreground">
-            Carteira
-          </h2>
+          <div className="flex items-center justify-between pt-6 pb-6">
+            <h2 className="sticky top-6 text-2xl font-bold bg-background z-10 text-foreground">
+              Carteira
+            </h2>
+
+            <SearchButton />
+          </div>
 
           {walletInfo.hasData ? (
             <div

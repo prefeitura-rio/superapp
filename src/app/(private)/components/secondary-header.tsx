@@ -3,21 +3,28 @@
 import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { useRouter } from 'next/navigation'
+import { SearchButton } from './search-button'
 
 interface SecondaryHeaderProps {
   title: string
+  showSearchButton?: boolean
 }
 
-export function SecondaryHeader({ title }: SecondaryHeaderProps) {
+export function SecondaryHeader({
+  title,
+  showSearchButton,
+}: SecondaryHeaderProps) {
   const router = useRouter()
 
   return (
     <>
       <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-center max-w-md mx-auto z-50 bg-background text-foreground h-16">
         <IconButton icon={ChevronLeftIcon} onClick={() => router.back()} />
-        <h1 className="text-xl font-medium w-full text-center flex items-center justify-center h-full text-foreground">
+        <h1 className="text-xl font-medium w-full text-center flex items-center justify-center h-full text-foreground ml-12">
           {title}
         </h1>
+
+        {showSearchButton && <SearchButton />}
       </header>
 
       {/* <div className="fixed top-16 w-full max-w-md mx-auto h-15 z-40 pointer-events-none">
