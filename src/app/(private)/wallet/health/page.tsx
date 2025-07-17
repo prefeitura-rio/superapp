@@ -13,7 +13,7 @@ import {
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletHealthCard } from '../../components/wallet-health-card'
+import { WalletCard } from '../../components/wealth-card'
 
 interface TeamPageProps {
   healthData?: {
@@ -201,7 +201,7 @@ export default async function HealthCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
-          <WalletHealthCard
+          {/* <WalletHealthCard
             href="#"
             title="CLÍNICA DA FAMÍLIA"
             name={unitName}
@@ -217,6 +217,24 @@ export default async function HealthCardDetail() {
             showEyeButton={true}
             showInfoButton={true}
             showStatusIcon={true}
+          />
+
+          <p>teste</p> */}
+
+          <WalletCard
+            title="CLÍNICA DA FAMÍLIA"
+            name="Clínica da Família Copacabana"
+            statusLabel="Status"
+            statusValue="Ativa"
+            extraLabel="Horário de atendimento"
+            extraValue="Seg-Sex: 08h às 18h"
+            address="Rua Santa Clara, 123 - Copacabana, Rio de Janeiro"
+            phone="(21) 99999-9999"
+            email="contato@clinicadafamilia.com.br"
+            risco="Baixo"
+            enableFlip={true}
+            showEyeButton={true}
+            showInitialShine
           />
         </div>
         {/* Icons Buttons Row */}

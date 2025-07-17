@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -61,6 +61,47 @@ html::-webkit-scrollbar {
   transform: rotateY(180deg);
 }
 
+.shine-animation {
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 20%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  filter: blur(35px);
+}
+
+.shine-active {
+  animation: shine 0.8s forwards;
+}
+
+.shine-reverse.shine-active {
+  animation: shine-reverse 0.8s forwards;
+}
+
+@keyframes shine-reverse {
+  0% {
+    left: 120%;
+  }
+  100% {
+    left: -60%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 120%;
+  }
+}
 
 @media (prefers-color-scheme: dark) {
   html {
@@ -153,13 +194,13 @@ html::-webkit-scrollbar {
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #09090b;
-  --foreground-light: #71717B;
+  --foreground-light: #71717b;
   --card: #f3f4f6;
   --card-foreground: #020618;
   --popover: #fafafa;
   --popover-foreground: #020618;
   --popover-line: #d4d4d8;
-  --primary: #13335A;
+  --primary: #13335a;
   --primary-foreground: #f8fafc;
   --secondary: #e4e4e7;
   --secondary-foreground: #0f172b;
@@ -195,14 +236,14 @@ html::-webkit-scrollbar {
   --card-4: #ff2056;
   --card-5: #e17100;
 
-  --wallet-1: #6993C2;
-  --wallet-1b: #4A7CB5;
-  --wallet-2: #5CA08C;
-  --wallet-2b: #54927F;
-  --wallet-3: #6F64B6;
-  --wallet-3b: #5E52AD;
-  --wallet-4: #C76E7D;
-  --wallet-4b: #C0596A;
+  --wallet-1: #6993c2;
+  --wallet-1b: #4a7cb5;
+  --wallet-2: #5ca08c;
+  --wallet-2b: #54927f;
+  --wallet-3: #6f64b6;
+  --wallet-3b: #5e52ad;
+  --wallet-4: #c76e7d;
+  --wallet-4b: #c0596a;
 
   /* custom theme for light mode */
   --stroke-100: #d0d0d0;
@@ -227,13 +268,13 @@ html::-webkit-scrollbar {
 .dark {
   --background: #09090b;
   --foreground: #f8fafc;
-  --foreground-light: #E2E8F0;
+  --foreground-light: #e2e8f0;
   --card: #18181b;
   --card-foreground: #ffffff;
   --popover: #18181b;
   --popover-foreground: #f8fafc;
   --popover-line: #3f3f46;
-  --primary: #8EC5FF;
+  --primary: #8ec5ff;
   --primary-foreground: #f8fafc;
   --secondary: #27272a;
   --secondary-foreground: #0f172b;
@@ -269,14 +310,14 @@ html::-webkit-scrollbar {
   --card-4: #ff2056;
   --card-5: #e17100;
 
-  --wallet-1: #6993C2;
-  --wallet-1b: #4A7CB5;
-  --wallet-2: #5CA08C;
-  --wallet-2b: #54927F;
-  --wallet-3: #6F64B6;
-  --wallet-3b: #5E52AD;
-  --wallet-4: #C76E7D;
-  --wallet-4b: #C0596A;
+  --wallet-1: #6993c2;
+  --wallet-1b: #4a7cb5;
+  --wallet-2: #5ca08c;
+  --wallet-2b: #54927f;
+  --wallet-3: #6f64b6;
+  --wallet-3b: #5e52ad;
+  --wallet-4: #c76e7d;
+  --wallet-4b: #c0596a;
 
   /* custom theme for dark mode */
   --stroke-100: #4d4d4d;

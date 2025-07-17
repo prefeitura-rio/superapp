@@ -27,6 +27,7 @@ import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
 import { WalletEducationCard } from '../../components/wallet-education-card'
 import { WalletHealthCard } from '../../components/wallet-health-card'
 import { WalletSocialAssistanceCard } from '../../components/wallet-social-assistance-card'
+import { WalletCard } from '../../components/wealth-card'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -171,6 +172,41 @@ export default async function Wallet() {
 
             <SearchButton />
           </div>
+
+          {/* <Link href="/wallet/health">
+            <WalletHealthCard
+              href=""
+              title="CLÍNICA DA FAMÍLIA"
+              name="Clínica da Família Copacabana"
+              statusLabel="Status"
+              statusValue="Ativa"
+              extraLabel="Horário de atendimento"
+              extraValue="Seg-Sex: 08h às 18h"
+              address="Rua Santa Clara, 123 - Copacabana, Rio de Janeiro"
+              phone="(21) 99999-9999"
+              email="contato@clinicadafamilia.com.br"
+              risco="Baixo"
+            />
+          </Link>
+
+          <p>testew</p> */}
+
+          <WalletCard
+            title="CLÍNICA DA FAMÍLIA"
+            name="Clínica da Família Copacabana"
+            statusLabel="Status"
+            statusValue="Ativa"
+            extraLabel="Horário de atendimento"
+            extraValue="Seg-Sex: 08h às 18h"
+            address="Rua Santa Clara, 123 - Copacabana, Rio de Janeiro"
+            phone="(21) 99999-9999"
+            email="contato@clinicadafamilia.com.br"
+            risco="Baixo"
+            enableFlip={false}
+            asLink={true}
+            href="/wallet/health"
+            showInitialShine={false}
+          />
 
           {walletInfo.hasData ? (
             <div
