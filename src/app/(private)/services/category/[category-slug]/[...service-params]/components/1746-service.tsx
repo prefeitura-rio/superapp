@@ -58,7 +58,10 @@ export function Service1746Component({ serviceData }: Service1746Props) {
             </Badge>
           )}
           {serviceData.custo_servico && (
-            <Badge variant="secondary" className="text-xs capitalize bg-card">
+            <Badge
+              variant="secondary"
+              className="text-xs capitalize bg-card mt-2"
+            >
               {serviceData.custo_servico}
             </Badge>
           )}

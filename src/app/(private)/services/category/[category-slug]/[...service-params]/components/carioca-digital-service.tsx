@@ -36,17 +36,22 @@ export function CariocaDigitalServiceComponent({
       )}
 
       {/* Service Cost */}
-      {serviceData.custo_do_servico && (
+      {(serviceData.custo_do_servico || serviceData.valor_a_ser_pago) && (
         <div className="mb-6">
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Custo do Serviço
           </h2>
           <p className="text-sm text-foreground-light leading-5">
-            <Badge variant="secondary" className="text-xs capitalize bg-card">
-              {serviceData.custo_do_servico}
-            </Badge>
+            {serviceData.custo_do_servico && (
+              <Badge
+                variant="secondary"
+                className="text-xs capitalize bg-card mb-2"
+              >
+                {serviceData.custo_do_servico}
+              </Badge>
+            )}
             {serviceData.valor_a_ser_pago && (
-              <span className="block mt-1 font-medium">
+              <span className="block mt-4 ">
                 Valor: {serviceData.valor_a_ser_pago}
               </span>
             )}
