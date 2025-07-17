@@ -35,6 +35,25 @@ export function CariocaDigitalServiceComponent({
         </div>
       )}
 
+      {/* Service Cost */}
+      {serviceData.custo_do_servico && (
+        <div className="mb-6">
+          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+            Custo do Serviço
+          </h2>
+          <p className="text-sm text-foreground-light leading-5">
+            <Badge variant="secondary" className="text-xs capitalize bg-card">
+              {serviceData.custo_do_servico}
+            </Badge>
+            {serviceData.valor_a_ser_pago && (
+              <span className="block mt-1 font-medium">
+                Valor: {serviceData.valor_a_ser_pago}
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+
       {/* Access Service Button */}
       {serviceData.link_acesso && (
         <Button
@@ -75,66 +94,6 @@ export function CariocaDigitalServiceComponent({
       {/* Divider */}
       {/* <div className="border-b border-border mb-6" /> */}
 
-      {/* How to Request Section */}
-      {serviceData.como_solicitar && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Como solicitar
-          </h2>
-          <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
-            {serviceData.como_solicitar}
-          </div>
-        </div>
-      )}
-
-      {/* Detailed Steps */}
-      {serviceData.etapas_detalhadas &&
-        serviceData.etapas_detalhadas.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-              Etapas
-            </h2>
-            <div className="space-y-4">
-              {serviceData.etapas_detalhadas.map((etapa, index) => (
-                <div key={index} className="bg-card p-4 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <span className="text-sm text-card-foreground leading-5 font-medium">
-                      {etapa.ordem || index + 1}.
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-sm text-card-foreground leading-5">
-                        {applyEtapaRules(etapa.descricao)}
-                      </p>
-                      {etapa.tem_link && etapa.link_solicitacao && (
-                        <Button
-                          asChild
-                          variant="default"
-                          size="lg"
-                          className="mt-2 rounded-full"
-                        >
-                          <Link
-                            href={etapa.link_solicitacao}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary inline-block"
-                          >
-                            Acesse aqui
-                          </Link>
-                        </Button>
-                      )}
-                      {etapa.em_manutencao && (
-                        <span className="text-xs text-orange-600 font-medium mt-1 block">
-                          Em manutenção
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
       {/* Detailed Documents */}
       {serviceData.documentos_detalhados &&
         serviceData.documentos_detalhados.length > 0 && (
@@ -154,13 +113,13 @@ export function CariocaDigitalServiceComponent({
                       : null
 
                 return (
-                  <div key={index} className="bg-card p-4 rounded-lg">
+                  <div key={index}>
                     <div className="flex items-start gap-2">
-                      <span className="text-sm text-card-foreground leading-5 font-medium mt-0.5">
+                      <span className="text-sm text-foreground-light leading-5 font-medium mt-0.5">
                         •
                       </span>
                       <div className="flex-1">
-                        <p className="text-sm text-card-foreground leading-5">
+                        <p className="text-sm text-foreground-light leading-5">
                           {doc.descricao}
                         </p>
                         {documentUrl && (
@@ -181,44 +140,6 @@ export function CariocaDigitalServiceComponent({
             </div>
           </div>
         )}
-
-      {/* Legislation */}
-      {serviceData.legislacao && serviceData.legislacao.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Legislação
-          </h2>
-          <ul className="space-y-1">
-            {serviceData.legislacao.map((lei, index) => (
-              <li
-                key={index}
-                className="text-sm text-foreground-light leading-5"
-              >
-                • {lei}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Service Cost */}
-      {serviceData.custo_do_servico && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Custo do Serviço
-          </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            <Badge variant="secondary" className="text-xs capitalize bg-card">
-              {serviceData.custo_do_servico}
-            </Badge>
-            {serviceData.valor_a_ser_pago && (
-              <span className="block mt-1 font-medium">
-                Valor: {serviceData.valor_a_ser_pago}
-              </span>
-            )}
-          </p>
-        </div>
-      )}
 
       {/* What this service doesn't cover */}
       {serviceData.este_servico_nao_cobre && (
@@ -241,6 +162,68 @@ export function CariocaDigitalServiceComponent({
           <p className="text-sm text-foreground-light leading-5">
             {serviceData.procedimentos_especiais}
           </p>
+        </div>
+      )}
+
+      {/* Detailed Steps */}
+      {serviceData.etapas_detalhadas &&
+        serviceData.etapas_detalhadas.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+              Etapas
+            </h2>
+            <div className="space-y-2">
+              {serviceData.etapas_detalhadas.map((etapa, index) => (
+                <div key={index} className="rounded-lg">
+                  <div className="flex items-start ">
+                    {/* <span className="text-sm text-card-foreground leading-5 font-medium">
+                      {etapa.ordem || index + 1}.
+                    </span> */}
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground-light leading-5">
+                        {applyEtapaRules(etapa.descricao)}
+                      </p>
+                      {etapa.tem_link && etapa.link_solicitacao && (
+                        <Button
+                          asChild
+                          variant="default"
+                          size="lg"
+                          className="mt-2 rounded-full"
+                        >
+                          <Link
+                            href={etapa.link_solicitacao}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary inline-block"
+                          >
+                            Acesse aqui
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      {/* Legislation */}
+      {serviceData.legislacao && serviceData.legislacao.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+            Legislação
+          </h2>
+          <ul className="space-y-1">
+            {serviceData.legislacao.map((lei, index) => (
+              <li
+                key={index}
+                className="text-sm text-foreground-light leading-5"
+              >
+                • {lei}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

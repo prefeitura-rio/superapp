@@ -19,7 +19,6 @@ export interface CariocaDigitalService {
   este_servico_nao_cobre?: string
   procedimentos_especiais?: string
   link_acesso?: string
-  como_solicitar?: string
   horario_funcionamento?: string
   como_orgao_atua?: string
 
