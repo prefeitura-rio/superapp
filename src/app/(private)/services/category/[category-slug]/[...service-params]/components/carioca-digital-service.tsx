@@ -118,7 +118,7 @@ export function CariocaDigitalServiceComponent({
                           asChild
                           variant="default"
                           size="lg"
-                          className="rounded-full"
+                          className="rounded-full my-2"
                         >
                           <Link
                             href={etapa.link_solicitacao}
@@ -185,16 +185,6 @@ export function CariocaDigitalServiceComponent({
           </div>
         )}
 
-      {/* What this service doesn't cover */}
-      {serviceData.este_servico_nao_cobre && (
-        <div className="mb-4">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Este serviço não cobre
-          </h2>
-          <CollapsibleText text={serviceData.este_servico_nao_cobre} />
-        </div>
-      )}
-
       {/* Special Procedures */}
       {serviceData.procedimentos_especiais && (
         <div className="mb-4">
@@ -204,6 +194,16 @@ export function CariocaDigitalServiceComponent({
           <p className="text-sm text-foreground-light leading-5">
             {serviceData.procedimentos_especiais}
           </p>
+        </div>
+      )}
+
+      {/* What this service doesn't cover */}
+      {serviceData.este_servico_nao_cobre && (
+        <div className="mb-4">
+          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+            Este serviço não cobre
+          </h2>
+          <CollapsibleText text={serviceData.este_servico_nao_cobre} />
         </div>
       )}
 
@@ -245,7 +245,7 @@ export function CariocaDigitalServiceComponent({
                 key={index}
                 className="text-sm text-foreground-light leading-5"
               >
-                • {lei}
+                {lei}
               </li>
             ))}
           </ul>

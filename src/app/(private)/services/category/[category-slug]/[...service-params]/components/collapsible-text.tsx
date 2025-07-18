@@ -41,7 +41,7 @@ export function CollapsibleText({ text }: CollapsibleTextProps) {
           variant="ghost"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="h-auto p-0 text-foreground hover:bg-transparent hover:text-foreground hover:cursor-pointer"
+          className="h-auto font-medium p-0 text-primary/80 hover:bg-transparent hover:text-primary hover:cursor-pointer"
         >
           {isExpanded ? 'Ler menos' : 'Ler mais'}
         </Button>
