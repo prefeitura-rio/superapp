@@ -11,7 +11,7 @@ interface CardBaseProps {
 
 export function CardBase({
   children,
-  bgColor = 'bg-[#3F6194]',
+  bgColor,
   isBack = false,
   showShine = false,
   className = '',

@@ -15,7 +15,7 @@ const backAnimationDirection = 'right-to-left'
 
 interface CardWrapperProps {
   frontCard: ReactNode
-  backCard: ReactNode
+  backCard?: ReactNode
   enableFlip?: boolean
   className?: string
   showInitialShine?: boolean
@@ -125,11 +125,11 @@ export function CardWrapper({
         onPointerUp={handlePointerUp}
       >
         <div className="card-front">{enhanceCard(frontCard)}</div>
-        <div className="card-back">{enhanceCard(backCard)}</div>
+        {backCard && <div className="card-back">{enhanceCard(backCard)}</div>}
       </div>
 
-      {/* Indicadores */}
-      <div className="flex gap-2 mt-3 justify-center">
+      {/* Pointers */}
+      <div className="flex gap-1 mt-3 justify-center">
         <button
           type="button"
           onClick={e => {
@@ -137,8 +137,8 @@ export function CardWrapper({
             setShowDetails(false)
             triggerShine()
           }}
-          className={`w-2.5 h-2.5 rounded-full transition-colors ${
-            !showDetails ? 'bg-blue-500' : 'bg-gray-300'
+          className={`w-1.5 h-1.5 rounded-full transition-colors ${
+            !showDetails ? 'bg-foreground' : 'bg-terciary'
           }`}
         />
         <button
@@ -148,8 +148,8 @@ export function CardWrapper({
             setShowDetails(true)
             triggerShine()
           }}
-          className={`w-2.5 h-2.5 rounded-full transition-colors ${
-            showDetails ? 'bg-blue-500' : 'bg-gray-300'
+          className={`w-1.5 h-1.5 rounded-full transition-colors ${
+            showDetails ? 'bg-foreground' : 'bg-terciary'
           }`}
         />
       </div>
