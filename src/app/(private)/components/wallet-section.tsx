@@ -79,7 +79,7 @@ export default function CarteiraSection({
             >
               <WealthCard
                 href="/wallet/health"
-                title="SAÚDE"
+                title="CLÍNICA DA FAMÍLIA"
                 name={
                   walletData?.saude?.clinica_familia?.nome || 'Não disponível'
                 }
