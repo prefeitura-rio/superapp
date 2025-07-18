@@ -1,13 +1,10 @@
 import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
-import {
-  formatMaintenanceRequestsCount,
-  getMaintenanceRequestStats,
-} from '@/lib/maintenance-requests-utils'
+import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Globe, Phone } from 'lucide-react'
 import Calls from '../../components/calls'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
+import { CaretakerCard } from '../../components/wallet-cards/caretaker-card'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -47,14 +44,16 @@ export default async function CaretakerCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
-          <WalletCaretakerCard
+          <CaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
-            statusLabel="Total de chamados"
-            statusValue={maintenanceStats.total.toString()}
-            extraLabel="Fechados"
-            extraValue={maintenanceStats.fechados.toString()}
+            name={maintenanceStats.aberto.toString()}
+            primaryLabel="Total de chamados"
+            primaryValue={maintenanceStats.total.toString()}
+            secondaryLabel="Fechados"
+            secondaryValue={maintenanceStats.fechados.toString()}
+            enableFlip={false}
+            showInitialShine
           />
         </div>
         {/* Icons Buttons Row */}

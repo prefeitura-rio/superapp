@@ -13,10 +13,10 @@ import {
 import { getOperatingStatus } from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import Link from 'next/link'
-import { WalletCaretakerCard } from './wallet-caretaker-card'
-import { WalletEducationCard } from './wallet-education-card'
-import { WalletHealthCard } from './wallet-health-card'
-import { WalletSocialAssistanceCard } from './wallet-social-assistance-card'
+import { CaretakerCard } from './wallet-cards/caretaker-card'
+import { EducationCard } from './wallet-cards/education-card'
+import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
+import { WealthCard } from './wallet-cards/wealth-card'
 
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
@@ -77,27 +77,27 @@ export default function CarteiraSection({
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
-              <WalletHealthCard
-                {...(healthCardData
-                  ? healthCardData
-                  : {
-                      href: '/wallet/health',
-                      title: 'CLÍNICA DA FAMÍLIA',
-                      name:
-                        walletData?.saude?.clinica_familia?.nome ||
-                        'Não disponível',
-                      statusLabel: 'Status',
-                      statusValue: getOperatingStatus(
-                        walletData?.saude?.clinica_familia?.horario_atendimento
-                      ),
-                      extraLabel: 'Horário de atendimento',
-                      extraValue:
-                        walletData?.saude?.clinica_familia
-                          ?.horario_atendimento || 'Não informado',
-                      address: walletData?.saude?.clinica_familia?.endereco,
-                      phone: walletData?.saude?.clinica_familia?.telefone,
-                      email: walletData?.saude?.clinica_familia?.email,
-                    })}
+              <WealthCard
+                href="/wallet/health"
+                title="SAÚDE"
+                name={
+                  walletData?.saude?.clinica_familia?.nome || 'Não disponível'
+                }
+                primaryLabel="Status"
+                primaryValue={getOperatingStatus(
+                  walletData?.saude?.clinica_familia?.horario_atendimento
+                )}
+                secondaryLabel="Horário de Atendimento"
+                secondaryValue={
+                  walletData?.saude?.clinica_familia?.horario_atendimento ||
+                  'Não informado'
+                }
+                address={walletData?.saude?.clinica_familia?.endereco}
+                phone={walletData?.saude?.clinica_familia?.telefone}
+                email={walletData?.saude?.clinica_familia?.email}
+                enableFlip={false}
+                showInitialShine={false}
+                asLink
               />
             </div>
           )}
@@ -108,22 +108,25 @@ export default function CarteiraSection({
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
-              <WalletEducationCard
+              <EducationCard
                 href="/wallet/education"
                 title="ESCOLA"
                 name={walletData?.educacao?.escola?.nome || 'Não disponível'}
-                statusLabel="Status"
-                statusValue={getOperatingStatus(
+                primaryLabel="Status"
+                primaryValue={getOperatingStatus(
                   walletData?.educacao?.escola?.horario_funcionamento
                 )}
-                extraLabel="Horário de atendimento"
-                extraValue={
+                secondaryLabel="Horário de Atendimento"
+                secondaryValue={
                   walletData?.educacao?.escola?.horario_funcionamento ||
                   'Não informado'
                 }
                 address={walletData?.educacao?.escola?.endereco}
                 phone={walletData?.educacao?.escola?.telefone}
                 email={walletData?.educacao?.escola?.email}
+                enableFlip={false}
+                showInitialShine={false}
+                asLink
               />
             </div>
           )}
@@ -134,24 +137,26 @@ export default function CarteiraSection({
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
-              <WalletSocialAssistanceCard
+              <SocialAssistanceCard
                 href="/wallet/social-assistance"
                 title="CADÚNICO"
-                name={
+                number={
                   walletData?.assistencia_social?.cras?.nome || 'Não disponível'
                 }
-                statusLabel="Status"
-                statusValue={getCadUnicoStatus(
+                badgeStatus={getCadUnicoStatus(
                   walletData?.assistencia_social?.cadunico
                 )}
-                extraLabel="Data de recadastramento"
-                extraValue={formatRecadastramentoDate(
+                primaryLabel="Data de recadastramento"
+                primaryValue={formatRecadastramentoDate(
                   walletData?.assistencia_social?.cadunico
                     ?.data_limite_cadastro_atual
                 )}
-                crasName={walletData?.assistencia_social?.cras?.nome}
+                unitName={walletData?.assistencia_social?.cras?.nome}
                 address={walletData?.assistencia_social?.cras?.endereco}
                 phone={walletData?.assistencia_social?.cras?.telefone}
+                showInitialShine={false}
+                enableFlip={false}
+                asLink
               />
             </div>
           )}
@@ -162,14 +167,17 @@ export default function CarteiraSection({
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
-              <WalletCaretakerCard
+              <CaretakerCard
                 href="/wallet/caretaker"
                 title="CUIDADOS COM A CIDADE"
                 name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
-                statusLabel="Total de chamados"
-                statusValue={maintenanceStats.total.toString()}
-                extraLabel="Fechados"
-                extraValue={maintenanceStats.fechados.toString()}
+                primaryLabel="Total de chamados"
+                primaryValue={maintenanceStats.total.toString()}
+                secondaryLabel="Fechados"
+                secondaryValue={maintenanceStats.fechados.toString()}
+                enableFlip={false}
+                showInitialShine={false}
+                asLink
               />
             </div>
           )}

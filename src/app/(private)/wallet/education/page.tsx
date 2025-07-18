@@ -1,13 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getOperatingStatus } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { MapPin, Phone } from 'lucide-react'
+import { getOperatingStatus } from '../../../../lib/operating-status'
 import { FrequencyInfoButton } from '../../components/frequency-info-button'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { getFrequenciaEscolarTextClass } from '../../components/utils'
-import { WalletEducationCard } from '../../components/wallet-education-card'
+import { EducationCard } from '../../components/wallet-cards/education-card'
 
 interface DesempenhoSectionProps {
   educationData?: {
@@ -109,20 +109,22 @@ export default async function EducationCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
-          <WalletEducationCard
-            href="#"
+          <EducationCard
             title="ESCOLA"
             name={escola?.nome || 'Não disponível'}
-            statusLabel="Status"
-            statusValue={getOperatingStatus(escola?.horario_funcionamento)}
-            extraLabel="Horário de Atendimento"
-            extraValue={escola?.horario_funcionamento || 'Não informado'}
-            address={escola?.endereco}
+            primaryLabel="Status"
+            primaryValue={
+              escola?.horario_funcionamento
+                ? getOperatingStatus(escola.horario_funcionamento)
+                : 'Não informado'
+            }
+            secondaryLabel="Horário de Atendimento"
+            secondaryValue={escola?.horario_funcionamento || 'Não informado'}
+            address={escola?.endereco || 'Endereço não disponível'}
             phone={escola?.telefone}
             email={escola?.email}
-            showEyeButton={true}
-            showInfoButton={true}
-            showStatusIcon={true}
+            enableFlip
+            showInitialShine
           />
         </div>
         {/* Icons Buttons Row */}
