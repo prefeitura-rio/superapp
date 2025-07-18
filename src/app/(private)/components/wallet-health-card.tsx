@@ -90,12 +90,13 @@ export function WalletHealthCard({
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
   useEffect(() => {
     setShineActive(true)
 
     const timeout = setTimeout(() => {
       setShineActive(false)
-    }, 1000) // duração total da animação (ajuste se quiser)
+    }, 1000)
 
     return () => clearTimeout(timeout)
   }, [showDetails])
