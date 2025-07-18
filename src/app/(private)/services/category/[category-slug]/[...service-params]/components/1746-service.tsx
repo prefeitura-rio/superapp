@@ -255,15 +255,15 @@ export function Service1746Component({ serviceData }: Service1746Props) {
             <h2 className="text-base font-medium text-foreground leading-5 mb-2">
               Etapas
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-2 pt-1">
               {serviceData.etapas_processo.map((step, index) => (
-                <div key={index} className="bg-card p-4 rounded-lg">
+                <div key={index} className="rounded-lg">
                   <div className="flex items-start gap-2">
-                    <span className="text-sm text-card-foreground leading-5 font-medium">
-                      {index + 1}.
+                    <span className="text-sm text-foreground-light leading-5 font-medium">
+                      •
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm text-card-foreground leading-5">
+                      <p className="text-sm text-foreground-light leading-5">
                         {step}
                       </p>
                     </div>
