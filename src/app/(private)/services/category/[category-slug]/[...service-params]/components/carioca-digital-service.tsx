@@ -2,6 +2,7 @@ import androidIcon from '@/assets/android_button.png'
 import iosIcon from '@/assets/ios_button.png'
 import { Button } from '@/components/ui/button'
 import { applyEtapaRules } from '@/lib/content-rules'
+import { convertUrlsToLinks } from '@/lib/url-utils'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
 import Link from 'next/link'
 import { CollapsibleText } from './collapsible-text'
@@ -21,7 +22,7 @@ export function CariocaDigitalServiceComponent({
       </h1>
 
       {/* Service Description */}
-      <p className="text-sm text-foreground-light leading-5 mb-6">
+      <p className="text-sm text-foreground-light leading-5 mb-6 max-w-md">
         {serviceData.descricao}
       </p>
 
@@ -83,15 +84,8 @@ export function CariocaDigitalServiceComponent({
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Custo
           </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            {/* {serviceData.custo_do_servico && (
-              <Badge
-                variant="secondary"
-                className="text-xs capitalize bg-card mb-2"
-              > */}
+          <p className="text-sm text-foreground-light leading-5 capitalize">
             {serviceData.custo_do_servico}
-            {/* </Badge> */}
-            {/* )} */}
             {serviceData.valor_a_ser_pago && (
               <span className="block mt-2">
                 Valor: {serviceData.valor_a_ser_pago}
@@ -108,7 +102,7 @@ export function CariocaDigitalServiceComponent({
             <h2 className="text-base font-medium text-foreground leading-5 mb-2">
               Como solicitar
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {serviceData.etapas_detalhadas.map((etapa, index) => (
                 <div key={index} className="rounded-lg">
                   <div className="flex items-start ">
@@ -116,8 +110,8 @@ export function CariocaDigitalServiceComponent({
                       {etapa.ordem || index + 1}.
                     </span> */}
                     <div className="flex flex-col items-start gap-2">
-                      <p className="text-sm text-foreground-light leading-5 ">
-                        {applyEtapaRules(etapa.descricao)}
+                      <p className="text-sm text-foreground-light leading-5">
+                        {convertUrlsToLinks(applyEtapaRules(etapa.descricao))}
                       </p>
                       {etapa.tem_link && etapa.link_solicitacao && (
                         <Button
