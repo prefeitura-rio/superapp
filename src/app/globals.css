@@ -188,6 +188,9 @@ html::-webkit-scrollbar {
 
   /* custom border width */
   --border-width: var(--border-width);
+
+  /* custom shadow */
+  --shadow-float-navigation: var(--shadow-float-navigation);
 }
 
 :root {
@@ -263,6 +266,9 @@ html::-webkit-scrollbar {
 
   /* custom border width */
   --border-width: 1.4px;
+
+  /* custom shadow */
+  --shadow-float-navigation: 0px 2px 10px 0px rgba(0, 0, 0, 0.15);
 }
 
 .dark {
@@ -337,6 +343,9 @@ html::-webkit-scrollbar {
 
   /* custom border width */
   --border-width: 1.4px;
+
+  /* custom shadow */
+  --shadow-float-navigation: 0px 2px 10px 0px rgba(255, 255, 255, 0.15);
 }
 
 @layer base {

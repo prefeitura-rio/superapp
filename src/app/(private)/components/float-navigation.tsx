@@ -27,7 +27,7 @@ export function FloatNavigation() {
   return (
     <>
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <nav className="flex items-center shadow-md justify-center gap-2 rounded-full bg-background px-2 py-2 backdrop-blur-sm">
+        <nav className="flex items-center shadow-float-navigation justify-center gap-2 rounded-full bg-background px-2 py-2 backdrop-blur-sm">
           {navItems.map(item => {
             const isActive = pathname === item.href
             const Icon = item.icon
