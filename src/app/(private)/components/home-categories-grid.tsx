@@ -44,8 +44,8 @@ export default function HomeCategoriesGrid({
         {/* Skeleton pagination bullets */}
         <div className="flex justify-center items-center h-12">
           <div className="flex items-center gap-1.5">
-            <Skeleton className="w-3 h-2 rounded-full" />
-            <Skeleton className="w-2 h-2 rounded-full" />
+            <Skeleton className="w-2 h-1.5 rounded-full" />
+            <Skeleton className="w-2 h-1.5 rounded-full" />
           </div>
         </div>
       </div>
@@ -109,32 +109,20 @@ export default function HomeCategoriesGrid({
         .swiper-pagination {
           display: flex;
           justify-content: center;
-          align-items: center;
+          // align-items: center;
           height: 10px;
         }
         .home-categories-swiper .swiper-pagination {
           position: relative !important;
           bottom: auto !important;
           margin-top: 1rem !important;
-          display: flex;
-          justify-content: center;
-          align-items: center;
         }
         .swiper-pagination-bullet { 
           background: var(--muted-foreground);
           opacity: 1;
-          margin-left: 3px !important;
-          margin-right: 3px !important;
-          transition: all 0.2s ease-in-out !important;
-          width: 8px;
-          height: 8px;
-          border-radius: 50% !important;
         }
         .swiper-pagination-bullet-active {
           background: var(--primary);
-          width: 15px;
-          border-radius: 16px !important;
-          height: 5px;
         }
       `}</style>
     </div>
