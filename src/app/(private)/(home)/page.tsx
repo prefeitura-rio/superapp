@@ -13,9 +13,9 @@ import {
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
+import HeaderWrapper from '../components/header-wrapper'
 import HomeCategoriesGrid from '../components/home-categories-grid'
 import MostAccessedServiceCards from '../components/most-accessed-services-cards'
-import ScrollAwareHeader from '../components/scroll-aware-header'
 import SuggestionCards from '../components/suggestion-cards'
 import CarteiraSection from '../components/wallet-section'
 
@@ -150,8 +150,8 @@ export default async function Home() {
   const categories = await fetchCategories()
 
   return (
-    <main className="flex max-w-md mx-auto pt-21 flex-col bg-background text-foreground">
-      <ScrollAwareHeader userName={userAuthInfo.name} />
+    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
+      <HeaderWrapper userName={userAuthInfo.name} />
 
       {/* Suggestion Cards*/}
       <SuggestionCards order={[1, 0]} />

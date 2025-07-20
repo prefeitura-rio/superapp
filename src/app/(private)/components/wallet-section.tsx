@@ -47,15 +47,9 @@ export default function CarteiraSection({
   // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
-  // Calculate dynamic margin-bottom based on wallet count
-  const dynamicMarginBottom = `calc(100lvh - (116px + 188px + ${(walletInfo.count - 1) * 80}px)`
-
-  // Track current card index for dynamic positioning
-  let cardIndex = 0
-
   return (
-    <section className="px-4 mt-6 ">
-      <div className="sticky top-20 flex items-center justify-between mb-4">
+    <section className="mt-6 w-full overflow-x-auto pb-30">
+      <div className="flex items-center px-4 justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
         {walletInfo.hasData && (
           <Link
@@ -68,119 +62,107 @@ export default function CarteiraSection({
       </div>
 
       {walletInfo.hasData ? (
-        <div
-          className="grid w-full gap-2"
-          style={{ marginBottom: dynamicMarginBottom }}
-        >
-          {(healthCardData || walletData?.saude?.clinica_familia?.nome) && (
-            <div
-              className="sticky"
-              style={{ top: `${116 + cardIndex++ * 80}px` }}
-            >
-              <HealthCard
-                href="/wallet/health"
-                title="CLÍNICA DA FAMÍLIA"
-                name={
-                  walletData?.saude?.clinica_familia?.nome || 'Não disponível'
-                }
-                primaryLabel="Status"
-                primaryValue={getOperatingStatus(
-                  walletData?.saude?.clinica_familia?.horario_atendimento
-                )}
-                secondaryLabel="Horário de Atendimento"
-                secondaryValue={
-                  walletData?.saude?.clinica_familia?.horario_atendimento ||
-                  'Não informado'
-                }
-                address={walletData?.saude?.clinica_familia?.endereco}
-                phone={walletData?.saude?.clinica_familia?.telefone}
-                email={walletData?.saude?.clinica_familia?.email}
-                enableFlip={false}
-                showInitialShine={false}
-                asLink
-              />
-            </div>
-          )}
+        <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex px-4 gap-2 w-max">
+            {(healthCardData || walletData?.saude?.clinica_familia?.nome) && (
+              <div className="min-w-[300px]">
+                <HealthCard
+                  href="/wallet/health"
+                  title="CLÍNICA DA FAMÍLIA"
+                  name={
+                    walletData?.saude?.clinica_familia?.nome || 'Não disponível'
+                  }
+                  primaryLabel="Status"
+                  primaryValue={getOperatingStatus(
+                    walletData?.saude?.clinica_familia?.horario_atendimento
+                  )}
+                  secondaryLabel="Horário de Atendimento"
+                  secondaryValue={
+                    walletData?.saude?.clinica_familia?.horario_atendimento ||
+                    'Não informado'
+                  }
+                  address={walletData?.saude?.clinica_familia?.endereco}
+                  phone={walletData?.saude?.clinica_familia?.telefone}
+                  email={walletData?.saude?.clinica_familia?.email}
+                  enableFlip={false}
+                  showInitialShine={false}
+                  asLink
+                />
+              </div>
+            )}
 
-          {/* Card 2: Educação */}
-          {walletData?.educacao?.escola?.nome && (
-            <div
-              className="sticky"
-              style={{ top: `${116 + cardIndex++ * 80}px` }}
-            >
-              <EducationCard
-                href="/wallet/education"
-                title="ESCOLA"
-                name={walletData?.educacao?.escola?.nome || 'Não disponível'}
-                primaryLabel="Status"
-                primaryValue={getOperatingStatus(
-                  walletData?.educacao?.escola?.horario_funcionamento
-                )}
-                secondaryLabel="Horário de Atendimento"
-                secondaryValue={
-                  walletData?.educacao?.escola?.horario_funcionamento ||
-                  'Não informado'
-                }
-                address={walletData?.educacao?.escola?.endereco}
-                phone={walletData?.educacao?.escola?.telefone}
-                email={walletData?.educacao?.escola?.email}
-                enableFlip={false}
-                showInitialShine={false}
-                asLink
-              />
-            </div>
-          )}
+            {/* Card 2: Educação */}
+            {walletData?.educacao?.escola?.nome && (
+              <div className="min-w-[300px]">
+                <EducationCard
+                  href="/wallet/education"
+                  title="ESCOLA"
+                  name={walletData?.educacao?.escola?.nome || 'Não disponível'}
+                  primaryLabel="Status"
+                  primaryValue={getOperatingStatus(
+                    walletData?.educacao?.escola?.horario_funcionamento
+                  )}
+                  secondaryLabel="Horário de Atendimento"
+                  secondaryValue={
+                    walletData?.educacao?.escola?.horario_funcionamento ||
+                    'Não informado'
+                  }
+                  address={walletData?.educacao?.escola?.endereco}
+                  phone={walletData?.educacao?.escola?.telefone}
+                  email={walletData?.educacao?.escola?.email}
+                  enableFlip={false}
+                  showInitialShine={false}
+                  asLink
+                />
+              </div>
+            )}
 
-          {/* Card 3: Assistência social */}
-          {walletData?.assistencia_social?.cras?.nome && (
-            <div
-              className="sticky"
-              style={{ top: `${116 + cardIndex++ * 80}px` }}
-            >
-              <SocialAssistanceCard
-                href="/wallet/social-assistance"
-                title="CADÚNICO"
-                number={
-                  walletData?.assistencia_social?.cras?.nome || 'Não disponível'
-                }
-                badgeStatus={getCadUnicoStatus(
-                  walletData?.assistencia_social?.cadunico
-                )}
-                primaryLabel="Data de recadastramento"
-                primaryValue={formatRecadastramentoDate(
-                  walletData?.assistencia_social?.cadunico
-                    ?.data_limite_cadastro_atual
-                )}
-                unitName={walletData?.assistencia_social?.cras?.nome}
-                address={walletData?.assistencia_social?.cras?.endereco}
-                phone={walletData?.assistencia_social?.cras?.telefone}
-                showInitialShine={false}
-                enableFlip={false}
-                asLink
-              />
-            </div>
-          )}
+            {/* Card 3: Assistência social */}
+            {walletData?.assistencia_social?.cras?.nome && (
+              <div className="min-w-[300px]">
+                <SocialAssistanceCard
+                  href="/wallet/social-assistance"
+                  title="CADÚNICO"
+                  number={
+                    walletData?.assistencia_social?.cras?.nome ||
+                    'Não disponível'
+                  }
+                  badgeStatus={getCadUnicoStatus(
+                    walletData?.assistencia_social?.cadunico
+                  )}
+                  primaryLabel="Data de recadastramento"
+                  primaryValue={formatRecadastramentoDate(
+                    walletData?.assistencia_social?.cadunico
+                      ?.data_limite_cadastro_atual
+                  )}
+                  unitName={walletData?.assistencia_social?.cras?.nome}
+                  address={walletData?.assistencia_social?.cras?.endereco}
+                  phone={walletData?.assistencia_social?.cras?.telefone}
+                  showInitialShine={false}
+                  enableFlip={false}
+                  asLink
+                />
+              </div>
+            )}
 
-          {/* Card 4: Cuidados com a Cidade (1746) */}
-          {maintenanceStats.total > 0 && (
-            <div
-              className="sticky"
-              style={{ top: `${116 + cardIndex++ * 80}px` }}
-            >
-              <CaretakerCard
-                href="/wallet/caretaker"
-                title="CUIDADOS COM A CIDADE"
-                name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
-                primaryLabel="Total de chamados"
-                primaryValue={maintenanceStats.total.toString()}
-                secondaryLabel="Fechados"
-                secondaryValue={maintenanceStats.fechados.toString()}
-                enableFlip={false}
-                showInitialShine={false}
-                asLink
-              />
-            </div>
-          )}
+            {/* Card 4: Cuidados com a Cidade (1746) */}
+            {maintenanceStats.total > 0 && (
+              <div className="min-w-[300px]">
+                <CaretakerCard
+                  href="/wallet/caretaker"
+                  title="CUIDADOS COM A CIDADE"
+                  name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
+                  primaryLabel="Total de chamados"
+                  primaryValue={maintenanceStats.total.toString()}
+                  secondaryLabel="Fechados"
+                  secondaryValue={maintenanceStats.fechados.toString()}
+                  enableFlip={false}
+                  showInitialShine={false}
+                  asLink
+                />
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex items-center justify-center py-6">
