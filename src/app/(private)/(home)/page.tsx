@@ -51,7 +51,7 @@ export default async function Home() {
         const [unitResponse, riskResponse] = await Promise.all([
           getHealthUnitInfo(cnes, {
             cache: 'force-cache',
-            next: { revalidate: 3600 },
+            next: { revalidate: 3600 }, //revalidate every hour
           }),
           getHealthUnitRisk(cnes),
         ])
@@ -98,10 +98,10 @@ export default async function Home() {
     }
   }
 
-  // Prepare healthCardData
+  // healthCardData
   let healthCardData = undefined
   if (walletData?.saude?.clinica_familia) {
-    // Use new API data if available, fallback to wallet data
+    // Here we use new API data if available, fallback to wallet data
     const unitName =
       healthUnitData?.nome ||
       walletData.saude.clinica_familia.nome ||
@@ -150,7 +150,7 @@ export default async function Home() {
   const categories = await fetchCategories()
 
   return (
-    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
+    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground pb-30">
       <HeaderWrapper userName={userAuthInfo.name} />
 
       {/* Suggestion Cards*/}
@@ -163,11 +163,13 @@ export default async function Home() {
       <MostAccessedServiceCards showMore={true} />
 
       {/* Carteira section */}
-      <CarteiraSection
-        walletData={walletData}
-        maintenanceRequests={maintenanceRequests}
-        healthCardData={healthCardData}
-      />
+      {walletData && (
+        <CarteiraSection
+          walletData={walletData}
+          maintenanceRequests={maintenanceRequests}
+          healthCardData={healthCardData}
+        />
+      )}
       <FloatNavigation />
     </main>
   )

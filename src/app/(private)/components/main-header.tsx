@@ -8,7 +8,7 @@ interface MainHeaderProps {
 
 export default function MainHeader({
   userName,
-  showSearchIcon = false,
+  showSearchIcon = true,
 }: MainHeaderProps) {
   return (
     <header className="relative  w-full z-50 bg-background text-foreground py-4">
@@ -29,15 +29,8 @@ export default function MainHeader({
         </Link>
 
         {/* Right side - Search icon with fade transition and debug background */}
-        <Link
-          href="/search"
-          className={`rounded-full p-4 transition-all duration-300 ease-in-out ${
-            showSearchIcon
-              ? 'opacity-100 bg-card'
-              : 'opacity-0 pointer-events-none'
-          }`}
-        >
-          <SearchIcon className="text-foreground h-5 w-5" />
+        <Link href="/search" className="rounded-full p-4 opacity-100 bg-card">
+          {showSearchIcon && <SearchIcon className="text-foreground h-5 w-5" />}
           <span className="sr-only">Search</span>
         </Link>
       </div>

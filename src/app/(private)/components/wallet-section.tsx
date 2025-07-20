@@ -48,7 +48,7 @@ export default function CarteiraSection({
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
   return (
-    <section className="mt-6 w-full overflow-x-auto pb-30">
+    <section className="mt-6 w-full overflow-x-auto">
       <div className="flex items-center px-4 justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
         {walletInfo.hasData && (

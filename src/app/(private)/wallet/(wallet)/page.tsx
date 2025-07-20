@@ -114,12 +114,6 @@ export default async function Wallet() {
   // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
-  // Calculate dynamic margin-bottom based on wallet count
-  const dynamicMarginBottom = `calc(100lvh - (80px + 188px + ${(walletInfo.count - 1) * 80}px))`
-
-  // Track current card index for dynamic positioning
-  let cardIndex = 0
-
   // Prepare health card data
   const hasHealthData =
     healthUnitData || walletData?.saude?.clinica_familia?.nome
@@ -162,10 +156,10 @@ export default async function Wallet() {
   return (
     <>
       {/* <MainHeader /> */}
-      <main className="max-w-md mx-auto text-white">
+      <main className="pb-30 max-w-md mx-auto text-white">
         <section className="px-4 relative h-full ">
           <div className="flex items-center justify-between pt-6 pb-6">
-            <h2 className="sticky top-6 text-2xl font-bold bg-background z-10 text-foreground">
+            <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
               Carteira
             </h2>
 
@@ -173,15 +167,9 @@ export default async function Wallet() {
           </div>
 
           {walletInfo.hasData ? (
-            <div
-              className="grid w-full gap-2 pt-6"
-              style={{ marginBottom: dynamicMarginBottom }}
-            >
+            <div className="grid w-full gap-2">
               {hasHealthData && (
-                <div
-                  className="sticky"
-                  style={{ top: `${80 + cardIndex++ * 80}px` }}
-                >
+                <div>
                   <HealthCard
                     title="CLÍNICA DA FAMÍLIA"
                     name={healthName}
@@ -202,10 +190,7 @@ export default async function Wallet() {
 
               {/* Card 2: Educação */}
               {walletData?.educacao?.escola?.nome && (
-                <div
-                  className="sticky"
-                  style={{ top: `${80 + cardIndex++ * 80}px` }}
-                >
+                <div>
                   <EducationCard
                     title="ESCOLA"
                     name={
@@ -233,10 +218,7 @@ export default async function Wallet() {
 
               {/* Card 3: Assistência social */}
               {walletData?.assistencia_social?.cras?.nome && (
-                <div
-                  className="sticky"
-                  style={{ top: `${80 + cardIndex++ * 80}px` }}
-                >
+                <div>
                   <SocialAssistanceCard
                     title="CADÚNICO"
                     number={
@@ -264,10 +246,7 @@ export default async function Wallet() {
 
               {/* Card 4: Cuidados com a Cidade (1746) */}
               {maintenanceStats.total > 0 && (
-                <div
-                  className="sticky"
-                  style={{ top: `${80 + cardIndex++ * 80}px` }}
-                >
+                <div>
                   <CaretakerCard
                     title="CUIDADOS COM A CIDADE"
                     name={formatMaintenanceRequestsCount(
