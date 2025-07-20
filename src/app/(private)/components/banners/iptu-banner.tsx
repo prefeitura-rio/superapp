@@ -10,7 +10,7 @@ export const IptuBanner = () => {
       title="Fique em dia!"
       subtitle="Emita sua guia ou saiba mais"
       color="#407137"
-      route="/services/iptu"
+      route="/"
       badge="IPTU 2025"
       image={
         <Image

@@ -10,7 +10,7 @@ export const TaxesBanner = () => {
       title="Carioca em dia"
       subtitle="Desconto até 30 de agosto"
       color="#977926"
-      route="/services/iptu"
+      route="/"
       badge="Impostos"
       image={
         <Image

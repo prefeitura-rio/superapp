@@ -44,7 +44,6 @@ export default async function Home() {
 
     // Fetch health unit info and risk if CNES is available
     const cnes = walletData?.saude?.clinica_familia?.id_cnes
-    console.log('>>cnes', cnes)
     if (cnes) {
       try {
         const [unitResponse, riskResponse] = await Promise.all([

@@ -1,10 +1,10 @@
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getUserInfoFromToken } from '@/lib/user-info'
-import { Calendar, MapPin, Phone } from 'lucide-react'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
-} from '../../../../lib/cadunico-utils'
+} from '@/lib/cadunico-utils'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { Calendar } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
 
@@ -62,7 +62,7 @@ export default async function SocialAssistanceCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a
+            {/* <a
               href={phoneUrl !== '#' ? phoneUrl : undefined}
               className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
             >
@@ -77,9 +77,9 @@ export default async function SocialAssistanceCardDetail() {
                 </span>
                 <span className="text-gray-300 text-xs font-normal">CRAS</span>
               </div>
-            </a>
+            </a> */}
 
-            <a
+            {/* <a
               href={mapUrl !== '#' ? mapUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
@@ -96,7 +96,7 @@ export default async function SocialAssistanceCardDetail() {
                 </span>
                 <span className="text-gray-300 text-xs font-normal">CRAS</span>
               </div>
-            </a>
+            </a> */}
 
             <a
               href="https://cadunico.rio/"

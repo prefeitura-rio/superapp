@@ -10,7 +10,7 @@ export const ProfileUpdateBanner = () => {
       title="Atualize seu cadastro"
       subtitle="E personalize seu atendimento"
       color="#589ECE"
-      route="/services/iptu"
+      route="/"
       badge="Marina"
       image={
         <Image

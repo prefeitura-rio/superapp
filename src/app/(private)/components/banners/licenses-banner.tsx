@@ -10,7 +10,7 @@ export const LicensesBanner = () => {
       title="Regularize sua obra!"
       subtitle="E ganhe até 50% de desconto"
       color="#A24821"
-      route="/services/iptu"
+      route="/"
       badge="Licenças"
       image={
         <Image

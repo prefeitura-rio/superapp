@@ -108,7 +108,6 @@ export default async function HealthCardDetail() {
     // Get CNES from wallet data and fetch health unit information
     const cnes = walletData?.saude?.clinica_familia?.id_cnes
     if (cnes) {
-      console.log('cnes', cnes)
       try {
         const [unitResponse, riskResponse] = await Promise.all([
           getHealthUnitInfo(cnes, {
