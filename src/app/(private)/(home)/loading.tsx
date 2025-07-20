@@ -3,9 +3,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function HomeLoading() {
   const dynamicMarginBottom = 'calc(100lvh - (116px + 188px + 240px))'
   return (
-    <main className="flex max-w-md mx-auto pt-21 flex-col bg-background text-foreground">
+    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground pb-30">
       {/* Header Skeleton */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground py-4">
+      <header className="relative w-full z-50 bg-background text-foreground py-4">
         <div className="mx-auto px-4 flex max-w-md items-center justify-between">
           {/* Left side - User info skeleton */}
           <div className="flex items-center space-x-3">
@@ -15,11 +15,13 @@ export default function HomeLoading() {
               <Skeleton className="h-3 w-20" />
             </div>
           </div>
+          {/* Right side - Pref logo skeleton */}
+          <Skeleton className="h-8 w-20" />
         </div>
       </header>
 
       {/* Search Placeholder Skeleton */}
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-2">
         <Skeleton className="h-14 w-full rounded-full" />
       </div>
 
@@ -31,8 +33,8 @@ export default function HomeLoading() {
         </div>
       </div>
 
-      {/* Home Services Grid Skeleton */}
-      <div className="px-4">
+      {/* Home Categories Grid Skeleton */}
+      <div className="px-4 pb-4">
         <div className="grid grid-cols-4 gap-2">
           {/* First row */}
           {Array.from({ length: 4 }).map((_, i) => (
@@ -52,7 +54,7 @@ export default function HomeLoading() {
         {/* Skeleton pagination bullets */}
         <div className="flex justify-center items-center h-12">
           <div className="flex items-center gap-1.5">
-            <Skeleton className="w-4 h-2 rounded-full" />
+            <Skeleton className="w-3 h-2 rounded-full" />
             <Skeleton className="w-2 h-2 rounded-full" />
           </div>
         </div>
@@ -60,12 +62,12 @@ export default function HomeLoading() {
 
       {/* Most Accessed Services Skeleton */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4 px-4 pt-0">
+        <div className="flex items-center justify-between mb-2 px-4">
           <Skeleton className="h-5 w-28" />
           <Skeleton className="h-5 w-16" />
         </div>
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-          <div className="flex gap-4 px-4 w-max">
+          <div className="flex gap-2 px-4 w-max">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="w-[140px] h-[140px] min-w-[140px]">
                 <Skeleton className="w-full h-full rounded-lg" />
@@ -76,26 +78,21 @@ export default function HomeLoading() {
       </div>
 
       {/* Wallet Section Skeleton */}
-      <section className="px-4 mt-6">
-        <div className="sticky top-20 flex items-center justify-between mb-4">
+      <section className="mt-6 w-full overflow-x-auto">
+        <div className="flex items-center px-4 justify-between mb-4">
           <Skeleton className="h-5 w-16" />
           <Skeleton className="h-5 w-16" />
         </div>
 
-        <div
-          className="grid w-full gap-2"
-          style={{ marginBottom: dynamicMarginBottom }}
-        >
-          {/* Wallet card skeletons */}
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="sticky"
-              style={{ top: `${116 + i * 80}px` }}
-            >
-              <Skeleton className="w-full h-[182px] rounded-lg" />
-            </div>
-          ))}
+        <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex px-4 gap-2 w-max">
+            {/* Wallet card skeletons */}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="min-w-[300px]">
+                <Skeleton className="w-full h-[182px] rounded-lg" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>

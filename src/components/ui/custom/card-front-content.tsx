@@ -23,7 +23,7 @@ export function CardFrontContent({
 }: CardFrontContentProps) {
   return (
     <div className="flex h-[140px] justify-between items-start relative">
-      <PrefLogo className="text-white absolute top-0 right-0" />
+      <PrefLogo fill="white" className="text-white absolute top-0 right-0" />
 
       <div className="flex flex-col justify-between h-full">
         <div>

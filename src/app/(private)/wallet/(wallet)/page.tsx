@@ -158,7 +158,7 @@ export default async function Wallet() {
       {/* <MainHeader /> */}
       <main className="pb-30 max-w-md mx-auto text-white">
         <section className="px-4 relative h-full ">
-          <div className="flex items-center justify-between pt-6 pb-6">
+          <div className="flex items-start justify-between pt-6 pb-6">
             <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
               Carteira
             </h2>

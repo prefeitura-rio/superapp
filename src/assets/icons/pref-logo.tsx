@@ -24,7 +24,7 @@ export const PrefLogo = (props: IconProps) => {
         <rect width="48" height="18.6021" fill="url(#pattern0_4608_5033)" />
       </mask>
       <g mask="url(#mask0_4608_5033)">
-        <rect x="2.25879" width="45.7412" height="18.6353" fill="white" />
+        <rect x="2.25879" width="45.7412" height="18.6353" fill={props.fill} />
       </g>
       <defs>
         <pattern

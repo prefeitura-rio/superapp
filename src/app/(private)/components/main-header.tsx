@@ -1,4 +1,5 @@
-import { SearchIcon, UserIcon } from '@/assets/icons'
+import { UserIcon } from '@/assets/icons'
+import { PrefLogo } from '@/assets/icons/pref-logo'
 import Link from 'next/link'
 
 interface MainHeaderProps {
@@ -15,7 +16,7 @@ export default function MainHeader({
       <div className="mx-auto px-4 flex max-w-md items-center justify-between">
         {/* Left side - User info with icon */}
         <Link href="/user-profile" className="flex items-center space-x-3">
-          <div className="rounded-full bg-card p-4">
+          <div className="rounded-full bg-card p-3">
             <UserIcon className="h-5 w-5" />
           </div>
           <div className="flex flex-col">
@@ -29,10 +30,11 @@ export default function MainHeader({
         </Link>
 
         {/* Right side - Search icon with fade transition and debug background */}
-        <Link href="/search" className="rounded-full p-4 opacity-100 bg-card">
-          {showSearchIcon && <SearchIcon className="text-foreground h-5 w-5" />}
-          <span className="sr-only">Search</span>
-        </Link>
+        {/* <Link href="/search" className="rounded-full p-4 opacity-100 bg-card"> */}
+        {/* {showSearchIcon && <SearchIcon className="text-foreground h-5 w-5" />} */}
+        <PrefLogo fill="var(--primary)" className="h-8 w-20" />
+        <span className="sr-only">Search</span>
+        {/* </Link> */}
       </div>
     </header>
   )

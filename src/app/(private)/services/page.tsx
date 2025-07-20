@@ -10,7 +10,7 @@ export default async function ServicesPage() {
   return (
     <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="px-4 py-6 flex justify-between items-center">
+      <header className="px-4 py-6 flex justify-between items-start">
         <h1 className="text-2xl font-bold">Serviços</h1>
 
         <SearchButton />

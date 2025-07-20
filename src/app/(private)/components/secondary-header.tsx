@@ -18,13 +18,25 @@ export function SecondaryHeader({
 
   return (
     <>
-      <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-center max-w-md mx-auto z-50 bg-background text-foreground h-16">
-        <IconButton icon={ChevronLeftIcon} onClick={() => router.back()} />
-        <h1 className="text-xl font-medium w-full text-center flex items-center justify-center h-full text-foreground ml-12">
-          {title}
-        </h1>
+      <header className="px-4 py-4 fixed top-0 w-full max-w-md mx-auto z-50 bg-background text-foreground h-auto">
+        <div className="grid grid-cols-3 items-center">
+          {/* Left column - IconButton */}
+          <div className="flex justify-start">
+            <IconButton icon={ChevronLeftIcon} onClick={() => router.back()} />
+          </div>
 
-        {showSearchButton && <SearchButton />}
+          {/* Center column - Title */}
+          <div className="flex justify-center">
+            <h1 className="text-xl text-nowrap font-medium text-center text-foreground">
+              {title}
+            </h1>
+          </div>
+
+          {/* Right column - SearchButton or empty space */}
+          <div className="flex justify-end">
+            {showSearchButton && <SearchButton />}
+          </div>
+        </div>
       </header>
 
       {/* <div className="fixed top-16 w-full max-w-md mx-auto h-15 z-40 pointer-events-none">
