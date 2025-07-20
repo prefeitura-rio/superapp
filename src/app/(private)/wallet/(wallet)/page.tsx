@@ -8,11 +8,9 @@ import {
 } from '@/lib/cadunico-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import {
-  formatAddress,
   formatOperatingHours,
   getCurrentOperatingStatus,
   getHealthUnitRiskStatus,
-  getPrimaryPhone,
 } from '@/lib/health-unit-utils'
 import {
   formatMaintenanceRequestsCount,
@@ -114,44 +112,28 @@ export default async function Wallet() {
   // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
 
-  // Prepare health card data
-  const hasHealthData =
-    healthUnitData || walletData?.saude?.clinica_familia?.nome
+  // Prepare health card data - only use wallet data as source of truth
+  const hasHealthData = walletData?.saude?.clinica_familia
 
-  // Get risk status data
-  const riskStatus =
-    healthUnitData && healthUnitRiskData
-      ? getHealthUnitRiskStatus(healthUnitRiskData)
-      : null
+  // Only use health unit API for operating hours and risk status
+  let healthStatusValue = 'Não informado'
+  let healthOperatingHours = 'Não informado'
+  let riskStatus = null
 
-  const healthName =
-    healthUnitData?.nome ||
-    walletData?.saude?.clinica_familia?.nome ||
-    'Não disponível'
+  if (healthUnitData) {
+    healthStatusValue = getCurrentOperatingStatus(
+      healthUnitData.funcionamento_dia_util,
+      healthUnitData.funcionamento_sabado
+    )
+    healthOperatingHours = formatOperatingHours(
+      healthUnitData.funcionamento_dia_util,
+      healthUnitData.funcionamento_sabado
+    )
+  }
 
-  // Status value should be "Aberto" or "Fechado" based on operating hours
-  const healthStatusValue = healthUnitData
-    ? getCurrentOperatingStatus(
-        healthUnitData.funcionamento_dia_util,
-        healthUnitData.funcionamento_sabado
-      )
-    : getOperatingStatus(
-        walletData?.saude?.clinica_familia?.horario_atendimento
-      )
-
-  const healthOperatingHours = healthUnitData
-    ? formatOperatingHours(
-        healthUnitData.funcionamento_dia_util,
-        healthUnitData.funcionamento_sabado
-      )
-    : walletData?.saude?.clinica_familia?.horario_atendimento || 'Não informado'
-  const healthAddress = healthUnitData
-    ? formatAddress(healthUnitData)
-    : walletData?.saude?.clinica_familia?.endereco
-  const healthPhone = healthUnitData
-    ? getPrimaryPhone(healthUnitData) || undefined
-    : walletData?.saude?.clinica_familia?.telefone
-  const healthEmail = walletData?.saude?.clinica_familia?.email
+  if (healthUnitRiskData) {
+    riskStatus = getHealthUnitRiskStatus(healthUnitRiskData)
+  }
 
   return (
     <>
@@ -168,18 +150,22 @@ export default async function Wallet() {
 
           {walletInfo.hasData ? (
             <div className="grid w-full gap-2">
+              {/* Health Card - only show if wallet has health data */}
               {hasHealthData && (
                 <div>
                   <HealthCard
                     title="CLÍNICA DA FAMÍLIA"
-                    name={healthName}
+                    name={
+                      walletData!.saude!.clinica_familia!.nome ||
+                      'Nome não disponível'
+                    }
                     primaryLabel="Status"
                     primaryValue={healthStatusValue}
                     secondaryLabel="Horário de Atendimento"
                     secondaryValue={healthOperatingHours}
-                    address={healthAddress}
-                    phone={healthPhone}
-                    email={healthEmail}
+                    address={walletData!.saude!.clinica_familia!.endereco}
+                    phone={walletData!.saude!.clinica_familia!.telefone}
+                    email={walletData!.saude!.clinica_familia!.email}
                     enableFlip={false}
                     asLink
                     href="/wallet/health"

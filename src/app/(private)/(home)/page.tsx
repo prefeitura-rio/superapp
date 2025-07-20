@@ -5,11 +5,9 @@ import {
 import { fetchCategories } from '@/lib/categories'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import {
-  formatAddress,
   formatOperatingHours,
   getCurrentOperatingStatus,
   getHealthUnitRiskStatus,
-  getPrimaryPhone,
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { FloatNavigation } from '../components/float-navigation'
@@ -46,6 +44,7 @@ export default async function Home() {
 
     // Fetch health unit info and risk if CNES is available
     const cnes = walletData?.saude?.clinica_familia?.id_cnes
+    console.log('>>cnes', cnes)
     if (cnes) {
       try {
         const [unitResponse, riskResponse] = await Promise.all([
@@ -101,48 +100,40 @@ export default async function Home() {
   // healthCardData
   let healthCardData = undefined
   if (walletData?.saude?.clinica_familia) {
-    // Here we use new API data if available, fallback to wallet data
-    const unitName =
-      healthUnitData?.nome ||
-      walletData.saude.clinica_familia.nome ||
-      'Não disponível'
+    // Use wallet data as primary source, only supplement with API data for specific fields
+    const clinicaFamilia = walletData.saude.clinica_familia
+
+    // Only use health unit API for operating hours and current status
     const operatingHours = healthUnitData
       ? formatOperatingHours(
           healthUnitData.funcionamento_dia_util,
           healthUnitData.funcionamento_sabado
         )
-      : walletData.saude.clinica_familia.horario_atendimento || 'Não informado'
-    const riskStatus =
-      healthUnitData && healthUnitRiskData
-        ? getHealthUnitRiskStatus(healthUnitRiskData)
-        : null
+      : 'Não informado'
+
     const statusValue = healthUnitData
       ? getCurrentOperatingStatus(
           healthUnitData.funcionamento_dia_util,
           healthUnitData.funcionamento_sabado
         )
-      : getCurrentOperatingStatus(
-          { inicio: 8, fim: 17 }, // Default hours if no data
-          null
-        )
-    const address = healthUnitData
-      ? formatAddress(healthUnitData)
-      : walletData.saude.clinica_familia.endereco || 'Endereço não disponível'
-    const phone = healthUnitData
-      ? getPrimaryPhone(healthUnitData) || undefined
-      : walletData.saude.clinica_familia.telefone
-    const email = walletData.saude.clinica_familia.email
+      : 'Não informado'
+
+    // Only use health unit API for risk status
+    const riskStatus = healthUnitRiskData
+      ? getHealthUnitRiskStatus(healthUnitRiskData)
+      : null
+
     healthCardData = {
       href: '/wallet/health',
       title: 'CLÍNICA DA FAMÍLIA',
-      name: unitName,
+      name: clinicaFamilia.nome || 'Nome não disponível',
       statusLabel: 'Status',
       statusValue,
       extraLabel: 'Horário de atendimento',
       extraValue: operatingHours,
-      address,
-      phone,
-      email,
+      address: clinicaFamilia.endereco || 'Endereço não disponível',
+      phone: clinicaFamilia.telefone,
+      email: clinicaFamilia.email,
       risco: riskStatus?.risco,
     }
   }

@@ -64,26 +64,23 @@ export default function CarteiraSection({
       {walletInfo.hasData ? (
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="flex px-4 gap-2 w-max">
-            {(healthCardData || walletData?.saude?.clinica_familia?.nome) && (
+            {/* Health Card - only show if wallet has health data */}
+            {walletData?.saude?.clinica_familia && (
               <div className="min-w-[300px]">
                 <HealthCard
                   href="/wallet/health"
                   title="CLÍNICA DA FAMÍLIA"
                   name={
-                    walletData?.saude?.clinica_familia?.nome || 'Não disponível'
+                    walletData.saude.clinica_familia.nome ||
+                    'Nome não disponível'
                   }
                   primaryLabel="Status"
-                  primaryValue={getOperatingStatus(
-                    walletData?.saude?.clinica_familia?.horario_atendimento
-                  )}
+                  primaryValue={healthCardData?.statusValue || 'Não informado'}
                   secondaryLabel="Horário de Atendimento"
-                  secondaryValue={
-                    walletData?.saude?.clinica_familia?.horario_atendimento ||
-                    'Não informado'
-                  }
-                  address={walletData?.saude?.clinica_familia?.endereco}
-                  phone={walletData?.saude?.clinica_familia?.telefone}
-                  email={walletData?.saude?.clinica_familia?.email}
+                  secondaryValue={healthCardData?.extraValue || 'Não informado'}
+                  address={walletData.saude.clinica_familia.endereco}
+                  phone={walletData.saude.clinica_familia.telefone}
+                  email={walletData.saude.clinica_familia.email}
                   enableFlip={false}
                   showInitialShine={false}
                   asLink

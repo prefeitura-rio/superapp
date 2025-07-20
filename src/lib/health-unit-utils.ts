@@ -24,8 +24,14 @@ export function formatOperatingHours(
     return `${formatHour(funcionamento_sabado.inicio)} às ${formatHour(funcionamento_sabado.fim)}`
   }
 
-  // Sunday or Saturday without hours
-  return 'Fechado hoje'
+  // Sunday or Saturday without hours - show when it opens next
+  if (currentDay === 0) {
+    // It's Sunday, opens tomorrow (Monday)
+    return `Abre amanhã às ${formatHour(funcionamento_dia_util.inicio)}`
+  }
+
+  // It's Saturday without Saturday hours, opens Monday
+  return `Abre segunda às ${formatHour(funcionamento_dia_util.inicio)}`
 }
 
 /**

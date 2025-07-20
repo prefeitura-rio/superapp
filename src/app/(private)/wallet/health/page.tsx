@@ -3,12 +3,9 @@ import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import {
-  formatAddress,
   formatOperatingHours,
   getCurrentOperatingStatus,
   getHealthUnitRiskStatus,
-  getPrimaryPhone,
-  getWhatsAppPhone,
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
@@ -143,54 +140,51 @@ export default async function HealthCardDetail() {
 
   const healthData = walletData?.saude
 
-  // Use new API data if available, fallback to wallet data
-  const unitName =
-    healthUnitData?.nome ||
-    healthData?.clinica_familia?.nome ||
-    'Não disponível'
-  const operatingHours = healthUnitData
-    ? formatOperatingHours(
-        healthUnitData.funcionamento_dia_util,
-        healthUnitData.funcionamento_sabado
-      )
-    : healthData?.clinica_familia?.horario_atendimento || 'Não informado'
+  // Only proceed if we have health data from wallet
+  if (!healthData?.clinica_familia) {
+    return (
+      <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
+        <SecondaryHeader title="Carteira" />
+        <div className="flex items-center justify-center py-6">
+          <p className="text-muted-foreground text-center">
+            Dados de saúde não disponíveis.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
-  // Get risk status data
-  const riskStatus =
-    healthUnitData && healthUnitRiskData
-      ? getHealthUnitRiskStatus(healthUnitRiskData)
-      : null
+  const clinicaFamilia = healthData.clinica_familia
 
-  // Status value should be "Aberto" or "Fechado" based on operating hours
-  const statusValue = healthUnitData
-    ? getCurrentOperatingStatus(
-        healthUnitData.funcionamento_dia_util,
-        healthUnitData.funcionamento_sabado
-      )
-    : getCurrentOperatingStatus(
-        { inicio: 8, fim: 17 }, // Default hours if no data
-        null
-      )
+  // Only use health unit API for operating hours and current status
+  let operatingHours = 'Não informado'
+  let statusValue = 'Não informado'
+  let riskStatus = null
 
-  const address = healthUnitData
-    ? formatAddress(healthUnitData)
-    : healthData?.clinica_familia?.endereco || 'Endereço não disponível'
+  if (healthUnitData) {
+    operatingHours = formatOperatingHours(
+      healthUnitData.funcionamento_dia_util,
+      healthUnitData.funcionamento_sabado
+    )
+    statusValue = getCurrentOperatingStatus(
+      healthUnitData.funcionamento_dia_util,
+      healthUnitData.funcionamento_sabado
+    )
+  }
 
-  const phone = healthUnitData
-    ? getPrimaryPhone(healthUnitData) || undefined
-    : healthData?.clinica_familia?.telefone
+  if (healthUnitRiskData) {
+    riskStatus = getHealthUnitRiskStatus(healthUnitRiskData)
+  }
 
-  const whatsappPhone = healthUnitData
-    ? getWhatsAppPhone(healthUnitData) || undefined
-    : healthData?.clinica_familia?.telefone
-
-  const email = healthData?.clinica_familia?.email
+  // Use wallet data for all contact info and address
+  const unitName = clinicaFamilia.nome || 'Nome não disponível'
+  const address = clinicaFamilia.endereco || 'Endereço não disponível'
+  const phone = clinicaFamilia.telefone
+  const email = clinicaFamilia.email
 
   // Build dynamic links with real data
   const phoneUrl = phone ? `tel:${phone}` : '#'
-  const whatsappUrl = whatsappPhone
-    ? `https://wa.me/${whatsappPhone.replace(/\D/g, '')}`
-    : '#'
+  const whatsappUrl = phone ? `https://wa.me/${phone.replace(/\D/g, '')}` : '#'
   const mapUrl =
     address && address !== 'Endereço não disponível'
       ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
