@@ -23,10 +23,10 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { FloatNavigation } from '../../components/float-navigation'
 import { SearchButton } from '../../components/search-button'
-import { WalletCaretakerCard } from '../../components/wallet-caretaker-card'
-import { WalletEducationCard } from '../../components/wallet-education-card'
-import { WalletHealthCard } from '../../components/wallet-health-card'
-import { WalletSocialAssistanceCard } from '../../components/wallet-social-assistance-card'
+import { CaretakerCard } from '../../components/wallet-cards/caretaker-card'
+import { EducationCard } from '../../components/wallet-cards/education-card'
+import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
+import { WealthCard } from '../../components/wallet-cards/wealth-card'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -182,18 +182,20 @@ export default async function Wallet() {
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
-                  <WalletHealthCard
-                    href="/wallet/health"
+                  <WealthCard
                     title="CLÍNICA DA FAMÍLIA"
                     name={healthName}
-                    statusLabel="Status"
-                    statusValue={healthStatusValue}
-                    extraLabel="Horário de atendimento"
-                    extraValue={healthOperatingHours}
+                    primaryLabel="Status"
+                    primaryValue={healthStatusValue}
+                    secondaryLabel="Horário de Atendimento"
+                    secondaryValue={healthOperatingHours}
                     address={healthAddress}
                     phone={healthPhone}
                     email={healthEmail}
-                    risco={riskStatus?.risco}
+                    enableFlip={false}
+                    asLink
+                    href="/wallet/health"
+                    showInitialShine={false}
                   />
                 </div>
               )}
@@ -204,24 +206,27 @@ export default async function Wallet() {
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
-                  <WalletEducationCard
-                    href="/wallet/education"
+                  <EducationCard
                     title="ESCOLA"
                     name={
                       walletData?.educacao?.escola?.nome || 'Não disponível'
                     }
-                    statusLabel="Status"
-                    statusValue={getOperatingStatus(
+                    primaryLabel="Status"
+                    primaryValue={getOperatingStatus(
                       walletData?.educacao?.escola?.horario_funcionamento
                     )}
-                    extraLabel="Horário de Atendimento"
-                    extraValue={
+                    secondaryLabel="Horário de Atendimento"
+                    secondaryValue={
                       walletData?.educacao?.escola?.horario_funcionamento ||
                       'Não informado'
                     }
                     address={walletData?.educacao?.escola?.endereco}
                     phone={walletData?.educacao?.escola?.telefone}
                     email={walletData?.educacao?.escola?.email}
+                    asLink
+                    enableFlip={false}
+                    href="/wallet/education"
+                    showInitialShine={false}
                   />
                 </div>
               )}
@@ -232,25 +237,27 @@ export default async function Wallet() {
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
-                  <WalletSocialAssistanceCard
-                    href="/wallet/social-assistance"
+                  <SocialAssistanceCard
                     title="CADÚNICO"
-                    name={
+                    number={
                       walletData?.assistencia_social?.cras?.nome ||
                       'Não disponível'
                     }
-                    statusLabel="Status"
-                    statusValue={getCadUnicoStatus(
-                      walletData?.assistencia_social?.cadunico
-                    )}
-                    extraLabel="Data de recadastramento"
-                    extraValue={formatRecadastramentoDate(
+                    primaryLabel="Data de recadastramento"
+                    primaryValue={formatRecadastramentoDate(
                       walletData?.assistencia_social?.cadunico
                         ?.data_limite_cadastro_atual
                     )}
-                    crasName={walletData?.assistencia_social?.cras?.nome}
+                    badgeStatus={getCadUnicoStatus(
+                      walletData?.assistencia_social?.cadunico
+                    )}
+                    unitName={walletData?.assistencia_social?.cras?.nome}
                     address={walletData?.assistencia_social?.cras?.endereco}
                     phone={walletData?.assistencia_social?.cras?.telefone}
+                    asLink
+                    enableFlip={false}
+                    href="/wallet/social-assistance"
+                    showInitialShine={false}
                   />
                 </div>
               )}
@@ -261,16 +268,19 @@ export default async function Wallet() {
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
-                  <WalletCaretakerCard
-                    href="/wallet/caretaker"
+                  <CaretakerCard
                     title="CUIDADOS COM A CIDADE"
                     name={formatMaintenanceRequestsCount(
                       maintenanceStats.aberto
                     )}
-                    statusLabel="Total de chamados"
-                    statusValue={maintenanceStats.total.toString()}
-                    extraLabel="Fechados"
-                    extraValue={maintenanceStats.fechados.toString()}
+                    primaryLabel="Total de chamados"
+                    primaryValue={maintenanceStats.total.toString()}
+                    secondaryLabel="Fechados"
+                    secondaryValue={maintenanceStats.fechados.toString()}
+                    showInitialShine={false}
+                    enableFlip={false}
+                    asLink
+                    href="/wallet/caretaker"
                   />
                 </div>
               )}

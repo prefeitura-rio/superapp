@@ -3,6 +3,7 @@
 import boyStudying from '@/assets/boyStudying.png'
 import smilingWoman from '@/assets/smilingWoman.png'
 import { Badge } from '@/components/ui/badge'
+import { suggestedBanners } from '@/constants/banners'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -87,26 +88,11 @@ export default function SuggestionCards({
 }: SuggestionCardsProps) {
   const router = useRouter()
   return (
-    <div className="relative w-full overflow-x-auto pb-6 no-scrollbar">
-      <div className="flex gap-4 px-4 w-max">
-        {order.map(idx => {
-          const card = cards[idx]
-          return (
-            <div
-              key={card.key}
-              className={`w-[85vw] max-w-[350px] h-[104px] ${card.bg} rounded-2xl overflow-hidden flex flex-col relative`}
-              // onClick={() => card.route && router.push(card.route)}
-              style={{ cursor: 'pointer' }}
-              // onKeyDown={e => {
-              //   if ((e.key === 'Enter' || e.key === ' ') && card.route)
-              //     router.push(card.route)
-              // }}
-            >
-              {card.badge}
-              {card.text}
-              {card.image}
-            </div>
-          )
+    <div className="relative w-full overflow-x-auto overflow-y-hidden pb-3 no-scrollbar">
+      <div className="flex gap-2 px-4 w-max py-2">
+        {suggestedBanners.map(banner => {
+          const BannerComponent = banner.component
+          return <BannerComponent key={banner.id} />
         })}
       </div>
     </div>

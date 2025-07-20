@@ -1,12 +1,12 @@
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { Calendar, MapPin, Phone } from 'lucide-react'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
-} from '@/lib/cadunico-utils'
-import { getUserInfoFromToken } from '@/lib/user-info'
-import { Calendar, MapPin, Phone } from 'lucide-react'
+} from '../../../../lib/cadunico-utils'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WalletSocialAssistanceCard } from '../../components/wallet-social-assistance-card'
+import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
 
 export default async function SocialAssistanceCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -45,20 +45,18 @@ export default async function SocialAssistanceCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
-          <WalletSocialAssistanceCard
-            href="#"
+          <SocialAssistanceCard
             title="CADÚNICO"
-            name={cras?.nome || 'Não disponível'}
-            statusLabel="Status"
-            statusValue={getCadUnicoStatus(cadunico)}
-            extraLabel="Data de recadastramento"
-            extraValue={formatRecadastramentoDate(
+            number={cras?.nome || 'Não disponível'}
+            badgeStatus={getCadUnicoStatus(cadunico)}
+            primaryLabel="Data de recadastramento"
+            primaryValue={formatRecadastramentoDate(
               cadunico?.data_limite_cadastro_atual
             )}
-            crasName={cras?.nome}
+            unitName={walletData?.assistencia_social?.cras?.nome}
             address={cras?.endereco}
             phone={cras?.telefone}
-            showEyeButton={true}
+            showInitialShine
           />
         </div>
         {/* Icons Buttons Row */}

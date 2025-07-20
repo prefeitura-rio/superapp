@@ -54,6 +54,9 @@ export default function HomeCategoriesGrid({
 
   return (
     <div className="px-4 pb-4">
+      <h3 className="pb-2 text-base font-medium text-foreground leading-5">
+        Serviços
+      </h3>
       <div className="pb-0">
         <Swiper
           slidesPerView={1}
