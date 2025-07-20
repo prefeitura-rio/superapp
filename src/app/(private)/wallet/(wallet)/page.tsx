@@ -16,7 +16,10 @@ import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
-import { getOperatingStatus } from '@/lib/operating-status'
+import {
+  formatEducationOperatingHours,
+  getOperatingStatus,
+} from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { FloatNavigation } from '../../components/float-navigation'
@@ -187,10 +190,9 @@ export default async function Wallet() {
                       walletData?.educacao?.escola?.horario_funcionamento
                     )}
                     secondaryLabel="Horário de Atendimento"
-                    secondaryValue={
-                      walletData?.educacao?.escola?.horario_funcionamento ||
-                      'Não informado'
-                    }
+                    secondaryValue={formatEducationOperatingHours(
+                      walletData?.educacao?.escola?.horario_funcionamento
+                    )}
                     address={walletData?.educacao?.escola?.endereco}
                     phone={walletData?.educacao?.escola?.telefone}
                     email={walletData?.educacao?.escola?.email}

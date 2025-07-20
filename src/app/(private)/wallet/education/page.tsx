@@ -3,7 +3,10 @@ import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { MapPin, Phone } from 'lucide-react'
-import { getOperatingStatus } from '../../../../lib/operating-status'
+import {
+  formatEducationOperatingHours,
+  getOperatingStatus,
+} from '../../../../lib/operating-status'
 import { FrequencyInfoButton } from '../../components/frequency-info-button'
 import { SecondaryHeader } from '../../components/secondary-header'
 import { getFrequenciaEscolarTextClass } from '../../components/utils'
@@ -119,7 +122,9 @@ export default async function EducationCardDetail() {
                 : 'Não informado'
             }
             secondaryLabel="Horário de Atendimento"
-            secondaryValue={escola?.horario_funcionamento || 'Não informado'}
+            secondaryValue={formatEducationOperatingHours(
+              escola?.horario_funcionamento
+            )}
             address={escola?.endereco || 'Endereço não disponível'}
             phone={escola?.telefone}
             email={escola?.email}

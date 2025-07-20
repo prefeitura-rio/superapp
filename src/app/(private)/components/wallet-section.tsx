@@ -10,7 +10,10 @@ import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
-import { getOperatingStatus } from '@/lib/operating-status'
+import {
+  formatEducationOperatingHours,
+  getOperatingStatus,
+} from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import Link from 'next/link'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
@@ -100,10 +103,9 @@ export default function CarteiraSection({
                     walletData?.educacao?.escola?.horario_funcionamento
                   )}
                   secondaryLabel="Horário de Atendimento"
-                  secondaryValue={
-                    walletData?.educacao?.escola?.horario_funcionamento ||
-                    'Não informado'
-                  }
+                  secondaryValue={formatEducationOperatingHours(
+                    walletData?.educacao?.escola?.horario_funcionamento
+                  )}
                   address={walletData?.educacao?.escola?.endereco}
                   phone={walletData?.educacao?.escola?.telefone}
                   email={walletData?.educacao?.escola?.email}
