@@ -23,7 +23,7 @@ interface WalletCardProps {
   showInitialShine?: boolean
 }
 
-export function WealthCard({
+export function HealthCard({
   href,
   title,
   name,

@@ -15,8 +15,8 @@ import { getWalletDataInfo } from '@/lib/wallet-utils'
 import Link from 'next/link'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
+import { HealthCard } from './wallet-cards/health-card'
 import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
-import { WealthCard } from './wallet-cards/wealth-card'
 
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
@@ -77,7 +77,7 @@ export default function CarteiraSection({
               className="sticky"
               style={{ top: `${116 + cardIndex++ * 80}px` }}
             >
-              <WealthCard
+              <HealthCard
                 href="/wallet/health"
                 title="CLÍNICA DA FAMÍLIA"
                 name={

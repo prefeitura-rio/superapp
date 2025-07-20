@@ -25,8 +25,8 @@ import { FloatNavigation } from '../../components/float-navigation'
 import { SearchButton } from '../../components/search-button'
 import { CaretakerCard } from '../../components/wallet-cards/caretaker-card'
 import { EducationCard } from '../../components/wallet-cards/education-card'
+import { HealthCard } from '../../components/wallet-cards/health-card'
 import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
-import { WealthCard } from '../../components/wallet-cards/wealth-card'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -182,7 +182,7 @@ export default async function Wallet() {
                   className="sticky"
                   style={{ top: `${80 + cardIndex++ * 80}px` }}
                 >
-                  <WealthCard
+                  <HealthCard
                     title="CLÍNICA DA FAMÍLIA"
                     name={healthName}
                     primaryLabel="Status"

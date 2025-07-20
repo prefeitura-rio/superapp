@@ -13,7 +13,7 @@ import {
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
 import { SecondaryHeader } from '../../components/secondary-header'
-import { WealthCard } from '../../components/wallet-cards/wealth-card'
+import { HealthCard } from '../../components/wallet-cards/health-card'
 
 interface TeamPageProps {
   healthData?: {
@@ -201,7 +201,7 @@ export default async function HealthCardDetail() {
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
-          <WealthCard
+          <HealthCard
             title="CLÍNICA DA FAMÍLIA"
             name={unitName}
             primaryLabel="Status"
