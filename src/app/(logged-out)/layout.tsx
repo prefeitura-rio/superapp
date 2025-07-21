@@ -3,10 +3,5 @@ export default function PublicLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <div className="">
-      {/* <h1>Public</h1> */}
-      {children}
-    </div>
-  )
+  return <div className="">{children}</div>
 }
