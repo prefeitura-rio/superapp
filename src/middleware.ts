@@ -7,9 +7,26 @@ import {
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
+  { path: '/search/*', whenAuthenticated: 'next' },
+  { path: '/services/*', whenAuthenticated: 'next' },
   { path: '/authentication-required/wallet', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
 ] as const
+
+function matchRoute(pathname: string, routePath: string): boolean {
+  // Handle exact match
+  if (routePath === pathname) {
+    return true
+  }
+
+  // Handle wildcard match (ending with /*)
+  if (routePath.endsWith('/*')) {
+    const baseRoute = routePath.slice(0, -2) // Remove /*
+    return pathname.startsWith(`${baseRoute}/`) || pathname === baseRoute
+  }
+
+  return false
+}
 
 export const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
 
@@ -67,7 +84,7 @@ export function middleware(request: NextRequest) {
     .trim()
 
   const path = request.nextUrl.pathname
-  const publicRoute = publicRoutes.find(route => route.path === path)
+  const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
   const authToken = request.cookies.get('access_token')
 
   // Set up request headers with nonce and CSP
