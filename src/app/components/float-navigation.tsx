@@ -29,7 +29,11 @@ export function FloatNavigation() {
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
         <nav className="flex items-center shadow-float-navigation justify-center gap-2 rounded-full bg-background px-2 py-2 backdrop-blur-sm">
           {navItems.map(item => {
-            const isActive = pathname === item.href
+            // Special case: wallet button should be active on authentication-required/wallet page
+            const isActive =
+              pathname === item.href ||
+              (item.href === '/wallet' &&
+                pathname === '/authentication-required/wallet')
             const Icon = item.icon
 
             return (

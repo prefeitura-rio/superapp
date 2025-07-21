@@ -19,12 +19,13 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
+  const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
   let walletData
   let maintenanceRequests
   let healthUnitData
   let healthUnitRiskData
 
-  if (userAuthInfo.cpf) {
+  if (isLoggedIn) {
     // Fetch wallet data
     try {
       const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
@@ -141,10 +142,10 @@ export default async function Home() {
 
   return (
     <main className="flex max-w-md mx-auto flex-col bg-background text-foreground pb-30">
-      <HeaderWrapper userName={userAuthInfo.name} />
+      <HeaderWrapper userName={userAuthInfo.name} isLoggedIn={isLoggedIn} />
 
       {/* Suggestion Cards*/}
-      <SuggestionCards order={[1, 0]} />
+      <SuggestionCards isLoggedIn={isLoggedIn} />
 
       {/* Home Categories Grid*/}
       <HomeCategoriesGrid categories={categories} />
@@ -152,8 +153,8 @@ export default async function Home() {
       {/* Most Accessed Service Cards*/}
       <MostAccessedServiceCards showMore={true} />
 
-      {/* Carteira section */}
-      {walletData && (
+      {/* Carteira section - only show for authenticated users */}
+      {isLoggedIn && walletData && (
         <CarteiraSection
           walletData={walletData}
           maintenanceRequests={maintenanceRequests}

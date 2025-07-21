@@ -5,12 +5,20 @@ import SearchPlaceholder from './search-placeholder'
 
 interface HeaderWrapper {
   userName: string
+  isLoggedIn: boolean
 }
 
-export default function ScrollAwareHeader({ userName }: HeaderWrapper) {
+export default function ScrollAwareHeader({
+  userName,
+  isLoggedIn,
+}: HeaderWrapper) {
   return (
     <>
-      <MainHeader userName={userName} showSearchIcon={true} />
+      <MainHeader
+        userName={userName}
+        isLoggedIn={isLoggedIn}
+        showSearchIcon={true}
+      />
 
       <div>
         <SearchPlaceholder />

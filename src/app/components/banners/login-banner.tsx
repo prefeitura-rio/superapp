@@ -10,7 +10,7 @@ export const LoginBanner = () => {
       title="Acesse sua carteira"
       subtitle="Faça login em gov.br"
       color="#13335A"
-      route="/"
+      route="/authentication-required/wallet"
       image={
         <Image
           src={loginBanner}
