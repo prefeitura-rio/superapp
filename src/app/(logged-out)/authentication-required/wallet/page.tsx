@@ -1,57 +1,80 @@
 'use client'
 
 import { FloatNavigation } from '@/app/components/float-navigation'
-import { WalletIcon } from '@/assets/icons'
-import { PrefLogo } from '@/assets/icons/pref-logo'
-import { Button } from '@/components/ui/button'
+import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
+import govbrLogo from '@/assets/govbr.svg'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function WalletAuthenticationRequired() {
-  const handleLogin = () => {
-    window.location.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
-  }
-
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-4 pb-32">
-        <div className="flex max-w-md mx-auto flex-col items-center gap-8 text-center">
-          {/* Logo */}
-          <div className="w-full flex justify-center mb-4">
-            <PrefLogo fill="var(--primary)" className="h-10 w-24" />
-          </div>
+      <main className="flex max-w-xl mx-auto min-h-lvh flex-col bg-background text-foreground pb-32">
+        {/* Header */}
+        <div className="px-4 pt-8 pb-4">
+          <h1 className="text-lg font-medium text-foreground">Carteira</h1>
+        </div>
 
-          {/* Wallet Icon */}
-          <div className="rounded-full bg-card p-6">
-            <WalletIcon className="h-12 w-12 text-primary" />
-          </div>
-
-          {/* Main Content */}
-          <div className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">
-              Acesso à Carteira
-            </h1>
-            <p className="text-base text-muted-foreground leading-relaxed">
-              Para acessar sua carteira digital e visualizar seus documentos e
-              serviços, você precisa fazer login com sua conta Gov.br.
+        {/* Main Content */}
+        <div className="flex flex-col justify-center space-y-8">
+          {/* Title and Description */}
+          <div className="px-4 text-left space-y-2">
+            <h2 className="text-2xl font-semibold text-foreground leading-tight">
+              Informações para você em um só lugar
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              CadÚnico, Clínica da Família, Educação de Jovens e Adultos e
+              Cuidados com a Cidade
             </p>
           </div>
 
-          {/* Login Button */}
-          <Button
-            onClick={handleLogin}
-            className="w-full max-w-sm h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-          >
-            Fazer Login com Gov.br
-          </Button>
+          {/* Wallet Cards Image - Overflowing */}
+          <div className="relative w-full overflow-hidden">
+            <div className="flex justify-center">
+              <Image
+                src={authReqWalletCards}
+                alt="Cartões da carteira digital"
+                className="w-[160%] max-w-none h-48 object-contain "
+                priority
+              />
+            </div>
+          </div>
 
-          {/* Back to Home */}
-          <Link
-            href="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Voltar para o início
-          </Link>
+          {/* Gov.br Login Section */}
+          <div className="px-4 w-full space-y-2">
+            <p className="text-center text-sm text-foreground-light font-normal">
+              Entre com a sua conta gov.br
+            </p>
+
+            {/* Gov.br Button - Figma Specs */}
+            <div className="flex justify-center">
+              <Link
+                href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
+                className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-[#F1F1F4] hover:bg-[#E5E5E8] transition-colors"
+              >
+                <Image
+                  src={govbrLogo}
+                  alt="Gov.br"
+                  width={80}
+                  height={30}
+                  className="object-contain"
+                />
+              </Link>
+            </div>
+
+            {/* Create Account Link */}
+            <div className="text-center">
+              <Link
+                href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm pt-2 text-foreground-light font-normal"
+              >
+                Crie uma conta
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
 
