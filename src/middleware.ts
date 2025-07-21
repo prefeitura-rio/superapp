@@ -6,15 +6,29 @@ import {
 } from 'next/server'
 
 const publicRoutes = [
-  { path: '/sign-in', whenAuthenticated: 'redirect' },
-  { path: '/sign-up', whenAuthenticated: 'redirect' },
-  { path: '/forgot-password', whenAuthenticated: 'redirect' },
-  { path: '/privacy-policy', whenAuthenticated: 'redirect' },
-  { path: '/pricing', whenAuthenticated: 'next' },
+  { path: '/', whenAuthenticated: 'next' },
+  { path: '/search/*', whenAuthenticated: 'next' },
+  { path: '/services/*', whenAuthenticated: 'next' },
+  { path: '/authentication-required/wallet', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
 ] as const
 
-const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+function matchRoute(pathname: string, routePath: string): boolean {
+  // Handle exact match
+  if (routePath === pathname) {
+    return true
+  }
+
+  // Handle wildcard match (ending with /*)
+  if (routePath.endsWith('/*')) {
+    const baseRoute = routePath.slice(0, -2) // Remove /*
+    return pathname.startsWith(`${baseRoute}/`) || pathname === baseRoute
+  }
+
+  return false
+}
+
+export const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
 
 function isJwtExpired(token: string): boolean {
   try {
@@ -70,7 +84,7 @@ export function middleware(request: NextRequest) {
     .trim()
 
   const path = request.nextUrl.pathname
-  const publicRoute = publicRoutes.find(route => route.path === path)
+  const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
   const authToken = request.cookies.get('access_token')
 
   // Set up request headers with nonce and CSP
@@ -80,6 +94,23 @@ export function middleware(request: NextRequest) {
     'Content-Security-Policy',
     contentSecurityPolicyHeaderValue
   )
+
+  // Special handling for wallet routes
+  if (path === '/wallet') {
+    if (!authToken) {
+      // Unauthenticated user trying to access wallet → redirect to auth required page
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/authentication-required/wallet'
+      redirectUrl.search = ''
+      const response = NextResponse.redirect(redirectUrl)
+      response.headers.set(
+        'Content-Security-Policy',
+        contentSecurityPolicyHeaderValue
+      )
+      return response
+    }
+    // Authenticated user accessing wallet → continue normally (will be handled below)
+  }
 
   if (!authToken && publicRoute) {
     const response = NextResponse.next({
@@ -112,7 +143,12 @@ export function middleware(request: NextRequest) {
     publicRoute.whenAuthenticated === 'redirect'
   ) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/'
+    // If authenticated user tries to access wallet auth page → redirect to actual wallet
+    if (path === '/authentication-required/wallet') {
+      redirectUrl.pathname = '/wallet'
+    } else {
+      redirectUrl.pathname = '/'
+    }
     const response = NextResponse.redirect(redirectUrl)
     response.headers.set(
       'Content-Security-Policy',

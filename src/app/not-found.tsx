@@ -1,6 +1,6 @@
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import Link from 'next/link'
-import { SecondaryHeader } from './(private)/components/secondary-header'
+import { SecondaryHeader } from './components/secondary-header'
 
 export default function NotFound() {
   return (
