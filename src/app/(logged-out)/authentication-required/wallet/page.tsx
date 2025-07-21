@@ -49,7 +49,7 @@ export default function WalletAuthenticationRequired() {
             <div className="flex justify-center">
               <Link
                 href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
-                className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-[#F1F1F4] hover:bg-[#E5E5E8] transition-colors"
+                className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-card transition-colors"
               >
                 <Image
                   src={govbrLogo}
