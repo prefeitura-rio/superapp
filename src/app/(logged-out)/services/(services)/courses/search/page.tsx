@@ -1,6 +1,6 @@
 'use client'
-import CourseCardSearchPage from '@/app/(private)/components/course-card-search-page'
-import { ServicesHeader } from '@/app/(private)/components/services-header'
+import CourseCardSearchPage from '@/app/components/course-card-search-page'
+import { ServicesHeader } from '@/app/components/services-header'
 import { Badge } from '@/components/ui/badge'
 import { ServicesSearchInput } from '@/components/ui/custom/services-search-input'
 import { COURSES } from '@/mocks/mock-courses'

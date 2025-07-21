@@ -1,6 +1,6 @@
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SecondaryHeader } from '../../components/secondary-header'
 
 export default function JobInfoForm() {
   return (

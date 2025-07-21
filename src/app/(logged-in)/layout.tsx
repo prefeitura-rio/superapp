@@ -1,7 +1,7 @@
 import { setFirstLoginFalse } from '@/actions/first-login'
 import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import Onboarding from './components/on-boarding'
+import Onboarding from '../components/on-boarding'
 
 export default async function PrivateLayout({
   children,

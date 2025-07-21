@@ -1,8 +1,8 @@
 'use client'
 
-import JobsHeader from '@/app/(private)/components/jobs-header'
-import RecentlyAddedJobs from '@/app/(private)/components/recently-added-jobs'
-import RecommendedJobsCards from '@/app/(private)/components/recommended-jobs-cards'
+import JobsHeader from '@/app/components/jobs-header'
+import RecentlyAddedJobs from '@/app/components/recently-added-jobs'
+import RecommendedJobsCards from '@/app/components/recommended-jobs-cards'
 import { Badge } from '@/components/ui/badge'
 import { JOBS } from '@/mocks/mock-jobs'
 

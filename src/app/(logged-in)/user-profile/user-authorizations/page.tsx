@@ -1,7 +1,7 @@
+import { OptInSwitch } from '@/app/components/opt-in-switch'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { getCitizenCpfOptin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { OptInSwitch } from '../../components/opt-in-switch'
-import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function ConsentForm() {
   const user = await getUserInfoFromToken()

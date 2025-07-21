@@ -1,4 +1,4 @@
-import { ServicesHeader } from '@/app/(private)/components/services-header'
+import { ServicesHeader } from '@/app/components/services-header'
 
 export default function FaqPage() {
   const sections = [

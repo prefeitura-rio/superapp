@@ -1,8 +1,8 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
+import { MenuItem } from '@/components/ui/custom/menu-item'
 import { Bell, Book, MessageCircleQuestion, Star } from 'lucide-react'
-import { MenuItem } from '../../../../../../components/ui/custom/menu-item'
 
 export default function ProfilePage() {
   return (

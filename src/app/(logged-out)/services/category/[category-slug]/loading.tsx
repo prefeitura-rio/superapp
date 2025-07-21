@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
 

@@ -1,5 +1,5 @@
-import JobCardSearchPage from '@/app/(private)/components/job-card-search-page'
-import { ServicesHeader } from '@/app/(private)/components/services-header'
+import JobCardSearchPage from '@/app/components/job-card-search-page'
+import { ServicesHeader } from '@/app/components/services-header'
 import { favoritesJobs } from '@/mocks/favorites-jobs'
 
 export default function FavoritesPage() {

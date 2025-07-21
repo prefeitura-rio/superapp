@@ -1,10 +1,10 @@
 'use client'
 
+import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ArrowRight, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { SearchResultSkeleton } from '../components/search-result-skeleton'
 
 interface SearchResultItem {
   titulo: string

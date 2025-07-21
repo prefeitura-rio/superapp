@@ -1,3 +1,7 @@
+import { ActionDiv } from '@/app/components/action-div'
+import { RaceDrawerContent } from '@/app/components/drawer-contents/race-drawer-content'
+import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social-name-drawer-content'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { getCitizenCpf } from '@/http/citizen/citizen'
@@ -5,10 +9,6 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { ActionDiv } from '../../components/action-div'
-import { RaceDrawerContent } from '../../components/drawer-contents/race-drawer-content'
-import { SocialNameDrawerContent } from '../../components/drawer-contents/social-name-drawer-content'
-import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()

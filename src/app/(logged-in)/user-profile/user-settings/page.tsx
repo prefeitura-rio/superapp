@@ -1,9 +1,9 @@
 'use client'
 
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { SecondaryHeader } from '../../components/secondary-header'
 
 export default function UserSettingsForm() {
   const { setTheme, theme } = useTheme()

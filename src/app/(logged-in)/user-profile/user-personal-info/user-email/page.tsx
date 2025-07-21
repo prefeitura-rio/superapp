@@ -1,7 +1,9 @@
 'use client'
 import { updateUserEmail } from '@/actions/update-user-email'
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
+import { CustomButton } from '@/components/ui/custom/custom-button'
+import { InputField } from '@/components/ui/custom/input-field'
 import {
   Drawer,
   DrawerContent,
@@ -14,8 +16,6 @@ import confetti from 'canvas-confetti'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { CustomButton } from '../../../../../components/ui/custom/custom-button'
-import { InputField } from '../../../../../components/ui/custom/input-field'
 
 export default function EmailForm() {
   const [email, setEmail] = useState('')

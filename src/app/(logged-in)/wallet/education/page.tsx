@@ -1,16 +1,17 @@
+import { FrequencyInfoButton } from '@/app/components/frequency-info-button'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getUserInfoFromToken } from '@/lib/user-info'
-import { MapPin, Phone } from 'lucide-react'
 import {
   formatEducationOperatingHours,
   getOperatingStatus,
-} from '../../../../lib/operating-status'
-import { FrequencyInfoButton } from '../../components/frequency-info-button'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { getFrequenciaEscolarTextClass } from '../../components/utils'
-import { EducationCard } from '../../components/wallet-cards/education-card'
+} from '@/lib/operating-status'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { MapPin, Phone } from 'lucide-react'
+
+import { getFrequenciaEscolarTextClass } from '@/app/components/utils'
+import { EducationCard } from '@/app/components/wallet-cards/education-card'
 
 interface DesempenhoSectionProps {
   educationData?: {

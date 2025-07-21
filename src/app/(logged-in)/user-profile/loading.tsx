@@ -1,5 +1,5 @@
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SecondaryHeader } from '../components/secondary-header'
 
 export default function UserProfileLoading() {
   return (

@@ -1,16 +1,16 @@
 'use client'
 
+import type { AddressFormSchema } from '@/app/(logged-in)/user-profile/user-address/address-form/page'
 import {
   BottomSheet,
   BottomSheetFooter,
 } from '@/components/ui/custom/bottom-sheet'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { InputField } from '@/components/ui/custom/input-field'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useRouter } from 'next/navigation'
 import type { UseFormReturn } from 'react-hook-form'
-import { CustomButton } from '../../../../components/ui/custom/custom-button'
-import type { AddressFormSchema } from '../../user-profile/user-address/address-form/page'
 
 interface AddressDetailsDrawerContentProps {
   selectedAddress: any

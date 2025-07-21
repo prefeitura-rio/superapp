@@ -1,3 +1,9 @@
+import { FloatNavigation } from '@/app/components/float-navigation'
+import { SearchButton } from '@/app/components/search-button'
+import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
+import { EducationCard } from '@/app/components/wallet-cards/education-card'
+import { HealthCard } from '@/app/components/wallet-cards/health-card'
+import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
@@ -22,12 +28,6 @@ import {
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
-import { FloatNavigation } from '../../components/float-navigation'
-import { SearchButton } from '../../components/search-button'
-import { CaretakerCard } from '../../components/wallet-cards/caretaker-card'
-import { EducationCard } from '../../components/wallet-cards/education-card'
-import { HealthCard } from '../../components/wallet-cards/health-card'
-import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()

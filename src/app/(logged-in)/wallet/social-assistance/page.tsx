@@ -1,3 +1,5 @@
+import { SecondaryHeader } from '@/app/components/secondary-header'
+import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import {
   formatRecadastramentoDate,
@@ -5,8 +7,6 @@ import {
 } from '@/lib/cadunico-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { SocialAssistanceCard } from '../../components/wallet-cards/social-assistance-card'
 
 export default async function SocialAssistanceCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()

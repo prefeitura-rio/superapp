@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import type { Service1746 } from '@/types/1746'
 import type { CariocaDigitalService } from '@/types/carioca-digital'

@@ -1,8 +1,8 @@
-import { IptuBanner } from '@/app/(private)/components/banners/iptu-banner'
-import { LicensesBanner } from '@/app/(private)/components/banners/licenses-banner'
-import { LoginBanner } from '@/app/(private)/components/banners/login-banner'
-import { ProfileUpdateBanner } from '@/app/(private)/components/banners/profile-update-banner'
-import { TaxesBanner } from '@/app/(private)/components/banners/taxes-banner'
+import { IptuBanner } from '@/app/components/banners/iptu-banner'
+import { LicensesBanner } from '@/app/components/banners/licenses-banner'
+import { LoginBanner } from '@/app/components/banners/login-banner'
+import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
+import { TaxesBanner } from '@/app/components/banners/taxes-banner'
 
 type BannerProps = {
   id: string

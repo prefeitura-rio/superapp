@@ -1,5 +1,5 @@
+import { FloatNavigation } from '@/app/components/float-navigation'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FloatNavigation } from '../../components/float-navigation'
 
 export default function WalletLoading() {
   return (

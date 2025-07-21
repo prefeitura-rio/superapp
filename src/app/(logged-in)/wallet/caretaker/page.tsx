@@ -1,10 +1,10 @@
+import Calls from '@/app/components/calls'
+import { SecondaryHeader } from '@/app/components/secondary-header'
+import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
 import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Globe, Phone } from 'lucide-react'
-import Calls from '../../components/calls'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { CaretakerCard } from '../../components/wallet-cards/caretaker-card'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()

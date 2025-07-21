@@ -2,12 +2,12 @@
 
 import { deleteUserAddress } from '@/actions/delete-user-address'
 import { Badge } from '@/components/ui/badge'
+import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
 import { MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { BottomSheet } from '../../../components/ui/custom/bottom-sheet'
-import { CustomButton } from '../../../components/ui/custom/custom-button'
 
 interface AddressInfoCardProps {
   address: ModelsEnderecoPrincipal | null

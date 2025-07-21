@@ -6,11 +6,8 @@ import {
 } from 'next/server'
 
 const publicRoutes = [
-  { path: '/sign-in', whenAuthenticated: 'redirect' },
-  { path: '/sign-up', whenAuthenticated: 'redirect' },
-  { path: '/forgot-password', whenAuthenticated: 'redirect' },
-  { path: '/privacy-policy', whenAuthenticated: 'redirect' },
-  { path: '/pricing', whenAuthenticated: 'next' },
+  { path: '/', whenAuthenticated: 'next' },
+  { path: '/wallet', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
 ] as const
 

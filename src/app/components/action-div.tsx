@@ -2,10 +2,10 @@
 
 import { InfoIcon } from '@/assets/icons/info-icon'
 import { Badge } from '@/components/ui/badge'
+import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { BottomSheet } from '../../../components/ui/custom/bottom-sheet'
 
 interface ActionDivProps {
   label?: string

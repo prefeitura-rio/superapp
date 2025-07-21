@@ -1,6 +1,7 @@
 'use client'
 import { updateAddress } from '@/actions/update-user-address'
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { AddressDetailsDrawerContent } from '@/app/components/drawer-contents/address-details-drawer-content'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/custom/search-input'
@@ -18,7 +19,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { AddressDetailsDrawerContent } from '../../../components/drawer-contents/address-details-drawer-content'
 
 // Define the schema for address validation
 const addressFormSchema = z

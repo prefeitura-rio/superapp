@@ -1,8 +1,8 @@
+import { CategoryGrid } from '@/app/components/category-grid'
+import { FloatNavigation } from '@/app/components/float-navigation'
+import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import { SearchButton } from '@/app/components/search-button'
 import { fetchCategories } from '@/lib/categories'
-import { CategoryGrid } from '../components/category-grid'
-import { FloatNavigation } from '../components/float-navigation'
-import MostAccessedServiceCards from '../components/most-accessed-services-cards'
-import { SearchButton } from '../components/search-button'
 
 export default async function ServicesPage() {
   const categories = await fetchCategories()

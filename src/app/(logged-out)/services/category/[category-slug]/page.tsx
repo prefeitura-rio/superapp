@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/(private)/components/secondary-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
   fetchServicesByCategory,
   getCategoryNameBySlug,

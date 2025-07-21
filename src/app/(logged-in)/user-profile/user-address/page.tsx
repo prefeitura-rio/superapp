@@ -1,8 +1,8 @@
+import { AddressInfoCard } from '@/app/components/address-info-card'
+import { EmptyAddress } from '@/app/components/empty-address'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { AddressInfoCard } from '../../components/address-info-card'
-import { EmptyAddress } from '../../components/empty-address'
-import { SecondaryHeader } from '../../components/secondary-header'
 
 export default async function UserAddress() {
   const userAuthInfo = await getUserInfoFromToken()

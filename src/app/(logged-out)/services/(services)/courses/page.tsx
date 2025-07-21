@@ -1,8 +1,8 @@
 'use client'
 
-import CoursesHeader from '@/app/(private)/components/courses-header'
-import RecentlyAddedCourses from '@/app/(private)/components/recently-added-courses'
-import RecommendedCoursesCards from '@/app/(private)/components/recommended-courses-cards'
+import CoursesHeader from '@/app/components/courses-header'
+import RecentlyAddedCourses from '@/app/components/recently-added-courses'
+import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import { Badge } from '@/components/ui/badge'
 import { COURSES } from '@/mocks/mock-courses'
 

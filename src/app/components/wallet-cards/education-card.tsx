@@ -1,9 +1,9 @@
 'use client'
 
+import { CardBackContent } from '@/components/ui/custom/card-back-content'
+import { CardFrontContent } from '@/components/ui/custom/card-front-content'
 import type { StaticImageData } from 'next/image'
 import Link from 'next/link'
-import { CardBackContent } from '../../../../components/ui/custom/card-back-content'
-import { CardFrontContent } from '../../../../components/ui/custom/card-front-content'
 import { CardBase } from '../card-base'
 import { CardWrapper } from '../card-wrapper'
 

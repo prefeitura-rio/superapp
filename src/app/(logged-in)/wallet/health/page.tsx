@@ -1,3 +1,5 @@
+import { SecondaryHeader } from '@/app/components/secondary-header'
+import { HealthCard } from '@/app/components/wallet-cards/health-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
@@ -9,8 +11,6 @@ import {
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { Calendar, MapPin, Phone } from 'lucide-react'
-import { SecondaryHeader } from '../../components/secondary-header'
-import { HealthCard } from '../../components/wallet-cards/health-card'
 
 interface TeamPageProps {
   healthData?: {

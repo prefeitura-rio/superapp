@@ -1,3 +1,9 @@
+import { FloatNavigation } from '@/app/components/float-navigation'
+import HeaderWrapper from '@/app/components/header-wrapper'
+import HomeCategoriesGrid from '@/app/components/home-categories-grid'
+import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import SuggestionCards from '@/app/components/suggestion-cards'
+import CarteiraSection from '@/app/components/wallet-section'
 import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
@@ -10,12 +16,6 @@ import {
   getHealthUnitRiskStatus,
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { FloatNavigation } from '../components/float-navigation'
-import HeaderWrapper from '../components/header-wrapper'
-import HomeCategoriesGrid from '../components/home-categories-grid'
-import MostAccessedServiceCards from '../components/most-accessed-services-cards'
-import SuggestionCards from '../components/suggestion-cards'
-import CarteiraSection from '../components/wallet-section'
 
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()

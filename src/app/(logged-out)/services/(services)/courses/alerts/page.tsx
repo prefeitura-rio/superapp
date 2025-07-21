@@ -1,6 +1,6 @@
 'use client'
 
-import { ServicesHeader } from '@/app/(private)/components/services-header'
+import { ServicesHeader } from '@/app/components/services-header'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
