@@ -43,8 +43,10 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       style={{ backgroundColor: color }}
     >
       {/* Blur */}
-      <div className="absolute right-[89px] top-[-9px] w-[82px] h-[82px] bg-white/15 blur-[30px] z-0" />
-      <div className="absolute right-[-14px] bottom-[-54px] w-[144px] h-[144px] bg-white/20 blur-[30px] z-0" />
+      <div className="absolute inset-0 rounded-xl overflow-hidden">
+        <div className="absolute right-[89px] top-[-9px] w-[82px] h-[82px] bg-white/15 blur-[30px] z-0" />
+        <div className="absolute right-[-14px] bottom-[-54px] w-[144px] h-[144px] bg-white/20 blur-[30px] z-0" />
+      </div>
 
       {/* Image */}
       {image}
