@@ -88,7 +88,7 @@ export function CariocaDigitalServiceComponent({
             {serviceData.custo_do_servico}
             {serviceData.valor_a_ser_pago && (
               <span className="block mt-2">
-                Valor: {serviceData.valor_a_ser_pago}
+                Valor: {convertUrlsToLinks(serviceData.valor_a_ser_pago)}
               </span>
             )}
           </p>
