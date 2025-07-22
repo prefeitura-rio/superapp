@@ -1,6 +1,6 @@
 'use client'
 
-import type { AddressFormSchema } from '@/app/(logged-in)/user-profile/user-address/address-form/page'
+import type { AddressFormSchema } from '@/app/(app)/(logged-in)/user-profile/user-address/address-form/page'
 import {
   BottomSheet,
   BottomSheetFooter,
