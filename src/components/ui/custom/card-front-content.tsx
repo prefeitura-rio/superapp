@@ -2,12 +2,14 @@
 'use client'
 
 import { PrefLogo } from '@/assets/icons/pref-logo'
+import type { ReactNode } from 'react'
 
 interface CardFrontContentProps {
   title: string
   name?: string
   primaryLabel: string
   primaryValue: string
+  primaryValueSlot?: ReactNode
   secondaryLabel?: string
   secondaryValue?: string
   hasUpdateBadge?: boolean
@@ -18,6 +20,7 @@ export function CardFrontContent({
   name,
   primaryLabel,
   primaryValue,
+  primaryValueSlot,
   secondaryLabel,
   secondaryValue,
 }: CardFrontContentProps) {
@@ -35,10 +38,11 @@ export function CardFrontContent({
           )}
         </div>
 
-        <div className="flex items-center gap-4">
-          <div>
+        <div className="flex items-center gap-7">
+          <div className="relative">
             <p className="text-sm font-normal text-white/80">{primaryLabel}</p>
             <p className="text-sm font-normal">{primaryValue}</p>
+            {primaryValueSlot}
           </div>
 
           <div>
