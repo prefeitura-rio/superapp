@@ -1,4 +1,5 @@
 import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
+import type { RiskStatusProps } from '../types/health'
 
 /**
  * Format the operating hours for the current day only
@@ -86,7 +87,7 @@ export function getCurrentOperatingStatus(
  * Get the risk status from the health unit risk data
  */
 export function getHealthUnitRiskStatus(riskData: HealthUnitRisk): {
-  risco: string
+  risco: RiskStatusProps
   status: string
 } {
   // Prefer active notification over last notification

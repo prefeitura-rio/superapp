@@ -2,9 +2,13 @@
 
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
+import { HealthStatusIndicator } from '@/components/ui/custom/health-status-indicator'
+import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
+import { useState } from 'react'
 import { CardBase } from '../card-base'
 import { CardWrapper } from '../card-wrapper'
+import { WalletHealthStatusDrawerContent } from '../drawer-contents/wallet-health-status-drawer-content'
 
 interface WalletCardProps {
   href?: string
@@ -19,6 +23,7 @@ interface WalletCardProps {
   phone?: string
   email?: string
   enableFlip?: boolean
+  riskStatus?: RiskStatusProps
   asLink?: boolean
   showInitialShine?: boolean
 }
@@ -34,11 +39,25 @@ export function HealthCard({
   address,
   phone,
   email,
+  riskStatus,
   enableFlip = true,
   asLink = false,
   showInitialShine = false,
 }: WalletCardProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const bgColor = 'bg-[#3F6194]'
+
+  const shouldEnableStatusClick = !asLink && !href && enableFlip
+
+  const handleStatusClick = (e: React.MouseEvent) => {
+    if (shouldEnableStatusClick) {
+      e.stopPropagation()
+      setIsDrawerOpen(prev => !prev)
+    }
+  }
+
+  const shouldRenderHealthStatusIndicator =
+    primaryValue !== 'Fechado' && riskStatus
 
   const frontContent = (
     <CardBase bgColor={bgColor}>
@@ -49,6 +68,14 @@ export function HealthCard({
         primaryValue={primaryValue}
         secondaryLabel={secondaryLabel}
         secondaryValue={secondaryValue}
+        primaryValueSlot={
+          shouldRenderHealthStatusIndicator ? (
+            <HealthStatusIndicator
+              riskStatus={riskStatus}
+              onClick={e => handleStatusClick(e)}
+            />
+          ) : null
+        }
       />
     </CardBase>
   )
@@ -94,5 +121,16 @@ export function HealthCard({
     )
   }
 
-  return cardContent
+  return (
+    <>
+      {cardContent}
+      {isDrawerOpen && (
+        <WalletHealthStatusDrawerContent
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          riskStatus={riskStatus}
+        />
+      )}
+    </>
+  )
 }

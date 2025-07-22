@@ -169,6 +169,7 @@ export default async function Wallet() {
                     address={walletData!.saude!.clinica_familia!.endereco}
                     phone={walletData!.saude!.clinica_familia!.telefone}
                     email={walletData!.saude!.clinica_familia!.email}
+                    riskStatus={riskStatus?.risco}
                     enableFlip={false}
                     asLink
                     href="/wallet/health"
