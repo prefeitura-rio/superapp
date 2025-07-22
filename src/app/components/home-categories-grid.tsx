@@ -64,7 +64,7 @@ export default function HomeCategoriesGrid({
           spaceBetween={8}
           pagination={{
             clickable: true,
-            dynamicBullets: true,
+            // dynamicBullets: true,
           }}
           modules={[Pagination]}
           className="home-categories-swiper animate-fade-in"
@@ -109,7 +109,8 @@ export default function HomeCategoriesGrid({
         .swiper-pagination {
           display: flex;
           justify-content: center;
-          // align-items: center;
+          align-items: center;
+          gap: 4px;
           height: 10px;
         }
         .home-categories-swiper .swiper-pagination {
@@ -118,11 +119,12 @@ export default function HomeCategoriesGrid({
           margin-top: 1rem !important;
         }
         .swiper-pagination-bullet { 
-          background: var(--muted-foreground);
+          background: var(--terciary);
           opacity: 1;
+          margin: 0 !important;
         }
         .swiper-pagination-bullet-active {
-          background: var(--primary);
+          background: var(--foreground);
         }
       `}</style>
     </div>
