@@ -72,7 +72,6 @@ export function HealthCard({
           shouldRenderHealthStatusIndicator ? (
             <HealthStatusIndicator
               riskStatus={riskStatus}
-              className="absolute top-[5px] left-11.5"
               onClick={e => handleStatusClick(e)}
             />
           ) : null

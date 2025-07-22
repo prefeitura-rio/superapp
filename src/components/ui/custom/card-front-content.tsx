@@ -40,9 +40,13 @@ export function CardFrontContent({
 
         <div className="flex items-center gap-7">
           <div className="relative">
-            <p className="text-sm font-normal text-white/80">{primaryLabel}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-normal text-white/80">
+                {primaryLabel}
+              </p>
+              {primaryValueSlot}
+            </div>
             <p className="text-sm font-normal">{primaryValue}</p>
-            {primaryValueSlot}
           </div>
 
           <div>

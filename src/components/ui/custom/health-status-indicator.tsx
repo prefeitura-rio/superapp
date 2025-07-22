@@ -19,7 +19,7 @@ export function HealthStatusIndicator({
     <Button
       variant="ghost"
       onClick={onClick}
-      className={`h-[11px] w-[11px] p-0 rounded-full ${bgClass} border-1 border-background/60  ${className} hover:${bgClass} dark:hover:${bgClass}`}
+      className={`h-3 w-3 p-0 rounded-full ${bgClass} border-1 border-background/60  ${className} hover:${bgClass} dark:hover:${bgClass} cursor-pointer`}
     />
   )
 }
