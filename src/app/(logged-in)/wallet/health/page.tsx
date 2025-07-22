@@ -201,6 +201,7 @@ export default async function HealthCardDetail() {
             primaryValue={statusValue}
             secondaryLabel="Horário de atendimento"
             secondaryValue={operatingHours}
+            riskStatus={riskStatus?.risco}
             address={address}
             phone={phone}
             email={email}

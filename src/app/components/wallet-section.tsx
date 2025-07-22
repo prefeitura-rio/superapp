@@ -15,6 +15,7 @@ import {
   getOperatingStatus,
 } from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
+import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
@@ -35,7 +36,7 @@ interface CartereiraSectionProps {
     address?: string
     phone?: string
     email?: string
-    risco?: string
+    risco?: RiskStatusProps
   }
 }
 
@@ -84,6 +85,7 @@ export default function CarteiraSection({
                   address={walletData.saude.clinica_familia.endereco}
                   phone={walletData.saude.clinica_familia.telefone}
                   email={walletData.saude.clinica_familia.email}
+                  riskStatus={healthCardData?.risco}
                   enableFlip={false}
                   showInitialShine={false}
                   asLink
