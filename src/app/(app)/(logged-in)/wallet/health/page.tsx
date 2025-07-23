@@ -1,5 +1,11 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { HealthCard } from '@/app/components/wallet-cards/health-card'
+import {
+  CalendarIcon,
+  MapPinIcon,
+  PhoneIcon,
+  WhatsappIcon,
+} from '@/assets/icons'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
@@ -10,7 +16,6 @@ import {
   getHealthUnitRiskStatus,
 } from '@/lib/health-unit-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { Calendar, MapPin, Phone } from 'lucide-react'
 
 interface TeamPageProps {
   healthData?: {
@@ -217,8 +222,8 @@ export default async function HealthCardDetail() {
               className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone
-                  className={`h-5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <PhoneIcon
+                  className={`h-6.5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -237,8 +242,8 @@ export default async function HealthCardDetail() {
               className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone
-                  className={`h-5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <WhatsappIcon
+                  className={`h-6.5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -257,8 +262,8 @@ export default async function HealthCardDetail() {
               className={`flex flex-col items-center ${mapUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <MapPin
-                  className={`h-5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <MapPinIcon
+                  className={`h-6.5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -274,7 +279,7 @@ export default async function HealthCardDetail() {
               className="flex flex-col items-center"
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Calendar className="h-5" />
+                <CalendarIcon className="h-6.5" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">

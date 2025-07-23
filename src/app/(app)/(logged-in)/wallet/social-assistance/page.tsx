@@ -1,12 +1,12 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
+import { CalendarIcon } from '@/assets/icons'
 import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { Calendar } from 'lucide-react'
 
 export default async function SocialAssistanceCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -105,7 +105,7 @@ export default async function SocialAssistanceCardDetail() {
               className="flex flex-col items-center"
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Calendar className="h-5" />
+                <CalendarIcon className="h-6.5" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">

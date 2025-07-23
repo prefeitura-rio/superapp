@@ -1,10 +1,10 @@
 import Calls from '@/app/components/calls'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
+import { GlobeIcon, PhoneIcon } from '@/assets/icons'
 import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { Globe, Phone } from 'lucide-react'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -61,7 +61,7 @@ export default async function CaretakerCardDetail() {
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
             <a href="tel:1746" className="flex flex-col items-center">
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone className="h-5" />
+                <PhoneIcon className="h-6.5" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
@@ -79,7 +79,7 @@ export default async function CaretakerCardDetail() {
               className="flex flex-col items-center"
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Globe className="h-5" />
+                <GlobeIcon className="h-6.5" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">

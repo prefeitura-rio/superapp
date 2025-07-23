@@ -3,6 +3,7 @@ import { CheckCircleIcon } from './check-circle-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
 import { ChevronRightIcon } from './chevron-right-icon'
 import { EditIcon } from './edit-icon'
+import { GlobeIcon } from './globe-icon'
 import { HomeIcon } from './home-icon'
 import { InfoIcon } from './info-icon'
 import { MapPinIcon } from './map-pin-icon'
@@ -20,6 +21,7 @@ export {
   ChevronLeftIcon,
   ChevronRightIcon,
   EditIcon,
+  GlobeIcon,
   HomeIcon,
   InfoIcon,
   MapPinIcon,
