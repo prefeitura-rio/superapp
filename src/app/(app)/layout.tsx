@@ -3,7 +3,7 @@ import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import Onboarding from '../components/on-boarding'
 
-export default async function PrivateLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode

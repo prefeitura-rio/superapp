@@ -4,10 +4,10 @@ import InstallPWAButtonClient from '@/app/components/install-pwa-button-client'
 import { LogoutButton } from '@/app/components/logout-button'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { MenuItem } from '@/components/ui/custom/menu-item'
+import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { User } from 'lucide-react'
-import { USER_PROFILE_MENU_ITEMS } from '../../../constants/user-profile-menu-items'
 
 export default async function ProfilePage() {
   const userInfo = await getUserInfoFromToken()
