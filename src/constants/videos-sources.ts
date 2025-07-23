@@ -26,9 +26,27 @@ export const VIDEO_SOURCES = {
       darkVideo: '/videos/onboarding-step-three-dark.mp4',
     },
   },
+
+  // Updated User Info
+  updatedNumber: {
+    lightVideo: '/videos/updated-number-light.mp4',
+    darkVideo: '/videos/updated-number-dark.mp4',
+  },
+  updatedAddress: {
+    lightVideo: '/videos/updated-address-light.mp4',
+    darkVideo: '/videos/updated-address-dark.mp4',
+  },
+  updatedEmail: {
+    lightVideo: '/videos/updated-email-light.mp4',
+    darkVideo: '/videos/updated-email-dark.mp4',
+  },
+  emptyAddress: {
+    lightVideo: '/videos/empty-address-light.mp4',
+    darkVideo: '/videos/empty-address-dark.mp4',
+  },
 }
 
-export type SourceVideosProps = {
+export type VideoSourceProps = {
   lightVideo: string
   darkVideo: string
 }
