@@ -1,11 +1,12 @@
 'use client'
 
-import type { SourceVideosProps } from '@/constants/videos-sources'
+import type { VideoSourceProps } from '@/constants/videos-sources'
 import { useTheme } from 'next-themes'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 
 interface ThemeAwareVideoProps {
-  source: SourceVideosProps
+  source: VideoSourceProps
   className?: string
   style?: React.CSSProperties
   containerClassName?: string
@@ -22,7 +23,7 @@ export function ThemeAwareVideo({
   const { lightVideo, darkVideo } = source
 
   // Aguarda hidratação para evitar mismatch
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true)
   }, [])
 
