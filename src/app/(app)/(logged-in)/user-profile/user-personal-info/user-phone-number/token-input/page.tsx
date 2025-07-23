@@ -2,18 +2,18 @@
 import { validateUserPhoneToken } from '@/actions/validate-user-phone-token'
 import PhoneInputTokenForm from '@/app/components/phone-input-token-form'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsPhoneVerificationValidateRequest } from '@/http/models/modelsPhoneVerificationValidateRequest'
 import confetti from 'canvas-confetti'
-import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
@@ -93,14 +93,10 @@ export default function TokenInputForm() {
                 atualizado!
               </DrawerTitle>
             </DrawerHeader>
-            <Image
-              src={welcomeImage}
-              alt="Número atualizado"
-              width={260}
-              height={320}
-              className="mx-auto mb-10"
-              style={{ objectFit: 'contain', maxHeight: '320px' }}
-              priority
+
+            <ThemeAwareVideo
+              source={VIDEO_SOURCES.updatedNumber}
+              containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
             <Button
               size="lg"

@@ -2,19 +2,19 @@
 import { updateAddress } from '@/actions/update-user-address'
 import { AddressDetailsDrawerContent } from '@/app/components/drawer-contents/address-details-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/custom/search-input'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
 import { MapPin } from 'lucide-react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -301,14 +301,9 @@ export default function AddressForm() {
                 atualizado!
               </DrawerTitle>
             </DrawerHeader>
-            <Image
-              src={welcomeImage}
-              alt="Endereço atualizado"
-              width={260}
-              height={320}
-              className="mx-auto mb-10"
-              style={{ objectFit: 'contain', maxHeight: '320px' }}
-              priority
+            <ThemeAwareVideo
+              source={VIDEO_SOURCES.updatedAddress}
+              containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
             <Button
               size="lg"

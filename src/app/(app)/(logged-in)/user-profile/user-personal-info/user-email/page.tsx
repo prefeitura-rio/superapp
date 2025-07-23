@@ -1,19 +1,19 @@
 'use client'
 import { updateUserEmail } from '@/actions/update-user-email'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import welcomeImage from '@/assets/welcome.svg'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { InputField } from '@/components/ui/custom/input-field'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useInputValidation } from '@/hooks/useInputValidation'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import confetti from 'canvas-confetti'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
@@ -100,14 +100,9 @@ export default function EmailForm() {
                 atualizado!
               </DrawerTitle>
             </DrawerHeader>
-            <Image
-              src={welcomeImage}
-              alt="Email atualizado"
-              width={260}
-              height={320}
-              className="mx-auto mb-10"
-              style={{ objectFit: 'contain', maxHeight: '320px' }}
-              priority
+            <ThemeAwareVideo
+              source={VIDEO_SOURCES.updatedEmail}
+              containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
             <CustomButton size="xl" fullWidth onClick={handleDrawerClose}>
               Finalizar
