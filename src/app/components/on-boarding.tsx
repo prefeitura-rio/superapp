@@ -75,10 +75,10 @@ export default function Onboarding({
   const showSkipButton = currentIndex < onboardingSlides.length - 1
 
   return (
-    <div className="relative min-h-lvh w-full px-4 mx-auto justify-center bg-white text-foreground flex flex-col overflow-hidden">
+    <div className="relative min-h-lvh w-full px-4 mx-auto justify-center bg-background text-foreground flex flex-col overflow-hidden">
       <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start w-full flex items-center">
         <CustomButton
-          className={` bg-[#F1F1F4] text-muted-foreground rounded-full w-11 h-11 hover:bg-[#F1F1F4]/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
+          className={` bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
             showBackButton
               ? 'opacity-100 translate-x-0'
               : 'opacity-0 -translate-x-2 pointer-events-none'
@@ -86,7 +86,7 @@ export default function Onboarding({
           onClick={handleBack}
           disabled={isPending}
         >
-          <ChevronLeftIcon className="text-black" />
+          <ChevronLeftIcon className="text-foreground" />
         </CustomButton>
       </div>
 

@@ -1,3 +1,6 @@
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
+
 export function WelcomeMessage({
   show,
   fadeOut,
@@ -15,31 +18,22 @@ export function WelcomeMessage({
             ? 'opacity-0'
             : 'opacity-100'
           : 'opacity-0 pointer-events-none'
-      } bg-white`}
+      } bg-background`}
       style={{
         animation: show && !fadeOut ? 'fadeIn 600ms ease-in-out' : undefined,
       }}
     >
       <div className="flex flex-col items-center justify-center w-full h-full px-4">
         <div className="mb-12">
-          <video
-            width={193}
-            height={342}
-            style={{ objectFit: 'contain' }}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
+          <ThemeAwareVideo
+            source={VIDEO_SOURCES.welcome}
+            containerClassName="h-[min(328px,40vh)] max-h-[328px]"
             className="pointer-events-none"
-          >
-            <source src="/onboarding/walkingWelcomePage.mp4" type="video/mp4" />
-            Seu navegador não suporta vídeos.
-          </video>
+          />
         </div>
         <div className="text-center w-full">
-          <p className="text-xl text-[#71717B]">Seja bem vindo(a)</p>
-          <p className="text-3xl font-bold text-[#09090B]">{userInfo.name}</p>
+          <p className="text-xl text-foreground-light">Seja bem vindo(a)</p>
+          <p className="text-3xl font-bold text-foreground">{userInfo.name}</p>
         </div>
       </div>
     </div>

@@ -8,10 +8,10 @@ import {
   getOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { MapPin, Phone } from 'lucide-react'
 
 import { getFrequenciaEscolarTextClass } from '@/app/components/utils'
 import { EducationCard } from '@/app/components/wallet-cards/education-card'
+import { MapPinIcon, PhoneIcon, WhatsappIcon } from '@/assets/icons'
 
 interface DesempenhoSectionProps {
   educationData?: {
@@ -141,8 +141,8 @@ export default async function EducationCardDetail() {
               className={`flex flex-col items-center ${phoneUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone
-                  className={`h-5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <PhoneIcon
+                  className={`h-6.5 ${phoneUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -161,8 +161,8 @@ export default async function EducationCardDetail() {
               className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <Phone
-                  className={`h-5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <WhatsappIcon
+                  className={`h-6.5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -181,8 +181,8 @@ export default async function EducationCardDetail() {
               className={`flex flex-col items-center ${mapUrl === '#' ? 'pointer-events-none' : ''}`}
             >
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <MapPin
-                  className={`h-5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
+                <MapPinIcon
+                  className={`h-6.5 ${mapUrl === '#' ? 'text-muted-foreground' : ''}`}
                 />
               </div>
               <div className="flex flex-col items-center">

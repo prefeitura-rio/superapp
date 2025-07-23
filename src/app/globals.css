@@ -103,6 +103,11 @@ html::-webkit-scrollbar {
   }
 }
 
+/* Video crop */
+.crop-right-5 video {
+  clip-path: inset(0 5% 0 0);
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
