@@ -141,7 +141,7 @@ export default async function Wallet() {
   return (
     <>
       {/* <MainHeader /> */}
-      <main className="pb-30 max-w-md mx-auto text-white">
+      <main className="pb-30 max-w-xl mx-auto text-white">
         <section className="px-4 relative h-full ">
           <div className="flex items-start justify-between pt-6 pb-6">
             <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
