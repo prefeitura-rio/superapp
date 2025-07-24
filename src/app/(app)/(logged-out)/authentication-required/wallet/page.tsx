@@ -18,10 +18,10 @@ export default function WalletAuthenticationRequired() {
         <div className="flex flex-col justify-center space-y-8">
           {/* Title and Description */}
           <div className="px-4 text-left space-y-2">
-            <h2 className="text-2xl font-semibold text-foreground leading-tight">
+            <h2 className="text-4xl font-medium text-foreground leading-10 text-spacing-4 tracking-tight">
               Informações para você em um só lugar
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-foreground-light leading-5">
               CadÚnico, Clínica da Família, Educação de Jovens e Adultos e
               Cuidados com a Cidade
             </p>
@@ -46,7 +46,7 @@ export default function WalletAuthenticationRequired() {
             </p>
 
             {/* Gov.br Button - Figma Specs */}
-            <div className="flex justify-center">
+            <div className="flex justify-center pb-2">
               <Link
                 href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
                 className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-card transition-colors"
@@ -67,7 +67,7 @@ export default function WalletAuthenticationRequired() {
                 href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm pt-2 text-foreground-light font-normal"
+                className="text-sm text-foreground-light font-normal"
               >
                 Crie uma conta
               </Link>
