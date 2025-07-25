@@ -221,7 +221,7 @@ export default function AddressForm() {
   }
 
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div className={headerAnim}>
         <SecondaryHeader title="" />
         <section className="relative">
@@ -293,7 +293,7 @@ export default function AddressForm() {
 
       {/* Drawer for feedback after address update */}
       <Drawer open={feedbackDrawerOpen} onOpenChange={setFeedbackDrawerOpen}>
-        <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+        <DrawerContent className="max-w-none mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
           <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
             <DrawerHeader className="text-center">
               <DrawerTitle className="text-4xl font-medium leading-10 mb-6">

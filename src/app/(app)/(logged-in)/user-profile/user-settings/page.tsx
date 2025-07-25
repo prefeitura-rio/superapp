@@ -9,7 +9,7 @@ export default function UserSettingsForm() {
   const { setTheme, theme } = useTheme()
 
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Configurações" />
 
       <RadioGroup

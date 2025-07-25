@@ -19,7 +19,7 @@ export default async function ConsentForm() {
   }
 
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Autorizações" />
       <div className="space-y-4 mx-4 ">
         <h1 className="text-xl font-medium text-primary">

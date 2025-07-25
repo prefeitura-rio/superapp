@@ -11,7 +11,7 @@ export default function NotFound() {
   const { isBelowBreakpoint } = useViewportHeight(648)
 
   return (
-    <div className="max-w-md max-h-lvh mx-auto pt-20 flex flex-col overflow-y-hidden">
+    <div className="max-w-xl max-h-lvh mx-auto pt-20 flex flex-col overflow-y-hidden">
       <SecondaryHeader title="" />
       <div className="px-4">
         <ThemeAwareVideo

@@ -6,7 +6,7 @@ import { Bell, Book, MessageCircleQuestion, Star } from 'lucide-react'
 
 export default function ProfilePage() {
   return (
-    <div className="pb-25 pt-20 max-w-md mx-auto text-white flex flex-col">
+    <div className="pb-25 pt-20 max-w-4xl mx-auto text-white flex flex-col">
       {/* Header */}
       <SecondaryHeader title="" />
 

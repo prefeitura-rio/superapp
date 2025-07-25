@@ -2,10 +2,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AddressFormLoading() {
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
         {/* Fixed header skeleton mimicking SecondaryHeader */}
-        <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-start max-w-md mx-auto z-50 bg-background text-foreground h-16">
+        <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-start max-w-4xl mx-auto z-50 bg-background text-foreground h-16">
           <Skeleton className="h-12 w-12 rounded-full" />
         </header>
 

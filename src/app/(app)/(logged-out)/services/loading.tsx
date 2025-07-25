@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ServicesLoading() {
   return (
-    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground">
+    <main className="flex max-w-4xl mx-auto flex-col bg-background text-foreground">
       {/* Header Skeleton */}
       <header className="px-4 py-6">
         <Skeleton className="h-8 w-24" />

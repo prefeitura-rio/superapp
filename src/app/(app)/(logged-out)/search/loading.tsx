@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function SearchLoading() {
   return (
     <>
-      <div className="max-w-md px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
+      <div className="max-w-4xl px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         {/* Search Input Skeleton - matching the actual SearchInput component */}
         <div className="flex h-14 items-center rounded-full bg-card px-4">
           {/* Back arrow skeleton */}
@@ -43,7 +43,7 @@ export default function SearchLoading() {
       </div>
 
       {/* "Pesquisados por você" section */}
-      <div className="max-w-md px-4 mx-auto pt-4 flex flex-col pb-4">
+      <div className="max-w-4xl px-4 mx-auto pt-4 flex flex-col pb-4">
         <Skeleton className="h-6 w-40 mb-3" />
         <div>
           {Array.from({ length: 5 }).map((_, index) => (

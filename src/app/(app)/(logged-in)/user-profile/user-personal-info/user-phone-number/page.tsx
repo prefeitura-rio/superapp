@@ -63,7 +63,7 @@ export default function PhoneNumberForm() {
   }
 
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
         <SecondaryHeader title="" />
         <section className="relative">
@@ -92,7 +92,7 @@ export default function PhoneNumberForm() {
 
       {/* Drawer for feedback after email update */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-md mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+        <DrawerContent className="mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
           <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
             <DrawerHeader className="text-center">
               <DrawerTitle className="text-4xl font-medium leading-10 mb-6">

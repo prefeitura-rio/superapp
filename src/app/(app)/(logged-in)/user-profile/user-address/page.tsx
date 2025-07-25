@@ -26,7 +26,7 @@ export default async function UserAddress() {
   }
 
   return (
-    <div className="max-w-md min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Endereço" />
       {addressInfo?.bairro !== 'null' ? (
         <AddressInfoCard address={addressInfo} showBadge />

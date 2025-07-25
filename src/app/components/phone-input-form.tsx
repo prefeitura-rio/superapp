@@ -49,7 +49,7 @@ export default function PhoneInputForm({
   return (
     <>
       <form className="w-full flex flex-col gap-4">
-        <div className="w-full flex row gap-4">
+        <div className="max-w-xl! mx-auto w-full flex row gap-4">
           <ActionDiv
             className={`w-19 bg-card ${callingCode && callingCode.length === 2 ? 'pl-7' : callingCode.length === 4 ? 'pl-4' : 'pl-5'}`}
             content={

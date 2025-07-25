@@ -22,7 +22,7 @@ export function CariocaDigitalServiceComponent({
       </h1>
 
       {/* Service Description */}
-      <p className="text-sm text-foreground-light leading-5 mb-6 max-w-md">
+      <p className="text-sm text-foreground-light leading-5 mb-6 max-w-4xl">
         {serviceData.descricao}
       </p>
 

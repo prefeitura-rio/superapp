@@ -13,7 +13,7 @@ export default async function ProfilePage() {
   const userInfo = await getUserInfoFromToken()
 
   return (
-    <div className="pt-20 min-h-lvh max-w-md mx-auto text-foreground flex flex-col">
+    <div className="pt-20 min-h-lvh max-w-4xl mx-auto text-foreground flex flex-col">
       {/* Header */}
       <SecondaryHeader title="Perfil" />
 

@@ -11,7 +11,7 @@ export function ServicesHeader({ title }: ServicesHeaderProps) {
   const router = useRouter()
   return (
     <>
-      <header className="p-4 fixed top-0 flex items-center w-full justify-center max-w-md mx-auto z-50 bg-background text-white h-19">
+      <header className="p-4 fixed top-0 flex items-center w-full justify-center max-w-4xl mx-auto z-50 bg-background text-white h-19">
         <button
           type="button"
           onClick={() => router.back()}
