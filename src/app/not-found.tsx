@@ -4,7 +4,7 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import Link from 'next/link'
 import { ThemeAwareVideo } from '../components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '../constants/videos-sources'
-import { useViewportHeight } from '../hooks/useViewportHeight'
+import { useViewportHeight } from '../hooks/useViewport'
 import { SecondaryHeader } from './components/secondary-header'
 
 export default function NotFound() {
