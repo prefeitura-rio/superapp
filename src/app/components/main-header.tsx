@@ -16,7 +16,7 @@ export default function MainHeader({
 }: MainHeaderProps) {
   return (
     <header className="relative  w-full z-50 bg-background text-foreground py-4">
-      <div className="mx-auto px-4 flex max-w-md items-center justify-between">
+      <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
         {/* Left side - User info with icon */}
         <Link
           href={
