@@ -187,6 +187,7 @@ html::-webkit-scrollbar {
   --color-red-200: var(--red-200);
   --color-purple-100: var(--purple-100);
   --color-orange-100: var(--orange-100);
+  --color-skeleton: var(--skeleton);
 
   /* font */
   --font-sans: var(--font-dm-sans);
@@ -203,7 +204,7 @@ html::-webkit-scrollbar {
   --background: #ffffff;
   --foreground: #09090b;
   --foreground-light: #71717b;
-  --card: #f3f4f6;
+  --card: #f1f1f4;
   --card-foreground: #020618;
   --popover: #fafafa;
   --popover-foreground: #020618;
@@ -268,7 +269,7 @@ html::-webkit-scrollbar {
   --red-200: #a93333;
   --purple-100: #e6cef6;
   --orange-100: #f5d7b8;
-
+  --skeleton: #EAEAEA;
   /* custom border width */
   --border-width: 1.4px;
 
@@ -345,7 +346,7 @@ html::-webkit-scrollbar {
   --red-200: #ff6b6b;
   --purple-100: #e6d6ff;
   --orange-100: #ffe5b4;
-
+  --skeleton: #E6E6E6;
   /* custom border width */
   --border-width: 1.4px;
 

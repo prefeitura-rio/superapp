@@ -149,7 +149,7 @@ export default function Search() {
   }
 
   return (
-    <div className="min-h-lvh max-w-md px-4 mx-auto pt-5 flex flex-col pb-4">
+    <div className="min-h-lvh max-w-4xl px-4 mx-auto pt-5 flex flex-col pb-4">
       <SearchInput
         ref={searchInputRef}
         placeholder="Do que você precisa?"
@@ -180,7 +180,7 @@ export default function Search() {
                   .map((item, index) => (
                     <li
                       key={index}
-                      className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card rounded-lg cursor-pointer"
+                      className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card hover:bg-card/70 rounded-lg cursor-pointer"
                       onClick={() => {
                         if (item.category && item.id && item.collection) {
                           router.push(
