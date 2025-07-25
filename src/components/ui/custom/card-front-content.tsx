@@ -32,7 +32,7 @@ export function CardFrontContent({
         <div>
           <p className="text-xs font-normal">{title}</p>
           {name && (
-            <p className="text-xl leading-6 font-medium max-w-[232px] break-words">
+            <p className="text-xl leading-6 font-medium max-w-[232px] min-[540px]:max-w-[90vw] break-words line-clamp-3">
               {name}
             </p>
           )}

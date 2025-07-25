@@ -39,7 +39,9 @@ function TeamPage({ healthData }: TeamPageProps) {
   return (
     <div className="p-6">
       <div className="">
-        <h2 className="text-base pb-4">{teamName}</h2>
+        <h2 className="text-base pb-2 text-foreground font-medium leading-5">
+          {teamName}
+        </h2>
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
@@ -147,7 +149,7 @@ export default async function HealthCardDetail() {
   // Only proceed if we have health data from wallet
   if (!healthData?.clinica_familia) {
     return (
-      <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
+      <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
         <SecondaryHeader title="Carteira" />
         <div className="flex items-center justify-center py-6">
           <p className="text-muted-foreground text-center">
@@ -195,7 +197,7 @@ export default async function HealthCardDetail() {
       : '#'
 
   return (
-    <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
+    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">

@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function WalletLoading() {
   return (
     <>
-      <main className="pb-30 max-w-md mx-auto text-white">
+      <main className="pb-30 max-w-xl mx-auto text-white">
         <section className="px-4 relative h-full">
           <div className="flex items-start justify-between pt-6 pb-6">
             <Skeleton className="h-8 w-32" />

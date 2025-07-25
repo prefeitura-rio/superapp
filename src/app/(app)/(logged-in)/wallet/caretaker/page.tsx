@@ -40,7 +40,7 @@ export default async function CaretakerCardDetail() {
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
   return (
-    <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
+    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">

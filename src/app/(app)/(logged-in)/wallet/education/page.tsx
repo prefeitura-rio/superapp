@@ -35,7 +35,9 @@ function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
   return (
     <div className="p-6">
       <div className="">
-        <h2 className="text-base pb-4">Desempenho</h2>
+        <h2 className="text-base pb-2 text-foreground font-medium leading-">
+          Desempenho
+        </h2>
 
         <Card className="rounded-xl border-0 shadow-none">
           <CardContent className="px-0">
@@ -109,7 +111,7 @@ export default async function EducationCardDetail() {
     : '#'
 
   return (
-    <div className="min-h-lvh max-w-md mx-auto pt-26 pb-10">
+    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" />
       <div className="z-50">
         <div className="px-4">
