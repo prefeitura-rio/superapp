@@ -49,7 +49,7 @@ export function AddressDetailsDrawerContent({
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
     >
-      <div className="overflow-y-auto min-h-130px max-h-[calc(100vh-200px)]">
+      <div className="max-h-[100vh]">
         <div className="text-center pt-6">
           <div className="text-lg font-normal">
             {selectedAddress?.main_text}
