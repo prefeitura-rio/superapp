@@ -29,14 +29,14 @@ export default function HomeCategoriesGrid({
           {/* First row */}
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={`row1-${i}`} className="flex flex-col items-center">
-              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
+              <Skeleton className=" aspect-square rounded-2xl mb-2 h-20 w-20 sm:w-40" />
               <Skeleton className="h-3 w-8 sm:w-12" />
             </div>
           ))}
           {/* Second row */}
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={`row2-${i}`} className="flex flex-col items-center">
-              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
+              <Skeleton className=" aspect-square rounded-2xl mb-2 h-20 w-20 sm:w-40" />
               <Skeleton className="h-3 w-8 sm:w-12" />
             </div>
           ))}
@@ -88,7 +88,7 @@ export default function HomeCategoriesGrid({
                           href={`/services/category/${category.categorySlug}`}
                           className="flex flex-col items-center"
                         >
-                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full">
+                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
                             <div className="flex items-center justify-center text-3xl mb-1">
                               {category.icon}
                             </div>
@@ -121,6 +121,8 @@ export default function HomeCategoriesGrid({
         .swiper-pagination-bullet { 
           background: var(--terciary);
           opacity: 1;
+          height: 6px;
+          width: 6px;
           margin: 0 !important;
         }
         .swiper-pagination-bullet-active {

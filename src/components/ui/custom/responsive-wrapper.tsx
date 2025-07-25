@@ -6,7 +6,6 @@ import type { ReactNode } from 'react'
 interface ResponsiveWrapperProps {
   mobileComponent: ReactNode
   desktopComponent: ReactNode
-  mobileSkeletonComponent?: ReactNode
   desktopSkeletonComponent?: ReactNode
   breakpoint?: number
 }
