@@ -39,13 +39,13 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       }}
       role={route ? 'button' : undefined}
       tabIndex={route ? 0 : undefined}
-      className={`relative rounded-xl pt-4 pl-[23px] pr-[23px] h-[104px] min-w-[328px] max-w-[350px] overflow-visible ${route ? 'cursor-pointer' : ''}`}
+      className={`relative rounded-xl pt-4 pl-[23px] pr-[23px] h-[104px] min-w-[320px] sm:min-w-[300px] overflow-visible w-full ${route ? 'cursor-pointer' : ''}`}
       style={{ backgroundColor: color }}
     >
       {/* Blur */}
       <div className="absolute inset-0 rounded-xl overflow-hidden">
-        <div className="absolute right-[89px] top-[-9px] w-[82px] h-[82px] bg-white/15 blur-[30px] z-0" />
-        <div className="absolute right-[-14px] bottom-[-54px] w-[144px] h-[144px] bg-white/20 blur-[30px] z-0" />
+        <div className="absolute right-[89px] top-[-9px] w-[82px] h-[82px] bg-white/15 blur-[30px] z-0 md:right-32" />
+        <div className="absolute right-[-14px] bottom-[-54px] w-[144px] h-[144px] bg-white/20 blur-[30px] z-0 md:right-6" />
       </div>
 
       {/* Image */}

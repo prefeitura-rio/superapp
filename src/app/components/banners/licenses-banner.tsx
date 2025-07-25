@@ -15,8 +15,8 @@ export const LicensesBanner = () => {
       image={
         <Image
           src={smilingWoman}
-          alt="Pessoa sentada em uma poltrona azul"
-          className="h-28 w-auto absolute bottom-0 right-0 z-20"
+          alt="Pessoa de capacete segurando documentos."
+          className="h-28 w-auto absolute bottom-0 right-0 z-20  md:right-7"
         />
       }
     />
