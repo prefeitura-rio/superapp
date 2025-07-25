@@ -19,10 +19,10 @@ export default async function CategoryPage({
   const servicesData = await fetchServicesByCategory(categorySlug)
 
   return (
-    <div className="min-h-lvh max-w-md mx-auto flex flex-col">
+    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
       <SecondaryHeader title={categoryName} showSearchButton />
       <div className="min-h-screen text-white">
-        <div className="max-w-md mx-auto pt-20 px-4 pb-20">
+        <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-20">
           <nav className="flex flex-col">
             {servicesData?.hits?.length ? (
               servicesData.hits.map(hit => (

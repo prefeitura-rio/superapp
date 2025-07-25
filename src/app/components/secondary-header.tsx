@@ -18,7 +18,7 @@ export function SecondaryHeader({
 
   return (
     <>
-      <header className="px-4 py-4 fixed top-0 w-full max-w-md mx-auto z-50 bg-background text-foreground h-auto">
+      <header className="px-4 py-4 md:py-6 fixed top-0 w-full max-w-4xl mx-auto z-50 bg-background text-foreground h-auto">
         <div className="grid grid-cols-3 items-center">
           {/* Left column - IconButton */}
           <div className="flex justify-start">

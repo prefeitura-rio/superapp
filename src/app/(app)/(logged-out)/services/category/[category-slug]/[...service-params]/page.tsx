@@ -34,11 +34,11 @@ export default async function ServicePage({
   const categoryName = getCategoryNameBySlug(categorySlug)
 
   return (
-    <div className="min-h-lvh max-w-md mx-auto flex flex-col">
+    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
       <SecondaryHeader title="Descrição do Serviço" showSearchButton />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="px-4 pt-20 pb-20">
+        <div className="px-4 pt-20 md:pt-22 pb-20">
           {collection === 'carioca-digital' && (
             <CariocaDigitalServiceComponent
               serviceData={serviceData as unknown as CariocaDigitalService}
