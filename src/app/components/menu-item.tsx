@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import type React from 'react'
 
@@ -9,20 +10,24 @@ export function MenuItem({
   href = '#',
   onClick,
   isFirst = false,
+  isLoading = false,
 }: {
   icon: React.ReactNode
   label: string
   href?: string
   onClick?: () => void
   isFirst?: boolean
+  isLoading?: boolean
 }) {
   const isButton = !!onClick && (!href || href === '#')
   const borderClass = cn(
     'border-b color-border',
     isFirst && 'border-t color-border'
   )
-  const contentClass =
-    'flex items-center justify-between w-full px-0 py-5 text-foreground'
+  const contentClass = cn(
+    'flex items-center justify-between w-full px-0 py-5 text-foreground',
+    isLoading && 'opacity-75'
+  )
 
   if (isButton) {
     return (
@@ -30,14 +35,19 @@ export function MenuItem({
         <button
           type="button"
           onClick={onClick}
-          className={`${contentClass} cursor-pointer`}
+          disabled={isLoading}
+          className={`${contentClass} cursor-pointer disabled:cursor-not-allowed`}
           style={{ width: '100%' }}
         >
           <div className="flex items-center gap-3">
-            {icon}
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              icon
+            )}
             <span>{label}</span>
           </div>
-          <ChevronRightIcon className="h-5 w-5 text-primary" />
+          {!isLoading && <ChevronRightIcon className="h-5 w-5 text-primary" />}
         </button>
       </div>
     )

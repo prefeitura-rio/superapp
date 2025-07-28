@@ -1,10 +1,16 @@
 'use client'
 
 import { LogOut } from 'lucide-react'
+import { useState } from 'react'
 import { MenuItem } from './menu-item'
 
 export function LogoutButton() {
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleLogout = async () => {
+    if (isLoading) return // Prevent multiple clicks
+    
+    setIsLoading(true)
     // TODO: add redirectUri to govbr
     try {
       // uri de redirecionamento do keycloak
@@ -27,14 +33,16 @@ export function LogoutButton() {
       }
     } catch (error) {
       console.error('Logout failed:', error)
+      setIsLoading(false) // Reset loading state on error
     }
   }
 
   return (
     <MenuItem
       icon={<LogOut className="h-5 w-5" />}
-      label="Sair"
+      label={isLoading ? "Saindo..." : "Sair"}
       onClick={handleLogout}
+      isLoading={isLoading}
     />
   )
 }
