@@ -81,6 +81,12 @@ export function MostAccessedServiceCardsSwipeSkeleton() {
           </div>
         ))}
       </div>
+      <div className="justify-center items-center h-12 hidden sm:flex">
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="w-2 h-1.5 rounded-full" />
+          <Skeleton className="w-2 h-1.5 rounded-full" />
+        </div>
+      </div>
     </div>
   )
 }
