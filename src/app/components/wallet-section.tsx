@@ -1,5 +1,6 @@
 'use client'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
@@ -20,7 +21,6 @@ import { getWalletDataInfo } from '@/lib/wallet-utils'
 import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Skeleton } from '../../components/ui/skeleton'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
