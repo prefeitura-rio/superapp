@@ -24,136 +24,150 @@ export default function MostAccessedServiceCards({
         )}
       </div>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-2 px-4 ">
-          {/* IPTU Card */}
-          <Link href="/services/category/Taxas/84702/carioca-digital">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-w-[140px] max-w-[240px] min-h-[140px] max-h-[211px]">
-              <div className="mb-4">
-                <img src={iptuIcon.src} alt="IPTU" className="w-10 h-10" />
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 px-4 w-max ">
+            {/* IPTU Card */}
+            <Link href="/services/category/Taxas/84702/carioca-digital">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-w-[140px] max-w-[240px] min-h-[140px] max-h-[211px]">
+                <div className="mb-4">
+                  <img src={iptuIcon.src} alt="IPTU" className="w-10 h-10" />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    IPTU
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Pague com desconto no PIX
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  IPTU
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Pague com desconto no PIX
-                </p>
-              </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* CAD Rio Card */}
-          <Link href="/services/category/Família/92294/carioca-digital">
-            <div className="bg-card  rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer relative flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4 flex justify-between w-full">
-                <img src={cadrioIcon.src} alt="CAD Rio" className="w-10 h-10" />
-                {/* <Badge className="bg-[#A0BFF9] text-black text-xs px-2 py-1 rounded-full font-medium ml-2 w-[44px] h-[20px]">
+            {/* CAD Rio Card */}
+            <Link href="/services/category/Família/92294/carioca-digital">
+              <div className="bg-card  rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer relative flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4 flex justify-between w-full">
+                  <img
+                    src={cadrioIcon.src}
+                    alt="CAD Rio"
+                    className="w-10 h-10"
+                  />
+                  {/* <Badge className="bg-[#A0BFF9] text-black text-xs px-2 py-1 rounded-full font-medium ml-2 w-[44px] h-[20px]">
                 novo
               </Badge> */}
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    CAD Rio
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Agende seu atendimento
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  CAD Rio
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Agende seu atendimento
-                </p>
-              </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Multas Card */}
-          <Link href="/services/category/Transporte/71536/carioca-digital">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4">
-                <img src={multasIcon.src} alt="Multas" className="w-10 h-10" />
+            {/* Multas Card */}
+            <Link href="/services/category/Transporte/71536/carioca-digital">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/50  transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4">
+                  <img
+                    src={multasIcon.src}
+                    alt="Multas"
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    Multas
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Consulta de multas de trânsito
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  Multas
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Consulta de multas de trânsito
-                </p>
+            </Link>
+            {/* Alvará Card */}
+            <Link href="/services/category/Licenças/91037/carioca-digital">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4">
+                  <img
+                    src={alvaraIcon.src}
+                    alt="Alvará"
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    Alvará
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Consulta prévia de local
+                  </p>
+                </div>
               </div>
-            </div>
-          </Link>
-          {/* Alvará Card */}
-          <Link href="/services/category/Licenças/91037/carioca-digital">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4">
-                <img src={alvaraIcon.src} alt="Alvará" className="w-10 h-10" />
+            </Link>
+            {/* Licença sanitária Card */}
+            <Link href="/services/category/Licenças/69823/carioca-digital">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4">
+                  <img
+                    src={licencasanitariaIcon.src}
+                    alt="Licença sanitária"
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    Licença Sani...
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Veja ou solicite o documento
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  Alvará
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Consulta prévia de local
-                </p>
+            </Link>
+            {/* Cadúnico Card */}
+            <Link href="/services/category/Família/10244935327515/1746">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4">
+                  <img
+                    src={cadunicoIcon.src}
+                    alt="Cadúnico"
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    CadÚnico
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Consulte e atualize seus dados
+                  </p>
+                </div>
               </div>
-            </div>
-          </Link>
-          {/* Licença sanitária Card */}
-          <Link href="/services/category/Licenças/69823/carioca-digital">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4">
-                <img
-                  src={licencasanitariaIcon.src}
-                  alt="Licença sanitária"
-                  className="w-10 h-10"
-                />
+            </Link>
+            {/* Dívida ativa Card */}
+            <Link href="/services/category/Taxas/82000/carioca-digital">
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
+                <div className="mb-4">
+                  <img
+                    src={dividaativaIcon.src}
+                    alt="Dívida ativa"
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium break-words text-foreground">
+                    Dívida ativa
+                  </h3>
+                  <p className="text-foreground-light text-xs leading-4 break-words">
+                    Consulte dívidas de IPTU
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  Licença Sani...
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Veja ou solicite o documento
-                </p>
-              </div>
-            </div>
-          </Link>
-          {/* Cadúnico Card */}
-          <Link href="/services/category/Família/10244935327515/1746">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4">
-                <img
-                  src={cadunicoIcon.src}
-                  alt="Cadúnico"
-                  className="w-10 h-10"
-                />
-              </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  CadÚnico
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Consulte e atualize seus dados
-                </p>
-              </div>
-            </div>
-          </Link>
-          {/* Dívida ativa Card */}
-          <Link href="/services/category/Taxas/82000/carioca-digital">
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/30 transition-colors cursor-pointer flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-              <div className="mb-4">
-                <img
-                  src={dividaativaIcon.src}
-                  alt="Dívida ativa"
-                  className="w-10 h-10"
-                />
-              </div>
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  Dívida ativa
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  Consulte dívidas de IPTU
-                </p>
-              </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         </div>
       </div>
     </>
