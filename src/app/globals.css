@@ -85,6 +85,8 @@ html::-webkit-scrollbar {
   animation: shine-reverse 0.8s forwards;
 }
 
+/* .grecaptcha-badge { visibility: hidden; } */
+
 @keyframes shine-reverse {
   0% {
     left: 120%;
