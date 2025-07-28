@@ -69,25 +69,47 @@ const mostAccessedServices = [
 
 export function MostAccessedServiceCardsSwipeSkeleton() {
   return (
-    <div className="px-4 pb-4 overflow-x-hidden">
-      <div className="flex items-center justify-between mb-2">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-5 w-20" />
-      </div>
-      <div className="grid grid-cols-4 gap-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={`service-${i}`} className="flex flex-col">
-            <Skeleton className="w-full aspect-square rounded-lg mb-2 h-[140px]" />
+    <>
+      {/* Mobile */}
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between mb-2 px-4">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+        <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+          <div className="overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 px-4 w-max">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={`mobile-${i}`} className="flex flex-col">
+                  <Skeleton className="bg-card rounded-lg p-3.5 flex flex-col items-start justify-between w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]" />
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-      <div className="justify-center items-center h-12 hidden sm:flex">
-        <div className="flex items-center gap-1.5">
-          <Skeleton className="w-2 h-1.5 rounded-full" />
-          <Skeleton className="w-2 h-1.5 rounded-full" />
         </div>
       </div>
-    </div>
+
+      {/* Desktop */}
+      <div className="px-4 pb-4 overflow-x-hidden hidden sm:block">
+        <div className="flex items-center justify-between mb-2">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={`service-${i}`} className="flex flex-col">
+              <Skeleton className="w-full aspect-square rounded-lg mb-2 h-[140px]" />
+            </div>
+          ))}
+        </div>
+        <div className="justify-center items-center h-12 flex">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="w-2 h-1.5 rounded-full" />
+            <Skeleton className="w-2 h-1.5 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
