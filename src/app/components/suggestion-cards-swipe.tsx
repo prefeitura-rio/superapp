@@ -121,6 +121,8 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
         .swiper-pagination-bullet { 
           background: var(--terciary);
           opacity: 1;
+          height: 6px;
+          width: 6px;
           margin: 0 !important;
         }
         .swiper-pagination-bullet-active {
