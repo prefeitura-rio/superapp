@@ -17,4 +17,5 @@ export interface ModelsEnderecoPrincipal {
   origem?: string
   sistema?: string
   tipo_logradouro?: string
+  updated_at?: string
 }

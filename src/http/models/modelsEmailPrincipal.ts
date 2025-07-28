@@ -10,4 +10,5 @@ export interface ModelsEmailPrincipal {
   origem?: string
   sistema?: string
   valor?: string
+  updated_at?: string
 }

@@ -9,6 +9,7 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { shouldShowUpdateBadge } from '@/lib/utils'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -40,6 +41,9 @@ export default async function PersonalInfoForm() {
     const d = new Date(dateStr)
     return d.toLocaleDateString('pt-BR')
   }
+
+  const showPhoneBadge = userInfo?.telefone?.principal ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at) : false
+  const showEmailBadge = userInfo?.email?.principal ? shouldShowUpdateBadge(userInfo.email.principal.updated_at) : false
 
   return (
     <>
@@ -101,8 +105,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="Celular"
-            optionalLabelVariant="destructive"
-            optionalLabel="Atualizar"
+            optionalLabelVariant={showPhoneBadge ? "destructive" : undefined}
+            optionalLabel={showPhoneBadge ? "Atualizar" : undefined}
             content={formatPhone(
               userInfo?.telefone?.principal?.ddi,
               userInfo?.telefone?.principal?.ddd,
@@ -116,8 +120,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="E-mail"
-            optionalLabelVariant="destructive"
-            optionalLabel="Atualizar"
+            optionalLabelVariant={showEmailBadge ? "destructive" : undefined}
+            optionalLabel={showEmailBadge ? "Atualizar" : undefined}
             content={userInfo?.email?.principal?.valor || ''}
             variant="default"
             disabled

@@ -3,6 +3,7 @@ import { EmptyAddress } from '@/app/components/empty-address'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { getCitizenCpf } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { shouldShowUpdateBadge } from '@/lib/utils'
 
 export default async function UserAddress() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -25,11 +26,13 @@ export default async function UserAddress() {
     }
   }
 
+  const showAddressBadge = addressInfo ? shouldShowUpdateBadge(addressInfo.updated_at) : false
+
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Endereço" />
       {addressInfo?.bairro !== 'null' ? (
-        <AddressInfoCard address={addressInfo} showBadge />
+        <AddressInfoCard address={addressInfo} showBadge={showAddressBadge} />
       ) : (
         <EmptyAddress />
       )}
