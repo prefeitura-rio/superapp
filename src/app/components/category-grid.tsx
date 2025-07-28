@@ -18,7 +18,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
   return (
     <div className="text-foreground space-y-2 px-4 pt-8 pb-24">
       <h2 className="text-md font-medium">{title}</h2>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 min-[360px]:grid-cols-3 min-[900px]:grid-cols-4 gap-2">
         {categories.map((category, index) => (
           <div
             key={category.categorySlug}
@@ -27,7 +27,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
             <button
               type="button"
               onClick={() => handleCategoryClick(category.categorySlug)}
-              className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition cursor-pointer"
+              className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition cursor-pointer max-h-[90px]"
             >
               <div className="flex items-center justify-center w-full h-full text-foreground">
                 {category.icon}

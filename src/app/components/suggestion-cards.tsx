@@ -14,11 +14,13 @@ export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
 
   return (
     <div className="relative w-full overflow-x-auto overflow-y-hidden pb-3 no-scrollbar">
-      <div className="flex gap-2 px-4 w-max py-2">
-        {filteredBanners.map(banner => {
-          const BannerComponent = banner.component
-          return <BannerComponent key={banner.id} />
-        })}
+      <div className="overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-4 py-2 w-max">
+          {filteredBanners.map(banner => {
+            const BannerComponent = banner.component
+            return <BannerComponent key={banner.id} />
+          })}
+        </div>
       </div>
     </div>
   )

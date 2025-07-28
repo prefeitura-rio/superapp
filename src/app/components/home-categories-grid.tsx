@@ -25,22 +25,22 @@ export default function HomeCategoriesGrid({
   if (!isLoaded) {
     return (
       <div className="px-4 pb-4">
+        <div className="flex items-center justify-between mb-2">
+          <Skeleton className="h-5 w-20" />
+        </div>
         <div className="grid grid-cols-4 gap-2">
-          {/* First row */}
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={`row1-${i}`} className="flex flex-col items-center">
-              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
-              <Skeleton className="h-3 w-8 sm:w-12" />
-            </div>
-          ))}
-          {/* Second row */}
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={`row2-${i}`} className="flex flex-col items-center">
-              <Skeleton className="w-full aspect-square rounded-2xl mb-2 min-h-12 min-w-12 sm:min-h-16 sm:min-w-16" />
-              <Skeleton className="h-3 w-8 sm:w-12" />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="flex flex-col items-center">
+              <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square w-full max-h-19 min-h-18">
+                <Skeleton className="text-3xl mb-1 h-6 w-6" />
+              </div>
+              <div className="pt-2">
+                <Skeleton className="h-3 w-8 sm:w-12" />
+              </div>
             </div>
           ))}
         </div>
+
         {/* Skeleton pagination bullets */}
         <div className="flex justify-center items-center h-12">
           <div className="flex items-center gap-1.5">
@@ -88,7 +88,7 @@ export default function HomeCategoriesGrid({
                           href={`/services/category/${category.categorySlug}`}
                           className="flex flex-col items-center"
                         >
-                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full">
+                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
                             <div className="flex items-center justify-center text-3xl mb-1">
                               {category.icon}
                             </div>
@@ -121,6 +121,8 @@ export default function HomeCategoriesGrid({
         .swiper-pagination-bullet { 
           background: var(--terciary);
           opacity: 1;
+          height: 6px;
+          width: 6px;
           margin: 0 !important;
         }
         .swiper-pagination-bullet-active {

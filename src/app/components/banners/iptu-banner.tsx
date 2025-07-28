@@ -15,8 +15,8 @@ export const IptuBanner = () => {
       image={
         <Image
           src={smilingWoman}
-          alt="Pessoa sentada em uma poltrona azul"
-          className="h-31 w-auto absolute bottom-0 -right-2 z-20"
+          alt="Pessoa acessando serviços pelo celular."
+          className="h-31 w-auto absolute bottom-0 -right-2 z-20  md:right-12"
         />
       }
     />

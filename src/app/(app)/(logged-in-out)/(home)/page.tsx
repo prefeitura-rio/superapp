@@ -1,9 +1,18 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 import HeaderWrapper from '@/app/components/header-wrapper'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
+import {
+  MostAccessedServiceCardsSwipe,
+  MostAccessedServiceCardsSwipeSkeleton,
+} from '@/app/components/most-accessed-services-card-swipe'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import SuggestionCards from '@/app/components/suggestion-cards'
+import {
+  SuggestionCardsSwipe,
+  SuggestionCardsSwipeSkeleton,
+} from '@/app/components/suggestion-cards-swipe'
 import CarteiraSection from '@/app/components/wallet-section'
+import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
@@ -141,17 +150,25 @@ export default async function Home() {
   const categories = await fetchCategories()
 
   return (
-    <main className="flex max-w-md mx-auto flex-col bg-background text-foreground pb-30">
+    <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
       <HeaderWrapper userName={userAuthInfo.name} isLoggedIn={isLoggedIn} />
 
       {/* Suggestion Cards*/}
-      <SuggestionCards isLoggedIn={isLoggedIn} />
+      <ResponsiveWrapper
+        mobileComponent={<SuggestionCards isLoggedIn={isLoggedIn} />}
+        desktopComponent={<SuggestionCardsSwipe isLoggedIn={isLoggedIn} />}
+        desktopSkeletonComponent={<SuggestionCardsSwipeSkeleton />}
+      />
 
       {/* Home Categories Grid*/}
       <HomeCategoriesGrid categories={categories} />
 
       {/* Most Accessed Service Cards*/}
-      <MostAccessedServiceCards showMore={true} />
+      <ResponsiveWrapper
+        mobileComponent={<MostAccessedServiceCards showMore={true} />}
+        desktopComponent={<MostAccessedServiceCardsSwipe showMore={true} />}
+        desktopSkeletonComponent={<MostAccessedServiceCardsSwipeSkeleton />}
+      />
 
       {/* Carteira section - only show for authenticated users */}
       {isLoggedIn && walletData && (

@@ -15,8 +15,8 @@ export const TaxesBanner = () => {
       image={
         <Image
           src={smilingWoman}
-          alt="Pessoa sentada em uma poltrona azul"
-          className="h-29 w-auto absolute bottom-1 -right-2 z-20"
+          alt="Documentos de impostos."
+          className="h-29 w-auto absolute bottom-1 -right-2 z-20  md:right-12"
         />
       }
     />
