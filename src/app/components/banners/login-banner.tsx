@@ -14,8 +14,8 @@ export const LoginBanner = () => {
       image={
         <Image
           src={loginBanner}
-          alt="Pessoa sentada em uma poltrona azul"
-          className="h-12 w-23 absolute bottom-6 right-3 z-20"
+          alt="Dois cartões."
+          className="h-12 w-23 absolute bottom-6 right-3 z-20 md:right-12"
         />
       }
     />

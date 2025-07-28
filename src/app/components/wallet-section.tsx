@@ -1,3 +1,6 @@
+'use client'
+
+import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
@@ -17,6 +20,7 @@ import {
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
@@ -40,16 +44,46 @@ interface CartereiraSectionProps {
   }
 }
 
+export function CarteiraSectionSkeleton() {
+  return (
+    <section className="mt-4 w-full overflow-x-auto sm:mt-0">
+      <div className="flex items-center px-4 justify-between mb-4">
+        <Skeleton className="h-5 w-16" />
+        <Skeleton className="h-5 w-20" />
+      </div>
+
+      <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex px-4 gap-2 w-max">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={`wallet-card-${i}`} className="min-w-[300px]">
+              <Skeleton className="w-full h-[200px] rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function CarteiraSection({
   walletData,
   maintenanceRequests,
   healthCardData,
 }: CartereiraSectionProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
   // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
+
+  if (!isLoaded) {
+    return <CarteiraSectionSkeleton />
+  }
 
   return (
     <section className="mt-6 w-full overflow-x-auto">

@@ -15,8 +15,8 @@ export const ProfileUpdateBanner = () => {
       image={
         <Image
           src={smilingWoman}
-          alt="Pessoa sentada em uma poltrona azul"
-          className="h-30 w-auto absolute bottom-0 -right-6 z-20"
+          alt="Mão segurando o celular com check azul."
+          className="h-30 w-auto absolute bottom-0 -right-6 z-20  md:right-4"
         />
       }
     />

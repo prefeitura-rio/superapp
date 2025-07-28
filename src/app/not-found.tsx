@@ -1,11 +1,11 @@
 'use client'
 
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import { useViewportHeight } from '@/hooks/useViewport'
 import Link from 'next/link'
-import { ThemeAwareVideo } from '../components/ui/custom/theme-aware-video'
-import { VIDEO_SOURCES } from '../constants/videos-sources'
-import { useViewportHeight } from '../hooks/useViewportHeight'
-import { SecondaryHeader } from './components/secondary-header'
 
 export default function NotFound() {
   const { isBelowBreakpoint } = useViewportHeight(648)
