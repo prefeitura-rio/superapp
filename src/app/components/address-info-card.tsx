@@ -1,11 +1,16 @@
 'use client'
 
 import { deleteUserAddress } from '@/actions/delete-user-address'
+import {
+  EditIcon,
+  MapPinIcon,
+  MoreVerticalIcon,
+  TrashIcon,
+} from '@/assets/icons'
 import { Badge } from '@/components/ui/badge'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
-import { MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -76,7 +81,7 @@ export function AddressInfoCard({
       >
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 pt-1">
-            <MapPin className="w-6 h-6 text-card-foreground" />
+            <MapPinIcon className="w-6 h-6 text-card-foreground" />
           </div>
 
           <div className="flex-1 space-y-1">
@@ -102,7 +107,7 @@ export function AddressInfoCard({
 
           <div className="flex-shrink-0">
             <div className="hover:text-gray-700 transition-colors">
-              <MoreVertical className="w-5 h-5" />
+              <MoreVerticalIcon className="w-5 h-5" />
             </div>
           </div>
         </div>
@@ -122,7 +127,7 @@ export function AddressInfoCard({
             <CustomButton
               variant="primary"
               size="lg"
-              icon={Pencil}
+              icon={EditIcon}
               className="py-6 w-full"
               onClick={handleEdit}
             >
@@ -133,7 +138,7 @@ export function AddressInfoCard({
           <CustomButton
             variant="secondary"
             size="lg"
-            icon={Trash2}
+            icon={TrashIcon}
             className="py-6"
             onClick={handleDelete}
           >

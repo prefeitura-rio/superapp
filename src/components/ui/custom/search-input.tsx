@@ -1,7 +1,7 @@
 'use client'
 
+import { ChevronLeftIcon, SearchIcon, XIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Search, X } from 'lucide-react'
 import * as React from 'react'
 
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -79,7 +79,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             className="mr-4 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
             aria-label="Back"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeftIcon className="h-6 w-6" />
           </button>
         )}
 
@@ -99,7 +99,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
               className="text-card-foreground  rounded-full"
               aria-label="Clear search"
             >
-              <X className="h-5 w-5" />
+              <XIcon className="h-6 w-6 text-card-foreground" />
             </button>
           )}
           {showIcons && (
@@ -108,7 +108,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
               className="text-card-foreground hover:text-card-foreground"
               aria-label="Search"
             >
-              <Search className="h-5 w-5" />
+              <SearchIcon className="h-6 w-6 text-card-foreground" />
             </button>
           )}
         </div>

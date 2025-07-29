@@ -1,6 +1,6 @@
 'use client'
 
-import { LogOut } from 'lucide-react'
+import { LogoutIcon } from '@/assets/icons'
 import { useState } from 'react'
 import { MenuItem } from './menu-item'
 
@@ -9,7 +9,7 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     if (isLoading) return // Prevent multiple clicks
-    
+
     setIsLoading(true)
     // TODO: add redirectUri to govbr
     try {
@@ -39,8 +39,8 @@ export function LogoutButton() {
 
   return (
     <MenuItem
-      icon={<LogOut className="h-5 w-5" />}
-      label={isLoading ? "Saindo..." : "Sair"}
+      icon={<LogoutIcon className="h-5 w-5" />}
+      label={isLoading ? 'Saindo...' : 'Sair'}
       onClick={handleLogout}
       isLoading={isLoading}
     />

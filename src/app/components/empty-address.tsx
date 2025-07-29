@@ -1,9 +1,9 @@
 'use client'
 
+import { PlusIcon } from '@/assets/icons'
 import { Button } from '@/components/ui/button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
-import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export function EmptyAddress() {
@@ -28,7 +28,7 @@ export function EmptyAddress() {
           onClick={() => {}}
         >
           <Link href={'/user-profile/user-address/address-form'}>
-            <Plus className="w-4 h-4" />
+            <PlusIcon className="w-5 h-5 text-background" />
             Adicionar
           </Link>
         </Button>

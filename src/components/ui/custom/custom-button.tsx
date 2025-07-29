@@ -1,7 +1,6 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
 import type React from 'react'
 import { Button } from '../button'
 
@@ -9,7 +8,7 @@ export interface CustomButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline'
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  icon?: LucideIcon
+  icon?: React.ElementType
   iconPosition?: 'left' | 'right'
   loading?: boolean
   fullWidth?: boolean
