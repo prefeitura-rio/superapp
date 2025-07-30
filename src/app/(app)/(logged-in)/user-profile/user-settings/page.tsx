@@ -1,8 +1,8 @@
 'use client'
 
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import { MoonIcon, SunIcon } from '@/assets/icons'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 export default function UserSettingsForm() {
@@ -19,7 +19,7 @@ export default function UserSettingsForm() {
       >
         <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
-            <Sun className="size-6" />
+            <SunIcon className="w-6 h-6" />
             <label
               htmlFor="light"
               className="text-md font-medium cursor-pointer select-none text-foreground"
@@ -31,7 +31,7 @@ export default function UserSettingsForm() {
         </div>
         <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
-            <Moon className="size-6" />
+            <MoonIcon className="w-6 h-6" />
             <label
               htmlFor="dark"
               className="text-md font-medium cursor-pointer select-none text-foreground"

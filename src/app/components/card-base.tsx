@@ -22,7 +22,7 @@ export function CardBase({
       className={`block w-full ${bgColor} rounded-3xl shadow-md text-white relative overflow-hidden ${className}`}
     >
       <div className="p-6 justify-between flex flex-col">
-        <div className="flex h-full min-h-[140px] flex-col justify-between">
+        <div className="flex h-full min-h-[140px] min-w-[262px] flex-col justify-between">
           {children}
         </div>
       </div>

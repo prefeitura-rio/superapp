@@ -1,8 +1,8 @@
 'use client'
 
 import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
+import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
-import { ArrowRight, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
@@ -246,7 +246,7 @@ export default function Search() {
                   }}
                 >
                   <span>{text}</span>
-                  <ArrowRight className="text-primary h-5 w-5" />
+                  <ChevronRightIcon className="text-primary h-6 w-6" />
                 </li>
               ))}
             </ul>
@@ -290,7 +290,7 @@ export default function Search() {
                   className="text-primary h-5 w-5 hover:text-destructive transition-colors"
                   aria-label={`Remove "${text}" from search history`}
                 >
-                  <X className="h-5 w-5" />
+                  <XIcon className="h-5 w-5" />
                 </button>
               </li>
             ))}

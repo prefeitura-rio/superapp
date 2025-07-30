@@ -12,6 +12,9 @@ import {
   SuggestionCardsSwipeSkeleton,
 } from '@/app/components/suggestion-cards-swipe'
 import CarteiraSection from '@/app/components/wallet-section'
+import CarteiraSectionSwipe, {
+  CarteiraSectionSwipeSkeleton,
+} from '@/app/components/wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import {
   getCitizenCpfMaintenanceRequest,
@@ -172,10 +175,22 @@ export default async function Home() {
 
       {/* Carteira section - only show for authenticated users */}
       {isLoggedIn && walletData && (
-        <CarteiraSection
-          walletData={walletData}
-          maintenanceRequests={maintenanceRequests}
-          healthCardData={healthCardData}
+        <ResponsiveWrapper
+          mobileComponent={
+            <CarteiraSection
+              walletData={walletData}
+              maintenanceRequests={maintenanceRequests}
+              healthCardData={healthCardData}
+            />
+          }
+          desktopComponent={
+            <CarteiraSectionSwipe
+              walletData={walletData}
+              maintenanceRequests={maintenanceRequests}
+              healthCardData={healthCardData}
+            />
+          }
+          desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}
         />
       )}
       <FloatNavigation />

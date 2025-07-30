@@ -1,4 +1,4 @@
-import { CheckCircle, MapIcon, Settings, User } from 'lucide-react'
+import { CheckIcon, MapPinIcon, SettingsIcon, UserIcon } from '@/assets/icons'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -11,13 +11,13 @@ interface UserProfileMenuItemsData {
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
     id: 'meus-dados',
-    icon: <User className="h-5 w-5" />,
+    icon: <UserIcon className="h-5 w-5" />,
     label: 'Meus dados',
     href: '/user-profile/user-personal-info',
   },
   {
     id: 'endereco',
-    icon: <MapIcon className="h-5 w-5" />,
+    icon: <MapPinIcon className="h-5 w-5" />,
     label: 'Endereço',
     href: '/user-profile/user-address',
   },
@@ -29,13 +29,13 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   // },
   {
     id: 'autorizacoes',
-    icon: <CheckCircle className="h-5 w-5" />,
+    icon: <CheckIcon className="h-5 w-5" />,
     label: 'Autorizações',
     href: '/user-profile/user-authorizations',
   },
   {
     id: 'configuracoes',
-    icon: <Settings className="h-5 w-5" />,
+    icon: <SettingsIcon className="h-5 w-5" />,
     label: 'Configurações',
     href: '/user-profile/user-settings',
   },
