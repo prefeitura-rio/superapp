@@ -52,7 +52,7 @@ interface CartereiraSectionSwipeProps {
 export function CarteiraSectionSwipeSkeleton() {
   return (
     <section className="mt-4 w-full overflow-x-auto sm:mt-0">
-      {/* Mobile - mantém o scroll original */}
+      {/* Mobile */}
       <div className="sm:hidden">
         <div className="flex items-center px-4 justify-between mb-4">
           <Skeleton className="h-5 w-16" />
@@ -69,7 +69,7 @@ export function CarteiraSectionSwipeSkeleton() {
         </div>
       </div>
 
-      {/* Desktop - grid com swipe */}
+      {/* Desktop */}
       <div className="hidden sm:block">
         <div className="flex items-center px-4 justify-between mb-4">
           <Skeleton className="h-5 w-16 rounded-3xl" />

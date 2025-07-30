@@ -28,7 +28,7 @@ export function EmptyAddress() {
           onClick={() => {}}
         >
           <Link href={'/user-profile/user-address/address-form'}>
-            <PlusIcon className="w-5 h-5 text-background" />
+            <PlusIcon className="w-5 h-5 text-white" />
             Adicionar
           </Link>
         </Button>
