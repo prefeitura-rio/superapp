@@ -64,7 +64,7 @@ export function middleware(request: NextRequest) {
   ]
 
   const cspHeader = `
-    default-src 'self';
+    default-src 'self' https://*.apps.rio.gov.br/;
     script-src ${scriptSrcDirectives.join(' ')};
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br;
