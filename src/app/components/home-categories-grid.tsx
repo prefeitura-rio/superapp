@@ -1,13 +1,10 @@
 'use client'
 
+import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Category } from '@/lib/categories'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
 
 interface HomeCategoriesGridProps {
   categories?: Category[]
@@ -53,21 +50,15 @@ export default function HomeCategoriesGrid({
   }
 
   return (
-    <div className="px-4 pb-4">
+    <div className="px-4 pb-4 overflow-x-hidden">
       <h3 className="pb-2 text-base font-medium text-foreground leading-5">
         Serviços
       </h3>
       <div className="pb-0">
-        <Swiper
-          slidesPerView={1}
-          slidesPerGroup={1}
-          spaceBetween={8}
-          pagination={{
-            clickable: true,
-            // dynamicBullets: true,
-          }}
-          modules={[Pagination]}
-          className="home-categories-swiper animate-fade-in"
+        <SwiperWrapper
+          showArrows={true}
+          showPagination={true}
+          className="animate-fade-in"
         >
           {categories &&
             Array.from(
@@ -80,55 +71,32 @@ export default function HomeCategoriesGrid({
                 )
 
                 return (
-                  <SwiperSlide key={`slide-${slideIndex}`}>
-                    <div className="grid grid-cols-4 gap-2">
-                      {slideCategories.map((category, index) => (
-                        <Link
-                          key={category.categorySlug}
-                          href={`/services/category/${category.categorySlug}`}
-                          className="flex flex-col items-center"
-                        >
-                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
-                            <div className="flex items-center justify-center text-3xl mb-1">
-                              {category.icon}
-                            </div>
+                  <div
+                    key={`slide-${slideIndex}`}
+                    className="grid grid-cols-4 gap-2"
+                  >
+                    {slideCategories.map((category, index) => (
+                      <Link
+                        key={category.categorySlug}
+                        href={`/services/category/${category.categorySlug}`}
+                        className="flex flex-col items-center"
+                      >
+                        <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
+                          <div className="flex items-center justify-center text-3xl mb-1">
+                            {category.icon}
                           </div>
-                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                            {category.name}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </SwiperSlide>
+                        </div>
+                        <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                          {category.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 )
               }
             )}
-        </Swiper>
+        </SwiperWrapper>
       </div>
-      <style jsx global>{`
-        .swiper-pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 4px;
-          height: 10px;
-        }
-        .home-categories-swiper .swiper-pagination {
-          position: relative !important;
-          bottom: auto !important;
-          margin-top: 1rem !important;
-        }
-        .swiper-pagination-bullet { 
-          background: var(--terciary);
-          opacity: 1;
-          height: 6px;
-          width: 6px;
-          margin: 0 !important;
-        }
-        .swiper-pagination-bullet-active {
-          background: var(--foreground);
-        }
-      `}</style>
     </div>
   )
 }

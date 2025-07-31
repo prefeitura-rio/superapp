@@ -1,12 +1,9 @@
 'use client'
 
+import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { suggestedBanners } from '@/constants/banners'
 import { useEffect, useState } from 'react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
 
 interface SuggestionCardsProps {
   isLoggedIn: boolean
@@ -67,18 +64,9 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
   }
 
   return (
-    <div className="px-4 pb-3">
+    <div className="px-4 pb-3 overflow-x-hidden">
       <div className="pb-0">
-        <Swiper
-          slidesPerView={1}
-          slidesPerGroup={1}
-          spaceBetween={8}
-          pagination={{
-            clickable: true,
-          }}
-          modules={[Pagination]}
-          className="suggestion-cards-swiper animate-fade-in"
-        >
+        <SwiperWrapper showArrows={true} showPagination={true}>
           {Array.from(
             { length: Math.ceil(filteredBanners.length / 2) },
             (_, slideIndex) => {
@@ -89,46 +77,22 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
               )
 
               return (
-                <SwiperSlide key={`slide-${slideIndex}`}>
-                  <div className="grid grid-cols-2 gap-2 py-2">
-                    {slideBanners.map(banner => {
-                      const BannerComponent = banner.component
-                      return <BannerComponent key={banner.id} />
-                    })}
-                    {/* One left slide */}
-                    {slideBanners.length === 1 && <div className="flex" />}
-                  </div>
-                </SwiperSlide>
+                <div
+                  key={`slide-${slideIndex}`}
+                  className="grid grid-cols-2 gap-2 py-2"
+                >
+                  {slideBanners.map(banner => {
+                    const BannerComponent = banner.component
+                    return <BannerComponent key={banner.id} />
+                  })}
+                  {/* One left slide */}
+                  {slideBanners.length === 1 && <div className="flex" />}
+                </div>
               )
             }
           )}
-        </Swiper>
+        </SwiperWrapper>
       </div>
-
-      <style jsx global>{`
-        .swiper-pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 4px;
-          height: 10px;
-        }
-        .suggestion-cards-swiper .swiper-pagination {
-          position: relative !important;
-          bottom: auto !important;
-          margin-top: 1rem !important;
-        }
-        .swiper-pagination-bullet { 
-          background: var(--terciary);
-          opacity: 1;
-          height: 6px;
-          width: 6px;
-          margin: 0 !important;
-        }
-        .swiper-pagination-bullet-active {
-          background: var(--foreground);
-        }
-      `}</style>
     </div>
   )
 }
