@@ -40,7 +40,7 @@ function TeamPage({ healthData }: TeamPageProps) {
     <div className="p-6">
       <div className="">
         <h2 className="text-base pb-2 text-foreground font-medium leading-5">
-          {teamName}
+          Equipe {teamName}
         </h2>
 
         <Card className="rounded-xl border-0 shadow-none">

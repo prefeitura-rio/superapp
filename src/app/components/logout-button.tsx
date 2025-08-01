@@ -42,6 +42,7 @@ export function LogoutButton() {
       icon={<LogoutIcon className="h-5 w-5" />}
       label={isLoading ? 'Saindo...' : 'Sair'}
       onClick={handleLogout}
+      isLast
       isLoading={isLoading}
     />
   )

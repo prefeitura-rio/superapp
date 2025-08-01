@@ -10,6 +10,7 @@ export function MenuItem({
   href = '#',
   onClick,
   isFirst = false,
+  isLast = false,
   isLoading = false,
 }: {
   icon: React.ReactNode
@@ -17,11 +18,12 @@ export function MenuItem({
   href?: string
   onClick?: () => void
   isFirst?: boolean
+  isLast?: boolean
   isLoading?: boolean
 }) {
   const isButton = !!onClick && (!href || href === '#')
   const borderClass = cn(
-    'border-b color-border',
+    !isLast && 'border-b color-border',
     isFirst && 'border-t color-border'
   )
   const contentClass = cn(
@@ -40,11 +42,7 @@ export function MenuItem({
           style={{ width: '100%' }}
         >
           <div className="flex items-center gap-3">
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              icon
-            )}
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : icon}
             <span>{label}</span>
           </div>
           {!isLoading && <ChevronRightIcon className="h-5 w-5 text-primary" />}

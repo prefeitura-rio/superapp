@@ -143,7 +143,7 @@ export default function CarteiraSectionSwipe({
       <EducationCard
         key="education"
         href="/wallet/education"
-        title="ESCOLA"
+        title="ESCOLA DE JOVENS E ADULTOS"
         name={walletData?.educacao?.escola?.nome || 'Não disponível'}
         primaryLabel="Status"
         primaryValue={getOperatingStatus(
