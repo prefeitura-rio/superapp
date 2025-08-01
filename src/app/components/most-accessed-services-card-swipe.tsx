@@ -7,13 +7,10 @@ import dividaativaIcon from '@/assets/icons/png/dividaativa-icon.png'
 import iptuIcon from '@/assets/icons/png/iptu-icon.png'
 import licencasanitariaIcon from '@/assets/icons/png/licencasanitaria-icon.png'
 import multasIcon from '@/assets/icons/png/multas-icon.png'
+import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
 
 const mostAccessedServices = [
   {
@@ -127,7 +124,7 @@ export function MostAccessedServiceCardsSwipe({
   }
 
   return (
-    <div className="px-4 pb-4">
+    <div className="px-4 pb-4 overflow-x-clip">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
         {showMore && (
@@ -141,16 +138,7 @@ export function MostAccessedServiceCardsSwipe({
       </div>
 
       <div className="pb-0">
-        <Swiper
-          slidesPerView={1}
-          slidesPerGroup={1}
-          spaceBetween={8}
-          pagination={{
-            clickable: true,
-          }}
-          modules={[Pagination]}
-          className="most-accessed-swiper animate-fade-in"
-        >
+        <SwiperWrapper showArrows={true} showPagination={true}>
           {Array.from(
             { length: Math.ceil(mostAccessedServices.length / 4) },
             (_, slideIndex) => {
@@ -161,61 +149,37 @@ export function MostAccessedServiceCardsSwipe({
               )
 
               return (
-                <SwiperSlide key={`slide-${slideIndex}`}>
-                  <div className="grid grid-cols-4 gap-2">
-                    {slideServices.map(service => (
-                      <Link key={service.id} href={service.href}>
-                        <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
-                          <div className="mb-4">
-                            <img
-                              src={service.icon.src}
-                              alt={service.title}
-                              className="w-10 h-10"
-                            />
-                          </div>
-                          <div>
-                            <h3 className="text-base font-medium break-words text-foreground">
-                              {service.title}
-                            </h3>
-                            <p className="text-foreground-light text-xs leading-4 break-words">
-                              {service.description}
-                            </p>
-                          </div>
+                <div
+                  key={`slide-${slideIndex}`}
+                  className="grid grid-cols-4 gap-2"
+                >
+                  {slideServices.map(service => (
+                    <Link key={service.id} href={service.href}>
+                      <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
+                        <div className="mb-4">
+                          <img
+                            src={service.icon.src}
+                            alt={service.title}
+                            className="w-10 h-10"
+                          />
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                </SwiperSlide>
+                        <div>
+                          <h3 className="text-base font-medium break-words text-foreground">
+                            {service.title}
+                          </h3>
+                          <p className="text-foreground-light text-xs leading-4 break-words">
+                            {service.description}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               )
             }
           )}
-        </Swiper>
+        </SwiperWrapper>
       </div>
-
-      <style jsx global>{`
-        .swiper-pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 4px;
-          height: 10px;
-        }
-        .most-accessed-swiper .swiper-pagination {
-          position: relative !important;
-          bottom: auto !important;
-          margin-top: 1rem !important;
-        }
-        .swiper-pagination-bullet { 
-          background: var(--terciary);
-          height: 6px;
-          width: 6px;
-          opacity: 1;
-          margin: 0 !important;
-        }
-        .swiper-pagination-bullet-active {
-          background: var(--foreground);
-        }
-      `}</style>
     </div>
   )
 }

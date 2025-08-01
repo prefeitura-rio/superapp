@@ -1,5 +1,6 @@
 'use client'
 
+import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
@@ -22,10 +23,6 @@ import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import type { JSX } from 'react'
 import { useEffect, useState } from 'react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
@@ -223,46 +220,37 @@ export default function CarteiraSectionSwipe({
       </div>
 
       {walletInfo.hasData ? (
-        <>
-          <div className="hidden sm:block px-4 pb-4">
-            <Swiper
-              slidesPerView={1}
-              slidesPerGroup={1}
-              spaceBetween={8}
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Pagination]}
-              className="carteira-swiper"
-            >
-              {Array.from(
-                { length: Math.ceil(walletCards.length / 2) },
-                (_, slideIndex) => {
-                  const startIndex = slideIndex * 2
-                  const slideCards = walletCards.slice(
-                    startIndex,
-                    startIndex + 2
-                  )
+        <div className="hidden sm:block px-4 pb-4  overflow-hidden">
+          <SwiperWrapper
+            showArrows={true}
+            showPagination={true}
+            arrowsVerticalPosition="top-[45%]"
+          >
+            {Array.from(
+              { length: Math.ceil(walletCards.length / 2) },
+              (_, slideIndex) => {
+                const startIndex = slideIndex * 2
+                const slideCards = walletCards.slice(startIndex, startIndex + 2)
 
-                  return (
-                    <SwiperSlide key={`slide-${slideIndex}`}>
-                      <div className="grid grid-cols-2 gap-2">
-                        {slideCards.map((card, cardIndex) => (
-                          <div
-                            key={`card-${startIndex + cardIndex}`}
-                            className="w-full"
-                          >
-                            {card}
-                          </div>
-                        ))}
+                return (
+                  <div
+                    key={`slide-${slideIndex}`}
+                    className="grid grid-cols-2 gap-2"
+                  >
+                    {slideCards.map((card, cardIndex) => (
+                      <div
+                        key={`card-${startIndex + cardIndex}`}
+                        className="w-full"
+                      >
+                        {card}
                       </div>
-                    </SwiperSlide>
-                  )
-                }
-              )}
-            </Swiper>
-          </div>
-        </>
+                    ))}
+                  </div>
+                )
+              }
+            )}
+          </SwiperWrapper>
+        </div>
       ) : (
         <div className="flex items-center justify-center py-6">
           <p className="text-muted-foreground text-center">
@@ -270,31 +258,6 @@ export default function CarteiraSectionSwipe({
           </p>
         </div>
       )}
-
-      <style jsx global>{`
-        .swiper-pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 4px;
-          height: 10px;
-        }
-        .carteira-swiper .swiper-pagination {
-          position: relative !important;
-          bottom: auto !important;
-          margin-top: 1rem !important;
-        }
-        .swiper-pagination-bullet { 
-          background: var(--terciary);
-          height: 6px;
-          width: 6px;
-          opacity: 1;
-          margin: 0 !important;
-        }
-        .swiper-pagination-bullet-active {
-          background: var(--foreground);
-        }
-      `}</style>
     </section>
   )
 }
