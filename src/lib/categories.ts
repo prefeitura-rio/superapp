@@ -81,23 +81,15 @@ function getIconForCategory(nomeNormalizado: string): ReactNode {
   })
 }
 
-export async function fetchCategories(
-  recaptchaToken?: string
-): Promise<Category[]> {
+export async function fetchCategories(): Promise<Category[]> {
+  const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
   try {
-    const headers: HeadersInit = {}
-
-    // Add reCAPTCHA token if provided
-    if (recaptchaToken) {
-      headers['X-Recaptcha-Token'] = recaptchaToken
-    }
-
-    // Use absolute URL for server-side fetching
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/categories`, {
-      headers,
-      next: { revalidate: 86400 }, // Cache for 1 day
-    })
+    const response = await fetch(
+      `${rootUrl}/categorias-relevancia?collections=1746,carioca-digital`,
+      {
+        next: { revalidate: 86400 }, // Cache for 1 day
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to fetch categories: ${response.status}`)

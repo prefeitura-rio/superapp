@@ -1,4 +1,4 @@
-import { CategoryGridWithRecaptcha } from '@/app/components/category-grid-with-recaptcha'
+import { CategoryGrid } from '@/app/components/category-grid'
 import { FloatNavigation } from '@/app/components/float-navigation'
 import {
   MostAccessedServiceCardsSwipe,
@@ -7,11 +7,10 @@ import {
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import { SearchButton } from '@/app/components/search-button'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
-import { getUserInfoFromToken } from '@/lib/user-info'
+import { fetchCategories } from '@/lib/categories'
 
 export default async function ServicesPage() {
-  const userAuthInfo = await getUserInfoFromToken()
-  const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
+  const categories = await fetchCategories()
 
   return (
     <main className="flex max-w-4xl mx-auto flex-col bg-background text-foreground">
@@ -29,8 +28,8 @@ export default async function ServicesPage() {
         desktopSkeletonComponent={<MostAccessedServiceCardsSwipeSkeleton />}
       />
 
-      {/* Category Grid with reCAPTCHA protection */}
-      <CategoryGridWithRecaptcha title="Categorias" isLoggedIn={isLoggedIn} />
+      {/* Category Grid*/}
+      <CategoryGrid title="Categorias" categories={categories} />
 
       <FloatNavigation />
     </main>

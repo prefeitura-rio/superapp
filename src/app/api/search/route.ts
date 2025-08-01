@@ -1,58 +1,28 @@
-import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const q = searchParams.get('q')
+  const recaptchaToken = request.headers.get('x-recaptcha-token')
+  //TODO: ADD REAL RECAPTCHA TOKEN
+  const headers = {
+    ...(recaptchaToken
+      ? { 'X-Recaptcha-Token': recaptchaToken }
+      : { 'X-Recaptcha-Token': 'mockada' }),
+  }
+
+  const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
+
   try {
-    // Get search query from URL parameters
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q')
-
-    if (!query) {
-      return NextResponse.json(
-        { error: 'Search query is required' },
-        { status: 400 }
-      )
-    }
-
-    // Get reCAPTCHA token from headers
-    const recaptchaToken = request.headers.get('X-Recaptcha-Token')
-
-    // Get the root URL from environment
-    const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
-
-    if (!rootUrl) {
-      return NextResponse.json(
-        { error: 'API root URL not configured' },
-        { status: 500 }
-      )
-    }
-
-    // Prepare headers for the API request
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
-
-    // Add reCAPTCHA token if provided
-    if (recaptchaToken) {
-      headers['X-Recaptcha-Token'] = recaptchaToken
-    }
-
-    // Fetch search results from the external API
     const response = await fetch(
-      `${rootUrl}/busca-hibrida-multi?q=${encodeURIComponent(query)}&collections=1746,carioca-digital,pref-rio&page=1&per_page=20`,
+      `${rootUrl}/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=20`,
       {
         headers,
-        next: { revalidate: 3600 }, // Cache for 1 hour
       }
     )
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Search API error:', response.status, errorText)
-      return NextResponse.json(
-        { error: 'Failed to fetch search results' },
-        { status: response.status }
-      )
+      throw new Error('Network response was not ok')
     }
 
     const data = await response.json()
@@ -62,17 +32,9 @@ export async function GET(request: NextRequest) {
       result: data.hits ? data.hits.map((hit: any) => hit.document) : [],
     }
 
-    // Return the transformed search results with caching headers
-    return NextResponse.json(transformedData, {
-      headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=3600',
-      },
-    })
+    return NextResponse.json(transformedData)
   } catch (error) {
-    console.error('Search route error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error fetching data:', error)
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
   }
 }

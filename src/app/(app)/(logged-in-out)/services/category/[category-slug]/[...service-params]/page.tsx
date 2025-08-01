@@ -1,6 +1,10 @@
-import ServiceWithRecaptcha from '@/app/components/service-with-recaptcha'
-import { getUserInfoFromToken } from '@/lib/user-info'
+import { SecondaryHeader } from '@/app/components/secondary-header'
+import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
+import type { Service1746 } from '@/types/1746'
+import type { CariocaDigitalService } from '@/types/carioca-digital'
 import { notFound } from 'next/navigation'
+import { Service1746Component } from './components/1746-service'
+import { CariocaDigitalServiceComponent } from './components/carioca-digital-service'
 
 export default async function ServicePage({
   params,
@@ -20,14 +24,34 @@ export default async function ServicePage({
     notFound()
   }
 
-  const userAuthInfo = await getUserInfoFromToken()
-  const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
+  // Fetch the service data
+  const serviceData = await fetchServiceById(collection, serviceId)
+
+  if (!serviceData) {
+    notFound()
+  }
+
+  const categoryName = getCategoryNameBySlug(categorySlug)
 
   return (
-    <ServiceWithRecaptcha
-      collection={collection}
-      serviceId={serviceId}
-      isLoggedIn={isLoggedIn}
-    />
+    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
+      <SecondaryHeader title="Descrição do Serviço" showSearchButton />
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 pt-20 md:pt-22 pb-20">
+          {collection === 'carioca-digital' && (
+            <CariocaDigitalServiceComponent
+              serviceData={serviceData as unknown as CariocaDigitalService}
+            />
+          )}
+
+          {collection === '1746' && (
+            <Service1746Component
+              serviceData={serviceData as unknown as Service1746}
+            />
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
