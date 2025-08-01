@@ -1,68 +1,10 @@
 'use client'
 
-import alvaraIcon from '@/assets/icons/png/alvara-icon.png'
-import cadrioIcon from '@/assets/icons/png/cadrio-icon.png'
-import cadunicoIcon from '@/assets/icons/png/cadunico-icon.png'
-import dividaativaIcon from '@/assets/icons/png/dividaativa-icon.png'
-import iptuIcon from '@/assets/icons/png/iptu-icon.png'
-import licencasanitariaIcon from '@/assets/icons/png/licencasanitaria-icon.png'
-import multasIcon from '@/assets/icons/png/multas-icon.png'
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
+import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
-const mostAccessedServices = [
-  {
-    id: 'iptu',
-    href: '/services/category/Taxas/84702/carioca-digital',
-    icon: iptuIcon,
-    title: 'IPTU',
-    description: 'Pague com desconto no PIX',
-  },
-  {
-    id: 'cadrio',
-    href: '/services/category/Família/92294/carioca-digital',
-    icon: cadrioIcon,
-    title: 'CAD Rio',
-    description: 'Agende seu atendimento',
-  },
-  {
-    id: 'multas',
-    href: '/services/category/Transporte/71536/carioca-digital',
-    icon: multasIcon,
-    title: 'Multas',
-    description: 'Consulta de multas de trânsito',
-  },
-  {
-    id: 'alvara',
-    href: '/services/category/Licenças/91037/carioca-digital',
-    icon: alvaraIcon,
-    title: 'Alvará',
-    description: 'Consulta prévia de local',
-  },
-  {
-    id: 'licenca-sanitaria',
-    href: '/services/category/Licenças/69823/carioca-digital',
-    icon: licencasanitariaIcon,
-    title: 'Licença Sani...',
-    description: 'Veja ou solicite o documento',
-  },
-  {
-    id: 'cadunico',
-    href: '/services/category/Família/10244935327515/1746',
-    icon: cadunicoIcon,
-    title: 'CadÚnico',
-    description: 'Consulte e atualize seus dados',
-  },
-  {
-    id: 'divida-ativa',
-    href: '/services/category/Taxas/82000/carioca-digital',
-    icon: dividaativaIcon,
-    title: 'Dívida ativa',
-    description: 'Consulte dívidas de IPTU',
-  },
-]
 
 export function MostAccessedServiceCardsSwipeSkeleton() {
   return (
@@ -140,10 +82,10 @@ export function MostAccessedServiceCardsSwipe({
       <div className="pb-0">
         <SwiperWrapper showArrows={true} showPagination={true}>
           {Array.from(
-            { length: Math.ceil(mostAccessedServices.length / 4) },
+            { length: Math.ceil(MOST_ACCESSED_SERVICES.length / 4) },
             (_, slideIndex) => {
               const startIndex = slideIndex * 4
-              const slideServices = mostAccessedServices.slice(
+              const slideServices = MOST_ACCESSED_SERVICES.slice(
                 startIndex,
                 startIndex + 4
               )
@@ -158,7 +100,7 @@ export function MostAccessedServiceCardsSwipe({
                       <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
                         <div className="mb-4">
                           <img
-                            src={service.icon.src}
+                            src={service.icon}
                             alt={service.title}
                             className="w-10 h-10"
                           />
