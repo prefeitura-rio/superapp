@@ -18,7 +18,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
   return (
     <div className="text-foreground space-y-2 px-4 pt-8 pb-24">
       <h2 className="text-md font-medium">{title}</h2>
-      <div className="grid grid-cols-2 min-[360px]:grid-cols-3 min-[900px]:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 min-[360px]:grid-cols-3 min-[900px]:grid-cols-4 gap-2 mb-12">
         {categories.map((category, index) => (
           <div
             key={category.categorySlug}
