@@ -1,23 +1,6 @@
+import serviceIcon from '@/constants/bucket'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
-
-// Import PNG icons
-import ambienteIcon from '@/assets/icons/png/ambiente-icon.png'
-import animaisIcon from '@/assets/icons/png/animais-icon.png'
-import cidadaniaIcon from '@/assets/icons/png/cidadania-icon.png'
-import cidadeIcon from '@/assets/icons/png/cidade-icon.png'
-import culturaIcon from '@/assets/icons/png/cultura-icon.png'
-import educacaoIcon from '@/assets/icons/png/educacao-icon.png'
-import emergenciaIcon from '@/assets/icons/png/emergencia-icon.png'
-import esporteIcon from '@/assets/icons/png/esporte-icon.png'
-import familiaIcon from '@/assets/icons/png/familia-icon.png'
-import impostoIcon from '@/assets/icons/png/imposto-icon.png'
-import licencaIcon from '@/assets/icons/png/licenca-icon.png'
-import saudeIcon from '@/assets/icons/png/saude-icon.png'
-import segurancaIcon from '@/assets/icons/png/seguranca-icon.png'
-import servidorIcon from '@/assets/icons/png/servidor-icon.png'
-import trabalhoIcon from '@/assets/icons/png/trabalho-icon.png'
-import transporteIcon from '@/assets/icons/png/transporte-icon.png'
 
 // API Types
 interface ApiCategory {
@@ -46,22 +29,22 @@ export interface Category {
 
 // Icon mapping based on nome_normalizado
 const iconMap: Record<string, any> = {
-  ambiente: ambienteIcon,
-  animais: animaisIcon,
-  cidadania: cidadaniaIcon,
-  cidade: cidadeIcon,
-  cultura: culturaIcon,
-  educacao: educacaoIcon,
-  emergencia: emergenciaIcon,
-  esportes: esporteIcon,
-  familia: familiaIcon,
-  taxas: impostoIcon,
-  licencas: licencaIcon,
-  saude: saudeIcon,
-  seguranca: segurancaIcon,
-  servidor: servidorIcon,
-  trabalho: trabalhoIcon,
-  transporte: transporteIcon,
+  ambiente: serviceIcon.ambienteIcon,
+  animais: serviceIcon.animaisIcon,
+  cidadania: serviceIcon.cidadaniaIcon,
+  cidade: serviceIcon.cidadeIcon,
+  cultura: serviceIcon.culturaIcon,
+  educacao: serviceIcon.educacaoIcon,
+  emergencia: serviceIcon.emergenciaIcon,
+  esportes: serviceIcon.esporteIcon,
+  familia: serviceIcon.familiaIcon,
+  taxas: serviceIcon.impostoIcon,
+  licencas: serviceIcon.licencaIcon,
+  saude: serviceIcon.saudeIcon,
+  seguranca: serviceIcon.segurancaIcon,
+  servidor: serviceIcon.servidorIcon,
+  trabalho: serviceIcon.trabalhoIcon,
+  transporte: serviceIcon.transporteIcon,
 }
 
 function getIconForCategory(nomeNormalizado: string): ReactNode {

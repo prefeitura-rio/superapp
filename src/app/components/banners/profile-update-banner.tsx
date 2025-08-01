@@ -1,7 +1,7 @@
 'use client'
 
-import smilingWoman from '@/assets/profile-update-banner.png'
 import { BannerBase } from '@/components/ui/custom/banner-base'
+import { atualizarCadastroIcon } from '@/constants/bucket'
 import Image from 'next/image'
 
 export const ProfileUpdateBanner = () => {
@@ -14,7 +14,9 @@ export const ProfileUpdateBanner = () => {
       badge="Marina"
       image={
         <Image
-          src={smilingWoman}
+          src={atualizarCadastroIcon}
+          width={100}
+          height={100}
           alt="Mão segurando o celular com check azul."
           className="h-30 w-auto absolute bottom-0 -right-6 z-20  md:right-4"
         />

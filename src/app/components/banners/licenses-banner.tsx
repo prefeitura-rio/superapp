@@ -1,8 +1,8 @@
 'use client'
 
-import smilingWoman from '@/assets/licenses-banner.png'
 import { BannerBase } from '@/components/ui/custom/banner-base'
 import Image from 'next/image'
+import { cariocaIcon } from '../../../constants/bucket'
 
 export const LicensesBanner = () => {
   return (
@@ -14,7 +14,9 @@ export const LicensesBanner = () => {
       badge="Licenças"
       image={
         <Image
-          src={smilingWoman}
+          src={cariocaIcon}
+          width={100}
+          height={100}
           alt="Pessoa de capacete segurando documentos."
           className="h-28 w-auto absolute bottom-0 right-0 z-20  md:right-7"
         />

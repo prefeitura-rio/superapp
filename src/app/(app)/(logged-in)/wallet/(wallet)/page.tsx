@@ -182,7 +182,7 @@ export default async function Wallet() {
               {walletData?.educacao?.escola?.nome && (
                 <div>
                   <EducationCard
-                    title="ESCOLA"
+                    title="ESCOLA DE JOVENS E ADULTOS"
                     name={
                       walletData?.educacao?.escola?.nome || 'Não disponível'
                     }

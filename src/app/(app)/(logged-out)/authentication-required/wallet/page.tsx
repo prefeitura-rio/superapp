@@ -15,7 +15,7 @@ export default function WalletAuthenticationRequired() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col justify-center space-y-8">
+        <div className="flex flex-col justify-center space-y-4">
           {/* Title and Description */}
           <div className="px-4 text-left space-y-2">
             <h2 className="text-4xl font-medium text-foreground leading-10 text-spacing-4 tracking-tight">
