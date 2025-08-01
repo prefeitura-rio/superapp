@@ -1,7 +1,7 @@
 'use client'
 
-import smilingWoman from '@/assets/iptu-banner.png'
 import { BannerBase } from '@/components/ui/custom/banner-base'
+import { iptuBannerIcon } from '@/constants/bucket'
 import Image from 'next/image'
 
 export const IptuBanner = () => {
@@ -14,8 +14,10 @@ export const IptuBanner = () => {
       badge="IPTU 2025"
       image={
         <Image
-          src={smilingWoman}
+          src={iptuBannerIcon}
           alt="Pessoa acessando serviços pelo celular."
+          width={100}
+          height={100}
           className="h-31 w-auto absolute bottom-0 -right-2 z-20  md:right-12"
         />
       }
