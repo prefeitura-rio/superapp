@@ -116,7 +116,7 @@ export default async function EducationCardDetail() {
       <div className="z-50">
         <div className="px-4">
           <EducationCard
-            title="ESCOLA"
+            title="ESCOLA DE JOVENS E ADULTOS"
             name={escola?.nome || 'Não disponível'}
             primaryLabel="Status"
             primaryValue={
