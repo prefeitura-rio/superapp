@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { PWAProvider } from '@/providers/pwa-provider'
+import { RecaptchaProvider } from '@/providers/recaptcha-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
 import type { Metadata } from 'next'
@@ -70,6 +71,14 @@ export default async function RootLayout({
             `,
           }}
         />
+
+        {/* Google reCAPTCHA Enterprise */}
+        <Script
+          id="google-recaptcha-enterprise"
+          strategy="afterInteractive"
+          nonce={nonce}
+          src="https://www.google.com/recaptcha/enterprise.js?render=explicit"
+        />
       </head>
       <body className={`${dmSans.className} antialiased`}>
         <ThemeProvider
@@ -78,7 +87,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <PWAProvider>{children}</PWAProvider>
+          <RecaptchaProvider>
+            <PWAProvider>{children}</PWAProvider>
+          </RecaptchaProvider>
           <ThemeColorMeta />
           <Toaster
             position="bottom-center"

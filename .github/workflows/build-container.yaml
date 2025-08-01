@@ -54,6 +54,7 @@ jobs:
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
+            --build-arg NEXT_PUBLIC_RECAPTCHA_SITE_KEY="6Lc3RJMrAAAAACxZCCgMPv3nTDQkfZsBaov3z1bl" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .

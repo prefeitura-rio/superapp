@@ -11,10 +11,12 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 
 interface HomeCategoriesGridProps {
   categories?: Category[]
+  isLoading?: boolean
 }
 
 export default function HomeCategoriesGrid({
   categories,
+  isLoading = false,
 }: HomeCategoriesGridProps) {
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -22,7 +24,7 @@ export default function HomeCategoriesGrid({
     setIsLoaded(true)
   }, [])
 
-  if (!isLoaded) {
+  if (!isLoaded || isLoading) {
     return (
       <div className="px-4 pb-4">
         <div className="flex items-center justify-between mb-2">

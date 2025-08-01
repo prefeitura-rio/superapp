@@ -1,6 +1,6 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 import HeaderWrapper from '@/app/components/header-wrapper'
-import HomeCategoriesGrid from '@/app/components/home-categories-grid'
+import HomeWithRecaptcha from '@/app/components/home-with-recaptcha'
 import {
   MostAccessedServiceCardsSwipe,
   MostAccessedServiceCardsSwipeSkeleton,
@@ -20,7 +20,6 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
-import { fetchCategories } from '@/lib/categories'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import {
   formatOperatingHours,
@@ -150,7 +149,7 @@ export default async function Home() {
     }
   }
 
-  const categories = await fetchCategories()
+  // Categories are now fetched by HomeWithRecaptcha component
 
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
@@ -163,8 +162,8 @@ export default async function Home() {
         desktopSkeletonComponent={<SuggestionCardsSwipeSkeleton />}
       />
 
-      {/* Home Categories Grid*/}
-      <HomeCategoriesGrid categories={categories} />
+      {/* Home Categories Grid with reCAPTCHA for non-authenticated users */}
+      <HomeWithRecaptcha isLoggedIn={isLoggedIn} />
 
       {/* Most Accessed Service Cards*/}
       <ResponsiveWrapper

@@ -19,17 +19,26 @@ export async function getCategoryNameBySlug(
 }
 
 export async function fetchServicesByCategory(
-  categorySlug: string
+  categorySlug: string,
+  recaptchaToken?: string
 ): Promise<ServicesApiResponse | null> {
   try {
-    // Decode the URL-encoded category slug - no need to encode again
-    const decodedSlug = decodeURIComponent(categorySlug)
-    const url = `${rootUrl}/categoria/1746,carioca-digital?categoria=${decodedSlug}&page=1&per_page=20`
+    const headers: HeadersInit = {}
 
-    const response = await fetch(url, {
-      cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 86400 }, // Revalidate every 1 day
-    })
+    // Add reCAPTCHA token if provided
+    if (recaptchaToken) {
+      headers['X-Recaptcha-Token'] = recaptchaToken
+    }
+
+    // Use absolute URL for server-side fetching
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const response = await fetch(
+      `${baseUrl}/api/services/category/${encodeURIComponent(categorySlug)}`,
+      {
+        headers,
+        next: { revalidate: 86400 }, // Cache for 1 day
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to fetch services: ${response.status}`)
@@ -44,15 +53,26 @@ export async function fetchServicesByCategory(
 
 export async function fetchServiceById(
   collection: string,
-  id: string
+  id: string,
+  recaptchaToken?: string
 ): Promise<CariocaDigitalService | Service1746 | null> {
   try {
-    const url = `${rootUrl}/documento/${collection}/${id}`
+    const headers: HeadersInit = {}
 
-    const response = await fetch(url, {
-      cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 3600 }, // Revalidate every hour
-    })
+    // Add reCAPTCHA token if provided
+    if (recaptchaToken) {
+      headers['X-Recaptcha-Token'] = recaptchaToken
+    }
+
+    // Use absolute URL for server-side fetching
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const response = await fetch(
+      `${baseUrl}/api/services/${collection}/${id}`,
+      {
+        headers,
+        next: { revalidate: 3600 }, // Cache for 1 hour
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to fetch service: ${response.status}`)

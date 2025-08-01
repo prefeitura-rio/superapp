@@ -74,7 +74,7 @@ export function middleware(request: NextRequest) {
     object-src 'none';
     base-uri 'self';
     form-action 'self' https://*.acesso.gov.br/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googletagmanager.com/* https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
-    frame-ancestors 'none';
+    frame-ancestors https://www.google.com https://www.gstatic.com;
     upgrade-insecure-requests;
   `.trim()
 

@@ -3,17 +3,6 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get search query from URL parameters
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q')
-
-    if (!query) {
-      return NextResponse.json(
-        { error: 'Search query is required' },
-        { status: 400 }
-      )
-    }
-
     // Get reCAPTCHA token from headers
     const recaptchaToken = request.headers.get('X-Recaptcha-Token')
 
@@ -37,39 +26,34 @@ export async function GET(request: NextRequest) {
       headers['X-Recaptcha-Token'] = recaptchaToken
     }
 
-    // Fetch search results from the external API
+    // Fetch categories from the external API
     const response = await fetch(
-      `${rootUrl}/busca-hibrida-multi?q=${encodeURIComponent(query)}&collections=1746,carioca-digital,pref-rio&page=1&per_page=20`,
+      `${rootUrl}/categorias-relevancia?collections=1746,carioca-digital`,
       {
         headers,
-        next: { revalidate: 3600 }, // Cache for 1 hour
+        next: { revalidate: 86400 }, // Cache for 1 day
       }
     )
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Search API error:', response.status, errorText)
+      console.error('Categories API error:', response.status, errorText)
       return NextResponse.json(
-        { error: 'Failed to fetch search results' },
+        { error: 'Failed to fetch categories' },
         { status: response.status }
       )
     }
 
-    const data = await response.json()
+    const categories = await response.json()
 
-    // Transform the new format to the old format expected by the frontend
-    const transformedData = {
-      result: data.hits ? data.hits.map((hit: any) => hit.document) : [],
-    }
-
-    // Return the transformed search results with caching headers
-    return NextResponse.json(transformedData, {
+    // Return the categories with caching headers
+    return NextResponse.json(categories, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=3600',
+        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400',
       },
     })
   } catch (error) {
-    console.error('Search route error:', error)
+    console.error('Categories route error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
