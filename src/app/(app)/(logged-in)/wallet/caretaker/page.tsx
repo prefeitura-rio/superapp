@@ -3,7 +3,10 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
 import { GlobeIcon, PhoneIcon } from '@/assets/icons'
 import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
-import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import {
+  formatMaintenanceRequestsCount,
+  getMaintenanceRequestStats,
+} from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export default async function CaretakerCardDetail() {
@@ -47,7 +50,7 @@ export default async function CaretakerCardDetail() {
           <CaretakerCard
             href="/wallet/caretaker"
             title="CUIDADOS COM A CIDADE"
-            name={maintenanceStats.aberto.toString()}
+            name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
             primaryLabel="Total de chamados"
             primaryValue={maintenanceStats.total.toString()}
             secondaryLabel="Fechados"
