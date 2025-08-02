@@ -23,11 +23,11 @@ import {
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
+import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
-  formatOperatingHours,
-  getCurrentOperatingStatus,
-  getHealthUnitRiskStatus,
-} from '@/lib/health-unit-utils'
+  formatHealthOperatingHours,
+  getHealthOperatingStatus,
+} from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export default async function Home() {
@@ -110,17 +110,11 @@ export default async function Home() {
 
     // Only use health unit API for operating hours and current status
     const operatingHours = healthUnitData
-      ? formatOperatingHours(
-          healthUnitData.funcionamento_dia_util,
-          healthUnitData.funcionamento_sabado
-        )
+      ? formatHealthOperatingHours(healthUnitData.funcionamento_dia_util)
       : 'Não informado'
 
     const statusValue = healthUnitData
-      ? getCurrentOperatingStatus(
-          healthUnitData.funcionamento_dia_util,
-          healthUnitData.funcionamento_sabado
-        )
+      ? getHealthOperatingStatus(healthUnitData.funcionamento_dia_util)
       : 'Não informado'
 
     // Only use health unit API for risk status

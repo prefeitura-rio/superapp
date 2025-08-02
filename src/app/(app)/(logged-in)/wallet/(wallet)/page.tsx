@@ -14,17 +14,15 @@ import {
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
-import {
-  formatOperatingHours,
-  getCurrentOperatingStatus,
-  getHealthUnitRiskStatus,
-} from '@/lib/health-unit-utils'
+import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
 import {
   formatEducationOperatingHours,
+  formatHealthOperatingHours,
+  getHealthOperatingStatus,
   getOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -117,13 +115,11 @@ export default async function Wallet() {
   let riskStatus = null
 
   if (healthUnitData) {
-    healthStatusValue = getCurrentOperatingStatus(
-      healthUnitData.funcionamento_dia_util,
-      healthUnitData.funcionamento_sabado
+    healthStatusValue = getHealthOperatingStatus(
+      healthUnitData.funcionamento_dia_util
     )
-    healthOperatingHours = formatOperatingHours(
-      healthUnitData.funcionamento_dia_util,
-      healthUnitData.funcionamento_sabado
+    healthOperatingHours = formatHealthOperatingHours(
+      healthUnitData.funcionamento_dia_util
     )
   }
 
@@ -144,7 +140,7 @@ export default async function Wallet() {
             <SearchButton />
           </div>
 
-          {walletInfo.hasData ? (
+          {walletInfo && (
             <div className="grid w-full gap-2">
               {/* Health Card - only show if wallet has health data */}
               {hasHealthData && (
@@ -245,12 +241,6 @@ export default async function Wallet() {
                   />
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center py-6">
-              <p className="text-muted-foreground text-center">
-                No momento sua carteira está vazia.
-              </p>
             </div>
           )}
         </section>

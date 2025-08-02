@@ -13,11 +13,11 @@ import {
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
+import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
-  formatOperatingHours,
-  getCurrentOperatingStatus,
-  getHealthUnitRiskStatus,
-} from '@/lib/health-unit-utils'
+  formatHealthOperatingHours,
+  getHealthOperatingStatus,
+} from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 interface TeamPageProps {
@@ -166,13 +166,11 @@ export default async function HealthCardDetail() {
   let riskStatus = null
 
   if (healthUnitData) {
-    operatingHours = formatOperatingHours(
-      healthUnitData.funcionamento_dia_util,
-      healthUnitData.funcionamento_sabado
+    operatingHours = formatHealthOperatingHours(
+      healthUnitData.funcionamento_dia_util
     )
-    statusValue = getCurrentOperatingStatus(
-      healthUnitData.funcionamento_dia_util,
-      healthUnitData.funcionamento_sabado
+    statusValue = getHealthOperatingStatus(
+      healthUnitData.funcionamento_dia_util
     )
   }
 

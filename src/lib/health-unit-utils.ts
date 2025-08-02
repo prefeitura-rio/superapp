@@ -1,5 +1,9 @@
 import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import type { RiskStatusProps } from '../types/health'
+import {
+  formatHealthOperatingHours,
+  getHealthOperatingStatus,
+} from './operating-status'
 
 /**
  * Format the operating hours for the current day only
@@ -8,31 +12,7 @@ export function formatOperatingHours(
   funcionamento_dia_util: { inicio: number; fim: number },
   funcionamento_sabado?: { inicio: number; fim: number } | null
 ): string {
-  const formatHour = (hour: number): string => {
-    return `${hour}h`
-  }
-
-  const now = new Date()
-  const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-
-  // Check if it's a weekday (Monday to Friday)
-  if (currentDay >= 1 && currentDay <= 5) {
-    return `${formatHour(funcionamento_dia_util.inicio)} às ${formatHour(funcionamento_dia_util.fim)}`
-  }
-
-  // Check if it's Saturday and Saturday hours are available
-  if (currentDay === 6 && funcionamento_sabado) {
-    return `${formatHour(funcionamento_sabado.inicio)} às ${formatHour(funcionamento_sabado.fim)}`
-  }
-
-  // Sunday or Saturday without hours - show when it opens next
-  if (currentDay === 0) {
-    // It's Sunday, opens tomorrow (Monday)
-    return `Abre amanhã às ${formatHour(funcionamento_dia_util.inicio)}`
-  }
-
-  // It's Saturday without Saturday hours, opens Monday
-  return `Abre segunda às ${formatHour(funcionamento_dia_util.inicio)}`
+  return formatHealthOperatingHours(funcionamento_dia_util)
 }
 
 /**
@@ -56,31 +36,7 @@ export function getCurrentOperatingStatus(
   funcionamento_dia_util: { inicio: number; fim: number },
   funcionamento_sabado?: { inicio: number; fim: number } | null
 ): string {
-  const now = new Date()
-  const currentHour = now.getHours()
-  const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-
-  // Check if it's a weekday (Monday to Friday)
-  if (currentDay >= 1 && currentDay <= 5) {
-    if (
-      currentHour >= funcionamento_dia_util.inicio &&
-      currentHour < funcionamento_dia_util.fim
-    ) {
-      return 'Aberto'
-    }
-  }
-
-  // Check if it's Saturday and Saturday hours are available
-  if (currentDay === 6 && funcionamento_sabado) {
-    if (
-      currentHour >= funcionamento_sabado.inicio &&
-      currentHour < funcionamento_sabado.fim
-    ) {
-      return 'Aberto'
-    }
-  }
-
-  return 'Fechado'
+  return getHealthOperatingStatus(funcionamento_dia_util)
 }
 
 /**
