@@ -22,7 +22,7 @@ export async function updateAddress(
         status: response.status,
       }
     }
-    revalidateTag('update-user-address')
+    revalidateTag(`user-info-${userAuthInfo.cpf}`)
     return { success: true, data: response.data }
   } catch (error: any) {
     const err = error as HandlersErrorResponse

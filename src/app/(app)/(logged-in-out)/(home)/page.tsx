@@ -16,12 +16,13 @@ import CarteiraSectionSwipe, {
   CarteiraSectionSwipeSkeleton,
 } from '@/app/components/wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
-import {
-  getCitizenCpfMaintenanceRequest,
-  getCitizenCpfWallet,
-} from '@/http/citizen/citizen'
 import { fetchCategories } from '@/lib/categories'
-import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
+import {
+  getDalCitizenCpfMaintenanceRequest,
+  getDalCitizenCpfWallet,
+  getDalHealthUnitInfo,
+  getDalHealthUnitRisk,
+} from '@/lib/dal'
 import {
   formatOperatingHours,
   getCurrentOperatingStatus,
@@ -40,9 +41,7 @@ export default async function Home() {
   if (isLoggedIn) {
     // Fetch wallet data
     try {
-      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
-        cache: 'force-cache',
-      })
+      const walletResponse = await getDalCitizenCpfWallet(userAuthInfo.cpf)
       if (walletResponse.status === 200) {
         walletData = walletResponse.data
       } else {
@@ -60,11 +59,8 @@ export default async function Home() {
     if (cnes) {
       try {
         const [unitResponse, riskResponse] = await Promise.all([
-          getHealthUnitInfo(cnes, {
-            cache: 'force-cache',
-            next: { revalidate: 3600 }, //revalidate every hour
-          }),
-          getHealthUnitRisk(cnes),
+          getDalHealthUnitInfo(cnes),
+          getDalHealthUnitRisk(cnes),
         ])
         if (unitResponse.status === 200) {
           healthUnitData = unitResponse.data
@@ -86,14 +82,11 @@ export default async function Home() {
 
     // Fetch maintenance requests data
     try {
-      const maintenanceResponse = await getCitizenCpfMaintenanceRequest(
+      const maintenanceResponse = await getDalCitizenCpfMaintenanceRequest(
         userAuthInfo.cpf,
         {
           page: 1,
           per_page: 100, // Get all requests for counting : TODO: paginate
-        },
-        {
-          cache: 'force-cache',
         }
       )
       if (maintenanceResponse.status === 200) {

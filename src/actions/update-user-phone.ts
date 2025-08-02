@@ -13,7 +13,7 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
   try {
     const response = await putCitizenCpfPhone(user.cpf, data)
     if (response.status === 200) {
-      revalidateTag('update-user-phone-number')
+      revalidateTag(`user-info-${user.cpf}`)
       return { success: true }
     }
     return {

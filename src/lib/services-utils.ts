@@ -3,7 +3,7 @@ import type { CariocaDigitalService } from '@/types/carioca-digital'
 import type { ServicesApiResponse } from '@/types/service'
 import { fetchCategories } from './categories'
 
-const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
+const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL
 
 export async function getCategoryNameBySlug(
   categorySlug: string
@@ -24,7 +24,7 @@ export async function fetchServicesByCategory(
   try {
     // Decode the URL-encoded category slug - no need to encode again
     const decodedSlug = decodeURIComponent(categorySlug)
-    const url = `${rootUrl}/categoria/1746,carioca-digital?categoria=${decodedSlug}&page=1&per_page=20`
+    const url = `${rootUrl}app-busca-search/api/v1/categoria/1746,carioca-digital?categoria=${decodedSlug}&page=1&per_page=20`
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production
@@ -47,7 +47,7 @@ export async function fetchServiceById(
   id: string
 ): Promise<CariocaDigitalService | Service1746 | null> {
   try {
-    const url = `${rootUrl}/documento/${collection}/${id}`
+    const url = `${rootUrl}app-busca-search/api/v1/documento/${collection}/${id}`
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production

@@ -1,7 +1,7 @@
 import { AddressInfoCard } from '@/app/components/address-info-card'
 import { EmptyAddress } from '@/app/components/empty-address'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { getCitizenCpf } from '@/http/citizen/citizen'
+import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { shouldShowUpdateBadge } from '@/lib/utils'
 
@@ -11,10 +11,7 @@ export default async function UserAddress() {
   let addressInfo = null
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, {
-        cache: 'force-cache',
-        next: { tags: ['update-user-address'] },
-      })
+      const response = await getDalCitizenCpf(userAuthInfo.cpf)
       if (response.status === 200) {
         userInfo = response.data
         addressInfo = userInfo?.endereco?.principal || null
@@ -26,7 +23,9 @@ export default async function UserAddress() {
     }
   }
 
-  const showAddressBadge = addressInfo ? shouldShowUpdateBadge(addressInfo.updated_at) : false
+  const showAddressBadge = addressInfo
+    ? shouldShowUpdateBadge(addressInfo.updated_at)
+    : false
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">

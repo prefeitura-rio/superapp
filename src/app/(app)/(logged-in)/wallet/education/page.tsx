@@ -2,7 +2,6 @@ import { FrequencyInfoButton } from '@/app/components/frequency-info-button'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import {
   formatEducationOperatingHours,
   getOperatingStatus,
@@ -12,6 +11,7 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { getFrequenciaEscolarTextClass } from '@/app/components/utils'
 import { EducationCard } from '@/app/components/wallet-cards/education-card'
 import { MapPinIcon, PhoneIcon, WhatsappIcon } from '@/assets/icons'
+import { getDalCitizenCpfWallet } from '@/lib/dal'
 
 interface DesempenhoSectionProps {
   educationData?: {
@@ -82,9 +82,7 @@ export default async function EducationCardDetail() {
 
   if (userAuthInfo.cpf) {
     try {
-      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
-        cache: 'force-cache',
-      })
+      const walletResponse = await getDalCitizenCpfWallet(userAuthInfo.cpf)
       if (walletResponse.status === 200) {
         walletData = walletResponse.data
       } else {

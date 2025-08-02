@@ -2,7 +2,7 @@ import Calls from '@/app/components/calls'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
 import { GlobeIcon, PhoneIcon } from '@/assets/icons'
-import { getCitizenCpfMaintenanceRequest } from '@/http/citizen/citizen'
+import { getDalCitizenCpfMaintenanceRequest } from '@/lib/dal'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
@@ -11,19 +11,15 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
-  await new Promise(resolve => setTimeout(resolve, 5000))
   let maintenanceRequests
 
   if (userAuthInfo.cpf) {
     try {
-      const maintenanceResponse = await getCitizenCpfMaintenanceRequest(
+      const maintenanceResponse = await getDalCitizenCpfMaintenanceRequest(
         userAuthInfo.cpf,
         {
           page: 1,
           per_page: 100, // Get all requests : TODO: paginate
-        },
-        {
-          cache: 'force-cache',
         }
       )
       if (maintenanceResponse.status === 200) {

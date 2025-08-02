@@ -24,7 +24,9 @@ const getUrl = (contextUrl: string): string => {
   }
 
   // Ensure baseUrl ends with '/' and contextUrl doesn't start with '/'
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+  const normalizedBaseUrl = baseUrl.endsWith('/')
+    ? `${baseUrl}rmi/v1/`
+    : `${baseUrl}/rmi/v1/`
   const normalizedContextUrl = contextUrl.startsWith('/')
     ? contextUrl.slice(1)
     : contextUrl
@@ -57,8 +59,6 @@ export const customFetch = async <T>(
     ...options,
     headers: requestHeaders,
   }
-
-  console.log('RequestInit:', requestInit)
 
   const response = await fetch(requestUrl, requestInit)
   const data = await getBody<T>(response)

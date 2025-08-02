@@ -4,7 +4,7 @@ import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
-import { getCitizenCpf } from '@/http/citizen/citizen'
+import { getDalCitizenCpf } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
@@ -16,16 +16,7 @@ export default async function PersonalInfoForm() {
   let userInfo
   if (userAuthInfo.cpf) {
     try {
-      const response = await getCitizenCpf(userAuthInfo.cpf, {
-        cache: 'force-cache',
-        next: {
-          tags: [
-            'update-user-email',
-            'update-user-phone-number',
-            'update-user-race',
-          ],
-        },
-      })
+      const response = await getDalCitizenCpf(userAuthInfo.cpf)
       if (response.status === 200) {
         userInfo = response.data
       } else {
@@ -42,8 +33,12 @@ export default async function PersonalInfoForm() {
     return d.toLocaleDateString('pt-BR')
   }
 
-  const showPhoneBadge = userInfo?.telefone?.principal ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at) : false
-  const showEmailBadge = userInfo?.email?.principal ? shouldShowUpdateBadge(userInfo.email.principal.updated_at) : false
+  const showPhoneBadge = userInfo?.telefone?.principal
+    ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at)
+    : false
+  const showEmailBadge = userInfo?.email?.principal
+    ? shouldShowUpdateBadge(userInfo.email.principal.updated_at)
+    : false
 
   return (
     <>
@@ -105,8 +100,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="Celular"
-            optionalLabelVariant={showPhoneBadge ? "destructive" : undefined}
-            optionalLabel={showPhoneBadge ? "Atualizar" : undefined}
+            optionalLabelVariant={showPhoneBadge ? 'destructive' : undefined}
+            optionalLabel={showPhoneBadge ? 'Atualizar' : undefined}
             content={formatPhone(
               userInfo?.telefone?.principal?.ddi,
               userInfo?.telefone?.principal?.ddd,
@@ -120,8 +115,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="E-mail"
-            optionalLabelVariant={showEmailBadge ? "destructive" : undefined}
-            optionalLabel={showEmailBadge ? "Atualizar" : undefined}
+            optionalLabelVariant={showEmailBadge ? 'destructive' : undefined}
+            optionalLabel={showEmailBadge ? 'Atualizar' : undefined}
             content={userInfo?.email?.principal?.valor || ''}
             variant="default"
             disabled

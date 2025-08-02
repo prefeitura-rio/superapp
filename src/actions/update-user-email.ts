@@ -16,7 +16,7 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
         status: response.status,
       }
     }
-    revalidateTag('update-user-email')
+    revalidateTag(`user-info-${userAuthInfo.cpf}`)
     return { success: true, data: response.data }
   } catch (error: any) {
     const err = error as HandlersErrorResponse

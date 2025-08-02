@@ -1,4 +1,3 @@
-
 // Types for the health unit API responses
 export interface HealthUnitInfo {
   cnes: string
@@ -51,12 +50,12 @@ const healthUnitFetch = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const baseUrl = 'https://services.staging.app.dados.rio/subpav-osa-api'
-  
+  const baseUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL}subpav-osa-api`
+
   const url = `${baseUrl}${endpoint}`
-  
+
   const headers = {
-    'Authorization': `Bearer ${process.env.API_KEY_SUBPAV_OSA_SMS}`,
+    Authorization: `Bearer ${process.env.API_KEY_SUBPAV_OSA_SMS}`,
     'Content-Type': 'application/json',
     ...options.headers,
   }
@@ -82,10 +81,7 @@ export const getHealthUnitInfo = async (
   cnes: string,
   options?: RequestInit
 ): Promise<GetHealthUnitInfoResponse> => {
-  return healthUnitFetch<GetHealthUnitInfoResponse>(
-    `/unidade/${cnes}`,
-    options
-  )
+  return healthUnitFetch<GetHealthUnitInfoResponse>(`/unidade/${cnes}`, options)
 }
 
 /**
@@ -99,4 +95,4 @@ export const getHealthUnitRisk = async (
     `/unidade/${cnes}/risco`,
     options
   )
-} 
+}

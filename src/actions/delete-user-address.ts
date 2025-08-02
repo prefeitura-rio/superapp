@@ -28,7 +28,7 @@ export async function deleteUserAddress() {
         status: response.status,
       }
     }
-    revalidateTag('update-user-address')
+    revalidateTag(`user-info-${userAuthInfo.cpf}`)
     console.log('Address deleted successfully:', response.data)
     return { success: true, data: response.data }
   } catch (error: unknown) {

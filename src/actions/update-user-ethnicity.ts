@@ -27,7 +27,7 @@ export async function updateUserEthnicity(
     )
 
     if (response.status === 200) {
-      revalidateTag('update-user-race')
+      revalidateTag(`user-info-${userInfo.cpf}`)
       return { success: true, message: 'Etnia atualizada com sucesso.' }
     }
     return {

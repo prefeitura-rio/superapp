@@ -8,8 +8,11 @@ import {
 } from '@/assets/icons'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { getCitizenCpfWallet } from '@/http/citizen/citizen'
-import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
+import {
+  getDalCitizenCpfWallet,
+  getDalHealthUnitInfo,
+  getDalHealthUnitRisk,
+} from '@/lib/dal'
 import {
   formatOperatingHours,
   getCurrentOperatingStatus,
@@ -97,9 +100,7 @@ export default async function HealthCardDetail() {
 
   if (userAuthInfo.cpf) {
     try {
-      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
-        cache: 'force-cache',
-      })
+      const walletResponse = await getDalCitizenCpfWallet(userAuthInfo.cpf)
       if (walletResponse.status === 200) {
         walletData = walletResponse.data
       } else {
@@ -117,11 +118,8 @@ export default async function HealthCardDetail() {
     if (cnes) {
       try {
         const [unitResponse, riskResponse] = await Promise.all([
-          getHealthUnitInfo(cnes, {
-            cache: 'force-cache',
-            next: { revalidate: 3600 },
-          }),
-          getHealthUnitRisk(cnes),
+          getDalHealthUnitInfo(cnes),
+          getDalHealthUnitRisk(cnes),
         ])
 
         if (unitResponse.status === 200) {

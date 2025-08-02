@@ -1,11 +1,11 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import { CalendarIcon } from '@/assets/icons'
-import { getCitizenCpfWallet } from '@/http/citizen/citizen'
 import {
   formatRecadastramentoDate,
   getCadUnicoStatus,
 } from '@/lib/cadunico-utils'
+import { getDalCitizenCpfWallet } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export default async function SocialAssistanceCardDetail() {
@@ -14,9 +14,7 @@ export default async function SocialAssistanceCardDetail() {
 
   if (userAuthInfo.cpf) {
     try {
-      const walletResponse = await getCitizenCpfWallet(userAuthInfo.cpf, {
-        cache: 'force-cache',
-      })
+      const walletResponse = await getDalCitizenCpfWallet(userAuthInfo.cpf)
       if (walletResponse.status === 200) {
         walletData = walletResponse.data
       } else {
