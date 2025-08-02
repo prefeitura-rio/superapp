@@ -70,6 +70,7 @@ export async function fetchCategories(): Promise<Category[]> {
     const response = await fetch(
       `${rootUrl}/categorias-relevancia?collections=1746,carioca-digital`,
       {
+        cache: 'force-cache',
         next: { revalidate: 86400 }, // Cache for 1 day
       }
     )

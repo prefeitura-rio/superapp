@@ -3,21 +3,26 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')
-  const recaptchaToken = request.headers.get('x-recaptcha-token')
-  //TODO: ADD REAL RECAPTCHA TOKEN
-  const headers = {
-    ...(recaptchaToken
-      ? { 'X-Recaptcha-Token': recaptchaToken }
-      : { 'X-Recaptcha-Token': 'mockada' }),
+
+  if (!q) {
+    return NextResponse.json(
+      { error: 'Query parameter q is required' },
+      { status: 400 }
+    )
   }
 
   const rootUrl = process.env.NEXT_PUBLIC_API_BUSCA_ROOT_URL
 
   try {
+    // Use fetch with explicit caching
     const response = await fetch(
       `${rootUrl}/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=20`,
       {
-        headers,
+        // Cache the response for 1 hour
+        next: {
+          revalidate: 3600,
+          tags: ['search-api'],
+        },
       }
     )
 

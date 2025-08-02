@@ -5,7 +5,7 @@ import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function WalletAuthenticationRequired() {
+export default async function WalletAuthenticationRequired() {
   return (
     <>
       <main className="flex max-w-xl mx-auto min-h-lvh flex-col bg-background text-foreground pb-32">
@@ -65,8 +65,6 @@ export default function WalletAuthenticationRequired() {
             <div className="text-center">
               <Link
                 href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="text-sm text-foreground-light font-normal"
               >
                 Crie uma conta
