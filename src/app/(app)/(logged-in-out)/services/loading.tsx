@@ -29,14 +29,14 @@ export default function ServicesLoading() {
               >
                 {/* Icon Skeleton */}
                 <div className="mb-4">
-                  <Skeleton className="bg-gray-500/15 w-10 h-10 rounded-lg" />
+                  <Skeleton className="w-10 h-10 rounded-lg" />
                 </div>
 
                 {/* Text Content */}
                 <div className="space-y-2">
-                  <Skeleton className="bg-gray-500/15 h-4 w-16" />
-                  <Skeleton className="bg-gray-500/15 h-3 w-full" />
-                  <Skeleton className="bg-gray-500/15 h-3 w-20" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
               </Skeleton>
             ))}
