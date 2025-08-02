@@ -45,6 +45,7 @@ export function AddressDetailsDrawerContent({
 
   return (
     <BottomSheet
+      contentClassName="[@media(max-height:700px)]:min-h-[95vh]"
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}

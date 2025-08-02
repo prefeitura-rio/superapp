@@ -42,7 +42,7 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
         <DrawerContent
           ref={ref}
           className={cn(
-            'p-6 max-w-4xl [@media(max-height:700px)]:min-h-[95vh] mx-auto !rounded-t-3xl',
+            'p-6 max-w-4xl mx-auto !rounded-t-3xl',
             contentClassName
           )}
           {...props}
