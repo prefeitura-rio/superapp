@@ -194,7 +194,7 @@ export default async function HealthCardDetail() {
 
   return (
     <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" />
+      <SecondaryHeader title="Carteira" className="max-w-xl" />
       <div className="z-50">
         <div className="px-4">
           <HealthCard

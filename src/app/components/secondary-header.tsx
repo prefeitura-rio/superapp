@@ -8,17 +8,21 @@ import { SearchButton } from './search-button'
 interface SecondaryHeaderProps {
   title: string
   showSearchButton?: boolean
+  className?: string
 }
 
 export function SecondaryHeader({
   title,
   showSearchButton,
+  className = 'max-w-4xl',
 }: SecondaryHeaderProps) {
   const router = useRouter()
 
   return (
     <>
-      <header className="px-4 py-4 md:py-6 fixed top-0 w-full max-w-4xl mx-auto z-50 bg-background text-foreground h-auto">
+      <header
+        className={`px-4 py-4 md:py-6 fixed top-0 w-full ${className} mx-auto z-50 bg-background text-foreground h-auto`}
+      >
         <div className="grid grid-cols-3 items-center">
           {/* Left column - IconButton */}
           <div className="flex justify-start">
