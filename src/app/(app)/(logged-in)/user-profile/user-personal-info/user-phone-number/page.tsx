@@ -51,7 +51,7 @@ export default function PhoneNumberForm() {
         const errorMessage =
           result.error === 'No change: phone matches current data'
             ? 'Esse já é o seu número'
-            : 'Erro'
+            : 'Erro ao atualizar número'
         toast.error(errorMessage)
       }
     })
