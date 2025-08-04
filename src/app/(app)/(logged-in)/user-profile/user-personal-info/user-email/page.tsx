@@ -58,7 +58,7 @@ export default function EmailForm() {
         })
         setDrawerOpen(true)
       } else if (result.status === 409) {
-        toast.error('Esse já é o seu email')
+        toast.error('Email Já Cadastrado')
       } else {
         toast.error('Erro ao atualizar email.')
       }
