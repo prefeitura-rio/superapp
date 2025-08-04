@@ -1,21 +1,11 @@
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
 import Link from 'next/link'
 
-export default function MostAccessedServiceCards({
-  showMore,
-}: { showMore: boolean }) {
+export default function MostAccessedServiceCards() {
   return (
     <>
       <div className="flex items-center justify-between mb-2 px-4">
         <h2 className="text-md font-medium text-foreground"> Mais acessados</h2>
-        {showMore && (
-          <Link
-            href="/services"
-            className="text-md text-muted-foreground cursor-pointer font-normal"
-          >
-            Ver mais
-          </Link>
-        )}
       </div>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="overflow-x-auto no-scrollbar">
