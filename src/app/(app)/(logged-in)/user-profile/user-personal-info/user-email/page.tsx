@@ -16,27 +16,40 @@ import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDecla
 import confetti from 'canvas-confetti'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_EMAIL_LENGTH = 5
+
+const validateEmail = (val: string) =>
+  val.length >= MIN_EMAIL_LENGTH && EMAIL_REGEX.test(val)
 
 export default function EmailForm() {
   const [email, setEmail] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const emailStateInput = useInputValidation({
     value: email,
-    validate: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+    validate: val => EMAIL_REGEX.test(val),
     debounceMs: 800,
-    minLength: 5,
+    minLength: MIN_EMAIL_LENGTH,
   })
 
+  const isEmailValid = validateEmail(email)
+
   async function handleSave() {
-    setError(null)
+    if (!isEmailValid) {
+      toast.error('Email inválido. Tente novamente.')
+      setEmail('')
+      return
+    }
     startTransition(async () => {
       const result = await updateUserEmail({
         valor: email,
       } as ModelsSelfDeclaredEmailInput)
+
       if (result.success) {
         confetti({
           particleCount: 100,
@@ -44,8 +57,10 @@ export default function EmailForm() {
           origin: { y: 0.7 },
         })
         setDrawerOpen(true)
+      } else if (result.status === 409) {
+        toast.error('Esse já é o seu email')
       } else {
-        setError(result.error || 'Erro ao atualizar email')
+        toast.error('Erro ao atualizar email.')
       }
     })
   }
@@ -79,7 +94,6 @@ export default function EmailForm() {
           state={emailStateInput}
           showClearButton
         />
-        {error && <span className="text-red-500 text-sm">{error}</span>}
         <CustomButton
           size="xl"
           fullWidth
