@@ -2,7 +2,7 @@ import androidIcon from '@/assets/android_button.png'
 import iosIcon from '@/assets/ios_button.png'
 import { Button } from '@/components/ui/button'
 import { applyEtapaRules } from '@/lib/content-rules'
-import { convertUrlsToLinks } from '@/lib/url-utils'
+import { convertUrlsToLinks, ensureUrlProtocol } from '@/lib/url-utils'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
 import Link from 'next/link'
 import { CollapsibleText } from './collapsible-text'
@@ -35,7 +35,7 @@ export function CariocaDigitalServiceComponent({
           className="mb-6 rounded-full"
         >
           <Link
-            href={serviceData.link_acesso}
+            href={ensureUrlProtocol(serviceData.link_acesso)}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -121,7 +121,7 @@ export function CariocaDigitalServiceComponent({
                           className="rounded-full my-2"
                         >
                           <Link
-                            href={etapa.link_solicitacao}
+                            href={ensureUrlProtocol(etapa.link_solicitacao)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-primary inline-block"
@@ -168,7 +168,7 @@ export function CariocaDigitalServiceComponent({
                         </p>
                         {documentUrl && (
                           <Link
-                            href={documentUrl}
+                            href={ensureUrlProtocol(documentUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-primary hover:text-primary/80 underline mt-2 inline-block"
@@ -270,8 +270,9 @@ export function CariocaDigitalServiceComponent({
                 <div className="inline-block">
                   <Link
                     href={
-                      serviceData.app_android ??
-                      'https://play.google.com/store/apps/details?id=br.com.datametrica.canal1746&hl=pt_BR'
+                      serviceData.app_android
+                        ? ensureUrlProtocol(serviceData.app_android)
+                        : 'https://play.google.com/store/apps/details?id=br.com.datametrica.canal1746&hl=pt_BR'
                     }
                     target="_blank"
                     rel="noopener noreferrer"
@@ -284,7 +285,7 @@ export function CariocaDigitalServiceComponent({
               {serviceData.app_ios && (
                 <div className="inline-block">
                   <Link
-                    href={serviceData.app_ios}
+                    href={ensureUrlProtocol(serviceData.app_ios)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block hover:opacity-80 transition-opacity"
