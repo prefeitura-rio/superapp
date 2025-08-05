@@ -85,6 +85,20 @@ html::-webkit-scrollbar {
   animation: shine-reverse 0.8s forwards;
 }
 
+.large-switch {
+  height: 24px;
+  width: 44px;
+}
+
+.large-switch [data-state='checked'] {
+  transform: translateX(5px);
+}
+
+.large-switch-thumb {
+  width: 19px;
+  height: 19px;
+}
+
 /* .grecaptcha-badge { visibility: hidden; } */
 
 @keyframes shine-reverse {
@@ -271,7 +285,7 @@ html::-webkit-scrollbar {
   --red-200: #a93333;
   --purple-100: #e6cef6;
   --orange-100: #f5d7b8;
-  --skeleton: #EAEAEA;
+  --skeleton: #eaeaea;
   /* custom border width */
   --border-width: 1.4px;
 
@@ -348,7 +362,7 @@ html::-webkit-scrollbar {
   --red-200: #ff6b6b;
   --purple-100: #e6d6ff;
   --orange-100: #ffe5b4;
-  --skeleton: #E6E6E6;
+  --skeleton: #e6e6e6;
   /* custom border width */
   --border-width: 1.4px;
 

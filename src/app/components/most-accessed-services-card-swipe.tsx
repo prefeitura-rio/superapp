@@ -13,7 +13,6 @@ export function MostAccessedServiceCardsSwipeSkeleton() {
       <div className="sm:hidden">
         <div className="flex items-center justify-between mb-2 px-4">
           <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-5 w-20" />
         </div>
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="overflow-x-auto no-scrollbar">
@@ -32,7 +31,6 @@ export function MostAccessedServiceCardsSwipeSkeleton() {
       <div className="px-4 pb-4 overflow-x-hidden hidden sm:block">
         <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-5 w-20" />
         </div>
         <div className="grid grid-cols-4 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -52,9 +50,7 @@ export function MostAccessedServiceCardsSwipeSkeleton() {
   )
 }
 
-export function MostAccessedServiceCardsSwipe({
-  showMore,
-}: { showMore: boolean }) {
+export function MostAccessedServiceCardsSwipe() {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -69,14 +65,6 @@ export function MostAccessedServiceCardsSwipe({
     <div className="px-4 pb-4 overflow-x-clip">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
-        {showMore && (
-          <Link
-            href="/services"
-            className="text-md text-muted-foreground cursor-pointer font-normal"
-          >
-            Ver mais
-          </Link>
-        )}
       </div>
 
       <div className="pb-0">

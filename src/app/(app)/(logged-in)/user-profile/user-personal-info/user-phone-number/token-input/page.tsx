@@ -15,21 +15,22 @@ import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsPhoneVerificationValidateRequest } from '@/http/models/modelsPhoneVerificationValidateRequest'
 import confetti from 'canvas-confetti'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
 
 export default function TokenInputForm() {
   const [token, setToken] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const valor = searchParams.get('valor') || ''
   const ddd = searchParams.get('ddd') || ''
   const ddi = searchParams.get('ddi') || ''
 
+  const hasAutoSubmitted = useRef(false)
+
   async function handleSave() {
-    setError(null)
     startTransition(async () => {
       const result = await validateUserPhoneToken({
         code: token,
@@ -45,8 +46,9 @@ export default function TokenInputForm() {
         })
         setDrawerOpen(true)
       } else {
-        setError(result.error || 'Erro ao validar token')
+        toast.error('Token inválido ou expirado.')
       }
+      setToken('')
     })
   }
 
@@ -54,6 +56,23 @@ export default function TokenInputForm() {
     setDrawerOpen(false)
     router.push('/user-profile/user-personal-info')
   }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary dependency>
+  useEffect(() => {
+    if (
+      token &&
+      token.length === 6 &&
+      !isPending &&
+      !hasAutoSubmitted.current
+    ) {
+      hasAutoSubmitted.current = true
+      handleSave()
+    }
+
+    if (token.length < 6) {
+      hasAutoSubmitted.current = false
+    }
+  }, [token, isPending])
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
@@ -71,7 +90,6 @@ export default function TokenInputForm() {
           onChange={setToken}
           resendParams={{ valor, ddd, ddi }}
         />
-        {error && <span className="text-red-500 text-sm">{error}</span>}
         <CustomButton
           size="xl"
           fullWidth

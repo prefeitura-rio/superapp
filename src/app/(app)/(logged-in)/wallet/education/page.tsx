@@ -1,80 +1,13 @@
-import { FrequencyInfoButton } from '@/app/components/frequency-info-button'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import {
   formatEducationOperatingHours,
   getOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
-import { getFrequenciaEscolarTextClass } from '@/app/components/utils'
 import { EducationCard } from '@/app/components/wallet-cards/education-card'
 import { MapPinIcon, PhoneIcon, WhatsappIcon } from '@/assets/icons'
 import { getDalCitizenCpfWallet } from '@/lib/dal'
-
-interface DesempenhoSectionProps {
-  educationData?: {
-    aluno?: {
-      conceito?: string
-      frequencia?: number
-    }
-  }
-}
-
-function DesempenhoSection({ educationData }: DesempenhoSectionProps) {
-  const conceito = educationData?.aluno?.conceito || 'Não disponível'
-  const frequencia = educationData?.aluno?.frequencia
-    ? (educationData.aluno.frequencia * 100).toFixed(2)
-    : null
-
-  // Capitalize first letter of conceito
-  const conceitoCapitalized =
-    conceito.charAt(0).toUpperCase() + conceito.slice(1).toLowerCase()
-
-  return (
-    <div className="p-6">
-      <div className="">
-        <h2 className="text-base pb-2 text-foreground font-medium leading-">
-          Desempenho
-        </h2>
-
-        <Card className="rounded-xl border-0 shadow-none">
-          <CardContent className="px-0">
-            {/* Conceito Section */}
-            <div className="space-y-1 px-4">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Conceito
-              </h3>
-              <div className="space-y-1 text-foreground">
-                <p className="text-sm font-medium">{conceitoCapitalized}</p>
-              </div>
-            </div>
-
-            {/* Full width separator that touches borders */}
-            <Separator className="my-4" />
-
-            <div className="space-y-1 px-4">
-              <div className="flex items-center gap-1">
-                <h3 className="text-xs font-medium text-foreground-light">
-                  Frequência escolar
-                </h3>
-                <FrequencyInfoButton />
-              </div>
-              <div className="space-y-1 text-foreground">
-                <p
-                  className={`text-sm font-medium ${frequencia ? getFrequenciaEscolarTextClass(frequencia) : ''}`}
-                >
-                  {frequencia ? `${frequencia}%` : 'Não informado'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
 
 export default async function EducationCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -194,7 +127,6 @@ export default async function EducationCardDetail() {
           </div>
         </div>
       </div>
-      <DesempenhoSection educationData={educationData} />
     </div>
   )
 }

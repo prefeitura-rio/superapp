@@ -155,9 +155,15 @@ export type putCitizenCpfEmailResponse400 = {
   status: 400
 }
 
+export type putCitizenCpfEmailResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
 export type putCitizenCpfEmailResponseComposite =
   | putCitizenCpfEmailResponse200
   | putCitizenCpfEmailResponse400
+  | putCitizenCpfEmailResponse409
 
 export type putCitizenCpfEmailResponse = putCitizenCpfEmailResponseComposite & {
   headers: Headers

@@ -35,12 +35,12 @@ export function OptInSwitch({ authorized }: { authorized: boolean }) {
 
   return (
     <>
-      <div className="flex items-center space-x-3 mx-4 ">
+      <div className="flex items-center space-x-3 mx-4">
         <Switch
           id="consent-switch"
           checked={authorized}
           onCheckedChange={handleSwitchChange}
-          className="data-[state=checked]:bg-primary"
+          className="data-[state=checked]:bg-primary large-switch"
           disabled={isPending}
         />
         <Label

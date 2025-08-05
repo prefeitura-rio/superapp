@@ -8,6 +8,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 
 interface PhoneInputTokenFormProps {
   value: string
@@ -59,13 +60,14 @@ export default function PhoneInputTokenForm({
       ddd: resendParams.ddd,
       ddi: resendParams.ddi,
     })
+    toast.success('Token reenviado!')
     setTimer(60)
     setIsResending(false)
   }
 
   return (
     <>
-      <form className="w-full flex flex-col gap-4">
+      <form className="w-full flex flex-col gap-4 items-start">
         <InputOTP
           className="w-full"
           maxLength={6}

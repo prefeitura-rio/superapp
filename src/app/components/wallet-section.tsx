@@ -19,7 +19,6 @@ import {
 } from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import type { RiskStatusProps } from '@/types/health'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
@@ -89,14 +88,6 @@ export default function CarteiraSection({
     <section className="mt-6 w-full overflow-x-auto">
       <div className="flex items-center px-4 justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
-        {walletInfo.hasData && (
-          <Link
-            href="/wallet"
-            className="text-md text-muted-foreground cursor-pointer font-normal"
-          >
-            Ver mais
-          </Link>
-        )}
       </div>
 
       {walletInfo.hasData ? (
