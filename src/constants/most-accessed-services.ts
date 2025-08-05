@@ -25,7 +25,7 @@ export const MOST_ACCESSED_SERVICES = [
   },
   {
     id: 'multas',
-    href: '/services/category/Transporte/71536/carioca-digital',
+    href: '/services/category/Transporte/71034/carioca-digital',
     icon: multasIcon,
     title: 'Multas',
     description: 'Consulta de multas de trânsito',
