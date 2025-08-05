@@ -23,8 +23,8 @@ export default async function ServicesPage() {
 
       {/* Most Accessed Service Cards*/}
       <ResponsiveWrapper
-        mobileComponent={<MostAccessedServiceCards showMore={true} />}
-        desktopComponent={<MostAccessedServiceCardsSwipe showMore={true} />}
+        mobileComponent={<MostAccessedServiceCards />}
+        desktopComponent={<MostAccessedServiceCardsSwipe />}
         desktopSkeletonComponent={<MostAccessedServiceCardsSwipeSkeleton />}
       />
 
