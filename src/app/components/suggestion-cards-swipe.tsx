@@ -56,7 +56,7 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
 
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
-    ? suggestedBanners
+    ? suggestedBanners.filter(banner => banner.id !== 'update')
     : suggestedBanners.filter(banner => banner.id !== 'login')
 
   if (!isLoaded) {

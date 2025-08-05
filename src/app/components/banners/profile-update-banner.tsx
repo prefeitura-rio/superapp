@@ -10,8 +10,8 @@ export const ProfileUpdateBanner = () => {
       title="Atualize seu cadastro"
       subtitle="E personalize seu atendimento"
       color="#589ECE"
-      route="/"
-      badge="Marina"
+      route="/user-profile/user-personal-info"
+      badge="Cadastro"
       image={
         <Image
           src={atualizarCadastroIcon}

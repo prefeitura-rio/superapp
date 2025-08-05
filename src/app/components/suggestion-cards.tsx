@@ -9,7 +9,7 @@ interface SuggestionCardsProps {
 export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
-    ? suggestedBanners
+    ? suggestedBanners.filter(banner => banner.id !== 'update')
     : suggestedBanners.filter(banner => banner.id !== 'login')
 
   return (
