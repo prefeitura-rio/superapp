@@ -19,7 +19,8 @@ import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
 
 const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z][a-zA-Z-]*\.)+[a-zA-Z]{2,}$/
+
 const MIN_EMAIL_LENGTH = 5
 
 const validateEmail = (val: string) =>
