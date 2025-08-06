@@ -11,7 +11,7 @@ const publicRoutes = [
   { path: '/services/*', whenAuthenticated: 'next' },
   { path: '/authentication-required/wallet', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
-  { path: '/session-expired', whenAuthenticated: 'redirect' },
+  { path: '/session-expired', whenAuthenticated: 'next' },
 ] as const
 
 function matchRoute(pathname: string, routePath: string): boolean {
@@ -77,7 +77,7 @@ export function middleware(request: NextRequest) {
   object-src 'none';
   base-uri 'self';
   form-action 'self' https://*.acesso.gov.br/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googletagmanager.com/* https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
-  frame-ancestors 'none';
+  frame-ancestors 'self' https://*.acesso.gov.br/;
   upgrade-insecure-requests;
 `.trim()
 
