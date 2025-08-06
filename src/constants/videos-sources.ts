@@ -62,6 +62,12 @@ export const VIDEO_SOURCES = {
     darkVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Atualiza%C3%A7%C3%A3o-de-endere%C3%A7o.mp4',
   },
+  sessionExpired: {
+    lightVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light_sess%C3%A3o%20expirada.mp4',
+    darkVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark_sess%C3%A3o%20expirada.mp4',
+  },
 }
 
 export type VideoSourceProps = {
