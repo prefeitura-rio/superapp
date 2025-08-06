@@ -9,7 +9,9 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { InputField } from '@/components/ui/custom/input-field'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
+import type React from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 
 interface AddressDetailsDrawerContentProps {
@@ -29,6 +31,8 @@ export function AddressDetailsDrawerContent({
   setDrawerOpen,
   handleCepChange,
 }: AddressDetailsDrawerContentProps) {
+  const { isBelowBreakpoint } = useViewportHeight()
+
   const {
     register,
     handleSubmit,
@@ -45,12 +49,13 @@ export function AddressDetailsDrawerContent({
 
   return (
     <BottomSheet
-      contentClassName="[@media(max-height:700px)]:min-h-[95vh]"
+      contentClassName={`[@media(max-height:700px)]:min-h-[95vh] flex flex-col ${isBelowBreakpoint && 'inset-0'}`}
+      className={`${isBelowBreakpoint && 'overflow-y-scroll'}`}
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
     >
-      <div className="max-h-[100vh]">
+      <div className={`"max-h-[95vh]" ${isBelowBreakpoint && 'h-[95vh]'}`}>
         <div className="text-center pt-6">
           <div className="text-lg font-normal">
             {selectedAddress?.main_text}

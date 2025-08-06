@@ -83,10 +83,13 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
                 >
                   {slideBanners.map(banner => {
                     const BannerComponent = banner.component
+
                     return <BannerComponent key={banner.id} />
                   })}
-                  {/* One left slide */}
-                  {slideBanners.length === 1 && <div className="flex" />}
+
+                  {slideBanners.length === 1 && (
+                    <div className="flex items-center justify-center opacity-0" />
+                  )}
                 </div>
               )
             }

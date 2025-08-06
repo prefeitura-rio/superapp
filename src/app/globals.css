@@ -73,8 +73,9 @@ html::-webkit-scrollbar {
     rgba(255, 255, 255, 0.15) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  transform: skewX(-20deg);
+  transform: skewX(-20deg) translateZ(0);
   filter: blur(35px);
+  will-change: transform, left;
 }
 
 .shine-active {
@@ -405,5 +406,14 @@ select:-webkit-autofill:focus {
   }
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* biome-ignore lint/correctness/noUnknownMediaFeatureName: <explanation> */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input {
+    font-size: 16px;
   }
 }

@@ -17,8 +17,21 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Super App',
+  title: 'Portal do Cidadão',
   description: 'Acesso a serviços públicos e informações.',
+  appleWebApp: {
+    title: 'Portal do Cidadão',
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    startupImage: {
+      url: '/icons/apple-icon.png',
+    },
+  },
+  themeColor: '#ffffff',
+  icons: {
+    icon: '/icons/apple-icon.png',
+    apple: '/icons/apple-icon.png',
+  },
 }
 
 export default async function RootLayout({
@@ -32,7 +45,25 @@ export default async function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head suppressHydrationWarning>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/icons/web-app-manifest-192x192.png" />
+        <link
+          rel="icon"
+          href="/icon?<generated>"
+          type="image/<generated>"
+          sizes="<generated>"
+        />
+        <link
+          rel="apple-touch-icon"
+          href="/apple-icon?<generated>"
+          type="image/<generated>"
+          sizes="<generated>"
+        />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+
         <meta name="theme-color" content="#ffffff" />
         {/* Google Analytics Data Stream */}
         <Script
