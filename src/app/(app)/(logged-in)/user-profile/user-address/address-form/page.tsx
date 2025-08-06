@@ -220,6 +220,27 @@ export default function AddressForm() {
     }
   }
 
+  const handleFocusInput = () => {
+    setHasInteracted(true)
+
+    // Fix IOS scroll issue
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        })
+
+        // Fallback IOS Safari
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+        if (window.pageYOffset > 0) {
+          window.scrollTo(0, 0)
+        }
+      }, 100)
+    }
+  }
+
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div className={headerAnim}>
@@ -237,7 +258,7 @@ export default function AddressForm() {
           showIcons={hasInteracted}
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-          onFocus={() => setHasInteracted(true)}
+          onFocus={handleFocusInput}
           onBack={() => router.back()}
         />
         {hasInteracted && inputValue.length > 0 && (
