@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 
 interface SuggestionCardsProps {
   isLoggedIn: boolean
+  userName?: string
 }
 
 export function SuggestionCardsSwipeSkeleton() {
@@ -47,7 +48,10 @@ export function SuggestionCardsSwipeSkeleton() {
   )
 }
 
-export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
+export function SuggestionCardsSwipe({
+  isLoggedIn,
+  userName,
+}: SuggestionCardsProps) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -82,11 +86,22 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
                   className="grid grid-cols-2 gap-2 py-2"
                 >
                   {slideBanners.map(banner => {
-                    const BannerComponent = banner.component
-                    return <BannerComponent key={banner.id} />
+                    const BannerComponent = banner.component as React.FC<{
+                      userName?: string
+                    }>
+
+                    return (
+                      <BannerComponent
+                        key={banner.id}
+                        {...(userName && { userName })}
+                      />
+                    )
                   })}
-                  {/* One left slide */}
-                  {slideBanners.length === 1 && <div className="flex" />}
+
+                  {/* Placeholder para slides com apenas 1 banner */}
+                  {slideBanners.length === 1 && (
+                    <div className="flex items-center justify-center opacity-0" />
+                  )}
                 </div>
               )
             }
