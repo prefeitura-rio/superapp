@@ -150,6 +150,21 @@ export function middleware(request: NextRequest) {
     return response
   }
 
+  // logged-in-out pages (home, courses and jobs)
+  if (authToken && publicRoute && path === '/') {
+    // Checar se o JWT está EXPIRADO
+    if (isJwtExpired(authToken.value)) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
+      const response = NextResponse.redirect(redirectUrl)
+      response.headers.set(
+        'Content-Security-Policy',
+        contentSecurityPolicyHeaderValue
+      )
+      return response
+    }
+  }
+
   if (authToken && !publicRoute) {
     // Checar se o JWT está EXPIRADO
     if (isJwtExpired(authToken.value)) {
