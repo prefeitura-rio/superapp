@@ -145,18 +145,8 @@ export default async function Home() {
 
       {/* Suggestion Cards*/}
       <ResponsiveWrapper
-        mobileComponent={
-          <SuggestionCards
-            isLoggedIn={isLoggedIn}
-            userName={userAuthInfo.name}
-          />
-        }
-        desktopComponent={
-          <SuggestionCardsSwipe
-            isLoggedIn={isLoggedIn}
-            userName={userAuthInfo.name}
-          />
-        }
+        mobileComponent={<SuggestionCards isLoggedIn={isLoggedIn} />}
+        desktopComponent={<SuggestionCardsSwipe isLoggedIn={isLoggedIn} />}
         desktopSkeletonComponent={<SuggestionCardsSwipeSkeleton />}
       />
 

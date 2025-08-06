@@ -4,13 +4,9 @@ import { suggestedBanners } from '@/constants/banners'
 
 interface SuggestionCardsProps {
   isLoggedIn: boolean
-  userName?: string
 }
 
-export default function SuggestionCards({
-  isLoggedIn,
-  userName,
-}: SuggestionCardsProps) {
+export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
     ? suggestedBanners.filter(banner => banner.id !== 'update')
@@ -21,16 +17,9 @@ export default function SuggestionCards({
       <div className="overflow-x-auto no-scrollbar">
         <div className="flex gap-2 px-4 py-2 w-max">
           {filteredBanners.map(banner => {
-            const BannerComponent = banner.component as React.FC<{
-              userName?: string
-            }>
+            const BannerComponent = banner.component
 
-            return (
-              <BannerComponent
-                key={banner.id}
-                {...(userName && { userName })}
-              />
-            )
+            return <BannerComponent key={banner.id} />
           })}
         </div>
       </div>

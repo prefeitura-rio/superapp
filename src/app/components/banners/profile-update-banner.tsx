@@ -4,18 +4,14 @@ import { BannerBase } from '@/components/ui/custom/banner-base'
 import { atualizarCadastroIcon } from '@/constants/bucket'
 import Image from 'next/image'
 
-type ProfileUpdateBannerProps = {
-  userName?: string
-}
-
-export const ProfileUpdateBanner = ({ userName }: ProfileUpdateBannerProps) => {
+export const ProfileUpdateBanner = () => {
   return (
     <BannerBase
       title="Atualize seu cadastro"
       subtitle="E personalize seu atendimento"
       color="#589ECE"
       route="/user-profile/user-personal-info"
-      badge={userName ? userName : 'Cadastro'}
+      badge="Cadastro"
       image={
         <Image
           src={atualizarCadastroIcon}
