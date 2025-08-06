@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { applyCategoriaRules } from '@/lib/content-rules'
-import { convertUrlsToLinks } from '@/lib/url-utils'
+import { convertUrlsToLinks, ensureUrlProtocol } from '@/lib/url-utils'
 import type { Service1746 } from '@/types/1746'
 import Link from 'next/link'
 
@@ -30,7 +30,7 @@ export function Service1746Component({ serviceData }: Service1746Props) {
           className="mb-6 rounded-full"
         >
           <Link
-            href={serviceData.url}
+            href={ensureUrlProtocol(serviceData.url)}
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -13,7 +13,7 @@ export default function SuggestionCards({
 }: SuggestionCardsProps) {
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
-    ? suggestedBanners
+    ? suggestedBanners.filter(banner => banner.id !== 'update')
     : suggestedBanners.filter(banner => banner.id !== 'login')
 
   return (

@@ -44,7 +44,7 @@ export default async function RootLayout({
   const nonce = (await headers()).get('x-nonce') ?? undefined
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
+      <head suppressHydrationWarning>
         <link rel="manifest" href="/manifest.json" />
         <link
           rel="icon"
@@ -103,7 +103,10 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className={`${dmSans.className} antialiased`}>
+      <body
+        className={`${dmSans.className} antialiased`}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

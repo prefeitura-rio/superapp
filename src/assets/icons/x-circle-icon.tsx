@@ -8,7 +8,6 @@ export function XCircleIcon(props: IconProps) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-foreground"
       {...props}
     >
       <path
@@ -17,14 +16,14 @@ export function XCircleIcon(props: IconProps) {
       />
       <path
         d="M15 9L9 15"
-        stroke="white"
+        stroke="var(--background)"
         strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M9 9L15 15"
-        stroke="white"
+        stroke="var(--background)"
         strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"

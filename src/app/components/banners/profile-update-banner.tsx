@@ -14,8 +14,8 @@ export const ProfileUpdateBanner = ({ userName }: ProfileUpdateBannerProps) => {
       title="Atualize seu cadastro"
       subtitle="E personalize seu atendimento"
       color="#589ECE"
-      route="/"
-      badge={userName}
+      route="/user-profile/user-personal-info"
+      badge={userName ? userName : 'Cadastro'}
       image={
         <Image
           src={atualizarCadastroIcon}
