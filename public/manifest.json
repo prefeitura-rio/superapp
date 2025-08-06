@@ -1,6 +1,6 @@
 {
-  "name": "Super App",
-  "short_name": "Super App",
+  "name": "Portal do Cidadão",
+  "short_name": "Portal do Cidadão",
   "description": "Acesso a serviços públicos e informações.",
   "start_url": "/",
   "display": "standalone",
@@ -8,16 +8,28 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/icons/web-app-manifest-192x192.png",
-      "sizes": "192x192",
+      "src": "/icons/superapp_png_icone_PWA_64x64.png",
+      "sizes": "64x64",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/web-app-manifest-512x512.png",
+      "src": "/icons/superapp_png_icone_PWA_128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/web-app-manifest-512x512png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/superapp_png_icone_PWA_1024x1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "screenshots": [

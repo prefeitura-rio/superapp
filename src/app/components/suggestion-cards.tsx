@@ -18,6 +18,7 @@ export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
         <div className="flex gap-2 px-4 py-2 w-max">
           {filteredBanners.map(banner => {
             const BannerComponent = banner.component
+
             return <BannerComponent key={banner.id} />
           })}
         </div>
