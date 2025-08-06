@@ -2,6 +2,7 @@ import { setFirstLoginFalse } from '@/actions/first-login'
 import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import Onboarding from '../components/on-boarding'
+import { SessionExpiredHandler } from '../components/session-expired-handler'
 
 export default async function AppLayout({
   children,
@@ -39,6 +40,7 @@ export default async function AppLayout({
 
   return (
     <div>
+      <SessionExpiredHandler />
       <main>{children}</main>
     </div>
   )

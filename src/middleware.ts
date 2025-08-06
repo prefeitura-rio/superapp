@@ -11,6 +11,7 @@ const publicRoutes = [
   { path: '/services/*', whenAuthenticated: 'next' },
   { path: '/authentication-required/wallet', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
+  { path: '/session-expired', whenAuthenticated: 'redirect' },
 ] as const
 
 function matchRoute(pathname: string, routePath: string): boolean {
@@ -29,6 +30,7 @@ function matchRoute(pathname: string, routePath: string): boolean {
 }
 
 export const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
+export const REDIRECT_WHEN_SESSION_EXPIRED_ROUTE = '/session-expired'
 
 function isJwtExpired(token: string): boolean {
   try {
@@ -126,23 +128,13 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  if (!authToken && !publicRoute) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
-    const response = NextResponse.redirect(redirectUrl)
-    response.headers.set(
-      'Content-Security-Policy',
-      contentSecurityPolicyHeaderValue
-    )
-    return response
-  }
-
   // Handle other authenticated cases
   if (
     authToken &&
     publicRoute &&
     publicRoute.whenAuthenticated === 'redirect'
   ) {
+    // Handle other authenticated cases
     const redirectUrl = request.nextUrl.clone()
     // If authenticated user tries to access wallet auth page → redirect to actual wallet
     if (path === '/authentication-required/wallet') {
@@ -162,18 +154,8 @@ export function middleware(request: NextRequest) {
     // Checar se o JWT está EXPIRADO
     if (isJwtExpired(authToken.value)) {
       const redirectUrl = request.nextUrl.clone()
-      redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
+      redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
       const response = NextResponse.redirect(redirectUrl)
-      response.cookies.set('access_token', '', {
-        path: '/',
-        httpOnly: true,
-        maxAge: 0,
-      })
-      response.cookies.set('refresh_token', '', {
-        path: '/',
-        httpOnly: true,
-        maxAge: 0,
-      })
       response.headers.set(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
@@ -186,6 +168,17 @@ export function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     })
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
+  }
+
+  if (!authToken && !publicRoute) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
+    const response = NextResponse.redirect(redirectUrl)
     response.headers.set(
       'Content-Security-Policy',
       contentSecurityPolicyHeaderValue
