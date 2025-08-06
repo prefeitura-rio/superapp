@@ -19,7 +19,6 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: 'Portal do Cidadão',
   description: 'Acesso a serviços públicos e informações.',
-  // manifest: '/manifest.json',
   appleWebApp: {
     title: 'Portal do Cidadão',
     capable: true,
