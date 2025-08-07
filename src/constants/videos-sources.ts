@@ -64,9 +64,9 @@ export const VIDEO_SOURCES = {
   },
   sessionExpired: {
     lightVideo:
-      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light_sess%C3%A3o%20expirada.mp4',
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-sess%C3%A3o-expirada.mp4',
     darkVideo:
-      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark_sess%C3%A3o%20expirada.mp4',
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-sess%C3%A3o-expirada.mp4',
   },
 }
 
