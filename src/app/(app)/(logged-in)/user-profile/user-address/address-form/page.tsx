@@ -228,16 +228,20 @@ export default function AddressForm() {
       setTimeout(() => {
         window.scrollTo({
           top: 0,
-          behavior: 'smooth',
+          behavior: 'auto',
         })
 
         // Fallback IOS Safari
         document.documentElement.scrollTop = 0
         document.body.scrollTop = 0
+        inputRef.current?.scrollIntoView({
+          behavior: 'auto',
+          block: 'center',
+        })
         if (window.pageYOffset > 0) {
           window.scrollTo(0, 0)
         }
-      }, 100)
+      }, 300)
     }
   }
 
