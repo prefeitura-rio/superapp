@@ -20,7 +20,7 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/web-app-manifest-512x512png",
+      "src": "/icons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
