@@ -226,6 +226,10 @@ export default function AddressForm() {
     // Fix IOS scroll issue
     if (typeof window !== 'undefined') {
       setTimeout(() => {
+        inputRef.current?.scrollIntoView({
+          behavior: 'auto',
+          block: 'start',
+        })
         window.scrollTo({
           top: 0,
           behavior: 'auto',
@@ -234,10 +238,6 @@ export default function AddressForm() {
         // Fallback IOS Safari
         document.documentElement.scrollTop = 0
         document.body.scrollTop = 0
-        inputRef.current?.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-        })
         if (window.pageYOffset > 0) {
           window.scrollTo(0, 0)
         }
