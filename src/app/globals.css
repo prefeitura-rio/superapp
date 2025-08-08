@@ -9,6 +9,9 @@ body {
   /* Hide vertical scrollbar for Chrome, Safari and Opera */
   overflow-y: scroll;
   scrollbar-width: none; /* Firefox */
+  /* Remove default text decoration */
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip-ink: none;
 }
 body::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
@@ -20,6 +23,23 @@ html {
 }
 html::-webkit-scrollbar {
   display: none;
+}
+
+/* Remove default text decoration */
+span,
+div,
+p {
+  text-decoration: none !important;
+  -webkit-text-decoration-line: none !important;
+  text-decoration-line: none !important;
+}
+
+/* Remove default text decoration for links */
+a[href^='tel:'],
+a[href^='mailto:'],
+span:not([data-auto-link]) {
+  text-decoration: none !important;
+  color: inherit !important;
 }
 
 /* CARD FLIP  */
