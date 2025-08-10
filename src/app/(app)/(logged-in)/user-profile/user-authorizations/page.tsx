@@ -11,7 +11,7 @@ export default async function ConsentForm() {
     try {
       const response = await getCitizenCpfOptin(user.cpf, { cache: 'no-store' })
       if (response.status === 200) {
-        authorized = response.data.optin ?? false
+        authorized = response.data.opt_in ?? false
       }
     } catch (error) {
       console.error('Error fetching opt-in status:', error)

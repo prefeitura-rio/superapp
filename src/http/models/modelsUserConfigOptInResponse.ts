@@ -7,5 +7,5 @@
  */
 
 export interface ModelsUserConfigOptInResponse {
-  optin?: boolean
+  opt_in?: boolean
 }
