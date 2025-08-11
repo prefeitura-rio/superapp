@@ -50,7 +50,7 @@ const healthUnitFetch = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const baseUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL}subpav-osa-api`
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API
 
   const url = `${baseUrl}${endpoint}`
 
@@ -81,7 +81,7 @@ export const getHealthUnitInfo = async (
   cnes: string,
   options?: RequestInit
 ): Promise<GetHealthUnitInfoResponse> => {
-  return healthUnitFetch<GetHealthUnitInfoResponse>(`/unidade/${cnes}`, options)
+  return healthUnitFetch<GetHealthUnitInfoResponse>(`unidade/${cnes}`, options)
 }
 
 /**
@@ -92,7 +92,7 @@ export const getHealthUnitRisk = async (
   options?: RequestInit
 ): Promise<GetHealthUnitRiskResponse> => {
   return healthUnitFetch<GetHealthUnitRiskResponse>(
-    `/unidade/${cnes}/risco`,
+    `unidade/${cnes}/risco`,
     options
   )
 }

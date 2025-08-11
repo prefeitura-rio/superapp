@@ -17,16 +17,18 @@ const getBody = <T>(c: Response | Request): Promise<T> => {
 
 // NOTE: Update just base url
 const getUrl = (contextUrl: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_RMI
 
   if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_BASE_API_URL environment variable is not set.')
+    throw new Error(
+      'NEXT_PUBLIC_BASE_API_URL_RMI environment variable is not set.'
+    )
   }
 
   // Ensure baseUrl ends with '/' and contextUrl doesn't start with '/'
   const normalizedBaseUrl = baseUrl.endsWith('/')
-    ? `${baseUrl}rmi/v1/`
-    : `${baseUrl}/rmi/v1/`
+    ? `${baseUrl}v1/`
+    : `${baseUrl}/v1/`
   const normalizedContextUrl = contextUrl.startsWith('/')
     ? contextUrl.slice(1)
     : contextUrl

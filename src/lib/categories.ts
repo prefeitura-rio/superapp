@@ -65,10 +65,10 @@ function getIconForCategory(nomeNormalizado: string): ReactNode {
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-  const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL
+  const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
   try {
     const response = await fetch(
-      `${rootUrl}app-busca-search/api/v1/categorias-relevancia?collections=1746,carioca-digital`,
+      `${rootUrl}api/v1/categorias-relevancia?collections=1746,carioca-digital`,
       {
         cache: 'force-cache',
         next: { revalidate: 86400 }, // Cache for 1 day

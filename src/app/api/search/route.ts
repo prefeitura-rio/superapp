@@ -11,12 +11,12 @@ export async function GET(request: Request) {
     )
   }
 
-  const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL
+  const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
 
   try {
     // Use fetch with explicit caching
     const response = await fetch(
-      `${rootUrl}app-busca-search/api/v1/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=20`,
+      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=20`,
       {
         // Cache the response for 1 hour
         next: {
