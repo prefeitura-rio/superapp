@@ -13,7 +13,7 @@ export async function updateOptInStatus(optin: boolean) {
 
   try {
     await putCitizenCpfOptin(user.cpf, { opt_in: optin })
-    revalidatePath('/(app)/(logged-in)/user-profile/user-authorizations')
+    revalidatePath('/user-profile/user-authorizations')
     return { success: true }
   } catch (error: any) {
     const err = error as HandlersErrorResponse
