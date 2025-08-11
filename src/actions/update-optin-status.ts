@@ -3,7 +3,7 @@
 import { putCitizenCpfOptin } from '@/http/citizen/citizen'
 import type { HandlersErrorResponse } from '@/http/models/handlersErrorResponse'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 
 export async function updateOptInStatus(optin: boolean) {
   const user = await getUserInfoFromToken()
@@ -13,7 +13,7 @@ export async function updateOptInStatus(optin: boolean) {
 
   try {
     await putCitizenCpfOptin(user.cpf, { opt_in: optin })
-    revalidatePath('/user-profile/user-authorizations')
+    revalidateTag('user-authorizations')
     return { success: true }
   } catch (error: any) {
     const err = error as HandlersErrorResponse

@@ -9,7 +9,12 @@ export default async function ConsentForm() {
 
   if (user.cpf) {
     try {
-      const response = await getCitizenCpfOptin(user.cpf, { cache: 'no-store' })
+      const response = await getCitizenCpfOptin(user.cpf, {
+        cache: 'no-store',
+        next: {
+          tags: ['user-authorizations'],
+        },
+      })
       if (response.status === 200) {
         authorized = response.data.opt_in ?? false
       }
