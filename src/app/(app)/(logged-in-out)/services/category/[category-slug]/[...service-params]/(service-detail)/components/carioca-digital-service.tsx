@@ -32,7 +32,7 @@ export function CariocaDigitalServiceComponent({
           asChild
           variant="default"
           size="lg"
-          className="mb-6 rounded-full"
+          className="mb-6 rounded-full text-background"
         >
           <Link
             href={ensureUrlProtocol(serviceData.link_acesso)}

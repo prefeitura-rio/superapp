@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     icon: '/icons/apple-icon.png',
     apple: '/icons/apple-icon.png',
   },
+  other: {
+    'format-detection': 'telephone=no, email=no, address=no',
+  },
 }
 
 export default async function RootLayout({

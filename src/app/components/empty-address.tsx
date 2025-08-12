@@ -24,11 +24,11 @@ export function EmptyAddress() {
         <Button
           asChild
           size="lg"
-          className="h-14 w-36.5 bg-primary hover:bg-primary/90 rounded-full flex items-center gap-2 mt-4"
+          className="h-14 w-36.5 bg-primary hover:bg-primary/90 rounded-full flex items-center gap-2 mt-4 text-background"
           onClick={() => {}}
         >
           <Link href={'/user-profile/user-address/address-form'}>
-            <PlusIcon className="w-5 h-5 text-white" />
+            <PlusIcon className="w-5 h-5 text-background" />
             Adicionar
           </Link>
         </Button>

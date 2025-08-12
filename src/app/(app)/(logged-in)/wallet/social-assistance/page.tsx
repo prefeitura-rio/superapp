@@ -1,10 +1,7 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import { CalendarIcon } from '@/assets/icons'
-import {
-  formatRecadastramentoDate,
-  getCadUnicoStatus,
-} from '@/lib/cadunico-utils'
+import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import { getDalCitizenCpfWallet } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -46,7 +43,6 @@ export default async function SocialAssistanceCardDetail() {
           <SocialAssistanceCard
             title="CADÚNICO"
             number={cras?.nome || 'Não disponível'}
-            badgeStatus={getCadUnicoStatus(cadunico)}
             primaryLabel="Data de recadastramento"
             primaryValue={formatRecadastramentoDate(
               cadunico?.data_limite_cadastro_atual

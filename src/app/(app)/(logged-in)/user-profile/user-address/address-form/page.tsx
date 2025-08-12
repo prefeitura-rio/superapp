@@ -72,6 +72,7 @@ export default function AddressForm() {
   const [feedbackDrawerOpen, setFeedbackDrawerOpen] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const inputContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   // Initialize react-hook-form
@@ -223,30 +224,20 @@ export default function AddressForm() {
   const handleFocusInput = () => {
     setHasInteracted(true)
 
-    // Fix IOS scroll issue
     if (typeof window !== 'undefined') {
       setTimeout(() => {
-        inputRef.current?.scrollIntoView({
-          behavior: 'auto',
-          block: 'start',
-        })
-        window.scrollTo({
-          top: 0,
-          behavior: 'auto',
-        })
-
-        // Fallback IOS Safari
-        document.documentElement.scrollTop = 0
-        document.body.scrollTop = 0
-        if (window.pageYOffset > 0) {
-          window.scrollTo(0, 0)
+        if (inputContainerRef.current) {
+          window.scrollTo({
+            top: -54,
+            behavior: 'auto',
+          })
         }
-      }, 300)
+      }, 100)
     }
   }
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl h-[70lvh] mx-auto pt-24 flex flex-col space-y-6">
       <div className={headerAnim}>
         <SecondaryHeader title="" />
         <section className="relative">
@@ -255,7 +246,7 @@ export default function AddressForm() {
           </h2>
         </section>
       </div>
-      <div className={`px-4 ${inputAnim}`}>
+      <div ref={inputContainerRef} className={`px-4 ${inputAnim}`}>
         <SearchInput
           ref={inputRef}
           placeholder="Digite o seu endereço"

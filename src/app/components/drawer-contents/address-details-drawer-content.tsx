@@ -49,8 +49,8 @@ export function AddressDetailsDrawerContent({
 
   return (
     <BottomSheet
-      contentClassName={`[@media(max-height:700px)]:min-h-[95vh] flex flex-col ${isBelowBreakpoint && 'inset-0'}`}
-      className={`${isBelowBreakpoint && 'overflow-y-scroll'}`}
+      contentClassName="[@media(max-height:700px)]:min-h-[90lvh] flex flex-col"
+      className={`${isBelowBreakpoint && 'overflow-y-scroll'} min-h-screen`}
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
