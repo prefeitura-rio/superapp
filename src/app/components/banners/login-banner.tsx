@@ -14,10 +14,10 @@ export const LoginBanner = () => {
       image={
         <Image
           src={deslogadoIcon}
-          width={100}
-          height={100}
+          width={80}
+          height={80}
           alt="Dois cartões."
-          className="h-12 w-23 absolute bottom-6 right-3 z-20 md:right-12"
+          className="h-15 w-24 absolute bottom-5 right-2 z-20 md:right-12"
         />
       }
     />

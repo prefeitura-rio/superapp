@@ -18,12 +18,14 @@ interface PhoneInputTokenFormProps {
     ddi: string
     valor: string
   }
+  error?: string | null
 }
 
 export default function PhoneInputTokenForm({
   value,
   onChange,
   resendParams,
+  error,
 }: PhoneInputTokenFormProps) {
   const [timer, setTimer] = useState(60)
   const [isResending, setIsResending] = useState(false)
@@ -110,6 +112,7 @@ export default function PhoneInputTokenForm({
               ? `Você pode solicitar outro código em ${timer}s`
               : 'Você pode solicitar outro código'}
           </span>
+          {error && <p className="text-destructive text-sm mt-4">{error}</p>}
         </div>
       </form>
     </>

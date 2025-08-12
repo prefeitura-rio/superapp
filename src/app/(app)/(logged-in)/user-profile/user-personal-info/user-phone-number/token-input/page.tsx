@@ -22,6 +22,7 @@ export default function TokenInputForm() {
   const [token, setToken] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const valor = searchParams.get('valor') || ''
@@ -47,6 +48,7 @@ export default function TokenInputForm() {
         setDrawerOpen(true)
       } else {
         toast.error('Token inválido ou expirado.')
+        setError('Token inválido ou expirado.')
       }
       setToken('')
     })
@@ -89,6 +91,7 @@ export default function TokenInputForm() {
           value={token}
           onChange={setToken}
           resendParams={{ valor, ddd, ddi }}
+          error={error}
         />
         <CustomButton
           size="xl"
