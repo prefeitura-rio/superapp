@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
 import Link from 'next/link'
@@ -35,38 +34,8 @@ export function SocialAssistanceCard({
   enableFlip = true,
   asLink = false,
   showInitialShine = false,
-  badgeStatus = 'Atualizado' as 'Atualizado' | 'Em atualização' | 'Atualizar',
 }: SocialAssistanceCardProps) {
   const bgColor = 'bg-[#6BA26B]'
-
-  const getBadgeComponent = () => {
-    if (!badgeStatus) return null
-
-    const badgeConfig = {
-      Atualizado: {
-        text: 'Atualizado',
-        className: 'bg-green-500 text-white',
-      },
-      'Em atualização': {
-        text: 'Em atualização',
-        className: 'bg-orange-500 text-white',
-      },
-      Atualizar: {
-        text: 'Atualizar',
-        className: 'bg-red-500 text-white',
-      },
-    }
-
-    const config = badgeConfig[badgeStatus as keyof typeof badgeConfig]
-
-    return (
-      <Badge
-        className={`absolute bottom-6 right-6 text-xs z-30 ${config.className}`}
-      >
-        {config.text}
-      </Badge>
-    )
-  }
 
   const frontContent = (
     <CardBase bgColor={bgColor}>
@@ -76,7 +45,6 @@ export function SocialAssistanceCard({
         primaryLabel={primaryLabel}
         primaryValue={primaryValue}
       />
-      {getBadgeComponent()}
     </CardBase>
   )
 
