@@ -1,6 +1,6 @@
 {
-  "name": "Portal do Cidadão",
-  "short_name": "Portal do Cidadão",
+  "name": "PrefRIO",
+  "short_name": "PrefRIO",
   "description": "Acesso a serviços públicos e informações.",
   "start_url": "/",
   "display": "standalone",
