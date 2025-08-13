@@ -95,6 +95,7 @@ export default function PhoneInputTokenForm({
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
+        {error && <p className="text-destructive text-sm mt-1">{error}</p>}
         <div>
           <span className="text-sm text-card-foreground mt-1 block text-left">
             Não recebeu o código?
@@ -107,12 +108,11 @@ export default function PhoneInputTokenForm({
               {isResending ? 'Reenviando...' : 'Reenviar'}
             </Button>
           </span>
-          <span className="text-sm text-muted-foreground block text-left">
+          <span className="text-sm text-muted-foreground block text-left -mt-1">
             {timer > 0
               ? `Você pode solicitar outro código em ${timer}s`
               : 'Você pode solicitar outro código'}
           </span>
-          {error && <p className="text-destructive text-sm mt-4">{error}</p>}
         </div>
       </form>
     </>
