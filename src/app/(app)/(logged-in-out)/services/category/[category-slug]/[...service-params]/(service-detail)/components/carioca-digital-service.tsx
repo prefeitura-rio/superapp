@@ -124,7 +124,7 @@ export function CariocaDigitalServiceComponent({
                             href={ensureUrlProtocol(etapa.link_solicitacao)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-background inline-block"
+                            className="text-sm text-background! inline-block"
                           >
                             Acesse aqui
                           </Link>
