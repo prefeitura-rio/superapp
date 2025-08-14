@@ -28,7 +28,7 @@ export function LogoutButton() {
         setTimeout(() => {
           document.body.removeChild(iframe)
           // Redireciona o usuário após o logout do govbr
-          window.location.href = redirectUri
+          window.location.href = `${process.env.NEXT_PUBLIC_HOME_URL}`
         }, 0) // coloca em ultima prioridade na stack de execução
       }
     } catch (error) {
