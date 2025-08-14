@@ -90,7 +90,7 @@ export default async function RootLayout({
 
         {/* Google Analytics Data Stream */}
         <GoogleAnalytics
-          // debugMode={true}
+          debugMode={true}
           nonce={nonce}
           gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
         />

@@ -3,6 +3,7 @@
 import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
+import { sendGAEvent } from '@next/third-parties/google'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
@@ -143,9 +144,24 @@ export default function Search() {
     }
   }
 
-  const displayBreadCrumbCollection = (collection?: string) => {
-    if (!collection) return ''
-    return collection.split('-').join(' ').toUpperCase()
+  const handleSearchItemClick = (item: SearchResultItem) => {
+    // Send GA event with search details
+    sendGAEvent('event', 'search_result_click', {
+      search_query: query,
+      result_title: item.titulo,
+      result_description: item.descricao || '',
+      result_type: item.tipo,
+      event_timestamp: new Date().toISOString(),
+    })
+
+    // Navigate to the item
+    if (item.category && item.id && item.collection) {
+      router.push(
+        `/services/category/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
+      )
+    } else if (item.url) {
+      window.open(item.url, '_blank')
+    }
   }
 
   return (
@@ -181,24 +197,10 @@ export default function Search() {
                     <li
                       key={index}
                       className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card hover:bg-card/70 rounded-lg cursor-pointer"
-                      onClick={() => {
-                        if (item.category && item.id && item.collection) {
-                          router.push(
-                            `/services/category/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
-                          )
-                        } else if (item.url) {
-                          window.open(item.url, '_blank')
-                        }
-                      }}
+                      onClick={() => handleSearchItemClick(item)}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                          if (item.category && item.id && item.collection) {
-                            router.push(
-                              `/services/category/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
-                            )
-                          } else if (item.url) {
-                            window.open(item.url, '_blank')
-                          }
+                          handleSearchItemClick(item)
                         }
                       }}
                     >
@@ -235,11 +237,21 @@ export default function Search() {
                   key={index}
                   className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
                   onClick={() => {
+                    // Send GA event for popular search click
+                    sendGAEvent('event', 'mais_pesquisados_click', {
+                      search_query: text,
+                      event_timestamp: new Date().toISOString(),
+                    })
                     setQuery(text)
                     handleSearch(text)
                   }}
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
+                      // Send GA event for popular search click
+                      sendGAEvent('event', 'mais_pesquisados_click', {
+                        search_query: text,
+                        event_timestamp: new Date().toISOString(),
+                      })
                       setQuery(text)
                       handleSearch(text)
                     }
