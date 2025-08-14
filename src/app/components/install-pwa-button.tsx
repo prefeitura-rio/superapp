@@ -39,7 +39,7 @@ const InstallPwaButton = () => {
   const [showIosDialog, setShowIosDialog] = useState(false)
 
   const handleInstallClick = async () => {
-    sendGAEvent('event', 'PWA_button_clicked', { value: 'true' })
+    sendGAEvent('event', 'PWA_button_clicked')
     if (isIOS()) {
       setShowIosDialog(true)
       return
@@ -51,10 +51,10 @@ const InstallPwaButton = () => {
         const { outcome } = await deferredPrompt.userChoice
         console.log(`Manual install prompt result: ${outcome}`)
         if (outcome === 'accepted') {
-          sendGAEvent('event', 'PWA_install_accepted', { value: 'true' })
+          sendGAEvent('event', 'PWA_install_accepted')
           clearPrompt()
         } else {
-          sendGAEvent('event', 'PWA_install_rejected', { value: 'true' })
+          sendGAEvent('event', 'PWA_install_rejected')
         }
       } catch (error) {
         console.error('Error showing install prompt:', error)
