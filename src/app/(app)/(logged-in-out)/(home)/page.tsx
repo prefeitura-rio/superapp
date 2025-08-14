@@ -161,7 +161,7 @@ export default async function Home() {
       />
 
       {/* Carteira section - only show for authenticated users */}
-      {isLoggedIn && walletData && (
+      {isLoggedIn && (walletData || maintenanceRequests) && (
         <ResponsiveWrapper
           mobileComponent={
             <CarteiraSection
