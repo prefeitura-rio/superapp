@@ -67,6 +67,32 @@ export default async function PersonalInfoForm() {
             drawerTitle="Nome social"
           />
 
+          <ActionDiv
+            label="Celular"
+            optionalLabelVariant={showPhoneBadge ? 'destructive' : undefined}
+            optionalLabel={showPhoneBadge ? 'Atualizar' : undefined}
+            content={formatPhone(
+              userInfo?.telefone?.principal?.ddi,
+              userInfo?.telefone?.principal?.ddd,
+              userInfo?.telefone?.principal?.valor
+            )}
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            redirectLink="/user-profile/user-personal-info/user-phone-number"
+          />
+
+          <ActionDiv
+            label="E-mail"
+            optionalLabelVariant={showEmailBadge ? 'destructive' : undefined}
+            optionalLabel={showEmailBadge ? 'Atualizar' : undefined}
+            content={userInfo?.email?.principal?.valor || ''}
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            redirectLink="/user-profile/user-personal-info/user-email"
+          />
+
           <CustomInput
             id="nationality"
             label="Nacionalidade"
@@ -96,32 +122,6 @@ export default async function PersonalInfoForm() {
             label="Sexo"
             defaultValue={userInfo?.sexo || ''}
             isEditable={false}
-          />
-
-          <ActionDiv
-            label="Celular"
-            optionalLabelVariant={showPhoneBadge ? 'destructive' : undefined}
-            optionalLabel={showPhoneBadge ? 'Atualizar' : undefined}
-            content={formatPhone(
-              userInfo?.telefone?.principal?.ddi,
-              userInfo?.telefone?.principal?.ddd,
-              userInfo?.telefone?.principal?.valor
-            )}
-            variant="default"
-            disabled
-            rightIcon={<EditIcon />}
-            redirectLink="/user-profile/user-personal-info/user-phone-number"
-          />
-
-          <ActionDiv
-            label="E-mail"
-            optionalLabelVariant={showEmailBadge ? 'destructive' : undefined}
-            optionalLabel={showEmailBadge ? 'Atualizar' : undefined}
-            content={userInfo?.email?.principal?.valor || ''}
-            variant="default"
-            disabled
-            rightIcon={<EditIcon />}
-            redirectLink="/user-profile/user-personal-info/user-email"
           />
         </div>
       </div>
