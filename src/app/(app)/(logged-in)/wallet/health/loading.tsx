@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function WalletHealthLoading() {
   return (
     <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" />
+      <SecondaryHeader title="Carteira" className="max-w-xl" />
       <div className="z-50">
         <div className="px-4">
           {/* Wallet Health Card Skeleton */}
