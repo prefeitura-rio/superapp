@@ -3,8 +3,8 @@
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { MostAccessedServiceLink } from './most-accessed-service-link'
 
 export function MostAccessedServiceCardsSwipeSkeleton() {
   return (
@@ -83,27 +83,34 @@ export function MostAccessedServiceCardsSwipe() {
                   key={`slide-${slideIndex}`}
                   className="grid grid-cols-4 gap-2"
                 >
-                  {slideServices.map(service => (
-                    <Link key={service.id} href={service.href}>
-                      <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
-                        <div className="mb-4">
-                          <img
-                            src={service.icon}
-                            alt={service.title}
-                            className="w-10 h-10"
-                          />
+                  {slideServices.map((service, serviceIndex) => {
+                    const globalPosition = startIndex + serviceIndex + 1
+                    return (
+                      <MostAccessedServiceLink
+                        key={service.id}
+                        service={service}
+                        position={globalPosition}
+                      >
+                        <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
+                          <div className="mb-4">
+                            <img
+                              src={service.icon}
+                              alt={service.title}
+                              className="w-10 h-10"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-medium break-words text-foreground">
+                              {service.title}
+                            </h3>
+                            <p className="text-foreground-light text-xs leading-4 break-words">
+                              {service.description}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-base font-medium break-words text-foreground">
-                            {service.title}
-                          </h3>
-                          <p className="text-foreground-light text-xs leading-4 break-words">
-                            {service.description}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </MostAccessedServiceLink>
+                    )
+                  })}
                 </div>
               )
             }

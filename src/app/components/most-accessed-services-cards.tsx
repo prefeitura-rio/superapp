@@ -1,5 +1,5 @@
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
-import Link from 'next/link'
+import { MostAccessedServiceLink } from './most-accessed-service-link'
 
 export default function MostAccessedServiceCards() {
   return (
@@ -10,8 +10,12 @@ export default function MostAccessedServiceCards() {
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex gap-2 px-4 w-max ">
-            {MOST_ACCESSED_SERVICES.map(service => (
-              <Link key={service.id} href={service.href}>
+            {MOST_ACCESSED_SERVICES.map((service, index) => (
+              <MostAccessedServiceLink
+                key={service.id}
+                service={service}
+                position={index + 1}
+              >
                 <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
                   <div className="mb-4">
                     <img
@@ -29,7 +33,7 @@ export default function MostAccessedServiceCards() {
                     </p>
                   </div>
                 </div>
-              </Link>
+              </MostAccessedServiceLink>
             ))}
           </div>
         </div>
