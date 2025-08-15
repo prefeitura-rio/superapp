@@ -8,6 +8,7 @@ import { MenuItem } from '@/components/ui/custom/menu-item'
 import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { formatUserName } from '@/lib/utils'
 
 export default async function ProfilePage() {
   const userInfo = await getUserInfoFromToken()
@@ -24,7 +25,9 @@ export default async function ProfilePage() {
             <UserIcon className="h-5 w-5 text-primary" />
           </AvatarFallback>
         </Avatar>
-        <h2 className="text-xl font-semibold mb-1">{userInfo.name}</h2>
+        <h2 className="text-xl font-semibold mb-1">
+          {formatUserName(userInfo.name)}
+        </h2>
         <p className="text-sm text-primary">{formatCpf(userInfo.cpf)}</p>
       </div>
 
