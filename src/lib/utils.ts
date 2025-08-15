@@ -43,3 +43,26 @@ export function formatUserName(userName: string): string {
   // Retorna os nomes formatados separados por espaço
   return formattedNames.join(' ')
 }
+
+/**
+ * Formata qualquer texto com a primeira letra de cada palavra em maiúscula
+ * @param text - Texto a ser formatado (ex: "joao silva", "JOAO SILVA")
+ * @returns Texto formatado com primeira letra de cada palavra em maiúscula (ex: "Joao Silva")
+ */
+export function formatTitleCase(text: string): string {
+  if (!text || typeof text !== 'string') {
+    return ''
+  }
+
+  // Remove espaços extras e divide por espaços
+  const words = text.trim().split(/\s+/)
+
+  // Formata cada palavra: primeira letra maiúscula, resto minúscula
+  const formattedWords = words.map(word => {
+    if (!word) return ''
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  })
+
+  // Retorna as palavras formatadas separadas por espaço
+  return formattedWords.join(' ')
+}
