@@ -1,5 +1,6 @@
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import { formatUserName } from '@/lib/utils'
 
 export function WelcomeMessage({
   show,
@@ -33,7 +34,9 @@ export function WelcomeMessage({
         </div>
         <div className="text-center w-full">
           <p className="text-xl text-foreground-light">Seja bem vindo(a)</p>
-          <p className="text-3xl font-bold text-foreground">{userInfo.name}</p>
+          <p className="text-3xl font-bold text-foreground">
+            {formatUserName(userInfo.name)}
+          </p>
         </div>
       </div>
     </div>

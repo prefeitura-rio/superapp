@@ -1,6 +1,7 @@
 import { UserIcon } from '@/assets/icons'
 import { PrefLogo } from '@/assets/icons/pref-logo'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { formatUserName } from '@/lib/utils'
 import Link from 'next/link'
 
 interface MainHeaderProps {
@@ -29,7 +30,9 @@ export default function MainHeader({
           </div>
           <div className="flex flex-col">
             <span className="text-base font-medium text-foreground">
-              {isLoggedIn ? userName : 'Olá, Visitante!'}
+              {isLoggedIn
+                ? formatUserName('LUCAS TAVARES DA SILVA FERREIRA')
+                : 'Olá, Visitante!'}
             </span>
             <span className="text-sm font-normal text-muted-foreground">
               {isLoggedIn ? '' : 'Faça seu login'}
