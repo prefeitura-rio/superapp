@@ -4,14 +4,27 @@ import { BannerBase } from '@/components/ui/custom/banner-base'
 import { licencaBannerIcon } from '@/constants/bucket'
 import Image from 'next/image'
 
-export const TaxesBanner = () => {
+interface TaxesBannerProps {
+  onBannerClick?: () => void
+  title: string
+  subtitle: string
+  route: string
+}
+
+export const TaxesBanner = ({
+  onBannerClick,
+  title,
+  subtitle,
+  route,
+}: TaxesBannerProps) => {
   return (
     <BannerBase
-      title="Carioca em dia"
-      subtitle="Desconto até 30 de agosto"
+      title={title}
+      subtitle={subtitle}
       color="#977926"
-      route="/"
+      route={route}
       badge="Impostos"
+      onBannerClick={onBannerClick}
       image={
         <Image
           src={licencaBannerIcon}

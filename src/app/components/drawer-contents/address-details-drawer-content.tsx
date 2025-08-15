@@ -49,13 +49,13 @@ export function AddressDetailsDrawerContent({
 
   return (
     <BottomSheet
-      contentClassName={`[@media(max-height:700px)]:min-h-[95vh] flex flex-col ${isBelowBreakpoint && 'inset-0'}`}
-      className={`${isBelowBreakpoint && 'overflow-y-scroll'}`}
+      contentClassName="[@media(max-height:700px)]:min-h-[70lvh] flex flex-col"
+      className={`${isBelowBreakpoint && 'overflow-y-scroll'} min-h-screen`}
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
     >
-      <div className={`"max-h-[95vh]" ${isBelowBreakpoint && 'h-[95vh]'}`}>
+      <div className={`"max-h-[85vh]" ${isBelowBreakpoint && 'h-[85vh]'}`}>
         <div className="text-center pt-6">
           <div className="text-lg font-normal">
             {selectedAddress?.main_text}

@@ -1,9 +1,12 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
-import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
+// import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
 import govbrLogo from '@/assets/govbr.svg'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
+
+const authReqWalletCardsPng =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/carteira/carteira-deslogada.png'
 
 export default async function WalletAuthenticationRequired() {
   return (
@@ -31,8 +34,10 @@ export default async function WalletAuthenticationRequired() {
           <div className="relative w-full overflow-hidden">
             <div className="flex justify-center">
               <Image
-                src={authReqWalletCards}
+                src={authReqWalletCardsPng}
                 alt="Cartões da carteira digital"
+                width={800}
+                height={300}
                 className="w-[160%] max-w-none h-48 object-contain "
                 priority
               />
@@ -41,7 +46,7 @@ export default async function WalletAuthenticationRequired() {
 
           {/* Gov.br Login Section */}
           <div className="px-4 w-full space-y-2">
-            <p className="text-center text-sm text-foreground-light font-normal">
+            <p className="text-center text-sm text-muted-foreground font-normal">
               Entre com a sua conta gov.br
             </p>
 

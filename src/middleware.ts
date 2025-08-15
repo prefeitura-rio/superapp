@@ -4,6 +4,10 @@ import {
   type NextRequest,
   NextResponse,
 } from 'next/server'
+import {
+  REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE,
+  REDIRECT_WHEN_SESSION_EXPIRED_ROUTE,
+} from './constants/url'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -29,9 +33,6 @@ function matchRoute(pathname: string, routePath: string): boolean {
   return false
 }
 
-export const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
-export const REDIRECT_WHEN_SESSION_EXPIRED_ROUTE = '/session-expired'
-
 function isJwtExpired(token: string): boolean {
   try {
     const decoded: { exp?: number } = jwtDecode(token)
@@ -55,6 +56,7 @@ export function middleware(request: NextRequest) {
     'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
     'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
     'sha256-QaDv8TLjywIM3mKcA73bK0btmqNpUfcuwzqZ4U9KTsk=',
+    'sha256-J9cZHZf5nVZbsm7Pqxc8RsURv1AIXkMgbhfrZvoOs/A=',
   ]
 
   const scriptSrcDirectives = [

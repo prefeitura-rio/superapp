@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
 import { headers } from 'next/headers'
-import Script from 'next/script'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icons/apple-icon.png',
     apple: '/icons/apple-icon.png',
+  },
+  other: {
+    'format-detection': 'telephone=no, email=no, address=no',
   },
 }
 
@@ -65,7 +68,7 @@ export default async function RootLayout({
 
         <meta name="theme-color" content="#ffffff" />
         {/* Google Analytics Data Stream */}
-        <Script
+        {/* <Script
           strategy="afterInteractive" // Ensures script runs after the page is interactive
           nonce={nonce}
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
@@ -83,10 +86,21 @@ export default async function RootLayout({
               gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
             `,
           }}
+        /> */}
+
+        {/* Google Analytics Data Stream */}
+        <GoogleAnalytics
+          debugMode={true}
+          nonce={nonce}
+          gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
         />
 
         {/* Google Tag Manager */}
-        <Script
+        <GoogleTagManager
+          nonce={nonce}
+          gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
+        />
+        {/* <Script
           id="google-tag-manager"
           strategy="afterInteractive"
           nonce={nonce}
@@ -99,7 +113,7 @@ export default async function RootLayout({
               })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}');
             `,
           }}
-        />
+        /> */}
       </head>
       <body
         className={`${dmSans.className} antialiased`}

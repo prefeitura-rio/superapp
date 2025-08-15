@@ -2,6 +2,7 @@
 import type { Category } from '@/lib/categories'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
+import { CategoryButton } from './category-button'
 
 interface CategoryGridProps {
   title: React.ReactNode
@@ -24,15 +25,15 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
             key={category.categorySlug}
             className="flex flex-col items-center"
           >
-            <button
-              type="button"
+            <CategoryButton
+              category={category}
+              position={index + 1}
               onClick={() => handleCategoryClick(category.categorySlug)}
-              className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition cursor-pointer max-h-[90px]"
             >
               <div className="flex items-center justify-center w-full h-full text-foreground">
                 {category.icon}
               </div>
-            </button>
+            </CategoryButton>
             <span className="mt-2 text-sm text-center text-foreground">
               {category.name}
             </span>

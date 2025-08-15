@@ -4,10 +4,7 @@ import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
 import { EducationCard } from '@/app/components/wallet-cards/education-card'
 import { HealthCard } from '@/app/components/wallet-cards/health-card'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
-import {
-  formatRecadastramentoDate,
-  getCadUnicoStatus,
-} from '@/lib/cadunico-utils'
+import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -207,9 +204,6 @@ export default async function Wallet() {
                     primaryValue={formatRecadastramentoDate(
                       walletData?.assistencia_social?.cadunico
                         ?.data_limite_cadastro_atual
-                    )}
-                    badgeStatus={getCadUnicoStatus(
-                      walletData?.assistencia_social?.cadunico
                     )}
                     unitName={walletData?.assistencia_social?.cras?.nome}
                     address={walletData?.assistencia_social?.cras?.endereco}

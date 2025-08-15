@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { usePWA } from '@/providers/pwa-provider'
+import { sendGAEvent } from '@next/third-parties/google'
 import { Download } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -38,6 +39,9 @@ const InstallPwaButton = () => {
   const [showIosDialog, setShowIosDialog] = useState(false)
 
   const handleInstallClick = async () => {
+    sendGAEvent('event', 'PWA_button_click', {
+      event_timestamp: new Date().toISOString(),
+    })
     if (isIOS()) {
       setShowIosDialog(true)
       return
@@ -49,7 +53,14 @@ const InstallPwaButton = () => {
         const { outcome } = await deferredPrompt.userChoice
         console.log(`Manual install prompt result: ${outcome}`)
         if (outcome === 'accepted') {
+          sendGAEvent('event', 'PWA_install_accept', {
+            event_timestamp: new Date().toISOString(),
+          })
           clearPrompt()
+        } else {
+          sendGAEvent('event', 'PWA_install_reject', {
+            event_timestamp: new Date().toISOString(),
+          })
         }
       } catch (error) {
         console.error('Error showing install prompt:', error)

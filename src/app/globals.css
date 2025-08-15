@@ -231,7 +231,7 @@ select:-webkit-autofill:focus {
 
 :root {
   --radius: 0.625rem;
-  --background: #ffffff;
+  --background: #f9fafb;
   --foreground: #09090b;
   --foreground-light: #71717b;
   --card: #f1f1f4;

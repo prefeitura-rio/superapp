@@ -6,10 +6,7 @@ import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
 } from '@/http/models'
-import {
-  formatRecadastramentoDate,
-  getCadUnicoStatus,
-} from '@/lib/cadunico-utils'
+import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
@@ -169,9 +166,6 @@ export default function CarteiraSectionSwipe({
         href="/wallet/social-assistance"
         title="CADÚNICO"
         number={walletData?.assistencia_social?.cras?.nome || 'Não disponível'}
-        badgeStatus={getCadUnicoStatus(
-          walletData?.assistencia_social?.cadunico
-        )}
         primaryLabel="Data de recadastramento"
         primaryValue={formatRecadastramentoDate(
           walletData?.assistencia_social?.cadunico?.data_limite_cadastro_atual

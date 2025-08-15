@@ -17,7 +17,7 @@ export function ThemeColorMeta() {
       // This creates better contrast
       metaThemeColor.setAttribute(
         'content',
-        currentTheme === 'dark' ? '#000000' : '#ffffff'
+        currentTheme === 'dark' ? '#09090b' : '#f9fafb'
       )
     }
   }, [theme, systemTheme])

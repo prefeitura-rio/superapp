@@ -4,14 +4,27 @@ import { BannerBase } from '@/components/ui/custom/banner-base'
 import { iptuBannerIcon } from '@/constants/bucket'
 import Image from 'next/image'
 
-export const IptuBanner = () => {
+interface IptuBannerProps {
+  onBannerClick?: () => void
+  title: string
+  subtitle: string
+  route: string
+}
+
+export const IptuBanner = ({
+  onBannerClick,
+  title,
+  subtitle,
+  route,
+}: IptuBannerProps) => {
   return (
     <BannerBase
-      title="Fique em dia!"
-      subtitle="Emita sua guia ou saiba mais"
+      title={title}
+      subtitle={subtitle}
       color="#407137"
-      route="/services/category/taxas/84670/carioca-digital"
+      route={route}
       badge="IPTU 2025"
+      onBannerClick={onBannerClick}
       image={
         <Image
           src={iptuBannerIcon}

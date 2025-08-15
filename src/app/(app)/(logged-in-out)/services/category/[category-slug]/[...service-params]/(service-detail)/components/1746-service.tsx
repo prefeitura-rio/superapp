@@ -27,7 +27,7 @@ export function Service1746Component({ serviceData }: Service1746Props) {
           asChild
           variant="default"
           size="lg"
-          className="mb-6 rounded-full"
+          className="mb-6 rounded-full text-background!"
         >
           <Link
             href={ensureUrlProtocol(serviceData.url)}

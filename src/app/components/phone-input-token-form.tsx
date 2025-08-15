@@ -18,12 +18,14 @@ interface PhoneInputTokenFormProps {
     ddi: string
     valor: string
   }
+  error?: string | null
 }
 
 export default function PhoneInputTokenForm({
   value,
   onChange,
   resendParams,
+  error,
 }: PhoneInputTokenFormProps) {
   const [timer, setTimer] = useState(60)
   const [isResending, setIsResending] = useState(false)
@@ -93,6 +95,7 @@ export default function PhoneInputTokenForm({
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
+        {error && <p className="text-destructive text-sm mt-1">{error}</p>}
         <div>
           <span className="text-sm text-card-foreground mt-1 block text-left">
             Não recebeu o código?
@@ -105,7 +108,7 @@ export default function PhoneInputTokenForm({
               {isResending ? 'Reenviando...' : 'Reenviar'}
             </Button>
           </span>
-          <span className="text-sm text-muted-foreground block text-left">
+          <span className="text-sm text-muted-foreground block text-left -mt-1">
             {timer > 0
               ? `Você pode solicitar outro código em ${timer}s`
               : 'Você pode solicitar outro código'}
