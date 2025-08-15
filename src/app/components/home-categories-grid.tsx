@@ -3,8 +3,8 @@
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Category } from '@/lib/categories'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { CategoryLink } from './category-link'
 
 interface HomeCategoriesGridProps {
   categories?: Category[]
@@ -75,22 +75,26 @@ export default function HomeCategoriesGrid({
                     key={`slide-${slideIndex}`}
                     className="grid grid-cols-4 gap-2"
                   >
-                    {slideCategories.map((category, index) => (
-                      <Link
-                        key={category.categorySlug}
-                        href={`/services/category/${category.categorySlug}`}
-                        className="flex flex-col items-center"
-                      >
-                        <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
-                          <div className="flex items-center justify-center text-3xl mb-1">
-                            {category.icon}
+                    {slideCategories.map((category, index) => {
+                      const globalPosition = startIndex + index + 1
+                      return (
+                        <CategoryLink
+                          key={category.categorySlug}
+                          category={category}
+                          position={globalPosition}
+                          href={`/services/category/${category.categorySlug}`}
+                        >
+                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
+                            <div className="flex items-center justify-center text-3xl mb-1">
+                              {category.icon}
+                            </div>
                           </div>
-                        </div>
-                        <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                          {category.name}
-                        </span>
-                      </Link>
-                    ))}
+                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                            {category.name}
+                          </span>
+                        </CategoryLink>
+                      )
+                    })}
                   </div>
                 )
               }
