@@ -1,3 +1,4 @@
+import EmptyWallet from '@/app/components/empty-wallet'
 import { FloatNavigation } from '@/app/components/float-navigation'
 import { SearchButton } from '@/app/components/search-button'
 import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
@@ -127,117 +128,121 @@ export default async function Wallet() {
   return (
     <>
       {/* <MainHeader /> */}
-      <main className="pb-30 max-w-xl mx-auto text-white">
-        <section className="px-4 relative h-full ">
-          <div className="flex items-start justify-between pt-6 pb-6">
-            <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
-              Carteira
-            </h2>
+      <main className="max-w-xl mx-auto text-white">
+        {walletInfo?.hasData ? (
+          <section className="pb-30 px-4 relative h-full ">
+            <div className="flex items-start justify-between pt-6 pb-6">
+              <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+                Carteira
+              </h2>
 
-            <SearchButton />
-          </div>
-
-          {walletInfo && (
-            <div className="grid w-full gap-2">
-              {/* Health Card - only show if wallet has health data */}
-              {hasHealthData && (
-                <div>
-                  <HealthCard
-                    title="CLÍNICA DA FAMÍLIA"
-                    name={
-                      walletData!.saude!.clinica_familia!.nome ||
-                      'Nome não disponível'
-                    }
-                    primaryLabel="Status"
-                    primaryValue={healthStatusValue}
-                    secondaryLabel="Horário de Atendimento"
-                    secondaryValue={healthOperatingHours}
-                    address={walletData!.saude!.clinica_familia!.endereco}
-                    phone={walletData!.saude!.clinica_familia!.telefone}
-                    email={walletData!.saude!.clinica_familia!.email}
-                    riskStatus={riskStatus?.risco}
-                    enableFlip={false}
-                    asLink
-                    href="/wallet/health"
-                    showInitialShine={false}
-                  />
-                </div>
-              )}
-
-              {/* Card 2: Educação */}
-              {walletData?.educacao?.escola?.nome && (
-                <div>
-                  <EducationCard
-                    title="ESCOLA DE JOVENS E ADULTOS"
-                    name={
-                      walletData?.educacao?.escola?.nome || 'Não disponível'
-                    }
-                    primaryLabel="Status"
-                    primaryValue={getOperatingStatus(
-                      walletData?.educacao?.escola?.horario_funcionamento
-                    )}
-                    secondaryLabel="Horário de Atendimento"
-                    secondaryValue={formatEducationOperatingHours(
-                      walletData?.educacao?.escola?.horario_funcionamento
-                    )}
-                    address={walletData?.educacao?.escola?.endereco}
-                    phone={walletData?.educacao?.escola?.telefone}
-                    email={walletData?.educacao?.escola?.email}
-                    asLink
-                    enableFlip={false}
-                    href="/wallet/education"
-                    showInitialShine={false}
-                  />
-                </div>
-              )}
-
-              {/* Card 3: Assistência social */}
-              {walletData?.assistencia_social?.cras?.nome && (
-                <div>
-                  <SocialAssistanceCard
-                    title="CADÚNICO"
-                    number={
-                      walletData?.assistencia_social?.cras?.nome ||
-                      'Não disponível'
-                    }
-                    primaryLabel="Data de recadastramento"
-                    primaryValue={formatRecadastramentoDate(
-                      walletData?.assistencia_social?.cadunico
-                        ?.data_limite_cadastro_atual
-                    )}
-                    unitName={walletData?.assistencia_social?.cras?.nome}
-                    address={walletData?.assistencia_social?.cras?.endereco}
-                    phone={walletData?.assistencia_social?.cras?.telefone}
-                    asLink
-                    enableFlip={false}
-                    href="/wallet/social-assistance"
-                    showInitialShine={false}
-                  />
-                </div>
-              )}
-
-              {/* Card 4: Cuidados com a Cidade (1746) */}
-              {maintenanceStats.total > 0 && (
-                <div>
-                  <CaretakerCard
-                    title="CUIDADOS COM A CIDADE"
-                    name={formatMaintenanceRequestsCount(
-                      maintenanceStats.aberto
-                    )}
-                    primaryLabel="Total de chamados"
-                    primaryValue={maintenanceStats.total.toString()}
-                    secondaryLabel="Fechados"
-                    secondaryValue={maintenanceStats.fechados.toString()}
-                    showInitialShine={false}
-                    enableFlip={false}
-                    asLink
-                    href="/wallet/caretaker"
-                  />
-                </div>
-              )}
+              <SearchButton />
             </div>
-          )}
-        </section>
+
+            {walletInfo && (
+              <div className="grid w-full gap-2">
+                {/* Health Card - only show if wallet has health data */}
+                {hasHealthData && (
+                  <div>
+                    <HealthCard
+                      title="CLÍNICA DA FAMÍLIA"
+                      name={
+                        walletData!.saude!.clinica_familia!.nome ||
+                        'Nome não disponível'
+                      }
+                      primaryLabel="Status"
+                      primaryValue={healthStatusValue}
+                      secondaryLabel="Horário de Atendimento"
+                      secondaryValue={healthOperatingHours}
+                      address={walletData!.saude!.clinica_familia!.endereco}
+                      phone={walletData!.saude!.clinica_familia!.telefone}
+                      email={walletData!.saude!.clinica_familia!.email}
+                      riskStatus={riskStatus?.risco}
+                      enableFlip={false}
+                      asLink
+                      href="/wallet/health"
+                      showInitialShine={false}
+                    />
+                  </div>
+                )}
+
+                {/* Card 2: Educação */}
+                {walletData?.educacao?.escola?.nome && (
+                  <div>
+                    <EducationCard
+                      title="ESCOLA DE JOVENS E ADULTOS"
+                      name={
+                        walletData?.educacao?.escola?.nome || 'Não disponível'
+                      }
+                      primaryLabel="Status"
+                      primaryValue={getOperatingStatus(
+                        walletData?.educacao?.escola?.horario_funcionamento
+                      )}
+                      secondaryLabel="Horário de Atendimento"
+                      secondaryValue={formatEducationOperatingHours(
+                        walletData?.educacao?.escola?.horario_funcionamento
+                      )}
+                      address={walletData?.educacao?.escola?.endereco}
+                      phone={walletData?.educacao?.escola?.telefone}
+                      email={walletData?.educacao?.escola?.email}
+                      asLink
+                      enableFlip={false}
+                      href="/wallet/education"
+                      showInitialShine={false}
+                    />
+                  </div>
+                )}
+
+                {/* Card 3: Assistência social */}
+                {walletData?.assistencia_social?.cras?.nome && (
+                  <div>
+                    <SocialAssistanceCard
+                      title="CADÚNICO"
+                      number={
+                        walletData?.assistencia_social?.cras?.nome ||
+                        'Não disponível'
+                      }
+                      primaryLabel="Data de recadastramento"
+                      primaryValue={formatRecadastramentoDate(
+                        walletData?.assistencia_social?.cadunico
+                          ?.data_limite_cadastro_atual
+                      )}
+                      unitName={walletData?.assistencia_social?.cras?.nome}
+                      address={walletData?.assistencia_social?.cras?.endereco}
+                      phone={walletData?.assistencia_social?.cras?.telefone}
+                      asLink
+                      enableFlip={false}
+                      href="/wallet/social-assistance"
+                      showInitialShine={false}
+                    />
+                  </div>
+                )}
+
+                {/* Card 4: Cuidados com a Cidade (1746) */}
+                {maintenanceStats.total > 0 && (
+                  <div>
+                    <CaretakerCard
+                      title="CUIDADOS COM A CIDADE"
+                      name={formatMaintenanceRequestsCount(
+                        maintenanceStats.aberto
+                      )}
+                      primaryLabel="Total de chamados"
+                      primaryValue={maintenanceStats.total.toString()}
+                      secondaryLabel="Fechados"
+                      secondaryValue={maintenanceStats.fechados.toString()}
+                      showInitialShine={false}
+                      enableFlip={false}
+                      asLink
+                      href="/wallet/caretaker"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        ) : (
+          <EmptyWallet />
+        )}
         <FloatNavigation />
       </main>
     </>

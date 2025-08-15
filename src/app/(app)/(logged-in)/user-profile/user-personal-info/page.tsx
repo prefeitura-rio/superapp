@@ -9,7 +9,7 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { shouldShowUpdateBadge } from '@/lib/utils'
+import { formatTitleCase, shouldShowUpdateBadge } from '@/lib/utils'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -55,14 +55,14 @@ export default async function PersonalInfoForm() {
           <CustomInput
             id="fullName"
             label="Nome completo"
-            defaultValue={userInfo?.nome || ''}
+            defaultValue={userInfo?.nome || 'Informação indisponível'}
             isEditable={false}
           />
 
           <ActionDiv
             label="Nome social"
             tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
-            content={userInfo?.nome_social || ''}
+            content={userInfo?.nome_social || 'Informação indisponível'}
             drawerContent={<SocialNameDrawerContent />}
             drawerTitle="Nome social"
           />
@@ -86,7 +86,9 @@ export default async function PersonalInfoForm() {
             label="E-mail"
             optionalLabelVariant={showEmailBadge ? 'destructive' : undefined}
             optionalLabel={showEmailBadge ? 'Atualizar' : undefined}
-            content={userInfo?.email?.principal?.valor || ''}
+            content={
+              userInfo?.email?.principal?.valor || 'Informação indisponível'
+            }
             variant="default"
             disabled
             rightIcon={<EditIcon />}
@@ -96,13 +98,15 @@ export default async function PersonalInfoForm() {
           <CustomInput
             id="nationality"
             label="Nacionalidade"
-            defaultValue={userInfo?.nascimento?.pais || ''}
+            defaultValue={
+              userInfo?.nascimento?.pais || 'Informação indisponível'
+            }
             isEditable={false}
           />
 
           <ActionDiv
             label="Cor / Raça"
-            content={formatRace(userInfo?.raca) || ''}
+            content={formatRace(userInfo?.raca) || 'Informação indisponível'}
             variant="default"
             disabled
             rightIcon={<EditIcon />}
@@ -113,14 +117,21 @@ export default async function PersonalInfoForm() {
           <CustomInput
             id="birthDate"
             label="Data de nascimento"
-            defaultValue={formatDate(userInfo?.nascimento?.data)}
+            defaultValue={
+              formatDate(userInfo?.nascimento?.data) ||
+              'Informação indisponível'
+            }
             isEditable={false}
           />
 
           <CustomInput
             id="sexo"
             label="Sexo"
-            defaultValue={userInfo?.sexo || ''}
+            defaultValue={
+              userInfo?.sexo
+                ? formatTitleCase(userInfo.sexo)
+                : 'Informação indisponível'
+            }
             isEditable={false}
           />
         </div>
