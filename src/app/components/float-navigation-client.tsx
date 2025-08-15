@@ -3,9 +3,9 @@
 import { cn } from '@/lib/utils'
 
 import { HomeIcon, ServicesIcon, WalletIcon } from '@/assets/icons'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
+import { NavigationLink } from './navigation-link'
 
 interface NavItem {
   href: string
@@ -45,12 +45,7 @@ export function FloatNavigationClient({
             const Icon = item.icon
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="group flex items-center justify-center"
-                aria-label={item.label}
-              >
+              <NavigationLink key={item.href} item={item} isActive={isActive}>
                 <div
                   className={cn(
                     'flex h-14 w-14 items-center justify-center rounded-full transition-colors',
@@ -64,7 +59,7 @@ export function FloatNavigationClient({
                     )}
                   />
                 </div>
-              </Link>
+              </NavigationLink>
             )
           })}
 
@@ -108,7 +103,7 @@ export function FloatNavigationClient({
               )}
             >
               Cancelar
-            </Button>
+          </Button>
           </BottomSheetClose>
         </BottomSheetFooter>
       </BottomSheet> */}
