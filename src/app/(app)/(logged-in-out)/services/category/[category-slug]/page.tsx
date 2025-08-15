@@ -3,9 +3,7 @@ import {
   fetchServicesByCategory,
   getCategoryNameBySlug,
 } from '@/lib/services-utils'
-import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
-import type React from 'react'
+import { MenuItemClient } from './components/menu-item-client'
 
 export default async function CategoryPage({
   params,
@@ -25,15 +23,19 @@ export default async function CategoryPage({
         <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-20">
           <nav className="flex flex-col">
             {servicesData?.hits?.length ? (
-              servicesData.hits.map(hit => (
-                <MenuItem
+              servicesData.hits.map((hit, index) => (
+                <MenuItemClient
                   key={hit.document.id}
                   href={`/services/category/${categorySlug}/${hit.document.id}/${hit.document.collection}`}
+                  title={hit.document.titulo}
+                  description={hit.document.descricao}
+                  category={categoryName}
+                  listPosition={index + 1}
                 >
                   <span className="text-card-foreground">
                     {hit.document.titulo}
                   </span>
-                </MenuItem>
+                </MenuItemClient>
               ))
             ) : (
               <div className="py-8 text-center text-card-foreground">
@@ -44,28 +46,5 @@ export default async function CategoryPage({
         </div>
       </div>
     </div>
-  )
-}
-
-interface MenuItemProps {
-  href: string
-  children: React.ReactNode
-  disabled?: boolean
-}
-
-function MenuItem({ href, children, disabled = false }: MenuItemProps) {
-  const content = (
-    <div className="border-b border-border flex items-center justify-between py-5">
-      <div className="flex items-center justify-between flex-1 pr-4">
-        {children}
-      </div>
-      <ChevronRight className="h-5 w-5 text-primary" />
-    </div>
-  )
-
-  return (
-    <Link href={href} className="hover:brightness-90 transition-colors">
-      {content}
-    </Link>
   )
 }
