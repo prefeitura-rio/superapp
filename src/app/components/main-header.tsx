@@ -30,9 +30,7 @@ export default function MainHeader({
           </div>
           <div className="flex flex-col">
             <span className="text-base font-medium text-foreground">
-              {isLoggedIn
-                ? formatUserName('LUCAS TAVARES DA SILVA FERREIRA')
-                : 'Olá, Visitante!'}
+              {isLoggedIn ? formatUserName(userName) : 'Olá, Visitante!'}
             </span>
             <span className="text-sm font-normal text-muted-foreground">
               {isLoggedIn ? '' : 'Faça seu login'}
