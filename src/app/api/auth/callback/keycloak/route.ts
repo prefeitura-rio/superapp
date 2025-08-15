@@ -1,5 +1,5 @@
 // src/app/api/auth/callback/keycloak/route.ts
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {

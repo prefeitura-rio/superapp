@@ -2,9 +2,9 @@
 
 import govbrLogo from '@/assets/govbr.svg'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useViewportHeight } from '@/hooks/useViewport'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
 import Image from 'next/image'
 import Link from 'next/link'
 

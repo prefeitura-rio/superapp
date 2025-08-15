@@ -1,7 +1,7 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 // import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
 import govbrLogo from '@/assets/govbr.svg'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/middleware'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
 
