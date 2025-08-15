@@ -3,7 +3,7 @@ name: Build and Push image
 on:
   push:
     branches:
-      - master
+      - main
       - staging
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
         id: meta
         run: |
           IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/superapp"
-          if [ "${GITHUB_REF##*/}" == "master" ]; then
+          if [ "${GITHUB_REF##*/}" == "main" ]; then
             COMMIT_HASH=${{ github.sha }}
             TAG1="stable"
             TAG2="$COMMIT_HASH"
