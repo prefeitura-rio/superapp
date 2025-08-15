@@ -6,15 +6,23 @@ import Image from 'next/image'
 
 interface LoginBannerProps {
   onBannerClick?: () => void
+  title: string
+  subtitle: string
+  route: string
 }
 
-export const LoginBanner = ({ onBannerClick }: LoginBannerProps) => {
+export const LoginBanner = ({
+  onBannerClick,
+  title,
+  subtitle,
+  route,
+}: LoginBannerProps) => {
   return (
     <BannerBase
-      title="Acesse sua carteira"
-      subtitle="Faça login em gov.br"
+      title={title}
+      subtitle={subtitle}
       color="#13335A"
-      route="/authentication-required/wallet"
+      route={route}
       onBannerClick={onBannerClick}
       image={
         <Image

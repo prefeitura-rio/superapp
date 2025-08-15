@@ -5,10 +5,15 @@ import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-ban
 
 type BannerProps = {
   id: string
-  component: React.ComponentType<{ onBannerClick?: () => void }>
+  component: React.ComponentType<{
+    onBannerClick?: () => void
+    title: string
+    subtitle: string
+    route: string
+  }>
   title: string
-  subtitle?: string
-  route?: string
+  subtitle: string
+  route: string
 }
 
 export const suggestedBanners: BannerProps[] = [
@@ -36,6 +41,9 @@ export const suggestedBanners: BannerProps[] = [
   // {
   //   id: 'taxes',
   //   component: TaxesBanner,
+  //   title: 'Carioca em dia',
+  //   subtitle: 'Desconto até 30 de agosto',
+  //   route: '/',
   // },
   {
     id: 'licenses',

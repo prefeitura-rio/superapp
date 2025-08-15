@@ -42,6 +42,9 @@ export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
               <BannerComponent
                 key={banner.id}
                 onBannerClick={() => handleBannerClick(banner, index + 1)}
+                title={banner.title}
+                subtitle={banner.subtitle}
+                route={banner.route}
               />
             )
           })}

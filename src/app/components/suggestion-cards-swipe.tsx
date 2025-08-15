@@ -110,6 +110,9 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
                         onBannerClick={() =>
                           handleBannerClick(banner, position)
                         }
+                        title={banner.title}
+                        subtitle={banner.subtitle}
+                        route={banner.route}
                       />
                     )
                   })}
