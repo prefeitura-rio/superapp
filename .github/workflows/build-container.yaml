@@ -50,7 +50,6 @@ jobs:
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
-            --build-arg NEXT_PUBLIC_HOTJAR_ID="6442311" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
@@ -72,9 +71,8 @@ jobs:
             --build-arg NEXT_PUBLIC_HOME_URL="https://pref.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.acesso.gov.br/" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
-            --build-arg NEXT_PUBLIC_HOTJAR_ID="" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="" \
-            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="" \
+            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-WTQV6K6W" \
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
