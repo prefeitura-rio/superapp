@@ -4,7 +4,11 @@ import { BannerBase } from '@/components/ui/custom/banner-base'
 import Image from 'next/image'
 import { cariocaIcon } from '../../../constants/bucket'
 
-export const LicensesBanner = () => {
+interface LicensesBannerProps {
+  onBannerClick?: () => void
+}
+
+export const LicensesBanner = ({ onBannerClick }: LicensesBannerProps) => {
   return (
     <BannerBase
       title="Regularize sua obra!"
@@ -12,6 +16,7 @@ export const LicensesBanner = () => {
       color="#A24821"
       route="/services/category/Cidade/82608/carioca-digital"
       badge="Licenças"
+      onBannerClick={onBannerClick}
       image={
         <Image
           src={cariocaIcon}

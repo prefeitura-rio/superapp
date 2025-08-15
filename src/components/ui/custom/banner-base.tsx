@@ -12,6 +12,7 @@ type BannerBaseProps = {
   color: string
   route?: string
   image?: React.ReactNode
+  onBannerClick?: () => void
 }
 
 export const BannerBase: React.FC<BannerBaseProps> = ({
@@ -21,10 +22,14 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
   color,
   route,
   image,
+  onBannerClick,
 }) => {
   const router = useRouter()
 
   const handleClick = () => {
+    if (onBannerClick) {
+      onBannerClick()
+    }
     if (route) router.push(route)
   }
 

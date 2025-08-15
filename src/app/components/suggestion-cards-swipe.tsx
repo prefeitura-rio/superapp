@@ -3,6 +3,7 @@
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { suggestedBanners } from '@/constants/banners'
+import { sendGAEvent } from '@next/third-parties/google'
 import { useEffect, useState } from 'react'
 
 interface SuggestionCardsProps {
@@ -59,6 +60,24 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
     ? suggestedBanners.filter(banner => banner.id !== 'update')
     : suggestedBanners.filter(banner => banner.id !== 'login')
 
+  const handleBannerClick = (
+    banner: (typeof suggestedBanners)[0],
+    position: number
+  ) => {
+    const ehFixo = banner.id !== 'update' && banner.id !== 'login'
+
+    sendGAEvent('event', 'banner_click', {
+      isLoggedIn,
+      event_timestamp: new Date().toISOString(),
+      title: banner.title,
+      subtitle: banner.subtitle,
+      id: banner.id,
+      link: banner.route,
+      posicao: position,
+      ehFixo,
+    })
+  }
+
   if (!isLoaded) {
     return <SuggestionCardsSwipeSkeleton />
   }
@@ -81,10 +100,18 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
                   key={`slide-${slideIndex}`}
                   className="grid grid-cols-2 gap-2 py-2"
                 >
-                  {slideBanners.map(banner => {
+                  {slideBanners.map((banner, bannerIndex) => {
                     const BannerComponent = banner.component
+                    const position = startIndex + bannerIndex + 1
 
-                    return <BannerComponent key={banner.id} />
+                    return (
+                      <BannerComponent
+                        key={banner.id}
+                        onBannerClick={() =>
+                          handleBannerClick(banner, position)
+                        }
+                      />
+                    )
                   })}
 
                   {slideBanners.length === 1 && (
