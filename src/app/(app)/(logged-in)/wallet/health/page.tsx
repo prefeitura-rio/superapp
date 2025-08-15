@@ -148,7 +148,7 @@ export default async function HealthCardDetail() {
   if (!healthData?.clinica_familia) {
     return (
       <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-        <SecondaryHeader title="Carteira" />
+        <SecondaryHeader title="Carteira" className="max-w-xl" />
         <div className="flex items-center justify-center py-6">
           <p className="text-muted-foreground text-center">
             Dados de saúde não disponíveis.
