@@ -5,10 +5,10 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
-import type { HandlersHealthResponseServices } from './handlersHealthResponseServices'
 
-export interface HandlersHealthResponse {
-  services?: HandlersHealthResponseServices
-  status?: boolean
-  timestamp?: string
+export interface ModelsValidateRegistrationRequest {
+  birth_date: string
+  channel: string
+  cpf: string
+  name: string
 }

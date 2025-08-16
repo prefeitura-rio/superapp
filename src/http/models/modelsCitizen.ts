@@ -5,15 +5,24 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsAssistenciaSocial } from './modelsAssistenciaSocial'
+import type { ModelsDocumentos } from './modelsDocumentos'
+import type { ModelsEducacao } from './modelsEducacao'
 import type { ModelsEmail } from './modelsEmail'
 import type { ModelsEndereco } from './modelsEndereco'
 import type { ModelsMae } from './modelsMae'
 import type { ModelsNascimento } from './modelsNascimento'
 import type { ModelsObito } from './modelsObito'
+import type { ModelsSaude } from './modelsSaude'
 import type { ModelsTelefone } from './modelsTelefone'
 
 export interface ModelsCitizen {
+  _id?: string
+  assistencia_social?: ModelsAssistenciaSocial
   cpf?: string
+  /** Wallet and internal fields */
+  documentos?: ModelsDocumentos
+  educacao?: ModelsEducacao
   email?: ModelsEmail
   endereco?: ModelsEndereco
   mae?: ModelsMae
@@ -23,6 +32,7 @@ export interface ModelsCitizen {
   nome_social?: string
   obito?: ModelsObito
   raca?: string
+  saude?: ModelsSaude
   sexo?: string
   telefone?: ModelsTelefone
 }

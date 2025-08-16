@@ -5,7 +5,7 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
-import type { HandlersHealthResponse } from '.././models'
+import type { HandlersErrorResponse, HandlersHealthResponse } from '.././models'
 
 import { customFetch } from '../../../custom-fetch'
 
@@ -18,14 +18,14 @@ export type getHealthResponse200 = {
   status: 200
 }
 
-export type getHealthResponse503 = {
-  data: HandlersHealthResponse
-  status: 503
+export type getHealthResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
 }
 
 export type getHealthResponseComposite =
   | getHealthResponse200
-  | getHealthResponse503
+  | getHealthResponse500
 
 export type getHealthResponse = getHealthResponseComposite & {
   headers: Headers

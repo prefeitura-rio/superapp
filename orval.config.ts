@@ -11,7 +11,6 @@ export default defineConfig({
       biome: true,
       httpClient: 'fetch',
       clean: true,
-      baseUrl: `${process.env.NEXT_PUBLIC_BASE_API_URL_RMI}v1/`,
       override: {
         mutator: {
           path: './custom-fetch.ts',

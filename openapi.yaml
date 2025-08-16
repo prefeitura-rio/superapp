@@ -16,6 +16,849 @@
     "version": "1.0"
   },
   "paths": {
+    "/admin/beta/groups": {
+      "get": {
+        "description": "Lista todos os grupos beta com paginação (apenas administradores)",
+        "tags": [
+          "Beta Groups"
+        ],
+        "summary": "Listar grupos beta",
+        "parameters": [
+          {
+            "description": "Página (padrão: 1)",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Itens por página (padrão: 10)",
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaGroupListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "description": "Cria um novo grupo beta para o chatbot (apenas administradores)",
+        "tags": [
+          "Beta Groups"
+        ],
+        "summary": "Criar grupo beta",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/models.BetaGroupRequest"
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaGroupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/groups/{group_id}": {
+      "get": {
+        "description": "Obtém um grupo beta por ID (apenas administradores)",
+        "tags": [
+          "Beta Groups"
+        ],
+        "summary": "Obter grupo beta",
+        "parameters": [
+          {
+            "description": "ID do grupo",
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaGroupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "description": "Atualiza um grupo beta existente (apenas administradores)",
+        "tags": [
+          "Beta Groups"
+        ],
+        "summary": "Atualizar grupo beta",
+        "parameters": [
+          {
+            "description": "ID do grupo",
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/models.BetaGroupRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaGroupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "description": "Exclui um grupo beta e remove todas as associações de telefones (apenas administradores)",
+        "tags": [
+          "Beta Groups"
+        ],
+        "summary": "Excluir grupo beta",
+        "parameters": [
+          {
+            "description": "ID do grupo",
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grupo excluído com sucesso"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/whitelist": {
+      "get": {
+        "description": "Lista telefones na whitelist beta com paginação (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Listar telefones na whitelist",
+        "parameters": [
+          {
+            "description": "Página (padrão: 1)",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Itens por página (padrão: 10)",
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filtrar por ID do grupo",
+            "name": "group_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaWhitelistListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/whitelist/bulk-add": {
+      "post": {
+        "description": "Adiciona múltiplos números de telefone a um grupo beta (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Adicionar múltiplos telefones à whitelist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.BetaWhitelistBulkRequest"
+              }
+            }
+          },
+          "description": "Dados da operação em lote",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/models.BetaWhitelistResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/whitelist/bulk-move": {
+      "post": {
+        "description": "Move múltiplos números de telefone de um grupo beta para outro (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Mover múltiplos telefones entre grupos",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.BetaWhitelistMoveRequest"
+              }
+            }
+          },
+          "description": "Dados da operação de movimentação",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/whitelist/bulk-remove": {
+      "post": {
+        "description": "Remove múltiplos números de telefone da whitelist beta (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Remover múltiplos telefones da whitelist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.BetaWhitelistBulkRemoveRequest"
+              }
+            }
+          },
+          "description": "Dados da operação em lote",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/beta/whitelist/{phone_number}": {
+      "post": {
+        "description": "Adiciona um número de telefone a um grupo beta (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Adicionar telefone à whitelist",
+        "parameters": [
+          {
+            "description": "Número de telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.BetaWhitelistRequest"
+              }
+            }
+          },
+          "description": "Dados da whitelist",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaWhitelistResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "description": "Remove um número de telefone da whitelist beta (apenas administradores)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Remover telefone da whitelist",
+        "parameters": [
+          {
+            "description": "Número de telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaWhitelistResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/phone/quarantine/stats": {
+      "get": {
+        "description": "Obtém estatísticas sobre telefones em quarentena (apenas administradores)",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Obter estatísticas de quarentena",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.QuarantineStats"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/phone/quarantined": {
+      "get": {
+        "description": "Lista todos os telefones em quarentena com paginação (apenas administradores)",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Listar telefones em quarentena",
+        "parameters": [
+          {
+            "description": "Página (padrão: 1)",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Itens por página (padrão: 10)",
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.QuarantinedListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/citizen/ethnicity/options": {
       "get": {
         "description": "Retorna a lista de opções válidas de etnia para autodeclaração. Esta lista é usada para validar as atualizações de etnia autodeclarada.",
@@ -62,7 +905,7 @@
             "bearerAuth": []
           }
         ],
-        "description": "Recupera os dados do cidadão por CPF, combinando dados base com atualizações autodeclaradas. Dados autodeclarados têm precedência sobre dados base. Os resultados são armazenados em cache usando Redis com TTL configurável.",
+        "description": "Recupera os dados do cidadão por CPF, incluindo informações básicas e dados autodeclarados.",
         "tags": [
           "citizen"
         ],
@@ -82,7 +925,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Dados completos do cidadão",
+            "description": "Dados do cidadão",
             "content": {
               "application/json": {
                 "schema": {
@@ -122,17 +965,7 @@
             }
           },
           "404": {
-            "description": "Cidadão não encontrado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/handlers.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Erro interno do servidor",
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -219,8 +1052,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "409": {
+            "description": "Endereço não alterado",
             "content": {
               "application/json": {
                 "schema": {
@@ -597,7 +1430,7 @@
             "bearerAuth": []
           }
         ],
-        "description": "Recupera os chamados do 1746 de um cidadão por CPF com paginação.",
+        "description": "Recupera os chamados do 1746 de um cidadão por CPF com paginação. Cada documento representa um chamado individual.",
         "tags": [
           "citizen"
         ],
@@ -956,14 +1789,14 @@
             "bearerAuth": []
           }
         ],
-        "description": "Validates the verification code sent to the phone number",
+        "description": "Valida o código de verificação enviado para o número de telefone",
         "tags": [
           "citizen"
         ],
-        "summary": "Validate phone verification",
+        "summary": "Validar verificação de telefone",
         "parameters": [
           {
-            "description": "CPF number",
+            "description": "Número do CPF",
             "name": "cpf",
             "in": "path",
             "required": true,
@@ -980,7 +1813,7 @@
               }
             }
           },
-          "description": "Verification code and phone",
+          "description": "Código de verificação e telefone",
           "required": true
         },
         "responses": {
@@ -1116,6 +1949,64 @@
         }
       }
     },
+    "/config/channels": {
+      "get": {
+        "description": "Obtém a lista de canais disponíveis para comunicação",
+        "tags": [
+          "config"
+        ],
+        "summary": "Obter canais disponíveis",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/config/opt-out-reasons": {
+      "get": {
+        "description": "Obtém a lista de motivos válidos para opt-out",
+        "tags": [
+          "config"
+        ],
+        "summary": "Obter motivos de opt-out",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/health": {
       "get": {
         "description": "Verifica a saúde da API e suas dependências (MongoDB e Redis). Retorna status detalhado para cada serviço.",
@@ -1134,12 +2025,778 @@
               }
             }
           },
-          "503": {
-            "description": "Um ou mais serviços estão indisponíveis",
+          "500": {
+            "description": "Um ou mais serviços não estão saudáveis",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/handlers.HealthResponse"
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Expõe métricas Prometheus para monitoramento do sistema",
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Métricas Prometheus",
+        "responses": {
+          "200": {
+            "description": "Métricas Prometheus",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/phone/{phone_number}/beta-status": {
+      "get": {
+        "description": "Verifica se um número de telefone está na whitelist beta (com cache)",
+        "tags": [
+          "Beta Whitelist"
+        ],
+        "summary": "Verificar status beta",
+        "parameters": [
+          {
+            "description": "Número de telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BetaStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/phone/{phone_number}/bind": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Vincula um número de telefone a um CPF sem definir opt-in",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Vincular telefone a CPF",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.BindRequest"
+              }
+            }
+          },
+          "description": "Dados da vinculação",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.BindResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/citizen": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Obtém informações do cidadão associado a um número de telefone",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Obter cidadão por telefone",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.PhoneCitizenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/opt-in": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Realiza opt-in para receber notificações",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Realizar opt-in",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.OptInRequest"
+              }
+            }
+          },
+          "description": "Dados do opt-in",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.OptInResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/opt-out": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Realiza opt-out para parar de receber notificações",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Realizar opt-out",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.OptOutRequest"
+              }
+            }
+          },
+          "description": "Dados do opt-out",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.OptOutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/quarantine": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Coloca um número de telefone em quarentena (apenas administradores)",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Colocar telefone em quarentena",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.QuarantineResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Libera um número de telefone da quarentena (apenas administradores)",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Liberar telefone da quarentena",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.QuarantineResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/reject-registration": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Rejeita um registro e bloqueia o mapeamento telefone-CPF",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Rejeitar registro",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.RejectRegistrationRequest"
+              }
+            }
+          },
+          "description": "Dados da rejeição",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.RejectRegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/{phone_number}/status": {
+      "get": {
+        "description": "Obtém o status de um número de telefone (quarentena, CPF vinculado, etc.)",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Obter status do telefone",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.PhoneStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/phone/{phone_number}/validate-registration": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Valida um registro de usuário contra dados base",
+        "tags": [
+          "phone"
+        ],
+        "summary": "Validar registro",
+        "parameters": [
+          {
+            "description": "Número do telefone",
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.ValidateRegistrationRequest"
+              }
+            }
+          },
+          "description": "Dados do registro",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.ValidateRegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validate/email": {
+      "post": {
+        "description": "Valida formato e estrutura de endereços de email, retornando informações detalhadas sobre o endereço quando válido.",
+        "tags": [
+          "validation"
+        ],
+        "summary": "Valida endereço de email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/handlers.EmailValidationRequest"
+              }
+            }
+          },
+          "description": "Email a ser validado",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.EmailValidationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handlers.ErrorResponse"
                 }
               }
             }
@@ -1216,6 +2873,19 @@
     }
   ],
   "components": {
+    "requestBodies": {
+      "models.BetaGroupRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/models.BetaGroupRequest"
+            }
+          }
+        },
+        "description": "Dados do grupo",
+        "required": true
+      }
+    },
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
@@ -1224,6 +2894,49 @@
       }
     },
     "schemas": {
+      "handlers.EmailValidationRequest": {
+        "description": "Estrutura de entrada contendo o endereço de email a ser validado.",
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "description": "Endereço de email a ser validado.\nexample: \"usuario@exemplo.com\"",
+            "type": "string"
+          }
+        }
+      },
+      "handlers.EmailValidationResponse": {
+        "description": "Resultado da validação, contendo informações sobre o endereço de email quando válido.",
+        "type": "object",
+        "properties": {
+          "domain": {
+            "description": "Domínio do email (após o @)",
+            "type": "string"
+          },
+          "local_part": {
+            "description": "Parte local do email (antes do @)",
+            "type": "string"
+          },
+          "message": {
+            "description": "Mensagem de retorno.",
+            "type": "string"
+          },
+          "normalized": {
+            "description": "Email normalizado (lowercase)",
+            "type": "string"
+          },
+          "valid": {
+            "description": "Indica se o email é válido.",
+            "type": "boolean"
+          },
+          "validation_type": {
+            "description": "Tipo de validação aplicada",
+            "type": "string"
+          }
+        }
+      },
       "handlers.ErrorResponse": {
         "type": "object",
         "properties": {
@@ -1238,11 +2951,11 @@
           "services": {
             "type": "object",
             "additionalProperties": {
-              "type": "string"
+              "$ref": "#/components/schemas/handlers.ServiceHealth"
             }
           },
           "status": {
-            "type": "string"
+            "type": "boolean"
           },
           "timestamp": {
             "type": "string"
@@ -1296,6 +3009,20 @@
           }
         }
       },
+      "handlers.ServiceHealth": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
       "handlers.SuccessResponse": {
         "type": "object",
         "properties": {
@@ -1326,6 +3053,202 @@
           },
           "cras": {
             "$ref": "#/components/schemas/models.CRAS"
+          }
+        }
+      },
+      "models.BetaGroupListResponse": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/models.BetaGroupResponse"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/models.PaginationInfo"
+          },
+          "total_groups": {
+            "type": "integer"
+          }
+        }
+      },
+      "models.BetaGroupRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BetaGroupResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BetaStatusResponse": {
+        "type": "object",
+        "properties": {
+          "beta_whitelisted": {
+            "type": "boolean"
+          },
+          "group_id": {
+            "type": "string"
+          },
+          "group_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BetaWhitelistBulkRemoveRequest": {
+        "type": "object",
+        "required": [
+          "phone_numbers"
+        ],
+        "properties": {
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "models.BetaWhitelistBulkRequest": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "phone_numbers"
+        ],
+        "properties": {
+          "group_id": {
+            "type": "string"
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "models.BetaWhitelistListResponse": {
+        "type": "object",
+        "properties": {
+          "pagination": {
+            "$ref": "#/components/schemas/models.PaginationInfo"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "whitelisted": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/models.BetaWhitelistResponse"
+            }
+          }
+        }
+      },
+      "models.BetaWhitelistMoveRequest": {
+        "type": "object",
+        "required": [
+          "from_group_id",
+          "phone_numbers",
+          "to_group_id"
+        ],
+        "properties": {
+          "from_group_id": {
+            "type": "string"
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "to_group_id": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BetaWhitelistRequest": {
+        "type": "object",
+        "required": [
+          "group_id"
+        ],
+        "properties": {
+          "group_id": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BetaWhitelistResponse": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          },
+          "group_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BindRequest": {
+        "type": "object",
+        "required": [
+          "channel",
+          "cpf"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          }
+        }
+      },
+      "models.BindResponse": {
+        "type": "object",
+        "properties": {
+          "cpf": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "opt_in": {
+            "type": "boolean"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         }
       },
@@ -1366,8 +3289,25 @@
       "models.Citizen": {
         "type": "object",
         "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "assistencia_social": {
+            "$ref": "#/components/schemas/models.AssistenciaSocial"
+          },
           "cpf": {
             "type": "string"
+          },
+          "documentos": {
+            "description": "Wallet and internal fields",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/models.Documentos"
+              }
+            ]
+          },
+          "educacao": {
+            "$ref": "#/components/schemas/models.Educacao"
           },
           "email": {
             "$ref": "#/components/schemas/models.Email"
@@ -1395,6 +3335,9 @@
           },
           "raca": {
             "type": "string"
+          },
+          "saude": {
+            "$ref": "#/components/schemas/models.Saude"
           },
           "sexo": {
             "type": "string"
@@ -1498,6 +3441,9 @@
           "sistema": {
             "type": "string"
           },
+          "updated_at": {
+            "type": "string"
+          },
           "valor": {
             "type": "string"
           }
@@ -1552,6 +3498,9 @@
           },
           "tipo_logradouro": {
             "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
           }
         }
       },
@@ -1561,7 +3510,7 @@
           "enfermeiros": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/models.ProfissionalSaude"
             }
           },
           "id_ine": {
@@ -1573,7 +3522,7 @@
           "medicos": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/models.ProfissionalSaude"
             }
           },
           "nome": {
@@ -1678,9 +3627,10 @@
           "id_unidade_organizacional_mae": {
             "type": "string"
           },
-          "justificativa_status": {
-            "type": "string"
+          "indicador": {
+            "type": "boolean"
           },
+          "justificativa_status": {},
           "latitude": {
             "type": "number"
           },
@@ -1714,14 +3664,18 @@
           "subtipo": {
             "type": "string"
           },
-          "tempo_prazo": {
-            "type": "string"
-          },
+          "tempo_prazo": {},
           "tipo": {
             "type": "string"
           },
           "tipo_situacao": {
             "type": "string"
+          },
+          "total_chamados": {
+            "type": "integer"
+          },
+          "total_fechados": {
+            "type": "integer"
           },
           "unidade_organizacional_ouvidoria": {
             "type": "string"
@@ -1762,6 +3716,58 @@
           }
         }
       },
+      "models.OptInRequest": {
+        "type": "object",
+        "required": [
+          "channel",
+          "cpf"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "validation_result": {
+            "$ref": "#/components/schemas/models.ValidationResult"
+          }
+        }
+      },
+      "models.OptInResponse": {
+        "type": "object",
+        "properties": {
+          "phone_mapping_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "models.OptOutRequest": {
+        "type": "object",
+        "required": [
+          "channel",
+          "reason"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "models.OptOutResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "models.PaginatedMaintenanceRequests": {
         "type": "object",
         "properties": {
@@ -1790,6 +3796,75 @@
           }
         }
       },
+      "models.PaginationInfo": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          }
+        }
+      },
+      "models.PhoneCitizenResponse": {
+        "type": "object",
+        "properties": {
+          "cpf": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "models.PhoneStatusResponse": {
+        "type": "object",
+        "properties": {
+          "beta_group_id": {
+            "type": "string"
+          },
+          "beta_group_name": {
+            "type": "string"
+          },
+          "beta_whitelisted": {
+            "type": "boolean"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "opted_out": {
+            "type": "boolean"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "quarantine_until": {
+            "type": "string"
+          },
+          "quarantined": {
+            "type": "boolean"
+          }
+        }
+      },
       "models.PhoneVerificationValidateRequest": {
         "type": "object",
         "required": [
@@ -1809,6 +3884,115 @@
             "type": "string"
           },
           "valor": {
+            "type": "string"
+          }
+        }
+      },
+      "models.ProfissionalSaude": {
+        "type": "object",
+        "properties": {
+          "id_profissional_sus": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          }
+        }
+      },
+      "models.QuarantineResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "quarantine_until": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "models.QuarantineStats": {
+        "type": "object",
+        "properties": {
+          "active_quarantines": {
+            "type": "integer"
+          },
+          "expired_quarantines": {
+            "type": "integer"
+          },
+          "quarantine_history_total": {
+            "type": "integer"
+          },
+          "quarantines_with_cpf": {
+            "type": "integer"
+          },
+          "quarantines_without_cpf": {
+            "type": "integer"
+          },
+          "total_quarantined": {
+            "type": "integer"
+          }
+        }
+      },
+      "models.QuarantinedListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/models.QuarantinedPhone"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/models.PaginationInfo"
+          }
+        }
+      },
+      "models.QuarantinedPhone": {
+        "type": "object",
+        "properties": {
+          "cpf": {
+            "type": "string"
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "quarantine_until": {
+            "type": "string"
+          }
+        }
+      },
+      "models.RejectRegistrationRequest": {
+        "type": "object",
+        "required": [
+          "channel",
+          "cpf",
+          "reason"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "models.RejectRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
             "type": "string"
           }
         }
@@ -1934,6 +4118,9 @@
           "sistema": {
             "type": "string"
           },
+          "updated_at": {
+            "type": "string"
+          },
           "valor": {
             "type": "string"
           }
@@ -1942,7 +4129,7 @@
       "models.UserConfigOptInResponse": {
         "type": "object",
         "properties": {
-          "optin": {
+          "opt_in": {
             "type": "boolean"
           }
         }
@@ -1951,6 +4138,51 @@
         "type": "object",
         "properties": {
           "firstlogin": {
+            "type": "boolean"
+          }
+        }
+      },
+      "models.ValidateRegistrationRequest": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "channel",
+          "cpf",
+          "name"
+        ],
+        "properties": {
+          "birth_date": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "models.ValidateRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "matched_cpf": {
+            "type": "string"
+          },
+          "matched_name": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        }
+      },
+      "models.ValidationResult": {
+        "type": "object",
+        "properties": {
+          "valid": {
             "type": "boolean"
           }
         }

@@ -26,7 +26,8 @@ export interface ModelsMaintenanceRequest {
   id_tipo?: string
   id_unidade_organizacional?: string
   id_unidade_organizacional_mae?: string
-  justificativa_status?: string
+  indicador?: boolean
+  justificativa_status?: unknown
   latitude?: number
   longitude?: number
   nome_unidade_organizacional?: string
@@ -38,8 +39,10 @@ export interface ModelsMaintenanceRequest {
   situacao?: string
   status?: string
   subtipo?: string
-  tempo_prazo?: string
+  tempo_prazo?: unknown
   tipo?: string
   tipo_situacao?: string
+  total_chamados?: number
+  total_fechados?: number
   unidade_organizacional_ouvidoria?: string
 }
