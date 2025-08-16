@@ -47,50 +47,11 @@ export default async function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head suppressHydrationWarning>
         <link rel="manifest" href="/manifest.json" />
-        {/* <link
-          rel="icon"
-          href="/icon?<generated>"
-          type="image/<generated>"
-          sizes="<generated>"
-        />
-        <link
-          rel="apple-touch-icon"
-          href="/apple-icon?<generated>"
-          type="image/<generated>"
-          sizes="<generated>"
-        />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        /> */}
 
         <meta name="theme-color" content="#ffffff" />
         {/* Google Analytics Data Stream */}
-        {/* <Script
-          strategy="afterInteractive" // Ensures script runs after the page is interactive
-          nonce={nonce}
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
-        />
-        <Script
-          id="google-analytics-config"
-          strategy="afterInteractive"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-
-              gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
-            `,
-          }}
-        /> */}
-
-        {/* Google Analytics Data Stream */}
         <GoogleAnalytics
-          debugMode={true}
+          debugMode={process.env.NODE_ENV === 'development'}
           nonce={nonce}
           gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
         />
@@ -100,20 +61,6 @@ export default async function RootLayout({
           nonce={nonce}
           gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
         />
-        {/* <Script
-          id="google-tag-manager"
-          strategy="afterInteractive"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}');
-            `,
-          }}
-        /> */}
       </head>
       <body
         className={`${dmSans.className} antialiased`}
