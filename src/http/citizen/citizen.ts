@@ -63,7 +63,7 @@ export const getCitizenEthnicityOptions = async (
 }
 
 /**
- * Recupera os dados do cidadão por CPF, combinando dados base com atualizações autodeclaradas. Dados autodeclarados têm precedência sobre dados base. Os resultados são armazenados em cache usando Redis com TTL configurável.
+ * Recupera os dados do cidadão por CPF, incluindo informações básicas e dados autodeclarados.
  * @summary Obter dados do cidadão
  */
 export type getCitizenCpfResponse200 = {
@@ -313,7 +313,7 @@ export const putCitizenCpfFirstlogin = async (
 }
 
 /**
- * Recupera os chamados do 1746 de um cidadão por CPF com paginação.
+ * Recupera os chamados do 1746 de um cidadão por CPF com paginação. Cada documento representa um chamado individual.
  * @summary Obter chamados do 1746 do cidadão
  */
 export type getCitizenCpfMaintenanceRequestResponse200 = {
@@ -492,8 +492,8 @@ export const putCitizenCpfPhone = async (
 }
 
 /**
- * Validates the verification code sent to the phone number
- * @summary Validate phone verification
+ * Valida o código de verificação enviado para o número de telefone
+ * @summary Validar verificação de telefone
  */
 export type postCitizenCpfPhoneValidateResponse200 = {
   data: HandlersSuccessResponse
