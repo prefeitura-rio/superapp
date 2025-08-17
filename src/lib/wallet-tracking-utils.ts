@@ -47,7 +47,7 @@ export function sendWalletCardGAEvent(
   sendGAEvent('event', 'wallet_card_click', {
     title,
     name,
-    posicao: position,
+    position: position,
     event_timestamp: new Date().toISOString(),
   })
 }
