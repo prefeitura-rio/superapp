@@ -20,6 +20,7 @@ interface SocialAssistanceCardProps {
   asLink?: boolean
   showInitialShine?: boolean
   badgeStatus?: string
+  onClick?: () => void
 }
 
 export function SocialAssistanceCard({
@@ -34,6 +35,7 @@ export function SocialAssistanceCard({
   enableFlip = true,
   asLink = false,
   showInitialShine = false,
+  onClick,
 }: SocialAssistanceCardProps) {
   const bgColor = 'bg-[#6BA26B]'
 
@@ -87,7 +89,7 @@ export function SocialAssistanceCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" onClick={onClick}>
         {cardContent}
       </Link>
     )

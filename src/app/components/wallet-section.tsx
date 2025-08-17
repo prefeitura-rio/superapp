@@ -14,6 +14,11 @@ import {
   formatEducationOperatingHours,
   getOperatingStatus,
 } from '@/lib/operating-status'
+import {
+  WALLET_CARD_TYPES,
+  getCardPosition,
+  sendWalletCardGAEvent,
+} from '@/lib/wallet-tracking-utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import type { RiskStatusProps } from '@/types/health'
 import { useEffect, useState } from 'react'
@@ -111,6 +116,18 @@ export default function CarteiraSection({
                   enableFlip={false}
                   showInitialShine={false}
                   asLink
+                  onClick={() =>
+                    sendWalletCardGAEvent(
+                      'CLÍNICA DA FAMÍLIA',
+                      walletData?.saude?.clinica_familia?.nome ||
+                        'Nome não disponível',
+                      getCardPosition(
+                        WALLET_CARD_TYPES.HEALTH,
+                        walletData,
+                        maintenanceStats
+                      )
+                    )
+                  }
                 />
               </div>
             )}
@@ -136,6 +153,17 @@ export default function CarteiraSection({
                   enableFlip={false}
                   showInitialShine={false}
                   asLink
+                  onClick={() =>
+                    sendWalletCardGAEvent(
+                      'ESCOLA DE JOVENS E ADULTOS',
+                      walletData?.educacao?.escola?.nome || 'Não disponível',
+                      getCardPosition(
+                        WALLET_CARD_TYPES.EDUCATION,
+                        walletData,
+                        maintenanceStats
+                      )
+                    )
+                  }
                 />
               </div>
             )}
@@ -161,6 +189,18 @@ export default function CarteiraSection({
                   showInitialShine={false}
                   enableFlip={false}
                   asLink
+                  onClick={() =>
+                    sendWalletCardGAEvent(
+                      'CADÚNICO',
+                      walletData?.assistencia_social?.cras?.nome ||
+                        'Não disponível',
+                      getCardPosition(
+                        WALLET_CARD_TYPES.SOCIAL,
+                        walletData,
+                        maintenanceStats
+                      )
+                    )
+                  }
                 />
               </div>
             )}
@@ -176,9 +216,20 @@ export default function CarteiraSection({
                   primaryValue={maintenanceStats.total.toString()}
                   secondaryLabel="Fechados"
                   secondaryValue={maintenanceStats.fechados.toString()}
-                  enableFlip={false}
                   showInitialShine={false}
+                  enableFlip={false}
                   asLink
+                  onClick={() =>
+                    sendWalletCardGAEvent(
+                      'CUIDADOS COM A CIDADE',
+                      formatMaintenanceRequestsCount(maintenanceStats.aberto),
+                      getCardPosition(
+                        WALLET_CARD_TYPES.CARETAKER,
+                        walletData,
+                        maintenanceStats
+                      )
+                    )
+                  }
                 />
               </div>
             )}

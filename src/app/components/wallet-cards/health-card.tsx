@@ -26,6 +26,7 @@ interface WalletCardProps {
   riskStatus?: RiskStatusProps
   asLink?: boolean
   showInitialShine?: boolean
+  onClick?: () => void
 }
 
 export function HealthCard({
@@ -43,6 +44,7 @@ export function HealthCard({
   enableFlip = true,
   asLink = false,
   showInitialShine = false,
+  onClick,
 }: WalletCardProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const bgColor = 'bg-[#3F6194]'
@@ -115,7 +117,7 @@ export function HealthCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" onClick={onClick}>
         {cardContent}
       </Link>
     )
