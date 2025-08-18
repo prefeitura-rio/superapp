@@ -31,7 +31,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
       onAcceptCallback = () => {},
       onDeclineCallback = () => {},
       className,
-      description = 'Utilizamos cookies necessários para o pleno funcionamento do nosso site, para aprimorar e personalizar sua experiência durante a navegação, bem como outros cookies adicionais. Ao clicar em "Aceitar Todos", você terá acesso a todas as funcionalidades da página e nos ajudará a desenvolver um site cada vez melhor.',
+      description = 'Utilizamos cookies necessários para o pleno funcionamento do nosso site, para aprimorar e personalizar sua experiência durante a navegação, bem como outros cookies adicionais.',
       learnMoreHref = '/cookies-policy',
       ...props
     },

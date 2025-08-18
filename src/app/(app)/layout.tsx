@@ -42,7 +42,7 @@ export default async function AppLayout({
   return (
     <div>
       <SessionExpiredHandler />
-      <CookieConsent variant="default" />
+      <CookieConsent variant="mini" />
       <main>{children}</main>
     </div>
   )
