@@ -17,6 +17,7 @@ interface CaretakerCardProps {
   asLink?: boolean
   showInitialShine?: boolean
   hasUpdateBadge?: boolean
+  onClick?: () => void
 }
 
 export function CaretakerCard({
@@ -31,6 +32,7 @@ export function CaretakerCard({
   asLink = false,
   showInitialShine = false,
   hasUpdateBadge,
+  onClick,
 }: CaretakerCardProps) {
   const bgColor = 'bg-[#A43B31]'
   const frontContent = (
@@ -57,7 +59,7 @@ export function CaretakerCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" onClick={onClick}>
         {cardContent}
       </Link>
     )

@@ -30,7 +30,7 @@ export function MenuItemClient({
       title,
       description,
       category,
-      list_position: listPosition,
+      position: listPosition,
     })
   }
 

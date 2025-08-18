@@ -9,6 +9,6 @@ import type { HandlersHealthResponseServices } from './handlersHealthResponseSer
 
 export interface HandlersHealthResponse {
   services?: HandlersHealthResponseServices
-  status?: string
+  status?: boolean
   timestamp?: string
 }

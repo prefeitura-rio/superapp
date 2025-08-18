@@ -73,7 +73,7 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
       subtitle: banner.subtitle,
       id: banner.id,
       link: banner.route,
-      posicao: position,
+      position: position,
       ehFixo,
     })
   }

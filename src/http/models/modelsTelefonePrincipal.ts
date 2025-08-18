@@ -11,6 +11,6 @@ export interface ModelsTelefonePrincipal {
   ddi?: string
   origem?: string
   sistema?: string
-  valor?: string
   updated_at?: string
+  valor?: string
 }

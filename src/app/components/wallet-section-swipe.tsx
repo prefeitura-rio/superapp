@@ -15,6 +15,11 @@ import {
   formatEducationOperatingHours,
   getOperatingStatus,
 } from '@/lib/operating-status'
+import {
+  WALLET_CARD_TYPES,
+  getCardPosition,
+  sendWalletCardGAEvent,
+} from '@/lib/wallet-tracking-utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import type { RiskStatusProps } from '@/types/health'
 import type { JSX } from 'react'
@@ -113,6 +118,11 @@ export default function CarteiraSectionSwipe({
   const walletCards: JSX.Element[] = []
 
   if (walletData?.saude?.clinica_familia) {
+    const position = getCardPosition(
+      WALLET_CARD_TYPES.HEALTH,
+      walletData,
+      maintenanceStats
+    )
     walletCards.push(
       <HealthCard
         key="health"
@@ -130,11 +140,23 @@ export default function CarteiraSectionSwipe({
         enableFlip={false}
         showInitialShine={false}
         asLink
+        onClick={() =>
+          sendWalletCardGAEvent(
+            'CLÍNICA DA FAMÍLIA',
+            walletData?.saude?.clinica_familia?.nome || 'Nome não disponível',
+            position
+          )
+        }
       />
     )
   }
 
   if (walletData?.educacao?.escola?.nome) {
+    const position = getCardPosition(
+      WALLET_CARD_TYPES.EDUCATION,
+      walletData,
+      maintenanceStats
+    )
     walletCards.push(
       <EducationCard
         key="education"
@@ -155,11 +177,23 @@ export default function CarteiraSectionSwipe({
         enableFlip={false}
         showInitialShine={false}
         asLink
+        onClick={() =>
+          sendWalletCardGAEvent(
+            'ESCOLA DE JOVENS E ADULTOS',
+            walletData?.educacao?.escola?.nome || 'Não disponível',
+            position
+          )
+        }
       />
     )
   }
 
   if (walletData?.assistencia_social?.cras?.nome) {
+    const position = getCardPosition(
+      WALLET_CARD_TYPES.SOCIAL,
+      walletData,
+      maintenanceStats
+    )
     walletCards.push(
       <SocialAssistanceCard
         key="social"
@@ -176,11 +210,23 @@ export default function CarteiraSectionSwipe({
         showInitialShine={false}
         enableFlip={false}
         asLink
+        onClick={() =>
+          sendWalletCardGAEvent(
+            'CADÚNICO',
+            walletData?.assistencia_social?.cras?.nome || 'Não disponível',
+            position
+          )
+        }
       />
     )
   }
 
   if (maintenanceStats.total > 0) {
+    const position = getCardPosition(
+      WALLET_CARD_TYPES.CARETAKER,
+      walletData,
+      maintenanceStats
+    )
     walletCards.push(
       <CaretakerCard
         key="caretaker"
@@ -194,6 +240,13 @@ export default function CarteiraSectionSwipe({
         enableFlip={false}
         showInitialShine={false}
         asLink
+        onClick={() =>
+          sendWalletCardGAEvent(
+            'CUIDADOS COM A CIDADE',
+            formatMaintenanceRequestsCount(maintenanceStats.aberto),
+            position
+          )
+        }
       />
     )
   }

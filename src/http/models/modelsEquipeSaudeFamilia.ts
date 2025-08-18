@@ -5,12 +5,13 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsProfissionalSaude } from './modelsProfissionalSaude'
 
 export interface ModelsEquipeSaudeFamilia {
-  enfermeiros?: string[]
+  enfermeiros?: ModelsProfissionalSaude[]
   id_ine?: string
   indicador?: boolean
-  medicos?: string[]
+  medicos?: ModelsProfissionalSaude[]
   nome?: string
   telefone?: string
 }

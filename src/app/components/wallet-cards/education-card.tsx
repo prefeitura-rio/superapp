@@ -28,6 +28,7 @@ interface EducationCardProps {
   enableFlip?: boolean
   asLink?: boolean
   showInitialShine?: boolean
+  onClick?: () => void
 }
 
 export function EducationCard({
@@ -44,6 +45,7 @@ export function EducationCard({
   enableFlip = true,
   asLink = false,
   showInitialShine = false,
+  onClick,
 }: EducationCardProps) {
   const bgColor = 'bg-[#B7632F]'
 
@@ -92,7 +94,7 @@ export function EducationCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" onClick={onClick}>
         {cardContent}
       </Link>
     )

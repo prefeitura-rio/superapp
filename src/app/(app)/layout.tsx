@@ -1,4 +1,5 @@
 import { setFirstLoginFalse } from '@/actions/first-login'
+import { CookieConsent } from '@/components/cookie-consent'
 import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import Onboarding from '../components/on-boarding'
@@ -41,6 +42,7 @@ export default async function AppLayout({
   return (
     <div>
       <SessionExpiredHandler />
+      <CookieConsent variant="default" />
       <main>{children}</main>
     </div>
   )

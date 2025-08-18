@@ -6,12 +6,52 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  HandlersEmailValidationRequest,
+  HandlersEmailValidationResponse,
   HandlersErrorResponse,
   HandlersPhoneValidationRequest,
   HandlersPhoneValidationResponse,
 } from '.././models'
 
 import { customFetch } from '../../../custom-fetch'
+
+/**
+ * Valida formato e estrutura de endereços de email, retornando informações detalhadas sobre o endereço quando válido.
+ * @summary Valida endereço de email
+ */
+export type postValidateEmailResponse200 = {
+  data: HandlersEmailValidationResponse
+  status: 200
+}
+
+export type postValidateEmailResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type postValidateEmailResponseComposite =
+  | postValidateEmailResponse200
+  | postValidateEmailResponse400
+
+export type postValidateEmailResponse = postValidateEmailResponseComposite & {
+  headers: Headers
+}
+
+export const getPostValidateEmailUrl = () => {
+  return `/validate/email`
+}
+
+export const postValidateEmail = async (
+  handlersEmailValidationRequest: HandlersEmailValidationRequest,
+  options?: RequestInit
+): Promise<postValidateEmailResponse> => {
+  return customFetch<postValidateEmailResponse>(getPostValidateEmailUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(handlersEmailValidationRequest),
+  })
+}
 
 /**
  * Valida DDI, DDD e número para qualquer telefone internacional.
