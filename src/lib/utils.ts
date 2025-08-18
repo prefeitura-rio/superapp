@@ -31,17 +31,13 @@ export function formatUserName(userName: string): string {
   // Remove espaços extras e divide por espaços
   const names = userName.trim().split(/\s+/)
 
-  // Pega apenas os dois primeiros nomes
-  const firstTwoNames = names.slice(0, 2)
+  // Pega apenas o primeiro nome
+  const firstName = names[0]
 
-  // Formata cada nome: primeira letra maiúscula, resto minúscula
-  const formattedNames = firstTwoNames.map(name => {
-    if (!name) return ''
-    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-  })
+  // Formata o nome: primeira letra maiúscula, resto minúscula
+  if (!firstName) return ''
 
-  // Retorna os nomes formatados separados por espaço
-  return formattedNames.join(' ')
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
 }
 
 /**
