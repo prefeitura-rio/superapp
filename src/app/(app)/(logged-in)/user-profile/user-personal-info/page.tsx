@@ -9,7 +9,11 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { formatTitleCase, shouldShowUpdateBadge } from '@/lib/utils'
+import {
+  formatTitleCase,
+  formatUserName,
+  shouldShowUpdateBadge,
+} from '@/lib/utils'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -35,10 +39,11 @@ export default async function PersonalInfoForm() {
 
   const showPhoneBadge = userInfo?.telefone?.principal
     ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at)
-    : false
+    : true // Show badge when phone info is missing
   const showEmailBadge = userInfo?.email?.principal
     ? shouldShowUpdateBadge(userInfo.email.principal.updated_at)
-    : false
+    : true // Show badge when email info is missing
+  const showRaceBadge = !userInfo?.raca // Show badge when race info is missing
 
   return (
     <>
@@ -48,14 +53,16 @@ export default async function PersonalInfoForm() {
           <CustomInput
             id="cpf"
             label="CPF"
-            defaultValue={formatCpf(userInfo?.cpf)}
+            defaultValue={formatCpf(userAuthInfo?.cpf)}
             isEditable={false}
           />
 
           <CustomInput
             id="fullName"
             label="Nome completo"
-            defaultValue={userInfo?.nome || 'Informação indisponível'}
+            defaultValue={
+              formatUserName(userAuthInfo?.name) || 'Informação indisponível'
+            }
             isEditable={false}
           />
 
@@ -71,11 +78,15 @@ export default async function PersonalInfoForm() {
             label="Celular"
             optionalLabelVariant={showPhoneBadge ? 'destructive' : undefined}
             optionalLabel={showPhoneBadge ? 'Atualizar' : undefined}
-            content={formatPhone(
-              userInfo?.telefone?.principal?.ddi,
-              userInfo?.telefone?.principal?.ddd,
-              userInfo?.telefone?.principal?.valor
-            )}
+            content={
+              userInfo?.telefone?.principal
+                ? formatPhone(
+                    userInfo.telefone.principal.ddi,
+                    userInfo.telefone.principal.ddd,
+                    userInfo.telefone.principal.valor
+                  )
+                : 'Informação indisponível'
+            }
             variant="default"
             disabled
             rightIcon={<EditIcon />}
@@ -87,7 +98,9 @@ export default async function PersonalInfoForm() {
             optionalLabelVariant={showEmailBadge ? 'destructive' : undefined}
             optionalLabel={showEmailBadge ? 'Atualizar' : undefined}
             content={
-              userInfo?.email?.principal?.valor || 'Informação indisponível'
+              userInfo?.email?.principal
+                ? userInfo.email.principal.valor
+                : 'Informação indisponível'
             }
             variant="default"
             disabled
@@ -106,6 +119,8 @@ export default async function PersonalInfoForm() {
 
           <ActionDiv
             label="Cor / Raça"
+            optionalLabelVariant={showRaceBadge ? 'destructive' : undefined}
+            optionalLabel={showRaceBadge ? 'Atualizar' : undefined}
             content={formatRace(userInfo?.raca) || 'Informação indisponível'}
             variant="default"
             disabled
