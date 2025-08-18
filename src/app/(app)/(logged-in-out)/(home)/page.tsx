@@ -24,11 +24,13 @@ import {
   getDalHealthUnitRisk,
 } from '@/lib/dal'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
+import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import {
   formatHealthOperatingHours,
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { getWalletDataInfo } from '@/lib/wallet-utils'
 
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -139,6 +141,15 @@ export default async function Home() {
 
   const categories = await fetchCategories()
 
+  // Calculate maintenance requests statistics
+  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
+
+  // Get wallet data info (count and hasData)
+  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+
+  // Check if wallet section should be displayed
+  const shouldShowWallet = isLoggedIn && walletInfo.hasData
+
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
       <HeaderWrapper userName={userAuthInfo.name} isLoggedIn={isLoggedIn} />
@@ -160,8 +171,8 @@ export default async function Home() {
         desktopSkeletonComponent={<MostAccessedServiceCardsSwipeSkeleton />}
       />
 
-      {/* Carteira section - only show for authenticated users */}
-      {isLoggedIn && (walletData || maintenanceRequests) && (
+      {/* Carteira section - only show for authenticated users with actual data */}
+      {shouldShowWallet && (
         <ResponsiveWrapper
           mobileComponent={
             <CarteiraSection
