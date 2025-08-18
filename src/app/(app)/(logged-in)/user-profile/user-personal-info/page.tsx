@@ -9,11 +9,7 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import {
-  formatTitleCase,
-  formatUserName,
-  shouldShowUpdateBadge,
-} from '@/lib/utils'
+import { formatTitleCase, shouldShowUpdateBadge } from '@/lib/utils'
 
 export default async function PersonalInfoForm() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -61,7 +57,7 @@ export default async function PersonalInfoForm() {
             id="fullName"
             label="Nome completo"
             defaultValue={
-              formatUserName(userAuthInfo?.name) || 'Informação indisponível'
+              formatTitleCase(userAuthInfo?.name) || 'Informação indisponível'
             }
             isEditable={false}
           />
