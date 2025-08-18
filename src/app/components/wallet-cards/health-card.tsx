@@ -2,7 +2,6 @@
 
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
-import { HealthStatusIndicator } from '@/components/ui/custom/health-status-indicator'
 import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -70,14 +69,14 @@ export function HealthCard({
         primaryValue={primaryValue}
         secondaryLabel={secondaryLabel}
         secondaryValue={secondaryValue}
-        primaryValueSlot={
-          shouldRenderHealthStatusIndicator ? (
-            <HealthStatusIndicator
-              riskStatus={riskStatus}
-              onClick={e => handleStatusClick(e)}
-            />
-          ) : null
-        }
+        // primaryValueSlot={
+        //   shouldRenderHealthStatusIndicator ? (
+        //     <HealthStatusIndicator
+        //       riskStatus={riskStatus}
+        //       onClick={e => handleStatusClick(e)}
+        //     />
+        //   ) : null
+        // }
       />
     </CardBase>
   )
