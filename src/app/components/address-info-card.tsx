@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 interface AddressInfoCardProps {
-  address: ModelsEnderecoPrincipal | null
+  address: ModelsEnderecoPrincipal
   onEdit?: (address: ModelsEnderecoPrincipal) => void
   onDelete?: (address: ModelsEnderecoPrincipal) => void
   showBadge?: boolean

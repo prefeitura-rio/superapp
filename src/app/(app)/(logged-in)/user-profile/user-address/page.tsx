@@ -14,7 +14,7 @@ export default async function UserAddress() {
       const response = await getDalCitizenCpf(userAuthInfo.cpf)
       if (response.status === 200) {
         userInfo = response.data
-        addressInfo = userInfo?.endereco?.principal || null
+        addressInfo = userInfo?.endereco?.principal
       } else {
         console.error('Failed to fetch user data status:', response.data)
       }
@@ -30,7 +30,7 @@ export default async function UserAddress() {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Endereço" />
-      {addressInfo?.bairro !== 'null' ? (
+      {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
         <AddressInfoCard address={addressInfo} showBadge={showAddressBadge} />
       ) : (
         <EmptyAddress />

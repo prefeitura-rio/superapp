@@ -111,8 +111,8 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
       className: cn(
         containerClasses,
         variant === 'mini'
-          ? 'left-0 right-0 sm:left-4 bottom-4 w-full sm:max-w-3xl'
-          : 'bottom-0 left-0 right-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md'
+          ? 'left-1/2 bottom-4 transform -translate-x-1/2 w-full sm:max-w-4xl'
+          : 'left-1/2 bottom-4 transform -translate-x-1/2 w-full sm:max-w-md'
       ),
       ...props,
     }
@@ -141,7 +141,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
                 Saiba mais
               </a>
             </CardContent>
-            <CardFooter className="flex gap-2 pt-2">
+            <CardFooter className="flex gap-2 pt-2 justify-start sm:justify-end">
               <Button
                 onClick={handleDecline}
                 variant="secondary"
@@ -171,7 +171,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
                 {description}
               </CardDescription>
             </CardContent>
-            <CardFooter className="flex gap-2 h-0 py-2 px-4">
+            <CardFooter className="flex gap-2 h-0 py-2 px-4 justify-start sm:justify-end">
               <Button
                 onClick={handleDecline}
                 variant="secondary"
@@ -197,7 +197,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
               <CardDescription className="text-xs sm:text-sm flex-1">
                 {description}
               </CardDescription>
-              <div className="flex items-center gap-2 justify-end sm:gap-3">
+              <div className="flex items-center gap-2 justify-start sm:justify-end sm:gap-3">
                 <Button
                   onClick={handleDecline}
                   size="sm"
