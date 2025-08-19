@@ -34,7 +34,10 @@ export default async function PersonalInfoForm() {
   }
 
   const showPhoneBadge = userInfo?.telefone?.principal
-    ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at)
+    ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at) ||
+      !userInfo?.telefone?.principal?.ddi ||
+      !userInfo?.telefone?.principal?.ddd ||
+      !userInfo?.telefone?.principal?.valor
     : true // Show badge when phone info is missing
   const showEmailBadge = userInfo?.email?.principal
     ? shouldShowUpdateBadge(userInfo.email.principal.updated_at)
@@ -75,13 +78,17 @@ export default async function PersonalInfoForm() {
             optionalLabelVariant={showPhoneBadge ? 'destructive' : undefined}
             optionalLabel={showPhoneBadge ? 'Atualizar' : undefined}
             content={
-              userInfo?.telefone?.principal
+              userInfo?.telefone?.principal?.ddi &&
+              userInfo?.telefone?.principal?.ddd &&
+              userInfo?.telefone?.principal?.valor
                 ? formatPhone(
                     userInfo.telefone.principal.ddi,
                     userInfo.telefone.principal.ddd,
                     userInfo.telefone.principal.valor
                   )
-                : 'Informação indisponível'
+                : userInfo?.telefone?.principal
+                  ? 'Faltando informação'
+                  : 'Informação indisponível'
             }
             variant="default"
             disabled
