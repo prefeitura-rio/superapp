@@ -56,7 +56,7 @@ export function RaceDrawerContent({
   }
 
   return (
-    <div className="py-2 -mb-2">
+    <div className="">
       <RadioList
         options={RACES}
         value={selectedRace}
