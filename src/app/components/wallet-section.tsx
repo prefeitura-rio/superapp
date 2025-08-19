@@ -96,7 +96,7 @@ export default function CarteiraSection({
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="flex px-4 gap-2 w-max">
             {/* Health Card - only show if wallet has health data */}
-            {walletData?.saude?.clinica_familia && (
+            {walletData?.saude?.clinica_familia?.indicador && (
               <div className="min-w-[300px]">
                 <HealthCard
                   href="/wallet/health"
@@ -133,7 +133,7 @@ export default function CarteiraSection({
             )}
 
             {/* Card 2: Educação */}
-            {walletData?.educacao?.escola?.nome && (
+            {walletData?.educacao?.aluno?.indicador && (
               <div className="min-w-[300px]">
                 <EducationCard
                   href="/wallet/education"
@@ -169,7 +169,7 @@ export default function CarteiraSection({
             )}
 
             {/* Card 3: Assistência social */}
-            {walletData?.assistencia_social?.cras?.nome && (
+            {walletData?.assistencia_social?.cadunico?.indicador && (
               <div className="min-w-[300px]">
                 <SocialAssistanceCard
                   href="/wallet/social-assistance"

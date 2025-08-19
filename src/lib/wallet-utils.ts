@@ -11,9 +11,9 @@ export function getWalletDataInfo(
   maintenanceRequestsTotal = 0
 ) {
   const availableCards = [
-    walletData?.saude?.clinica_familia?.nome,
-    walletData?.educacao?.escola?.nome,
-    walletData?.assistencia_social?.cras?.nome,
+    walletData?.saude?.clinica_familia?.indicador,
+    walletData?.educacao?.aluno?.indicador,
+    walletData?.assistencia_social?.cadunico?.indicador,
     maintenanceRequestsTotal > 0,
   ].filter(Boolean)
 
