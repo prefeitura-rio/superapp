@@ -71,6 +71,8 @@ export default function AddressForm() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [feedbackDrawerOpen, setFeedbackDrawerOpen] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState<any>(null)
+  const [cepLoading, setCepLoading] = useState(false)
+  const [autoCepDisabled, setAutoCepDisabled] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -145,7 +147,33 @@ export default function AddressForm() {
     }
   }, [inputValue])
 
-  const handleSuggestionClick = (item: any) => {
+  // Function to lookup CEP based on place_id and number
+  const lookupCep = async (placeId: string, number?: string) => {
+    if (!placeId) return null
+
+    setCepLoading(true)
+    try {
+      const params = new URLSearchParams({ place_id: placeId })
+      if (number) {
+        params.append('number', number)
+      }
+
+      const response = await fetch(`/api/cep-lookup?${params.toString()}`)
+      const data = await response.json()
+
+      if (response.ok && data.cep) {
+        return data.cep
+      }
+      return null
+    } catch (error) {
+      console.error('Error looking up CEP:', error)
+      return null
+    } finally {
+      setCepLoading(false)
+    }
+  }
+
+  const handleSuggestionClick = async (item: any) => {
     setSelectedAddress(item)
     // extracts 'numero' from the address if it exists
     let numero = ''
@@ -158,14 +186,27 @@ export default function AddressForm() {
         numero = match[0]
       }
     }
+
+    // Lookup CEP if we have a number
+    let cep = ''
+    let cepDisabled = false
+    if (numero) {
+      const foundCep = await lookupCep(item.place_id, numero)
+      if (foundCep) {
+        cep = foundCep
+        cepDisabled = true
+      }
+    }
+
+    setAutoCepDisabled(cepDisabled)
     reset({
       number: numero,
       complement: '',
-      cep: '',
+      cep: cep,
       noNumber: false,
       noComplement: false,
       noCep: false,
-    }) // reset form and prefill number if found
+    })
     setDrawerOpen(true)
   }
 
@@ -191,8 +232,16 @@ export default function AddressForm() {
     } else if (data.cep) {
       cepToSend = data.cep.replace(/\D/g, '')
     }
+
+    // Clean the logradouro by removing any existing number to avoid duplication
+    let cleanLogradouro = selectedAddress.main_text
+    // Remove numbers at the end of the string (with or without comma)
+    cleanLogradouro = cleanLogradouro.replace(/,?\s*\d+\s*$/, '').trim()
+    // Remove trailing comma if it exists
+    cleanLogradouro = cleanLogradouro.replace(/,\s*$/, '').trim()
+
     const addressData = {
-      logradouro: selectedAddress.main_text,
+      logradouro: cleanLogradouro,
       tipo_logradouro: '',
       numero: data.noNumber ? 'S/N' : data.number || '',
       complemento: data.noComplement ? '' : data.complement || '',
@@ -305,6 +354,10 @@ export default function AddressForm() {
         drawerOpen={drawerOpen}
         setDrawerOpen={setDrawerOpen}
         handleCepChange={handleCepChange}
+        lookupCep={lookupCep}
+        cepLoading={cepLoading}
+        autoCepDisabled={autoCepDisabled}
+        setAutoCepDisabled={setAutoCepDisabled}
       />
 
       {/* Drawer for feedback after address update */}

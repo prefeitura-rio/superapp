@@ -21,6 +21,10 @@ interface AddressDetailsDrawerContentProps {
   drawerOpen: boolean
   setDrawerOpen: (value: boolean) => void
   handleCepChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  lookupCep: (placeId: string, number?: string) => Promise<string | null>
+  cepLoading: boolean
+  autoCepDisabled: boolean
+  setAutoCepDisabled: (value: boolean) => void
 }
 
 export function AddressDetailsDrawerContent({
@@ -30,6 +34,10 @@ export function AddressDetailsDrawerContent({
   drawerOpen,
   setDrawerOpen,
   handleCepChange,
+  lookupCep,
+  cepLoading,
+  autoCepDisabled,
+  setAutoCepDisabled,
 }: AddressDetailsDrawerContentProps) {
   const { isBelowBreakpoint } = useViewportHeight()
 
@@ -45,17 +53,53 @@ export function AddressDetailsDrawerContent({
   const noNumber = watch('noNumber')
   const noComplement = watch('noComplement')
   const noCep = watch('noCep')
+  const number = watch('number')
   const router = useRouter()
+
+  // Handle number changes to lookup CEP
+  const handleNumberChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '')
+    setValue('number', value)
+    trigger('number')
+
+    // Clear CEP when number is cleared
+    if (!value || value.trim() === '') {
+      setValue('cep', '')
+      setAutoCepDisabled(false)
+      return
+    }
+
+    // Lookup CEP for the new number if we have a selected address
+    if (selectedAddress?.place_id && value) {
+      const foundCep = await lookupCep(selectedAddress.place_id, value)
+      if (foundCep) {
+        setValue('cep', foundCep)
+        setAutoCepDisabled(true)
+      } else {
+        // If no CEP found, clear the field and allow manual entry
+        setValue('cep', '')
+        setAutoCepDisabled(false)
+      }
+    }
+  }
+
+  // Handle "Sem número" toggle
+  const handleNoNumberChange = (checked: boolean) => {
+    setValue('noNumber', checked)
+    if (checked) {
+      setValue('number', '')
+      setValue('cep', '')
+      setAutoCepDisabled(false)
+    }
+  }
 
   return (
     <BottomSheet
-      contentClassName="[@media(max-height:700px)]:min-h-[70lvh] flex flex-col"
-      className={`${isBelowBreakpoint && 'overflow-y-scroll'} min-h-screen`}
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
     >
-      <div className={`"max-h-[85vh]" ${isBelowBreakpoint && 'h-[85vh]'}`}>
+      <div>
         <div className="text-center pt-6">
           <div className="text-lg font-normal">
             {selectedAddress?.main_text}
@@ -66,7 +110,7 @@ export function AddressDetailsDrawerContent({
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="px-4 flex-1 flex flex-col pt-5 gap-4 "
+          className="px-4 flex flex-col pt-5 gap-4 "
         >
           <div>
             <InputField
@@ -77,12 +121,12 @@ export function AddressDetailsDrawerContent({
               inputMode="numeric"
               pattern="[0-9]*"
               showClearButton={!noNumber}
-              onClear={() => setValue('number', '')}
-              onChange={e => {
-                const value = e.target.value.replace(/\D/g, '')
-                setValue('number', value)
-                trigger('number')
+              onClear={() => {
+                setValue('number', '')
+                setValue('cep', '')
+                setAutoCepDisabled(false)
               }}
+              onChange={handleNumberChange}
               value={watch('number')}
             />
             {errors.number && !noNumber && (
@@ -94,7 +138,7 @@ export function AddressDetailsDrawerContent({
           <div className="flex items-center gap-2 mb-2">
             <Switch
               checked={noNumber}
-              onCheckedChange={checked => setValue('noNumber', checked)}
+              onCheckedChange={handleNoNumberChange}
               id="no-number"
             />
             <Label
@@ -143,11 +187,22 @@ export function AddressDetailsDrawerContent({
           <div>
             <InputField
               className="bg-card outline-none border-none text-lg placeholder:text-muted-foreground focus:ring-1"
-              placeholder={noCep ? 'Sem CEP' : 'Escreva o CEP'}
+              placeholder={
+                noCep
+                  ? 'Sem CEP'
+                  : cepLoading
+                    ? 'Buscando CEP...'
+                    : autoCepDisabled
+                      ? 'CEP encontrado automaticamente'
+                      : 'Escreva o CEP'
+              }
               {...register('cep')}
-              disabled={noCep}
-              showClearButton={!noCep}
-              onClear={() => setValue('cep', '')}
+              disabled={noCep || autoCepDisabled || cepLoading}
+              showClearButton={!noCep && !autoCepDisabled && !cepLoading}
+              onClear={() => {
+                setValue('cep', '')
+                setAutoCepDisabled(false)
+              }}
               state="default"
               maxLength={9}
               onChange={handleCepChange}
@@ -160,7 +215,13 @@ export function AddressDetailsDrawerContent({
           <div className="flex items-center gap-2 mb-2">
             <Switch
               checked={noCep}
-              onCheckedChange={checked => setValue('noCep', checked)}
+              onCheckedChange={checked => {
+                setValue('noCep', checked)
+                if (checked) {
+                  setValue('cep', '')
+                  setAutoCepDisabled(false)
+                }
+              }}
               id="no-cep"
             />
             <Label
