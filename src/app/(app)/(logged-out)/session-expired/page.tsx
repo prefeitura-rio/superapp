@@ -2,7 +2,7 @@
 
 import govbrLogo from '@/assets/govbr.svg'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { REDIRECT_DIRECT_TO_GOVBR_ROUTE } from '@/constants/url'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useViewportHeight } from '@/hooks/useViewport'
 import Image from 'next/image'
@@ -36,7 +36,7 @@ export default function SessionExpired() {
           {/* Gov.br Button - Figma Specs */}
           <div className="flex justify-center pb-2">
             <Link
-              href={REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}
+              href={REDIRECT_DIRECT_TO_GOVBR_ROUTE}
               className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-card transition-colors"
             >
               <Image
