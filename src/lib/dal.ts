@@ -3,6 +3,7 @@
 
 import {
   getCitizenCpf,
+  getCitizenCpfFirstlogin,
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
@@ -29,6 +30,18 @@ export async function getDalCitizenCpf(cpf: string) {
     next: {
       revalidate: 1800, // 30 minutes - optimal for high traffic
       tags: [`user-info-${cpf}`], // Tag for selective revalidation
+    },
+  })
+}
+
+// First login status caching (user-specific data)
+// 30-minute cache since first login status can change once per user
+export async function getDalCitizenCpfFirstlogin(cpf: string) {
+  return await getCitizenCpfFirstlogin(cpf, {
+    cache: 'force-cache',
+    next: {
+      revalidate: 1800, // 30 minutes - optimal for high traffic
+      tags: [`firstlogin-${cpf}`], // Tag for selective revalidation
     },
   })
 }
@@ -96,4 +109,12 @@ export async function revalidateDalCitizenCpfMaintenanceRequest(cpf: string) {
   // to invalidate cache when maintenance requests change
   // Example: after user creates a new maintenance request
   revalidateTag(`maintenance-${cpf}`)
+}
+
+// Helper function to revalidate first login status when needed
+export async function revalidateDalCitizenCpfFirstlogin(cpf: string) {
+  // This would be called from a Server Action or API route
+  // to invalidate cache when first login status changes
+  // Example: after user completes onboarding
+  revalidateTag(`firstlogin-${cpf}`)
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useRef, useState, useTransition } from 'react'
 import 'swiper/css'
 import 'swiper/css/pagination'
@@ -32,6 +33,7 @@ export default function Onboarding({
   userInfo,
   setFirstLoginFalse,
 }: OnboardingProps) {
+  const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSlides, setShowSlides] = useState(true)
   const [slidesFadingOut, setSlidesFadingOut] = useState(false)
@@ -64,13 +66,12 @@ export default function Onboarding({
     await delay(TRANSITIONS.FADE)
     startTransition(async () => {
       await setFirstLoginFalse(userInfo.cpf)
-      // TODO: revalidate rather than reload
-      await delay(TRANSITIONS.FADE)
-      window.location.reload()
+      // Revalidate and refresh to show the main app
+      router.refresh()
     })
   }
 
-  const showBackButton = currentIndex > 0
+  const showBackButton = currentIndex > 0 && showSlides && !showWelcome
   const showFinishButton = currentIndex === onboardingSlides.length - 1
   const showSkipButton = currentIndex < onboardingSlides.length - 1
 
