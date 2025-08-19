@@ -104,9 +104,12 @@ export default async function Home() {
     }
   }
 
-  // healthCardData
+  // healthCardData - only create if clinica_familia exists and indicador is true
   let healthCardData = undefined
-  if (walletData?.saude?.clinica_familia) {
+  if (
+    walletData?.saude?.clinica_familia &&
+    walletData?.saude?.clinica_familia?.indicador === true
+  ) {
     // Use wallet data as primary source, only supplement with API data for specific fields
     const clinicaFamilia = walletData.saude.clinica_familia
 

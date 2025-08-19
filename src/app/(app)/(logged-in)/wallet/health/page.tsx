@@ -27,6 +27,7 @@ interface TeamPageProps {
     }
     equipe_saude_familia?: {
       nome?: string
+      indicador?: boolean
       medicos?: Array<{ id_profissional_sus: string; nome: string }>
       enfermeiros?: Array<{ id_profissional_sus: string; nome: string }>
     }
@@ -38,6 +39,11 @@ function TeamPage({ healthData }: TeamPageProps) {
   const enfermeiros = healthData?.equipe_saude_familia?.enfermeiros || []
   const teamName =
     healthData?.equipe_saude_familia?.nome || 'Equipe não disponível'
+
+  // Don't show team section if indicador is false
+  if (healthData?.equipe_saude_familia?.indicador === false) {
+    return null
+  }
 
   return (
     <div className="p-6">
@@ -144,8 +150,11 @@ export default async function HealthCardDetail() {
 
   const healthData = walletData?.saude
 
-  // Only proceed if we have health data from wallet
-  if (!healthData?.clinica_familia) {
+  // Only proceed if we have health data from wallet and indicador is true
+  if (
+    !healthData?.clinica_familia ||
+    healthData?.clinica_familia?.indicador === false
+  ) {
     return (
       <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
         <SecondaryHeader title="Carteira" className="max-w-xl" />

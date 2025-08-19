@@ -39,8 +39,10 @@ export function WalletCardsWrapper({
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
-  // Prepare health card data
-  const hasHealthData = walletData?.saude?.clinica_familia
+  // Prepare health card data - only show if clinica_familia exists and indicador is true
+  const hasHealthData =
+    walletData?.saude?.clinica_familia &&
+    walletData?.saude?.clinica_familia?.indicador === true
 
   // Only use health unit API for operating hours and risk status
   let healthStatusValue = 'Não informado'
