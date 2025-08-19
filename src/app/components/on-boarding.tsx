@@ -42,7 +42,7 @@ export default function Onboarding({
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
 
-  const { isBelowBreakpoint } = useViewportHeight(648)
+  const { isBelowBreakpoint } = useViewportHeight(670)
 
   const handleNext = () => {
     swiperRef.current?.swiper?.slideNext()

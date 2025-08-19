@@ -32,7 +32,7 @@ export const OnboardingSlider = forwardRef<SwiperRef, OnboardingSliderProps>(
           {onboardingSlides.map((slide, idx) => (
             <SwiperSlide key={idx}>
               <div
-                className={`flex flex-col items-center justify-center text-left max-h-lvh mt-5 md:mt-0 gap-5 md:gap-18 ${isBelowBreakpoint && 'max-h-[410px]'}`}
+                className={`flex flex-col items-center justify-center text-left max-h-lvh mt-0 md:mt-0 gap-5 md:gap-18 ${isBelowBreakpoint && 'max-h-[410px]'}`}
               >
                 <ThemeAwareVideo
                   source={slide.videoSource}
@@ -41,7 +41,7 @@ export const OnboardingSlider = forwardRef<SwiperRef, OnboardingSliderProps>(
                   } ${
                     isBelowBreakpoint
                       ? 'h-[min(250px,30vh)] max-h-[250px]'
-                      : 'h-[min(328px,40vh)] max-h-[328px]'
+                      : 'h-[min(270px,40vh)] max-h-[270px]'
                   }`}
                 />
 
