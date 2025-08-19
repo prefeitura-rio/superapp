@@ -1,6 +1,6 @@
 import { setFirstLoginFalse } from '@/actions/first-login'
 import { CookieConsent } from '@/components/cookie-consent'
-import { getCitizenCpfFirstlogin } from '@/http/citizen/citizen'
+import { getDalCitizenCpfFirstlogin } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import Onboarding from '../components/on-boarding'
 import { SessionExpiredHandler } from '../components/session-expired-handler'
@@ -16,7 +16,7 @@ export default async function AppLayout({
 
   if (userInfo.cpf) {
     try {
-      const response = await getCitizenCpfFirstlogin(userInfo.cpf)
+      const response = await getDalCitizenCpfFirstlogin(userInfo.cpf)
 
       if (response.status === 200) {
         firstLogin = response.data?.firstlogin ?? false
