@@ -8,7 +8,6 @@ export async function setFirstLoginFalse(cpf: string) {
 
   // Revalidate the cached first login status
   if (result.status === 200) {
-    console.log('result', result)
     await revalidateDalCitizenCpfFirstlogin(cpf)
   }
 

@@ -2,7 +2,6 @@ import { setFirstLoginFalse } from '@/actions/first-login'
 import { CookieConsent } from '@/components/cookie-consent'
 import { getDalCitizenCpfFirstlogin } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { redirect } from 'next/navigation'
 import Onboarding from '../components/on-boarding'
 import { SessionExpiredHandler } from '../components/session-expired-handler'
 
@@ -23,7 +22,6 @@ export default async function AppLayout({
         firstLogin = response.data?.firstlogin ?? false
       } else {
         console.error('Failed to fetch first login status:', response.data)
-        redirect('/session-expired')
       }
     } catch (error) {
       console.error('Error fetching first login data:', error)
