@@ -91,7 +91,7 @@ export default function Onboarding({
         </CustomButton>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 -mt-10 md:mt-0 flex flex-col justify-center">
         {/* Slides container - shows first */}
         {showSlides && (
           <div
