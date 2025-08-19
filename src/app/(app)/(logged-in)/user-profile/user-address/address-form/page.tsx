@@ -232,8 +232,16 @@ export default function AddressForm() {
     } else if (data.cep) {
       cepToSend = data.cep.replace(/\D/g, '')
     }
+
+    // Clean the logradouro by removing any existing number to avoid duplication
+    let cleanLogradouro = selectedAddress.main_text
+    // Remove numbers at the end of the string (with or without comma)
+    cleanLogradouro = cleanLogradouro.replace(/,?\s*\d+\s*$/, '').trim()
+    // Remove trailing comma if it exists
+    cleanLogradouro = cleanLogradouro.replace(/,\s*$/, '').trim()
+
     const addressData = {
-      logradouro: selectedAddress.main_text,
+      logradouro: cleanLogradouro,
       tipo_logradouro: '',
       numero: data.noNumber ? 'S/N' : data.number || '',
       complemento: data.noComplement ? '' : data.complement || '',
