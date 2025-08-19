@@ -154,7 +154,7 @@ export default function CarteiraSectionSwipe({
     )
   }
 
-  if (walletData?.educacao?.escola?.nome) {
+  if (walletData?.educacao?.aluno?.indicador) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.EDUCATION,
       walletData,
@@ -191,7 +191,7 @@ export default function CarteiraSectionSwipe({
     )
   }
 
-  if (walletData?.assistencia_social?.cras?.nome) {
+  if (walletData?.assistencia_social?.cadunico?.indicador) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.SOCIAL,
       walletData,

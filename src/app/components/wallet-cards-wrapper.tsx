@@ -101,7 +101,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 2: Educação */}
-      {walletData?.educacao?.escola?.nome && (
+      {walletData?.educacao?.aluno?.indicador && (
         <div>
           <EducationCard
             title="ESCOLA DE JOVENS E ADULTOS"
@@ -137,7 +137,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 3: Assistência social */}
-      {walletData?.assistencia_social?.cras?.nome && (
+      {walletData?.assistencia_social?.cadunico?.indicador && (
         <div>
           <SocialAssistanceCard
             title="CADÚNICO"
