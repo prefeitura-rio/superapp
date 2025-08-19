@@ -1,7 +1,7 @@
 'use client'
 
 import { UserIcon } from '@/assets/icons'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { REDIRECT_DIRECT_TO_GOVBR_ROUTE } from '@/constants/url'
 import { formatUserName } from '@/lib/utils'
 import { sendGAEvent } from '@next/third-parties/google'
 import Link from 'next/link'
@@ -29,9 +29,7 @@ export default function HeaderUserLink({
 
   return (
     <Link
-      href={
-        isLoggedIn ? '/user-profile' : REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
-      }
+      href={isLoggedIn ? '/user-profile' : REDIRECT_DIRECT_TO_GOVBR_ROUTE}
       className="flex items-center space-x-3"
       onClick={handleClick}
     >
