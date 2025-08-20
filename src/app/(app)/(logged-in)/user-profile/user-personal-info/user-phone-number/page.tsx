@@ -78,6 +78,7 @@ export default function PhoneNumberForm() {
           onChange={setPhone}
           country={country}
           onCountryChange={setCountry}
+          onSubmit={handleSave}
         />
         <CustomButton
           size="xl"
