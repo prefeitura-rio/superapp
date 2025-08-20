@@ -5,10 +5,11 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsEnderecoAlternativo } from './modelsEnderecoAlternativo'
 import type { ModelsEnderecoPrincipal } from './modelsEnderecoPrincipal'
 
 export interface ModelsEndereco {
-  alternativo?: number[]
+  alternativo?: ModelsEnderecoAlternativo[]
   indicador?: boolean
   principal?: ModelsEnderecoPrincipal
 }

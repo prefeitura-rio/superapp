@@ -2,7 +2,8 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   api: {
-    input: './openapi.yaml',
+    input:
+      'https://raw.githubusercontent.com/prefeitura-rio/app-rmi/refs/heads/staging/docs/openapi-v3.json',
     output: {
       target: './src/http/api.ts',
       schemas: './src/http/models',

@@ -5,10 +5,11 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsEmailAlternativo } from './modelsEmailAlternativo'
 import type { ModelsEmailPrincipal } from './modelsEmailPrincipal'
 
 export interface ModelsEmail {
-  alternativo?: number[]
+  alternativo?: ModelsEmailAlternativo[]
   indicador?: boolean
   principal?: ModelsEmailPrincipal
 }
