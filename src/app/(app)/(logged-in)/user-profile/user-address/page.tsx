@@ -29,7 +29,7 @@ export default async function UserAddress() {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-      <SecondaryHeader title="Endereço" />
+      <SecondaryHeader title="Endereço" route="/user-profile" />
       {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
         <AddressInfoCard address={addressInfo} showBadge={showAddressBadge} />
       ) : (

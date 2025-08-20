@@ -47,7 +47,7 @@ export default async function PersonalInfoForm() {
   return (
     <>
       <div className="min-h-screen max-w-4xl mx-auto pt-24 pb-10 bg-background">
-        <SecondaryHeader title="Informações pessoais" />
+        <SecondaryHeader title="Informações pessoais" route="/user-profile" />
         <div className="space-y-6 p-4">
           <CustomInput
             id="cpf"

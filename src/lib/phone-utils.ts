@@ -59,6 +59,11 @@ export function isValidPhone(
 
 export function getPhonePlaceholder(country: CountryCode): string {
   try {
+    // For Brazil, use a custom placeholder with DDD 21 (Rio de Janeiro)
+    if (country === 'BR') {
+      return '(21) 98765-4321'
+    }
+
     const example = getExampleNumber(country, examples)
     return example ? example.formatNational() : ''
   } catch (error) {
