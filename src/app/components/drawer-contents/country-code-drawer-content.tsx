@@ -84,7 +84,7 @@ export function CountryCodeDrawerContent({
   }
 
   return (
-    <div className="py-5 -mb-2">
+    <div className="py-5 ">
       <div className="mb-4">
         <CustomInput
           value={searchQuery}
