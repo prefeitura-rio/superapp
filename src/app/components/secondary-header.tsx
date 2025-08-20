@@ -9,12 +9,14 @@ interface SecondaryHeaderProps {
   title: string
   showSearchButton?: boolean
   className?: string
+  route?: string
 }
 
 export function SecondaryHeader({
   title,
   showSearchButton,
   className = 'max-w-4xl',
+  route,
 }: SecondaryHeaderProps) {
   const router = useRouter()
 
@@ -26,7 +28,10 @@ export function SecondaryHeader({
         <div className="grid grid-cols-3 items-center">
           {/* Left column - IconButton */}
           <div className="flex justify-start">
-            <IconButton icon={ChevronLeftIcon} onClick={() => router.back()} />
+            <IconButton
+              icon={ChevronLeftIcon}
+              onClick={() => (route ? router.push(route) : router.back())}
+            />
           </div>
 
           {/* Center column - Title */}

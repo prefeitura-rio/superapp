@@ -10,7 +10,7 @@ export default function UserSettingsForm() {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-      <SecondaryHeader title="Configurações" />
+      <SecondaryHeader title="Configurações" route="/user-profile" />
 
       <RadioGroup
         value={theme}

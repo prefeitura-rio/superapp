@@ -5,7 +5,7 @@ export default function UserProfileLoading() {
   return (
     <div className="pt-20 min-h-lvh max-w-4xl mx-auto text-foreground flex flex-col">
       {/* Header */}
-      <SecondaryHeader title="Perfil" />
+      <SecondaryHeader title="Perfil" route="/" />
 
       {/* Profile Info Skeleton */}
       <div className="flex flex-col items-center mt-6 mb-10">

@@ -288,7 +288,7 @@ export default function AddressForm() {
   return (
     <div className="max-w-4xl h-[70lvh] mx-auto pt-24 flex flex-col space-y-6">
       <div className={headerAnim}>
-        <SecondaryHeader title="" />
+        <SecondaryHeader title="" route="/user-profile" />
         <section className="relative">
           <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
             Escreva seu <br /> endereço
