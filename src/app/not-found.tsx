@@ -28,14 +28,16 @@ export default function NotFound() {
           o link ou retorne à pagina inicial.
         </p>
         <div className="space-y-4 mb-16">
-          <CustomButton
-            size="xl"
-            className="rounded-full"
-            variant="primary"
-            fullWidth
-          >
-            <Link href="/">Voltar para a Home</Link>
-          </CustomButton>
+          <Link href="/">
+            <CustomButton
+              size="xl"
+              className="rounded-full"
+              variant="primary"
+              fullWidth
+            >
+              Voltar para a Home
+            </CustomButton>
+          </Link>
         </div>
       </div>
     </div>
