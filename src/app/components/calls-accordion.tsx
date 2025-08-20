@@ -124,14 +124,14 @@ export function CallsAccordion({ requests }: CallsAccordionProps) {
                 </span>
               </div>
 
-              {/* <div className="flex justify-between gap-4">
+              <div className="flex justify-between gap-4">
                 <span className="text-foreground-light whitespace-nowrap">
                   Endereço da solicitação
                 </span>
                 <span className="text-card-foreground line-clamp-2 font-medium text-right">
-                  {request.id_bairro || 'Não informado'}
+                  {request.endereco || '-'}
                 </span>
-              </div> */}
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>

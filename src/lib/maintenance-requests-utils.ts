@@ -7,7 +7,7 @@ import type { ModelsMaintenanceRequest } from '@/http/models'
  */
 export function getMaintenanceRequestDisplayStatus(status: string): string {
   // Return the status as is since we now have the complete list
-  return status || 'Status não informado'
+  return status || '-'
 }
 
 /**
@@ -197,9 +197,9 @@ export function formatMaintenanceRequestDate(dateString?: string): string {
 export function getMaintenanceRequestDateLabel(status: string): string {
   // Closed/Resolved statuses (using bg-card-3)
   const closedStatuses = [
-    'fechado de ofício – integração',
+    'fechado de ofício - integração',
     'fechado de ofício',
-    'fechado com providências – público',
+    'fechado com providências - público',
     'fechado com informação',
     'fechado com solução',
     'fechado',
@@ -232,9 +232,9 @@ export function getMaintenanceRequestDateValue(
 
   // Closed/Resolved statuses (using bg-card-3) - show completion date
   const closedStatuses = [
-    'fechado de ofício – integração',
+    'fechado de ofício - integração',
     'fechado de ofício',
-    'fechado com providências – público',
+    'fechado com providências - público',
     'fechado com informação',
     'fechado com solução',
     'fechado',
