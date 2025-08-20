@@ -16,6 +16,8 @@ export interface ModelsMaintenanceRequest {
   data_real_diagnostico?: string
   dentro_prazo?: string
   descricao?: string
+  /** Human-readable address, built on demand */
+  endereco?: string
   id?: string
   id_bairro?: string
   id_chamado?: string

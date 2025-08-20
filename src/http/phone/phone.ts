@@ -36,14 +36,14 @@ export type getAdminPhoneQuarantineStatsResponse200 = {
   status: 200
 }
 
-export type getAdminPhoneQuarantineStatsResponse403 = {
+export type getAdminPhoneQuarantineStatsResponse401 = {
   data: HandlersErrorResponse
-  status: 403
+  status: 401
 }
 
 export type getAdminPhoneQuarantineStatsResponseComposite =
   | getAdminPhoneQuarantineStatsResponse200
-  | getAdminPhoneQuarantineStatsResponse403
+  | getAdminPhoneQuarantineStatsResponse401
 
 export type getAdminPhoneQuarantineStatsResponse =
   getAdminPhoneQuarantineStatsResponseComposite & {
