@@ -13,6 +13,8 @@ import {
   getMaintenanceRequestDateValue,
   getMaintenanceRequestDisplayStatus,
   getMaintenanceRequestStatusColor,
+  getMaintenanceRequestStatusTextColor,
+  isValidMaintenanceRequestStatus,
 } from '@/lib/maintenance-requests-utils'
 import { useState } from 'react'
 
@@ -39,13 +41,15 @@ export function CallsAccordion({ requests }: CallsAccordionProps) {
         >
           <AccordionTrigger className="hover:no-underline pt-4 pb-4 items-start">
             <div className="flex flex-col items-start text-left w-0 flex-1">
-              <div className="flex items-center mb-2">
-                <Badge
-                  className={`${getMaintenanceRequestStatusColor(request.status || '')} text-white`}
-                >
-                  {getMaintenanceRequestDisplayStatus(request.status || '')}
-                </Badge>
-              </div>
+              {isValidMaintenanceRequestStatus(request.status || '') && (
+                <div className="flex items-center mb-2">
+                  <Badge
+                    className={`${getMaintenanceRequestStatusColor(request.status || '')} ${getMaintenanceRequestStatusTextColor(request.status || '')}`}
+                  >
+                    {getMaintenanceRequestDisplayStatus(request.status || '')}
+                  </Badge>
+                </div>
+              )}
               <h3
                 className={`text-sm font-normal text-card-foreground break-words w-full ${openItem === (request.id || '') ? '' : 'line-clamp-2'}`}
               >
@@ -120,14 +124,14 @@ export function CallsAccordion({ requests }: CallsAccordionProps) {
                 </span>
               </div>
 
-              <div className="flex justify-between gap-4">
+              {/* <div className="flex justify-between gap-4">
                 <span className="text-foreground-light whitespace-nowrap">
                   Endereço da solicitação
                 </span>
                 <span className="text-card-foreground line-clamp-2 font-medium text-right">
                   {request.id_bairro || 'Não informado'}
                 </span>
-              </div>
+              </div> */}
             </div>
           </AccordionContent>
         </AccordionItem>
