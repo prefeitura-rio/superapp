@@ -32,6 +32,11 @@ export default function TokenInputForm() {
   const hasAutoSubmitted = useRef(false)
 
   async function handleSave() {
+    // Close keyboard when submitting
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+
     startTransition(async () => {
       const result = await validateUserPhoneToken({
         code: token,

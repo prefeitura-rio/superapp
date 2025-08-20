@@ -18,6 +18,7 @@ interface PhoneInputFormProps {
   onChange: (value: string) => void
   country: CountryCode
   onCountryChange: (value: CountryCode) => void
+  onSubmit?: () => void
 }
 
 export default function PhoneInputForm({
@@ -25,6 +26,7 @@ export default function PhoneInputForm({
   onChange,
   country,
   onCountryChange,
+  onSubmit,
 }: PhoneInputFormProps) {
   const phoneState = useInputValidation({
     value,
@@ -46,9 +48,20 @@ export default function PhoneInputForm({
 
   const callingCode = `+${getCountryCallingCode(country)}`
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (isValidPhone(value, country) && onSubmit) {
+      // Close keyboard by blurring the active element
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
+      onSubmit()
+    }
+  }
+
   return (
     <>
-      <form className="w-full flex flex-col gap-4">
+      <form className="w-full flex flex-col gap-4" onSubmit={handleFormSubmit}>
         <div className="max-w-xl! mx-auto w-full flex row gap-4">
           <ActionDiv
             className={`w-19 bg-card ${callingCode && callingCode.length === 2 ? 'pl-7' : callingCode.length === 4 ? 'pl-4' : 'pl-5'}`}
