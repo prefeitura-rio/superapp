@@ -56,11 +56,6 @@ export default function Onboarding({
   const goToWelcome = async () => {
     setSlidesFadingOut(true)
 
-    startTransition(async () => {
-      await setFirstLoginFalse(userInfo.cpf)
-      // console.log('setFirstLoginFalse')
-    })
-
     await delay(TRANSITIONS.FADE)
     setShowSlides(false)
     setShowWelcome(true)
@@ -68,9 +63,12 @@ export default function Onboarding({
     await delay(TRANSITIONS.WELCOME)
     setFadeOutWelcome(true)
 
-    // Revalidate and refresh to show the main app
-    // console.log('refresh')
-    router.refresh()
+    // await delay(TRANSITIONS.FADE)
+    startTransition(async () => {
+      await setFirstLoginFalse(userInfo.cpf)
+      // Revalidate and refresh to show the main app
+      router.refresh()
+    })
   }
 
   const showBackButton = currentIndex > 0 && showSlides && !showWelcome
