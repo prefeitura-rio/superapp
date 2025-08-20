@@ -42,6 +42,11 @@ export default function EmailForm() {
   const isEmailValid = validateEmail(email)
 
   async function handleSave() {
+    // Close keyboard when submitting
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+
     if (!isEmailValid) {
       toast.error('Email inválido. Tente novamente.')
       setEmail('')
@@ -76,6 +81,13 @@ export default function EmailForm() {
     setEmail('')
   }
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (isEmailValid) {
+      handleSave()
+    }
+  }
+
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
@@ -87,15 +99,17 @@ export default function EmailForm() {
         </section>
       </div>
       <div className="flex flex-col gap-14 px-4 items-center">
-        <InputField
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          type="email"
-          placeholder="Digite seu email"
-          onClear={clearEmail}
-          state={emailStateInput}
-          showClearButton
-        />
+        <form className="w-full" onSubmit={handleFormSubmit}>
+          <InputField
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            type="email"
+            placeholder="Digite seu email"
+            onClear={clearEmail}
+            state={emailStateInput}
+            showClearButton
+          />
+        </form>
         <CustomButton
           size="xl"
           fullWidth
