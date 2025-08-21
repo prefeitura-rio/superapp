@@ -138,7 +138,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
         <div className="p-4 w-full max-w-4xl">
           <Link
-            href="/services/course/confirm-user-info"
+            href="/services/courses/confirm-user-info"
             className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
           >
             Inscreva-se
@@ -179,7 +179,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
         <div className="p-4 w-full max-w-4xl">
           <Link
-            href="/services/course/confirm-user-info"
+            href="/services/courses/confirm-user-info"
             className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
           >
             Inscreva-se
