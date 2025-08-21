@@ -1,5 +1,5 @@
 export interface MenuItemProps {
-  icon: React.ReactNode
+  icon?: React.ReactNode
   label: string
   href?: string
   variant?: 'default' | 'danger'
