@@ -11,5 +11,6 @@ export interface Course {
   recentlyAdded: boolean
   spots?: number
   description?: string
+  imageUrl: string
   requirements?: string[]
 }
