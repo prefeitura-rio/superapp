@@ -128,7 +128,7 @@ export default async function Home() {
       : null
 
     healthCardData = {
-      href: '/wallet/health',
+      href: '/carteira/clinica-da-familia',
       title: 'CLÍNICA DA FAMÍLIA',
       name: clinicaFamilia.nome || 'Nome não disponível',
       statusLabel: 'Status',

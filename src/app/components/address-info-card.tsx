@@ -123,7 +123,7 @@ export function AddressInfoCard({
           <h2 className="text-md">{displayAddress}</h2>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto">
-          <Link href="/user-profile/user-address/address-form">
+          <Link href="/meu-perfil/endereco/atualizar-endereco">
             <CustomButton
               variant="primary"
               size="lg"

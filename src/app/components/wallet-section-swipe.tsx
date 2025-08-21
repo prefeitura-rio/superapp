@@ -129,7 +129,7 @@ export default function CarteiraSectionSwipe({
     walletCards.push(
       <HealthCard
         key="health"
-        href="/wallet/health"
+        href="/carteira/clinica-da-familia"
         title="CLÍNICA DA FAMÍLIA"
         name={walletData.saude.clinica_familia.nome || 'Nome não disponível'}
         primaryLabel="Status"
@@ -163,7 +163,7 @@ export default function CarteiraSectionSwipe({
     walletCards.push(
       <EducationCard
         key="education"
-        href="/wallet/education"
+        href="/carteira/escola-de-jovens-e-adultos"
         title="ESCOLA DE JOVENS E ADULTOS"
         name={walletData?.educacao?.escola?.nome || 'Não disponível'}
         primaryLabel="Status"
@@ -200,7 +200,7 @@ export default function CarteiraSectionSwipe({
     walletCards.push(
       <SocialAssistanceCard
         key="social"
-        href="/wallet/social-assistance"
+        href="/carteira/cadunico"
         title="CADÚNICO"
         number={walletData?.assistencia_social?.cras?.nome || 'Não disponível'}
         primaryLabel="Data de recadastramento"
@@ -233,7 +233,7 @@ export default function CarteiraSectionSwipe({
     walletCards.push(
       <CaretakerCard
         key="caretaker"
-        href="/wallet/caretaker"
+        href="/carteira/cuidados-com-a-cidade"
         title="CUIDADOS COM A CIDADE"
         name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
         primaryLabel="Total de chamados"

@@ -22,21 +22,21 @@ export const suggestedBanners: BannerProps[] = [
     component: LoginBanner,
     title: 'Acesse sua carteira',
     subtitle: 'Faça login em gov.br',
-    route: '/authentication-required/wallet',
+    route: '/autenticacao-necessaria/carteira',
   },
   {
     id: 'iptu',
     component: IptuBanner,
     title: 'Fique em dia!',
     subtitle: 'Emita sua guia ou saiba mais',
-    route: '/services/category/taxas/84670/carioca-digital',
+    route: '/servicos/categoria/taxas/84670/carioca-digital',
   },
   {
     id: 'update',
     component: ProfileUpdateBanner,
     title: 'Atualize seu cadastro',
     subtitle: 'E personalize seu atendimento',
-    route: '/user-profile/user-personal-info',
+    route: '/meu-perfil/informacoes-pessoais',
   },
   // {
   //   id: 'taxes',
@@ -50,6 +50,6 @@ export const suggestedBanners: BannerProps[] = [
     component: LicensesBanner,
     title: 'Regularize sua obra!',
     subtitle: 'E ganhe até 50% de desconto',
-    route: '/services/category/Cidade/82608/carioca-digital',
+    route: '/servicos/categoria/Cidade/82608/carioca-digital',
   },
 ]

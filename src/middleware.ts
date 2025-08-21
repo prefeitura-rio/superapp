@@ -11,12 +11,12 @@ import {
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
-  { path: '/search/*', whenAuthenticated: 'next' },
-  { path: '/services/*', whenAuthenticated: 'next' },
-  { path: '/authentication-required/wallet', whenAuthenticated: 'redirect' },
+  { path: '/busca/*', whenAuthenticated: 'next' },
+  { path: '/servicos/*', whenAuthenticated: 'next' },
+  { path: '/autenticacao-necessaria/carteira', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
-  { path: '/session-expired', whenAuthenticated: 'next' },
-  { path: '/cookies-policy', whenAuthenticated: 'next' },
+  { path: '/sessao-expirada', whenAuthenticated: 'next' },
+  { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
 ] as const
 
 function matchRoute(pathname: string, routePath: string): boolean {
@@ -102,11 +102,11 @@ export function middleware(request: NextRequest) {
   )
 
   // Special handling for wallet routes
-  if (path === '/wallet') {
+  if (path === '/carteira') {
     if (!authToken) {
       // Unauthenticated user trying to access wallet → redirect to auth required page
       const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/authentication-required/wallet'
+      redirectUrl.pathname = '/autenticacao-necessaria/carteira'
       redirectUrl.search = ''
       const response = NextResponse.redirect(redirectUrl)
       response.headers.set(
@@ -140,8 +140,8 @@ export function middleware(request: NextRequest) {
     // Handle other authenticated cases
     const redirectUrl = request.nextUrl.clone()
     // If authenticated user tries to access wallet auth page → redirect to actual wallet
-    if (path === '/authentication-required/wallet') {
-      redirectUrl.pathname = '/wallet'
+    if (path === '/autenticacao-necessaria/carteira') {
+      redirectUrl.pathname = '/carteira'
     } else {
       redirectUrl.pathname = '/'
     }
