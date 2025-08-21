@@ -13,22 +13,22 @@ export function getCardPosition(
   let position = 1
 
   if (walletData?.saude?.clinica_familia) {
-    if (cardType === 'health') return position
+    if (cardType === 'clinica-da-familia') return position
     position++
   }
 
   if (walletData?.educacao?.escola?.nome) {
-    if (cardType === 'education') return position
+    if (cardType === 'escola-de-jovens-e-adultos') return position
     position++
   }
 
   if (walletData?.assistencia_social?.cras?.nome) {
-    if (cardType === 'social') return position
+    if (cardType === 'cadunico') return position
     position++
   }
 
   if (maintenanceStats?.total && maintenanceStats.total > 0) {
-    if (cardType === 'caretaker') return position
+    if (cardType === 'cuidados-com-a-cidade') return position
     position++
   }
 
@@ -56,10 +56,10 @@ export function sendWalletCardGAEvent(
  * Card types for wallet tracking
  */
 export const WALLET_CARD_TYPES = {
-  HEALTH: 'health',
-  EDUCATION: 'education',
-  SOCIAL: 'social',
-  CARETAKER: 'caretaker',
+  HEALTH: 'clinica-da-familia',
+  EDUCATION: 'escola-de-jovens-e-adultos',
+  SOCIAL: 'cadunico',
+  CARETAKER: 'cuidados-com-a-cidade',
 } as const
 
 export type WalletCardType =

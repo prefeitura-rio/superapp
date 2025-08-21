@@ -99,7 +99,7 @@ export default function CarteiraSection({
             {walletData?.saude?.clinica_familia?.indicador && (
               <div className="min-w-[300px]">
                 <HealthCard
-                  href="/wallet/health"
+                  href="/carteira/clinica-da-familia"
                   title="CLÍNICA DA FAMÍLIA"
                   name={
                     walletData.saude.clinica_familia.nome ||
@@ -136,7 +136,7 @@ export default function CarteiraSection({
             {walletData?.educacao?.aluno?.indicador && (
               <div className="min-w-[300px]">
                 <EducationCard
-                  href="/wallet/education"
+                  href="/carteira/escola-de-jovens-e-adultos"
                   title="ESCOLA DE JOVENS E ADULTOS"
                   name={walletData?.educacao?.escola?.nome || 'Não disponível'}
                   primaryLabel="Status"
@@ -172,7 +172,7 @@ export default function CarteiraSection({
             {walletData?.assistencia_social?.cadunico?.indicador && (
               <div className="min-w-[300px]">
                 <SocialAssistanceCard
-                  href="/wallet/social-assistance"
+                  href="/carteira/cadunico"
                   title="CADÚNICO"
                   number={
                     walletData?.assistencia_social?.cras?.nome ||
@@ -209,7 +209,7 @@ export default function CarteiraSection({
             {maintenanceStats.total > 0 && (
               <div className="min-w-[300px]">
                 <CaretakerCard
-                  href="/wallet/caretaker"
+                  href="/carteira/cuidados-com-a-cidade"
                   title="CUIDADOS COM A CIDADE"
                   name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
                   primaryLabel="Total de chamados"

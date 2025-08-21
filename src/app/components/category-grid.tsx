@@ -13,7 +13,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
   const router = useRouter()
 
   const handleCategoryClick = (slug: string) => {
-    router.push(`/services/category/${slug}`)
+    router.push(`/servicos/categoria/${slug}`)
   }
 
   return (

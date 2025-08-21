@@ -29,7 +29,7 @@ export default function HeaderUserLink({
 
   return (
     <Link
-      href={isLoggedIn ? '/user-profile' : REDIRECT_DIRECT_TO_GOVBR_ROUTE}
+      href={isLoggedIn ? '/meu-perfil' : REDIRECT_DIRECT_TO_GOVBR_ROUTE}
       className="flex items-center space-x-3"
       onClick={handleClick}
     >

@@ -7,7 +7,7 @@ export function SessionExpiredHandler() {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (pathname === '/session-expired') {
+    if (pathname === '/sessao-expirada') {
       const handleSessionExpiredLogout = async () => {
         try {
           // First logout from Keycloak

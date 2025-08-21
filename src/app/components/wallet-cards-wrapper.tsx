@@ -82,7 +82,7 @@ export function WalletCardsWrapper({
             riskStatus={riskStatus?.risco}
             enableFlip={false}
             asLink
-            href="/wallet/health"
+            href="/carteira/clinica-da-familia"
             showInitialShine={false}
             onClick={() =>
               sendWalletCardGAEvent(
@@ -119,7 +119,7 @@ export function WalletCardsWrapper({
             email={walletData?.educacao?.escola?.email}
             asLink
             enableFlip={false}
-            href="/wallet/education"
+            href="/carteira/escola-de-jovens-e-adultos"
             showInitialShine={false}
             onClick={() =>
               sendWalletCardGAEvent(
@@ -154,7 +154,7 @@ export function WalletCardsWrapper({
             phone={walletData?.assistencia_social?.cras?.telefone}
             asLink
             enableFlip={false}
-            href="/wallet/social-assistance"
+            href="/carteira/cadunico"
             showInitialShine={false}
             onClick={() =>
               sendWalletCardGAEvent(
@@ -184,7 +184,7 @@ export function WalletCardsWrapper({
             showInitialShine={false}
             enableFlip={false}
             asLink
-            href="/wallet/caretaker"
+            href="/carteira/cuidados-com-a-cidade"
             onClick={() =>
               sendWalletCardGAEvent(
                 'CUIDADOS COM A CIDADE',

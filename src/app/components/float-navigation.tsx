@@ -8,8 +8,8 @@ export async function FloatNavigation() {
 
   // Determine the correct wallet URL based on authentication status
   const walletUrl = isAuthenticated
-    ? '/wallet'
-    : '/authentication-required/wallet'
+    ? '/carteira'
+    : '/autenticacao-necessaria/carteira'
 
   return <FloatNavigationClient walletUrl={walletUrl} />
 }
