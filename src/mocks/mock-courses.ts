@@ -4,13 +4,7 @@ export const COURSES = [
     title: 'Informática Básico para Iniciantes',
     description:
       'Aprenda os fundamentos da informática, como uso de computadores, internet e principais softwares.',
-    requirements: [
-      'Idade mínima de 14 anos',
-      'Ensino fundamental completo',
-      'Ensino fundamental completo',
-      'Ensino fundamental completo',
-      'Ensino fundamental completo',
-    ],
+    requirements: ['Idade mínima de 14 anos', 'Ensino fundamental completo'],
     spots: 30,
     status: 'Aberto',
     date: '25.05.2024',
@@ -20,19 +14,15 @@ export const COURSES = [
     type: 'technology',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 2,
     title: 'Curso de Marcenaria Básica',
     description:
       'Introdução às técnicas de marcenaria com foco em segurança, ferramentas e montagem de móveis simples.',
-    requirements: [
-      'Idade mínima de 16 anos',
-      'Noções básicas de matemática',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Idade mínima de 16 anos', 'Noções básicas de matemática'],
     spots: 18,
     status: 'Encerrado',
     date: '13.04.2024',
@@ -42,19 +32,15 @@ export const COURSES = [
     type: 'construction',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 3,
     title: 'Educação Ambiental nas Escolas',
     description:
       'Capacitação para promover práticas sustentáveis e educação ambiental no ambiente escolar.',
-    requirements: [
-      'Ser profissional da educação',
-      'Atuação em escolas públicas ou privadas',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Ser profissional da educação', 'Atuação em escolas'],
     spots: 25,
     status: 'Aberto',
     date: '18.06.2024',
@@ -64,6 +50,8 @@ export const COURSES = [
     type: 'environment',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 4,
@@ -73,9 +61,6 @@ export const COURSES = [
     requirements: [
       'Ensino médio completo',
       'Conhecimentos básicos em obras civis',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
     ],
     spots: 40,
     status: 'Aberto',
@@ -86,6 +71,8 @@ export const COURSES = [
     type: 'construction',
     recommended: false,
     recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 5,
@@ -94,10 +81,7 @@ export const COURSES = [
       'Explore os conceitos básicos da inteligência artificial, aplicações e ferramentas atuais.',
     requirements: [
       'Noções de lógica de programação',
-      'Computador com acesso à internet',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
+      'Computador com internet',
     ],
     spots: 22,
     status: 'Aberto',
@@ -108,18 +92,17 @@ export const COURSES = [
     type: 'ai',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 6,
-    title: 'Tecnoligia Básica e Aplicada',
+    title: 'Tecnologia Básica e Aplicada',
     description:
       'Aprenda sobre tecnologias atuais e como aplicá-las no dia a dia pessoal e profissional.',
     requirements: [
       'Ensino fundamental completo',
-      'Celular ou computador com acesso à internet',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
+      'Celular ou computador com internet',
     ],
     spots: 45,
     status: 'Aberto',
@@ -130,19 +113,15 @@ export const COURSES = [
     type: 'technology',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 7,
     title: 'Robótica Educacional',
     description:
       'Capacitação para professores e educadores aplicarem robótica como ferramenta de ensino.',
-    requirements: [
-      'Ser educador ou estudante de licenciatura',
-      'Conhecimentos básicos de informática',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Ser educador ou estudante de licenciatura'],
     spots: 16,
     status: 'Encerrado',
     date: '02.05.2024',
@@ -152,19 +131,15 @@ export const COURSES = [
     type: 'technology',
     recommended: false,
     recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 8,
     title: 'Capacitação de Professores em Educação Digital',
     description:
       'Curso voltado ao uso de tecnologias digitais na educação e inovação em sala de aula.',
-    requirements: [
-      'Ser professor da rede pública ou privada',
-      'Possuir conta Google para acesso às ferramentas',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Ser professor da rede pública ou privada'],
     spots: 28,
     status: 'Aberto',
     date: '22.06.2024',
@@ -174,19 +149,15 @@ export const COURSES = [
     type: 'education',
     recommended: true,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 9,
     title: 'Construção Sustentável',
     description:
       'Aprenda técnicas e práticas de construção com foco na sustentabilidade ambiental e eficiência energética.',
-    requirements: [
-      'Ensino médio completo',
-      'Conhecimentos em construção civil',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Ensino médio completo'],
     spots: 35,
     status: 'Aberto',
     date: '30.06.2024',
@@ -196,21 +167,15 @@ export const COURSES = [
     type: 'construction',
     recommended: false,
     recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: 10,
     title: 'Fundamentos de Programação',
     description:
       'Curso introdutório sobre lógica de programação, variáveis, estruturas de controle e algoritmos.',
-    requirements: [
-      'Computador com acesso à internet',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-      'Nenhum conhecimento prévio necessário',
-    ],
+    requirements: ['Computador com acesso à internet'],
     spots: 50,
     status: 'Aberto',
     date: '05.07.2024',
@@ -220,5 +185,226 @@ export const COURSES = [
     type: 'technology',
     recommended: true,
     recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 11,
+    title: 'Primeiros Socorros Básicos',
+    description:
+      'Capacitação para reconhecer situações de emergência e aplicar procedimentos de primeiros socorros até a chegada de ajuda profissional.',
+    requirements: ['Idade mínima de 18 anos'],
+    spots: 20,
+    status: 'Aberto',
+    date: '15.07.2024',
+    provider: 'Prefeitura',
+    workload: '12',
+    modality: 'Presencial',
+    type: 'health',
+    recommended: false,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 12,
+    title: 'Nutrição Infantil e Desenvolvimento',
+    description:
+      'Aprenda como a alimentação adequada influencia o crescimento e desenvolvimento de crianças até 10 anos.',
+    requirements: ['Ser profissional ou estudante da área de saúde'],
+    spots: 25,
+    status: 'Aberto',
+    date: '28.07.2024',
+    provider: 'SENAC',
+    workload: '30',
+    modality: 'Remoto',
+    type: 'nutrition',
+    recommended: true,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 13,
+    title: 'Direitos Trabalhistas Essenciais',
+    description:
+      'Conheça as principais leis trabalhistas brasileiras e seus impactos no dia a dia do trabalhador.',
+    requirements: ['Ensino médio completo'],
+    spots: 40,
+    status: 'Aberto',
+    date: '10.08.2024',
+    provider: 'Sindicato dos Trabalhadores',
+    workload: '20',
+    modality: 'Presencial',
+    type: 'law',
+    recommended: false,
+    recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 14,
+    title: 'Alimentação Saudável no Trabalho',
+    description:
+      'Estratégias para manter uma alimentação equilibrada durante a rotina profissional.',
+    requirements: ['Idade mínima de 16 anos'],
+    spots: 30,
+    status: 'Aberto',
+    date: '20.08.2024',
+    provider: 'Google',
+    workload: '15',
+    modality: 'Híbrido',
+    type: 'nutrition',
+    recommended: true,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 15,
+    title: 'Saúde Mental no Ambiente Escolar',
+    description:
+      'Formação para professores e gestores escolares sobre prevenção e promoção da saúde mental em estudantes.',
+    requirements: ['Ser educador ou profissional da área de saúde'],
+    spots: 18,
+    status: 'Encerrado',
+    date: '01.09.2024',
+    provider: 'SENAI',
+    workload: '25',
+    modality: 'Remoto',
+    type: 'health',
+    recommended: true,
+    recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 16,
+    title: 'Legislação Ambiental Brasileira',
+    description:
+      'Curso introdutório sobre as principais normas ambientais do Brasil e sua aplicação em projetos.',
+    requirements: ['Ensino médio completo'],
+    spots: 22,
+    status: 'Aberto',
+    date: '12.09.2024',
+    provider: 'Instituto Verde Brasil',
+    workload: '35',
+    modality: 'Presencial',
+    type: 'law',
+    recommended: false,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 17,
+    title: 'Introdução à Biotecnologia',
+    description:
+      'Explore os princípios básicos da biotecnologia e suas aplicações na saúde e agricultura.',
+    requirements: ['Ensino médio completo'],
+    spots: 25,
+    status: 'Aberto',
+    date: '22.09.2024',
+    provider: 'SENAC',
+    workload: '40',
+    modality: 'Híbrido',
+    type: 'technology',
+    recommended: true,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 18,
+    title: 'Culinária Funcional',
+    description:
+      'Aprenda receitas práticas que unem sabor e benefícios nutricionais para o dia a dia.',
+    requirements: ['Interesse em culinária e nutrição'],
+    spots: 20,
+    status: 'Aberto',
+    date: '30.09.2024',
+    provider: 'Escola Gastronômica do Rio',
+    workload: '18',
+    modality: 'Presencial',
+    type: 'nutrition',
+    recommended: false,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 19,
+    title: 'Gestão Pública e Legislação',
+    description:
+      'Curso voltado para servidores e interessados em compreender o funcionamento das leis na administração pública.',
+    requirements: ['Ensino superior em andamento ou completo'],
+    spots: 30,
+    status: 'Aberto',
+    date: '10.10.2024',
+    provider: 'Prefeitura',
+    workload: '45',
+    modality: 'Remoto',
+    type: 'law',
+    recommended: true,
+    recentlyAdded: false,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: 20,
+    title: 'Promoção da Saúde e Bem-estar',
+    description:
+      'Aprenda práticas de promoção de saúde integrando corpo e mente.',
+    requirements: ['Nenhum conhecimento prévio necessário'],
+    spots: 40,
+    status: 'Aberto',
+    date: '25.10.2024',
+    provider: 'ONG Saúde para Todos',
+    workload: '20',
+    modality: 'Remoto',
+    type: 'health',
+    recommended: false,
+    recentlyAdded: true,
+    imageUrl:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+]
+
+export const MY_COURSES = [
+  {
+    id: '1',
+    title: 'Informática Básico para Iniciantes',
+    provider: 'Prefeitura',
+    status: 'Em análise',
+    statusColor: 'bg-orange-500',
+    image:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: '5',
+    title: 'Introdução à Inteligência Artificial',
+    provider: 'SENAC',
+    status: 'Inscrito',
+    statusColor: 'bg-green-500',
+    image:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: '3',
+    title: 'Educação Ambiental nas Escolas',
+    provider: 'Prefeitura',
+    status: 'Finalizado',
+    statusColor: 'bg-gray-400',
+    image:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  },
+  {
+    id: '7',
+    title: 'Robótica Educacional',
+    provider: 'SENAI',
+    status: 'Recusado',
+    statusColor: 'bg-red-500',
+    image:
+      'https://plus.unsplash.com/premium_photo-1690303193898-f9c721d0770b?q=80&w=1466&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
 ]

@@ -1,77 +1,135 @@
 'use client'
-import CourseCardSearchPage from '@/app/components/course-card-search-page'
-import { ServicesHeader } from '@/app/components/services-header'
-import { Badge } from '@/components/ui/badge'
-import { ServicesSearchInput } from '@/components/ui/custom/services-search-input'
-import { COURSES } from '@/mocks/mock-courses'
-import { useState } from 'react'
 
-const FILTERS = [
-  { label: 'Todos', value: 'all' },
-  { label: 'IA', value: 'ai' },
-  { label: 'Tecnologia', value: 'technology' },
-  { label: 'Construção', value: 'construction' },
-  { label: 'Meio Ambiente', value: 'environment' },
-  { label: 'Educação', value: 'education' },
-]
+import { ChevronRightIcon, XIcon } from '@/assets/icons'
+import { SearchInput } from '@/components/ui/custom/search-input'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 
-export default function ProfilePage() {
+const SEARCH_HISTORY_KEY = 'courses-search-history'
+const MAX_HISTORY_ITEMS = 8
+
+export default function CoursesSearchPage() {
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState('all')
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
-  const filtered = COURSES.filter(c => {
-    const matchesQuery = c.title.toLowerCase().includes(query.toLowerCase())
-    const matchesFilter = selected === 'all' ? true : c.type === selected
-    return matchesQuery && matchesFilter
-  })
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (savedHistory) {
+      try {
+        setSearchHistory(JSON.parse(savedHistory))
+      } catch {
+        localStorage.removeItem(SEARCH_HISTORY_KEY)
+      }
+    }
+  }, [])
+
+  const saveSearchToHistory = (searchQuery: string) => {
+    if (!searchQuery.trim() || searchQuery.length <= 2) return
+    const trimmed = searchQuery.trim()
+
+    setSearchHistory(prev => {
+      const filtered = prev.filter(item => item !== trimmed)
+      const newHistory = [trimmed, ...filtered].slice(0, MAX_HISTORY_ITEMS)
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+      return newHistory
+    })
+  }
+
+  const removeFromHistory = (item: string) => {
+    setSearchHistory(prev => {
+      const newHistory = prev.filter(q => q !== item)
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+      return newHistory
+    })
+  }
+
+  const handleSearch = (text: string) => {
+    setQuery(text)
+    saveSearchToHistory(text)
+  }
+
+  const clearSearch = () => {
+    setQuery('')
+  }
 
   return (
-    <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
-      <ServicesHeader title="Buscador" />
-      <div>
-        <section className="relative pt-10 px-4">
-          <ServicesSearchInput
-            placeholder="Pesquise um curso"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onClear={() => setQuery('')}
-          />
-        </section>
+    <main className="min-h-lvh max-w-4xl mx-auto text-white">
+      <section className="relative pt-10 px-4">
+        <SearchInput
+          ref={searchInputRef}
+          placeholder="Pesquise um curso"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onClear={clearSearch}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              saveSearchToHistory(query)
+            }
+          }}
+          onBack={() => {
+            router.back()
+          }}
+        />
+      </section>
 
-        <div className="relative px-4 pt-2 w-full overflow-x-auto pb-4 no-scrollbar">
-          <div className="flex gap-3 min-w-max pt-3">
-            {FILTERS.map(filter => (
-              <Badge
-                key={filter.value}
-                onClick={() => setSelected(filter.value)}
-                className={`cursor-pointer px-3 py-1 rounded-full text-sm transition-colors
-                    ${
-                      selected === filter.value
-                        ? 'bg-white text-black'
-                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                    }
-                  `}
-                variant={selected === filter.value ? 'secondary' : 'outline'}
-              >
-                {filter.label}
-              </Badge>
-            ))}
+      {query.length <= 2 && (
+        <div className="px-4 mt-6 space-y-6">
+          <div>
+            <h2 className="text-base font-medium text-foreground">
+              Mais pesquisados
+            </h2>
+            <ul>
+              {[
+                'Curso de IA',
+                'Excel Essencial',
+                'Meio Ambiente',
+                'Educação básica',
+              ].map((text, idx) => (
+                <li
+                  key={idx}
+                  className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                  onClick={() => handleSearch(text)}
+                >
+                  <span>{text}</span>
+                  <ChevronRightIcon className="text-primary h-6 w-6" />
+                </li>
+              ))}
+            </ul>
           </div>
+
+          {searchHistory.length > 0 && (
+            <div>
+              <h2 className="text-base font-medium text-foreground">
+                Pesquisados por você
+              </h2>
+              <ul>
+                {searchHistory.map((text, idx) => (
+                  <li
+                    key={idx}
+                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
+                  >
+                    <span className="flex-1" onClick={() => handleSearch(text)}>
+                      {text}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        removeFromHistory(text)
+                      }}
+                      className="text-primary h-5 w-5 hover:text-destructive transition-colors"
+                    >
+                      <XIcon className="h-5 w-5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-        <div className="px-4">
-          <h2 className="text-md pt-4 font-semibold">Resultado</h2>
-          <div className="pt-4">
-            {filtered.length === 0 && (
-              <div className="text-zinc-400 text-center py-10">
-                Nenhum curso encontrado
-              </div>
-            )}
-            {filtered.map(course => (
-              <CourseCardSearchPage key={course.id} course={course} />
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </main>
   )
 }

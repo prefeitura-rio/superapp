@@ -62,3 +62,20 @@ export function formatTitleCase(text: string): string {
   // Retorna as palavras formatadas separadas por espaço
   return formattedWords.join(' ')
 }
+
+export function slugify(text: string): string {
+  return (
+    text
+      .normalize('NFD')
+      // biome-ignore lint/suspicious/noMisleadingCharacterClass: <regex>
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+  )
+}
+
+export function createCourseSlug(id: string | number, title: string): string {
+  return `${id}-${slugify(title)}`
+}

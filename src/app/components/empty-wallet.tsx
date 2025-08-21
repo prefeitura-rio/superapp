@@ -20,15 +20,15 @@ export default function EmptyWallet() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col justify-center space-y-4">
+        <div className="flex flex-col justify-center space-y-3">
           {/* Title and Description */}
           <div className="px-4 sm:px-0 text-left space-y-2">
             <h2 className="text-4xl font-medium text-foreground leading-10 text-spacing-4 tracking-tight">
-              Sem informação disponível.
+              Nenhum cartão disponível no momento
             </h2>
             <p className="text-sm text-foreground-light leading-5 pb-6">
-              Mantenha sempre os seus dados atualizados para acessar a sua
-              carteira digital.
+              Atualize as informações no seu perfil para visualizar suas
+              carteiras
             </p>
           </div>
 

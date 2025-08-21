@@ -1,11 +1,11 @@
-import { ServicesHeader } from '@/app/components/services-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 
 export default function FaqPage() {
   const sections = [
     {
       title: 'O que é a Plataforma GoRio?',
       content:
-        'O Município do Rio de Janeiro, por meio da Secretaria Municipal de Ciência, Tecnologia e Inovação – SMCTI, com o apoio do Senac RJ, oferece a oportunidade de disseminação gratuita de cursos à população nos eixos de Empreendedorismo Inovador, Comunicação, Tecnologia básica e aplicada.',
+        'O Município do Rio de Janeiro, por meio da Secretaria Municipal de Ciência, Tecnologia e Inovação – SMCT, com o apoio do Senac RJ, oferece a oportunidade de disseminação gratuita de cursos à população nos eixos de Empreendedorismo Inovador, Comunicação, Tecnologia básica e aplicada.',
     },
     {
       title: 'Qual o objetivo do projeto?',
@@ -13,14 +13,14 @@ export default function FaqPage() {
         'Levar oportunidades para todo o município, atrair novos públicos para o universo digital e contribuir com a melhoria da qualidade de vida por meio da difusão e promoção de Tecnologia, Inovação, Empreendedorismo, Economia Criativa e Comunicação.',
     },
     {
-      title: 'Quem pode participar?',
+      title: 'Todos os cursos do projeto são gratuitos?',
       content:
-        'Todos os cidadãos do Rio de Janeiro maiores de 16 anos podem se inscrever nos cursos oferecidos pela plataforma. Não é necessário ter conhecimento prévio, pois oferecemos desde cursos básicos até avançados em diversas áreas.',
+        'Sim, todos os cursos oferecidos para a população serão gratuitos.',
     },
     {
-      title: 'Como funciona a inscrição?',
+      title: 'Quem pode se inscrever?',
       content:
-        'As inscrições são realizadas através da plataforma online, onde você pode escolher entre os cursos disponíveis, verificar horários e locais das aulas. O processo é totalmente gratuito e as vagas são limitadas por turma.',
+        'Residentes no Município do Rio de Janeiro com idade a partir de 16 anos e Ensino Fundamental completo. *Funcionários Senac não podem participar do projeto.',
     },
     {
       title: 'Quais áreas são cobertas?',
@@ -34,22 +34,22 @@ export default function FaqPage() {
     },
   ]
   return (
-    <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
-      <ServicesHeader title="FAQ" />
-      <div className="text-white p-5 pt-10 max-w-md mx-auto">
+    <main className="max-w-4xl min-h-lvh mx-auto pt-15 text-foreground">
+      <SecondaryHeader title="FAQ" />
+      <div className="p-5 pt-10 max-w-4xl mx-auto">
         <div className="space-y-8">
           {sections.map((section, index) => (
             <div key={index}>
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold leading-tight">
+              <div className="space-y-2">
+                <h2 className="text-lg font-medium leading-tight tracking-normal">
                   {section.title}
                 </h2>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-foreground-light text-sm leading-relaxed opacity-50">
                   {section.content}
                 </p>
               </div>
               {index < sections.length - 1 && (
-                <div className="mt-8 border-t border-gray-700" />
+                <div className="mt-8 border-t border-border" />
               )}
             </div>
           ))}

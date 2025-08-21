@@ -201,6 +201,7 @@ select:-webkit-autofill:focus {
   --color-wallet-3b: var(--wallet-3b);
   --color-wallet-4: var(--wallet-4);
   --color-wallet-4b: var(--wallet-4b);
+  --color-card-gov: var(--card-gov);
 
   /* custom variables */
   --color-stroke-100: var(--stroke-100);
@@ -274,6 +275,7 @@ select:-webkit-autofill:focus {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
+  --card-gov: #EBECF0;
 
   --wallet-1: #6993c2;
   --wallet-1b: #4a7cb5;
@@ -351,6 +353,7 @@ select:-webkit-autofill:focus {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
+  --card-gov: #18181B;
 
   --wallet-1: #6993c2;
   --wallet-1b: #4a7cb5;

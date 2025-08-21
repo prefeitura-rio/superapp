@@ -2,16 +2,26 @@ import { SearchIcon } from '@/assets/icons'
 import { sendGAEvent } from '@next/third-parties/google'
 import Link from 'next/link'
 
-export default function SearchPlaceholder() {
+interface SearchPlaceholderProps {
+  isCourseSearch?: boolean
+}
+
+export default function SearchPlaceholder({
+  isCourseSearch = false,
+}: SearchPlaceholderProps) {
   const handleSearchClick = () => {
-    sendGAEvent('event', 'home_search_input_click', {
-      event_timestamp: new Date().toISOString(),
-    })
+    if (!isCourseSearch) {
+      sendGAEvent('event', 'home_search_input_click', {
+        event_timestamp: new Date().toISOString(),
+      })
+    }
   }
+
+  const searchUrl = isCourseSearch ? '/services/courses/search' : '/search'
 
   return (
     <div className="px-4 mb-2">
-      <Link href="/search" className="block">
+      <Link href={searchUrl} className="block">
         <div
           className="flex items-center space-x-4 bg-card rounded-full px-4 py-4"
           onClick={handleSearchClick}

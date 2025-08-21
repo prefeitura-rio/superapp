@@ -2,9 +2,9 @@
 
 import { ChevronRightIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
+import type { MenuItemProps } from '@/types/menu-items'
 import Link from 'next/link'
 import { forwardRef } from 'react'
-import type { MenuItemProps } from '../../../types/menu-items'
 
 const variantStyles = {
   default: '',

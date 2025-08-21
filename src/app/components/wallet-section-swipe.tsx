@@ -117,7 +117,10 @@ export default function CarteiraSectionSwipe({
   // Prepare wallet cards array
   const walletCards: JSX.Element[] = []
 
-  if (walletData?.saude?.clinica_familia) {
+  if (
+    walletData?.saude?.clinica_familia &&
+    walletData?.saude?.clinica_familia?.indicador === true
+  ) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.HEALTH,
       walletData,
