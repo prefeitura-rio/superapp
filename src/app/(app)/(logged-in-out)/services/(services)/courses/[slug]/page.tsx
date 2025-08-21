@@ -3,7 +3,7 @@ import { createCourseSlug } from '@/lib/utils'
 import { COURSES } from '@/mocks/mock-courses'
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getCourseBySlug(slug: string) {
@@ -12,7 +12,7 @@ async function getCourseBySlug(slug: string) {
 }
 
 export default async function CoursePage({ params }: PageProps) {
-  const courseSlug = params.slug
+  const { slug: courseSlug } = await params
   const course = await getCourseBySlug(courseSlug)
 
   if (!course) {
