@@ -107,6 +107,7 @@ const InstallPwaButton = () => {
                     <Image
                       src={slide.image}
                       alt={slide.title}
+                      unoptimized
                       width={300}
                       height={230}
                       style={{
