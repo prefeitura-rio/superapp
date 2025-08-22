@@ -10,18 +10,23 @@ import { InputField } from '@/components/ui/custom/input-field'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useViewportHeight } from '@/hooks/useViewport'
+import type { GoogleAddressSuggestion } from '@/types/address'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 
 interface AddressDetailsDrawerContentProps {
-  selectedAddress: any
+  selectedAddress: GoogleAddressSuggestion | null
   form: UseFormReturn<AddressFormSchema>
   onSubmit: (data: AddressFormSchema) => Promise<void>
   drawerOpen: boolean
   setDrawerOpen: (value: boolean) => void
   handleCepChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  lookupCep: (placeId: string, number?: string) => Promise<string | null>
+  lookupCep: (
+    placeId: string,
+    number?: string,
+    addressItem?: GoogleAddressSuggestion
+  ) => Promise<string | null>
   cepLoading: boolean
 }
 
@@ -69,6 +74,8 @@ export function AddressDetailsDrawerContent({
       const foundCep = await lookupCep(selectedAddress.place_id, value)
       if (foundCep) {
         setValue('cep', foundCep)
+        // Clear the "no CEP" flag if we found a CEP
+        setValue('noCep', false)
       }
     }
   }
