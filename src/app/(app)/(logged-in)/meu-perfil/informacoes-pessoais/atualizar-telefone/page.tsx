@@ -48,15 +48,18 @@ export default function PhoneNumberForm() {
             )}`
           )
           toast.success('Token enviado')
+        } else {
+          // Handle specific error statuses
+          if (result.status === 409) {
+            toast.error('Número já cadastrado')
+          } else {
+            // For other API errors, redirect to session expired
+            router.push('/sessao-expirada')
+          }
         }
       } catch (error: any) {
-        // Check if it's a "no change" error (specific business logic)
-        if (error.message && error.message.includes('No change: phone matches current data')) {
-          toast.error('Esse já é o seu número')
-        } else {
-          // Redirect to session expired page on any other error
-          router.push('/sessao-expirada')
-        }
+        // For unexpected errors (network, etc.), redirect to session expired
+        toast.error('Oops! Houve um erro.')
       }
     })
   }
