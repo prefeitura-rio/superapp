@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   try {
     // Use fetch with explicit caching
     const response = await fetch(
-      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=${carioca_digital_collection},${_1746_collection}&page=1&per_page=20`,
+      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=1746,carioca-digital&page=1&per_page=20`,
       {
         // Cache the response for 1 hour
         next: {
