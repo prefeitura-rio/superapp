@@ -45,7 +45,6 @@ export default async function SocialAssistanceCardDetail() {
             address={cras?.endereco}
             phone={cras?.telefone}
             showInitialShine
-            statusCadastral={cadunico?.status_cadastral}
           />
         </div>
         {/* Icons Buttons Row */}
