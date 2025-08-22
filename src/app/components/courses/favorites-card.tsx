@@ -1,5 +1,6 @@
 'use client'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { createCourseSlug } from '@/lib/utils'
 import { COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
@@ -21,17 +22,42 @@ async function getFavorites(): Promise<typeof COURSES> {
   })
 }
 
+function FavoritesSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 px-4">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="flex rounded-xl bg-background overflow-hidden">
+          <Skeleton className="w-30 h-30 rounded-xl" />
+          <div className="p-4 flex-1 space-y-2">
+            <Skeleton className="h-3 w-16 rounded" />
+            <Skeleton className="h-4 w-50 rounded" />
+            <Skeleton className="h-3 w-25 rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function FavoritesCard() {
+  const [isLoading, setIsLoading] = useState(true)
   const [favorites, setFavorites] = useState<typeof COURSES>([])
 
   useEffect(() => {
-    getFavorites().then(data => setFavorites(data))
+    setIsLoading(true)
+    getFavorites()
+      .then(data => setFavorites(data))
+      .finally(() => setIsLoading(false))
   }, [])
+
+  if (isLoading) {
+    return <FavoritesSkeleton />
+  }
 
   if (!favorites.length) {
     return (
-      <div className="text-center text-muted-foreground py-6">
-        Você ainda não possui cursos favoritos.
+      <div className="flex items-center justify-center h-64">
+        <span className="text-muted-foreground">Nenhum curso favorito</span>
       </div>
     )
   }

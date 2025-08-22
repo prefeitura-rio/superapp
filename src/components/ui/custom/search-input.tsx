@@ -68,7 +68,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cn(
-          'flex h-14 items-center rounded-full bg-card px-4',
+          'flex h-14 items-center rounded-full bg-card px-4 min-w-0 overflow-hidden',
           className
         )}
       >
@@ -85,7 +85,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
         <input
           ref={mergedRef}
-          className="flex-1 bg-transparent border-0 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 truncate pr-3"
+          className="flex-1 min-w-0 bg-transparent border-0 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 truncate pr-3"
           value={value}
           onChange={handleChange}
           {...props}
