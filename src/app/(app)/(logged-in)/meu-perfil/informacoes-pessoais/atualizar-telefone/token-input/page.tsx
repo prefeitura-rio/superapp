@@ -31,7 +31,7 @@ export default function TokenInputForm() {
 
   const hasAutoSubmitted = useRef(false)
 
-  async function handleSave() {
+ async function handleSave() {
     // Close keyboard when submitting
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
@@ -53,16 +53,19 @@ export default function TokenInputForm() {
             origin: { y: 0.7 },
           })
           setDrawerOpen(true)
+        } else {
+          // Handle specific error statuses
+          if (result.error === "Invalid or expired verification code") {
+            toast.error('Token inválido ou expirado.')
+            setError('Token inválido ou expirado.')
+          } else {
+            // For other API errors, show toast
+             router.push('/sessao-expirada')
+          }
         }
       } catch (error: any) {
-        // Check if it's a token validation error (specific business logic)
-        if (error.message && (error.message.includes('Token inválido') || error.message.includes('Token expirado'))) {
-          toast.error('Token inválido ou expirado.')
-          setError('Token inválido ou expirado.')
-        } else {
-          // Redirect to session expired page on any other error
-          router.push('/sessao-expirada')
-        }
+        // For unexpected errors (network, etc.), redirect to session expired
+        toast.error('Oops! Houve um erro.')
       }
       setToken('')
     })
