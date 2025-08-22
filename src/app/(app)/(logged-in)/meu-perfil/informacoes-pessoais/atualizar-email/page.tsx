@@ -66,15 +66,18 @@ export default function EmailForm() {
             origin: { y: 0.7 },
           })
           setDrawerOpen(true)
+        } else {
+          // Handle specific error statuses
+          if (result.status === 409) {
+            toast.error('Email já cadastrado')
+          } else {
+            // For other API errors, redirect to session expired
+            router.push('/sessao-expirada')
+          }
         }
       } catch (error: any) {
-        // Check if it's a duplicate email error (409 status)
-        if (error.message && error.message.includes('já cadastrado')) {
-          toast.error('Email Já Cadastrado')
-        } else {
-          // Redirect to session expired page on any other error
-          router.push('/sessao-expirada')
-        }
+        // For unexpected errors (network, etc.), redirect to session expired
+       toast.error('Oops! Houve um erro.')
       }
     })
   }
