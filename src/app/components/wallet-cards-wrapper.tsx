@@ -156,9 +156,6 @@ export function WalletCardsWrapper({
             enableFlip={false}
             href="/carteira/cadunico"
             showInitialShine={false}
-            statusCadastral={
-              walletData?.assistencia_social?.cadunico?.status_cadastral
-            }
             onClick={() =>
               sendWalletCardGAEvent(
                 'CADÚNICO',
