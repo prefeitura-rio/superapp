@@ -53,19 +53,22 @@ export default function TokenInputForm() {
             origin: { y: 0.7 },
           })
           setDrawerOpen(true)
+          setError(null)
         } else {
           // Handle specific error statuses
           if (result.error === "Invalid or expired verification code") {
-            toast.error('Token inválido ou expirado.')
+            toast.error('Token inválido ou expirado')
             setError('Token inválido ou expirado.')
           } else {
             // For other API errors, show toast
-             router.push('/sessao-expirada')
+             toast.error('Oops! Houve um erro')
+             
           }
         }
       } catch (error: any) {
         // For unexpected errors (network, etc.), redirect to session expired
-        toast.error('Oops! Houve um erro.')
+       router.push('/sessao-expirada')
+
       }
       setToken('')
     })

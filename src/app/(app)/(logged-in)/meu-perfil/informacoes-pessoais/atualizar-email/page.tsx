@@ -72,12 +72,12 @@ export default function EmailForm() {
             toast.error('Email já cadastrado')
           } else {
             // For other API errors, redirect to session expired
-            router.push('/sessao-expirada')
+            toast.error('Oops! Houve um erro')
           }
         }
       } catch (error: any) {
         // For unexpected errors (network, etc.), redirect to session expired
-       toast.error('Oops! Houve um erro.')
+       router.push('/sessao-expirada')
       }
     })
   }
