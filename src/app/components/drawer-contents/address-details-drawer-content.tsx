@@ -10,21 +10,24 @@ import { InputField } from '@/components/ui/custom/input-field'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useViewportHeight } from '@/hooks/useViewport'
+import type { GoogleAddressSuggestion } from '@/types/address'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 
 interface AddressDetailsDrawerContentProps {
-  selectedAddress: any
+  selectedAddress: GoogleAddressSuggestion | null
   form: UseFormReturn<AddressFormSchema>
   onSubmit: (data: AddressFormSchema) => Promise<void>
   drawerOpen: boolean
   setDrawerOpen: (value: boolean) => void
   handleCepChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  lookupCep: (placeId: string, number?: string) => Promise<string | null>
+  lookupCep: (
+    placeId: string,
+    number?: string,
+    addressItem?: GoogleAddressSuggestion
+  ) => Promise<string | null>
   cepLoading: boolean
-  autoCepDisabled: boolean
-  setAutoCepDisabled: (value: boolean) => void
 }
 
 export function AddressDetailsDrawerContent({
@@ -36,8 +39,6 @@ export function AddressDetailsDrawerContent({
   handleCepChange,
   lookupCep,
   cepLoading,
-  autoCepDisabled,
-  setAutoCepDisabled,
 }: AddressDetailsDrawerContentProps) {
   const { isBelowBreakpoint } = useViewportHeight()
 
@@ -65,7 +66,6 @@ export function AddressDetailsDrawerContent({
     // Clear CEP when number is cleared
     if (!value || value.trim() === '') {
       setValue('cep', '')
-      setAutoCepDisabled(false)
       return
     }
 
@@ -74,11 +74,8 @@ export function AddressDetailsDrawerContent({
       const foundCep = await lookupCep(selectedAddress.place_id, value)
       if (foundCep) {
         setValue('cep', foundCep)
-        setAutoCepDisabled(true)
-      } else {
-        // If no CEP found, clear the field and allow manual entry
-        setValue('cep', '')
-        setAutoCepDisabled(false)
+        // Clear the "no CEP" flag if we found a CEP
+        setValue('noCep', false)
       }
     }
   }
@@ -89,7 +86,6 @@ export function AddressDetailsDrawerContent({
     if (checked) {
       setValue('number', '')
       setValue('cep', '')
-      setAutoCepDisabled(false)
     }
   }
 
@@ -124,7 +120,6 @@ export function AddressDetailsDrawerContent({
               onClear={() => {
                 setValue('number', '')
                 setValue('cep', '')
-                setAutoCepDisabled(false)
               }}
               onChange={handleNumberChange}
               value={watch('number')}
@@ -192,16 +187,13 @@ export function AddressDetailsDrawerContent({
                   ? 'Sem CEP'
                   : cepLoading
                     ? 'Buscando CEP...'
-                    : autoCepDisabled
-                      ? 'CEP encontrado automaticamente'
-                      : 'Escreva o CEP'
+                    : 'Escreva o CEP'
               }
               {...register('cep')}
-              disabled={noCep || autoCepDisabled || cepLoading}
-              showClearButton={!noCep && !autoCepDisabled && !cepLoading}
+              disabled={noCep || cepLoading}
+              showClearButton={!noCep && !cepLoading}
               onClear={() => {
                 setValue('cep', '')
-                setAutoCepDisabled(false)
               }}
               state="default"
               maxLength={9}
@@ -219,7 +211,6 @@ export function AddressDetailsDrawerContent({
                 setValue('noCep', checked)
                 if (checked) {
                   setValue('cep', '')
-                  setAutoCepDisabled(false)
                 }
               }}
               id="no-cep"

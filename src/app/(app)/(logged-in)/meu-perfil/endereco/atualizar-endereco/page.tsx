@@ -1,4 +1,5 @@
 'use client'
+
 import { updateAddress } from '@/actions/update-user-address'
 import { AddressDetailsDrawerContent } from '@/app/components/drawer-contents/address-details-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -12,6 +13,16 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import {
+  cleanLogradouroForSubmission,
+  extractNumberFromAddress,
+  parseAddressForSubmission,
+  parseAddressFromGoogle,
+} from '@/lib/address-parser'
+import type {
+  AddressSubmissionData,
+  GoogleAddressSuggestion,
+} from '@/types/address'
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
 import { MapPin } from 'lucide-react'
@@ -66,13 +77,13 @@ export type AddressFormSchema = z.infer<typeof addressFormSchema>
 export default function AddressForm() {
   const [hasInteracted, setHasInteracted] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const [suggestions, setSuggestions] = useState([])
+  const [suggestions, setSuggestions] = useState<GoogleAddressSuggestion[]>([])
   const [loading, setLoading] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [feedbackDrawerOpen, setFeedbackDrawerOpen] = useState(false)
-  const [selectedAddress, setSelectedAddress] = useState<any>(null)
+  const [selectedAddress, setSelectedAddress] =
+    useState<GoogleAddressSuggestion | null>(null)
   const [cepLoading, setCepLoading] = useState(false)
-  const [autoCepDisabled, setAutoCepDisabled] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -147,18 +158,41 @@ export default function AddressForm() {
     }
   }, [inputValue])
 
-  // Function to lookup CEP based on place_id and number
-  const lookupCep = async (placeId: string, number?: string) => {
-    if (!placeId) return null
+  // Function to lookup CEP using ViaCEP API
+  const lookupCep = async (
+    placeId: string,
+    number?: string,
+    addressItem?: GoogleAddressSuggestion
+  ): Promise<string | null> => {
+    // Use provided addressItem or fall back to selectedAddress
+    const address = addressItem || selectedAddress
+    if (!address) return null
 
     setCepLoading(true)
     try {
-      const params = new URLSearchParams({ place_id: placeId })
-      if (number) {
-        params.append('number', number)
+      const parsedAddress = parseAddressFromGoogle(address)
+
+      if (
+        !parsedAddress.uf ||
+        !parsedAddress.cidade ||
+        !parsedAddress.logradouro
+      ) {
+        console.log('Missing required data for CEP lookup:', parsedAddress)
+        return null
       }
 
-      const response = await fetch(`/api/cep-lookup?${params.toString()}`)
+      const params = new URLSearchParams({
+        uf: parsedAddress.uf,
+        cidade: parsedAddress.cidade,
+        logradouro: parsedAddress.logradouro,
+      })
+
+      // Add number if provided
+      if (number) {
+        params.append('numero', number)
+      }
+
+      const response = await fetch(`/api/viacep-lookup?${params.toString()}`)
       const data = await response.json()
 
       if (response.ok && data.cep) {
@@ -173,32 +207,32 @@ export default function AddressForm() {
     }
   }
 
-  const handleSuggestionClick = async (item: any) => {
+  const handleSuggestionClick = async (item: GoogleAddressSuggestion) => {
     setSelectedAddress(item)
-    // extracts 'numero' from the address if it exists
-    let numero = ''
-    if (item.numero) {
-      numero = item.numero
-    } else if (item.main_text) {
-      // extracts a number from the main_text (e.g., 'Rua X, 123')
-      const match = item.main_text.match(/\b\d{1,6}\b/)
-      if (match) {
-        numero = match[0]
-      }
-    }
+
+    // Extract number from address
+    const numero = extractNumberFromAddress(item.main_text)
+
+    console.log(
+      'Address selected:',
+      item.main_text,
+      'Number extracted:',
+      numero
+    )
 
     // Lookup CEP if we have a number
     let cep = ''
-    let cepDisabled = false
     if (numero) {
-      const foundCep = await lookupCep(item.place_id, numero)
+      console.log('Looking up CEP for number:', numero)
+      const foundCep = await lookupCep(item.place_id, numero, item)
       if (foundCep) {
+        console.log('Found CEP:', foundCep)
         cep = foundCep
-        cepDisabled = true
+      } else {
+        console.log('No CEP found for number:', numero)
       }
     }
 
-    setAutoCepDisabled(cepDisabled)
     reset({
       number: numero,
       complement: '',
@@ -224,8 +258,8 @@ export default function AddressForm() {
   const onSubmit = async (data: AddressFormSchema) => {
     if (!selectedAddress) return
 
-    // Construct the address data from the form inputs
-    const addressParts = selectedAddress.secondary_text.split(', ')
+    const parsedAddress = parseAddressForSubmission(selectedAddress)
+
     let cepToSend = ''
     if (data.noCep) {
       cepToSend = 'Não informado'
@@ -234,20 +268,18 @@ export default function AddressForm() {
     }
 
     // Clean the logradouro by removing any existing number to avoid duplication
-    let cleanLogradouro = selectedAddress.main_text
-    // Remove numbers at the end of the string (with or without comma)
-    cleanLogradouro = cleanLogradouro.replace(/,?\s*\d+\s*$/, '').trim()
-    // Remove trailing comma if it exists
-    cleanLogradouro = cleanLogradouro.replace(/,\s*$/, '').trim()
+    const cleanLogradouro = cleanLogradouroForSubmission(
+      selectedAddress.main_text
+    )
 
-    const addressData = {
+    const addressData: AddressSubmissionData = {
       logradouro: cleanLogradouro,
       tipo_logradouro: '',
       numero: data.noNumber ? 'S/N' : data.number || '',
       complemento: data.noComplement ? '' : data.complement || '',
-      bairro: addressParts[0] || '',
-      municipio: addressParts[1] || '',
-      estado: addressParts[2] || '',
+      bairro: parsedAddress.bairro,
+      municipio: parsedAddress.municipio,
+      estado: parsedAddress.estado,
       cep: cepToSend,
     }
 
@@ -314,27 +346,29 @@ export default function AddressForm() {
             )}
             {!loading && suggestions.length > 0 && (
               <div className="flex flex-col">
-                {suggestions.map((item: any, idx: number) => (
-                  <div key={item.place_id}>
-                    <div
-                      className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30"
-                      onClick={() => handleSuggestionClick(item)}
-                    >
-                      <MapPin className="h-5 w-5" />
-                      <div>
-                        <div className="font-medium text-foreground leading-tight text-base">
-                          {item.main_text}
-                        </div>
-                        <div className="text-sm text-muted-foreground leading-tight">
-                          {item.secondary_text}
+                {suggestions.map(
+                  (item: GoogleAddressSuggestion, idx: number) => (
+                    <div key={item.place_id}>
+                      <div
+                        className="flex px-2 items-center gap-3 py-5 cursor-pointer hover:bg-accent/30"
+                        onClick={() => handleSuggestionClick(item)}
+                      >
+                        <MapPin className="h-5 w-5" />
+                        <div>
+                          <div className="font-medium text-foreground leading-tight text-base">
+                            {item.main_text}
+                          </div>
+                          <div className="text-sm text-muted-foreground leading-tight">
+                            {item.secondary_text}
+                          </div>
                         </div>
                       </div>
+                      {idx !== suggestions.length - 1 && (
+                        <div className="border-b border-border mx-4" />
+                      )}
                     </div>
-                    {idx !== suggestions.length - 1 && (
-                      <div className="border-b border-border mx-4" />
-                    )}
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             )}
             {!loading && suggestions.length === 0 && inputValue.length > 2 && (
@@ -356,8 +390,6 @@ export default function AddressForm() {
         handleCepChange={handleCepChange}
         lookupCep={lookupCep}
         cepLoading={cepLoading}
-        autoCepDisabled={autoCepDisabled}
-        setAutoCepDisabled={setAutoCepDisabled}
       />
 
       {/* Drawer for feedback after address update */}

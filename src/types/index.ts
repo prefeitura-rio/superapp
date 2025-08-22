@@ -18,3 +18,12 @@ export type {
 // Course and Job types
 export type { Course } from './course'
 export type { Job } from './job'
+
+// Address types
+export type {
+  AddressFormData,
+  AddressSubmissionData,
+  CepLookupParams,
+  GoogleAddressSuggestion,
+  ViaCepResponse,
+} from './address'
