@@ -12,11 +12,14 @@ export async function GET(request: Request) {
   }
 
   const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
+  const _1746_collection = process.env.NEXT_PUBLIC_BUSCA_1746_COLLECTION
+  const carioca_digital_collection =
+    process.env.NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION
 
   try {
     // Use fetch with explicit caching
     const response = await fetch(
-      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=carioca-digital,1746,pref-rio&page=1&per_page=20`,
+      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=${carioca_digital_collection},${_1746_collection}&page=1&per_page=20`,
       {
         // Cache the response for 1 hour
         next: {
@@ -25,6 +28,7 @@ export async function GET(request: Request) {
         },
       }
     )
+    console.log(response)
 
     if (!response.ok) {
       throw new Error('Network response was not ok')
