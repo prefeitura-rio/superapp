@@ -38,22 +38,31 @@ export default function TokenInputForm() {
     }
 
     startTransition(async () => {
-      const result = await validateUserPhoneToken({
-        code: token,
-        ddd,
-        ddi,
-        valor,
-      } as ModelsPhoneVerificationValidateRequest)
-      if (result.success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.7 },
-        })
-        setDrawerOpen(true)
-      } else {
-        toast.error('Token inválido ou expirado.')
-        setError('Token inválido ou expirado.')
+      try {
+        const result = await validateUserPhoneToken({
+          code: token,
+          ddd,
+          ddi,
+          valor,
+        } as ModelsPhoneVerificationValidateRequest)
+        
+        if (result.success) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.7 },
+          })
+          setDrawerOpen(true)
+        }
+      } catch (error: any) {
+        // Check if it's a token validation error (specific business logic)
+        if (error.message && (error.message.includes('Token inválido') || error.message.includes('Token expirado'))) {
+          toast.error('Token inválido ou expirado.')
+          setError('Token inválido ou expirado.')
+        } else {
+          // Redirect to session expired page on any other error
+          router.push('/sessao-expirada')
+        }
       }
       setToken('')
     })

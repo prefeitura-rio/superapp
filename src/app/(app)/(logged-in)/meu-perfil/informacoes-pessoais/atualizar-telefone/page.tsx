@@ -36,23 +36,27 @@ export default function PhoneNumberForm() {
         return
       }
 
-      const result = await updateUserPhone(
-        parsedPhone as ModelsSelfDeclaredPhoneInput
-      )
-
-      if (result.success) {
-        router.push(
-          `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
-            parsedPhone.ddi
-          )}`
+      try {
+        const result = await updateUserPhone(
+          parsedPhone as ModelsSelfDeclaredPhoneInput
         )
-        toast.success('Token enviado')
-      } else {
-        const errorMessage =
-          result.error === 'No change: phone matches current data'
-            ? 'Esse já é o seu número'
-            : 'Erro ao atualizar número'
-        toast.error(errorMessage)
+
+        if (result.success) {
+          router.push(
+            `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
+              parsedPhone.ddi
+            )}`
+          )
+          toast.success('Token enviado')
+        }
+      } catch (error: any) {
+        // Check if it's a "no change" error (specific business logic)
+        if (error.message && error.message.includes('No change: phone matches current data')) {
+          toast.error('Esse já é o seu número')
+        } else {
+          // Redirect to session expired page on any other error
+          router.push('/sessao-expirada')
+        }
       }
     })
   }

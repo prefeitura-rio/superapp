@@ -286,9 +286,7 @@ export default function AddressForm() {
     try {
       const result = await updateAddress(addressData)
 
-      if (result.error) {
-        console.error(result.error)
-      } else {
+      if (result.success) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -297,8 +295,9 @@ export default function AddressForm() {
         setDrawerOpen(false)
         setFeedbackDrawerOpen(true)
       }
-    } catch (error) {
-      console.error('Ocorreu um erro ao atualizar o endereço')
+    } catch (error: any) {
+      // Redirect to session expired page on any error
+      router.push('/sessao-expirada')
     }
   }
 

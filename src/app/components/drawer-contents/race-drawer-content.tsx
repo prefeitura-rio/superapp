@@ -3,6 +3,7 @@
 import { updateUserEthnicity } from '@/actions/update-user-ethnicity'
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { RACE_API_TO_DISPLAY } from '@/lib/format-race'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const RACES = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outra']
@@ -16,6 +17,8 @@ export function RaceDrawerContent({
   currentRace,
   onClose,
 }: RaceDrawerContentProps) {
+  const router = useRouter()
+  
   // Map API value to display value for initial selection
   const initialDisplayRace =
     currentRace && RACE_API_TO_DISPLAY[currentRace.toLowerCase()]
@@ -45,11 +48,10 @@ export function RaceDrawerContent({
       if (result.success) {
         console.log('Etnia atualizada com sucesso:', result.message)
         onClose?.()
-      } else {
-        console.error('Falha ao atualizar etnia:', result.message)
       }
-    } catch (error) {
-      console.log('Erro ao atualizar etnia:', error)
+    } catch (error: any) {
+      // Redirect to session expired page on any error
+      router.push('/sessao-expirada')
     } finally {
       setIsLoading(false)
     }

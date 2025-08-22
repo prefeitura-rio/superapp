@@ -7,6 +7,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -27,6 +28,7 @@ export default function PhoneInputTokenForm({
   resendParams,
   error,
 }: PhoneInputTokenFormProps) {
+  const router = useRouter()
   const [timer, setTimer] = useState(60)
   const [isResending, setIsResending] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -57,14 +59,20 @@ export default function PhoneInputTokenForm({
   async function handleResend() {
     if (!resendParams) return
     setIsResending(true)
-    await updateUserPhone({
-      valor: resendParams.valor,
-      ddd: resendParams.ddd,
-      ddi: resendParams.ddi,
-    })
-    toast.success('Token reenviado!')
-    setTimer(60)
-    setIsResending(false)
+    try {
+      await updateUserPhone({
+        valor: resendParams.valor,
+        ddd: resendParams.ddd,
+        ddi: resendParams.ddi,
+      })
+      toast.success('Token reenviado!')
+      setTimer(60)
+    } catch (error: any) {
+      // Redirect to session expired page on any error
+      router.push('/sessao-expirada')
+    } finally {
+      setIsResending(false)
+    }
   }
 
   return (

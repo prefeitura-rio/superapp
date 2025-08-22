@@ -52,22 +52,29 @@ export default function EmailForm() {
       setEmail('')
       return
     }
+    
     startTransition(async () => {
-      const result = await updateUserEmail({
-        valor: email,
-      } as ModelsSelfDeclaredEmailInput)
+      try {
+        const result = await updateUserEmail({
+          valor: email,
+        } as ModelsSelfDeclaredEmailInput)
 
-      if (result.success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.7 },
-        })
-        setDrawerOpen(true)
-      } else if (result.status === 409) {
-        toast.error('Email Já Cadastrado')
-      } else {
-        toast.error('Erro ao atualizar email.')
+        if (result.success) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.7 },
+          })
+          setDrawerOpen(true)
+        }
+      } catch (error: any) {
+        // Check if it's a duplicate email error (409 status)
+        if (error.message && error.message.includes('já cadastrado')) {
+          toast.error('Email Já Cadastrado')
+        } else {
+          // Redirect to session expired page on any other error
+          router.push('/sessao-expirada')
+        }
       }
     })
   }

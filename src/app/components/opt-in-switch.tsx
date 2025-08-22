@@ -3,12 +3,24 @@
 import { updateOptInStatus } from '@/actions/update-optin-status'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { OptInConfirmationDrawerContent } from './drawer-contents/opt-in-confirmation-drawer-content'
 
 export function OptInSwitch({ authorized }: { authorized: boolean }) {
   const [isPending, startTransition] = useTransition()
   const [showConfirmDrawer, setShowConfirmDrawer] = useState(false)
+  const router = useRouter()
+
+  const handleOptInUpdate = async (optin: boolean) => {
+    try {
+      await updateOptInStatus(optin)
+    } catch (error: any) {
+      // Redirect to session expired page on any error
+      router.push('/sessao-expirada')
+      return
+    }
+  }
 
   const handleSwitchChange = (checked: boolean) => {
     if (!checked && authorized) {
@@ -17,14 +29,14 @@ export function OptInSwitch({ authorized }: { authorized: boolean }) {
     } else {
       // Direct update for enabling authorization
       startTransition(() => {
-        updateOptInStatus(checked)
+        handleOptInUpdate(checked)
       })
     }
   }
 
   const handleConfirmDeactivation = () => {
     startTransition(() => {
-      updateOptInStatus(false)
+      handleOptInUpdate(false)
     })
     setShowConfirmDrawer(false)
   }
