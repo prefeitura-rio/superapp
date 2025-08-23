@@ -1,24 +1,22 @@
 'use client'
 
-import { categoriaToTypeOrSynonym } from '@/app/(app)/(logged-in-out)/services/(services)/courses/search/page'
 import CoursesHeader from '@/app/components/courses/courses-header'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import SearchPlaceholder from '@/app/components/search-placeholder'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import Link from 'next/link'
-import { RecommendedCoursesSwipeSkeleton } from '../recommended-courses-swipe-skeleton'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
 import { RecommendedCoursesSwipe } from './recommended-courses-swipe'
+import { RecommendedCoursesSwipeSkeleton } from './recommended-courses-swipe-skeleton'
 
 const FILTERS = [
-  { label: 'Dados', value: 'data', icon: '📊' },
-  { label: 'Nutrição', value: 'nutrition', icon: '🥗' },
-  { label: 'Alimentação', value: 'food', icon: '🍎' },
-  { label: 'Saúde', value: 'health', icon: '💊' },
-  { label: 'Animal', value: 'animal', icon: '🐾' },
-  { label: 'Carreira', value: 'career', icon: '💼' },
+  { label: 'Tecnologia', value: 'tecnologia', icon: '💻' },
+  { label: 'Construção', value: 'construcao', icon: '🏗️' },
+  { label: 'Meio Ambiente', value: 'meio-ambiente', icon: '🌱' },
+  { label: 'Educação', value: 'educacao', icon: '📚' },
+  { label: 'Saúde', value: 'saude', icon: '🏥' },
 ]
 
 interface CoursePageClientProps {
@@ -40,7 +38,7 @@ export default function CoursePageClient({ courses }: CoursePageClientProps) {
               {FILTERS.map(filter => (
                 <Link
                   key={filter.value}
-                  href={`/services/courses/search?categoria=${categoriaToTypeOrSynonym[filter.value]}`}
+                  href={`/services/courses/search?categoria=${filter.value}`}
                   className="flex flex-col items-center cursor-pointer shrink"
                 >
                   <div className="flex flex-col items-center justify-center p-2 rounded-2xl aspect-square transition-all h-20 border-2 border-card bg-card hover:bg-card/80">
