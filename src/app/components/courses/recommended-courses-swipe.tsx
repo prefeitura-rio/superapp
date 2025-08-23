@@ -17,7 +17,7 @@ export function RecommendedCoursesSwipe({
   if (!recommended.length) return null
 
   return (
-    <div className="px-4 pb-6">
+    <div className="px-4 pb-6 mt-8">
       <h3 className="pb-2 text-base font-medium text-foreground leading-5">
         Mais Populares
       </h3>
