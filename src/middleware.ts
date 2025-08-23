@@ -13,6 +13,7 @@ const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
+  { path: '/ouvidoria/*', whenAuthenticated: 'next' },
   { path: '/autenticacao-necessaria/carteira', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
