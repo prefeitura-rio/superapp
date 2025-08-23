@@ -1,37 +1,58 @@
 'use client'
 
-import { createCourseSlug } from '@/lib/utils'
-import { COURSES } from '@/mocks/mock-courses'
+import courseApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { providerIcons } from '../utils'
 
-async function getFavorites(): Promise<typeof COURSES> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const favoriteCoursesId = localStorage.getItem('courses-favorites')
-      const favoriteCourses = COURSES.filter(course =>
-        favoriteCoursesId
-          ? JSON.parse(favoriteCoursesId).includes(course.id)
-          : false
-      )
-      resolve(favoriteCourses)
-    }, 400)
-  })
+function FavoritesSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 px-4">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="flex rounded-xl bg-background overflow-hidden">
+          <Skeleton className="w-30 h-30 rounded-xl" />
+          <div className="p-4 flex-1 space-y-2">
+            <Skeleton className="h-3 w-16 rounded" />
+            <Skeleton className="h-4 w-50 rounded" />
+            <Skeleton className="h-3 w-25 rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function FavoritesCard() {
+  const [isLoading, setIsLoading] = useState(true)
   const [favorites, setFavorites] = useState<typeof COURSES>([])
 
+  const fetchFavorites = async () => {
+    try {
+      const data = await courseApi.getAllFavoritesCourses()
+      setFavorites(data.flat())
+    } catch (error) {
+      console.error('Erro ao carregar favoritos:', error)
+    }
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    getFavorites().then(data => setFavorites(data))
+    setIsLoading(true)
+    fetchFavorites().finally(() => setIsLoading(false))
   }, [])
 
-  if (!favorites.length) {
+  if (isLoading) {
+    return <FavoritesSkeleton />
+  }
+
+  if (!favorites.length && !isLoading) {
     return (
-      <div className="text-center text-muted-foreground py-6">
-        Você ainda não possui cursos favoritos.
+      <div className="flex items-center justify-center h-64">
+        <span className="text-muted-foreground">Nenhum curso favorito</span>
       </div>
     )
   }

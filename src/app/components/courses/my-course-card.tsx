@@ -1,31 +1,71 @@
 'use client'
 
-import { cn, createCourseSlug } from '@/lib/utils'
-import { MY_COURSES } from '@/mocks/mock-courses'
+import coursesApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { MY_COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { cn } from '../../../lib/utils'
 import { providerIcons } from '../utils'
 
-function getMyCourses(): Promise<typeof MY_COURSES> {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(MY_COURSES), 500) // simula latência
-  })
+function MyCoursesSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="flex items-start gap-3 rounded-lg p-3 bg-background"
+        >
+          <Skeleton className="w-30 h-30 rounded-xl" />
+          <div className="flex flex-col flex-1 min-w-0">
+            <Skeleton className="h-4 w-60 mb-3 rounded" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function getStatusColor(status: string) {
+  switch (status.toLowerCase()) {
+    case 'em análise':
+      return 'bg-card-5'
+    case 'inscrito':
+      return 'bg-card-3'
+    case 'finalizado':
+      return 'bg-muted-foreground'
+    case 'recusado':
+      return 'bg-destructive'
+    default:
+      return 'bg-secondary'
+  }
 }
 
 export function MyCoursesCard() {
   const [courses, setCourses] = useState<typeof MY_COURSES>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    getMyCourses().then(data => {
-      setCourses(data)
+  const fetchMyCourses = async () => {
+    try {
+      const courses = await coursesApi.getMyCourses()
+      setCourses(courses)
+    } catch (error) {
+      console.error('Erro ao carregar cursos:', error)
+    } finally {
       setLoading(false)
-    })
+    }
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
+  useEffect(() => {
+    fetchMyCourses()
   }, [])
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+    return <MyCoursesSkeleton />
   }
 
   return (
@@ -38,7 +78,7 @@ export function MyCoursesCard() {
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl">
             <Image
-              src={course.image}
+              src={course.imageUrl}
               alt={course.title}
               fill
               className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
@@ -67,8 +107,8 @@ export function MyCoursesCard() {
             </p>
             <span
               className={cn(
-                'inline-block px-3 py-1 text-xs font-medium text-white rounded-full w-fit',
-                course.statusColor
+                'inline-block px-3 py-1 text-xs font-medium text-background rounded-full w-fit',
+                getStatusColor(course.status)
               )}
             >
               {course.status}

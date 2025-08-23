@@ -1,17 +1,19 @@
 'use client'
 
+import coursesApi from '@/actions/courses'
 import { providerIcons } from '@/app/components/utils'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { BookmarkIcon } from '@/assets/icons/bookmark-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 interface Course {
-  id: number
+  id: string
   title: string
   description: string
   requirements: string[]
@@ -27,39 +29,50 @@ interface Course {
   imageUrl: string
 }
 
-const FAVORITES_KEY = 'courses-favorites'
-
 export function CourseDetails({ course }: { course: Course }) {
   const provider = course.provider
   const providerIcon = providerIcons[provider]
   const router = useRouter()
 
   const [isFavorite, setIsFavorite] = useState(false)
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(FAVORITES_KEY)
-    if (stored) {
+    const checkFavoriteStatus = async () => {
       try {
-        const parsed = JSON.parse(stored) as number[]
-        setIsFavorite(parsed.includes(course.id))
-      } catch {
-        localStorage.removeItem(FAVORITES_KEY)
+        const favorite = await coursesApi.isFavoriteCourse(course.id)
+        setIsFavorite(favorite)
+      } catch (error) {
+        console.error('Erro ao verificar favorito:', error)
+      } finally {
+        setIsInitialLoading(false)
       }
     }
+
+    checkFavoriteStatus()
   }, [course.id])
 
-  const toggleFavorite = () => {
-    const stored = localStorage.getItem(FAVORITES_KEY)
-    let favorites: number[] = stored ? JSON.parse(stored) : []
+  const toggleFavorite = async () => {
+    if (isLoadingFavorite) return
 
-    if (isFavorite) {
-      favorites = favorites.filter(id => id !== course.id)
-    } else {
-      favorites.push(course.id)
+    setIsLoadingFavorite(true)
+
+    try {
+      if (isFavorite) {
+        await coursesApi.removeCourseFromFavorites(course.id).then(() => {
+          setIsFavorite(false)
+        })
+      } else {
+        await coursesApi.addCourseToFavorites(course.id).then(() => {
+          setIsFavorite(true)
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao alterar favorito:', error)
+    } finally {
+      setIsLoadingFavorite(false)
     }
-
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites))
-    setIsFavorite(!isFavorite)
   }
 
   return (
@@ -124,15 +137,21 @@ export function CourseDetails({ course }: { course: Course }) {
               <p className="font-medium">{course.date}</p>
             </div>
           </div>
+
           <CustomButton
-            className="p-2 rounded-full bg-background hover:bg-background-50 border-0 shadow-none outline-none focus:outline-none focus:ring-0 active:outline-none scale-125"
+            className={`p-2 rounded-full bg-background hover:bg-background-50 border-0 shadow-none outline-none focus:outline-none focus:ring-0 active:outline-none scale-125 ${isLoadingFavorite ? 'opacity-75 cursor-not-allowed' : ''}`}
             variant="ghost"
             onClick={toggleFavorite}
+            disabled={isLoadingFavorite || isInitialLoading}
           >
-            <BookmarkIcon
-              className={`h-10 w-10 ${isFavorite ? 'text-primary fill-primary' : 'text-foreground'}`}
-              isSaved={isFavorite}
-            />
+            {isLoadingFavorite ? (
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            ) : (
+              <BookmarkIcon
+                className={`h-10 w-10 ${isFavorite ? 'text-primary fill-primary' : 'text-foreground'}`}
+                isSaved={isFavorite}
+              />
+            )}
           </CustomButton>
         </div>
 
@@ -145,14 +164,14 @@ export function CourseDetails({ course }: { course: Course }) {
           </Link>
         </div>
 
-        <div className="p-4 text-gray-700 text-sm leading-relaxed">
+        <div className="p-4 text-muted-foreground text-sm leading-relaxed">
           {course.description}
         </div>
 
         <div className="p-4 space-y-6">
           <div>
             <h2 className="text-base font-semibold mb-2">Pré-requisitos</h2>
-            <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
+            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
               {course.requirements.map((req, i) => (
                 <li key={i}>{req}</li>
               ))}
@@ -161,7 +180,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
           <div>
             <h2 className="text-base font-semibold mb-2">Orientações gerais</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               A capacitação pode incluir atividades presenciais, e os
               participantes devem seguir todas as orientações enviadas pela
               instituição responsável.
@@ -170,7 +189,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
           <div>
             <h2 className="text-base font-semibold mb-2">Certificado</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Os participantes que concluírem o curso com aproveitamento
               receberão certificado válido emitido pela instituição promotora.
             </p>

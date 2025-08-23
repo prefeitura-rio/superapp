@@ -1,6 +1,6 @@
 'use client'
 
-import { createCourseSlug } from '@/lib/utils'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
 import Image from 'next/image'
 import Link from 'next/link'
 
