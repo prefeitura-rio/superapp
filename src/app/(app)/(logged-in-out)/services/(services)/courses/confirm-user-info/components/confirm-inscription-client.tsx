@@ -15,7 +15,8 @@ import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
 import { UserDescriptionSlide } from './slides/user-description-slide'
 
-import { submitInscription } from '../actions'
+import coursesApi from '@/actions/courses'
+
 import {
   type InscriptionFormData,
   type NearbyUnit,
@@ -26,6 +27,7 @@ import {
 interface ConfirmInscriptionClientProps {
   userInfo: UserInfo
   nearbyUnits: NearbyUnit[]
+  courseId: string
 }
 
 const TRANSITIONS = {
@@ -37,6 +39,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 export function ConfirmInscriptionClient({
   userInfo,
   nearbyUnits,
+  courseId,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -103,14 +106,16 @@ export function ConfirmInscriptionClient({
     }
   }
 
+  const HOME_COURSES = '/services/courses'
+
   const handleBack = () => {
     if (showSuccess) {
       setCurrentIndex(slides.length - 1)
-      window.location.href = '/'
+      window.location.href = HOME_COURSES
       return
     }
     if (currentIndex === 0) {
-      window.location.href = '/'
+      window.location.href = HOME_COURSES
       return
     }
     swiperRef.current?.swiper?.slidePrev()
@@ -121,16 +126,33 @@ export function ConfirmInscriptionClient({
     await delay(TRANSITIONS.FADE)
 
     startTransition(async () => {
-      const formData = form.getValues()
-      await submitInscription(formData)
-      setShowSuccess(true)
-      setFadeOut(false)
+      try {
+        const formData = form.getValues()
+
+        const inscriptionData = {
+          ...formData,
+          userInfo,
+          timestamp: new Date().toISOString(),
+        }
+
+        const _result = await coursesApi.submitCourseApplication(
+          courseId,
+          inscriptionData
+        )
+
+        setShowSuccess(true)
+        setFadeOut(false)
+      } catch (error) {
+        console.error('Erro ao fazer inscrição:', error)
+        setShowSuccess(true)
+        setFadeOut(false)
+      }
     })
   }
 
   const handleFinish = () => {
-    // console.log('Dados:', form.getValues())
-    window.location.href = '/'
+    // inscrição já foi realizada no ultimo slide
+    window.location.href = HOME_COURSES
   }
 
   const currentSlide = slides[currentIndex]
