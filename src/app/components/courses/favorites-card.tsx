@@ -1,26 +1,13 @@
 'use client'
 
+import courseApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createCourseSlug } from '@/lib/utils'
-import { COURSES } from '@/mocks/mock-courses'
+import type { COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { providerIcons } from '../utils'
-
-async function getFavorites(): Promise<typeof COURSES> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const favoriteCoursesId = localStorage.getItem('courses-favorites')
-      const favoriteCourses = COURSES.filter(course =>
-        favoriteCoursesId
-          ? JSON.parse(favoriteCoursesId).includes(course.id)
-          : false
-      )
-      resolve(favoriteCourses)
-    }, 400)
-  })
-}
 
 function FavoritesSkeleton() {
   return (
@@ -43,18 +30,26 @@ export function FavoritesCard() {
   const [isLoading, setIsLoading] = useState(true)
   const [favorites, setFavorites] = useState<typeof COURSES>([])
 
+  const fetchFavorites = async () => {
+    try {
+      const data = await courseApi.getAllFavoritesCourses()
+      setFavorites(data.flat())
+    } catch (error) {
+      console.error('Erro ao carregar favoritos:', error)
+    }
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     setIsLoading(true)
-    getFavorites()
-      .then(data => setFavorites(data))
-      .finally(() => setIsLoading(false))
+    fetchFavorites().finally(() => setIsLoading(false))
   }, [])
 
   if (isLoading) {
     return <FavoritesSkeleton />
   }
 
-  if (!favorites.length) {
+  if (!favorites.length && !isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <span className="text-muted-foreground">Nenhum curso favorito</span>

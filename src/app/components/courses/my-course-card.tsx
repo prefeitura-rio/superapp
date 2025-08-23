@@ -1,18 +1,14 @@
 'use client'
 
+import coursesApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn, createCourseSlug } from '@/lib/utils'
-import { MY_COURSES } from '@/mocks/mock-courses'
+import type { MY_COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { cn } from '../../../lib/utils'
 import { providerIcons } from '../utils'
-
-function getMyCourses(): Promise<typeof MY_COURSES> {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(MY_COURSES), 500)
-  })
-}
 
 function MyCoursesSkeleton() {
   return (
@@ -52,11 +48,20 @@ export function MyCoursesCard() {
   const [courses, setCourses] = useState<typeof MY_COURSES>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    getMyCourses().then(data => {
-      setCourses(data)
+  const fetchMyCourses = async () => {
+    try {
+      const courses = await coursesApi.getMyCourses()
+      setCourses(courses)
+    } catch (error) {
+      console.error('Erro ao carregar cursos:', error)
+    } finally {
       setLoading(false)
-    })
+    }
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
+  useEffect(() => {
+    fetchMyCourses()
   }, [])
 
   if (loading) {
@@ -73,7 +78,7 @@ export function MyCoursesCard() {
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl">
             <Image
-              src={course.image}
+              src={course.imageUrl}
               alt={course.title}
               fill
               className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
