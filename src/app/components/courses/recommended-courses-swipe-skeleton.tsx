@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 
-export function RecentlyAddedCoursesSwipeSkeleton() {
+export function RecommendedCoursesSwipeSkeleton() {
   return (
     <>
       {/* Mobile - Scroll horizontal como o componente original */}
@@ -48,7 +48,7 @@ export function RecentlyAddedCoursesSwipeSkeleton() {
 
       {/* Desktop - Swiper com grid */}
       <div className="hidden sm:block">
-        <div className="px-4 pb-6 mt-5">
+        <div className="px-4 pb-6 mt-8">
           <div className="pb-2">
             <Skeleton className="h-5 w-32" />
           </div>
