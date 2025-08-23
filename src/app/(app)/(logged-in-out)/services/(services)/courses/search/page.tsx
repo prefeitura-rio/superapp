@@ -1,21 +1,21 @@
 'use client'
 
+import coursesApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
-import { COURSES as ALL_COURSES } from '@/mocks/mock-courses'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { createCourseSlug } from '../../../../../../../lib/utils'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const SEARCH_HISTORY_KEY = 'courses-search-history'
 const MAX_HISTORY_ITEMS = 8
 
 type Course = {
-  id: number | string
+  id: string
   title: string
   description?: string
   requirements?: string[]
@@ -32,54 +32,21 @@ type Course = {
   [k: string]: any
 }
 
-const normalize = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-
-const periodPtToEn: Record<string, string> = {
-  manha: 'morning',
-  tarde: 'afternoon',
-  noite: 'night',
-}
-const periodEnToPt: Record<string, string> = {
-  morning: 'manhã',
-  afternoon: 'tarde',
-  night: 'noite',
-}
-
-export const categoriaToTypeOrSynonym: Record<string, string> = {
-  tecnologia: 'technology',
-  technology: 'technology',
-  tech: 'technology',
-  informatica: 'technology',
-  ia: 'technology',
-  construcao: 'construction',
-  marcenaria: 'construction',
-  construction: 'construction',
-  obra: 'construction',
-  ambiente: 'environment',
-  'meio ambiente': 'environment',
-  meioambiente: 'environment',
-  ambiental: 'environment',
-  environment: 'environment',
-  carreira: 'career',
-  career: 'career',
-  dados: 'technology',
-  data: 'technology',
-}
+import { FILTER_LABELS } from '@/actions/courses/utils-mock'
 
 export default function CoursesSearchPage() {
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string>
   >({})
   const [draftFilters, setDraftFilters] = useState<Record<string, string>>({})
 
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const pathname = usePathname()
@@ -95,18 +62,51 @@ export default function CoursesSearchPage() {
     push = false
   ) => {
     const params = new URLSearchParams(searchParams.toString())
-    ;(
-      ['q', 'modalidade', 'certificado', 'categoria', 'periodo'] as const
-    ).forEach(key => {
+    for (const key of [
+      'q',
+      'modalidade',
+      'certificado',
+      'categoria',
+      'periodo',
+    ] as const) {
       const next = patch[key]
       if (typeof next === 'string') {
         if (next) params.set(key, next)
         else params.delete(key)
       }
-    })
+    }
     const url = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
     ;(push ? router.push : router.replace)(url, { scroll: false })
   }
+
+  // Função para fazer busca na API
+  const searchCourses = useCallback(
+    async (filters: {
+      q?: string
+      modalidade?: string
+      certificado?: string
+      categoria?: string
+      periodo?: string
+    }) => {
+      setIsLoading(true)
+      try {
+        const courses = await coursesApi.getCoursesWithFilters({
+          query: filters.q,
+          modalidade: filters.modalidade,
+          certificado: filters.certificado,
+          categoria: filters.categoria,
+          periodo: filters.periodo,
+        })
+        setFilteredCourses(courses)
+      } catch (error) {
+        console.error('Erro ao buscar cursos:', error)
+        setFilteredCourses([])
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    []
+  )
 
   useEffect(() => {
     const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY)
@@ -132,12 +132,19 @@ export default function CoursesSearchPage() {
     setSelectedFilters(applied)
 
     if (!isFilterOpen) setDraftFilters(applied)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+
+    // Fazer busca se houver filtros ou query com mais de 2 caracteres
+    const shouldSearch = q.length >= 3 || Object.values(applied).some(Boolean)
+    if (shouldSearch) {
+      searchCourses({ q, ...applied })
+    } else {
+      setFilteredCourses([])
+    }
+  }, [searchParams, searchCourses, isFilterOpen])
 
   useEffect(() => {
     if (isFilterOpen) setDraftFilters(selectedFilters)
-  }, [isFilterOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isFilterOpen, selectedFilters])
 
   // -------- Histórico --------
   const saveSearchToHistory = (searchQuery: string) => {
@@ -165,6 +172,24 @@ export default function CoursesSearchPage() {
     saveSearchToHistory(text)
     updateUrl({ q: text }, true)
   }
+
+  const onQueryChange = (newQuery: string) => {
+    setQuery(newQuery)
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current)
+    }
+
+    if (newQuery.length >= 3) {
+      debounceTimeout.current = setTimeout(() => {
+        saveSearchToHistory(newQuery)
+        updateUrl({ q: newQuery }, true)
+      }, 500)
+    } else {
+      updateUrl({ q: newQuery })
+    }
+  }
+
   const clearSearch = () => {
     setQuery('')
     updateUrl({ q: '' })
@@ -176,6 +201,7 @@ export default function CoursesSearchPage() {
       [category]: prev[category] === value ? '' : value,
     }))
   }
+
   const clearDraftFilters = () => setDraftFilters({})
 
   const applyFilters = () => {
@@ -189,52 +215,46 @@ export default function CoursesSearchPage() {
     setIsFilterOpen(false)
   }
 
+  // Função para remover um filtro específico
+  const removeFilter = (filterKey: string) => {
+    const newFilters = { ...selectedFilters, [filterKey]: '' }
+    setSelectedFilters(newFilters)
+    setDraftFilters(newFilters)
+    updateUrl({
+      modalidade:
+        filterKey === 'modalidade' ? '' : selectedFilters.modalidade || '',
+      certificado:
+        filterKey === 'certificado' ? '' : selectedFilters.certificado || '',
+      categoria:
+        filterKey === 'categoria' ? '' : selectedFilters.categoria || '',
+      periodo: filterKey === 'periodo' ? '' : selectedFilters.periodo || '',
+    })
+  }
+
   const hasAnyAppliedFilter = useMemo(
     () => Object.values(selectedFilters).some(Boolean),
     [selectedFilters]
   )
 
-  const filteredCourses: Course[] = useMemo(() => {
-    const q = normalize(query || '')
-    const wantsText = q.length >= 3
+  // Gera os badges de filtros ativos
+  const activeFilterBadges = useMemo(() => {
+    const badges = []
 
-    const categoriaRaw = selectedFilters.categoria?.trim() || ''
-    const categoriaNorm = normalize(categoriaRaw)
-    const mappedType = categoriaToTypeOrSynonym[categoriaNorm]
+    for (const [key, value] of Object.entries(selectedFilters)) {
+      if (value) {
+        const label = FILTER_LABELS[key]?.[value] || value
+        badges.push({
+          key,
+          value,
+          label,
+        })
+      }
+    }
 
-    const modalidade = selectedFilters.modalidade?.trim() || ''
-    const certificado = selectedFilters.certificado?.trim() || ''
-    const periodoRaw = selectedFilters.periodo?.trim() || ''
-    const periodoEn = periodPtToEn[normalize(periodoRaw)] || ''
+    return badges
+  }, [selectedFilters])
 
-    return (ALL_COURSES as Course[]).filter(course => {
-      if (wantsText) {
-        const txt = `${course.title ?? ''} ${course.description ?? ''}`
-        if (!normalize(txt).includes(q)) return false
-      }
-      if (modalidade) {
-        if (normalize(course.modality ?? '') !== normalize(modalidade))
-          return false
-      }
-      if (certificado) {
-        const want = certificado === 'sim'
-        if (Boolean(course.certificate) !== want) return false
-      }
-      if (periodoEn) {
-        if (normalize(course.period ?? '') !== normalize(periodoEn))
-          return false
-      }
-      if (categoriaNorm && categoriaNorm !== 'todos') {
-        if (mappedType && course.type) {
-          if (normalize(course.type) !== normalize(mappedType)) return false
-        } else {
-          const hay = `${course.title ?? ''} ${course.description ?? ''}`
-          if (!normalize(hay).includes(categoriaNorm)) return false
-        }
-      }
-      return true
-    })
-  }, [ALL_COURSES, query, selectedFilters])
+  const showResults = hasAnyAppliedFilter || (query?.trim().length ?? 0) >= 3
 
   return (
     <main className="min-h-lvh max-w-4xl mx-auto text-foreground">
@@ -243,10 +263,13 @@ export default function CoursesSearchPage() {
           ref={searchInputRef}
           placeholder="Pesquise um curso"
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={e => onQueryChange(e.target.value)}
           onClear={clearSearch}
           onKeyDown={e => {
             if (e.key === 'Enter') {
+              if (debounceTimeout.current) {
+                clearTimeout(debounceTimeout.current)
+              }
               saveSearchToHistory(query)
               updateUrl({ q: query }, true)
             }
@@ -265,7 +288,31 @@ export default function CoursesSearchPage() {
         </CustomButton>
       </section>
 
-      {!hasAnyAppliedFilter && (query?.length ?? 0) <= 2 && (
+      {/* Badges de filtros ativos */}
+      {activeFilterBadges.length > 0 && (
+        <section className="px-4 mt-4 pl-10">
+          <div className="flex flex-wrap gap-2">
+            {activeFilterBadges.map(({ key, label }) => (
+              <div
+                key={key}
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-card text-muted-foreground rounded-full text-sm font-normal"
+              >
+                <span>{label}</span>
+                <button
+                  type="button"
+                  onClick={() => removeFilter(key)}
+                  className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                  aria-label={`Remover filtro ${label}`}
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!showResults && (
         <div className="px-4 mt-6 space-y-6">
           <div>
             <h2 className="text-base font-medium text-foreground">
@@ -323,14 +370,29 @@ export default function CoursesSearchPage() {
         </div>
       )}
 
-      {(hasAnyAppliedFilter || (query?.trim().length ?? 0) >= 3) && (
+      {showResults && (
         <section className="px-4 mt-6">
           <div className="text-sm text-muted-foreground mb-2">
-            {filteredCourses.length} resultado
-            {filteredCourses.length === 1 ? '' : 's'}
+            {isLoading ? (
+              'Buscando...'
+            ) : (
+              <>
+                {filteredCourses.length} resultado
+                {filteredCourses.length === 1 ? '' : 's'}
+              </>
+            )}
           </div>
 
-          {filteredCourses.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-muted/70 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : filteredCourses.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Nenhum curso encontrado com os critérios aplicados.
             </p>
@@ -349,9 +411,7 @@ export default function CoursesSearchPage() {
                       {course.provider ?? '—'}
                       {' • '}
                       {course.modality ?? '—'}
-                      {course.period
-                        ? ` • ${periodEnToPt[course.period] ?? course.period}`
-                        : ''}
+                      {course.period ? ` • ${course.period}` : ''}
                     </p>
                   </Link>
                 </li>
