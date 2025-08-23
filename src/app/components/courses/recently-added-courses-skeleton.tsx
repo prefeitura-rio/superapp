@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function RecentlyAddedCoursesSwipeSkeleton() {
   return (
     <>
-      {/* Mobile - Scroll horizontal como o componente original */}
+      {/* Mobile */}
       <div className="block sm:hidden">
         <div className="px-4 mt-8">
           <div className="pb-2">
@@ -83,7 +83,7 @@ export function RecentlyAddedCoursesSwipeSkeleton() {
               </div>
             </div>
 
-            {/* Paginação - só no desktop */}
+            {/* Paginação */}
             <div className="flex justify-center items-center gap-1 mt-4">
               <Skeleton className="w-1.5 h-1.5 rounded-full" />
               <Skeleton className="w-1.5 h-1.5 rounded-full" />

@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function RecommendedCoursesSwipeSkeleton() {
   return (
     <>
-      {/* Mobile - Scroll horizontal como o componente original */}
+      {/* Mobile */}
       <div className="block sm:hidden">
         <div className="px-4 mt-8">
           <div className="pb-2">
