@@ -1,37 +1,9 @@
+import { COURSE_FILTERS } from '@/actions/courses/utils-mock'
 import {
   BottomSheet,
   BottomSheetFooter,
 } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-
-const FILTER_OPTIONS = {
-  modalidade: [
-    { label: 'Presencial', value: 'presencial' },
-    { label: 'Remoto', value: 'remoto' },
-    { label: 'Híbrido', value: 'hibrido' },
-  ],
-  certificado: [
-    { label: 'Sim', value: 'sim' },
-    { label: 'Não', value: 'nao' },
-  ],
-  categoria: [
-    { label: 'Todos', value: 'todos' },
-    { label: 'Saúde', value: 'saude' },
-    { label: 'Nutrição', value: 'nutricao' },
-    { label: 'Vigilância', value: 'vigilancia' },
-    { label: 'Estética', value: 'estetica' },
-    { label: 'Tecnologia', value: 'tecnologia' },
-    { label: 'Legislação', value: 'legislacao' },
-    { label: 'Alimentos', value: 'alimentos' },
-    { label: 'Imunização', value: 'imunizacao' },
-    { label: 'Radiologia', value: 'radiologia' },
-  ],
-  periodo: [
-    { label: 'Manhã', value: 'manha' },
-    { label: 'Tarde', value: 'tarde' },
-    { label: 'Noite', value: 'noite' },
-  ],
-}
 
 interface CoursesFilterDrawerContentProps {
   open: boolean
@@ -59,7 +31,7 @@ export default function CoursesFilterDrawerContent({
             Modalidade
           </h3>
           <div className="flex flex-wrap gap-2">
-            {FILTER_OPTIONS.modalidade.map(option => (
+            {COURSE_FILTERS.modalidade.map(option => (
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('modalidade', option.value)}
@@ -81,7 +53,7 @@ export default function CoursesFilterDrawerContent({
             Certificado
           </h3>
           <div className="flex flex-wrap gap-2">
-            {FILTER_OPTIONS.certificado.map(option => (
+            {COURSE_FILTERS.certificado.map(option => (
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('certificado', option.value)}
@@ -103,7 +75,7 @@ export default function CoursesFilterDrawerContent({
             Categoria
           </h3>
           <div className="flex flex-wrap gap-2">
-            {FILTER_OPTIONS.categoria.map(option => (
+            {COURSE_FILTERS.categoria.map(option => (
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('categoria', option.value)}
@@ -125,7 +97,7 @@ export default function CoursesFilterDrawerContent({
             Período do dia
           </h3>
           <div className="flex flex-wrap gap-2">
-            {FILTER_OPTIONS.periodo.map(option => (
+            {COURSE_FILTERS.periodo.map(option => (
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('periodo', option.value)}
