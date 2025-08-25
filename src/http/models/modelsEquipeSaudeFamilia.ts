@@ -14,4 +14,5 @@ export interface ModelsEquipeSaudeFamilia {
   medicos?: ModelsProfissionalSaude[]
   nome?: string
   telefone?: string
+  whatsapp?: string //forced !
 }
