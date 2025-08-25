@@ -51,8 +51,8 @@ export const getGetV1AvatarsUrl = (params?: GetV1AvatarsParams) => {
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `/v1/avatars?${stringifiedParams}`
-    : `/v1/avatars`
+    ? `/avatars?${stringifiedParams}`
+    : `/avatars`
 }
 
 export const getV1Avatars = async (
@@ -88,7 +88,7 @@ export type postV1AvatarsResponse = postV1AvatarsResponseComposite & {
 }
 
 export const getPostV1AvatarsUrl = () => {
-  return `/v1/avatars`
+  return `/avatars`
 }
 
 export const postV1Avatars = async (
@@ -126,7 +126,7 @@ export type deleteV1AvatarsIdResponse = deleteV1AvatarsIdResponseComposite & {
 }
 
 export const getDeleteV1AvatarsIdUrl = (id: string) => {
-  return `/v1/avatars/${id}`
+  return `/avatars/${id}`
 }
 
 export const deleteV1AvatarsId = async (
@@ -163,7 +163,7 @@ export type getV1CitizenCpfAvatarResponse =
   }
 
 export const getGetV1CitizenCpfAvatarUrl = (cpf: string) => {
-  return `/v1/citizen/${cpf}/avatar`
+  return `/citizen/${cpf}/avatar`
 }
 
 export const getV1CitizenCpfAvatar = async (
@@ -203,7 +203,7 @@ export type putV1CitizenCpfAvatarResponse =
   }
 
 export const getPutV1CitizenCpfAvatarUrl = (cpf: string) => {
-  return `/v1/citizen/${cpf}/avatar`
+  return `/citizen/${cpf}/avatar`
 }
 
 export const putV1CitizenCpfAvatar = async (

@@ -12,6 +12,7 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface AddressInfoCardProps {
@@ -30,6 +31,7 @@ export function AddressInfoCard({
   badgeText = 'Atualizar',
 }: AddressInfoCardProps) {
   const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   // Helper to format address string
   let mainLine = 'Endereço não disponível'
@@ -65,9 +67,14 @@ export function AddressInfoCard({
 
   const handleDelete = async () => {
     if (address) {
-      console.log('Deleting address:', address)
-      await deleteUserAddress()
-      setOpen(false)
+      try {
+        console.log('Deleting address:', address)
+        await deleteUserAddress()
+        setOpen(false)
+      } catch (error: any) {
+        // Redirect to session expired page on any error
+        router.push('/sessao-expirada')
+      }
     }
   }
 

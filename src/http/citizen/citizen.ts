@@ -463,9 +463,15 @@ export type putCitizenCpfPhoneResponse400 = {
   status: 400
 }
 
+export type putCitizenCpfPhoneResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
 export type putCitizenCpfPhoneResponseComposite =
   | putCitizenCpfPhoneResponse200
   | putCitizenCpfPhoneResponse400
+  | putCitizenCpfPhoneResponse409
 
 export type putCitizenCpfPhoneResponse = putCitizenCpfPhoneResponseComposite & {
   headers: Headers

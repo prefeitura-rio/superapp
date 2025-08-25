@@ -36,23 +36,30 @@ export default function PhoneNumberForm() {
         return
       }
 
-      const result = await updateUserPhone(
-        parsedPhone as ModelsSelfDeclaredPhoneInput
-      )
-
-      if (result.success) {
-        router.push(
-          `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
-            parsedPhone.ddi
-          )}`
+      try {
+        const result = await updateUserPhone(
+          parsedPhone as ModelsSelfDeclaredPhoneInput
         )
-        toast.success('Token enviado')
-      } else {
-        const errorMessage =
-          result.error === 'No change: phone matches current data'
-            ? 'Esse já é o seu número'
-            : 'Erro ao atualizar número'
-        toast.error(errorMessage)
+
+        if (result.success) {
+          router.push(
+            `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
+              parsedPhone.ddi
+            )}`
+          )
+          toast.success('Token enviado')
+        } else {
+          // Handle specific error statuses
+          if (result.status === 409) {
+            toast.error('Número já cadastrado')
+          } else {
+            // For other API errors, redirect to session expired
+            toast.error('Oops! Houve um erro')
+          }
+        }
+      } catch (error: any) {
+        // For unexpected errors (network, etc.), redirect to session expired
+         router.push('/sessao-expirada')
       }
     })
   }

@@ -29,12 +29,6 @@ export default async function SocialAssistanceCardDetail() {
   const cras = socialAssistanceData?.cras
   const cadunico = socialAssistanceData?.cadunico
 
-  // Build dynamic links with real data
-  const phoneUrl = cras?.telefone ? `tel:${cras.telefone}` : '#'
-  const mapUrl = cras?.endereco
-    ? `https://www.google.com/maps?q=${encodeURIComponent(cras.endereco)}`
-    : '#'
-
   return (
     <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" className="max-w-xl" />

@@ -7,21 +7,38 @@ import { revalidateTag } from 'next/cache'
 
 export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
   const user = await getUserInfoFromToken()
+  
   if (!user.cpf) {
-    return { success: false, error: 'Usuário não autenticado' }
+    throw new Error('Usuário não autenticado')
   }
+  
   try {
     const response = await putCitizenCpfPhone(user.cpf, data)
-    if (response.status === 200) {
-      revalidateTag(`user-info-${user.cpf}`)
-      return { success: true }
+    
+    // Check if the response indicates an error
+    if (response.status !== 200) {
+      const errorData = response.data as HandlersErrorResponse
+      // Return error with status so the component can handle it appropriately
+      return {
+        success: false,
+        error: errorData?.error || 'Erro ao atualizar número',
+        status: response.status
+      }
     }
-    return {
-      success: false,
-      error: response.data?.error || 'Erro ao atualizar número',
-    }
+    
+    revalidateTag(`user-info-${user.cpf}`)
+    return { success: true, data: response.data }
   } catch (error: any) {
-    const err = error as HandlersErrorResponse
-    return { success: false, error: err?.error || 'Erro desconhecido' }
+    // If it's an API error response, return it with error
+    if (error?.status && error?.data) {
+      const err = error as HandlersErrorResponse
+      return {
+        success: false,
+        error: err?.error || 'Erro ao atualizar número',
+      }
+    }
+    
+    // For other errors (network, etc.), throw as well
+    throw error
   }
 }

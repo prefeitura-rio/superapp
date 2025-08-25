@@ -213,20 +213,13 @@ export default function AddressForm() {
     // Extract number from address
     const numero = extractNumberFromAddress(item.main_text)
 
-    console.log(
-      'Address selected:',
-      item.main_text,
-      'Number extracted:',
-      numero
-    )
-
     // Lookup CEP if we have a number
     let cep = ''
     if (numero) {
       console.log('Looking up CEP for number:', numero)
       const foundCep = await lookupCep(item.place_id, numero, item)
       if (foundCep) {
-        console.log('Found CEP:', foundCep)
+        // console.log('Found CEP:', foundCep)
         cep = foundCep
       } else {
         console.log('No CEP found for number:', numero)
@@ -286,9 +279,7 @@ export default function AddressForm() {
     try {
       const result = await updateAddress(addressData)
 
-      if (result.error) {
-        console.error(result.error)
-      } else {
+      if (result.success) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -297,8 +288,9 @@ export default function AddressForm() {
         setDrawerOpen(false)
         setFeedbackDrawerOpen(true)
       }
-    } catch (error) {
-      console.error('Ocorreu um erro ao atualizar o endereço')
+    } catch (error: any) {
+      // Redirect to session expired page on any error
+      router.push('/sessao-expirada')
     }
   }
 

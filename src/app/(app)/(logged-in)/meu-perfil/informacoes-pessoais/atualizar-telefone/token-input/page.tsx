@@ -31,29 +31,44 @@ export default function TokenInputForm() {
 
   const hasAutoSubmitted = useRef(false)
 
-  async function handleSave() {
+ async function handleSave() {
     // Close keyboard when submitting
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
     }
 
     startTransition(async () => {
-      const result = await validateUserPhoneToken({
-        code: token,
-        ddd,
-        ddi,
-        valor,
-      } as ModelsPhoneVerificationValidateRequest)
-      if (result.success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.7 },
-        })
-        setDrawerOpen(true)
-      } else {
-        toast.error('Token inválido ou expirado.')
-        setError('Token inválido ou expirado.')
+      try {
+        const result = await validateUserPhoneToken({
+          code: token,
+          ddd,
+          ddi,
+          valor,
+        } as ModelsPhoneVerificationValidateRequest)
+        
+        if (result.success) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.7 },
+          })
+          setDrawerOpen(true)
+          setError(null)
+        } else {
+          // Handle specific error statuses
+          if (result.error === "Invalid or expired verification code") {
+            toast.error('Token inválido ou expirado')
+            setError('Token inválido ou expirado.')
+          } else {
+            // For other API errors, show toast
+             toast.error('Oops! Houve um erro')
+             
+          }
+        }
+      } catch (error: any) {
+        // For unexpected errors (network, etc.), redirect to session expired
+       router.push('/sessao-expirada')
+
       }
       setToken('')
     })
