@@ -21,12 +21,12 @@ export default function CoursesHeader() {
         </button>
 
         <div className="flex items-center space-x-2">
-          <Link href="courses/search" className="rounded-full bg-card p-4">
+          <Link href="cursos/busca" className="rounded-full bg-card p-4">
             <Search className="h-5 w-5 text-foreground" />
             <span className="sr-only">Search</span>
           </Link>
 
-          <Link href="courses/options" className="rounded-full bg-card p-4">
+          <Link href="cursos/opcoes" className="rounded-full bg-card p-4">
             <ListFilter className="h-5 w-5 text-foreground" />
             <span className="sr-only">Options</span>
           </Link>

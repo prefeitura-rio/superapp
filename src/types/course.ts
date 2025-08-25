@@ -1,5 +1,5 @@
 export interface Course {
-  id: number
+  id: string
   title: string
   status: string
   date: string
@@ -12,4 +12,5 @@ export interface Course {
   spots?: number
   description?: string
   requirements?: string[]
+  imageUrl?: string
 }
