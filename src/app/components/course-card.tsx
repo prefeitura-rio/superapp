@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 interface CourseCardProps {
-  id: number
+  id: string
   title: string
   workload: string
   modality: string

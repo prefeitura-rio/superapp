@@ -18,7 +18,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 interface Course {
-  id: number
+  id: string
   title: string
   status: string
   date: string

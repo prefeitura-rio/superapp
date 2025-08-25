@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { useRef } from 'react'
 
 interface Course {
-  id: number
+  id: string
   name: string
   institution: string
   location: string
