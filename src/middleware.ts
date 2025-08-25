@@ -46,7 +46,43 @@ function isJwtExpired(token: string): boolean {
   }
 }
 
-export function middleware(request: NextRequest) {
+async function refreshAccessToken(refreshToken: string): Promise<{
+  success: boolean
+  accessToken?: string
+  newRefreshToken?: string
+  error?: string
+}> {
+  try {
+    const tokenUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/token`
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID!,
+      client_secret: process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET!,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    })
+
+    if (!response.ok) {
+      return { success: false, error: 'Failed to refresh token' }
+    }
+
+    const data = await response.json()
+    return {
+      success: true,
+      accessToken: data.access_token,
+      newRefreshToken: data.refresh_token,
+    }
+  } catch (error) {
+    return { success: false, error: 'Network error during token refresh' }
+  }
+}
+
+export async function middleware(request: NextRequest) {
   // Generate nonce for CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
@@ -93,6 +129,7 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
   const authToken = request.cookies.get('access_token')
+  const refreshToken = request.cookies.get('refresh_token')
 
   // Set up request headers with nonce and CSP
   const requestHeaders = new Headers(request.headers)
@@ -154,32 +191,64 @@ export function middleware(request: NextRequest) {
     return response
   }
 
+  // Helper function to handle expired token scenarios
+  async function handleExpiredToken(): Promise<NextResponse> {
+    // Try to refresh the token if we have a refresh token
+    if (refreshToken) {
+      const refreshResult = await refreshAccessToken(refreshToken.value)
+      
+      if (refreshResult.success && refreshResult.accessToken) {
+        // Token refresh successful, create response with new tokens
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        
+        // Set new tokens in cookies
+        response.cookies.set('access_token', refreshResult.accessToken, {
+          httpOnly: true,
+          path: '/',
+        })
+        
+        if (refreshResult.newRefreshToken) {
+          response.cookies.set('refresh_token', refreshResult.newRefreshToken, {
+            httpOnly: true,
+            path: '/',
+          })
+        }
+        
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
+      }
+    }
+    
+    // Token refresh failed or no refresh token, redirect to session expired
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
+    const response = NextResponse.redirect(redirectUrl)
+    response.headers.set(
+      'Content-Security-Policy',
+      contentSecurityPolicyHeaderValue
+    )
+    return response
+  }
+
   // logged-in-out pages (home, courses and jobs)
   if (authToken && publicRoute && path === '/') {
-    // Checar se o JWT está EXPIRADO
+    // Check if JWT is expired
     if (isJwtExpired(authToken.value)) {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
-      const response = NextResponse.redirect(redirectUrl)
-      response.headers.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
-      return response
+      return await handleExpiredToken()
     }
   }
 
   if (authToken && !publicRoute) {
-    // Checar se o JWT está EXPIRADO
+    // Check if JWT is expired
     if (isJwtExpired(authToken.value)) {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
-      const response = NextResponse.redirect(redirectUrl)
-      response.headers.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
-      return response
+      return await handleExpiredToken()
     }
 
     const response = NextResponse.next({
