@@ -38,7 +38,7 @@ export default function HeaderUserLink({
       className="flex items-center space-x-3"
       onClick={handleClick}
     >
-      <div className="rounded-full bg-card w-9 h-9 flex items-center justify-center overflow-hidden">
+      <div className="rounded-full bg-card w-10 h-10 flex items-center justify-center overflow-hidden">
         {isLoggedIn && userAvatarUrl ? (
           <Image
             src={userAvatarUrl}

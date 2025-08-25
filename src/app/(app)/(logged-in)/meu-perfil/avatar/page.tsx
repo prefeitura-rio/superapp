@@ -1,6 +1,6 @@
 import { SecondaryHeader } from "@/app/components/secondary-header";
-import { getV1Avatars, getV1CitizenCpfAvatar } from "@/http/avatars/avatars";
 import type { ModelsAvatarsListResponse } from "@/http/models";
+import { getDalAvatars, getDalCitizenCpfAvatar } from "@/lib/dal";
 import { getUserInfoFromToken } from "@/lib/user-info";
 import { AvatarSelector } from "./components/avatar-selector";
 
@@ -15,8 +15,8 @@ export default async function AvatarPage() {
   let error = null;
 
   try {
-    // Fetch available avatars
-    const avatarsResponse = await getV1Avatars();
+    // Fetch available avatars using DAL
+    const avatarsResponse = await getDalAvatars();
     if (avatarsResponse.status === 200) {
       avatars = avatarsResponse.data;
     } else {
@@ -26,7 +26,7 @@ export default async function AvatarPage() {
     // Fetch user's current avatar if avatars were loaded successfully
     if (!error && userInfo.cpf) {
       try {
-        const userAvatarResponse = await getV1CitizenCpfAvatar(userInfo.cpf);
+        const userAvatarResponse = await getDalCitizenCpfAvatar(userInfo.cpf);
         if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar_id) {
           currentUserAvatar = userAvatarResponse.data.avatar_id;
         }

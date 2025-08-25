@@ -16,9 +16,9 @@ import CarteiraSectionSwipe, {
   CarteiraSectionSwipeSkeleton,
 } from '@/app/components/wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
-import { getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
 import { fetchCategories } from '@/lib/categories'
 import {
+  getDalCitizenCpfAvatar,
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
   getDalHealthUnitInfo,
@@ -44,9 +44,9 @@ export default async function Home() {
   let userAvatarName: string | null = null
 
   if (isLoggedIn) {
-    // Fetch user's current avatar
+    // Fetch user's current avatar using DAL
     try {
-      const userAvatarResponse = await getV1CitizenCpfAvatar(userAuthInfo.cpf);
+      const userAvatarResponse = await getDalCitizenCpfAvatar(userAuthInfo.cpf);
      if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar) {
         userAvatarUrl = userAvatarResponse.data.avatar.url || null;
         userAvatarName = userAvatarResponse.data.avatar.name || null;

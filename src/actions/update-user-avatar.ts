@@ -1,8 +1,8 @@
 "use server";
 
 import { putV1CitizenCpfAvatar } from "@/http/avatars/avatars";
+import { revalidateDalCitizenCpfAvatar } from "@/lib/dal";
 import { getUserInfoFromToken } from "@/lib/user-info";
-import { revalidatePath } from "next/cache";
 
 export async function updateUserAvatar(avatarId: string) {
   try {
@@ -17,10 +17,8 @@ export async function updateUserAvatar(avatarId: string) {
     });
 
     if (response.status === 200) {
-      // Revalidate the profile page to show the new avatar
-      revalidatePath("/meu-perfil");
-      revalidatePath("/");
-      revalidatePath("/meu-perfil/avatar");
+      // Revalidate the user's avatar cache using DAL
+      await revalidateDalCitizenCpfAvatar(userInfo.cpf);
       return { success: true, data: response.data };
     } else {
       return { success: false, error: "Erro ao atualizar avatar" };

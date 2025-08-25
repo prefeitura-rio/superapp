@@ -6,7 +6,7 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { UserIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
 import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
-import { getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
+import { getDalCitizenCpfAvatar } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { formatUserName } from '@/lib/utils'
@@ -21,7 +21,7 @@ export default async function ProfilePage() {
   let userAvatarName: string | null = null;
 
   try {
-      const userAvatarResponse = await getV1CitizenCpfAvatar(userInfo.cpf);
+      const userAvatarResponse = await getDalCitizenCpfAvatar(userInfo.cpf);
      if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar) {
         userAvatarUrl = userAvatarResponse.data.avatar.url || null;
         userAvatarName = userAvatarResponse.data.avatar.name || null;
