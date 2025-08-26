@@ -195,8 +195,9 @@ export default async function HealthCardDetail() {
 
   // Build dynamic links with real data
   const phoneUrl = phone ? `tel:${phone}` : '#'
-  const whatsappUrl = healthData?.equipe_saude_familia?.telefone
-    ? `https://wa.me/${healthData?.equipe_saude_familia?.telefone.replace(/\D/g, '')}`
+  const whatsappNumber = healthData?.equipe_saude_familia?.telefone
+  const whatsappUrl = whatsappNumber
+    ? `https://wa.me/55${whatsappNumber.replace(/\D/g, '')}`
     : '#'
   const mapUrl =
     address && address !== 'Endereço não disponível'
