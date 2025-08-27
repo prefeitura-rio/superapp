@@ -8,8 +8,8 @@ import type { SwiperRef } from 'swiper/react'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
+import { useRouter } from 'next/navigation'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
-
 import { ConfirmUserDataSlide } from './slides/confirm-user-data-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
@@ -47,6 +47,7 @@ export function ConfirmInscriptionClient({
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const showUpdateButton = currentIndex === 0
+  const router = useRouter()
 
   const { isBelowBreakpoint } = useViewportHeight(648)
 
@@ -115,7 +116,7 @@ export function ConfirmInscriptionClient({
       return
     }
     if (currentIndex === 0) {
-      window.location.href = HOME_COURSES
+      router.back()
       return
     }
     swiperRef.current?.swiper?.slidePrev()

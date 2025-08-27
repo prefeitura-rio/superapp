@@ -1,6 +1,7 @@
 'use client'
 
 import coursesApi from '@/actions/courses'
+import { createCourseSlug } from '@/actions/courses/utils-mock'
 import { providerIcons } from '@/app/components/utils'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { BookmarkIcon } from '@/assets/icons/bookmark-icon'
@@ -37,6 +38,9 @@ export function CourseDetails({ course }: { course: Course }) {
   const [isFavorite, setIsFavorite] = useState(false)
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  const courseSlug = createCourseSlug(course.id, course.title)
+  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
@@ -157,7 +161,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
         <div className="p-4 w-full max-w-4xl">
           <Link
-            href="/servicos/cursos/confirmar-informacoes"
+            href={courseSubscriptionHref}
             className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
           >
             Inscreva-se
@@ -198,7 +202,7 @@ export function CourseDetails({ course }: { course: Course }) {
 
         <div className="p-4 w-full max-w-4xl">
           <Link
-            href="/servicos/cursos/confirmar-informacoes"
+            href={courseSubscriptionHref}
             className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
           >
             Inscreva-se
