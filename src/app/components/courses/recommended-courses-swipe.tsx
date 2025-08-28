@@ -1,20 +1,18 @@
 'use client'
 
-import { providerIcons } from '@/app/components/utils'
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
-import type { Course } from '@/types/course'
+import { ModelsCurso } from '@/http-courses/models'
 import { CourseCard } from './courses-card'
 
 interface RecommendedCoursesSwipeProps {
-  courses: Course[]
+  courses: ModelsCurso[]
 }
 
 export function RecommendedCoursesSwipe({
   courses,
 }: RecommendedCoursesSwipeProps) {
-  const recommended = courses.filter(course => course.recommended)
 
-  if (!recommended.length) return null
+  if (!courses.length) return null
 
   return (
     <div className="px-4 pb-6">
@@ -27,10 +25,10 @@ export function RecommendedCoursesSwipe({
         arrowsVerticalPosition="top-[30%]"
       >
         {Array.from(
-          { length: Math.ceil(recommended.length / 4) },
+          { length: Math.ceil(courses.length / 4) },
           (_, slideIndex) => {
             const startIndex = slideIndex * 4
-            const slideCourses = recommended.slice(startIndex, startIndex + 4)
+            const slideCourses = courses.slice(startIndex, startIndex + 4)
 
             return (
               <div
@@ -42,11 +40,11 @@ export function RecommendedCoursesSwipe({
                     key={course.id}
                     courseId={course.id}
                     title={course.title}
-                    modality={course.modality}
+                    modality={course.modalidade}
                     workload={course.workload}
-                    providerIcon={providerIcons[course.provider]}
-                    provider={course.provider}
-                    imageUrl={course.imageUrl}
+                    institutionaLogo={course.institutional_logo}
+                    provider={course.organization}
+                    coverImage={course.cover_image}
                   />
                 ))}
               </div>

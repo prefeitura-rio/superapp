@@ -1,33 +1,15 @@
 'use client'
 
+import { ModelsCurso } from '@/http-courses/models'
 import { CourseCard } from './courses/courses-card'
-import { providerIcons } from './utils'
-
-interface Course {
-  id: string
-  title: string
-  status: string
-  date: string
-  provider: string
-  workload: string
-  modality: string
-  type: string
-  recommended: boolean
-  recentlyAdded: boolean
-  spots?: number
-  description?: string
-  requirements?: string[]
-  imageUrl: string
-}
 
 interface RecentlyAddedCoursesProps {
-  courses: Course[]
+  courses: ModelsCurso[]
 }
 
 export default function RecentlyAddedCourses({
   courses,
 }: RecentlyAddedCoursesProps) {
-  const recentCourses = courses.filter(course => course.recentlyAdded)
 
   return (
     <>
@@ -36,16 +18,16 @@ export default function RecentlyAddedCourses({
       </h3>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-4 px-4 w-max">
-          {recentCourses.map(course => (
+          {courses.map(course => (
             <CourseCard
               courseId={course.id}
               key={course.id}
               title={course.title}
-              modality={course.modality}
+              modality={course.modalidade}
               workload={course.workload}
-              providerIcon={providerIcons[course.provider]}
-              provider={course.provider}
-              imageUrl={course.imageUrl}
+              institutionaLogo={course.institutional_logo}
+              provider={course.organization}
+              coverImage={course.cover_image}
             />
           ))}
         </div>

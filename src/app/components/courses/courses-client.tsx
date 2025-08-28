@@ -5,6 +5,7 @@ import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import SearchPlaceholder from '@/app/components/search-placeholder'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
+import { ModelsCurso } from '@/http-courses/models'
 import Link from 'next/link'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
@@ -19,11 +20,7 @@ const FILTERS = [
   { label: 'Saúde', value: 'saude', icon: '🏥' },
 ]
 
-interface CoursePageClientProps {
-  courses: any[]
-}
-
-export default function CoursePageClient({ courses }: CoursePageClientProps) {
+export default function CoursePageClient({ courses }: { courses: ModelsCurso[] }) {
   return (
     <div className="min-h-lvh">
       <CoursesHeader />

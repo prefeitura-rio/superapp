@@ -1,17 +1,16 @@
 'use client'
 
-import { createCourseSlug } from '@/actions/courses/utils-mock'
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface CourseCardProps {
-  courseId: string
-  title: string
-  modality: string
-  workload: string
-  provider: string
-  providerIcon?: string
-  imageUrl?: string
+  courseId?: number;
+  title?: string
+  modality?: string
+  workload?: string
+  provider?: string
+  institutionaLogo?: string
+  coverImage?: string
 }
 
 export function CourseCard({
@@ -20,20 +19,19 @@ export function CourseCard({
   modality,
   workload,
   provider,
-  providerIcon,
-  imageUrl,
+  institutionaLogo,
+  coverImage,
 }: CourseCardProps) {
-  const slug = createCourseSlug(courseId, title)
 
   return (
     <Link
-      href={`/servicos/cursos/${slug}`}
+      href={`/servicos/cursos/${courseId}`}
       className="w-[197px] rounded-xl overflow-hidden bg-background cursor-pointer group block"
     >
       <div className="relative w-full h-[120px] overflow-hidden rounded-xl">
         <Image
-          src={imageUrl || ''}
-          alt={title}
+          src={coverImage || ''}
+          alt="Imagem de capa do curso"
           fill
           className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
         />
@@ -41,13 +39,12 @@ export function CourseCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
-          {providerIcon ? (
-            <Image src={providerIcon} alt="provider" width={15} height={15} />
-          ) : (
+          {institutionaLogo ? <Image src={institutionaLogo} alt="Logo da instituição" width={15} height={15} /> :
             <span className="text-[10px] font-semibold text-foreground uppercase">
-              {provider.charAt(0)}
+              {title?.charAt(0)}
             </span>
-          )}
+          
+          }
         </div>
       </div>
 
