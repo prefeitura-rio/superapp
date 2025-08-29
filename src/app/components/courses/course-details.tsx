@@ -1,22 +1,109 @@
 'use client'
 
+import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
 import { ChevronLeftIcon } from '@/assets/icons'
+import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-export function CourseDetails({ course }: { course: any }) {
+interface UserEnrollment {
+  id: string
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  course_id: number
+}
+
+export function CourseDetails({ 
+  course, 
+  userEnrollment 
+}: { 
+  course: any
+  userEnrollment: UserEnrollment | null
+}) {
   const provider = course.organization
   const cover_image = course.cover_image
   const institutional_logo = course.institutional_logo
   const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
+
+  const handleCancelEnrollment = async () => {
+    if (!userEnrollment || isDeleting) return
+    
+    setIsDeleting(true)
+    setError(null)
+    
+    try {
+      const result = await deleteEnrollment(course.id, userEnrollment.id)
+      if (result.success) {
+        // Refresh the page to show the updated state
+        router.refresh()
+      } else {
+        setError(result.error || 'Falha ao cancelar inscrição')
+        console.error('Failed to cancel enrollment:', result.error)
+      }
+    } catch (error) {
+      const errorMessage = 'Erro ao cancelar inscrição. Tente novamente.'
+      setError(errorMessage)
+      console.error('Error cancelling enrollment:', error)
+    } finally {
+      setIsDeleting(false)
+      setShowConfirmation(false)
+    }
+  }
+
+  const isEnrolled = userEnrollment && ['pending', 'approved', 'rejected', 'cancelled'].includes(userEnrollment.status)
 
   return (
     <div className="flex flex-col items-center pb-20">
       <div className="w-full max-w-3xl">
+        {/* Error message */}
+        {error && (
+          <div className="p-4 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-destructive text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Confirmation Bottom Sheet */}
+        <BottomSheet
+          open={showConfirmation}
+          onOpenChange={setShowConfirmation}
+          title="Confirmar cancelamento"
+          headerClassName="text-center p-0 mb-6"
+        >
+          <div className="text-center p-4">
+            <h2 className="text-md mb-4">Confirmar cancelamento</h2>
+            <p className="text-muted-foreground mb-6">
+              Tem certeza que deseja cancelar sua inscrição neste curso? Esta ação não pode ser desfeita.
+            </p>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-4">
+            <CustomButton
+              variant="primary"
+              size="lg"
+              className="py-6 w-full"
+              onClick={() => setShowConfirmation(false)}
+            >
+              Cancelar
+            </CustomButton>
+            <CustomButton
+              variant="secondary"
+              size="lg"
+              className="py-6 w-full"
+              onClick={handleCancelEnrollment}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Cancelando...' : 'Confirmar'}
+            </CustomButton>
+          </div>
+        </BottomSheet>
+
         <div className="h-[320px] md:h-[380px] w-full relative">
           <div className="flex justify-start">
             <IconButton
@@ -83,12 +170,22 @@ export function CourseDetails({ course }: { course: any }) {
         </div>
 
         <div className="p-4 w-full max-w-4xl">
-          <Link
-            href={courseSubscriptionHref}
-            className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
-          >
-            Inscreva-se
-          </Link>
+          {isEnrolled ? (
+            <button
+              onClick={() => setShowConfirmation(true)}
+              disabled={isDeleting}
+              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancelar inscrição
+            </button>
+          ) : (
+            <Link
+              href={courseSubscriptionHref}
+              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
+            >
+              Inscreva-se
+            </Link>
+          )}
         </div>
 
         <div className="p-4 text-muted-foreground text-sm leading-relaxed">
@@ -126,12 +223,22 @@ export function CourseDetails({ course }: { course: any }) {
         </div>
 
         <div className="p-4 w-full max-w-4xl">
-          <Link
-            href={courseSubscriptionHref}
-            className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
-          >
-            Inscreva-se
-          </Link>
+          {isEnrolled ? (
+            <button
+              onClick={() => setShowConfirmation(true)}
+              disabled={isDeleting}
+              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancelar inscrição
+            </button>
+          ) : (
+            <Link
+              href={courseSubscriptionHref}
+              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
+            >
+              Inscreva-se
+            </Link>
+          )}
         </div>
       </div>
     </div>
