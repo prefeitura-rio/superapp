@@ -21,6 +21,7 @@ export default function ProfilePage() {
             label="Favoritos"
             href="/servicos/cursos/meus-cursos?favorites=true"
           />
+          <MenuItem label="Certificados" href="/servicos/cursos/certificados" />
           <MenuItem label="FAQ" href="/servicos/cursos/faq" />
         </nav>
       </div>

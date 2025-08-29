@@ -1,4 +1,9 @@
-import { COURSES, MY_COURSES, NEARBY_UNITS } from '@/mocks/mock-courses'
+import {
+  COURSES,
+  MY_CERTIFICATES,
+  MY_COURSES,
+  NEARBY_UNITS,
+} from '@/mocks/mock-courses'
 import {
   FAVORITES_KEY,
   getFavoritesFromStorage,
@@ -74,13 +79,18 @@ const getCoursesWithFilters = async (filters: {
 
 /*
  * ================================================
- * MEUS CURSOS - GESTÃO PESSOAL
+ * MEUS CURSOS - CERTIFICADOS - GESTÃO PESSOAL
  * ================================================
  */
 
 const getMyCourses = async (): Promise<any> => {
   await simulateDelay(1000)
   return MY_COURSES
+}
+
+const getCertifiedCourses = async (): Promise<any> => {
+  await simulateDelay(1000)
+  return MY_CERTIFICATES
 }
 
 /*
@@ -200,6 +210,7 @@ export default {
 
   // Meus cursos
   getMyCourses,
+  getCertifiedCourses,
 
   // Favoritos
   getAllFavoritesCourses,
