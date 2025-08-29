@@ -18,10 +18,10 @@ import { UserDescriptionSlide } from './slides/user-description-slide'
 import coursesApi from '@/actions/courses'
 
 import {
-  type InscriptionFormData,
-  type NearbyUnit,
   type CourseUserInfo,
+  type InscriptionFormData,
   inscriptionSchema,
+  type NearbyUnit,
 } from '../types'
 
 interface ConfirmInscriptionClientProps {
@@ -31,6 +31,7 @@ interface ConfirmInscriptionClientProps {
     name: string
   }
   nearbyUnits: NearbyUnit[]
+  courseInfo: any // Add courseInfo prop
   courseId: string
 }
 
@@ -44,8 +45,10 @@ export function ConfirmInscriptionClient({
   userInfo,
   userAuthInfo,
   nearbyUnits,
+  courseInfo,
   courseId,
 }: ConfirmInscriptionClientProps) {
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)

@@ -3,16 +3,32 @@ import { z } from 'zod'
 export interface CourseUserInfo {
   cpf: string
   name: string
-  email: string
-  phone: string
+  email: {
+    principal?: {
+      valor?: string
+    }
+  }
+  phone: {
+    principal?: {
+      ddi?: string
+      ddd?: string
+      valor?: string
+    }
+  }
 }
 
 export interface NearbyUnit {
   id: string
-  name: string
+  curso_id: number
   address: string
   neighborhood: string
-  city: string
+  vacancies: number
+  class_start_date: string
+  class_end_date: string
+  class_time: string
+  class_days: string
+  created_at: string
+  updated_at: string
 }
 
 export const inscriptionSchema = z.object({

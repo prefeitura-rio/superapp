@@ -1,6 +1,7 @@
 'use client'
 
 import { formatCpf } from '@/lib/format-cpf'
+import { formatPhone } from '@/lib/format-phone'
 import { formatTitleCase } from '@/lib/utils'
 import type { CourseUserInfo } from '../../types'
 
@@ -40,7 +41,17 @@ export default function ConfirmUserDataSlide({ userInfo, userAuthInfo }: Confirm
             Celular
           </p>
           <p className="text-foreground font-normal">
-            {userInfo?.phone || 'Informação indisponível'}
+            {userInfo?.phone?.principal?.ddi &&
+             userInfo?.phone?.principal?.ddd &&
+             userInfo?.phone?.principal?.valor
+              ? formatPhone(
+                  userInfo.phone.principal.ddi,
+                  userInfo.phone.principal.ddd,
+                  userInfo.phone.principal.valor
+                )
+              : userInfo?.phone?.principal
+                ? 'Faltando informação'
+                : 'Informação indisponível'}
           </p>
         </div>
         <div className="py-1">
@@ -48,7 +59,9 @@ export default function ConfirmUserDataSlide({ userInfo, userAuthInfo }: Confirm
             E-mail
           </p>
           <p className="text-foreground font-normal">
-            {userInfo?.email || 'Informação indisponível'}
+            {userInfo?.email?.principal
+              ? userInfo.email.principal.valor
+              : 'Informação indisponível'}
           </p>
         </div>
       </div>
