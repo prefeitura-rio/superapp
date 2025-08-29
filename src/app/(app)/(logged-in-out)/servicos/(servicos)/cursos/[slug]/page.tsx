@@ -10,7 +10,6 @@ export default async function CoursePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug: courseSlug } = await params
-  
 
   try {
     const response = await getApiV1CoursesCourseId(parseInt(courseSlug))

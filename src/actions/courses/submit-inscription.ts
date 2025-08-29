@@ -89,7 +89,7 @@ export async function submitCourseInscription(data: SubmitInscriptionData): Prom
       console.error(`API returned status ${response.status}`)
       return {
         success: false,
-        error: `Você já está inscrito(a) no curso`
+        error: `Erro ao inscrever-se no curso`
       }
     }
   } catch (error) {
