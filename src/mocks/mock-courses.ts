@@ -330,3 +330,90 @@ export const NEARBY_UNITS = [
     city: 'Rio de Janeiro',
   },
 ]
+
+export const MY_CERTIFICATES = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440001',
+    title:
+      'Alimentação de Crianças Menores de Dois Anos: Perspectivas e Desafios',
+    description:
+      'Curso sobre nutrição infantil, desenvolvimento alimentar e práticas recomendadas para crianças de 0 a 2 anos.',
+    requirements: ['Profissionais da área da saúde', 'Cuidadores certificados'],
+    spots: 25,
+    status: 'Certificado disponível',
+    date: '15.03.2024',
+    provider: 'Google',
+    workload: '30',
+    modality: 'online',
+    type: 'Saúde',
+    certificate: true,
+    period: 'livre',
+    recommended: true,
+    recentlyAdded: false,
+    imageUrl:
+      'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1466&auto=format&fit=crop&q=80',
+  },
+  {
+    id: '6ba7b810-9dad-11d1-80b4-00c04fd430c9',
+    title: 'Manuseio de Smartphone para 3ª Idade',
+    description:
+      'Capacitação para uso básico de smartphones, aplicativos essenciais e segurança digital para idosos.',
+    requirements: ['Idade mínima 60 anos', 'Possuir smartphone'],
+    spots: 20,
+    status: 'Certificado disponível',
+    date: '28.02.2024',
+    provider: 'Prefeitura',
+    workload: '25',
+    modality: 'presencial',
+    type: 'Tecnologia',
+    certificate: true,
+    period: 'tarde',
+    recommended: true,
+    recentlyAdded: false,
+    imageUrl:
+      'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=1466&auto=format&fit=crop&q=80',
+  },
+  {
+    id: '6ba7b811-9dad-11d1-80b4-00c04fd430ca',
+    title: 'Aspectos Legais na Produção de Bebidas',
+    description:
+      'Regulamentações, licenças e aspectos jurídicos para produção artesanal e comercial de bebidas.',
+    requirements: ['Ensino médio completo', 'Interesse em empreendedorismo'],
+    spots: 30,
+    status: 'Certificado indisponível',
+    date: '10.01.2024',
+    provider: 'SENAI',
+    workload: '50',
+    modality: 'online',
+    type: 'Jurídico',
+    certificate: false,
+    period: 'noite',
+    recommended: false,
+    recentlyAdded: false,
+    imageUrl:
+      'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=1466&auto=format&fit=crop&q=80',
+  },
+  {
+    id: '6ba7b812-9dad-11d1-80b4-00c04fd430cb',
+    title: 'Marketing Digital para Pequenos Negócios',
+    description:
+      'Estratégias de marketing digital, redes sociais e vendas online para microempreendedores.',
+    requirements: [
+      'Possuir negócio próprio',
+      'Conhecimentos básicos de internet',
+    ],
+    spots: 35,
+    status: 'Certificado disponível',
+    date: '05.04.2024',
+    provider: 'Google',
+    workload: '40',
+    modality: 'híbrido',
+    type: 'Negócios',
+    certificate: true,
+    period: 'manhã',
+    recommended: true,
+    recentlyAdded: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1466&auto=format&fit=crop&q=80',
+  },
+]
