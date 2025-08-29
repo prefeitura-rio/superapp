@@ -1,6 +1,7 @@
 // Data Access Layer (DAL)
 // This file is used to cache the data fetching functions
 
+import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import {
   getCitizenCpf,
   getCitizenCpfFirstlogin,
@@ -61,6 +62,21 @@ export async function getDalCitizenCpfMaintenanceRequest(
   })
 }
 
+// Course enrollment caching (user-specific data)
+// 5-minute cache since enrollment status can change frequently
+export async function getDalCourseEnrollment(courseId: number, cpf: string) {
+  return await getApiV1CoursesCourseIdEnrollments(courseId, {
+    search: cpf,
+    limit: 1
+  }, {
+    cache: 'force-cache',
+    next: {
+      revalidate: 600, // 10 minutes - optimal for enrollment status changes
+      tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+    },
+  })
+}
+
 // Health unit info caching (shared across all users)
 // 1 hour cache since health unit info doesn't change frequently
 export const getDalHealthUnitInfo = unstable_cache(
@@ -117,4 +133,12 @@ export async function revalidateDalCitizenCpfFirstlogin(cpf: string) {
   // to invalidate cache when first login status changes
   // Example: after user completes onboarding
   revalidateTag(`firstlogin-${cpf}`)
+}
+
+// Helper function to revalidate course enrollment when needed
+export async function revalidateDalCourseEnrollment(courseId: number, cpf: string) {
+  // This would be called from a Server Action or API route
+  // to invalidate cache when enrollment status changes
+  // Example: after user cancels or enrolls in a course
+  revalidateTag(`course-enrollment-${courseId}-${cpf}`)
 }

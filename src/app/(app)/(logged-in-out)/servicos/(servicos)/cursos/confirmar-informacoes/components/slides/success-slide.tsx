@@ -4,6 +4,7 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import confetti from 'canvas-confetti'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 interface SuccessSlideProps {
@@ -12,6 +13,7 @@ interface SuccessSlideProps {
 
 export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
   const [visible, setVisible] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const timerShow = setTimeout(() => setVisible(true), 50)
@@ -29,6 +31,10 @@ export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
       clearTimeout(timerConfetti)
     }
   }, [])
+
+  const handleFinish = () => {
+    router.back()
+  }
 
   return (
     <div
@@ -54,7 +60,7 @@ export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
       </div>
 
       <CustomButton
-        onClick={onFinish}
+        onClick={handleFinish}
         className="w-full py-3 bg-primary text-background rounded-full font-medium hover:bg-primary/90"
       >
         Finalizar

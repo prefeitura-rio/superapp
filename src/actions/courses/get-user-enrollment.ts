@@ -1,6 +1,6 @@
 'use server'
 
-import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
+import { getDalCourseEnrollment } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function getUserEnrollment(courseId: number) {
@@ -14,10 +14,7 @@ export async function getUserEnrollment(courseId: number) {
 
     console.log('Fetching enrollment for user:', currentUser.cpf, 'course:', courseId)
 
-    const response = await getApiV1CoursesCourseIdEnrollments(courseId, {
-      search: currentUser.cpf,
-      limit: 1
-    })
+    const response = await getDalCourseEnrollment(courseId, currentUser.cpf)
 
     console.log('API Response status:', response.status)
 

@@ -42,8 +42,6 @@ export function CourseDetails({
     try {
       const result = await deleteEnrollment(course.id, userEnrollment.id)
       if (result.success) {
-        // Refresh the page to show the updated state
-        router.refresh()
       } else {
         setError(result.error || 'Falha ao cancelar inscrição')
         console.error('Failed to cancel enrollment:', result.error)

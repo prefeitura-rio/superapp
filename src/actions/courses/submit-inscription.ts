@@ -2,6 +2,7 @@
 
 import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes';
 import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao';
+import { revalidateDalCourseEnrollment } from '@/lib/dal';
 import { v4 as uuidv4 } from 'uuid';
 
 // Generate a UUID v4 using crypto.randomUUID()
@@ -81,6 +82,11 @@ export async function submitCourseInscription(data: SubmitInscriptionData): Prom
 
     if (response.status === 201) {
       console.log('Inscription submitted successfully:', response.data)
+      
+      // Revalidate the enrollment cache for this user and course
+      // This ensures the UI updates automatically when the user returns to the course page
+      await revalidateDalCourseEnrollment(parseInt(data.courseId), data.userInfo.cpf)
+      
       return {
         success: true,
         data: response.data
