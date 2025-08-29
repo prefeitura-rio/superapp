@@ -6,7 +6,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '../../../lib/utils'
 import { providerIcons } from '../utils'
-import loading from '@/app/(app)/(logged-in)/meu-perfil/loading'
 
 function MyCoursesSkeleton() {
   return (
@@ -42,16 +41,22 @@ function getStatusColor(status: string) {
   }
 }
 
-export function MyCoursesCard({courses}) {
+export function MyCoursesCard({courses}: {courses: any}) {
 
 
-  if (loading) {
-    return <MyCoursesSkeleton />
+  if (courses.length === 0) {
+    return (
+      <div className="overflow-hidden mt-4 px-4 flex justify-center items-center">
+        <p className="block text-lg text-muted-foreground">
+          Você ainda não possui nenhum curso.
+        </p>
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-col gap-3">
-      {courses.map(course => (
+      {courses.map((course: any) => (
         <Link
           key={course.id}
           href={`/servicos/cursos/${createCourseSlug(course.id, course.title)}`}

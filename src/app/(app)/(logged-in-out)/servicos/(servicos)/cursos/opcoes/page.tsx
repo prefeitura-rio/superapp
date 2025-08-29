@@ -17,10 +17,10 @@ export default function ProfilePage() {
             href="/servicos/cursos/meus-cursos"
             isFirst={true}
           />
-          <MenuItem
+          {/* <MenuItem
             label="Favoritos"
             href="/servicos/cursos/meus-cursos?favorites=true"
-          />
+          /> */}
           <MenuItem label="Certificados" href="/servicos/cursos/certificados" />
           <MenuItem label="FAQ" href="/servicos/cursos/faq" />
         </nav>

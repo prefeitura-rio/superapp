@@ -9,7 +9,7 @@ export default function MyCoursesPage() {
     <div className="max-w-4xl mx-auto py-6">
       <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
       <div className="relative overflow-hidden mt-16 px-4">
-        <MyCoursesCard />
+        <MyCoursesCard courses={[]} />
       </div>
     </div>
   )
