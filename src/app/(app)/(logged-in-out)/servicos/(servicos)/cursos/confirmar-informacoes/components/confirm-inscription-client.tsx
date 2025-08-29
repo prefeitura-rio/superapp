@@ -11,15 +11,16 @@ import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
+import { CustomFieldSlide } from './slides/custom-field-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
-import { UserDescriptionSlide } from './slides/user-description-slide'
 
 import coursesApi from '@/actions/courses'
 
 import {
   createInscriptionSchema,
   type CourseUserInfo,
+  type CustomField,
   type InscriptionFormData,
   type NearbyUnit,
 } from '../types'
@@ -66,11 +67,18 @@ export function ConfirmInscriptionClient({
 
   const { isBelowBreakpoint } = useViewportHeight(648)
 
+  // Extract custom fields from course info
+  const customFields: CustomField[] = (courseInfo as any)?.data?.custom_fields || []
+  
   const form = useForm<InscriptionFormData>({
-    resolver: zodResolver(createInscriptionSchema(nearbyUnits && nearbyUnits.length > 0)),
+    resolver: zodResolver(createInscriptionSchema(nearbyUnits && nearbyUnits.length > 0, customFields)),
     defaultValues: {
       unitId: nearbyUnits && nearbyUnits.length > 0 ? '' : 'no-units-available',
       description: '',
+      // Initialize custom fields with empty values
+      ...Object.fromEntries(
+        customFields.map(field => [`custom_${field.id}`, ''])
+      )
     },
   })
 
@@ -94,18 +102,35 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     }] : []),
-    {
-      id: 'user-description',
-      component: UserDescriptionSlide,
+    // Add custom field slides dynamically
+    ...customFields.map(field => ({
+      id: `custom-field-${field.id}`,
+      component: CustomFieldSlide,
       props: {
+        field,
+        fieldName: `custom_${field.id}`,
         form,
-        fieldName: 'description',
       },
       showPagination: true,
       showBackButton: true,
-    },
+    })),
+    // {
+    //   id: 'user-description',
+    //   component: UserDescriptionSlide,
+    //   props: {
+    //     form,
+    //     fieldName: 'description',
+    //   },
+    //   showPagination: true,
+    //   showBackButton: true,
+    // },
   ]
 
+  // Log the slides configuration
+  // console.log('ConfirmInscriptionClient - slides:', slides.map(slide => ({ id: slide.id, component: slide.component.name })))
+  // console.log('ConfirmInscriptionClient - slides count:', slides.length)
+  // console.log('ConfirmInscriptionClient - customFields:', customFields)
+  // console.log('ConfirmInscriptionClient - customFields count:', customFields.length)
 
   const handleNext = async () => {
     if (currentIndex === slides.length - 1) {
@@ -118,6 +143,17 @@ export function ConfirmInscriptionClient({
       if (currentSlide.id === 'select-unit' && nearbyUnits && nearbyUnits.length > 0) {
         const isValid = await form.trigger('unitId')
         if (!isValid) return
+      }
+      
+      // Validate custom fields if they are required
+      if (currentSlide.id.startsWith('custom-field-')) {
+        const fieldId = currentSlide.id.replace('custom-field-', '')
+        const field = customFields.find(f => f.id === fieldId)
+        if (field && field.required) {
+          const fieldName = `custom_${field.id}` as keyof InscriptionFormData
+          const isValid = await form.trigger(fieldName)
+          if (!isValid) return
+        }
       }
 
       swiperRef.current?.swiper?.slideNext()
@@ -151,6 +187,13 @@ export function ConfirmInscriptionClient({
           ...formData,
           // Only include unitId if there are nearby units
           ...(nearbyUnits && nearbyUnits.length > 0 ? { unitId: formData.unitId } : {}),
+          // Include custom fields data
+          customFields: customFields.map(field => ({
+            id: field.id,
+            title: field.title,
+            value: formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
+            required: field.required
+          })),
           userInfo,
           timestamp: new Date().toISOString(),
         }

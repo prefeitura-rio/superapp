@@ -31,18 +31,47 @@ export interface NearbyUnit {
   updated_at: string
 }
 
+export interface CustomField {
+  id: string
+  curso_id: number
+  title: string
+  field_type: string
+  required: boolean
+  created_at: string
+  updated_at: string
+}
+
 export const inscriptionSchema = z.object({
   unitId: z.string().min(1, 'Selecione uma unidade'),
   description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
 })
 
 // Dynamic schema that makes unitId optional when there are no nearby units
-export const createInscriptionSchema = (hasNearbyUnits: boolean) => z.object({
-  unitId: hasNearbyUnits 
-    ? z.string().min(1, 'Selecione uma unidade')
-    : z.string().optional(),
-  description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
-})
+// and includes all custom fields dynamically
+export const createInscriptionSchema = (hasNearbyUnits: boolean, customFields: CustomField[] = []) => {
+  const baseSchema = {
+    unitId: hasNearbyUnits 
+      ? z.string().min(1, 'Selecione uma unidade')
+      : z.string().optional(),
+    description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
+  }
+
+  // Add custom fields dynamically
+  const customFieldSchema: Record<string, any> = {}
+  customFields.forEach(field => {
+    const fieldKey = `custom_${field.id}`
+    if (field.required) {
+      customFieldSchema[fieldKey] = z.string().min(1, `${field.title} é obrigatório`)
+    } else {
+      customFieldSchema[fieldKey] = z.string().optional()
+    }
+  })
+
+  return z.object({
+    ...baseSchema,
+    ...customFieldSchema
+  })
+}
 
 // Use the dynamic schema type for InscriptionFormData
 export type InscriptionFormData = z.infer<ReturnType<typeof createInscriptionSchema>>
