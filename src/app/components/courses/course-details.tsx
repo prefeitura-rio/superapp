@@ -12,8 +12,6 @@ export function CourseDetails({ course }: { course: any }) {
   const institutional_logo = course.institutional_logo
   const router = useRouter()
 
-  console.log('>>>course_details', course)
-
   const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
 
   return (
