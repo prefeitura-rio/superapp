@@ -222,6 +222,8 @@ export function ConfirmInscriptionClient({
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
+  const isLastSlide = currentIndex === slides.length - 1
+  const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
     <div className="relative min-h-lvh w-full px-4 mx-auto bg-background max-w-xl text-foreground flex flex-col overflow-hidden">
@@ -284,7 +286,7 @@ export function ConfirmInscriptionClient({
             )}
 
             <CustomButton
-              onClick={handleNext}
+              onClick={isLastSlide ? goToSuccess : handleNext}
               disabled={isPending}
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
           ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
@@ -294,7 +296,7 @@ export function ConfirmInscriptionClient({
               : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
           }`}
             >
-              Continuar
+              {buttonText}
             </CustomButton>
           </div>
         </div>
