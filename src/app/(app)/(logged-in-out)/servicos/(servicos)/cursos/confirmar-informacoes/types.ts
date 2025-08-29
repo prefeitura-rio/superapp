@@ -36,7 +36,16 @@ export const inscriptionSchema = z.object({
   description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
 })
 
-export type InscriptionFormData = z.infer<typeof inscriptionSchema>
+// Dynamic schema that makes unitId optional when there are no nearby units
+export const createInscriptionSchema = (hasNearbyUnits: boolean) => z.object({
+  unitId: hasNearbyUnits 
+    ? z.string().min(1, 'Selecione uma unidade')
+    : z.string().optional(),
+  description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
+})
+
+// Use the dynamic schema type for InscriptionFormData
+export type InscriptionFormData = z.infer<ReturnType<typeof createInscriptionSchema>>
 
 export interface SlideData {
   id: string

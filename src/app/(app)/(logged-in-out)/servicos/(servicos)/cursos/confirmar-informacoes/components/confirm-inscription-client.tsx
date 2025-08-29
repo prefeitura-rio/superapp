@@ -18,9 +18,9 @@ import { UserDescriptionSlide } from './slides/user-description-slide'
 import coursesApi from '@/actions/courses'
 
 import {
+  createInscriptionSchema,
   type CourseUserInfo,
   type InscriptionFormData,
-  inscriptionSchema,
   type NearbyUnit,
 } from '../types'
 
@@ -48,6 +48,13 @@ export function ConfirmInscriptionClient({
   courseInfo,
   courseId,
 }: ConfirmInscriptionClientProps) {
+  // Add console logging for all props
+  console.log('ConfirmInscriptionClient - userInfo:', userInfo)
+  console.log('ConfirmInscriptionClient - userAuthInfo:', userAuthInfo)
+  console.log('ConfirmInscriptionClient - nearbyUnits:', nearbyUnits)
+  console.log('ConfirmInscriptionClient - courseInfo:', courseInfo)
+  console.log('ConfirmInscriptionClient - courseId:', courseId)
+  console.log('ConfirmInscriptionClient - hasNearbyUnits:', nearbyUnits && nearbyUnits.length > 0)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -60,9 +67,9 @@ export function ConfirmInscriptionClient({
   const { isBelowBreakpoint } = useViewportHeight(648)
 
   const form = useForm<InscriptionFormData>({
-    resolver: zodResolver(inscriptionSchema),
+    resolver: zodResolver(createInscriptionSchema(nearbyUnits && nearbyUnits.length > 0)),
     defaultValues: {
-      unitId: '',
+      unitId: nearbyUnits && nearbyUnits.length > 0 ? '' : 'no-units-available',
       description: '',
     },
   })
@@ -75,7 +82,8 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     },
-    {
+    // Only show select-unit slide if there are nearby units available
+    ...(nearbyUnits && nearbyUnits.length > 0 ? [{
       id: 'select-unit',
       component: SelectUnitSlide,
       props: {
@@ -85,7 +93,7 @@ export function ConfirmInscriptionClient({
       },
       showPagination: true,
       showBackButton: true,
-    },
+    }] : []),
     {
       id: 'user-description',
       component: UserDescriptionSlide,
@@ -98,6 +106,7 @@ export function ConfirmInscriptionClient({
     },
   ]
 
+
   const handleNext = async () => {
     if (currentIndex === slides.length - 1) {
       const isValid = await form.trigger()
@@ -106,7 +115,7 @@ export function ConfirmInscriptionClient({
       }
     } else {
       const currentSlide = slides[currentIndex]
-      if (currentSlide.id === 'select-unit') {
+      if (currentSlide.id === 'select-unit' && nearbyUnits && nearbyUnits.length > 0) {
         const isValid = await form.trigger('unitId')
         if (!isValid) return
       }
@@ -140,6 +149,8 @@ export function ConfirmInscriptionClient({
 
         const inscriptionData = {
           ...formData,
+          // Only include unitId if there are nearby units
+          ...(nearbyUnits && nearbyUnits.length > 0 ? { unitId: formData.unitId } : {}),
           userInfo,
           timestamp: new Date().toISOString(),
         }
