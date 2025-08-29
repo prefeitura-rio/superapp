@@ -29,12 +29,14 @@ export function CourseCard({
       className="w-[197px] rounded-xl overflow-hidden bg-background cursor-pointer group block"
     >
       <div className="relative w-full h-[120px] overflow-hidden rounded-xl">
+       {coverImage && (
         <Image
-          src={coverImage || ''}
+          src={coverImage}
           alt="Imagem de capa do curso"
           fill
           className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
         />
+       )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

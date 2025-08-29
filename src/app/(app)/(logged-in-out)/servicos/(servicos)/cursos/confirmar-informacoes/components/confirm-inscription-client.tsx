@@ -10,7 +10,7 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
-import { ConfirmUserDataSlide } from './slides/confirm-user-data-slide'
+import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
 import { UserDescriptionSlide } from './slides/user-description-slide'
@@ -20,12 +20,16 @@ import coursesApi from '@/actions/courses'
 import {
   type InscriptionFormData,
   type NearbyUnit,
-  type UserInfo,
+  type CourseUserInfo,
   inscriptionSchema,
 } from '../types'
 
 interface ConfirmInscriptionClientProps {
-  userInfo: UserInfo
+  userInfo: CourseUserInfo
+  userAuthInfo: {
+    cpf: string
+    name: string
+  }
   nearbyUnits: NearbyUnit[]
   courseId: string
 }
@@ -38,6 +42,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export function ConfirmInscriptionClient({
   userInfo,
+  userAuthInfo,
   nearbyUnits,
   courseId,
 }: ConfirmInscriptionClientProps) {
@@ -63,7 +68,7 @@ export function ConfirmInscriptionClient({
     {
       id: 'confirm-user-data',
       component: ConfirmUserDataSlide,
-      props: { userInfo },
+      props: { userInfo, userAuthInfo },
       showPagination: true,
       showBackButton: true,
     },

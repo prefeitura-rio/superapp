@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export interface UserInfo {
+export interface CourseUserInfo {
   cpf: string
   name: string
   email: string
