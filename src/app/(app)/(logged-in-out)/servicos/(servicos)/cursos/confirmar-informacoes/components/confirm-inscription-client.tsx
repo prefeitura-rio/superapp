@@ -9,13 +9,14 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { CustomFieldSlide } from './slides/custom-field-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
 
-import coursesApi from '@/actions/courses'
+import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 import {
   createInscriptionSchema,
@@ -24,6 +25,7 @@ import {
   type InscriptionFormData,
   type NearbyUnit,
 } from '../types'
+import { UserDescriptionSlide } from './slides/user-description-slide'
 
 interface ConfirmInscriptionClientProps {
   userInfo: CourseUserInfo
@@ -114,16 +116,16 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     })),
-    // {
-    //   id: 'user-description',
-    //   component: UserDescriptionSlide,
-    //   props: {
-    //     form,
-    //     fieldName: 'description',
-    //   },
-    //   showPagination: true,
-    //   showBackButton: true,
-    // },
+      {
+        id: 'user-description',
+        component: UserDescriptionSlide,
+        props: {
+          form,
+          fieldName: 'description',
+        },
+        showPagination: true,
+        showBackButton: true,
+      },
   ]
 
   // Log the slides configuration
@@ -183,31 +185,39 @@ export function ConfirmInscriptionClient({
       try {
         const formData = form.getValues()
 
-        const inscriptionData = {
-          ...formData,
-          // Only include unitId if there are nearby units
-          ...(nearbyUnits && nearbyUnits.length > 0 ? { unitId: formData.unitId } : {}),
-          // Include custom fields data
-          customFields: customFields.map(field => ({
-            id: field.id,
-            title: field.title,
-            value: formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
-            required: field.required
-          })),
-          userInfo,
-          timestamp: new Date().toISOString(),
+                 const result = await submitCourseInscription({
+           courseId,
+           userInfo: {
+             cpf: userAuthInfo.cpf,
+             name: userAuthInfo.name,
+             email: userInfo.email?.principal?.valor,
+             phone: userInfo.phone?.principal?.ddi && userInfo.phone?.principal?.ddd && userInfo.phone?.principal?.valor
+               ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
+               : undefined
+           },
+           unitId: nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
+           customFields: customFields.map(field => ({
+             id: field.id,
+             title: field.title,
+             value: formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
+             required: field.required
+           })),
+           reason: formData.description || 'Inscrição realizada através do portal do cidadão'
+         })
+
+        if (!result.success) {
+          throw new Error(result.error || 'Erro ao fazer inscrição')
         }
 
-        const _result = await coursesApi.submitCourseApplication(
-          courseId,
-          inscriptionData
-        )
-
+        // Success - show success slide
         setShowSuccess(true)
         setFadeOut(false)
       } catch (error) {
         console.error('Erro ao fazer inscrição:', error)
-        setShowSuccess(true)
+        // Error - show toast with specific error message
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer inscrição. Tente novamente.'
+        toast.error(errorMessage)
+        router.back()
         setFadeOut(false)
       }
     })
