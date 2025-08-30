@@ -23,8 +23,6 @@ export default async function CoursesPage() {
     
     // Extract courses array from the API response
     const courses: ModelsCurso[] = data?.data?.courses || []
-    console.log('API Response:', data)
-    console.log('Courses:', courses)
     
     return <CoursePageClient courses={courses} />
   } catch (error) {
