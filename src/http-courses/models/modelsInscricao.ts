@@ -15,7 +15,7 @@ export interface ModelsInscricao {
   cpf?: string;
   /** Relacionamentos */
   curso?: ModelsCurso;
-  custom_fields?: ModelsInscricaoCustomFields;
+  custom_fields?: ModelsInscricaoCustomFields[] //force array 
   email?: string;
   enrolled_at?: string;
   id?: string;

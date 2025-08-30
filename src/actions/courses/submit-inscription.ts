@@ -49,27 +49,10 @@ export async function submitCourseInscription(data: SubmitInscriptionData): Prom
       name: data.userInfo.name,
       email: data.userInfo.email,
       phone: formattedPhone,
-      reason: data.reason || 'Inscrição realizada através do portal do cidadão',
+      reason: data.reason || '',
       enrolled_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      // Build admin_notes combining custom fields and unit information
-      admin_notes: (() => {
-        const parts = []
-        
-        // Add custom fields if they exist
-        if (data.customFields && data.customFields.length > 0) {
-          parts.push(`Campos customizados: ${data.customFields
-            .map(field => `${field.title}: ${field.value}`)
-            .join('; ')}`)
-        }
-        
-        // Add unit information if selected
-        if (data.unitId && data.unitId !== 'no-units-available') {
-          parts.push(`Unidade selecionada: ${data.unitId}`)
-        }
-        
-        return parts.length > 0 ? parts.join('; ') : undefined
-      })()
+      custom_fields: data.customFields,
     }
 
     console.log('Submitting inscription with payload:', inscriptionPayload)
