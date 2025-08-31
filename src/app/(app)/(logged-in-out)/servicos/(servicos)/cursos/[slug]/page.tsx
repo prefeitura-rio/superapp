@@ -20,6 +20,10 @@ export default async function CoursePage({
     }
 
     const course = response.data.data
+
+    if (course.status !== 'opened') {
+      notFound()
+    }
     
     // Get user enrollment status for this course
     let userEnrollment = null

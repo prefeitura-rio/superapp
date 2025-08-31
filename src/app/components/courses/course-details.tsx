@@ -33,6 +33,11 @@ export function CourseDetails({
 
   const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
 
+  // Check if enrollment is closed
+  const isEnrollmentClosed = course.enrollment_end_date 
+    ? new Date() > new Date(course.enrollment_end_date)
+    : false
+
   const handleCancelEnrollment = async () => {
     if (!userEnrollment || isDeleting) return
     
@@ -176,6 +181,13 @@ export function CourseDetails({
             >
               Cancelar inscrição
             </button>
+          ) : isEnrollmentClosed ? (
+            <button
+              disabled
+              className="disabled block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Inscrições encerradas
+            </button>
           ) : (
             <Link
               href={courseSubscriptionHref}
@@ -228,6 +240,13 @@ export function CourseDetails({
               className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar inscrição
+            </button>
+          ) : isEnrollmentClosed ? (
+            <button
+              disabled
+              className="disabled block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Inscrições encerradas
             </button>
           ) : (
             <Link
