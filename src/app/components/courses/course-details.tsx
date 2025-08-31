@@ -5,6 +5,8 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { UserInfo } from '@/lib/user-info'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,10 +20,12 @@ interface UserEnrollment {
 
 export function CourseDetails({ 
   course, 
-  userEnrollment 
+  userEnrollment,
+  userInfo
 }: { 
   course: any
   userEnrollment: UserEnrollment | null
+  userInfo: UserInfo
 }) {
   const provider = course.organization
   const cover_image = course.cover_image
@@ -31,7 +35,7 @@ export function CourseDetails({
   const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
+  const courseSubscriptionHref = userInfo.cpf ? `/servicos/cursos/confirmar-informacoes/${course.id}` : `${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`
 
   // Check if enrollment is closed
   const isEnrollmentClosed = course.enrollment_end_date 

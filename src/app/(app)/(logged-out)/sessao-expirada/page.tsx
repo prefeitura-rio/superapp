@@ -7,9 +7,19 @@ import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useViewportHeight } from '@/hooks/useViewport'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function SessionExpired() {
   const { isBelowBreakpoint } = useViewportHeight(648)
+  const router = useRouter()
+
+  const handleNavigation = () => {
+    try {
+      router.back()
+    } catch {
+      router.push('/')
+    }
+  }
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-16 md:pt-16 flex flex-col overflow-y-hidden">
@@ -51,12 +61,12 @@ export default function SessionExpired() {
 
           {/* Create Account Link */}
           <div className="text-center mb-8">
-            <Link
-              href="/"
-              className="text-sm text-muted-foreground font-normal"
+            <button
+              onClick={handleNavigation}
+              className="text-sm text-muted-foreground font-normal cursor-pointer"
             >
               Continuar sem fazer login
-            </Link>
+            </button>
           </div>
         </div>
       </div>

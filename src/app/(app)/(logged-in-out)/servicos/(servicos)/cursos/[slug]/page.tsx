@@ -3,6 +3,7 @@
 import { getUserEnrollment } from '@/actions/courses/get-user-enrollment'
 import { CourseDetails } from '@/app/components/courses/course-details'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'
 
 export default async function CoursePage({
@@ -11,6 +12,7 @@ export default async function CoursePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug: courseSlug } = await params
+  const userInfo = await getUserInfoFromToken()
 
   try {
     const response = await getApiV1CoursesCourseId(parseInt(courseSlug))
@@ -34,7 +36,7 @@ export default async function CoursePage({
       // Continue without enrollment data - user will see "Inscreva-se" button
     }
 
-    return <CourseDetails course={course} userEnrollment={userEnrollment} />
+    return <CourseDetails course={course} userEnrollment={userEnrollment} userInfo={userInfo} />
   } catch (error) {
     console.error('Error fetching course:', error)
     notFound()

@@ -155,7 +155,7 @@ export function middleware(request: NextRequest) {
   }
 
   // logged-in-out pages (home, courses and jobs)
-  if (authToken && publicRoute && path === '/') {
+  if (authToken && publicRoute && (path === '/' || path.startsWith('/servicos/cursos'))) {
     // Checar se o JWT está EXPIRADO
     if (isJwtExpired(authToken.value)) {
       const redirectUrl = request.nextUrl.clone()
