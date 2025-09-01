@@ -1,12 +1,9 @@
 'use client'
 
-import coursesApi from '@/actions/courses'
 import { createCourseSlug } from '@/actions/courses/utils-mock'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { MY_COURSES } from '@/mocks/mock-courses'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { cn } from '../../../lib/utils'
 import { providerIcons } from '../utils'
 
@@ -44,37 +41,26 @@ function getStatusColor(status: string) {
   }
 }
 
-export function MyCoursesCard() {
-  const [courses, setCourses] = useState<typeof MY_COURSES>([])
-  const [loading, setLoading] = useState(true)
+export function MyCoursesCard({courses}: {courses: any}) {
 
-  const fetchMyCourses = async () => {
-    try {
-      const courses = await coursesApi.getMyCourses()
-      setCourses(courses)
-    } catch (error) {
-      console.error('Erro ao carregar cursos:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
-  useEffect(() => {
-    fetchMyCourses()
-  }, [])
-
-  if (loading) {
-    return <MyCoursesSkeleton />
+  if (courses.length === 0) {
+    return (
+      <div className="overflow-hidden mt-4 px-4 flex justify-center items-center">
+        <p className="block text-lg text-muted-foreground">
+          Você ainda não possui nenhum curso.
+        </p>
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-col gap-3">
-      {courses.map(course => (
+      {courses.map((course: any) => (
         <Link
           key={course.id}
           href={`/servicos/cursos/${createCourseSlug(course.id, course.title)}`}
-          className="flex items-start gap-3 rounded-lg p-3 bg-background transition cursor-pointer group"
+          className="flex items-start gap-3 rounded-lg py-3 bg-background transition cursor-pointer group"
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl">
             <Image

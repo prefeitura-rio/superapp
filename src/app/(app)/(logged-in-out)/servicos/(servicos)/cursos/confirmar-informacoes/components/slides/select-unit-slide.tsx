@@ -83,12 +83,9 @@ export const SelectUnitSlide = ({
                 `}
               >
                 <div className="flex flex-col">
-                  <h3 className="font-medium text-foreground">{unit.name}</h3>
+                  <h3 className="font-medium text-foreground">{unit.address}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {unit.address}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {unit.neighborhood}, {unit.city}
+                    {unit.neighborhood}, Rio de Janeiro
                   </p>
                 </div>
                 <div className="flex items-center">

@@ -8,25 +8,33 @@ import type { SwiperRef } from 'swiper/react'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
-
-import { ConfirmUserDataSlide } from './slides/confirm-user-data-slide'
+import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
+import { CustomFieldSlide } from './slides/custom-field-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
-import { UserDescriptionSlide } from './slides/user-description-slide'
 
-import coursesApi from '@/actions/courses'
+import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 import {
+  createInscriptionSchema,
+  type CourseUserInfo,
+  type CustomField,
   type InscriptionFormData,
   type NearbyUnit,
-  type UserInfo,
-  inscriptionSchema,
 } from '../types'
+import { UserDescriptionSlide } from './slides/user-description-slide'
 
 interface ConfirmInscriptionClientProps {
-  userInfo: UserInfo
+  userInfo: CourseUserInfo
+  userAuthInfo: {
+    cpf: string
+    name: string
+  }
   nearbyUnits: NearbyUnit[]
+  courseInfo: any // Add courseInfo prop
   courseId: string
 }
 
@@ -38,23 +46,41 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export function ConfirmInscriptionClient({
   userInfo,
+  userAuthInfo,
   nearbyUnits,
+  courseInfo,
   courseId,
 }: ConfirmInscriptionClientProps) {
+  // Add console logging for all props
+  console.log('ConfirmInscriptionClient - userInfo:', userInfo)
+  console.log('ConfirmInscriptionClient - userAuthInfo:', userAuthInfo)
+  console.log('ConfirmInscriptionClient - nearbyUnits:', nearbyUnits)
+  console.log('ConfirmInscriptionClient - courseInfo:', courseInfo)
+  console.log('ConfirmInscriptionClient - courseId:', courseId)
+  console.log('ConfirmInscriptionClient - hasNearbyUnits:', nearbyUnits && nearbyUnits.length > 0)
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const showUpdateButton = currentIndex === 0
+  const router = useRouter()
 
   const { isBelowBreakpoint } = useViewportHeight(648)
 
+  // Extract custom fields from course info
+  const customFields: CustomField[] = (courseInfo as any)?.data?.custom_fields || []
+  
   const form = useForm<InscriptionFormData>({
-    resolver: zodResolver(inscriptionSchema),
+    resolver: zodResolver(createInscriptionSchema(nearbyUnits && nearbyUnits.length > 0, customFields)),
     defaultValues: {
-      unitId: '',
+      unitId: nearbyUnits && nearbyUnits.length > 0 ? '' : 'no-units-available',
       description: '',
+      // Initialize custom fields with empty values
+      ...Object.fromEntries(
+        customFields.map(field => [`custom_${field.id}`, ''])
+      )
     },
   })
 
@@ -62,11 +88,12 @@ export function ConfirmInscriptionClient({
     {
       id: 'confirm-user-data',
       component: ConfirmUserDataSlide,
-      props: { userInfo },
+      props: { userInfo, userAuthInfo },
       showPagination: true,
       showBackButton: true,
     },
-    {
+    // Only show select-unit slide if there are nearby units available
+    ...(nearbyUnits && nearbyUnits.length > 0 ? [{
       id: 'select-unit',
       component: SelectUnitSlide,
       props: {
@@ -76,18 +103,36 @@ export function ConfirmInscriptionClient({
       },
       showPagination: true,
       showBackButton: true,
-    },
-    {
-      id: 'user-description',
-      component: UserDescriptionSlide,
+    }] : []),
+    // Add custom field slides dynamically
+    ...customFields.map(field => ({
+      id: `custom-field-${field.id}`,
+      component: CustomFieldSlide,
       props: {
+        field,
+        fieldName: `custom_${field.id}`,
         form,
-        fieldName: 'description',
       },
       showPagination: true,
       showBackButton: true,
-    },
+    })),
+      {
+        id: 'user-description',
+        component: UserDescriptionSlide,
+        props: {
+          form,
+          fieldName: 'description',
+        },
+        showPagination: true,
+        showBackButton: true,
+      },
   ]
+
+  // Log the slides configuration
+  // console.log('ConfirmInscriptionClient - slides:', slides.map(slide => ({ id: slide.id, component: slide.component.name })))
+  // console.log('ConfirmInscriptionClient - slides count:', slides.length)
+  // console.log('ConfirmInscriptionClient - customFields:', customFields)
+  // console.log('ConfirmInscriptionClient - customFields count:', customFields.length)
 
   const handleNext = async () => {
     if (currentIndex === slides.length - 1) {
@@ -97,9 +142,20 @@ export function ConfirmInscriptionClient({
       }
     } else {
       const currentSlide = slides[currentIndex]
-      if (currentSlide.id === 'select-unit') {
+      if (currentSlide.id === 'select-unit' && nearbyUnits && nearbyUnits.length > 0) {
         const isValid = await form.trigger('unitId')
         if (!isValid) return
+      }
+      
+      // Validate custom fields if they are required
+      if (currentSlide.id.startsWith('custom-field-')) {
+        const fieldId = currentSlide.id.replace('custom-field-', '')
+        const field = customFields.find(f => f.id === fieldId)
+        if (field && field.required) {
+          const fieldName = `custom_${field.id}` as keyof InscriptionFormData
+          const isValid = await form.trigger(fieldName)
+          if (!isValid) return
+        }
       }
 
       swiperRef.current?.swiper?.slideNext()
@@ -115,7 +171,7 @@ export function ConfirmInscriptionClient({
       return
     }
     if (currentIndex === 0) {
-      window.location.href = HOME_COURSES
+      router.back()
       return
     }
     swiperRef.current?.swiper?.slidePrev()
@@ -129,22 +185,39 @@ export function ConfirmInscriptionClient({
       try {
         const formData = form.getValues()
 
-        const inscriptionData = {
-          ...formData,
-          userInfo,
-          timestamp: new Date().toISOString(),
+                 const result = await submitCourseInscription({
+           courseId,
+           userInfo: {
+             cpf: userAuthInfo.cpf,
+             name: userAuthInfo.name,
+             email: userInfo.email?.principal?.valor,
+             phone: userInfo.phone?.principal?.ddi && userInfo.phone?.principal?.ddd && userInfo.phone?.principal?.valor
+               ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
+               : undefined
+           },
+           unitId: nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
+           customFields: customFields.map(field => ({
+             id: field.id,
+             title: field.title,
+             value: formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
+             required: field.required
+           })),
+           reason: formData.description || 'Inscrição realizada através do portal do cidadão'
+         })
+
+        if (!result.success) {
+          throw new Error(result.error || 'Erro ao fazer inscrição')
         }
 
-        const _result = await coursesApi.submitCourseApplication(
-          courseId,
-          inscriptionData
-        )
-
+        // Success - show success slide
         setShowSuccess(true)
         setFadeOut(false)
       } catch (error) {
         console.error('Erro ao fazer inscrição:', error)
-        setShowSuccess(true)
+        // Error - show toast with specific error message
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer inscrição. Tente novamente.'
+        toast.error(errorMessage)
+        router.back()
         setFadeOut(false)
       }
     })
@@ -159,6 +232,8 @@ export function ConfirmInscriptionClient({
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
+  const isLastSlide = currentIndex === slides.length - 1
+  const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
     <div className="relative min-h-lvh w-full px-4 mx-auto bg-background max-w-xl text-foreground flex flex-col overflow-hidden">
@@ -221,7 +296,7 @@ export function ConfirmInscriptionClient({
             )}
 
             <CustomButton
-              onClick={handleNext}
+              onClick={isLastSlide ? goToSuccess : handleNext}
               disabled={isPending}
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
           ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
@@ -231,7 +306,7 @@ export function ConfirmInscriptionClient({
               : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
           }`}
             >
-              Continuar
+              {buttonText}
             </CustomButton>
           </div>
         </div>
