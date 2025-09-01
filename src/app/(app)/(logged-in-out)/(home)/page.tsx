@@ -18,6 +18,7 @@ import CarteiraSectionSwipe, {
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { fetchCategories } from '@/lib/categories'
 import {
+  getDalCitizenCpfAvatar,
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
   getDalHealthUnitInfo,
@@ -39,8 +40,21 @@ export default async function Home() {
   let maintenanceRequests
   let healthUnitData
   let healthUnitRiskData
+  let userAvatarUrl: string | null = null
+  let userAvatarName: string | null = null
 
   if (isLoggedIn) {
+    // Fetch user's current avatar using DAL
+    try {
+      const userAvatarResponse = await getDalCitizenCpfAvatar(userAuthInfo.cpf);
+     if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar) {
+        userAvatarUrl = userAvatarResponse.data.avatar.url || null;
+        userAvatarName = userAvatarResponse.data.avatar.name || null;
+    }
+    } catch (error) {
+      console.log("Could not fetch user avatar:", error);
+    }
+
     // Fetch wallet data
     try {
       const walletResponse = await getDalCitizenCpfWallet(userAuthInfo.cpf)
@@ -155,7 +169,12 @@ export default async function Home() {
 
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
-      <HeaderWrapper userName={userAuthInfo.name} isLoggedIn={isLoggedIn} />
+      <HeaderWrapper 
+        userName={userAuthInfo.name} 
+        isLoggedIn={isLoggedIn}
+        userAvatarUrl={userAvatarUrl}
+        userAvatarName={userAvatarName}
+      />
 
       {/* Suggestion Cards*/}
       <ResponsiveWrapper

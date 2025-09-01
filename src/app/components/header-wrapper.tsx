@@ -6,11 +6,15 @@ import SearchPlaceholder from './search-placeholder'
 interface HeaderWrapper {
   userName: string
   isLoggedIn: boolean
+  userAvatarUrl?: string | null
+  userAvatarName?: string | null
 }
 
 export default function ScrollAwareHeader({
   userName,
   isLoggedIn,
+  userAvatarUrl,
+  userAvatarName,
 }: HeaderWrapper) {
   return (
     <>
@@ -18,6 +22,8 @@ export default function ScrollAwareHeader({
         userName={userName}
         isLoggedIn={isLoggedIn}
         showSearchIcon={true}
+        userAvatarUrl={userAvatarUrl}
+        userAvatarName={userAvatarName}
       />
 
       <div>
