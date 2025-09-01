@@ -1,14 +1,12 @@
 'use client'
 
-// import { BottomSheet } from '@/components/ui/bottom-sheet'
-// import { MenuItem } from '@/components/ui/menu-item'
+import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import {
   DownloadCloudIcon,
   EyeOffIcon,
   PrinterCheckIcon,
   Share2Icon,
 } from 'lucide-react'
-import { BottomSheet } from '../../../components/ui/custom/bottom-sheet'
 import { MenuItem } from '../menu-item'
 
 interface CoursesCertifiedDrawerProps {
