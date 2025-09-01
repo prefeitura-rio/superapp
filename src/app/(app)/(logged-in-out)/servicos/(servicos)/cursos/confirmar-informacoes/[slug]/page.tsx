@@ -12,16 +12,16 @@ interface PageProps {
 export default async function ConfirmInscriptionPage({ params }: PageProps) {
   const { slug: courseSlug } = await params
   const courseUuid = extractCourseId(courseSlug)
-  
+
   const userAuthInfo = await getUserInfoFromToken()
-  
+
   if (!userAuthInfo.cpf) {
     notFound()
   }
 
   const [userInfoResponse, courseInfoResponse] = await Promise.all([
     getDalCitizenCpf(userAuthInfo.cpf),
-    getApiV1CoursesCourseId(parseInt(courseSlug))
+    getApiV1CoursesCourseId(Number.parseInt(courseSlug)),
   ])
 
   if (userInfoResponse.status !== 200 || courseInfoResponse.status !== 200) {
@@ -35,22 +35,23 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
     cpf: userInfo.cpf || userAuthInfo.cpf,
     name: userInfo.nome || userAuthInfo.name,
     email: userInfo.email || { principal: { valor: '' } },
-    phone: userInfo.telefone || { principal: { ddi: '', ddd: '', valor: '' } }
+    phone: userInfo.telefone || { principal: { ddi: '', ddd: '', valor: '' } },
   }
 
-  const nearbyUnits = (courseInfo as any).data?.locations?.map((location: any) => ({
-    id: location.id,
-    curso_id: location.curso_id,
-    address: location.address,
-    neighborhood: location.neighborhood,
-    vacancies: location.vacancies,
-    class_start_date: location.class_start_date,
-    class_end_date: location.class_end_date,
-    class_time: location.class_time,
-    class_days: location.class_days,
-    created_at: location.created_at,
-    updated_at: location.updated_at
-  })) || []
+  const nearbyUnits =
+    (courseInfo as any).data?.locations?.map((location: any) => ({
+      id: location.id,
+      curso_id: location.curso_id,
+      address: location.address,
+      neighborhood: location.neighborhood,
+      vacancies: location.vacancies,
+      class_start_date: location.class_start_date,
+      class_end_date: location.class_end_date,
+      class_time: location.class_time,
+      class_days: location.class_days,
+      created_at: location.created_at,
+      updated_at: location.updated_at,
+    })) || []
 
   return (
     <ConfirmInscriptionClient

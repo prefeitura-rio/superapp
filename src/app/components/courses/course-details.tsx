@@ -6,7 +6,8 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
-import { UserInfo } from '@/lib/user-info'
+import { getCourseEnrollmentInfo } from '@/lib/course-utils'
+import type { UserInfo } from '@/lib/user-info'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,11 +19,11 @@ interface UserEnrollment {
   course_id: number
 }
 
-export function CourseDetails({ 
-  course, 
+export function CourseDetails({
+  course,
   userEnrollment,
-  userInfo
-}: { 
+  userInfo,
+}: {
   course: any
   userEnrollment: UserEnrollment | null
   userInfo: UserInfo
@@ -35,19 +36,19 @@ export function CourseDetails({
   const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const courseSubscriptionHref = userInfo.cpf ? `/servicos/cursos/confirmar-informacoes/${course.id}` : `${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`
+  // Get enrollment information for the course
+  const enrollmentInfo = getCourseEnrollmentInfo(course)
 
-  // Check if enrollment is closed
-  const isEnrollmentClosed = course.enrollment_end_date 
-    ? new Date() > new Date(course.enrollment_end_date)
-    : false
+  const courseSubscriptionHref = userInfo.cpf
+    ? `/servicos/cursos/confirmar-informacoes/${course.id}`
+    : `${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`
 
   const handleCancelEnrollment = async () => {
     if (!userEnrollment || isDeleting) return
-    
+
     setIsDeleting(true)
     setError(null)
-    
+
     try {
       const result = await deleteEnrollment(course.id, userEnrollment.id)
       if (result.success) {
@@ -65,7 +66,48 @@ export function CourseDetails({
     }
   }
 
-  const isEnrolled = userEnrollment && ['pending', 'approved', 'rejected', 'cancelled'].includes(userEnrollment.status)
+  const isEnrolled =
+    userEnrollment &&
+    ['pending', 'approved', 'rejected', 'cancelled'].includes(
+      userEnrollment.status
+    )
+
+  // Render button based on enrollment status
+  const renderActionButton = () => {
+    if (isEnrolled) {
+      return (
+        <button
+          type="button"
+          onClick={() => setShowConfirmation(true)}
+          disabled={isDeleting}
+          className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancelar inscrição
+        </button>
+      )
+    }
+
+    if (enrollmentInfo.isDisabled) {
+      return (
+        <button
+          type="button"
+          disabled
+          className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {enrollmentInfo.buttonText}
+        </button>
+      )
+    }
+
+    return (
+      <Link
+        href={courseSubscriptionHref}
+        className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
+      >
+        {enrollmentInfo.buttonText}
+      </Link>
+    )
+  }
 
   return (
     <div className="flex flex-col items-center pb-20">
@@ -87,7 +129,7 @@ export function CourseDetails({
           <div className="text-center p-4">
             <h2 className="text-md mb-4">Confirmar cancelamento</h2>
             <p className="text-muted-foreground mb-6">
-              Tem certeza que deseja cancelar sua inscrição neste curso? Esta ação não pode ser desfeita.
+              Tem certeza que deseja cancelar sua inscrição neste curso?
             </p>
           </div>
           <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-4">
@@ -120,12 +162,12 @@ export function CourseDetails({
             />
           </div>
           {cover_image && (
-          <Image
-            src={course.cover_image || ''}
-            alt={course.title || ''}
-            fill
-            className="object-cover"
-          />
+            <Image
+              src={course.cover_image || ''}
+              alt={course.title || ''}
+              fill
+              className="object-cover"
+            />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
             <span className="text-white/80 text-sm capitalize">
@@ -161,46 +203,30 @@ export function CourseDetails({
           <div className="flex gap-4">
             <div>
               <p className="text-muted-foreground">Modalidade</p>
-              <p className="font-medium">{course.modalidade || 'Não informado'}</p>
+              <p className="font-medium">
+                {course.modalidade || 'Não informado'}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground">Carga horária</p>
-              <p className="font-medium">{course.workload || 'Não informado'}</p>
+              <p className="font-medium">
+                {course.workload || 'Não informado'}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground">Inscrições até</p>
               <p className="font-medium">
-                {course.enrollment_end_date ? new Date(course.enrollment_end_date).toLocaleDateString('pt-BR') : 'Não informado'}
+                {course.enrollment_end_date
+                  ? new Date(course.enrollment_end_date).toLocaleDateString(
+                      'pt-BR'
+                    )
+                  : 'Não informado'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-4 w-full max-w-4xl">
-          {isEnrolled ? (
-            <button
-              onClick={() => setShowConfirmation(true)}
-              disabled={isDeleting}
-              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar inscrição
-            </button>
-          ) : isEnrollmentClosed ? (
-            <button
-              disabled
-              className="disabled block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Inscrições encerradas
-            </button>
-          ) : (
-            <Link
-              href={courseSubscriptionHref}
-              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
-            >
-              Inscreva-se
-            </Link>
-          )}
-        </div>
+        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
 
         <div className="p-4 text-muted-foreground text-sm leading-relaxed">
           {course.description || 'Descrição não disponível'}
@@ -228,39 +254,14 @@ export function CourseDetails({
           <div>
             <h2 className="text-base font-semibold mb-2">Certificado</h2>
             <p className="text-sm text-muted-foreground">
-              {course.has_certificate 
+              {course.has_certificate
                 ? 'Os participantes que concluírem o curso com aproveitamento receberão certificado válido emitido pela instituição promotora.'
-                : 'Este curso não oferece certificado.'
-              }
+                : 'Este curso não oferece certificado.'}
             </p>
           </div>
         </div>
 
-        <div className="p-4 w-full max-w-4xl">
-          {isEnrolled ? (
-            <button
-              onClick={() => setShowConfirmation(true)}
-              disabled={isDeleting}
-              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar inscrição
-            </button>
-          ) : isEnrollmentClosed ? (
-            <button
-              disabled
-              className="disabled block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Inscrições encerradas
-            </button>
-          ) : (
-            <Link
-              href={courseSubscriptionHref}
-              className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
-            >
-              Inscreva-se
-            </Link>
-          )}
-        </div>
+        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
       </div>
     </div>
   )
