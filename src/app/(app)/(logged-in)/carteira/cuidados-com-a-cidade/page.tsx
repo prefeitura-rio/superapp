@@ -1,13 +1,14 @@
 import Calls from '@/app/components/calls'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CaretakerCard } from '@/app/components/wallet-cards/caretaker-card'
-import { GlobeIcon, PhoneIcon } from '@/assets/icons'
+import { GlobeIcon, UserIcon, WhatsappIcon } from '@/assets/icons'
 import { getDalCitizenCpfMaintenanceRequest } from '@/lib/dal'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
 } from '@/lib/maintenance-requests-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import Link from 'next/link'
 
 export default async function CaretakerCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -58,20 +59,20 @@ export default async function CaretakerCardDetail() {
         {/* Icons Buttons Row */}
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex flex-row pl-5 gap-5 justify-start mt-8 min-w-max">
-            <a href="tel:1746" className="flex flex-col items-center">
+            <Link href="https://wa.me/552134601746" className="flex flex-col items-center" target="_blank" rel="noopener noreferrer">
               <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <PhoneIcon className="h-6.5" />
+                <WhatsappIcon className="h-6.5" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="mt-2 text-foreground text-sm font-normal">
                   Chamado
                 </span>
                 <span className=" text-gray-300 text-xs font-normal">
-                  telefone
+                  whatsapp
                 </span>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://1746.rio/"
               target="_blank"
               rel="noopener noreferrer"
@@ -88,7 +89,23 @@ export default async function CaretakerCardDetail() {
                   website
                 </span>
               </div>
-            </a>
+            </Link>
+            <Link
+              href="/ouvidoria"
+              className="flex flex-col items-center"
+            >
+              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                <UserIcon className="h-6.5" />
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="mt-2 text-foreground text-sm font-normal">
+                  Ouvidoria
+                </span>
+                {/* <span className="text-gray-300 text-xs font-normal">
+                  website
+                </span> */}
+              </div>
+            </Link>
           </div>
         </div>
       </div>

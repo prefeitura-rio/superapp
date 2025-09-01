@@ -1,99 +1,82 @@
 import { SecondaryHeader } from "@/app/components/secondary-header";
+import type { ModelsAvatarsListResponse } from "@/http/models";
+import { getDalAvatars, getDalCitizenCpfAvatar } from "@/lib/dal";
+import { getUserInfoFromToken } from "@/lib/user-info";
 import { AvatarSelector } from "./components/avatar-selector";
 
-export default function AvatarPage() {
-  const avatars = {
-    data: [
-      {
-        "id": "1",
-        "name": "Avatar 1",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar1.png",
-        "is_active": true,
-        "created_at": "2025-08-22T10:19:09.942Z"
-      },
-      {
-        "id": "2",
-        "name": "Avatar 2",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar2.png",
-        "is_active": true,
-        "created_at": "2025-08-22T10:18:30.236Z"
-      },
-      {
-        "id": "3",
-        "name": "Avatar 3",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar3.png",
-        "is_active": true,
-        "created_at": "2025-08-22T10:17:40.519Z"
-      },
-      {
-        "id": "4",
-        "name": "Avatar 4",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar4.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "5",
-        "name": "Avatar 5",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar5.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "6",
-        "name": "Avatar 6",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar6.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "7",
-        "name": "Avatar 7",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar7.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "8",
-        "name": "Avatar 8",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar8.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "9",
-        "name": "Avatar 9",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar9.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "10",
-        "name": "Avatar 10",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar10.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "11",
-        "name": "Avatar 11",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar11.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
-      },
-      {
-        "id": "12",
-        "name": "Avatar 12",
-        "url": "https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar12.png",
-        "is_active": true,
-        "created_at": "2025-08-22T09:54:44.859Z"
+// Revalidate this page when needed
+export const revalidate = 0;
+
+export default async function AvatarPage() {
+  const userInfo = await getUserInfoFromToken();
+  
+  let avatars: ModelsAvatarsListResponse = { data: [], total: 0, page: 1, per_page: 12, total_pages: 0 };
+  let currentUserAvatar: string | null = null;
+  let error = null;
+
+  try {
+    // Fetch available avatars using DAL
+    const avatarsResponse = await getDalAvatars();
+    if (avatarsResponse.status === 200) {
+      avatars = avatarsResponse.data;
+    } else {
+      error = "Erro ao carregar avatares";
+    }
+
+    // Fetch user's current avatar if avatars were loaded successfully
+    if (!error && userInfo.cpf) {
+      try {
+        const userAvatarResponse = await getDalCitizenCpfAvatar(userInfo.cpf);
+        if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar_id) {
+          currentUserAvatar = userAvatarResponse.data.avatar_id;
+        }
+        console.log(userAvatarResponse.data)
+      } catch (avatarErr) {
+        // Silently fail for current avatar - not critical
+        console.log("Could not fetch current user avatar:", avatarErr);
       }
-    ],
-    "total": 12,
-    "page": 1,
-    "per_page": 20,
-    "total_pages": 1
-  };
+    }
+  } catch (err) {
+    error = "Erro ao carregar avatares";
+    console.error("Error fetching avatars:", err);
+  }
+
+  if (error) {
+    return (
+      <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
+        <SecondaryHeader title="Escolha seu avatar" route="/meu-perfil" className="max-w-xl" />
+        <div className="px-4 mt-6 text-center">
+          <p className="text-destructive">{error}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Tente novamente mais tarde
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Filter out inactive avatars, ensure required fields exist, and only show Avatar 1-12
+  const availableAvatars = avatars.data?.filter(avatar => 
+    avatar.is_active && 
+    avatar.id && 
+    avatar.url && 
+    avatar.name &&
+    /^Avatar (1[0-2]|[1-9])$/.test(avatar.name)
+  ) || [];
+
+  if (availableAvatars.length === 0) {
+    return (
+      <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
+        <SecondaryHeader title="Escolha seu avatar" route="/meu-perfil" className="max-w-xl" />
+        <div className="px-4 mt-6 text-center">
+          <p className="text-muted-foreground">Nenhum avatar disponível no momento</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Tente novamente mais tarde
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
@@ -101,7 +84,10 @@ export default function AvatarPage() {
       <SecondaryHeader title="Escolha seu avatar" route="/meu-perfil" className="max-w-xl" />
       
       {/* Avatar Grid */}
-      <AvatarSelector avatars={avatars.data} />
+      <AvatarSelector 
+        avatars={availableAvatars} 
+        currentAvatarId={currentUserAvatar}
+      />
     </div>
   );
 }   

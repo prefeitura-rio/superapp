@@ -2,6 +2,7 @@
 // This file is used to cache the data fetching functions
 
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
+import { getV1Avatars, getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
   getCitizenCpfFirstlogin,
@@ -103,6 +104,33 @@ export const getDalHealthUnitRisk = unstable_cache(
   }
 )
 
+// Avatar caching functions
+
+// Available avatars list caching (shared across all users)
+// 30-minute cache since avatar list doesn't change frequently
+// Using standard Next.js caching instead of unstable_cache to avoid cookie issues
+export async function getDalAvatars() {
+  return await getV1Avatars(undefined, {
+    cache: 'force-cache',
+    next: {
+      revalidate: 1800, // 30 minutes
+      tags: ['available-avatars'],
+    },
+  })
+}
+
+// User avatar caching (user-specific data)
+// 30-minute cache since user avatar can be updated
+export async function getDalCitizenCpfAvatar(cpf: string) {
+  return await getV1CitizenCpfAvatar(cpf, {
+    cache: 'force-cache',
+    next: {
+      revalidate: 1800, // 30 minutes - optimal for user data
+      tags: [`user-avatar-${cpf}`], // Tag for selective revalidation
+    },
+  })
+}
+
 // Helper function to revalidate wallet data when needed
 export async function revalidateDalCitizenCpfWallet(cpf: string) {
   // This would be called from a Server Action or API route
@@ -141,4 +169,19 @@ export async function revalidateDalCourseEnrollment(courseId: number, cpf: strin
   // to invalidate cache when enrollment status changes
   // Example: after user cancels or enrolls in a course
   revalidateTag(`course-enrollment-${courseId}-${cpf}`)
+
+// Helper function to revalidate available avatars when needed
+export async function revalidateDalAvatars() {
+  // This would be called from a Server Action or API route
+  // to invalidate cache when avatar list changes
+  // Example: after admin adds/removes avatars
+  revalidateTag('available-avatars')
+}
+
+// Helper function to revalidate user avatar when needed
+export async function revalidateDalCitizenCpfAvatar(cpf: string) {
+  // This would be called from a Server Action or API route
+  // to invalidate cache when user avatar changes
+  // Example: after user updates their avatar
+  revalidateTag(`user-avatar-${cpf}`)
 }

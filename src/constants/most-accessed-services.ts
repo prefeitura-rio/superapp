@@ -14,7 +14,7 @@ export const MOST_ACCESSED_SERVICES = [
     href: '/servicos/categoria/Taxas/84702/carioca-digital',
     icon: iptuIcon,
     title: 'IPTU',
-    description: 'Pague com desconto no PIX',
+    description: 'Pague no PIX',
   },
   {
     id: 'cadrio',
