@@ -3,10 +3,8 @@ import {
   type NextRequest,
   NextResponse,
 } from 'next/server'
-import {
-  REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE,
-} from './constants/url'
-import { handleExpiredToken, isJwtExpired } from './lib'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from './constants/url'
+import { isJwtExpired, handleExpiredToken } from './lib'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -144,8 +142,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // logged-in-out pages (home, courses and jobs)
-  if (authToken && publicRoute && path === '/') {
-    // Check if JWT is expired
+  if (
+    authToken &&
+    publicRoute &&
+    (path === '/' || path.startsWith('/servicos/cursos'))
+  ) {
+    // Checar se o JWT está EXPIRADO
     if (isJwtExpired(authToken.value)) {
       return await handleExpiredToken(
         request,

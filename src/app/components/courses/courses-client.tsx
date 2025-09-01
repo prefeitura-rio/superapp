@@ -6,6 +6,7 @@ import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import SearchPlaceholder from '@/app/components/search-placeholder'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { ModelsCurso } from '@/http-courses/models'
+import { UserInfo } from '@/lib/user-info'
 import Link from 'next/link'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
@@ -20,10 +21,10 @@ const FILTERS = [
   { label: 'Saúde', value: 'saude', icon: '🏥' },
 ]
 
-export default function CoursePageClient({ courses }: { courses: ModelsCurso[] }) {
+export default function CoursePageClient({ courses, userInfo }: { courses: ModelsCurso[], userInfo: UserInfo }) {
   return (
     <div className="min-h-lvh">
-      <CoursesHeader />
+      <CoursesHeader userInfo={userInfo} />
       <main className="max-w-4xl mx-auto pt-15 pb-20 text-white">
         <div className="mt-4">
           <SearchPlaceholder isCourseSearch />

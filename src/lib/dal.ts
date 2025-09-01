@@ -66,16 +66,20 @@ export async function getDalCitizenCpfMaintenanceRequest(
 // Course enrollment caching (user-specific data)
 // 5-minute cache since enrollment status can change frequently
 export async function getDalCourseEnrollment(courseId: number, cpf: string) {
-  return await getApiV1CoursesCourseIdEnrollments(courseId, {
-    search: cpf,
-    limit: 1
-  }, {
-    cache: 'force-cache',
-    next: {
-      revalidate: 600, // 10 minutes - optimal for enrollment status changes
-      tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+  return await getApiV1CoursesCourseIdEnrollments(
+    courseId,
+    {
+      search: cpf,
+      limit: 1,
     },
-  })
+    {
+      cache: 'force-cache',
+      next: {
+        revalidate: 600, // 10 minutes - optimal for enrollment status changes
+        tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+      },
+    }
+  )
 }
 
 // Health unit info caching (shared across all users)
@@ -164,12 +168,15 @@ export async function revalidateDalCitizenCpfFirstlogin(cpf: string) {
 }
 
 // Helper function to revalidate course enrollment when needed
-export async function revalidateDalCourseEnrollment(courseId: number, cpf: string) {
+export async function revalidateDalCourseEnrollment(
+  courseId: number,
+  cpf: string
+) {
   // This would be called from a Server Action or API route
   // to invalidate cache when enrollment status changes
   // Example: after user cancels or enrolls in a course
   revalidateTag(`course-enrollment-${courseId}-${cpf}`)
-
+}
 // Helper function to revalidate available avatars when needed
 export async function revalidateDalAvatars() {
   // This would be called from a Server Action or API route

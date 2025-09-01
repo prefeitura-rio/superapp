@@ -12,11 +12,11 @@ export async function getUserEnrollment(courseId: number) {
       return null
     }
 
-    console.log('Fetching enrollment for user:', currentUser.cpf, 'course:', courseId)
+    // console.log('Fetching enrollment for user:', currentUser.cpf, 'course:', courseId)
 
     const response = await getDalCourseEnrollment(courseId, currentUser.cpf)
 
-    console.log('API Response status:', response.status)
+    // console.log('API Response status:', response.status)
 
     if (response.status === 200 && response.data) {
       // Based on the console output, the structure is:
@@ -32,7 +32,7 @@ export async function getUserEnrollment(courseId: number) {
           )
           
           if (userEnrollment) {
-            console.log('Found user enrollment:', userEnrollment.id, 'status:', userEnrollment.status)
+            // console.log('Found user enrollment:', userEnrollment.id, 'status:', userEnrollment.status)
             return userEnrollment
           } else {
             console.log('No matching enrollment found for user CPF')
