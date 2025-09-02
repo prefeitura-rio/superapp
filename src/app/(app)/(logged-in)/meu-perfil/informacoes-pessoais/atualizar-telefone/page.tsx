@@ -28,8 +28,9 @@ export default function PhoneNumberForm() {
   const searchParams = useSearchParams()
 
   const isPhoneValid = isValidPhone(phone, country)
-  const isRedirectFromCourses =
-    searchParams.get('redirectFromCourses') === 'true'
+  const courseSlug = searchParams.get('redirectFromCourses')
+  const redirectFromCourses = !!courseSlug
+  let redirectFromCoursesUrl = ''
 
   async function handleSave() {
     startTransition(async () => {
@@ -44,11 +45,15 @@ export default function PhoneNumberForm() {
           parsedPhone as ModelsSelfDeclaredPhoneInput
         )
 
+        if (redirectFromCourses) {
+          redirectFromCoursesUrl = `&redirectFromCourses=${courseSlug}`
+        }
+
         if (result.success) {
           router.push(
             `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
               parsedPhone.ddi
-            )}`
+            )}${redirectFromCoursesUrl}`
           )
           toast.success('Token enviado')
         } else {
@@ -67,14 +72,14 @@ export default function PhoneNumberForm() {
     })
   }
 
+  const routeBackUrl = redirectFromCourses
+    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+    : '/meu-perfil'
+
   function handleDrawerClose() {
     setDrawerOpen(false)
-    router.back()
+    router.push(routeBackUrl)
   }
-
-  const routeBackUrl = isRedirectFromCourses
-    ? '/servicos/cursos/atualizar-dados'
-    : '/meu-perfil'
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">

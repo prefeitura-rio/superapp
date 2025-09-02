@@ -33,8 +33,7 @@ export default function EmailForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const isRedirectFromCourses =
-    searchParams.get('redirectFromCourses') === 'true'
+  const courseSlug = searchParams.get('redirectFromCourses')
 
   const emailStateInput = useInputValidation({
     value: email,
@@ -102,8 +101,8 @@ export default function EmailForm() {
     }
   }
 
-  const routeBackUrl = isRedirectFromCourses
-    ? '/servicos/cursos/atualizar-dados'
+  const routeBackUrl = courseSlug
+    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
     : '/meu-perfil'
 
   return (
