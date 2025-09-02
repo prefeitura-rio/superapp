@@ -1,8 +1,8 @@
 'use client'
 
 import { Textarea } from '@/components/ui/textarea'
-import { UseFormReturn } from 'react-hook-form'
-import { CustomField } from '../../types'
+import type { UseFormReturn } from 'react-hook-form'
+import type { CustomField } from '../../types'
 
 interface CustomFieldSlideProps {
   field: CustomField
@@ -10,8 +10,15 @@ interface CustomFieldSlideProps {
   form: UseFormReturn<any>
 }
 
-export function CustomFieldSlide({ field, fieldName, form }: CustomFieldSlideProps) {
-  const { register, formState: { errors } } = form
+export function CustomFieldSlide({
+  field,
+  fieldName,
+  form,
+}: CustomFieldSlideProps) {
+  const {
+    register,
+    formState: { errors },
+  } = form
   const error = errors[fieldName]
 
   return (
@@ -20,7 +27,6 @@ export function CustomFieldSlide({ field, fieldName, form }: CustomFieldSlidePro
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           {field.title}
         </h2>
-      
       </div>
 
       <div className="space-y-4">
@@ -42,7 +48,7 @@ export function CustomFieldSlide({ field, fieldName, form }: CustomFieldSlidePro
             )}
           </div>
         )}
-        
+
         {/* Add support for other field types here in the future */}
         {field.field_type !== 'text' && (
           <div className="text-center py-8">

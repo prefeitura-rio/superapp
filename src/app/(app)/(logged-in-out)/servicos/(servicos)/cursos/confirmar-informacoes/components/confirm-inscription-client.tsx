@@ -26,7 +26,6 @@ import {
   type NearbyUnit,
   createInscriptionSchema,
 } from '../types'
-import { UserDescriptionSlide } from './slides/user-description-slide'
 
 interface ConfirmInscriptionClientProps {
   userInfo: CourseUserInfo
@@ -119,16 +118,6 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     })),
-    {
-      id: 'user-description',
-      component: UserDescriptionSlide,
-      props: {
-        form,
-        fieldName: 'description',
-      },
-      showPagination: true,
-      showBackButton: true,
-    },
   ]
 
   const handleNext = async () => {
@@ -178,7 +167,53 @@ export function ConfirmInscriptionClient({
     swiperRef.current?.swiper?.slidePrev()
   }
 
+  // Function to find the first slide with missing required fields
+  const findFirstInvalidSlide = async (): Promise<number | null> => {
+    // Check unit selection if required
+    if (nearbyUnits && nearbyUnits.length > 0) {
+      const unitSlideIndex = slides.findIndex(
+        slide => slide.id === 'select-unit'
+      )
+      if (unitSlideIndex !== -1) {
+        const isUnitValid = await form.trigger('unitId')
+        if (!isUnitValid) {
+          return unitSlideIndex
+        }
+      }
+    }
+
+    // Check custom fields
+    for (let i = 0; i < customFields.length; i++) {
+      const field = customFields[i]
+      if (field.required) {
+        const fieldName = `custom_${field.id}` as keyof InscriptionFormData
+        const isFieldValid = await form.trigger(fieldName)
+        if (!isFieldValid) {
+          const customFieldSlideIndex = slides.findIndex(
+            slide => slide.id === `custom-field-${field.id}`
+          )
+          if (customFieldSlideIndex !== -1) {
+            return customFieldSlideIndex
+          }
+        }
+      }
+    }
+
+    return null
+  }
+
   const goToSuccess = async () => {
+    // First, check if there are any invalid required fields
+    const firstInvalidSlideIndex = await findFirstInvalidSlide()
+
+    if (firstInvalidSlideIndex !== null) {
+      // Navigate to the first invalid slide
+      setCurrentIndex(firstInvalidSlideIndex)
+      swiperRef.current?.swiper?.slideTo(firstInvalidSlideIndex)
+      return
+    }
+
+    // All fields are valid, proceed with submission
     setFadeOut(true)
     await delay(TRANSITIONS.FADE)
 
@@ -312,7 +347,7 @@ export function ConfirmInscriptionClient({
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
           ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
           ${
-            showNextButton || !showUpdateButton
+            !showSuccess
               ? 'opacity-100 translate-x-0 scale-100'
               : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
           }`}
