@@ -36,7 +36,7 @@ function getCertificateStatusColor(status: string) {
     case 'certificado disponível':
       return 'bg-card-3 text-background'
     case 'certificado indisponível':
-      return 'bg-secondary text-zinc-900'
+      return 'bg-secondary text-foreground'
     default:
       return 'bg-secondary text-zinc-900'
   }
