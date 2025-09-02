@@ -335,7 +335,9 @@ function CourseContent({ course }: CourseContentProps) {
 
         return (
           <div key={key}>
-            <h2 className="text-sm leading-4 font-semibold mb-2">{title}</h2>
+            <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
+              {title}
+            </h2>
             {renderContentWithLineBreaks(content)}
           </div>
         )
@@ -479,7 +481,7 @@ export function CourseDetails({
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
 
-        <div className="px-4 py-8 pb-0 text-muted-foreground text-xs md:text-sm leading-relaxed">
+        <div className="px-4 py-8 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
           {course.description || 'Descrição não disponível'}
         </div>
 
