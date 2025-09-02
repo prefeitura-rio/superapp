@@ -87,7 +87,7 @@ export function CourseDetails({ course }: { course: Course }) {
             <IconButton
               icon={ChevronLeftIcon}
               className="top-4 left-4 absolute z-10"
-              onClick={() => router.back()}
+              onClick={() => router.push('/servicos/cursos')}
             />
           </div>
           <Image

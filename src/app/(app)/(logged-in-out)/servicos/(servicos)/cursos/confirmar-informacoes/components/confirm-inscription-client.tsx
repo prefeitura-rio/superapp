@@ -21,14 +21,15 @@ import Link from 'next/link'
 import {
   type InscriptionFormData,
   type NearbyUnit,
-  type UserInfo,
+  type UserInfoComplete,
   inscriptionSchema,
 } from '../types'
 
 interface ConfirmInscriptionClientProps {
-  userInfo: UserInfo
+  userInfo: UserInfoComplete | { cpf: ''; name: '' }
   nearbyUnits: NearbyUnit[]
   courseId: string
+  courseSlug?: string
 }
 
 const TRANSITIONS = {
@@ -41,6 +42,7 @@ export function ConfirmInscriptionClient({
   userInfo,
   nearbyUnits,
   courseId,
+  courseSlug,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -117,7 +119,7 @@ export function ConfirmInscriptionClient({
       return
     }
     if (currentIndex === 0) {
-      router.back()
+      router.push(`/servicos/cursos/${courseSlug ?? ''}`)
       return
     }
     swiperRef.current?.swiper?.slidePrev()
@@ -207,7 +209,7 @@ export function ConfirmInscriptionClient({
       </div>
 
       {!showSuccess && (
-        <div className="flex-shrink-0 pb-8 pt-4">
+        <div className="flex-shrink-0 pb-12">
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
               <Link
@@ -216,7 +218,7 @@ export function ConfirmInscriptionClient({
                     ? 'opacity-100 translate-x-0 scale-100'
                     : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
                 }`}
-                href="/servicos/cursos/atualizar-dados"
+                href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
               >
                 Atualizar
               </Link>
