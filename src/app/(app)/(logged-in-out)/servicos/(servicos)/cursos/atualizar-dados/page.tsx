@@ -47,7 +47,7 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
       : 'Informação indisponível'
 
   return (
-    <div className="pt-20 min-h-lvh max-w-4xl mx-auto text-foreground flex flex-col">
+    <div className="pt-20 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
       <SecondaryHeader
         title=""
         route={
