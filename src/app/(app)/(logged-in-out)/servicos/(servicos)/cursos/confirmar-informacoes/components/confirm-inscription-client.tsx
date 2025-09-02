@@ -17,6 +17,7 @@ import { UserDescriptionSlide } from './slides/user-description-slide'
 
 import coursesApi from '@/actions/courses'
 
+import Link from 'next/link'
 import {
   type InscriptionFormData,
   type NearbyUnit,
@@ -209,16 +210,16 @@ export function ConfirmInscriptionClient({
         <div className="flex-shrink-0 pb-8 pt-4">
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
-              <CustomButton
-                className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-[50%] h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ${
+              <Link
+                className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-[50%] h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
                   showUpdateButton
                     ? 'opacity-100 translate-x-0 scale-100'
                     : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
                 }`}
-                onClick={() => {}}
+                href="/servicos/cursos/atualizar-dados"
               >
                 Atualizar
-              </CustomButton>
+              </Link>
             )}
 
             <CustomButton
