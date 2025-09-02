@@ -26,7 +26,6 @@ import {
   type NearbyUnit,
   createInscriptionSchema,
 } from '../types'
-import { UserDescriptionSlide } from './slides/user-description-slide'
 
 interface ConfirmInscriptionClientProps {
   userInfo: CourseUserInfo
@@ -119,16 +118,6 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     })),
-    {
-      id: 'user-description',
-      component: UserDescriptionSlide,
-      props: {
-        form,
-        fieldName: 'description',
-      },
-      showPagination: true,
-      showBackButton: true,
-    },
   ]
 
   const handleNext = async () => {
@@ -312,7 +301,7 @@ export function ConfirmInscriptionClient({
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
           ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
           ${
-            showNextButton || !showUpdateButton
+            !showSuccess
               ? 'opacity-100 translate-x-0 scale-100'
               : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
           }`}
