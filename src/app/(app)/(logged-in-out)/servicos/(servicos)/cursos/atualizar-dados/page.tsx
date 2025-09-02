@@ -30,8 +30,6 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
     }
   }
 
-  console.log(params)
-
   const formatedUserPhone =
     userInfoObj && 'telefone' in userInfoObj
       ? (formatUserPhone(
