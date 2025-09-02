@@ -5,6 +5,7 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { Separator } from '@/components/ui/separator'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
@@ -226,13 +227,58 @@ export function CourseDetails({
           </div>
         </div>
 
-        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
-
-        <div className="p-4 text-muted-foreground text-sm leading-relaxed">
+        <div className="px-4 py-8 text-muted-foreground text-sm leading-relaxed">
           {course.description || 'Descrição não disponível'}
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="px-4 pb-2 w-full max-w-4xl">{renderActionButton()}</div>
+
+        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
+
+        <div className="flex flex-col items-start px-4 gap-2">
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Data início
+            </div>
+            <div className="text-xs text-foreground md:text-sm">29.08.2025</div>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Data final
+            </div>
+            <div className="text-xs text-foreground md:text-sm">29.08.2025</div>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Horário
+            </div>
+            <div className="text-xs text-foreground md:text-sm">14h às 18h</div>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Período
+            </div>
+            <div className="text-xs text-foreground md:text-sm">Tarde</div>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Dias de aula
+            </div>
+            <div className="text-xs text-foreground md:text-sm">
+              Segunda, Quarta e Sexta
+            </div>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-1">
+            <div className="text-muted-foreground text-xs md:text-sm">
+              Vagas
+            </div>
+            <div className="text-xs text-foreground md:text-sm">30</div>
+          </div>
+        </div>
+
+        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
+
+        <div className="px-4 space-y-6">
           {course.pre_requisitos && (
             <div>
               <h2 className="text-base font-semibold mb-2">Pré-requisitos</h2>
@@ -242,14 +288,89 @@ export function CourseDetails({
             </div>
           )}
 
-          <div>
-            <h2 className="text-base font-semibold mb-2">Orientações gerais</h2>
-            <p className="text-sm text-muted-foreground">
-              A capacitação pode incluir atividades presenciais, e os
-              participantes devem seguir todas as orientações enviadas pela
-              instituição responsável.
-            </p>
-          </div>
+          {course.facilitator && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">Facilitador </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.facilitator || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.objectives && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Objetivos da capacitação{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.objectives || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.expected_results && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Resultados esperados{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.expected_results || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.program_content && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Conteúdo programático{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.program_content || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.methodology && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">Metodologia </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.methodology || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.resources_used && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Recursos utilizados{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.resources_used || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.material_used && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Material utilizado{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.material_used || 'Não informado'}
+              </p>
+            </div>
+          )}
+
+          {course.teaching_material && (
+            <div>
+              <h2 className="text-base font-semibold mb-2">
+                Material didático{' '}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {course.teaching_material || 'Não informado'}
+              </p>
+            </div>
+          )}
 
           <div>
             <h2 className="text-base font-semibold mb-2">Certificado</h2>
@@ -261,7 +382,7 @@ export function CourseDetails({
           </div>
         </div>
 
-        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
+        <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
       </div>
     </div>
   )
