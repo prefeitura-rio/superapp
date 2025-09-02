@@ -1,7 +1,7 @@
 'use client'
 
 import { formatCpf } from '@/lib/format-cpf'
-import { formatPhone } from '@/lib/format-phone'
+import { formatUserPhone } from '@/lib/format-phone'
 import { formatTitleCase } from '@/lib/utils'
 import type { CourseUserInfo } from '../../types'
 
@@ -13,7 +13,10 @@ interface ConfirmUserDataSlideProps {
   }
 }
 
-export default function ConfirmUserDataSlide({ userInfo, userAuthInfo }: ConfirmUserDataSlideProps) {
+export default function ConfirmUserDataSlide({
+  userInfo,
+  userAuthInfo,
+}: ConfirmUserDataSlideProps) {
   return (
     <div className="w-full space-y-10">
       <div className="text-left">
@@ -28,30 +31,24 @@ export default function ConfirmUserDataSlide({ userInfo, userAuthInfo }: Confirm
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
             CPF
           </p>
-          <p className="text-foreground font-normal">{formatCpf(userAuthInfo?.cpf)}</p>
+          <p className="text-foreground font-normal">
+            {formatCpf(userAuthInfo?.cpf)}
+          </p>
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
             Nome
           </p>
-          <p className="text-foreground font-normal">{ formatTitleCase(userAuthInfo?.name) || 'Informação indisponível'}</p>
+          <p className="text-foreground font-normal">
+            {formatTitleCase(userAuthInfo?.name) || 'Informação indisponível'}
+          </p>
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
             Celular
           </p>
           <p className="text-foreground font-normal">
-            {userInfo?.phone?.principal?.ddi &&
-             userInfo?.phone?.principal?.ddd &&
-             userInfo?.phone?.principal?.valor
-              ? formatPhone(
-                  userInfo.phone.principal.ddi,
-                  userInfo.phone.principal.ddd,
-                  userInfo.phone.principal.valor
-                )
-              : userInfo?.phone?.principal
-                ? 'Faltando informação'
-                : 'Informação indisponível'}
+            {formatUserPhone(userInfo?.phone)}
           </p>
         </div>
         <div className="py-1">
