@@ -28,8 +28,7 @@ export default function PhoneNumberForm() {
   const searchParams = useSearchParams()
 
   const isPhoneValid = isValidPhone(phone, country)
-  const isRedirectFromCourses =
-    searchParams.get('redirectFromCourses') === 'true'
+  const courseSlug = searchParams.get('redirectFromCourses')
 
   async function handleSave() {
     startTransition(async () => {
@@ -67,14 +66,14 @@ export default function PhoneNumberForm() {
     })
   }
 
+  const routeBackUrl = courseSlug
+    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+    : '/meu-perfil'
+
   function handleDrawerClose() {
     setDrawerOpen(false)
-    router.back()
+    router.push(routeBackUrl)
   }
-
-  const routeBackUrl = isRedirectFromCourses
-    ? '/servicos/cursos/atualizar-dados'
-    : '/meu-perfil'
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
