@@ -30,9 +30,7 @@ export default function CoursesHeader({ userInfo }: { userInfo: UserInfo }) {
           </Link>
 
           <Link
-            href={
-              userInfo.cpf ? '/servicos/cursos/opcoes' : '/servicos/cursos/faq'
-            }
+            href="/servicos/cursos/opcoes"
             className="rounded-full bg-card p-4"
           >
             <MenuIcon className="h-5 w-5 text-foreground" />
