@@ -1,10 +1,10 @@
 'use client'
 
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface CourseCardProps {
-  courseId?: number;
+  courseId?: number
   title?: string
   modality?: string
   workload?: string
@@ -22,31 +22,36 @@ export function CourseCard({
   institutionaLogo,
   coverImage,
 }: CourseCardProps) {
-
   return (
     <Link
       href={`/servicos/cursos/${courseId}`}
       className="w-[197px] rounded-xl overflow-hidden bg-background cursor-pointer group block"
     >
       <div className="relative w-full h-[120px] overflow-hidden rounded-xl">
-       {coverImage && (
-        <Image
-          src={coverImage}
-          alt="Imagem de capa do curso"
-          fill
-          className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-        />
-       )}
+        {coverImage && (
+          <Image
+            src={coverImage}
+            alt="Imagem de capa do curso"
+            fill
+            className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+          />
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
-          {institutionaLogo ? <Image src={institutionaLogo} alt="Logo da instituição" width={15} height={15} /> :
+          {institutionaLogo ? (
+            <Image
+              src={institutionaLogo}
+              alt="Logo da instituição"
+              width={15}
+              height={15}
+            />
+          ) : (
             <span className="text-[10px] font-semibold text-foreground uppercase">
               {title?.charAt(0)}
             </span>
-          
-          }
+          )}
         </div>
       </div>
 
@@ -55,7 +60,7 @@ export function CourseCard({
           {title}
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
-          {modality} • {workload} horas
+          {modality} • {workload}
         </p>
       </div>
     </Link>

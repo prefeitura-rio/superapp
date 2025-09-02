@@ -3,7 +3,7 @@
 import CicloCariocaIcon from '@/assets/ciclocarioca-icon.png'
 import { HomeIcon } from '@/assets/icons'
 import { MenuIcon } from '@/assets/icons/menu-icon'
-import { UserInfo } from '@/lib/user-info'
+import type { UserInfo } from '@/lib/user-info'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -29,7 +29,12 @@ export default function CoursesHeader({ userInfo }: { userInfo: UserInfo }) {
             <span className="sr-only">Search</span>
           </Link>
 
-          <Link href={userInfo.cpf ? "/servicos/cursos/opcoes" : "/servicos/cursos/faq"} className="rounded-full bg-card p-4">
+          <Link
+            href={
+              userInfo.cpf ? '/servicos/cursos/opcoes' : '/servicos/cursos/faq'
+            }
+            className="rounded-full bg-card p-4"
+          >
             <MenuIcon className="h-5 w-5 text-foreground" />
             <span className="sr-only">Options</span>
           </Link>

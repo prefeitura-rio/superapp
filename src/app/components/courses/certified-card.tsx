@@ -118,7 +118,7 @@ export function MyCertificatesCard() {
               {course.title}
             </p>
             <p className="text-xs text-muted-foreground mb-2">
-              {course.modality} • {course.workload} horas
+              {course.modality} • {course.workload}
             </p>
             <span
               className={cn(

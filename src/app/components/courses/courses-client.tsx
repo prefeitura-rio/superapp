@@ -3,11 +3,9 @@
 import CoursesHeader from '@/app/components/courses/courses-header'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
-import SearchPlaceholder from '@/app/components/search-placeholder'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { UserInfo } from '@/lib/user-info'
-import Link from 'next/link'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
 import { RecommendedCoursesSwipe } from './recommended-courses-swipe'
@@ -28,12 +26,12 @@ export default function CoursePageClient({
   return (
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
-      <main className="max-w-4xl mx-auto pt-15 pb-20 text-white">
-        <div className="mt-4">
+      <main className="max-w-4xl mx-auto pt-25 pb-20 text-white">
+        {/* <div className="mt-4">
           <SearchPlaceholder isCourseSearch />
-        </div>
+        </div> */}
 
-        <section className="mt-4 pb-8">
+        {/* <section className="mt-4 pb-8">
           <div className="w-full overflow-x-auto no-scrollbar">
             <div className="flex px-4 gap-4 w-max">
               {FILTERS.map(filter => (
@@ -54,7 +52,7 @@ export default function CoursePageClient({
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         <ResponsiveWrapper
           mobileComponent={<RecommendedCoursesCards courses={courses} />}

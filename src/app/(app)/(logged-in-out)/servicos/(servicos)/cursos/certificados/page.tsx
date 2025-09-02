@@ -6,11 +6,11 @@ export default function CoursesCertifiedPage() {
       <SecondaryHeader title="Certificados" />
 
       <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
-        <p className="block text-lg text-muted-foreground">
+        <p className="block text-lg text-muted-foreground text-center">
           Você ainda não possui nenhum certificado.
         </p>
       </div>
-     
+
       {/* <div className="relative overflow-hidden mt-15 px-4">
         <MyCertificatesCard />
       </div> */}
