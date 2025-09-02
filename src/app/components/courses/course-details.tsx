@@ -170,13 +170,14 @@ interface CourseHeaderProps {
 }
 
 function CourseHeader({ course, onBack }: CourseHeaderProps) {
+  const router = useRouter()
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
       <div className="flex justify-start">
         <IconButton
           icon={ChevronLeftIcon}
           className="top-4 left-4 absolute z-10"
-          onClick={onBack}
+          onClick={() => router.push('/servicos/cursos')}
         />
       </div>
       {course.cover_image && (

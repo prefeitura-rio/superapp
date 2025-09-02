@@ -60,6 +60,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
       nearbyUnits={nearbyUnits}
       courseInfo={courseInfo}
       courseId={courseUuid}
+      courseSlug={courseSlug}
     />
   )
 }
