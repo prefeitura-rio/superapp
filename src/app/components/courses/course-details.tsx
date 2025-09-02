@@ -157,7 +157,7 @@ function InfoRow({ label, value }: InfoRowProps) {
   if (!value) return null
 
   return (
-    <div className="flex flex-row items-center justify-start gap-1">
+    <div className="flex flex-row items-start justify-start gap-1">
       <div className="text-muted-foreground text-xs md:text-sm">{label}</div>
       <div className="text-xs text-foreground md:text-sm">{value}</div>
     </div>
@@ -216,12 +216,14 @@ function CourseInfo({ course }: CourseInfoProps) {
               height={25}
             />
           ) : (
-            <span className="text-[10px] font-semibold text-foreground uppercase">
+            <span className="text-2.5 font-semibold text-foreground uppercase">
               {course.organization?.charAt(0)}
             </span>
           )}
         </div>
-        <p>{course.organization || 'Instituição não informada'}</p>
+        <p className="text-xs md:text-sm">
+          {course.organization || 'Instituição não informada'}
+        </p>
       </div>
     </div>
   )
@@ -233,7 +235,7 @@ interface CourseMetadataProps {
 
 function CourseMetadata({ course }: CourseMetadataProps) {
   return (
-    <div className="flex justify-between px-4 pt-4 text-sm">
+    <div className="flex justify-between px-4 pt-4 text-xs md:text-sm">
       <div className="flex gap-4">
         <div>
           <p className="text-muted-foreground">Modalidade</p>
@@ -288,7 +290,10 @@ interface CourseContentProps {
 
 function CourseContent({ course }: CourseContentProps) {
   const contentSections = [
-    { key: 'pre_requisitos', title: 'Pré-requisitos' },
+    {
+      key: 'pre_requisitos',
+      title: 'Pré-requisitos para obtenção do certificado',
+    },
     { key: 'facilitator', title: 'Facilitador' },
     { key: 'objectives', title: 'Objetivos da capacitação' },
     { key: 'expected_results', title: 'Resultados esperados' },
@@ -299,6 +304,29 @@ function CourseContent({ course }: CourseContentProps) {
     { key: 'teaching_material', title: 'Material didático' },
   ]
 
+  const renderContentWithLineBreaks = (content: string) => {
+    const parts = content
+      .split(';')
+      .map(part => part.trim())
+      .filter(part => part.length > 0)
+
+    if (parts.length === 1) {
+      return (
+        <p className="text-xs md:text-sm text-muted-foreground">{content}</p>
+      )
+    }
+
+    return (
+      <div className="text-xs md:text-sm text-muted-foreground">
+        {parts.map((part, index) => (
+          <p key={index} className={index > 0 ? 'mt-1' : ''}>
+            {part}
+          </p>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="px-4 space-y-6">
       {contentSections.map(({ key, title }) => {
@@ -307,20 +335,22 @@ function CourseContent({ course }: CourseContentProps) {
 
         return (
           <div key={key}>
-            <h2 className="text-base font-semibold mb-2">{title}</h2>
-            <p className="text-sm text-muted-foreground">{content}</p>
+            <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
+              {title}
+            </h2>
+            {renderContentWithLineBreaks(content)}
           </div>
         )
       })}
 
-      <div>
-        <h2 className="text-base font-semibold mb-2">Certificado</h2>
-        <p className="text-sm text-muted-foreground">
+      {/* <div>
+        <h2 className="text-sm font-semibold mb-2">Certificado</h2>
+        <p className="text-xs md:text-sm text-muted-foreground">
           {course.has_certificate
             ? 'Os participantes que concluírem o curso com aproveitamento receberão certificado válido emitido pela instituição promotora.'
             : 'Este curso não oferece certificado.'}
         </p>
-      </div>
+      </div> */}
     </div>
   )
 }
@@ -373,7 +403,7 @@ export function CourseDetails({
 
   const renderActionButton = () => {
     const buttonClasses =
-      'block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+      'block text-sm w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
 
     if (isEnrolled) {
       return (
@@ -451,11 +481,15 @@ export function CourseDetails({
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
 
-        <div className="px-4 py-8 text-muted-foreground text-sm leading-relaxed">
+        <div className="px-4 py-8 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
           {course.description || 'Descrição não disponível'}
         </div>
 
-        <div className="px-4 pb-2 w-full max-w-4xl">{renderActionButton()}</div>
+        {!isEnrolled && (
+          <div className="px-4 pb-2 py-8 w-full max-w-4xl">
+            {renderActionButton()}
+          </div>
+        )}
 
         <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
 
