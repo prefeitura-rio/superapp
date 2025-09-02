@@ -5,6 +5,7 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { Separator } from '@/components/ui/separator'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
@@ -13,31 +14,330 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+// Types
 interface UserEnrollment {
   id: string
   status: 'pending' | 'approved' | 'rejected' | 'cancelled'
   course_id: number
 }
 
+interface RemoteClass {
+  id: string
+  curso_id: number
+  vacancies: number
+  class_start_date: string
+  class_end_date: string
+  class_time: string
+  class_days: string
+  created_at: string
+  updated_at: string
+}
+
+interface Location {
+  id: string
+  curso_id: number
+  address: string
+  neighborhood: string
+  vacancies: number
+  class_start_date: string
+  class_end_date: string
+  class_time: string
+  class_days: string
+  created_at: string
+  updated_at: string
+}
+
+interface Course {
+  id: number
+  title: string
+  description: string
+  enrollment_start_date: string
+  enrollment_end_date: string
+  organization: string
+  modalidade: string
+  theme: string
+  workload: string
+  target_audience: string
+  institutional_logo: string
+  cover_image: string
+  status: string
+  has_certificate: boolean
+  pre_requisitos?: string
+  facilitator?: string
+  objectives?: string
+  expected_results?: string
+  program_content?: string
+  methodology?: string
+  resources_used?: string
+  material_used?: string
+  teaching_material?: string
+  remote_class?: RemoteClass | null
+  locations?: Location[]
+}
+
+interface CourseScheduleInfo {
+  startDate: string | null
+  endDate: string | null
+  time: string | null
+  days: string | null
+  vacancies: number | null
+  address: string | null
+  neighborhood: string | null
+}
+
+interface CourseDetailsProps {
+  course: Course
+  userEnrollment: UserEnrollment | null
+  userInfo: UserInfo
+}
+
+// Utility functions
+const formatDate = (dateString: string | null): string | null => {
+  if (!dateString) return null
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('pt-BR').replace(/\//g, '.')
+  } catch {
+    return null
+  }
+}
+
+const getCourseScheduleInfo = (course: Course): CourseScheduleInfo => {
+  const modality = course.modalidade?.toLowerCase()
+
+  // Check for remote/online courses
+  if ((modality === 'online' || modality === 'remoto') && course.remote_class) {
+    return {
+      startDate: course.remote_class.class_start_date,
+      endDate: course.remote_class.class_end_date,
+      time: course.remote_class.class_time,
+      days: course.remote_class.class_days,
+      vacancies: course.remote_class.vacancies,
+      address: null,
+      neighborhood: null,
+    }
+  }
+
+  // Check for presencial/semipresencial courses
+  if (
+    (modality === 'presencial' || modality === 'semipresencial') &&
+    course.locations &&
+    course.locations.length > 0
+  ) {
+    const firstLocation = course.locations[0]
+    return {
+      startDate: firstLocation.class_start_date,
+      endDate: firstLocation.class_end_date,
+      time: firstLocation.class_time,
+      days: firstLocation.class_days,
+      vacancies: firstLocation.vacancies,
+      address: firstLocation.address,
+      neighborhood: firstLocation.neighborhood,
+    }
+  }
+
+  return {
+    startDate: null,
+    endDate: null,
+    time: null,
+    days: null,
+    vacancies: null,
+    address: null,
+    neighborhood: null,
+  }
+}
+
+// Sub-components
+interface InfoRowProps {
+  label: string
+  value: string | number | null
+}
+
+function InfoRow({ label, value }: InfoRowProps) {
+  if (!value) return null
+
+  return (
+    <div className="flex flex-row items-center justify-start gap-1">
+      <div className="text-muted-foreground text-xs md:text-sm">{label}</div>
+      <div className="text-xs text-foreground md:text-sm">{value}</div>
+    </div>
+  )
+}
+
+interface CourseHeaderProps {
+  course: Course
+  onBack: () => void
+}
+
+function CourseHeader({ course, onBack }: CourseHeaderProps) {
+  return (
+    <div className="h-[320px] md:h-[380px] w-full relative">
+      <div className="flex justify-start">
+        <IconButton
+          icon={ChevronLeftIcon}
+          className="top-4 left-4 absolute z-10"
+          onClick={onBack}
+        />
+      </div>
+      {course.cover_image && (
+        <Image
+          src={course.cover_image}
+          alt={course.title || ''}
+          fill
+          className="object-cover"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
+        <span className="text-white/80 text-sm capitalize">
+          {course.theme || 'Curso'}
+        </span>
+        <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
+          {course.title || 'Título não disponível'}
+        </h1>
+      </div>
+    </div>
+  )
+}
+
+interface CourseInfoProps {
+  course: Course
+}
+
+function CourseInfo({ course }: CourseInfoProps) {
+  return (
+    <div className="flex items-center justify-between p-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+          {course.institutional_logo ? (
+            <Image
+              src={course.institutional_logo}
+              alt="provider"
+              width={25}
+              height={25}
+            />
+          ) : (
+            <span className="text-[10px] font-semibold text-foreground uppercase">
+              {course.organization?.charAt(0)}
+            </span>
+          )}
+        </div>
+        <p>{course.organization || 'Instituição não informada'}</p>
+      </div>
+    </div>
+  )
+}
+
+interface CourseMetadataProps {
+  course: Course
+}
+
+function CourseMetadata({ course }: CourseMetadataProps) {
+  return (
+    <div className="flex justify-between px-4 pt-4 text-sm">
+      <div className="flex gap-4">
+        <div>
+          <p className="text-muted-foreground">Modalidade</p>
+          <p className="font-medium">{course.modalidade || 'Não informado'}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Carga horária</p>
+          <p className="font-medium">{course.workload || 'Não informado'}</p>
+        </div>
+        {course.enrollment_end_date && (
+          <div>
+            <p className="text-muted-foreground">Inscrições até</p>
+            <p className="font-medium">
+              {new Date(course.enrollment_end_date)
+                .toLocaleDateString('pt-BR')
+                .replace(/\//g, '.')}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+interface CourseScheduleProps {
+  scheduleInfo: CourseScheduleInfo
+}
+
+function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
+  return (
+    <div className="flex flex-col items-start px-4 gap-2">
+      <InfoRow label="Data início" value={formatDate(scheduleInfo.startDate)} />
+      <InfoRow label="Data final" value={formatDate(scheduleInfo.endDate)} />
+      <InfoRow label="Horário" value={scheduleInfo.time} />
+      <InfoRow label="Dias de aula" value={scheduleInfo.days} />
+      <InfoRow label="Vagas" value={scheduleInfo.vacancies} />
+      {scheduleInfo.address && (
+        <InfoRow
+          label="Endereço"
+          value={`${scheduleInfo.address}${
+            scheduleInfo.neighborhood ? ` - ${scheduleInfo.neighborhood}` : ''
+          }`}
+        />
+      )}
+    </div>
+  )
+}
+
+interface CourseContentProps {
+  course: Course
+}
+
+function CourseContent({ course }: CourseContentProps) {
+  const contentSections = [
+    { key: 'pre_requisitos', title: 'Pré-requisitos' },
+    { key: 'facilitator', title: 'Facilitador' },
+    { key: 'objectives', title: 'Objetivos da capacitação' },
+    { key: 'expected_results', title: 'Resultados esperados' },
+    { key: 'program_content', title: 'Conteúdo programático' },
+    { key: 'methodology', title: 'Metodologia' },
+    { key: 'resources_used', title: 'Recursos utilizados' },
+    { key: 'material_used', title: 'Material utilizado' },
+    { key: 'teaching_material', title: 'Material didático' },
+  ]
+
+  return (
+    <div className="px-4 space-y-6">
+      {contentSections.map(({ key, title }) => {
+        const content = course[key as keyof Course] as string
+        if (!content) return null
+
+        return (
+          <div key={key}>
+            <h2 className="text-base font-semibold mb-2">{title}</h2>
+            <p className="text-sm text-muted-foreground">{content}</p>
+          </div>
+        )
+      })}
+
+      <div>
+        <h2 className="text-base font-semibold mb-2">Certificado</h2>
+        <p className="text-sm text-muted-foreground">
+          {course.has_certificate
+            ? 'Os participantes que concluírem o curso com aproveitamento receberão certificado válido emitido pela instituição promotora.'
+            : 'Este curso não oferece certificado.'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// Main component
 export function CourseDetails({
   course,
   userEnrollment,
   userInfo,
-}: {
-  course: any
-  userEnrollment: UserEnrollment | null
-  userInfo: UserInfo
-}) {
-  const provider = course.organization
-  const cover_image = course.cover_image
-  const institutional_logo = course.institutional_logo
+}: CourseDetailsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  // Get enrollment information for the course
-  const enrollmentInfo = getCourseEnrollmentInfo(course)
+  const enrollmentInfo = getCourseEnrollmentInfo(course as any)
+  const scheduleInfo = getCourseScheduleInfo(course)
 
   const courseSubscriptionHref = userInfo.cpf
     ? `/servicos/cursos/confirmar-informacoes/${course.id}`
@@ -51,8 +351,7 @@ export function CourseDetails({
 
     try {
       const result = await deleteEnrollment(course.id, userEnrollment.id)
-      if (result.success) {
-      } else {
+      if (!result.success) {
         setError(result.error || 'Falha ao cancelar inscrição')
         console.error('Failed to cancel enrollment:', result.error)
       }
@@ -72,15 +371,17 @@ export function CourseDetails({
       userEnrollment.status
     )
 
-  // Render button based on enrollment status
   const renderActionButton = () => {
+    const buttonClasses =
+      'block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+
     if (isEnrolled) {
       return (
         <button
           type="button"
           onClick={() => setShowConfirmation(true)}
           disabled={isDeleting}
-          className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          className={buttonClasses}
         >
           Cancelar inscrição
         </button>
@@ -89,21 +390,14 @@ export function CourseDetails({
 
     if (enrollmentInfo.isDisabled) {
       return (
-        <button
-          type="button"
-          disabled
-          className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="button" disabled className={buttonClasses}>
           {enrollmentInfo.buttonText}
         </button>
       )
     }
 
     return (
-      <Link
-        href={courseSubscriptionHref}
-        className="block w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none"
-      >
+      <Link href={courseSubscriptionHref} className={buttonClasses}>
         {enrollmentInfo.buttonText}
       </Link>
     )
@@ -153,115 +447,25 @@ export function CourseDetails({
           </div>
         </BottomSheet>
 
-        <div className="h-[320px] md:h-[380px] w-full relative">
-          <div className="flex justify-start">
-            <IconButton
-              icon={ChevronLeftIcon}
-              className="top-4 left-4 absolute z-10"
-              onClick={() => router.back()}
-            />
-          </div>
-          {cover_image && (
-            <Image
-              src={course.cover_image || ''}
-              alt={course.title || ''}
-              fill
-              className="object-cover"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-            <span className="text-white/80 text-sm capitalize">
-              {course.theme || 'Curso'}
-            </span>
-            <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
-              {course.title || 'Título não disponível'}
-            </h1>
-          </div>
-        </div>
+        <CourseHeader course={course} onBack={() => router.back()} />
+        <CourseInfo course={course} />
+        <CourseMetadata course={course} />
 
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
-              {institutional_logo ? (
-                <Image
-                  src={institutional_logo}
-                  alt="provider"
-                  width={25}
-                  height={25}
-                />
-              ) : (
-                <span className="text-[10px] font-semibold text-foreground uppercase">
-                  {provider?.charAt(0)}
-                </span>
-              )}
-            </div>
-            <p>{provider || 'Instituição não informada'}</p>
-          </div>
-        </div>
-
-        <div className="flex justify-between p-4 text-sm">
-          <div className="flex gap-4">
-            <div>
-              <p className="text-muted-foreground">Modalidade</p>
-              <p className="font-medium">
-                {course.modalidade || 'Não informado'}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Carga horária</p>
-              <p className="font-medium">
-                {course.workload || 'Não informado'}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Inscrições até</p>
-              <p className="font-medium">
-                {course.enrollment_end_date
-                  ? new Date(course.enrollment_end_date).toLocaleDateString(
-                      'pt-BR'
-                    )
-                  : 'Não informado'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
-
-        <div className="p-4 text-muted-foreground text-sm leading-relaxed">
+        <div className="px-4 py-8 text-muted-foreground text-sm leading-relaxed">
           {course.description || 'Descrição não disponível'}
         </div>
 
-        <div className="p-4 space-y-6">
-          {course.pre_requisitos && (
-            <div>
-              <h2 className="text-base font-semibold mb-2">Pré-requisitos</h2>
-              <p className="text-sm text-muted-foreground">
-                {course.pre_requisitos}
-              </p>
-            </div>
-          )}
+        <div className="px-4 pb-2 w-full max-w-4xl">{renderActionButton()}</div>
 
-          <div>
-            <h2 className="text-base font-semibold mb-2">Orientações gerais</h2>
-            <p className="text-sm text-muted-foreground">
-              A capacitação pode incluir atividades presenciais, e os
-              participantes devem seguir todas as orientações enviadas pela
-              instituição responsável.
-            </p>
-          </div>
+        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
 
-          <div>
-            <h2 className="text-base font-semibold mb-2">Certificado</h2>
-            <p className="text-sm text-muted-foreground">
-              {course.has_certificate
-                ? 'Os participantes que concluírem o curso com aproveitamento receberão certificado válido emitido pela instituição promotora.'
-                : 'Este curso não oferece certificado.'}
-            </p>
-          </div>
-        </div>
+        <CourseSchedule scheduleInfo={scheduleInfo} />
 
-        <div className="p-4 w-full max-w-4xl">{renderActionButton()}</div>
+        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
+
+        <CourseContent course={course} />
+
+        <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
       </div>
     </div>
   )
