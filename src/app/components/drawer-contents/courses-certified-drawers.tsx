@@ -1,12 +1,7 @@
 'use client'
 
+import { DownloadIcon, EyeIcon, PrinterIcon, ShareIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
-import {
-  DownloadCloudIcon,
-  EyeOffIcon,
-  PrinterCheckIcon,
-  Share2Icon,
-} from 'lucide-react'
 import { MenuItem } from '../menu-item'
 
 interface CoursesCertifiedDrawerProps {
@@ -47,23 +42,23 @@ export function CoursesCertifiedDrawer({
 
         <div className="space-y-0">
           <MenuItem
-            icon={<DownloadCloudIcon className="h-5 w-5" />}
+            icon={<DownloadIcon className="h-5 w-5" />}
             label="Baixar"
             href="#"
             isFirst
           />
           <MenuItem
-            icon={<Share2Icon className="h-5 w-5" />}
+            icon={<ShareIcon className="h-5 w-5" />}
             label="Compartilhar"
             href="#"
           />
           <MenuItem
-            icon={<EyeOffIcon className="h-5 w-5" />}
+            icon={<EyeIcon className="h-5 w-5" />}
             label="Visualizar"
             href="#"
           />
           <MenuItem
-            icon={<PrinterCheckIcon className="h-5 w-5" />}
+            icon={<PrinterIcon className="h-5 w-5" />}
             label="Imprimir"
             href="#"
             isLast
