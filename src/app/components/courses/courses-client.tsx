@@ -23,6 +23,20 @@ export default function CoursePageClient({
   courses,
   userInfo,
 }: { courses: ModelsCurso[]; userInfo: UserInfo }) {
+  if (courses.length === 0) {
+    return (
+      <div className="min-h-lvh">
+        <CoursesHeader userInfo={userInfo} />
+        <main className="max-w-4xl mx-auto pt-30 pb-20 text-white">
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="text-lg text-muted-foreground text-center">
+              Nenhum curso encontrado
+            </p>
+          </div>
+        </main>
+      </div>
+    )
+  }
   return (
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
