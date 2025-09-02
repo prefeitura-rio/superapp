@@ -451,11 +451,15 @@ export function CourseDetails({
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
 
-        <div className="px-4 py-8 text-muted-foreground text-sm leading-relaxed">
+        <div className="px-4 py-8 pb-0 text-muted-foreground text-sm leading-relaxed">
           {course.description || 'Descrição não disponível'}
         </div>
 
-        <div className="px-4 pb-2 w-full max-w-4xl">{renderActionButton()}</div>
+        {!isEnrolled && (
+          <div className="px-4 pb-2 py-8 w-full max-w-4xl">
+            {renderActionButton()}
+          </div>
+        )}
 
         <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
 
