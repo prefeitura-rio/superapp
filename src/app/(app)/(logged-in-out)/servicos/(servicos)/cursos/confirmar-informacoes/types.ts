@@ -1,11 +1,18 @@
+import type { ModelsCitizen } from '@/http/models'
 import { z } from 'zod'
 
-export interface UserInfo {
+export interface UserAuthInfo {
   cpf: string
   name: string
-  email: string
-  phone: string
 }
+
+export interface EmptyUserInfo {
+  cpf: ''
+  name: ''
+}
+
+export type UserInfoComplete = UserAuthInfo & Partial<ModelsCitizen>
+export type UserInfoObj = UserInfoComplete | EmptyUserInfo
 
 export interface NearbyUnit {
   id: string
