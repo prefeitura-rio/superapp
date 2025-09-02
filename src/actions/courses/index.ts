@@ -182,11 +182,11 @@ const submitCourseApplication = async (
 ): Promise<any> => {
   await simulateDelay(1200)
 
-  console.log('=== INSCRIÇÃO NO CURSO ===')
-  console.log('Course ID:', courseId)
-  console.log('Dados da inscrição:', data)
-  console.log('Timestamp:', new Date().toISOString())
-  console.log('========================')
+  // console.log('=== INSCRIÇÃO NO CURSO ===')
+  // console.log('Course ID:', courseId)
+  // console.log('Dados da inscrição:', data)
+  // console.log('Timestamp:', new Date().toISOString())
+  // console.log('========================')
 
   // Simula resposta de sucesso
   return {

@@ -41,13 +41,11 @@ function getStatusColor(status: string) {
   }
 }
 
-export function MyCoursesCard({courses}: {courses: any}) {
-
-
+export function MyCoursesCard({ courses }: { courses: any }) {
   if (courses.length === 0) {
     return (
       <div className="overflow-hidden mt-4 px-4 flex justify-center items-center">
-        <p className="block text-lg text-muted-foreground">
+        <p className="block text-lg text-muted-foreground text-center">
           Você ainda não possui nenhum curso.
         </p>
       </div>

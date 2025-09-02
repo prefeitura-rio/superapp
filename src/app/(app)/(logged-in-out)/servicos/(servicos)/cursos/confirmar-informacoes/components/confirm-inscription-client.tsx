@@ -19,11 +19,11 @@ import { SuccessSlide } from './slides/success-slide'
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 import {
-  createInscriptionSchema,
   type CourseUserInfo,
   type CustomField,
   type InscriptionFormData,
   type NearbyUnit,
+  createInscriptionSchema,
 } from '../types'
 import { UserDescriptionSlide } from './slides/user-description-slide'
 
@@ -51,14 +51,6 @@ export function ConfirmInscriptionClient({
   courseInfo,
   courseId,
 }: ConfirmInscriptionClientProps) {
-  // Add console logging for all props
-  console.log('ConfirmInscriptionClient - userInfo:', userInfo)
-  console.log('ConfirmInscriptionClient - userAuthInfo:', userAuthInfo)
-  console.log('ConfirmInscriptionClient - nearbyUnits:', nearbyUnits)
-  console.log('ConfirmInscriptionClient - courseInfo:', courseInfo)
-  console.log('ConfirmInscriptionClient - courseId:', courseId)
-  console.log('ConfirmInscriptionClient - hasNearbyUnits:', nearbyUnits && nearbyUnits.length > 0)
-
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
@@ -70,17 +62,23 @@ export function ConfirmInscriptionClient({
   const { isBelowBreakpoint } = useViewportHeight(648)
 
   // Extract custom fields from course info
-  const customFields: CustomField[] = (courseInfo as any)?.data?.custom_fields || []
-  
+  const customFields: CustomField[] =
+    (courseInfo as any)?.data?.custom_fields || []
+
   const form = useForm<InscriptionFormData>({
-    resolver: zodResolver(createInscriptionSchema(nearbyUnits && nearbyUnits.length > 0, customFields)),
+    resolver: zodResolver(
+      createInscriptionSchema(
+        nearbyUnits && nearbyUnits.length > 0,
+        customFields
+      )
+    ),
     defaultValues: {
       unitId: nearbyUnits && nearbyUnits.length > 0 ? '' : 'no-units-available',
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
         customFields.map(field => [`custom_${field.id}`, ''])
-      )
+      ),
     },
   })
 
@@ -93,17 +91,21 @@ export function ConfirmInscriptionClient({
       showBackButton: true,
     },
     // Only show select-unit slide if there are nearby units available
-    ...(nearbyUnits && nearbyUnits.length > 0 ? [{
-      id: 'select-unit',
-      component: SelectUnitSlide,
-      props: {
-        nearbyUnits,
-        form,
-        fieldName: 'unitId',
-      },
-      showPagination: true,
-      showBackButton: true,
-    }] : []),
+    ...(nearbyUnits && nearbyUnits.length > 0
+      ? [
+          {
+            id: 'select-unit',
+            component: SelectUnitSlide,
+            props: {
+              nearbyUnits,
+              form,
+              fieldName: 'unitId',
+            },
+            showPagination: true,
+            showBackButton: true,
+          },
+        ]
+      : []),
     // Add custom field slides dynamically
     ...customFields.map(field => ({
       id: `custom-field-${field.id}`,
@@ -116,23 +118,17 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     })),
-      {
-        id: 'user-description',
-        component: UserDescriptionSlide,
-        props: {
-          form,
-          fieldName: 'description',
-        },
-        showPagination: true,
-        showBackButton: true,
+    {
+      id: 'user-description',
+      component: UserDescriptionSlide,
+      props: {
+        form,
+        fieldName: 'description',
       },
+      showPagination: true,
+      showBackButton: true,
+    },
   ]
-
-  // Log the slides configuration
-  // console.log('ConfirmInscriptionClient - slides:', slides.map(slide => ({ id: slide.id, component: slide.component.name })))
-  // console.log('ConfirmInscriptionClient - slides count:', slides.length)
-  // console.log('ConfirmInscriptionClient - customFields:', customFields)
-  // console.log('ConfirmInscriptionClient - customFields count:', customFields.length)
 
   const handleNext = async () => {
     if (currentIndex === slides.length - 1) {
@@ -142,16 +138,20 @@ export function ConfirmInscriptionClient({
       }
     } else {
       const currentSlide = slides[currentIndex]
-      if (currentSlide.id === 'select-unit' && nearbyUnits && nearbyUnits.length > 0) {
+      if (
+        currentSlide.id === 'select-unit' &&
+        nearbyUnits &&
+        nearbyUnits.length > 0
+      ) {
         const isValid = await form.trigger('unitId')
         if (!isValid) return
       }
-      
+
       // Validate custom fields if they are required
       if (currentSlide.id.startsWith('custom-field-')) {
         const fieldId = currentSlide.id.replace('custom-field-', '')
         const field = customFields.find(f => f.id === fieldId)
-        if (field && field.required) {
+        if (field?.required) {
           const fieldName = `custom_${field.id}` as keyof InscriptionFormData
           const isValid = await form.trigger(fieldName)
           if (!isValid) return
@@ -185,25 +185,32 @@ export function ConfirmInscriptionClient({
       try {
         const formData = form.getValues()
 
-                 const result = await submitCourseInscription({
-           courseId,
-           userInfo: {
-             cpf: userAuthInfo.cpf,
-             name: userAuthInfo.name,
-             email: userInfo.email?.principal?.valor,
-             phone: userInfo.phone?.principal?.ddi && userInfo.phone?.principal?.ddd && userInfo.phone?.principal?.valor
-               ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
-               : undefined
-           },
-           unitId: nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
-           customFields: customFields.map(field => ({
-             id: field.id,
-             title: field.title,
-             value: formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
-             required: field.required
-           })),
-           reason: formData.description || 'Inscrição realizada através do portal do cidadão'
-         })
+        const result = await submitCourseInscription({
+          courseId,
+          userInfo: {
+            cpf: userAuthInfo.cpf,
+            name: userAuthInfo.name,
+            email: userInfo.email?.principal?.valor,
+            phone:
+              userInfo.phone?.principal?.ddi &&
+              userInfo.phone?.principal?.ddd &&
+              userInfo.phone?.principal?.valor
+                ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
+                : undefined,
+          },
+          unitId:
+            nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
+          customFields: customFields.map(field => ({
+            id: field.id,
+            title: field.title,
+            value:
+              formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
+            required: field.required,
+          })),
+          reason:
+            formData.description ||
+            'Inscrição realizada através do portal do cidadão',
+        })
 
         if (!result.success) {
           throw new Error(result.error || 'Erro ao fazer inscrição')
@@ -215,7 +222,10 @@ export function ConfirmInscriptionClient({
       } catch (error) {
         console.error('Erro ao fazer inscrição:', error)
         // Error - show toast with specific error message
-        const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer inscrição. Tente novamente.'
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Erro ao fazer inscrição. Tente novamente.'
         toast.error(errorMessage)
         router.back()
         setFadeOut(false)

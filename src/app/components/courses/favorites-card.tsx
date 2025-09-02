@@ -99,7 +99,7 @@ export function FavoritesCard() {
               {course.title}
             </h3>
             <div className="text-xs text-muted-foreground">
-              {course.modality} • {course.workload} horas
+              {course.modality} • {course.workload}
             </div>
           </div>
         </Link>
