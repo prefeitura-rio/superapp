@@ -56,7 +56,7 @@ export const createInscriptionSchema = (
     unitId: hasNearbyUnits
       ? z.string().min(1, 'Selecione uma unidade')
       : z.string().optional(),
-    description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
+    description: z.string().optional(),
   }
 
   // Add custom fields dynamically

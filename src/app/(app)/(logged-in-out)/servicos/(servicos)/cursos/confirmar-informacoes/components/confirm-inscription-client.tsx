@@ -167,7 +167,53 @@ export function ConfirmInscriptionClient({
     swiperRef.current?.swiper?.slidePrev()
   }
 
+  // Function to find the first slide with missing required fields
+  const findFirstInvalidSlide = async (): Promise<number | null> => {
+    // Check unit selection if required
+    if (nearbyUnits && nearbyUnits.length > 0) {
+      const unitSlideIndex = slides.findIndex(
+        slide => slide.id === 'select-unit'
+      )
+      if (unitSlideIndex !== -1) {
+        const isUnitValid = await form.trigger('unitId')
+        if (!isUnitValid) {
+          return unitSlideIndex
+        }
+      }
+    }
+
+    // Check custom fields
+    for (let i = 0; i < customFields.length; i++) {
+      const field = customFields[i]
+      if (field.required) {
+        const fieldName = `custom_${field.id}` as keyof InscriptionFormData
+        const isFieldValid = await form.trigger(fieldName)
+        if (!isFieldValid) {
+          const customFieldSlideIndex = slides.findIndex(
+            slide => slide.id === `custom-field-${field.id}`
+          )
+          if (customFieldSlideIndex !== -1) {
+            return customFieldSlideIndex
+          }
+        }
+      }
+    }
+
+    return null
+  }
+
   const goToSuccess = async () => {
+    // First, check if there are any invalid required fields
+    const firstInvalidSlideIndex = await findFirstInvalidSlide()
+
+    if (firstInvalidSlideIndex !== null) {
+      // Navigate to the first invalid slide
+      setCurrentIndex(firstInvalidSlideIndex)
+      swiperRef.current?.swiper?.slideTo(firstInvalidSlideIndex)
+      return
+    }
+
+    // All fields are valid, proceed with submission
     setFadeOut(true)
     await delay(TRANSITIONS.FADE)
 
