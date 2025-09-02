@@ -28,10 +28,11 @@ export default function TokenInputForm() {
   const valor = searchParams.get('valor') || ''
   const ddd = searchParams.get('ddd') || ''
   const ddi = searchParams.get('ddi') || ''
+  const courseSlug = searchParams.get('redirectFromCourses') || ''
 
   const hasAutoSubmitted = useRef(false)
 
- async function handleSave() {
+  async function handleSave() {
     // Close keyboard when submitting
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
@@ -45,7 +46,7 @@ export default function TokenInputForm() {
           ddi,
           valor,
         } as ModelsPhoneVerificationValidateRequest)
-        
+
         if (result.success) {
           confetti({
             particleCount: 100,
@@ -56,19 +57,17 @@ export default function TokenInputForm() {
           setError(null)
         } else {
           // Handle specific error statuses
-          if (result.error === "Invalid or expired verification code") {
+          if (result.error === 'Invalid or expired verification code') {
             toast.error('Token inválido ou expirado')
             setError('Token inválido ou expirado.')
           } else {
             // For other API errors, show toast
-             toast.error('Oops! Houve um erro')
-             
+            toast.error('Oops! Houve um erro')
           }
         }
       } catch (error: any) {
         // For unexpected errors (network, etc.), redirect to session expired
-       router.push('/sessao-expirada')
-
+        router.push('/sessao-expirada')
       }
       setToken('')
     })
@@ -76,6 +75,12 @@ export default function TokenInputForm() {
 
   function handleDrawerClose() {
     setDrawerOpen(false)
+    if (courseSlug) {
+      router.push(
+        `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+      )
+      return
+    }
     router.push('/meu-perfil/informacoes-pessoais')
   }
 
