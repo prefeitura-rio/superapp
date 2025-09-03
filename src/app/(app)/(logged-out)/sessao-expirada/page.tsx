@@ -14,9 +14,22 @@ export default function SessionExpired() {
   const router = useRouter()
 
   const handleNavigation = () => {
-    try {
-      router.back()
-    } catch {
+    // Check if the referrer is from the same domain (our website B)
+    const currentDomain = window.location.origin
+    const referrerDomain = document.referrer
+      ? new URL(document.referrer).origin
+      : null
+
+    // Only go back if the referrer is from the same domain
+    if (referrerDomain === currentDomain) {
+      console.log('Same domain detected, using router.back()')
+      try {
+        router.back()
+      } catch {
+        router.push('/')
+      }
+    } else {
+      //External domain or no referrer, navigating to home
       router.push('/')
     }
   }
@@ -62,6 +75,7 @@ export default function SessionExpired() {
           {/* Create Account Link */}
           <div className="text-center mb-8">
             <button
+              type="button"
               onClick={handleNavigation}
               className="text-sm text-muted-foreground font-normal cursor-pointer"
             >
