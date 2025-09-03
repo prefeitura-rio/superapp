@@ -16,6 +16,7 @@ import CarteiraSectionSwipe, {
   CarteiraSectionSwipeSkeleton,
 } from '@/app/components/wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
+import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { fetchCategories } from '@/lib/categories'
 import {
   getDalCitizenCpfAvatar,
@@ -46,13 +47,13 @@ export default async function Home() {
   if (isLoggedIn) {
     // Fetch user's current avatar using DAL
     try {
-      const userAvatarResponse = await getDalCitizenCpfAvatar(userAuthInfo.cpf);
-     if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar) {
-        userAvatarUrl = userAvatarResponse.data.avatar.url || null;
-        userAvatarName = userAvatarResponse.data.avatar.name || null;
-    }
+      const userAvatarResponse = await getDalCitizenCpfAvatar(userAuthInfo.cpf)
+      if (userAvatarResponse.status === 200 && userAvatarResponse.data.avatar) {
+        userAvatarUrl = userAvatarResponse.data.avatar.url || null
+        userAvatarName = userAvatarResponse.data.avatar.name || null
+      }
     } catch (error) {
-      console.log("Could not fetch user avatar:", error);
+      console.log('Could not fetch user avatar:', error)
     }
 
     // Fetch wallet data
@@ -157,6 +158,8 @@ export default async function Home() {
   }
 
   const categories = await fetchCategories()
+  const categoriesSlice = categories.slice(0, -3)
+  const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
@@ -169,8 +172,8 @@ export default async function Home() {
 
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
-      <HeaderWrapper 
-        userName={userAuthInfo.name} 
+      <HeaderWrapper
+        userName={userAuthInfo.name}
         isLoggedIn={isLoggedIn}
         userAvatarUrl={userAvatarUrl}
         userAvatarName={userAvatarName}
@@ -184,7 +187,7 @@ export default async function Home() {
       />
 
       {/* Home Categories Grid*/}
-      <HomeCategoriesGrid categories={categories} />
+      <HomeCategoriesGrid categories={allCategories} />
 
       {/* Most Accessed Service Cards*/}
       <ResponsiveWrapper
