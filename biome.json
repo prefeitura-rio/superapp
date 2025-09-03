@@ -47,7 +47,8 @@
       "next-env.d.ts",
       "node_modules/**",
       "package-lock.json",
-      "src/http/**"
+      "src/http/**",
+      "src/http-courses/**"
     ]
   }
 }

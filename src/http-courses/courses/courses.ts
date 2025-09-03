@@ -11,15 +11,17 @@ import type {
   GetApiV1CoursesDrafts200,
   GetApiV1CoursesDraftsParams,
   GetApiV1CoursesParams,
+  GetApiV1UsersUserIdCourses200,
+  GetApiV1UsersUserIdCoursesParams,
   ModelsCurso,
   ModelsCursoBody,
   ModelsErrorResponse,
   PostApiV1Courses201,
   PostApiV1CoursesDraft201,
-  PutApiV1CoursesCourseId200
-} from '.././models';
+  PutApiV1CoursesCourseId200,
+} from '.././models'
 
-import { customFetch } from '../../../custom-fetch-course';
+import { customFetch } from '../../../custom-fetch-course'
 
 /**
  * Retorna lista paginada de cursos criados (status: "opened", "closed", "canceled")
@@ -34,39 +36,40 @@ export type getApiV1CoursesResponse500 = {
   data: ModelsErrorResponse
   status: 500
 }
-    
-export type getApiV1CoursesResponseComposite = getApiV1CoursesResponse200 | getApiV1CoursesResponse500;
-    
+
+export type getApiV1CoursesResponseComposite =
+  | getApiV1CoursesResponse200
+  | getApiV1CoursesResponse500
+
 export type getApiV1CoursesResponse = getApiV1CoursesResponseComposite & {
-  headers: Headers;
+  headers: Headers
 }
 
-export const getGetApiV1CoursesUrl = (params?: GetApiV1CoursesParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getGetApiV1CoursesUrl = (params?: GetApiV1CoursesParams) => {
+  const normalizedParams = new URLSearchParams()
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
-  });
+  })
 
-  const stringifiedParams = normalizedParams.toString();
+  const stringifiedParams = normalizedParams.toString()
 
-  return stringifiedParams.length > 0 ? `/api/v1/courses?${stringifiedParams}` : `/api/v1/courses`
+  return stringifiedParams.length > 0
+    ? `/api/v1/courses?${stringifiedParams}`
+    : `/api/v1/courses`
 }
 
-export const getApiV1Courses = async (params?: GetApiV1CoursesParams, options?: RequestInit): Promise<getApiV1CoursesResponse> => {
-  
-  return customFetch<getApiV1CoursesResponse>(getGetApiV1CoursesUrl(params),
-  {      
+export const getApiV1Courses = async (
+  params?: GetApiV1CoursesParams,
+  options?: RequestInit
+): Promise<getApiV1CoursesResponse> => {
+  return customFetch<getApiV1CoursesResponse>(getGetApiV1CoursesUrl(params), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
+    method: 'GET',
+  })
+}
 
 /**
  * Cria um novo curso no sistema (status: "opened")
@@ -81,33 +84,30 @@ export type postApiV1CoursesResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
-    
-export type postApiV1CoursesResponseComposite = postApiV1CoursesResponse201 | postApiV1CoursesResponse400;
-    
+
+export type postApiV1CoursesResponseComposite =
+  | postApiV1CoursesResponse201
+  | postApiV1CoursesResponse400
+
 export type postApiV1CoursesResponse = postApiV1CoursesResponseComposite & {
-  headers: Headers;
+  headers: Headers
 }
 
 export const getPostApiV1CoursesUrl = () => {
-
-
-  
-
   return `/api/v1/courses`
 }
 
-export const postApiV1Courses = async (modelsCursoBody: ModelsCursoBody, options?: RequestInit): Promise<postApiV1CoursesResponse> => {
-  
-  return customFetch<postApiV1CoursesResponse>(getPostApiV1CoursesUrl(),
-  {      
+export const postApiV1Courses = async (
+  modelsCursoBody: ModelsCursoBody,
+  options?: RequestInit
+): Promise<postApiV1CoursesResponse> => {
+  return customFetch<postApiV1CoursesResponse>(getPostApiV1CoursesUrl(), {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      modelsCursoBody,)
-  }
-);}
-
+    body: JSON.stringify(modelsCursoBody),
+  })
+}
 
 /**
  * Cria um curso e salva como rascunho (status: "draft")
@@ -122,33 +122,34 @@ export type postApiV1CoursesDraftResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
-    
-export type postApiV1CoursesDraftResponseComposite = postApiV1CoursesDraftResponse201 | postApiV1CoursesDraftResponse400;
-    
-export type postApiV1CoursesDraftResponse = postApiV1CoursesDraftResponseComposite & {
-  headers: Headers;
-}
+
+export type postApiV1CoursesDraftResponseComposite =
+  | postApiV1CoursesDraftResponse201
+  | postApiV1CoursesDraftResponse400
+
+export type postApiV1CoursesDraftResponse =
+  postApiV1CoursesDraftResponseComposite & {
+    headers: Headers
+  }
 
 export const getPostApiV1CoursesDraftUrl = () => {
-
-
-  
-
   return `/api/v1/courses/draft`
 }
 
-export const postApiV1CoursesDraft = async (modelsCursoBody: ModelsCursoBody, options?: RequestInit): Promise<postApiV1CoursesDraftResponse> => {
-  
-  return customFetch<postApiV1CoursesDraftResponse>(getPostApiV1CoursesDraftUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      modelsCursoBody,)
-  }
-);}
-
+export const postApiV1CoursesDraft = async (
+  modelsCursoBody: ModelsCursoBody,
+  options?: RequestInit
+): Promise<postApiV1CoursesDraftResponse> => {
+  return customFetch<postApiV1CoursesDraftResponse>(
+    getPostApiV1CoursesDraftUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsCursoBody),
+    }
+  )
+}
 
 /**
  * Retorna lista paginada de cursos salvos como rascunho (status: "draft")
@@ -163,39 +164,46 @@ export type getApiV1CoursesDraftsResponse500 = {
   data: ModelsErrorResponse
   status: 500
 }
-    
-export type getApiV1CoursesDraftsResponseComposite = getApiV1CoursesDraftsResponse200 | getApiV1CoursesDraftsResponse500;
-    
-export type getApiV1CoursesDraftsResponse = getApiV1CoursesDraftsResponseComposite & {
-  headers: Headers;
-}
 
-export const getGetApiV1CoursesDraftsUrl = (params?: GetApiV1CoursesDraftsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export type getApiV1CoursesDraftsResponseComposite =
+  | getApiV1CoursesDraftsResponse200
+  | getApiV1CoursesDraftsResponse500
+
+export type getApiV1CoursesDraftsResponse =
+  getApiV1CoursesDraftsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetApiV1CoursesDraftsUrl = (
+  params?: GetApiV1CoursesDraftsParams
+) => {
+  const normalizedParams = new URLSearchParams()
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
-  });
+  })
 
-  const stringifiedParams = normalizedParams.toString();
+  const stringifiedParams = normalizedParams.toString()
 
-  return stringifiedParams.length > 0 ? `/api/v1/courses/drafts?${stringifiedParams}` : `/api/v1/courses/drafts`
+  return stringifiedParams.length > 0
+    ? `/api/v1/courses/drafts?${stringifiedParams}`
+    : `/api/v1/courses/drafts`
 }
 
-export const getApiV1CoursesDrafts = async (params?: GetApiV1CoursesDraftsParams, options?: RequestInit): Promise<getApiV1CoursesDraftsResponse> => {
-  
-  return customFetch<getApiV1CoursesDraftsResponse>(getGetApiV1CoursesDraftsUrl(params),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
+export const getApiV1CoursesDrafts = async (
+  params?: GetApiV1CoursesDraftsParams,
+  options?: RequestInit
+): Promise<getApiV1CoursesDraftsResponse> => {
+  return customFetch<getApiV1CoursesDraftsResponse>(
+    getGetApiV1CoursesDraftsUrl(params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
 
 /**
  * Retorna dados completos de um curso específico
@@ -210,32 +218,32 @@ export type getApiV1CoursesCourseIdResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
-    
-export type getApiV1CoursesCourseIdResponseComposite = getApiV1CoursesCourseIdResponse200 | getApiV1CoursesCourseIdResponse400;
-    
-export type getApiV1CoursesCourseIdResponse = getApiV1CoursesCourseIdResponseComposite & {
-  headers: Headers;
-}
 
-export const getGetApiV1CoursesCourseIdUrl = (courseId: number,) => {
+export type getApiV1CoursesCourseIdResponseComposite =
+  | getApiV1CoursesCourseIdResponse200
+  | getApiV1CoursesCourseIdResponse400
 
+export type getApiV1CoursesCourseIdResponse =
+  getApiV1CoursesCourseIdResponseComposite & {
+    headers: Headers
+  }
 
-  
-
+export const getGetApiV1CoursesCourseIdUrl = (courseId: number) => {
   return `/api/v1/courses/${courseId}`
 }
 
-export const getApiV1CoursesCourseId = async (courseId: number, options?: RequestInit): Promise<getApiV1CoursesCourseIdResponse> => {
-  
-  return customFetch<getApiV1CoursesCourseIdResponse>(getGetApiV1CoursesCourseIdUrl(courseId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
+export const getApiV1CoursesCourseId = async (
+  courseId: number,
+  options?: RequestInit
+): Promise<getApiV1CoursesCourseIdResponse> => {
+  return customFetch<getApiV1CoursesCourseIdResponse>(
+    getGetApiV1CoursesCourseIdUrl(courseId),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
 
 /**
  * Atualiza um curso existente. Também usado para publicar rascunhos mudando status de "draft" para "opened"
@@ -250,34 +258,35 @@ export type putApiV1CoursesCourseIdResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
-    
-export type putApiV1CoursesCourseIdResponseComposite = putApiV1CoursesCourseIdResponse200 | putApiV1CoursesCourseIdResponse400;
-    
-export type putApiV1CoursesCourseIdResponse = putApiV1CoursesCourseIdResponseComposite & {
-  headers: Headers;
-}
 
-export const getPutApiV1CoursesCourseIdUrl = (courseId: number,) => {
+export type putApiV1CoursesCourseIdResponseComposite =
+  | putApiV1CoursesCourseIdResponse200
+  | putApiV1CoursesCourseIdResponse400
 
+export type putApiV1CoursesCourseIdResponse =
+  putApiV1CoursesCourseIdResponseComposite & {
+    headers: Headers
+  }
 
-  
-
+export const getPutApiV1CoursesCourseIdUrl = (courseId: number) => {
   return `/api/v1/courses/${courseId}`
 }
 
-export const putApiV1CoursesCourseId = async (courseId: number,
-    modelsCursoBody: ModelsCursoBody, options?: RequestInit): Promise<putApiV1CoursesCourseIdResponse> => {
-  
-  return customFetch<putApiV1CoursesCourseIdResponse>(getPutApiV1CoursesCourseIdUrl(courseId),
-  {      
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      modelsCursoBody,)
-  }
-);}
-
+export const putApiV1CoursesCourseId = async (
+  courseId: number,
+  modelsCursoBody: ModelsCursoBody,
+  options?: RequestInit
+): Promise<putApiV1CoursesCourseIdResponse> => {
+  return customFetch<putApiV1CoursesCourseIdResponse>(
+    getPutApiV1CoursesCourseIdUrl(courseId),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsCursoBody),
+    }
+  )
+}
 
 /**
  * Remove um curso pelo ID
@@ -292,30 +301,85 @@ export type deleteApiV1CoursesCourseIdResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
-    
-export type deleteApiV1CoursesCourseIdResponseComposite = deleteApiV1CoursesCourseIdResponse200 | deleteApiV1CoursesCourseIdResponse400;
-    
-export type deleteApiV1CoursesCourseIdResponse = deleteApiV1CoursesCourseIdResponseComposite & {
-  headers: Headers;
-}
 
-export const getDeleteApiV1CoursesCourseIdUrl = (courseId: number,) => {
+export type deleteApiV1CoursesCourseIdResponseComposite =
+  | deleteApiV1CoursesCourseIdResponse200
+  | deleteApiV1CoursesCourseIdResponse400
 
+export type deleteApiV1CoursesCourseIdResponse =
+  deleteApiV1CoursesCourseIdResponseComposite & {
+    headers: Headers
+  }
 
-  
-
+export const getDeleteApiV1CoursesCourseIdUrl = (courseId: number) => {
   return `/api/v1/courses/${courseId}`
 }
 
-export const deleteApiV1CoursesCourseId = async (courseId: number, options?: RequestInit): Promise<deleteApiV1CoursesCourseIdResponse> => {
-  
-  return customFetch<deleteApiV1CoursesCourseIdResponse>(getDeleteApiV1CoursesCourseIdUrl(courseId),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
+export const deleteApiV1CoursesCourseId = async (
+  courseId: number,
+  options?: RequestInit
+): Promise<deleteApiV1CoursesCourseIdResponse> => {
+  return customFetch<deleteApiV1CoursesCourseIdResponse>(
+    getDeleteApiV1CoursesCourseIdUrl(courseId),
+    {
+      ...options,
+      method: 'DELETE',
+    }
+  )
+}
+
+/**
+ * Retorna lista paginada de cursos criados por um usuário/organização
+ * @summary Listar cursos de um usuário específico
+ */
+export type getApiV1UsersUserIdCoursesResponse200 = {
+  data: GetApiV1UsersUserIdCourses200
+  status: 200
+}
+
+export type getApiV1UsersUserIdCoursesResponse400 = {
+  data: ModelsErrorResponse
+  status: 400
+}
+
+export type getApiV1UsersUserIdCoursesResponseComposite =
+  | getApiV1UsersUserIdCoursesResponse200
+  | getApiV1UsersUserIdCoursesResponse400
+
+export type getApiV1UsersUserIdCoursesResponse =
+  getApiV1UsersUserIdCoursesResponseComposite & {
+    headers: Headers
   }
-);}
 
+export const getGetApiV1UsersUserIdCoursesUrl = (
+  userId: number,
+  params?: GetApiV1UsersUserIdCoursesParams
+) => {
+  const normalizedParams = new URLSearchParams()
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/users/${userId}/courses?${stringifiedParams}`
+    : `/api/v1/users/${userId}/courses`
+}
+
+export const getApiV1UsersUserIdCourses = async (
+  userId: number,
+  params?: GetApiV1UsersUserIdCoursesParams,
+  options?: RequestInit
+): Promise<getApiV1UsersUserIdCoursesResponse> => {
+  return customFetch<getApiV1UsersUserIdCoursesResponse>(
+    getGetApiV1UsersUserIdCoursesUrl(userId, params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}

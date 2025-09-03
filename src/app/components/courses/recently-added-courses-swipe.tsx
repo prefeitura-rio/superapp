@@ -1,7 +1,7 @@
 'use client'
 
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
-import { ModelsCurso } from '@/http-courses/models'
+import type { ModelsCurso } from '@/http-courses/models'
 import { CourseCard } from './courses-card'
 
 interface RecentlyAddedCoursesSwipeProps {
@@ -11,7 +11,6 @@ interface RecentlyAddedCoursesSwipeProps {
 export function RecentlyAddedCoursesSwipe({
   courses,
 }: RecentlyAddedCoursesSwipeProps) {
-
   if (!courses.length) return null
 
   return (
@@ -37,14 +36,14 @@ export function RecentlyAddedCoursesSwipe({
               >
                 {slideCourses.map(course => (
                   <CourseCard
-                    key={course.id}
-                    courseId={course.id}
-                    title={course.title}
-                    modality={course.modalidade}
-                    workload={course.workload}
-                    institutionaLogo={course.institutional_logo}
-                    provider={course.organization}
-                    coverImage={course.cover_image}
+                    key={course.id as string}
+                    courseId={course.id as number}
+                    title={course.title as string}
+                    modality={course.modalidade as string}
+                    workload={course.workload as string}
+                    institutionaLogo={course.institutional_logo as string}
+                    provider={course.organization as string}
+                    coverImage={course.cover_image as string}
                   />
                 ))}
               </div>
