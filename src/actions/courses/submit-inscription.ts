@@ -1,9 +1,9 @@
 'use server'
 
-import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes';
-import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao';
-import { revalidateDalCourseEnrollment } from '@/lib/dal';
-import { v4 as uuidv4 } from 'uuid';
+import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
+import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao'
+import { revalidateDalCourseEnrollment } from '@/lib/dal'
+import { v4 as uuidv4 } from 'uuid'
 
 // Generate a UUID v4 using crypto.randomUUID()
 function generateUUID(): string {
@@ -28,7 +28,9 @@ interface SubmitInscriptionData {
   reason: string
 }
 
-export async function submitCourseInscription(data: SubmitInscriptionData): Promise<{
+export async function submitCourseInscription(
+  data: SubmitInscriptionData
+): Promise<{
   success: boolean
   data?: any
   error?: string
@@ -44,7 +46,7 @@ export async function submitCourseInscription(data: SubmitInscriptionData): Prom
     // Create the inscription payload according to ModelsInscricao
     const inscriptionPayload: ModelsInscricao = {
       id: uuidv4(),
-      course_id: parseInt(data.courseId),
+      course_id: Number.parseInt(data.courseId),
       cpf: data.userInfo.cpf,
       name: data.userInfo.name,
       email: data.userInfo.email,
@@ -59,33 +61,36 @@ export async function submitCourseInscription(data: SubmitInscriptionData): Prom
 
     // Submit to the API
     const response = await postApiV1CoursesCourseIdEnrollments(
-      parseInt(data.courseId),
+      Number.parseInt(data.courseId),
       inscriptionPayload
     )
 
     if (response.status === 201) {
       console.log('Inscription submitted successfully:', response.data)
-      
+
       // Revalidate the enrollment cache for this user and course
       // This ensures the UI updates automatically when the user returns to the course page
-      await revalidateDalCourseEnrollment(parseInt(data.courseId), data.userInfo.cpf)
-      
+      await revalidateDalCourseEnrollment(
+        Number.parseInt(data.courseId),
+        data.userInfo.cpf
+      )
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       }
-    } else {
-      console.error(`API returned status ${response.status}`)
-      return {
-        success: false,
-        error: `Erro ao inscrever-se no curso`
-      }
+    }
+
+    console.error(`API returned status ${response.status}`)
+    return {
+      success: false,
+      error: 'Erro ao inscrever-se no curso',
     }
   } catch (error) {
     console.error('Error submitting inscription:', error)
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     }
   }
 }

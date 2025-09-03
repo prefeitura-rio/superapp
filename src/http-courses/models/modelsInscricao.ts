@@ -5,23 +5,5 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
-import type { ModelsCurso } from './modelsCurso';
-import type { ModelsInscricaoCustomFields } from './modelsInscricaoCustomFields';
-import type { ModelsStatusInscricao } from './modelsStatusInscricao';
 
-export interface ModelsInscricao {
-  admin_notes?: string;
-  course_id?: number;
-  cpf?: string;
-  /** Relacionamentos */
-  curso?: ModelsCurso;
-  custom_fields?: ModelsInscricaoCustomFields[] //force array 
-  email?: string;
-  enrolled_at?: string;
-  id?: string;
-  name?: string;
-  phone?: string;
-  reason?: string;
-  status?: ModelsStatusInscricao;
-  updated_at?: string;
-}
+export interface ModelsInscricao { [key: string]: unknown }

@@ -21,15 +21,15 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
   const endDates: Date[] = []
 
   // Check remote_class (online courses)
-  if (course.remote_class?.class_end_date) {
-    endDates.push(new Date(course.remote_class.class_end_date))
+  if ((course.remote_class as any)?.class_end_date) {
+    endDates.push(new Date((course.remote_class as any).class_end_date))
   }
 
   // Check locations (in-person/semi-in-person courses)
-  if (course.locations && course.locations.length > 0) {
-    for (const location of course.locations) {
-      if (location.class_end_date) {
-        endDates.push(new Date(location.class_end_date))
+  if ((course.locations as any) && (course.locations as any).length > 0) {
+    for (const location of course.locations as any) {
+      if ((location as any).class_end_date) {
+        endDates.push(new Date((location as any).class_end_date))
       }
     }
   }
@@ -80,7 +80,7 @@ export function getCourseEnrollmentInfo(
 
   // Check if enrollment start date is in the future
   if (course.enrollment_start_date) {
-    const enrollmentStartDate = new Date(course.enrollment_start_date)
+    const enrollmentStartDate = new Date(course.enrollment_start_date as string)
     if (now < enrollmentStartDate) {
       return {
         status: 'coming_soon',
@@ -104,7 +104,7 @@ export function getCourseEnrollmentInfo(
 
   // Check if enrollment end date has passed (only if class hasn't ended)
   if (course.enrollment_end_date) {
-    const enrollmentEndDate = new Date(course.enrollment_end_date)
+    const enrollmentEndDate = new Date(course.enrollment_end_date as string)
     if (now > enrollmentEndDate) {
       return {
         status: 'enrollment_closed',

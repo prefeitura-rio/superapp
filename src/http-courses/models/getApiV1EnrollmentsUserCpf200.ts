@@ -6,4 +6,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsAcessibilidade { [key: string]: unknown }
+export type GetApiV1EnrollmentsUserCpf200 = { [key: string]: unknown };
