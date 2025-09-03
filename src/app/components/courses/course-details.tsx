@@ -404,7 +404,7 @@ export function CourseDetails({
 
   const renderActionButton = () => {
     const buttonClasses =
-      'block text-sm w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+      'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
 
     if (isEnrolled) {
       return (
@@ -451,13 +451,13 @@ export function CourseDetails({
           title="Confirmar cancelamento"
           headerClassName="text-center p-0 mb-6"
         >
-          <div className="text-center p-4">
-            <h2 className="text-md mb-4">Confirmar cancelamento</h2>
-            <p className="text-muted-foreground mb-6">
+          <div className="text-center p-2">
+            <h2 className="text-base mb-4">Confirmar cancelamento</h2>
+            <p className="text-muted-foreground mb-2">
               Tem certeza que deseja cancelar sua inscrição neste curso?
             </p>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-4">
+          <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-2">
             <CustomButton
               variant="primary"
               size="lg"
