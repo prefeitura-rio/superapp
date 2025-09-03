@@ -2,6 +2,8 @@
 
 import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
 import { ChevronLeftIcon } from '@/assets/icons'
+import { CourseStatusCard } from './course-status-card'
+
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
@@ -236,7 +238,7 @@ interface CourseMetadataProps {
 
 function CourseMetadata({ course }: CourseMetadataProps) {
   return (
-    <div className="flex justify-between px-4 pt-4 text-xs md:text-sm">
+    <div className="flex justify-between px-4 text-xs md:text-sm">
       <div className="flex gap-4">
         <div>
           <p className="text-muted-foreground">Modalidade</p>
@@ -406,6 +408,15 @@ export function CourseDetails({
     const buttonClasses =
       'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
 
+    // Handle rejected status specifically
+    if (userEnrollment?.status === 'rejected') {
+      return (
+        <button type="button" disabled className={buttonClasses}>
+          Inscrição recusada
+        </button>
+      )
+    }
+
     if (isEnrolled) {
       return (
         <button
@@ -443,7 +454,6 @@ export function CourseDetails({
             <p className="text-destructive text-sm">{error}</p>
           </div>
         )}
-
         {/* Confirmation Bottom Sheet */}
         <BottomSheet
           open={showConfirmation}
@@ -477,29 +487,27 @@ export function CourseDetails({
             </CustomButton>
           </div>
         </BottomSheet>
-
         <CourseHeader course={course} onBack={() => router.back()} />
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
-
-        <div className="px-4 py-8 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
+        {userEnrollment?.status && (
+          <CourseStatusCard
+            status={userEnrollment.status as any}
+            className="mx-4"
+          />
+        )}
+        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
           {course.description || 'Descrição não disponível'}
         </div>
-
         {!isEnrolled && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
             {renderActionButton()}
           </div>
         )}
-
         <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
-
         <CourseSchedule scheduleInfo={scheduleInfo} />
-
         <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
-
         <CourseContent course={course} />
-
         <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
       </div>
     </div>
