@@ -57,8 +57,8 @@ export const getGetApiV1CoursesUrl = (params?: GetApiV1CoursesParams) => {
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `/api/v1/courses?${stringifiedParams}`
-    : `/api/v1/courses`
+    ? `/api/public/courses?${stringifiedParams}`
+    : `/api/public/courses` //forced
 }
 
 export const getApiV1Courses = async (
@@ -229,7 +229,7 @@ export type getApiV1CoursesCourseIdResponse =
   }
 
 export const getGetApiV1CoursesCourseIdUrl = (courseId: number) => {
-  return `/api/v1/courses/${courseId}`
+  return `/api/public/courses/${courseId}` //forced
 }
 
 export const getApiV1CoursesCourseId = async (
