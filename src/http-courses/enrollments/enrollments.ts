@@ -11,7 +11,7 @@ import type {
   ModelsErrorResponse
 } from '.././models';
 
-import { customFetch } from '../../../custom-fetch';
+import { customFetch } from '../../../custom-fetch-course';
 
 /**
  * Retorna lista paginada de inscrições realizadas por um usuário (identificado pelo CPF)

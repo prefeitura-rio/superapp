@@ -179,7 +179,7 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
         <IconButton
           icon={ChevronLeftIcon}
           className="top-4 left-4 absolute z-10"
-          onClick={() => router.push('/servicos/cursos')}
+          onClick={() => router.back()}
         />
       </div>
       {course.cover_image && (
