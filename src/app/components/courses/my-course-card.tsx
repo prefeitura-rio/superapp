@@ -1,6 +1,5 @@
 'use client'
 
-import { createCourseSlug } from '@/actions/courses/utils-mock'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '../../../lib/utils'
@@ -75,7 +74,7 @@ export function MyCoursesCard({
       {courses.map(course => (
         <Link
           key={course.id}
-          href={`/servicos/cursos/${createCourseSlug(course.id, course.title)}`}
+          href={`/servicos/cursos/${course.id}`}
           className="flex items-start gap-3 rounded-lg py-3 bg-background transition cursor-pointer group"
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl">
