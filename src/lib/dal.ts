@@ -16,11 +16,11 @@ import { revalidateTag, unstable_cache } from 'next/cache'
 // 30-minute cache provides optimal balance of performance and data freshness
 export async function getDalCitizenCpfWallet(cpf: string) {
   return await getCitizenCpfWallet(cpf, {
-    cache: 'force-cache',
-    next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
-      tags: [`wallet-${cpf}`], // Tag for selective revalidation
-    },
+    cache: 'no-store',
+    // next: {
+    //   revalidate: 600, // 10 minutes - optimal for high traffic
+    //   tags: [`wallet-${cpf}`], // Tag for selective revalidation
+    // },
   })
 }
 
@@ -30,7 +30,7 @@ export async function getDalCitizenCpf(cpf: string) {
   return await getCitizenCpf(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`user-info-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -42,7 +42,7 @@ export async function getDalCitizenCpfFirstlogin(cpf: string) {
   return await getCitizenCpfFirstlogin(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`firstlogin-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -57,7 +57,7 @@ export async function getDalCitizenCpfMaintenanceRequest(
   return await getCitizenCpfMaintenanceRequest(cpf, params, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`maintenance-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -73,11 +73,11 @@ export async function getDalCourseEnrollment(courseId: number, cpf: string) {
       limit: 1,
     },
     {
-      cache: 'force-cache',
-      next: {
-        revalidate: 600, // 10 minutes - optimal for enrollment status changes
-        tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
-      },
+      cache: 'no-store',
+      // next: {
+      //   revalidate: 600, // 10 minutes - optimal for enrollment status changes
+      //   tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+      // },
     }
   )
 }
@@ -90,7 +90,7 @@ export const getDalHealthUnitInfo = unstable_cache(
   },
   ['health-unit-info'],
   {
-    revalidate: 3600, // 1 hour
+    revalidate: 600, // 10 minutes
     tags: ['health-unit-info'],
   }
 )
@@ -117,7 +117,7 @@ export async function getDalAvatars() {
   return await getV1Avatars(undefined, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes
+      revalidate: 600, // 10 minutes
       tags: ['available-avatars'],
     },
   })
@@ -129,7 +129,7 @@ export async function getDalCitizenCpfAvatar(cpf: string) {
   return await getV1CitizenCpfAvatar(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for user data
+      revalidate: 600, // 10 minutes - optimal for user data
       tags: [`user-avatar-${cpf}`], // Tag for selective revalidation
     },
   })
