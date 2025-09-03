@@ -2,6 +2,7 @@
 
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
+import { categoriesUrl } from '@/constants/aditional-services'
 import type { Category } from '@/lib/categories'
 import { useEffect, useState } from 'react'
 import { CategoryLink } from './category-link'
@@ -82,7 +83,7 @@ export default function HomeCategoriesGrid({
                           key={category.categorySlug}
                           category={category}
                           position={globalPosition}
-                          href={`/servicos/categoria/${category.categorySlug}`}
+                          href={categoriesUrl(category.categorySlug)}
                         >
                           <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
                             <div className="flex items-center justify-center text-3xl mb-1">
