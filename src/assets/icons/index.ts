@@ -7,6 +7,7 @@ import { DownloadIcon } from './download-icon'
 import { EditIcon } from './edit-icon'
 import { EyeIcon } from './eye-icon'
 import { GlobeIcon } from './globe-icon'
+import { HelpCircleIcon } from './help-circle-icon'
 import { HomeIcon } from './home-icon'
 import { InfoIcon } from './info-icon'
 import { LogoutIcon } from './logout-icon'
@@ -39,6 +40,7 @@ export {
   EditIcon,
   EyeIcon,
   GlobeIcon,
+  HelpCircleIcon,
   HomeIcon,
   InfoIcon,
   LogoutIcon,
