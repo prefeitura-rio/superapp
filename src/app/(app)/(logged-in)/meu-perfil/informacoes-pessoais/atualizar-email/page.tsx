@@ -11,12 +11,14 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import { useEmailSuggestion } from '@/hooks/useEmailSuggestion'
 import { useInputValidation } from '@/hooks/useInputValidation'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import confetti from 'canvas-confetti'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
+import { EmailFeedback } from './email-feedback'
 
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z][a-zA-Z-]*\.)+[a-zA-Z]{2,}$/
@@ -30,6 +32,7 @@ export default function EmailForm() {
   const [email, setEmail] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const { suggestion, acceptSuggestion } = useEmailSuggestion(email, setEmail)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -127,10 +130,17 @@ export default function EmailForm() {
             showClearButton
           />
         </form>
+        <EmailFeedback
+          email={email}
+          emailStateInput={emailStateInput}
+          suggestion={suggestion}
+          onAcceptSuggestion={acceptSuggestion}
+        />
         <CustomButton
           size="xl"
           fullWidth
           onClick={handleSave}
+          className="-mt-5"
           disabled={isPending || emailStateInput !== 'success'}
         >
           {isPending ? 'Salvando...' : 'Salvar'}
