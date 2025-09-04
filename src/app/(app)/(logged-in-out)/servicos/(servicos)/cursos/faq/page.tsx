@@ -1,9 +1,9 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 
-export default function FaqPage() {
+export default function FaqPageCourses() {
   const sections = [
     {
-      title: 'O que é a Plataforma GoRio?',
+      title: 'O que é a Plataforma Ciclo Carioca?',
       content:
         'O Ciclo Carioca é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos oferecidos pela Prefeitura do Rio e instituições parceiras. ',
     },
