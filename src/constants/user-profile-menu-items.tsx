@@ -1,4 +1,10 @@
-import { CheckIcon, MapPinIcon, SettingsIcon, UserIcon } from '@/assets/icons'
+import {
+  CheckIcon,
+  HelpCircleIcon,
+  MapPinIcon,
+  SettingsIcon,
+  UserIcon,
+} from '@/assets/icons'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -38,5 +44,11 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     icon: <SettingsIcon className="h-5 w-5" />,
     label: 'Configurações',
     href: '/meu-perfil/configuracoes',
+  },
+  {
+    id: 'faq',
+    icon: <HelpCircleIcon className="h-5 w-5" />,
+    label: 'FAQ',
+    href: '/faq',
   },
 ] as const
