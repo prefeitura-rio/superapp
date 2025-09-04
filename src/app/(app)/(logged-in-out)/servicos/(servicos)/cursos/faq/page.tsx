@@ -45,7 +45,7 @@ export default function FaqPage() {
     },
   ]
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto pt-15 text-foreground">
+    <main className="max-w-4xl min-h-lvh mx-auto pt-15 text-foreground pb-10">
       <SecondaryHeader title="FAQ" />
       <div className="p-5 pt-10 max-w-4xl mx-auto">
         <div className="space-y-8">
