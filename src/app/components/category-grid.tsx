@@ -1,4 +1,5 @@
 'use client'
+import { categoriesUrl } from '@/constants/aditional-services'
 import type { Category } from '@/lib/categories'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -13,7 +14,8 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
   const router = useRouter()
 
   const handleCategoryClick = (slug: string) => {
-    router.push(`/servicos/categoria/${slug}`)
+    const route = categoriesUrl(slug)
+    router.push(route)
   }
 
   return (

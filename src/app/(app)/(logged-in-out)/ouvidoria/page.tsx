@@ -39,7 +39,7 @@ export default function OuvidoriaPage() {
               <div className="text-left">
                 <h3 className="font-normal leading-5 text-sm text-foreground">Elogio</h3>
                 <p className="text-xs text-muted-foreground">
-                  Quer ver mais ações similares a alguma que te agradou? Deixe a gente saber disso!
+                  Conte para gente o que lhe agradou em nossos serviços
                 </p>
               </div>
               <div className="text-muted-foreground">
@@ -62,8 +62,8 @@ export default function OuvidoriaPage() {
               <div className="text-left">
                 <h3 className="font-normal leading-5 text-sm text-foreground">Sugestão</h3>
                 <p className="text-xs text-muted-foreground">
-                  Proponha uma ideia para o aprimoramento de políticas e serviços públicos. A cidade também é sua!
-                </p>
+                 Queremos sua contribuição para melhorar nossos serviços e políticas públicas.          
+               </p>
               </div>
               <div className="text-muted-foreground">
                 <ChevronRightIcon />
@@ -83,7 +83,7 @@ export default function OuvidoriaPage() {
               <div className="text-left">
                 <h3 className="font-normal leading-5 text-sm text-foreground">Reclamação</h3>
                 <p className="text-xs text-muted-foreground">
-                  Alguma ação da Prefeitura te desagradou? Não se acanhe. É com críticas que se melhoram os serviços e a vida na cidade
+                 Diga o que não funcionou bem para buscarmos uma solução
                 </p>
               </div>
               <div className="text-muted-foreground">

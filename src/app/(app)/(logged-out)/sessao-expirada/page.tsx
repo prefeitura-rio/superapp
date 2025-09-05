@@ -7,9 +7,32 @@ import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useViewportHeight } from '@/hooks/useViewport'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function SessionExpired() {
   const { isBelowBreakpoint } = useViewportHeight(648)
+  const router = useRouter()
+
+  const handleNavigation = () => {
+    // Check if the referrer is from the same domain (our website B)
+    const currentDomain = window.location.origin
+    const referrerDomain = document.referrer
+      ? new URL(document.referrer).origin
+      : null
+
+    // Only go back if the referrer is from the same domain
+    if (referrerDomain === currentDomain) {
+      console.log('Same domain detected, using router.back()')
+      try {
+        router.back()
+      } catch {
+        router.push('/')
+      }
+    } else {
+      //External domain or no referrer, navigating to home
+      router.push('/')
+    }
+  }
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-16 md:pt-16 flex flex-col overflow-y-hidden">
@@ -51,12 +74,13 @@ export default function SessionExpired() {
 
           {/* Create Account Link */}
           <div className="text-center mb-8">
-            <Link
-              href="/"
-              className="text-sm text-muted-foreground font-normal"
+            <button
+              type="button"
+              onClick={handleNavigation}
+              className="text-sm text-muted-foreground font-normal cursor-pointer"
             >
               Continuar sem fazer login
-            </Link>
+            </button>
           </div>
         </div>
       </div>

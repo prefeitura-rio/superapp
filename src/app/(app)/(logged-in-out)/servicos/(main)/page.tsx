@@ -7,10 +7,12 @@ import {
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import { SearchButton } from '@/app/components/search-button'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
+import { additionalCategories } from '@/constants/aditional-services'
 import { fetchCategories } from '@/lib/categories'
 
 export default async function ServicesPage() {
   const categories = await fetchCategories()
+  const allCategories = [...categories, ...additionalCategories]
 
   return (
     <main className="flex max-w-4xl mx-auto flex-col bg-background text-foreground">
@@ -29,7 +31,7 @@ export default async function ServicesPage() {
       />
 
       {/* Category Grid*/}
-      <CategoryGrid title="Categorias" categories={categories} />
+      <CategoryGrid title="Categorias" categories={allCategories} />
 
       <FloatNavigation />
     </main>

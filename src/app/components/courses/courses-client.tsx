@@ -3,9 +3,9 @@
 import CoursesHeader from '@/app/components/courses/courses-header'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
-import SearchPlaceholder from '@/app/components/search-placeholder'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
-import Link from 'next/link'
+import type { ModelsCurso } from '@/http-courses/models'
+import type { UserInfo } from '@/lib/user-info'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
 import { RecommendedCoursesSwipe } from './recommended-courses-swipe'
@@ -19,20 +19,33 @@ const FILTERS = [
   { label: 'Saúde', value: 'saude', icon: '🏥' },
 ]
 
-interface CoursePageClientProps {
-  courses: any[]
-}
-
-export default function CoursePageClient({ courses }: CoursePageClientProps) {
+export default function CoursePageClient({
+  courses,
+  userInfo,
+}: { courses: ModelsCurso[]; userInfo: UserInfo }) {
+  if (courses.length === 0) {
+    return (
+      <div className="min-h-lvh">
+        <CoursesHeader userInfo={userInfo} />
+        <main className="max-w-4xl mx-auto pt-30 pb-20 text-white">
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="text-lg text-muted-foreground text-center">
+              Nenhum curso encontrado
+            </p>
+          </div>
+        </main>
+      </div>
+    )
+  }
   return (
     <div className="min-h-lvh">
-      <CoursesHeader />
-      <main className="max-w-4xl mx-auto pt-15 pb-20 text-white">
-        <div className="mt-4">
+      <CoursesHeader userInfo={userInfo} />
+      <main className="max-w-4xl mx-auto pt-25 pb-20 text-white">
+        {/* <div className="mt-4">
           <SearchPlaceholder isCourseSearch />
-        </div>
+        </div> */}
 
-        <section className="mt-4 pb-8">
+        {/* <section className="mt-4 pb-8">
           <div className="w-full overflow-x-auto no-scrollbar">
             <div className="flex px-4 gap-4 w-max">
               {FILTERS.map(filter => (
@@ -53,7 +66,7 @@ export default function CoursePageClient({ courses }: CoursePageClientProps) {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         <ResponsiveWrapper
           mobileComponent={<RecommendedCoursesCards courses={courses} />}

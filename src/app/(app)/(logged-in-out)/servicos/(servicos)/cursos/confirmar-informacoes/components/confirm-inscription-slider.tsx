@@ -100,7 +100,7 @@ export const ConfirmInscriptionSlider = forwardRef<
             return (
               <SwiperSlide key={slide.id || idx}>
                 <div
-                  className={`flex flex-col items-center justify-center max-h-lvh mt-5 md:mt-0 ${
+                  className={`flex flex-col items-center min-h-[70dvh] md:min-h-[80dvh] max-h-lvh mt-5 md:mt-0 ${
                     isBelowBreakpoint && 'max-h-[410px]'
                   }`}
                 >

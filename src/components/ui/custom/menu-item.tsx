@@ -1,10 +1,9 @@
 'use-client'
-
 import { ChevronRightIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
+import type { MenuItemProps } from '@/types/menu-items'
 import Link from 'next/link'
 import { forwardRef } from 'react'
-import type { MenuItemProps } from '../../../types/menu-items'
 
 const variantStyles = {
   default: '',
@@ -16,6 +15,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
     {
       icon,
       label,
+      title,
       href = '#',
       isFirst = false,
       isLast = false,
@@ -44,7 +44,12 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
       >
         <div className="flex items-center gap-4">
           {icon}
-          <span>{label}</span>
+          <div className="flex flex-col">
+            {title && (
+              <span className="text-sm text-muted-foreground">{title}</span>
+            )}
+            <span>{label}</span>
+          </div>
         </div>
         <ChevronRightIcon className="h-5 w-5 text-primary" />
       </Link>

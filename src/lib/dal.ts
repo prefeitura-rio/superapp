@@ -1,6 +1,7 @@
 // Data Access Layer (DAL)
 // This file is used to cache the data fetching functions
 
+import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import { getV1Avatars, getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -15,11 +16,11 @@ import { revalidateTag, unstable_cache } from 'next/cache'
 // 30-minute cache provides optimal balance of performance and data freshness
 export async function getDalCitizenCpfWallet(cpf: string) {
   return await getCitizenCpfWallet(cpf, {
-    cache: 'force-cache',
-    next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
-      tags: [`wallet-${cpf}`], // Tag for selective revalidation
-    },
+    cache: 'no-store',
+    // next: {
+    //   revalidate: 600, // 10 minutes - optimal for high traffic
+    //   tags: [`wallet-${cpf}`], // Tag for selective revalidation
+    // },
   })
 }
 
@@ -29,7 +30,7 @@ export async function getDalCitizenCpf(cpf: string) {
   return await getCitizenCpf(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`user-info-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -41,7 +42,7 @@ export async function getDalCitizenCpfFirstlogin(cpf: string) {
   return await getCitizenCpfFirstlogin(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`firstlogin-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -56,10 +57,29 @@ export async function getDalCitizenCpfMaintenanceRequest(
   return await getCitizenCpfMaintenanceRequest(cpf, params, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for high traffic
+      revalidate: 600, // 10 minutes - optimal for high traffic
       tags: [`maintenance-${cpf}`], // Tag for selective revalidation
     },
   })
+}
+
+// Course enrollment caching (user-specific data)
+// 5-minute cache since enrollment status can change frequently
+export async function getDalCourseEnrollment(courseId: number, cpf: string) {
+  return await getApiV1CoursesCourseIdEnrollments(
+    courseId,
+    {
+      search: cpf,
+      limit: 1,
+    },
+    {
+      cache: 'no-store',
+      // next: {
+      //   revalidate: 600, // 10 minutes - optimal for enrollment status changes
+      //   tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+      // },
+    }
+  )
 }
 
 // Health unit info caching (shared across all users)
@@ -70,7 +90,7 @@ export const getDalHealthUnitInfo = unstable_cache(
   },
   ['health-unit-info'],
   {
-    revalidate: 3600, // 1 hour
+    revalidate: 600, // 10 minutes
     tags: ['health-unit-info'],
   }
 )
@@ -97,7 +117,7 @@ export async function getDalAvatars() {
   return await getV1Avatars(undefined, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes
+      revalidate: 600, // 10 minutes
       tags: ['available-avatars'],
     },
   })
@@ -109,7 +129,7 @@ export async function getDalCitizenCpfAvatar(cpf: string) {
   return await getV1CitizenCpfAvatar(cpf, {
     cache: 'force-cache',
     next: {
-      revalidate: 1800, // 30 minutes - optimal for user data
+      revalidate: 600, // 10 minutes - optimal for user data
       tags: [`user-avatar-${cpf}`], // Tag for selective revalidation
     },
   })
@@ -147,6 +167,16 @@ export async function revalidateDalCitizenCpfFirstlogin(cpf: string) {
   revalidateTag(`firstlogin-${cpf}`)
 }
 
+// Helper function to revalidate course enrollment when needed
+export async function revalidateDalCourseEnrollment(
+  courseId: number,
+  cpf: string
+) {
+  // This would be called from a Server Action or API route
+  // to invalidate cache when enrollment status changes
+  // Example: after user cancels or enrolls in a course
+  revalidateTag(`course-enrollment-${courseId}-${cpf}`)
+}
 // Helper function to revalidate available avatars when needed
 export async function revalidateDalAvatars() {
   // This would be called from a Server Action or API route

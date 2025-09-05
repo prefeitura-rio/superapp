@@ -11,6 +11,7 @@ type BannerBaseProps = {
   badge?: string
   color: string
   route?: string
+  logo?: React.ReactNode
   image?: React.ReactNode
   onBannerClick?: () => void
 }
@@ -21,6 +22,7 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
   badge,
   color,
   route,
+  logo,
   image,
   onBannerClick,
 }) => {
@@ -58,13 +60,16 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
 
       {/* Content */}
       <div className="relative z-20 flex flex-col gap-3 h-full">
-        <Badge
-          className={`bg-secondary/30 font-normal text-white text-xs flex justify-center items-center ${
-            badge ? '' : 'invisible'
-          }`}
-        >
-          {badge || 'placeholder'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {logo}
+          <Badge
+            className={`bg-secondary/30 font-normal text-white text-xs flex justify-center items-center ${
+              badge ? '' : 'invisible'
+            }`}
+          >
+            {badge || 'placeholder'}
+          </Badge>
+        </div>
 
         <div className="flex flex-col gap-0">
           <h3 className="text-xl font-semibold leading-6 text-white">

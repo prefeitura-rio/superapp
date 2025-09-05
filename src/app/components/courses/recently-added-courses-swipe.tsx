@@ -1,36 +1,17 @@
 'use client'
 
-import { providerIcons } from '@/app/components/utils'
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
+import type { ModelsCurso } from '@/http-courses/models'
 import { CourseCard } from './courses-card'
 
-interface Course {
-  id: string
-  title: string
-  status: string
-  date: string
-  provider: string
-  workload: string
-  modality: string
-  type: string
-  recommended: boolean
-  recentlyAdded: boolean
-  spots?: number
-  description?: string
-  requirements?: string[]
-  imageUrl: string
-}
-
 interface RecentlyAddedCoursesSwipeProps {
-  courses: Course[]
+  courses: ModelsCurso[]
 }
 
 export function RecentlyAddedCoursesSwipe({
   courses,
 }: RecentlyAddedCoursesSwipeProps) {
-  const recentCourses = courses.filter(course => course.recentlyAdded)
-
-  if (!recentCourses.length) return null
+  if (!courses.length) return null
 
   return (
     <div className="px-4 pb-6">
@@ -43,10 +24,10 @@ export function RecentlyAddedCoursesSwipe({
         arrowsVerticalPosition="top-[30%]"
       >
         {Array.from(
-          { length: Math.ceil(recentCourses.length / 4) },
+          { length: Math.ceil(courses.length / 4) },
           (_, slideIndex) => {
             const startIndex = slideIndex * 4
-            const slideCourses = recentCourses.slice(startIndex, startIndex + 4)
+            const slideCourses = courses.slice(startIndex, startIndex + 4)
 
             return (
               <div
@@ -55,14 +36,14 @@ export function RecentlyAddedCoursesSwipe({
               >
                 {slideCourses.map(course => (
                   <CourseCard
-                    key={course.id}
-                    courseId={course.id}
-                    title={course.title}
-                    modality={course.modality}
-                    workload={course.workload}
-                    providerIcon={providerIcons[course.provider]}
-                    provider={course.provider}
-                    imageUrl={course.imageUrl}
+                    key={course.id as string}
+                    courseId={course.id as number}
+                    title={course.title as string}
+                    modality={course.modalidade as string}
+                    workload={course.workload as string}
+                    institutionaLogo={course.institutional_logo as string}
+                    provider={course.organization as string}
+                    coverImage={course.cover_image as string}
                   />
                 ))}
               </div>

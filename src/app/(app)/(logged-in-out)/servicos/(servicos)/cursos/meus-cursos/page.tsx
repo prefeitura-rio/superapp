@@ -1,107 +1,73 @@
-'use client'
-
-import { FavoritesCard } from '@/app/components/courses/favorites-card'
 import { MyCoursesCard } from '@/app/components/courses/my-course-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { cn } from '@/lib/utils'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { redirect } from 'next/navigation'
 
-export default function MyCoursesPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const [isAnimating, setIsAnimating] = useState(false)
+export default async function MyCoursesPage() {
+  const userInfo = await getUserInfoFromToken()
 
-  const isFavorites = searchParams.get('favorites') === 'true'
-
-  const handleTabClick = (favorites: boolean) => {
-    if (isFavorites === favorites || isAnimating) return
-
-    setIsAnimating(true)
-
-    setTimeout(() => {
-      const query = favorites ? '?favorites=true' : ''
-      router.push(`/servicos/cursos/meus-cursos${query}`)
-
-      setTimeout(() => {
-        setIsAnimating(false)
-      }, 100)
-    }, 150)
+  if (!userInfo.cpf) {
+    return redirect(`${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`)
   }
 
-  return (
-    <div className="max-w-4xl mx-auto py-6">
-      <SecondaryHeader title="Cursos" route="/servicos/cursos/opcoes" />
-      <div className="w-full px-4">
-        <div className="relative flex w-full rounded-full bg-card p-1 mt-25 h-13 py-2 px-4">
-          <span
-            className={cn(
-              'absolute top-1 bottom-1 w-1/2 rounded-full bg-secondary transition-all duration-200 px-4',
-              isFavorites ? 'left-1/2' : 'left-0'
-            )}
-            style={{
-              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            }}
-          />
+  try {
+    // Fetch user enrollments with pagination
+    const response = await getApiV1EnrollmentsUserCpf(userInfo.cpf, {
+      page: 1,
+      limit: 100, // Get more enrollments to show all user courses
+    })
 
-          <button
-            type="button"
-            onClick={() => handleTabClick(false)}
-            className={cn(
-              'relative z-10 w-full py-2 text-sm font-medium transition-colors duration-200 px-4 cursor-pointer',
-              !isFavorites ? 'text-foreground' : 'text-foreground/80'
-            )}
-            style={{
-              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            }}
-          >
-            Meus cursos
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabClick(true)}
-            className={cn(
-              'relative z-10 w-full py-2 text-sm font-medium transition-colors duration-200 px-4 cursor-pointer',
-              isFavorites ? 'text-foreground' : 'text-foreground/80'
-            )}
-            style={{
-              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            }}
-          >
-            Favoritos
-          </button>
+    if (response.status !== 200) {
+      console.error(
+        'Failed to fetch enrollments:',
+        response.status,
+        response.data
+      )
+      throw new Error(`API returned status ${response.status}`)
+    }
+
+    const data = response.data as any
+
+    // Extract enrollments array from the API response
+    const enrollments = data?.data?.enrollments || []
+
+    // Transform enrollments to match the expected course structure
+    const coursesWithEnrollments = enrollments
+      .map((enrollment: any) => ({
+        ...enrollment.curso,
+        id: enrollment.course_id,
+        title: enrollment.curso?.title || 'Curso',
+        description: enrollment.curso?.description,
+        imageUrl:
+          enrollment.curso?.cover_image || enrollment.curso?.institutional_logo,
+        provider: enrollment.curso?.organization,
+        status: enrollment.status,
+        enrollmentId: enrollment.id,
+        enrolledAt: enrollment.enrolled_at,
+        updatedAt: enrollment.updated_at,
+      }))
+      .filter((course: any) => course.id)
+
+    return (
+      <div className="max-w-4xl mx-auto py-6">
+        <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
+        <div className="relative overflow-hidden mt-16 px-4">
+          <MyCoursesCard courses={coursesWithEnrollments} />
         </div>
       </div>
-
-      <div className="relative overflow-hidden mt-6 px-4">
-        <div
-          className={cn(
-            'transition-all duration-500 ease-out',
-            isFavorites
-              ? 'transform -translate-x-full opacity-0 pointer-events-none'
-              : 'transform translate-x-0 opacity-100'
-          )}
-          style={{
-            transitionTimingFunction: 'cubic-bezier(0.32, 0.72, 0, 1)',
-          }}
-        >
-          <MyCoursesCard />
-        </div>
-
-        <div
-          className={cn(
-            'transition-all duration-500 ease-out',
-            !isFavorites
-              ? 'absolute inset-0 transform translate-x-full opacity-0 pointer-events-none'
-              : 'absolute inset-0 transform translate-x-0 opacity-100'
-          )}
-          style={{
-            transitionTimingFunction: 'cubic-bezier(0.32, 0.72, 0, 1)',
-          }}
-        >
-          <FavoritesCard />
+    )
+  } catch (error) {
+    console.error('Error fetching user enrollments:', error)
+    // Return empty courses array on error
+    return (
+      <div className="max-w-4xl mx-auto py-6">
+        <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
+        <div className="relative overflow-hidden mt-16 px-4">
+          <MyCoursesCard courses={[]} />
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 }

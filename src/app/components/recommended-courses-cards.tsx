@@ -1,15 +1,13 @@
-import type { Course } from '@/types/course'
+import type { ModelsCurso } from '@/http-courses/models'
 import { CourseCard } from './courses/courses-card'
-import { providerIcons } from './utils'
 
 interface RecommendedCoursesCardsProps {
-  courses: Course[]
+  courses: ModelsCurso[]
 }
 
 export default function RecommendedCoursesCards({
   courses,
 }: RecommendedCoursesCardsProps) {
-  const recommended = courses.filter(course => course.recommended)
   return (
     <>
       <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
@@ -17,16 +15,16 @@ export default function RecommendedCoursesCards({
       </h3>
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
         <div className="flex gap-4 px-4 w-max">
-          {recommended.map(course => (
+          {courses.map(course => (
             <CourseCard
-              courseId={course.id}
-              key={course.id}
-              title={course.title}
-              modality={course.modality}
-              workload={course.workload}
-              providerIcon={providerIcons[course.provider]}
-              provider={course.provider}
-              imageUrl={course.imageUrl}
+              courseId={course.id as number}
+              key={course.id as string}
+              title={course.title as string}
+              modality={course.modalidade as string}
+              workload={course.workload as string}
+              institutionaLogo={course.institutional_logo as string}
+              provider={course.organization as string}
+              coverImage={course.cover_image as string}
             />
           ))}
         </div>

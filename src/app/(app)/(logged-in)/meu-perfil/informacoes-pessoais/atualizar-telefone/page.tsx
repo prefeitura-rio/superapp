@@ -15,7 +15,7 @@ import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDecla
 import { isValidPhone, parsePhoneNumberForApi } from '@/lib/phone-utils'
 import type { CountryCode } from 'libphonenumber-js/max'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
 
@@ -25,8 +25,12 @@ export default function PhoneNumberForm() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const isPhoneValid = isValidPhone(phone, country)
+  const courseSlug = searchParams.get('redirectFromCourses')
+  const redirectFromCourses = !!courseSlug
+  let redirectFromCoursesUrl = ''
 
   async function handleSave() {
     startTransition(async () => {
@@ -41,11 +45,15 @@ export default function PhoneNumberForm() {
           parsedPhone as ModelsSelfDeclaredPhoneInput
         )
 
+        if (redirectFromCourses) {
+          redirectFromCoursesUrl = `&redirectFromCourses=${courseSlug}`
+        }
+
         if (result.success) {
           router.push(
             `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
               parsedPhone.ddi
-            )}`
+            )}${redirectFromCoursesUrl}`
           )
           toast.success('Token enviado')
         } else {
@@ -59,20 +67,24 @@ export default function PhoneNumberForm() {
         }
       } catch (error: any) {
         // For unexpected errors (network, etc.), redirect to session expired
-         router.push('/sessao-expirada')
+        router.push('/sessao-expirada')
       }
     })
   }
 
+  const routeBackUrl = redirectFromCourses
+    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+    : '/meu-perfil'
+
   function handleDrawerClose() {
     setDrawerOpen(false)
-    router.back()
+    router.push(routeBackUrl)
   }
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
-        <SecondaryHeader title="" route="/meu-perfil" />
+        <SecondaryHeader title="" route={routeBackUrl} />
         <section className="relative">
           <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
             Escreva seu <br /> celular

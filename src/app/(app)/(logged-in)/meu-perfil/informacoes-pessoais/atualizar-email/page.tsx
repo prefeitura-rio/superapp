@@ -11,12 +11,14 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import { useEmailSuggestion } from '@/hooks/useEmailSuggestion'
 import { useInputValidation } from '@/hooks/useInputValidation'
 import type { ModelsSelfDeclaredEmailInput } from '@/http/models/modelsSelfDeclaredEmailInput'
 import confetti from 'canvas-confetti'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
+import { EmailFeedback } from './email-feedback'
 
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z][a-zA-Z-]*\.)+[a-zA-Z]{2,}$/
@@ -30,7 +32,11 @@ export default function EmailForm() {
   const [email, setEmail] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const { suggestion, acceptSuggestion } = useEmailSuggestion(email, setEmail)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const courseSlug = searchParams.get('redirectFromCourses')
 
   const emailStateInput = useInputValidation({
     value: email,
@@ -52,7 +58,7 @@ export default function EmailForm() {
       setEmail('')
       return
     }
-    
+
     startTransition(async () => {
       try {
         const result = await updateUserEmail({
@@ -77,7 +83,7 @@ export default function EmailForm() {
         }
       } catch (error: any) {
         // For unexpected errors (network, etc.), redirect to session expired
-       router.push('/sessao-expirada')
+        router.push('/sessao-expirada')
       }
     })
   }
@@ -98,10 +104,14 @@ export default function EmailForm() {
     }
   }
 
+  const routeBackUrl = courseSlug
+    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+    : '/meu-perfil'
+
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <div>
-        <SecondaryHeader title="" route="/meu-perfil" />
+        <SecondaryHeader title="" route={routeBackUrl} />
         <section className="relative">
           <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
             Escreva seu <br /> email
@@ -120,10 +130,17 @@ export default function EmailForm() {
             showClearButton
           />
         </form>
+        <EmailFeedback
+          email={email}
+          emailStateInput={emailStateInput}
+          suggestion={suggestion}
+          onAcceptSuggestion={acceptSuggestion}
+        />
         <CustomButton
           size="xl"
           fullWidth
           onClick={handleSave}
+          className="-mt-5"
           disabled={isPending || emailStateInput !== 'success'}
         >
           {isPending ? 'Salvando...' : 'Salvar'}
