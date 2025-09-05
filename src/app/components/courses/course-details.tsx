@@ -191,9 +191,11 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-        <span className="text-white/80 text-sm capitalize">
-          {course.theme || 'Curso'}
-        </span>
+        {course.theme && (
+          <span className="text-white/80 text-sm capitalize">
+            {course.theme}
+          </span>
+        )}
         <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
           {course.title || 'Título não disponível'}
         </h1>
