@@ -65,12 +65,23 @@ export default async function PersonalInfoForm() {
             isEditable={false}
           />
 
+          {userInfo?.nome_social && (
+            <ActionDiv
+              label="Nome social"
+              tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
+              content={userInfo?.nome_social || 'Informação indisponível'}
+              drawerContent={<SocialNameDrawerContent />}
+              drawerTitle="Nome social"
+            />
+          )}
+
           <ActionDiv
-            label="Nome social"
-            tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
-            content={userInfo?.nome_social || 'Informação indisponível'}
-            drawerContent={<SocialNameDrawerContent />}
-            drawerTitle="Nome social"
+            label="Como prefere ser chamado(a)?"
+            content={userInfo?.nome_exibicao ? userInfo.nome_exibicao : ''}
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            redirectLink="/meu-perfil/informacoes-pessoais/atualizar-nome-exibicao"
           />
 
           <ActionDiv
