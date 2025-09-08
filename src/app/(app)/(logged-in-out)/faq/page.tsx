@@ -9,6 +9,9 @@ export default function FaqPagePrefRio() {
   const [currentId, setCurrentId] = useState<string>(faqSections[0]?.id)
   const [showMini, setShowMini] = useState<boolean>(false)
 
+  const [miniH, setMiniH] = useState<number>(0)
+  const miniRef = useRef<HTMLDivElement | null>(null)
+
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const registerSection = useCallback(
     (id: string) => (el: HTMLElement | null) => {
@@ -37,6 +40,23 @@ export default function FaqPagePrefRio() {
     }
   }, [])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
+  useEffect(() => {
+    const update = () => {
+      const h = miniRef.current?.offsetHeight
+      if (h && h !== miniH) setMiniH(h)
+    }
+    update()
+    const ro = miniRef.current ? new ResizeObserver(update) : null
+    if (miniRef.current && ro) ro.observe(miniRef.current)
+    window.addEventListener('resize', update)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [showMini, miniH])
+
+  // Detect actual section in view
   useEffect(() => {
     let ticking = false
     const onScroll = () => {
@@ -89,9 +109,8 @@ export default function FaqPagePrefRio() {
     [currentId]
   )
 
-  const miniH = 36
-  const fadeH = 20
-  const safeTopPadding = headerH + miniH + 12
+  const fadeH = 32
+  const safeTopPadding = headerH
 
   return (
     <main
@@ -108,7 +127,10 @@ export default function FaqPagePrefRio() {
             aria-live="polite"
           >
             <div className="mx-auto max-w-4xl px-4">
-              <div className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden">
+              <div
+                ref={miniRef}
+                className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
+              >
                 <span key={currentId} className="mini-animate inline-block">
                   {currentTitle}
                 </span>
@@ -116,10 +138,10 @@ export default function FaqPagePrefRio() {
             </div>
           </div>
 
-          {/* fade */}
+          {/* fade: começa exatamente no bottom do mini e sobrepõe 1px */}
           <div
             className="fixed left-0 right-0 z-30 pointer-events-none bg-gradient-to-b from-background to-background/0"
-            style={{ top: headerH + miniH, height: fadeH }}
+            style={{ top: headerH + miniH - 1, height: fadeH + 1 }}
           />
         </>
       )}
@@ -184,9 +206,9 @@ export default function FaqPagePrefRio() {
         }
         .mini-animate {
           animation: miniSlideIn 180ms ease-out;
+          will-change: transform, opacity;
         }
 
-        /* respect  user preference */
         @media (prefers-reduced-motion: reduce) {
           .mini-animate {
             animation: none;
