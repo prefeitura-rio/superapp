@@ -138,7 +138,7 @@ export default function FaqPagePrefRio() {
             </div>
           </div>
 
-          {/* fade: começa exatamente no bottom do mini e sobrepõe 1px */}
+          {/* fade */}
           <div
             className="fixed left-0 right-0 z-30 pointer-events-none bg-gradient-to-b from-background to-background/0"
             style={{ top: headerH + miniH - 1, height: fadeH + 1 }}
