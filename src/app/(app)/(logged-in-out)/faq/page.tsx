@@ -155,13 +155,13 @@ export default function FaqPagePrefRio() {
             className={sIdx > 0 ? 'mt-14' : ''}
           >
             <h2
-              className="font-medium text-primary tracking-tight text-4xl leading-10 h-10 md:h-14 mb-15"
+              className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10"
               ref={sIdx === 0 ? firstH2Ref : undefined}
             >
               {section.title}
             </h2>
 
-            <div className="space-y-8 mt-4">
+            <div className="space-y-8 mt-6">
               {section.items.map((item, index) => (
                 <div key={index}>
                   <div className="space-y-2">

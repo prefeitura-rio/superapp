@@ -70,6 +70,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
   ) => {
     const inputId = id
     const [showTooltip, setShowTooltip] = useState(false)
+    const readOnlyClasses = 'text-muted-foreground bg-card'
 
     return (
       <div className={cn('space-y-2', containerClassName)}>
@@ -142,6 +143,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
               optionalLabel && rightIcon && 'pr-[140px]',
               !isEditable &&
                 'focus:!outline-none focus:!bg-transparent focus:!border-border focus:!ring-0 focus:!ring-offset-0',
+              !isEditable && readOnlyClasses,
               className
             )}
             {...props}
