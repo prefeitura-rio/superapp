@@ -70,7 +70,8 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
   ) => {
     const inputId = id
     const [showTooltip, setShowTooltip] = useState(false)
-    const readOnlyClasses = 'text-muted-foreground bg-card'
+    const readOnlyClasses =
+      'text-muted-foreground bg-card cursor-not-allowed focus:!outline-none focus:!bg-card focus:!border-border'
 
     return (
       <div className={cn('space-y-2', containerClassName)}>
