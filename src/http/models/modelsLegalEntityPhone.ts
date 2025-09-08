@@ -6,14 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsClinicaFamilia {
-  email?: string
-  endereco?: string
-  /** "bigquery" or "mcp" - not stored in DB, populated at response time */
-  fonte?: string
-  horario_atendimento?: string
-  id_cnes?: string
-  indicador?: boolean
-  nome?: string
+export interface ModelsLegalEntityPhone {
+  ddd?: string
   telefone?: string
 }

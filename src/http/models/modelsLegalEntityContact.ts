@@ -5,15 +5,9 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsLegalEntityPhone } from './modelsLegalEntityPhone'
 
-export interface ModelsClinicaFamilia {
+export interface ModelsLegalEntityContact {
   email?: string
-  endereco?: string
-  /** "bigquery" or "mcp" - not stored in DB, populated at response time */
-  fonte?: string
-  horario_atendimento?: string
-  id_cnes?: string
-  indicador?: boolean
-  nome?: string
-  telefone?: string
+  telefone?: ModelsLegalEntityPhone[]
 }

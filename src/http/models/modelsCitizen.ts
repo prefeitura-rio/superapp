@@ -29,6 +29,8 @@ export interface ModelsCitizen {
   menor_idade?: boolean
   nascimento?: ModelsNascimento
   nome?: string
+  /** Self-declared, not stored in base collection */
+  nome_exibicao?: string
   nome_social?: string
   obito?: ModelsObito
   raca?: string

@@ -6,15 +6,18 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetCitizenCpfLegalEntitiesParams,
   GetCitizenCpfMaintenanceRequestParams,
   HandlersErrorResponse,
   HandlersSuccessResponse,
   ModelsCitizen,
   ModelsCitizenWallet,
+  ModelsPaginatedLegalEntities,
   ModelsPaginatedMaintenanceRequests,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
   ModelsSelfDeclaredEmailInput,
+  ModelsSelfDeclaredNomeExibicaoInput,
   ModelsSelfDeclaredPhoneInput,
   ModelsSelfDeclaredRacaInput,
   ModelsUserConfigOptInResponse,
@@ -154,7 +157,7 @@ export type putCitizenCpfEmailResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-
+//forced
 export type putCitizenCpfEmailResponse409 = {
   data: HandlersErrorResponse
   status: 409
@@ -163,7 +166,7 @@ export type putCitizenCpfEmailResponse409 = {
 export type putCitizenCpfEmailResponseComposite =
   | putCitizenCpfEmailResponse200
   | putCitizenCpfEmailResponse400
-  | putCitizenCpfEmailResponse409
+  | putCitizenCpfEmailResponse409 //forced
 
 export type putCitizenCpfEmailResponse = putCitizenCpfEmailResponseComposite & {
   headers: Headers
@@ -228,6 +231,49 @@ export const putCitizenCpfEthnicity = async (
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(modelsSelfDeclaredRacaInput),
+    }
+  )
+}
+
+/**
+ * Atualiza ou cria o nome de exibição autodeclarado de um cidadão por CPF. Apenas o campo de nome de exibição é atualizado. O nome de exibição é o nome que aparece na interface do usuário, permitindo ao cidadão controlar como seu nome é exibido no aplicativo.
+ * @summary Atualizar nome de exibição autodeclarado
+ */
+export type putCitizenCpfExhibitionNameResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfExhibitionNameResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfExhibitionNameResponseComposite =
+  | putCitizenCpfExhibitionNameResponse200
+  | putCitizenCpfExhibitionNameResponse400
+
+export type putCitizenCpfExhibitionNameResponse =
+  putCitizenCpfExhibitionNameResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutCitizenCpfExhibitionNameUrl = (cpf: string) => {
+  return `/citizen/${cpf}/exhibition-name`
+}
+
+export const putCitizenCpfExhibitionName = async (
+  cpf: string,
+  modelsSelfDeclaredNomeExibicaoInput: ModelsSelfDeclaredNomeExibicaoInput,
+  options?: RequestInit
+): Promise<putCitizenCpfExhibitionNameResponse> => {
+  return customFetch<putCitizenCpfExhibitionNameResponse>(
+    getPutCitizenCpfExhibitionNameUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredNomeExibicaoInput),
     }
   )
 }
@@ -308,6 +354,62 @@ export const putCitizenCpfFirstlogin = async (
     {
       ...options,
       method: 'PUT',
+    }
+  )
+}
+
+/**
+ * Recupera a lista paginada de entidades jurídicas (pessoas jurídicas) associadas ao CPF do cidadão. A busca é feita através do campo 'cpf_socio' no array 'socios' de cada entidade.
+ * @summary Obter entidades jurídicas associadas ao CPF
+ */
+export type getCitizenCpfLegalEntitiesResponse200 = {
+  data: ModelsPaginatedLegalEntities
+  status: 200
+}
+
+export type getCitizenCpfLegalEntitiesResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfLegalEntitiesResponseComposite =
+  | getCitizenCpfLegalEntitiesResponse200
+  | getCitizenCpfLegalEntitiesResponse400
+
+export type getCitizenCpfLegalEntitiesResponse =
+  getCitizenCpfLegalEntitiesResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfLegalEntitiesUrl = (
+  cpf: string,
+  params?: GetCitizenCpfLegalEntitiesParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/citizen/${cpf}/legal-entities?${stringifiedParams}`
+    : `/citizen/${cpf}/legal-entities`
+}
+
+export const getCitizenCpfLegalEntities = async (
+  cpf: string,
+  params?: GetCitizenCpfLegalEntitiesParams,
+  options?: RequestInit
+): Promise<getCitizenCpfLegalEntitiesResponse> => {
+  return customFetch<getCitizenCpfLegalEntitiesResponse>(
+    getGetCitizenCpfLegalEntitiesUrl(cpf, params),
+    {
+      ...options,
+      method: 'GET',
     }
   )
 }
@@ -462,7 +564,7 @@ export type putCitizenCpfPhoneResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-
+//forced
 export type putCitizenCpfPhoneResponse409 = {
   data: HandlersErrorResponse
   status: 409
@@ -471,7 +573,7 @@ export type putCitizenCpfPhoneResponse409 = {
 export type putCitizenCpfPhoneResponseComposite =
   | putCitizenCpfPhoneResponse200
   | putCitizenCpfPhoneResponse400
-  | putCitizenCpfPhoneResponse409
+  | putCitizenCpfPhoneResponse409 //forced
 
 export type putCitizenCpfPhoneResponse = putCitizenCpfPhoneResponseComposite & {
   headers: Headers
