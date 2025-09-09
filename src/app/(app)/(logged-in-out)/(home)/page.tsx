@@ -33,7 +33,7 @@ import {
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { formatUserName, getDisplayName } from '@/lib/utils'
+import { getDisplayName } from '@/lib/utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 
 export default async function Home() {
@@ -58,11 +58,11 @@ export default async function Home() {
           userAuthInfo.name
         )
       } else {
-        userDisplayName = formatUserName(userAuthInfo.name)
+        userDisplayName = getDisplayName(undefined, userAuthInfo.name)
       }
     } catch (error) {
       console.error('Error fetching user data:', error)
-      userDisplayName = formatUserName(userAuthInfo.name)
+      userDisplayName = getDisplayName(undefined, userAuthInfo.name)
     }
 
     // Fetch user's current avatar using DAL

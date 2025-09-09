@@ -56,9 +56,9 @@ export function getDisplayName(
     return displayName
   }
 
-  // Caso contrário, usa o nome padrão
+  // Caso contrário, usa o nome padrão formatado (apenas primeiro nome)
   if (defaultName?.trim()) {
-    return defaultName
+    return formatUserName(defaultName)
   }
 
   return ''

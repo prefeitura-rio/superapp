@@ -9,7 +9,7 @@ import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
 import { getDalCitizenCpf, getDalCitizenCpfAvatar } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { formatUserName, getDisplayName } from '@/lib/utils'
+import { getDisplayName } from '@/lib/utils'
 
 // Revalidate this page when needed
 export const revalidate = 0
@@ -29,11 +29,11 @@ export default async function ProfilePage() {
         const userData = userDataResponse.data
         userDisplayName = getDisplayName(userData.nome_exibicao, userInfo.name)
       } else {
-        userDisplayName = formatUserName(userInfo.name)
+        userDisplayName = getDisplayName(undefined, userInfo.name)
       }
     } catch (error) {
       console.error('Error fetching user data:', error)
-      userDisplayName = formatUserName(userInfo.name)
+      userDisplayName = getDisplayName(undefined, userInfo.name)
     }
   }
 
