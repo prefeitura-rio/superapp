@@ -1,5 +1,6 @@
 'use client'
 
+import { getEmailValue, hasValidEmail } from '@/helpers/email-helpers'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatUserPhone } from '@/lib/format-phone'
 import { formatTitleCase } from '@/lib/utils'
@@ -17,6 +18,7 @@ export default function ConfirmUserDataSlide({
   userInfo,
   userAuthInfo,
 }: ConfirmUserDataSlideProps) {
+  const hasEmail = hasValidEmail(userInfo.email)
   return (
     <div className="w-full space-y-10">
       <div className="text-left">
@@ -55,10 +57,12 @@ export default function ConfirmUserDataSlide({
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
             E-mail
           </p>
-          <p className="text-foreground font-normal">
-            {userInfo?.email?.principal
-              ? userInfo.email.principal.valor
-              : 'Informação indisponível'}
+          <p
+            className={`font-normal ${
+              hasEmail ? 'text-foreground' : 'text-orange-400/70'
+            }`}
+          >
+            {hasEmail ? getEmailValue(userInfo.email) : 'E-mail não cadastrado'}
           </p>
         </div>
       </div>

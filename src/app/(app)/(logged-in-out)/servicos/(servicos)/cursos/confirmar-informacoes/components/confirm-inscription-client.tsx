@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
+import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
@@ -18,6 +19,7 @@ import { SuccessSlide } from './slides/success-slide'
 
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
+import { getEmailValue, hasValidEmail } from '@/helpers/email-helpers'
 import Link from 'next/link'
 import {
   type CourseUserInfo,
@@ -56,12 +58,16 @@ export function ConfirmInscriptionClient({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
   const { isBelowBreakpoint } = useViewportHeight(648)
+
+  // Check if user has email - variable for reuse
+  const hasEmail = hasValidEmail(userInfo.email)
 
   // Extract custom fields from course info
   const customFields: CustomField[] =
@@ -129,6 +135,12 @@ export function ConfirmInscriptionClient({
         await goToSuccess()
       }
     } else {
+      // Check if email is missing before final submission
+      if (!hasEmail) {
+        setShowEmailModal(true)
+        return
+      }
+
       const currentSlide = slides[currentIndex]
       if (
         currentSlide.id === 'select-unit' &&
@@ -139,8 +151,8 @@ export function ConfirmInscriptionClient({
         if (!isValid) return
       }
 
-      // Validate custom fields if they are required
       if (currentSlide.id.startsWith('custom-field-')) {
+        // Validate custom fields if they are required
         const fieldId = currentSlide.id.replace('custom-field-', '')
         const field = customFields.find(f => f.id === fieldId)
         if (field?.required) {
@@ -228,7 +240,7 @@ export function ConfirmInscriptionClient({
           userInfo: {
             cpf: userAuthInfo.cpf,
             name: userAuthInfo.name,
-            email: userInfo.email?.principal?.valor,
+            email: getEmailValue(userInfo.email),
             phone:
               userInfo.phone?.principal?.ddi &&
               userInfo.phone?.principal?.ddd &&
@@ -331,34 +343,70 @@ export function ConfirmInscriptionClient({
         <div className="flex-shrink-0 pb-12">
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
-              <Link
-                className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-[50%] h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
-                  showUpdateButton
-                    ? 'opacity-100 translate-x-0 scale-100'
-                    : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                }`}
-                href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
-              >
-                Atualizar
-              </Link>
+              <div className="flex flex-col items-center w-[50%]">
+                <Link
+                  className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
+                    showUpdateButton
+                      ? 'opacity-100 translate-x-0 scale-100'
+                      : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
+                  }`}
+                  href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
+                >
+                  Atualizar
+                </Link>
+
+                {!hasEmail && (
+                  <p className="mt-2">
+                    <span className="text-destructive text-sm">
+                      *Email pendente
+                    </span>
+                  </p>
+                )}
+              </div>
             )}
 
             <CustomButton
               onClick={isLastSlide ? goToSuccess : handleNext}
               disabled={isPending}
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
-          ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
-          ${
-            !showSuccess
-              ? 'opacity-100 translate-x-0 scale-100'
-              : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
-          }`}
+        ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
+        ${
+          !showSuccess
+            ? 'opacity-100 translate-x-0 scale-100'
+            : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
+        }`}
             >
               {buttonText}
             </CustomButton>
           </div>
         </div>
       )}
+
+      {/* Email Required Bottom Sheet */}
+      <BottomSheet
+        open={showEmailModal}
+        onOpenChange={setShowEmailModal}
+        title="Quase lá!"
+        headerClassName="text-center p-0 mb-6"
+      >
+        <div className="text-center py-4">
+          <h2 className="text-xl font-medium leading-6 text-popover-foreground mb-4">
+            Quase lá!
+          </h2>
+          <p className="text-sm text-popover-foreground leading-5 mb-6">
+            Para continuar sua inscrição no curso, você deve atualizar o email.
+            É rápido e simples!
+          </p>
+          <Link
+            className="bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-primary/90 transition-all duration-300 ease-out flex items-center justify-center"
+            href={`/meu-perfil/informacoes-pessoais/atualizar-email?emailPendency=true${
+              courseSlug ? `&redirectFromCourses=${courseSlug}` : ''
+            }`}
+          >
+            Atualizar Email
+          </Link>
+        </div>
+      </BottomSheet>
     </div>
   )
 }
