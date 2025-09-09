@@ -168,18 +168,26 @@ function InfoRow({ label, value }: InfoRowProps) {
 
 interface CourseHeaderProps {
   course: Course
-  onBack: () => void
+  onBack?: () => void
 }
 
 function CourseHeader({ course, onBack }: CourseHeaderProps) {
   const router = useRouter()
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
+      return
+    }
+    router.push('/servicos/cursos/')
+  }
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
       <div className="flex justify-start">
         <IconButton
           icon={ChevronLeftIcon}
           className="top-4 left-4 absolute z-10"
-          onClick={() => router.back()}
+          onClick={handleBack}
         />
       </div>
       {course.cover_image && (
@@ -489,7 +497,7 @@ export function CourseDetails({
             </CustomButton>
           </div>
         </BottomSheet>
-        <CourseHeader course={course} onBack={() => router.back()} />
+        <CourseHeader course={course} />
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
         {userEnrollment?.status && (
