@@ -22,7 +22,7 @@ import { DisplayNameFeedback } from './display-name-feedback'
 const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s]+$/
 
 const MIN_NAME_LENGTH = 2
-const MAX_NAME_LENGTH = 50
+const MAX_NAME_LENGTH = 18
 
 const validateDisplayName = (val: string) =>
   val.length >= MIN_NAME_LENGTH &&
@@ -46,6 +46,7 @@ export default function DisplayNameForm() {
   })
 
   const isDisplayNameValid = validateDisplayName(displayName)
+  const isDisplayNameTooLong = displayName.length > MAX_NAME_LENGTH
 
   async function handleSave() {
     // Close keyboard when submitting
@@ -129,7 +130,6 @@ export default function DisplayNameForm() {
             onClear={clearDisplayName}
             state={displayNameStateInput}
             showClearButton
-            maxLength={MAX_NAME_LENGTH}
           />
         </form>
         <DisplayNameFeedback
@@ -141,7 +141,11 @@ export default function DisplayNameForm() {
           fullWidth
           onClick={handleSave}
           className="-mt-5"
-          disabled={isPending || displayNameStateInput !== 'success'}
+          disabled={
+            isPending ||
+            displayNameStateInput !== 'success' ||
+            isDisplayNameTooLong
+          }
         >
           {isPending ? 'Salvando...' : 'Salvar'}
         </CustomButton>

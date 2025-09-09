@@ -2,7 +2,6 @@
 
 import { UserIcon } from '@/assets/icons'
 import { REDIRECT_DIRECT_TO_GOVBR_ROUTE } from '@/constants/url'
-import { formatUserName } from '@/lib/utils'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -42,7 +41,7 @@ export default function HeaderUserLink({
         {isLoggedIn && userAvatarUrl ? (
           <Image
             src={userAvatarUrl}
-            alt={userAvatarName || "Avatar do usuário"}
+            alt={userAvatarName || 'Avatar do usuário'}
             width={48}
             height={48}
             className="w-full h-full rounded-full object-cover"
@@ -53,7 +52,7 @@ export default function HeaderUserLink({
       </div>
       <div className="flex flex-col">
         <span className="text-base font-medium text-foreground">
-          {isLoggedIn ? formatUserName(userName) : 'Olá, Visitante!'}
+          {isLoggedIn ? userName : 'Olá, Visitante!'}
         </span>
         <span className="text-sm font-normal text-muted-foreground">
           {isLoggedIn ? '' : 'Faça seu login'}

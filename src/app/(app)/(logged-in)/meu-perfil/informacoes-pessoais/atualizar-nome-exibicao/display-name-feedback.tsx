@@ -20,10 +20,10 @@ export function DisplayNameFeedback({
           Nome deve ter pelo menos 2 caracteres.
         </p>
       )
-    } else if (displayName.length > 50) {
+    } else if (displayName.length > 18) {
       message = (
         <p className="text-sm text-destructive">
-          Nome deve ter no máximo 50 caracteres.
+          Nome deve ter no máximo 18 caracteres.
         </p>
       )
     } else {
@@ -33,6 +33,13 @@ export function DisplayNameFeedback({
         </p>
       )
     }
+  } else if (displayName.length > 18) {
+    // Case 2: valid but too long (show warning even when valid)
+    message = (
+      <p className="text-sm text-destructive">
+        Nome deve ter no máximo 18 caracteres.
+      </p>
+    )
   }
 
   return (

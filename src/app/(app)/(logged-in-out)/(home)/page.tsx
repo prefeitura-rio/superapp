@@ -19,6 +19,7 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { fetchCategories } from '@/lib/categories'
 import {
+  getDalCitizenCpf,
   getDalCitizenCpfAvatar,
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -32,6 +33,7 @@ import {
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { formatUserName, getDisplayName } from '@/lib/utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 
 export default async function Home() {
@@ -43,8 +45,26 @@ export default async function Home() {
   let healthUnitRiskData
   let userAvatarUrl: string | null = null
   let userAvatarName: string | null = null
+  let userDisplayName = ''
 
   if (isLoggedIn) {
+    // Buscar dados completos do usuário para obter nome_exibicao
+    try {
+      const userDataResponse = await getDalCitizenCpf(userAuthInfo.cpf)
+      if (userDataResponse.status === 200) {
+        const userData = userDataResponse.data
+        userDisplayName = getDisplayName(
+          userData.nome_exibicao,
+          userAuthInfo.name
+        )
+      } else {
+        userDisplayName = formatUserName(userAuthInfo.name)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+      userDisplayName = formatUserName(userAuthInfo.name)
+    }
+
     // Fetch user's current avatar using DAL
     try {
       const userAvatarResponse = await getDalCitizenCpfAvatar(userAuthInfo.cpf)
@@ -173,7 +193,7 @@ export default async function Home() {
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
       <HeaderWrapper
-        userName={userAuthInfo.name}
+        userName={userDisplayName || userAuthInfo.name}
         isLoggedIn={isLoggedIn}
         userAvatarUrl={userAvatarUrl}
         userAvatarName={userAvatarName}
