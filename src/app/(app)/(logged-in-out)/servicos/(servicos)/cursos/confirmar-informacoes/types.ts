@@ -1,13 +1,10 @@
+import type { EmailData } from '@/helpers/email-helpers'
 import { z } from 'zod'
 
 export interface CourseUserInfo {
   cpf: string
   name: string
-  email: {
-    principal?: {
-      valor?: string
-    }
-  }
+  email: EmailData
   phone: {
     principal?: {
       ddi?: string
