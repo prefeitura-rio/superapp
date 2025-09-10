@@ -28,20 +28,14 @@ export default function FaqPageCourses() {
         'Não. A maioria dos cursos é gratuita, mas alguns podem ter um custo. Se houver, essa informação estará sempre destacada na descrição do próprio curso.',
     },
     {
-      title: 'Receberei certificado de conclusão do curso?',
-      content:
-        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
-    },
-    {
       title: 'Como faço para cancelar minha inscrição?',
       content:
-        'Para cancelar, basta enviar um e-mail para [endereço oficial da plataforma] informando seus dados e o curso.',
+        'Para cancelar sua inscrição, basta ir até a página do curso desejado no Ciclo Carioca e clicar em “Cancelar inscrição”. ',
     },
     {
-      title:
-        'Há suporte técnico caso eu tenha dificuldades no ato de inscrição?',
+      title: 'Receberei certificado de conclusão do curso?',
       content:
-        'Sim. A plataforma oferece canais de suporte digital para dúvidas de acesso, solicitação de inscrição ou navegação.',
+        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. \n\n Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
     },
   ]
   return (
