@@ -20,8 +20,9 @@ import toast from 'react-hot-toast'
 // Types
 interface UserEnrollment {
   id: string
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'concluded'
   course_id: number
+  certificate_url?: string
 }
 
 interface RemoteClass {
@@ -379,7 +380,10 @@ export function CourseDetails({
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const enrollmentInfo = getCourseEnrollmentInfo(course as any)
+  const enrollmentInfo = getCourseEnrollmentInfo(
+    course as any,
+    userEnrollment as any
+  )
   const scheduleInfo = getCourseScheduleInfo(course)
 
   const courseSubscriptionHref = userInfo.cpf
@@ -418,6 +422,15 @@ export function CourseDetails({
   const renderActionButton = () => {
     const buttonClasses =
       'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+
+    // Handle certificate available status
+    if (enrollmentInfo.status === 'certificate_available') {
+      return (
+        <Link href="/servicos/cursos/certificados" className={buttonClasses}>
+          {enrollmentInfo.buttonText}
+        </Link>
+      )
+    }
 
     // Handle rejected status specifically
     if (userEnrollment?.status === 'rejected') {
@@ -504,7 +517,7 @@ export function CourseDetails({
         <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
           {course.description || 'Descrição não disponível'}
         </div>
-        {!isEnrolled && (
+        {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
             {renderActionButton()}
           </div>

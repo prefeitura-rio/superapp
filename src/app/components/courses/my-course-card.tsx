@@ -49,7 +49,7 @@ function getStatusLabel(status: string) {
       return 'Recusado'
     case 'cancelled':
       return 'Cancelado'
-    case 'completed':
+    case 'concluded':
       return 'Finalizado'
     default:
       return status

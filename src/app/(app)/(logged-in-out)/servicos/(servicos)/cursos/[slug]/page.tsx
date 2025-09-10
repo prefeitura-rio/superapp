@@ -3,7 +3,10 @@
 import { getUserEnrollment } from '@/actions/courses/get-user-enrollment'
 import { CourseDetails } from '@/app/components/courses/course-details'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
-import { shouldShowCourse } from '@/lib/course-utils'
+import {
+  type UserEnrollmentExtended,
+  shouldShowCourse,
+} from '@/lib/course-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'
 
@@ -30,7 +33,7 @@ export default async function CoursePage({
     }
 
     // Get user enrollment status for this course
-    let userEnrollment = null
+    let userEnrollment: UserEnrollmentExtended | null = null
     try {
       userEnrollment = await getUserEnrollment(course.id)
     } catch (enrollmentError) {
