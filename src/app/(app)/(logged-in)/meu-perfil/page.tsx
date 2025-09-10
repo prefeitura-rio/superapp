@@ -3,13 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import InstallPWAButtonClient from '@/app/components/install-pwa-button-client'
 import { LogoutButton } from '@/app/components/logout-button'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { UserIcon } from '@/assets/icons'
+import { EditIcon, UserIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
 import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
 import { getDalCitizenCpf, getDalCitizenCpfAvatar } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getDisplayName } from '@/lib/utils'
+import Link from 'next/link'
 
 // Revalidate this page when needed
 export const revalidate = 0
@@ -54,17 +55,27 @@ export default async function ProfilePage() {
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
-        <Avatar className="h-24 w-24 mb-4 border-2 border-border">
-          {userAvatarUrl ? (
-            <AvatarImage
-              src={userAvatarUrl}
-              alt={userAvatarName || 'Avatar do usuário'}
-            />
-          ) : null}
-          <AvatarFallback className="bg-background">
-            <UserIcon className="h-5 w-5 text-primary" />
-          </AvatarFallback>
-        </Avatar>
+        <Link href="/meu-perfil/avatar" className="group relative">
+          <div className="relative">
+            <Avatar className="h-24 w-24 mb-4 bg-card border-2 border-border group-hover:shadow-lg transition-shadow duration-300">
+              {userAvatarUrl ? (
+                <AvatarImage
+                  src={userAvatarUrl}
+                  alt={userAvatarName || 'Avatar do usuário'}
+                  className="transition-transform duration-300 group-hover:scale-110"
+                />
+              ) : null}
+              <AvatarFallback className="bg-background">
+                <UserIcon className="h-5 w-5 text-primary" />
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Overlay com ícone de lápis no hover */}
+            <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <EditIcon className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </Link>
         <h2 className="text-xl font-semibold mb-1">{userDisplayName}</h2>
         <p className="text-sm text-primary">{formatCpf(userInfo.cpf)}</p>
       </div>

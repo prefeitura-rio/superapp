@@ -7,22 +7,28 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 export async function deleteEnrollment(courseId: number, enrollmentId: string) {
   try {
     const currentUser = await getUserInfoFromToken()
-    
+
     if (!currentUser?.cpf) {
       return { success: false, error: 'User not authenticated' }
     }
 
-    const response = await deleteApiV1CoursesCourseIdEnrollmentsEnrollmentId(courseId, enrollmentId)
-    
+    const response = await deleteApiV1CoursesCourseIdEnrollmentsEnrollmentId(
+      courseId,
+      enrollmentId
+    )
+
     if (response.status === 200) {
       // Revalidate the cached enrollment data for this user and course
       await revalidateDalCourseEnrollment(courseId, currentUser.cpf)
       return { success: true }
-    } else {
-      return { success: false, error: 'Failed to delete enrollment' }
     }
+
+    return { success: false, error: 'Erro ao cancelar inscrição' }
   } catch (error) {
-    console.error('Error deleting enrollment:', error)
-    return { success: false, error: 'An error occurred while deleting the enrollment' }
+    console.error('Erro ao cancelar inscrição:', error)
+    return {
+      success: false,
+      error: 'Erro ao cancelar inscrição',
+    }
   }
 }

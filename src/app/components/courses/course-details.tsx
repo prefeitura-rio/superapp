@@ -15,6 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 // Types
 interface UserEnrollment {
@@ -376,7 +377,6 @@ export function CourseDetails({
 }: CourseDetailsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const enrollmentInfo = getCourseEnrollmentInfo(course as any)
@@ -390,17 +390,18 @@ export function CourseDetails({
     if (!userEnrollment || isDeleting) return
 
     setIsDeleting(true)
-    setError(null)
 
     try {
       const result = await deleteEnrollment(course.id, userEnrollment.id)
       if (!result.success) {
-        setError(result.error || 'Falha ao cancelar inscrição')
+        toast.error(result.error || 'Falha ao cancelar inscrição')
         console.error('Failed to cancel enrollment:', result.error)
+      } else {
+        toast.success('Inscrição cancelada com sucesso')
       }
     } catch (error) {
       const errorMessage = 'Erro ao cancelar inscrição. Tente novamente.'
-      setError(errorMessage)
+      toast.error(errorMessage)
       console.error('Error cancelling enrollment:', error)
     } finally {
       setIsDeleting(false)
@@ -458,12 +459,6 @@ export function CourseDetails({
   return (
     <div className="flex flex-col items-center pb-20">
       <div className="w-full max-w-3xl">
-        {/* Error message */}
-        {error && (
-          <div className="p-4 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <p className="text-destructive text-sm">{error}</p>
-          </div>
-        )}
         {/* Confirmation Bottom Sheet */}
         <BottomSheet
           open={showConfirmation}
