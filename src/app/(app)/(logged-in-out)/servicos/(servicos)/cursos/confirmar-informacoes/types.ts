@@ -1,17 +1,12 @@
-import type { EmailData } from '@/helpers/email-helpers'
+import type { EmailData } from '@/helpers/email-data-helpers'
+import type { PhoneData } from '@/helpers/phone-data-helpers'
 import { z } from 'zod'
 
 export interface CourseUserInfo {
   cpf: string
   name: string
   email: EmailData
-  phone: {
-    principal?: {
-      ddi?: string
-      ddd?: string
-      valor?: string
-    }
-  }
+  phone: PhoneData
 }
 
 export interface NearbyUnit {
