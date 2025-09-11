@@ -37,6 +37,22 @@ export default function FaqPageCourses() {
       content:
         'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. \n\n Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
     },
+    {
+      title:
+        'O que é a conta Gov.br e por que preciso dela para me inscrever nos cursos?',
+      content:
+        'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Ciclo Carioca, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
+    },
+    {
+      title: 'Não tenho uma conta Gov.br. Como posso criar uma?',
+      content:
+        'Você pode criar sua conta de forma gratuita e rápida pelo site ou aplicativo do Gov.br. Basta seguir as instruções e preencher os dados solicitados.',
+    },
+    {
+      title: 'Esqueci a senha da minha conta Gov.br. O que devo fazer?',
+      content:
+        'Você pode recuperar sua senha diretamente no site ou aplicativo do Gov.br. Basta seguir o processo de "Esqueci minha senha" e usar o método de recuperação que preferir (e-mail, celular ou reconhecimento facial, dependendo do nível da sua conta).',
+    },
   ]
   return (
     <main className="max-w-4xl min-h-lvh mx-auto pt-15 text-foreground pb-10">

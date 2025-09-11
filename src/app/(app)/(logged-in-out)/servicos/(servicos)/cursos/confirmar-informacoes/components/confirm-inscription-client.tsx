@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form'
 import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
-import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
@@ -59,7 +58,6 @@ export function ConfirmInscriptionClient({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
-  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const showUpdateButton = currentIndex === 0
@@ -143,12 +141,6 @@ export function ConfirmInscriptionClient({
         await goToSuccess()
       }
     } else {
-      // Check if data is missing before proceeding
-      if (!hasValidContactInfo) {
-        setShowUpdateInfoModal(true)
-        return
-      }
-
       const currentSlide = slides[currentIndex]
       if (
         currentSlide.id === 'select-unit' &&
@@ -288,7 +280,7 @@ export function ConfirmInscriptionClient({
 
   const handleFinish = () => {
     // inscrição já foi realizada no ultimo slide
-    window.location.href = HOME_COURSES
+    router.push(`/servicos/cursos/${courseSlug ?? ''}`)
   }
 
   const currentSlide = slides[currentIndex]
@@ -344,32 +336,28 @@ export function ConfirmInscriptionClient({
 
       {!showSuccess && (
         <div className="flex-shrink-0 pb-12">
+          {(!hasEmail || !hasPhone) && (
+            <p className="mb-8">
+              <span className="text-muted-foreground text-sm">
+                * Campo Obrigatório
+              </span>
+            </p>
+          )}
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
               <div className="flex flex-col items-center w-[50%]">
                 <Link
-                  className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
+                  className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
                     showUpdateButton
-                      ? 'opacity-100 translate-x-0 scale-100'
+                      ? 'opacity-100 translate-x-0 scale-100 text-foreground'
                       : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                  }`}
+                  }
+                  ${!hasValidContactInfo && '!text-background bg-primary hover:bg-primary'}
+                  `}
                   href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
                 >
                   Atualizar
                 </Link>
-
-                {(!hasEmail || !hasPhone) && (
-                  <p className="mt-2">
-                    <span className="text-destructive text-sm">
-                      *
-                      {!hasEmail && !hasPhone
-                        ? 'Informações pendentes'
-                        : !hasEmail
-                          ? 'Email pendente'
-                          : 'Celular pendente'}
-                    </span>
-                  </p>
-                )}
               </div>
             )}
 
@@ -382,39 +370,15 @@ export function ConfirmInscriptionClient({
           !showSuccess
             ? 'opacity-100 translate-x-0 scale-100'
             : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
-        }`}
+        }
+        ${showUpdateButton && !hasValidContactInfo && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
+        `}
             >
               {buttonText}
             </CustomButton>
           </div>
         </div>
       )}
-
-      {/* Update Data Required Bottom Sheet */}
-      <BottomSheet
-        open={showUpdateInfoModal}
-        onOpenChange={setShowUpdateInfoModal}
-        title="Quase lá!"
-        headerClassName="text-center p-0 mb-6"
-      >
-        <div className="text-center py-4">
-          <h2 className="text-xl font-medium leading-6 text-popover-foreground mb-4">
-            Quase lá!
-          </h2>
-          <p className="text-sm text-popover-foreground leading-5 mb-6">
-            Para continuar sua inscrição no curso, você deve atualizar suas
-            informações. É rápido e simples!
-          </p>
-          <Link
-            className="bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-primary/90 transition-all duration-300 ease-out flex items-center justify-center"
-            href={`/servicos/cursos/atualizar-dados?${
-              courseSlug ? `&redirectFromCourses=${courseSlug}` : ''
-            }`}
-          >
-            Atualizar Informações
-          </Link>
-        </div>
-      </BottomSheet>
     </div>
   )
 }
