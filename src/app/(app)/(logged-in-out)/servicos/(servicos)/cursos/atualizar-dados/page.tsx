@@ -1,9 +1,17 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { MailIcon, PhoneIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
-import type { ModelsTelefone } from '@/http/models'
+import {
+  type EmailData,
+  getEmailValue,
+  hasValidEmail,
+} from '@/helpers/email-data-helpers'
+import {
+  type PhoneData,
+  getPhoneValue,
+  hasValidPhone,
+} from '@/helpers/phone-data-helpers'
 import { getDalCitizenCpf } from '@/lib/dal'
-import { formatUserPhone } from '@/lib/format-phone'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 interface PageProps {
@@ -13,8 +21,8 @@ interface PageProps {
 type UserInfoProps = {
   cpf?: string
   name?: string
-  email?: { principal?: { valor: string } }
-  telefone?: ModelsTelefone
+  email?: EmailData
+  telefone?: PhoneData
 }
 
 export default async function AtualizarDadosPage({ searchParams }: PageProps) {
@@ -33,18 +41,20 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
     userInfoObj = {
       ...userAuthInfo,
       ...dataCitizen.data,
-      email: {
-        principal: {
-          valor: dataCitizen.data?.email?.principal?.valor || '',
-        },
+      email: dataCitizen.data?.email || { principal: { valor: '' } },
+      telefone: dataCitizen.data?.telefone || {
+        principal: { ddi: '', ddd: '', valor: '' },
       },
     }
   }
 
-  const formatedUserPhone =
-    userInfoObj && 'telefone' in userInfoObj
-      ? formatUserPhone(userInfoObj.telefone as ModelsTelefone | undefined)
-      : 'Informação indisponível'
+  const phoneDisplay = hasValidPhone(userInfoObj?.telefone)
+    ? getPhoneValue(userInfoObj.telefone)
+    : 'Informação pendente'
+
+  const emailDisplay = hasValidEmail(userInfoObj?.email)
+    ? getEmailValue(userInfoObj.email)
+    : 'Informação pendente'
 
   return (
     <div className="pt-20 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
@@ -66,7 +76,7 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
           <MenuItem
             icon={<PhoneIcon className="h-5 w-5" />}
             title="Celular"
-            label={String(formatedUserPhone) || 'Informação indisponível'}
+            label={phoneDisplay as string}
             href={`/meu-perfil/informacoes-pessoais/atualizar-telefone${
               courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
             }`}
@@ -75,11 +85,7 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
           <MenuItem
             icon={<MailIcon className="h-5 w-5" />}
             title="E-mail"
-            label={
-              userInfoObj?.email?.principal?.valor
-                ? userInfoObj.email.principal.valor
-                : 'Informação indisponível'
-            }
+            label={emailDisplay as string}
             href={`/meu-perfil/informacoes-pessoais/atualizar-email${
               courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
             }`}
