@@ -50,13 +50,6 @@ export default async function PersonalInfoForm() {
         <SecondaryHeader title="Informações pessoais" route="/meu-perfil" />
         <div className="space-y-6 p-4">
           <CustomInput
-            id="cpf"
-            label="CPF"
-            defaultValue={formatCpf(userAuthInfo?.cpf)}
-            isEditable={false}
-          />
-
-          <CustomInput
             id="fullName"
             label="Nome completo"
             defaultValue={
@@ -76,7 +69,7 @@ export default async function PersonalInfoForm() {
           )}
 
           <ActionDiv
-            label="Como prefere ser chamado(a)?"
+            label="Nome de exibição"
             content={userInfo?.nome_exibicao ? userInfo.nome_exibicao : ''}
             variant="default"
             disabled
@@ -120,6 +113,13 @@ export default async function PersonalInfoForm() {
             disabled
             rightIcon={<EditIcon />}
             redirectLink="/meu-perfil/informacoes-pessoais/atualizar-email"
+          />
+
+          <CustomInput
+            id="cpf"
+            label="CPF"
+            defaultValue={formatCpf(userAuthInfo?.cpf)}
+            isEditable={false}
           />
 
           <CustomInput
