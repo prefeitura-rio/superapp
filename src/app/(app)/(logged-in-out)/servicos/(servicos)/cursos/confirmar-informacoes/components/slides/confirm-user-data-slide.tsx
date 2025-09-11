@@ -48,28 +48,28 @@ export default function ConfirmUserDataSlide({
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            Celular
+            Celular {!hasPhone && '*'}
           </p>
           <p
             className={`font-normal ${
-              hasPhone ? 'text-foreground' : 'text-orange-400/70'
+              hasPhone ? 'text-foreground' : 'text-destructive'
             }`}
           >
             {hasPhone
               ? (getPhoneValue(userInfo.phone) as string)
-              : 'Celular não cadastrado'}
+              : 'celular não cadastrado'}
           </p>
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            E-mail
+            E-mail {!hasEmail && '*'}
           </p>
           <p
             className={`font-normal ${
-              hasEmail ? 'text-foreground' : 'text-orange-400/70'
+              hasEmail ? 'text-foreground' : 'text-destructive'
             }`}
           >
-            {hasEmail ? getEmailValue(userInfo.email) : 'E-mail não cadastrado'}
+            {hasEmail ? getEmailValue(userInfo.email) : 'e-mail não cadastrado'}
           </p>
         </div>
       </div>
