@@ -288,7 +288,7 @@ export function ConfirmInscriptionClient({
 
   const handleFinish = () => {
     // inscrição já foi realizada no ultimo slide
-    window.location.href = HOME_COURSES
+    router.push(`/servicos/cursos/${courseSlug ?? ''}`)
   }
 
   const currentSlide = slides[currentIndex]
