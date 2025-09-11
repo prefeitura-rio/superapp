@@ -94,10 +94,15 @@ export const ActionDiv = ({
         rightIcon && 'pr-10',
         optionalLabel && !rightIcon && 'pr-[80px]',
         optionalLabel && rightIcon && 'pr-[140px]',
-        redirectLink && 'pointer-events-none',
         className
       )}
-      onClick={drawerContent ? handleDrawerOpen('content') : undefined}
+      onClick={
+        redirectLink 
+          ? undefined // Deixa o Link do Next.js lidar com o clique
+          : drawerContent 
+          ? handleDrawerOpen('content') 
+          : undefined
+      }
     >
       {leftIcon && (
         <div
@@ -167,7 +172,7 @@ export const ActionDiv = ({
             )}
           </div>
         )}
-        {redirectLink && !drawerContent ? (
+        {redirectLink ? (
           <Link href={redirectLink}>{Content}</Link>
         ) : (
           Content

@@ -1,4 +1,5 @@
 import { ActionDiv } from '@/app/components/action-div'
+import { DisplayNameDrawerContent } from '@/app/components/drawer-contents/display-name-drawer-content'
 import { RaceDrawerContent } from '@/app/components/drawer-contents/race-drawer-content'
 import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social-name-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -73,6 +74,9 @@ export default async function PersonalInfoForm() {
             content={userInfo?.nome_exibicao ? userInfo.nome_exibicao : ''}
             variant="default"
             disabled
+            tooltip="Nome que será usado nas comunicações entre você e a Prefeitura"
+            drawerContent={<DisplayNameDrawerContent />}
+            drawerTitle="Nome de exibição"
             rightIcon={<EditIcon />}
             redirectLink="/meu-perfil/informacoes-pessoais/atualizar-nome-exibicao"
           />
