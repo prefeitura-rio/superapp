@@ -19,7 +19,8 @@ import { SuccessSlide } from './slides/success-slide'
 
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
-import { getEmailValue, hasValidEmail } from '@/helpers/email-helpers'
+import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
+import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import Link from 'next/link'
 import {
   type CourseUserInfo,
@@ -58,7 +59,7 @@ export function ConfirmInscriptionClient({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
-  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const showUpdateButton = currentIndex === 0
@@ -66,8 +67,10 @@ export function ConfirmInscriptionClient({
 
   const { isBelowBreakpoint } = useViewportHeight(648)
 
-  // Check if user has email - variable for reuse
+  // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
+  const hasPhone = hasValidPhone(userInfo.phone)
+  const hasValidContactInfo = hasEmail && hasPhone
 
   // Extract custom fields from course info
   const customFields: CustomField[] =
@@ -98,46 +101,51 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     },
-    // Only show select-unit slide if there are nearby units available
-    ...(nearbyUnits && nearbyUnits.length > 0
+    // Only include subsequent slides if user has valid contact info
+    ...(hasValidContactInfo
       ? [
-          {
-            id: 'select-unit',
-            component: SelectUnitSlide,
+          // Only show select-unit slide if there are nearby units available
+          ...(nearbyUnits && nearbyUnits.length > 0
+            ? [
+                {
+                  id: 'select-unit',
+                  component: SelectUnitSlide,
+                  props: {
+                    nearbyUnits,
+                    form,
+                    fieldName: 'unitId',
+                  },
+                  showPagination: true,
+                  showBackButton: true,
+                },
+              ]
+            : []),
+          // Add custom field slides dynamically
+          ...customFields.map(field => ({
+            id: `custom-field-${field.id}`,
+            component: CustomFieldSlide,
             props: {
-              nearbyUnits,
+              field,
+              fieldName: `custom_${field.id}`,
               form,
-              fieldName: 'unitId',
             },
             showPagination: true,
             showBackButton: true,
-          },
+          })),
         ]
       : []),
-    // Add custom field slides dynamically
-    ...customFields.map(field => ({
-      id: `custom-field-${field.id}`,
-      component: CustomFieldSlide,
-      props: {
-        field,
-        fieldName: `custom_${field.id}`,
-        form,
-      },
-      showPagination: true,
-      showBackButton: true,
-    })),
   ]
 
   const handleNext = async () => {
-    if (currentIndex === slides.length - 1) {
+    if (currentIndex === slides.length - 1 && hasValidContactInfo) {
       const isValid = await form.trigger()
       if (isValid) {
         await goToSuccess()
       }
     } else {
-      // Check if email is missing before final submission
-      if (!hasEmail) {
-        setShowEmailModal(true)
+      // Check if data is missing before proceeding
+      if (!hasValidContactInfo) {
+        setShowUpdateInfoModal(true)
         return
       }
 
@@ -241,12 +249,7 @@ export function ConfirmInscriptionClient({
             cpf: userAuthInfo.cpf,
             name: userAuthInfo.name,
             email: getEmailValue(userInfo.email),
-            phone:
-              userInfo.phone?.principal?.ddi &&
-              userInfo.phone?.principal?.ddd &&
-              userInfo.phone?.principal?.valor
-                ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
-                : undefined,
+            phone: getPhoneValue(userInfo.phone),
           },
           unitId:
             nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
@@ -292,7 +295,7 @@ export function ConfirmInscriptionClient({
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
-  const isLastSlide = currentIndex === slides.length - 1
+  const isLastSlide = currentIndex === slides.length - 1 && hasValidContactInfo
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
@@ -355,10 +358,15 @@ export function ConfirmInscriptionClient({
                   Atualizar
                 </Link>
 
-                {!hasEmail && (
+                {(!hasEmail || !hasPhone) && (
                   <p className="mt-2">
                     <span className="text-destructive text-sm">
-                      *Email pendente
+                      *
+                      {!hasEmail && !hasPhone
+                        ? 'Informações pendentes'
+                        : !hasEmail
+                          ? 'Email pendente'
+                          : 'Celular pendente'}
                     </span>
                   </p>
                 )}
@@ -382,10 +390,10 @@ export function ConfirmInscriptionClient({
         </div>
       )}
 
-      {/* Email Required Bottom Sheet */}
+      {/* Update Data Required Bottom Sheet */}
       <BottomSheet
-        open={showEmailModal}
-        onOpenChange={setShowEmailModal}
+        open={showUpdateInfoModal}
+        onOpenChange={setShowUpdateInfoModal}
         title="Quase lá!"
         headerClassName="text-center p-0 mb-6"
       >
@@ -394,16 +402,16 @@ export function ConfirmInscriptionClient({
             Quase lá!
           </h2>
           <p className="text-sm text-popover-foreground leading-5 mb-6">
-            Para continuar sua inscrição no curso, você deve atualizar o email.
-            É rápido e simples!
+            Para continuar sua inscrição no curso, você deve atualizar suas
+            informações. É rápido e simples!
           </p>
           <Link
             className="bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-primary/90 transition-all duration-300 ease-out flex items-center justify-center"
-            href={`/meu-perfil/informacoes-pessoais/atualizar-email?emailPendency=true${
+            href={`/servicos/cursos/atualizar-dados?${
               courseSlug ? `&redirectFromCourses=${courseSlug}` : ''
             }`}
           >
-            Atualizar Email
+            Atualizar Informações
           </Link>
         </div>
       </BottomSheet>

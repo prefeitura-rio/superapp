@@ -37,7 +37,6 @@ export default function EmailForm() {
   const searchParams = useSearchParams()
 
   const courseSlug = searchParams.get('redirectFromCourses')
-  const emailPendency = searchParams.get('emailPendency')
 
   const emailStateInput = useInputValidation({
     value: email,
@@ -112,9 +111,6 @@ export default function EmailForm() {
   }
 
   const getRouteBackUrl = () => {
-    if (emailPendency) {
-      return `/servicos/cursos/confirmar-informacoes/${courseSlug}`
-    }
     if (courseSlug) {
       return `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
     }
