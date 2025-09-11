@@ -1,11 +1,11 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function CertificatedsCoursesLoading() {
+export default function CoursesCertifiedLoading() {
   return (
     <div className="max-w-4xl mx-auto py-6">
       {/* Header */}
-      <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
+      <SecondaryHeader title="Certificados" />
 
       {/* Course Cards Skeleton */}
       <div className="relative overflow-hidden mt-16 px-4">

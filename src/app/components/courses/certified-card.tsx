@@ -1,41 +1,10 @@
 'use client'
 
-import coursesApi from '@/actions/courses'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
-import type { MY_CERTIFICATES } from '@/mocks/mock-courses'
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import {
-  CoursesCertifiedDrawer,
-  CoursesUnavailableDrawer,
-} from '../drawer-contents/courses-certified-drawers'
-import { providerIcons } from '../utils'
-
-function MyCertificatesSkeleton() {
-  return (
-    <div className="flex flex-col gap-3">
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="flex items-start gap-3 rounded-lg p-3 bg-background"
-        >
-          <Skeleton className="w-30 h-30 rounded-xl" />
-          <div className="flex flex-col flex-1 min-w-0">
-            <Skeleton className="h-4 w-60 mb-3 rounded" />
-            <Skeleton className="h-6 w-32 rounded-full" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function getCertificateStatusColor(status: string) {
   switch (status.toLowerCase()) {
-    case 'certificado disponível':
+    case 'certificate_available':
       return 'bg-card-3 text-background'
-    case 'certificado indisponível':
+    case 'certificate_unavailable':
       return 'bg-secondary text-foreground'
     default:
       return 'bg-secondary text-zinc-900'
@@ -43,45 +12,9 @@ function getCertificateStatusColor(status: string) {
 }
 
 export function MyCertificatesCard() {
-  const [courses, setCourses] = useState<any>([])
-  const [loading, setLoading] = useState(true)
-  const [openCertified, setOpenCertified] = useState(false)
-  const [openUnavailable, setOpenUnavailable] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState<any>(null)
-
-  const fetchMyCertificates = async () => {
-    try {
-      const courses = await coursesApi.getCertifiedCourses()
-      setCourses(courses)
-    } catch (error) {
-      console.error('Erro ao carregar certificados:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCourseClick = (course: any) => {
-    setSelectedCourse(course)
-
-    if (course.status.toLowerCase() === 'certificado disponível') {
-      setOpenCertified(true)
-    } else {
-      setOpenUnavailable(true)
-    }
-  }
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
-  useEffect(() => {
-    fetchMyCertificates()
-  }, [])
-
-  if (loading) {
-    return <MyCertificatesSkeleton />
-  }
-
   return (
     <div className="flex flex-col gap-3">
-      {courses.map((course: (typeof MY_CERTIFICATES)[0]) => (
+      {/* {courses.map((course: (typeof MY_CERTIFICATES)[0]) => (
         <button
           type="button"
           key={course.id}
@@ -130,19 +63,19 @@ export function MyCertificatesCard() {
             </span>
           </div>
         </button>
-      ))}
+      ))} */}
 
       {/* Bottom Sheets */}
-      <CoursesCertifiedDrawer
+      {/* <CoursesCertifiedDrawer
         open={openCertified}
         onOpenChange={setOpenCertified}
         courseTitle={selectedCourse?.title || ''}
-      />
+      /> */}
 
-      <CoursesUnavailableDrawer
+      {/* <CoursesUnavailableDrawer
         open={openUnavailable}
         onOpenChange={setOpenUnavailable}
-      />
+      /> */}
     </div>
   )
 }
