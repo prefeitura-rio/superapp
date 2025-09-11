@@ -1,5 +1,6 @@
 import { extractCourseId } from '@/actions/courses/utils-mock'
-import { normalizeEmailData } from '@/helpers/email-helpers'
+import { normalizeEmailData } from '@/helpers/email-data-helpers'
+import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -36,7 +37,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
     cpf: userInfo.cpf || userAuthInfo.cpf,
     name: userInfo.nome || userAuthInfo.name,
     email: normalizeEmailData(userInfo.email),
-    phone: userInfo.telefone || { principal: { ddi: '', ddd: '', valor: '' } },
+    phone: normalizePhoneData(userInfo.telefone),
   }
 
   const nearbyUnits =
