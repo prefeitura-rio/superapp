@@ -366,7 +366,7 @@ export function ConfirmInscriptionClient({
                         ? 'Informações pendentes'
                         : !hasEmail
                           ? 'Email pendente'
-                          : 'Telefone pendente'}
+                          : 'Celular pendente'}
                     </span>
                   </p>
                 )}
