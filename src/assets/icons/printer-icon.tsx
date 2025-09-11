@@ -11,7 +11,7 @@ export function PrinterIcon(props: IconProps) {
       className="text-foreground"
       {...props}
     >
-      <g clip-path="url(#clip0_9466_23409)">
+      <g clipPath="url(#clip0_9466_23409)">
         <path
           d="M5 7.5013V1.66797H15V7.5013"
           stroke="currentColor"

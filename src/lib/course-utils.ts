@@ -7,6 +7,7 @@ export type EnrollmentStatus =
   | 'course_ended'
   | 'not_available'
   | 'certificate_available'
+  | 'certificate_pending'
 
 export interface CourseEnrollmentInfo {
   status: EnrollmentStatus
@@ -21,6 +22,7 @@ export interface UserEnrollmentExtended {
   status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'concluded'
   course_id: number
   certificate_url?: string
+  has_certificate?: boolean
 }
 
 /**
@@ -88,19 +90,28 @@ export function getCourseEnrollmentInfo(
 ): CourseEnrollmentInfo {
   const now = new Date()
 
-  // Check if user has concluded the course and has certificate available
-  if (
-    userEnrollment?.status === 'concluded' &&
-    userEnrollment.certificate_url
-  ) {
+  // Check if user has concluded the course
+  if (userEnrollment?.status === 'concluded') {
     const latestClassEndDate = getLatestClassEndDate(course)
-    if (latestClassEndDate && now > latestClassEndDate) {
+    
+    // If class has ended and user has certificate URL, show certificate available
+    if (latestClassEndDate && now > latestClassEndDate && userEnrollment.certificate_url) {
       return {
         status: 'certificate_available',
         buttonText: 'Acessar certificado',
         isDisabled: false,
         canEnroll: false,
         certificateUrl: userEnrollment.certificate_url,
+      }
+    }
+    
+    // If user has concluded but certificate is pending (has_certificate = true but no URL yet)
+    if (course.has_certificate && !userEnrollment.certificate_url) {
+      return {
+        status: 'certificate_pending',
+        buttonText: 'Aguardando certificado',
+        isDisabled: true,
+        canEnroll: false,
       }
     }
   }

@@ -50,8 +50,6 @@ export default async function MyCoursesPage() {
       }))
       .filter((course: any) => course.id)
 
-    console.log('coursesWithEnrollments', coursesWithEnrollments)
-
     return (
       <div className="max-w-4xl mx-auto py-6">
         <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
