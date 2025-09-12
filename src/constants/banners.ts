@@ -3,6 +3,7 @@ import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
 import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
+import { NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from './venvs'
 
 type BannerProps = {
   id: string
@@ -37,7 +38,7 @@ export const suggestedBanners: BannerProps[] = [
     component: IptuBanner,
     title: 'Fique em dia!',
     subtitle: 'Emita sua guia ou saiba mais',
-    route: '/servicos/categoria/taxas/84670/carioca-digital',
+    route: `/servicos/categoria/taxas/84670/${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION}`,
   },
   {
     id: 'update',
@@ -58,6 +59,6 @@ export const suggestedBanners: BannerProps[] = [
     component: LicensesBanner,
     title: 'Regularize sua obra!',
     subtitle: 'E ganhe até 50% de desconto',
-    route: '/servicos/categoria/Cidade/82608/carioca-digital',
+    route: `/servicos/categoria/Cidade/82608/${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION}`,
   },
 ]

@@ -1,4 +1,5 @@
 import { ActionDiv } from '@/app/components/action-div'
+import { DisplayNameDrawerContent } from '@/app/components/drawer-contents/display-name-drawer-content'
 import { RaceDrawerContent } from '@/app/components/drawer-contents/race-drawer-content'
 import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social-name-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -50,13 +51,6 @@ export default async function PersonalInfoForm() {
         <SecondaryHeader title="Informações pessoais" route="/meu-perfil" />
         <div className="space-y-6 p-4">
           <CustomInput
-            id="cpf"
-            label="CPF"
-            defaultValue={formatCpf(userAuthInfo?.cpf)}
-            isEditable={false}
-          />
-
-          <CustomInput
             id="fullName"
             label="Nome completo"
             defaultValue={
@@ -65,12 +59,26 @@ export default async function PersonalInfoForm() {
             isEditable={false}
           />
 
+          {userInfo?.nome_social && (
+            <ActionDiv
+              label="Nome social"
+              tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
+              content={userInfo?.nome_social || 'Informação indisponível'}
+              drawerContent={<SocialNameDrawerContent />}
+              drawerTitle="Nome social"
+            />
+          )}
+
           <ActionDiv
-            label="Nome social"
-            tooltip="Nome pelo qual a pessoa prefere ser chamada socialmente"
-            content={userInfo?.nome_social || 'Informação indisponível'}
-            drawerContent={<SocialNameDrawerContent />}
-            drawerTitle="Nome social"
+            label="Nome de exibição"
+            content={userInfo?.nome_exibicao ? userInfo.nome_exibicao : ''}
+            variant="default"
+            disabled
+            tooltip="Nome que será usado nas comunicações entre você e a Prefeitura"
+            drawerContent={<DisplayNameDrawerContent />}
+            drawerTitle="Nome de exibição"
+            rightIcon={<EditIcon />}
+            redirectLink="/meu-perfil/informacoes-pessoais/atualizar-nome-exibicao"
           />
 
           <ActionDiv
@@ -109,6 +117,13 @@ export default async function PersonalInfoForm() {
             disabled
             rightIcon={<EditIcon />}
             redirectLink="/meu-perfil/informacoes-pessoais/atualizar-email"
+          />
+
+          <CustomInput
+            id="cpf"
+            label="CPF"
+            defaultValue={formatCpf(userAuthInfo?.cpf)}
+            isEditable={false}
           />
 
           <CustomInput

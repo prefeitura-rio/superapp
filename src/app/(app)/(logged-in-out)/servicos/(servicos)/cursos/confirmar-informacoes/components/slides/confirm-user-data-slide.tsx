@@ -1,7 +1,8 @@
 'use client'
 
+import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
+import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { formatCpf } from '@/lib/format-cpf'
-import { formatUserPhone } from '@/lib/format-phone'
 import { formatTitleCase } from '@/lib/utils'
 import type { CourseUserInfo } from '../../types'
 
@@ -17,6 +18,8 @@ export default function ConfirmUserDataSlide({
   userInfo,
   userAuthInfo,
 }: ConfirmUserDataSlideProps) {
+  const hasEmail = hasValidEmail(userInfo.email)
+  const hasPhone = hasValidPhone(userInfo.phone)
   return (
     <div className="w-full space-y-10">
       <div className="text-left">
@@ -45,20 +48,28 @@ export default function ConfirmUserDataSlide({
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            Celular
+            Celular {!hasPhone && '*'}
           </p>
-          <p className="text-foreground font-normal">
-            {formatUserPhone(userInfo?.phone)}
+          <p
+            className={`font-normal ${
+              hasPhone ? 'text-foreground' : 'text-destructive'
+            }`}
+          >
+            {hasPhone
+              ? (getPhoneValue(userInfo.phone) as string)
+              : 'celular não cadastrado'}
           </p>
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            E-mail
+            E-mail {!hasEmail && '*'}
           </p>
-          <p className="text-foreground font-normal">
-            {userInfo?.email?.principal
-              ? userInfo.email.principal.valor
-              : 'Informação indisponível'}
+          <p
+            className={`font-normal ${
+              hasEmail ? 'text-foreground' : 'text-destructive'
+            }`}
+          >
+            {hasEmail ? getEmailValue(userInfo.email) : 'e-mail não cadastrado'}
           </p>
         </div>
       </div>

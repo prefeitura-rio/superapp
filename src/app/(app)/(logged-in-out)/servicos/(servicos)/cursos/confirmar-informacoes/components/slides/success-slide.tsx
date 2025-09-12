@@ -33,7 +33,7 @@ export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
   }, [])
 
   const handleFinish = () => {
-    router.back()
+    onFinish()
   }
 
   return (

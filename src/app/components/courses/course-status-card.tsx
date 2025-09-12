@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 interface CourseStatusCardProps {
-  status: 'pending' | 'approved' | 'finished' | 'rejected'
+  status: 'pending' | 'approved' | 'concluded' | 'rejected'
   className?: string
 }
 
@@ -19,17 +19,17 @@ const statusConfig = {
       'Sua inscrição foi aprovada com sucesso. Você já está confirmado no curso e receberá por e-mail mais informações sobre as próximas etapas.',
     badgeClassName: 'bg-card-3 text-background dark:text-foreground',
   },
-  finished: {
-    badgeText: 'Finalizado',
-    message:
-      'Parabéns! Você concluiu o curso.\nO certificado já está disponível e pode ser acessado diretamente pelo botão abaixo.',
-    badgeClassName: 'bg-secondary text-foreground',
-  },
   rejected: {
     badgeText: 'Recusado',
     message:
       'Sua inscrição foi analisada, mas não pôde ser aprovada neste momento. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
     badgeClassName: 'bg-destructive text-background dark:text-foreground',
+  },
+  concluded: {
+    badgeText: 'Finalizado',
+    message:
+      'Parabéns! Você concluiu o curso.\nO certificado já está disponível e pode ser acessado diretamente pelo botão abaixo.',
+    badgeClassName: 'bg-secondary text-foreground',
   },
 }
 

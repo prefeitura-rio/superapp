@@ -114,13 +114,16 @@ export const getDalHealthUnitRisk = unstable_cache(
 // 30-minute cache since avatar list doesn't change frequently
 // Using standard Next.js caching instead of unstable_cache to avoid cookie issues
 export async function getDalAvatars() {
-  return await getV1Avatars(undefined, {
-    cache: 'force-cache',
-    next: {
-      revalidate: 600, // 10 minutes
-      tags: ['available-avatars'],
-    },
-  })
+  return await getV1Avatars(
+    { per_page: 100 },
+    {
+      cache: 'force-cache',
+      next: {
+        revalidate: 600, // 10 minutes
+        tags: ['available-avatars'],
+      },
+    }
+  )
 }
 
 // User avatar caching (user-specific data)

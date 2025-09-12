@@ -18,6 +18,8 @@ import { SuccessSlide } from './slides/success-slide'
 
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
+import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
+import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import Link from 'next/link'
 import {
   type CourseUserInfo,
@@ -63,6 +65,11 @@ export function ConfirmInscriptionClient({
 
   const { isBelowBreakpoint } = useViewportHeight(648)
 
+  // Check if user has email/phone - variable for reuse
+  const hasEmail = hasValidEmail(userInfo.email)
+  const hasPhone = hasValidPhone(userInfo.phone)
+  const hasValidContactInfo = hasEmail && hasPhone
+
   // Extract custom fields from course info
   const customFields: CustomField[] =
     (courseInfo as any)?.data?.custom_fields || []
@@ -92,38 +99,43 @@ export function ConfirmInscriptionClient({
       showPagination: true,
       showBackButton: true,
     },
-    // Only show select-unit slide if there are nearby units available
-    ...(nearbyUnits && nearbyUnits.length > 0
+    // Only include subsequent slides if user has valid contact info
+    ...(hasValidContactInfo
       ? [
-          {
-            id: 'select-unit',
-            component: SelectUnitSlide,
+          // Only show select-unit slide if there are nearby units available
+          ...(nearbyUnits && nearbyUnits.length > 0
+            ? [
+                {
+                  id: 'select-unit',
+                  component: SelectUnitSlide,
+                  props: {
+                    nearbyUnits,
+                    form,
+                    fieldName: 'unitId',
+                  },
+                  showPagination: true,
+                  showBackButton: true,
+                },
+              ]
+            : []),
+          // Add custom field slides dynamically
+          ...customFields.map(field => ({
+            id: `custom-field-${field.id}`,
+            component: CustomFieldSlide,
             props: {
-              nearbyUnits,
+              field,
+              fieldName: `custom_${field.id}`,
               form,
-              fieldName: 'unitId',
             },
             showPagination: true,
             showBackButton: true,
-          },
+          })),
         ]
       : []),
-    // Add custom field slides dynamically
-    ...customFields.map(field => ({
-      id: `custom-field-${field.id}`,
-      component: CustomFieldSlide,
-      props: {
-        field,
-        fieldName: `custom_${field.id}`,
-        form,
-      },
-      showPagination: true,
-      showBackButton: true,
-    })),
   ]
 
   const handleNext = async () => {
-    if (currentIndex === slides.length - 1) {
+    if (currentIndex === slides.length - 1 && hasValidContactInfo) {
       const isValid = await form.trigger()
       if (isValid) {
         await goToSuccess()
@@ -139,8 +151,8 @@ export function ConfirmInscriptionClient({
         if (!isValid) return
       }
 
-      // Validate custom fields if they are required
       if (currentSlide.id.startsWith('custom-field-')) {
+        // Validate custom fields if they are required
         const fieldId = currentSlide.id.replace('custom-field-', '')
         const field = customFields.find(f => f.id === fieldId)
         if (field?.required) {
@@ -228,13 +240,8 @@ export function ConfirmInscriptionClient({
           userInfo: {
             cpf: userAuthInfo.cpf,
             name: userAuthInfo.name,
-            email: userInfo.email?.principal?.valor,
-            phone:
-              userInfo.phone?.principal?.ddi &&
-              userInfo.phone?.principal?.ddd &&
-              userInfo.phone?.principal?.valor
-                ? `+${userInfo.phone.principal.ddi} ${userInfo.phone.principal.ddd} ${userInfo.phone.principal.valor}`
-                : undefined,
+            email: getEmailValue(userInfo.email),
+            phone: getPhoneValue(userInfo.phone),
           },
           unitId:
             nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
@@ -273,14 +280,14 @@ export function ConfirmInscriptionClient({
 
   const handleFinish = () => {
     // inscrição já foi realizada no ultimo slide
-    window.location.href = HOME_COURSES
+    router.push(`/servicos/cursos/${courseSlug ?? ''}`)
   }
 
   const currentSlide = slides[currentIndex]
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
-  const isLastSlide = currentIndex === slides.length - 1
+  const isLastSlide = currentIndex === slides.length - 1 && hasValidContactInfo
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
@@ -329,30 +336,43 @@ export function ConfirmInscriptionClient({
 
       {!showSuccess && (
         <div className="flex-shrink-0 pb-12">
+          {(!hasEmail || !hasPhone) && (
+            <p className="mb-8">
+              <span className="text-muted-foreground text-sm">
+                * Campo Obrigatório
+              </span>
+            </p>
+          )}
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
-              <Link
-                className={`bg-card py-4 px-6 text-foreground text-sm font-normal leading-5 rounded-full w-[50%] h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
-                  showUpdateButton
-                    ? 'opacity-100 translate-x-0 scale-100'
-                    : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                }`}
-                href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
-              >
-                Atualizar
-              </Link>
+              <div className="flex flex-col items-center w-[50%]">
+                <Link
+                  className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
+                    showUpdateButton
+                      ? 'opacity-100 translate-x-0 scale-100 text-foreground'
+                      : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
+                  }
+                  ${!hasValidContactInfo && '!text-background bg-primary hover:bg-primary'}
+                  `}
+                  href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
+                >
+                  Atualizar
+                </Link>
+              </div>
             )}
 
             <CustomButton
               onClick={isLastSlide ? goToSuccess : handleNext}
               disabled={isPending}
               className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
-          ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
-          ${
-            !showSuccess
-              ? 'opacity-100 translate-x-0 scale-100'
-              : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
-          }`}
+        ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
+        ${
+          !showSuccess
+            ? 'opacity-100 translate-x-0 scale-100'
+            : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
+        }
+        ${showUpdateButton && !hasValidContactInfo && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
+        `}
             >
               {buttonText}
             </CustomButton>

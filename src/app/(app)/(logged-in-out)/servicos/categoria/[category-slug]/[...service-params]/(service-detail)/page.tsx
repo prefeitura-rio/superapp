@@ -1,4 +1,5 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
 import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import type { Service1746 } from '@/types/1746'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
@@ -19,7 +20,7 @@ export default async function ServicePage({
 
   if (
     !serviceId ||
-    (collection !== 'carioca-digital' && collection !== '1746')
+    (collection !== NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION && collection !== NEXT_PUBLIC_BUSCA_1746_COLLECTION)
   ) {
     notFound()
   }
@@ -39,13 +40,13 @@ export default async function ServicePage({
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pt-20 md:pt-22 pb-20">
-          {collection === 'carioca-digital' && (
+          {collection === NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION && (
             <CariocaDigitalServiceComponent
               serviceData={serviceData as unknown as CariocaDigitalService}
             />
           )}
 
-          {collection === '1746' && (
+          {collection === NEXT_PUBLIC_BUSCA_1746_COLLECTION && (
             <Service1746Component
               serviceData={serviceData as unknown as Service1746}
             />

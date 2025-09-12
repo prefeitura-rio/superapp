@@ -86,16 +86,23 @@ export const ActionDiv = ({
     <div
       className={cn(
         'relative group cursor-pointer border-2 border-border rounded-xl text-card-foreground font-normal truncate transition-colors',
-        disabled ? 'bg-card' : 'bg-transparent hover:bg-accent/40',
+        disabled
+          ? 'bg-transparent hover:bg-accent/40'
+          : 'bg-card text-muted-foreground',
         sizeStyles[size],
         leftIcon && 'pl-15',
         rightIcon && 'pr-10',
         optionalLabel && !rightIcon && 'pr-[80px]',
         optionalLabel && rightIcon && 'pr-[140px]',
-        redirectLink && 'pointer-events-none',
         className
       )}
-      onClick={drawerContent ? handleDrawerOpen('content') : undefined}
+      onClick={
+        redirectLink 
+          ? undefined // Deixa o Link do Next.js lidar com o clique
+          : drawerContent 
+          ? handleDrawerOpen('content') 
+          : undefined
+      }
     >
       {leftIcon && (
         <div
@@ -165,7 +172,7 @@ export const ActionDiv = ({
             )}
           </div>
         )}
-        {redirectLink && !drawerContent ? (
+        {redirectLink ? (
           <Link href={redirectLink}>{Content}</Link>
         ) : (
           Content

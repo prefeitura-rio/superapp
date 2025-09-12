@@ -15,12 +15,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 // Types
 interface UserEnrollment {
   id: string
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'concluded'
   course_id: number
+  certificate_url?: string
 }
 
 interface RemoteClass {
@@ -168,18 +170,26 @@ function InfoRow({ label, value }: InfoRowProps) {
 
 interface CourseHeaderProps {
   course: Course
-  onBack: () => void
+  onBack?: () => void
 }
 
 function CourseHeader({ course, onBack }: CourseHeaderProps) {
   const router = useRouter()
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
+      return
+    }
+    router.push('/servicos/cursos/')
+  }
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
       <div className="flex justify-start">
         <IconButton
           icon={ChevronLeftIcon}
           className="top-4 left-4 absolute z-10"
-          onClick={() => router.back()}
+          onClick={handleBack}
         />
       </div>
       {course.cover_image && (
@@ -307,6 +317,7 @@ function CourseContent({ course }: CourseContentProps) {
     { key: 'resources_used', title: 'Recursos utilizados' },
     { key: 'material_used', title: 'Material utilizado' },
     { key: 'teaching_material', title: 'Material didático' },
+    { key: 'target_audience', title: 'Público-alvo' },
   ]
 
   const renderContentWithLineBreaks = (content: string) => {
@@ -368,10 +379,12 @@ export function CourseDetails({
 }: CourseDetailsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const enrollmentInfo = getCourseEnrollmentInfo(course as any)
+  const enrollmentInfo = getCourseEnrollmentInfo(
+    course as any,
+    userEnrollment as any
+  )
   const scheduleInfo = getCourseScheduleInfo(course)
 
   const courseSubscriptionHref = userInfo.cpf
@@ -382,17 +395,18 @@ export function CourseDetails({
     if (!userEnrollment || isDeleting) return
 
     setIsDeleting(true)
-    setError(null)
 
     try {
       const result = await deleteEnrollment(course.id, userEnrollment.id)
       if (!result.success) {
-        setError(result.error || 'Falha ao cancelar inscrição')
+        toast.error(result.error || 'Falha ao cancelar inscrição')
         console.error('Failed to cancel enrollment:', result.error)
+      } else {
+        toast.success('Inscrição cancelada com sucesso')
       }
     } catch (error) {
       const errorMessage = 'Erro ao cancelar inscrição. Tente novamente.'
-      setError(errorMessage)
+      toast.error(errorMessage)
       console.error('Error cancelling enrollment:', error)
     } finally {
       setIsDeleting(false)
@@ -409,6 +423,15 @@ export function CourseDetails({
   const renderActionButton = () => {
     const buttonClasses =
       'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+
+    // Handle certificate available status
+    if (enrollmentInfo.status === 'certificate_available') {
+      return (
+        <Link href="/servicos/cursos/certificados" className={buttonClasses}>
+          {enrollmentInfo.buttonText}
+        </Link>
+      )
+    }
 
     // Handle rejected status specifically
     if (userEnrollment?.status === 'rejected') {
@@ -450,12 +473,6 @@ export function CourseDetails({
   return (
     <div className="flex flex-col items-center pb-20">
       <div className="w-full max-w-3xl">
-        {/* Error message */}
-        {error && (
-          <div className="p-4 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <p className="text-destructive text-sm">{error}</p>
-          </div>
-        )}
         {/* Confirmation Bottom Sheet */}
         <BottomSheet
           open={showConfirmation}
@@ -489,7 +506,7 @@ export function CourseDetails({
             </CustomButton>
           </div>
         </BottomSheet>
-        <CourseHeader course={course} onBack={() => router.back()} />
+        <CourseHeader course={course} />
         <CourseInfo course={course} />
         <CourseMetadata course={course} />
         {userEnrollment?.status && (
@@ -501,7 +518,7 @@ export function CourseDetails({
         <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
           {course.description || 'Descrição não disponível'}
         </div>
-        {!isEnrolled && (
+        {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
             {renderActionButton()}
           </div>

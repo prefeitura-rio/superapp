@@ -9,6 +9,8 @@
 export interface ModelsClinicaFamilia {
   email?: string
   endereco?: string
+  /** "bigquery" or "mcp" - not stored in DB, populated at response time */
+  fonte?: string
   horario_atendimento?: string
   id_cnes?: string
   indicador?: boolean

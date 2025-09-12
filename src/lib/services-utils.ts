@@ -1,3 +1,4 @@
+import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
 import type { Service1746 } from '@/types/1746'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
 import type { ServicesApiResponse } from '@/types/service'
@@ -24,13 +25,13 @@ export async function fetchServicesByCategory(
   try {
     // Decode the URL-encoded category slug - no need to encode again
     const decodedSlug = decodeURIComponent(categorySlug)
-    const url = `${rootUrl}api/v1/categoria/1746,carioca-digital?categoria=${decodedSlug}&page=1&per_page=20`
+    const url = `${rootUrl}api/v1/categoria/${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION}?categoria=${decodedSlug}&page=1&per_page=20`
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production
       next: { revalidate: 86400 }, // Revalidate every 1 day
     })
-
+console.log(url)
     if (!response.ok) {
       throw new Error(`Failed to fetch services: ${response.status}`)
     }

@@ -41,6 +41,30 @@ export function formatUserName(userName: string): string {
 }
 
 /**
+ * Retorna o nome de exibição do usuário, priorizando nome_exibicao se disponível,
+ * caso contrário retorna o nome padrão
+ * @param displayName - Nome de exibição personalizado (nome_exibicao)
+ * @param defaultName - Nome padrão do usuário (name)
+ * @returns Nome de exibição formatado
+ */
+export function getDisplayName(
+  displayName?: string,
+  defaultName?: string
+): string {
+  // Se nome_exibicao existe e não está vazio, usa ele
+  if (displayName?.trim()) {
+    return displayName
+  }
+
+  // Caso contrário, usa o nome padrão formatado (apenas primeiro nome)
+  if (defaultName?.trim()) {
+    return formatUserName(defaultName)
+  }
+
+  return ''
+}
+
+/**
  * Formata qualquer texto com a primeira letra de cada palavra em maiúscula
  * @param text - Texto a ser formatado (ex: "joao silva", "JOAO SILVA")
  * @returns Texto formatado com primeira letra de cada palavra em maiúscula (ex: "Joao Silva")

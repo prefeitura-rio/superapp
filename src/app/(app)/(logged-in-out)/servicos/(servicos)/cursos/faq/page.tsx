@@ -28,20 +28,30 @@ export default function FaqPageCourses() {
         'Não. A maioria dos cursos é gratuita, mas alguns podem ter um custo. Se houver, essa informação estará sempre destacada na descrição do próprio curso.',
     },
     {
-      title: 'Receberei certificado de conclusão do curso?',
-      content:
-        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
-    },
-    {
       title: 'Como faço para cancelar minha inscrição?',
       content:
-        'Para cancelar, basta enviar um e-mail para [endereço oficial da plataforma] informando seus dados e o curso.',
+        'Para cancelar sua inscrição, basta ir até a página do curso desejado no Ciclo Carioca e clicar em “Cancelar inscrição”. ',
+    },
+    {
+      title: 'Receberei certificado de conclusão do curso?',
+      content:
+        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. \n\n Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
     },
     {
       title:
-        'Há suporte técnico caso eu tenha dificuldades no ato de inscrição?',
+        'O que é a conta Gov.br e por que preciso dela para me inscrever nos cursos?',
       content:
-        'Sim. A plataforma oferece canais de suporte digital para dúvidas de acesso, solicitação de inscrição ou navegação.',
+        'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Ciclo Carioca, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
+    },
+    {
+      title: 'Não tenho uma conta Gov.br. Como posso criar uma?',
+      content:
+        'Você pode criar sua conta de forma gratuita e rápida pelo site ou aplicativo do Gov.br. Basta seguir as instruções e preencher os dados solicitados.',
+    },
+    {
+      title: 'Esqueci a senha da minha conta Gov.br. O que devo fazer?',
+      content:
+        'Você pode recuperar sua senha diretamente no site ou aplicativo do Gov.br. Basta seguir o processo de "Esqueci minha senha" e usar o método de recuperação que preferir (e-mail, celular ou reconhecimento facial, dependendo do nível da sua conta).',
     },
   ]
   return (

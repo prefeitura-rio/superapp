@@ -49,7 +49,7 @@ function getStatusLabel(status: string) {
       return 'Recusado'
     case 'cancelled':
       return 'Cancelado'
-    case 'completed':
+    case 'concluded':
       return 'Finalizado'
     default:
       return status
@@ -129,7 +129,7 @@ export function MyCoursesCard({
             </p>
             <span
               className={cn(
-                'inline-block px-3 py-1 text-xs font-medium text-background rounded-full w-fit',
+                'inline-block px-3 py-1 text-xs font-medium text-background dark:text-foreground rounded-full w-fit',
                 getStatusColor(course.status)
               )}
             >

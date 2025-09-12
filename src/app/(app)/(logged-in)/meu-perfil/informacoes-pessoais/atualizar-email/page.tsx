@@ -90,6 +90,12 @@ export default function EmailForm() {
 
   function handleDrawerClose() {
     setDrawerOpen(false)
+
+    if (courseSlug) {
+      router.push(`/servicos/cursos/confirmar-informacoes/${courseSlug}`)
+      return
+    }
+
     router.back()
   }
 
@@ -104,9 +110,14 @@ export default function EmailForm() {
     }
   }
 
-  const routeBackUrl = courseSlug
-    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
-    : '/meu-perfil'
+  const getRouteBackUrl = () => {
+    if (courseSlug) {
+      return `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+    }
+    return '/meu-perfil'
+  }
+
+  const routeBackUrl = getRouteBackUrl()
 
   return (
     <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
