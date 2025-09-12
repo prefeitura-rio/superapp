@@ -317,6 +317,7 @@ function CourseContent({ course }: CourseContentProps) {
     { key: 'resources_used', title: 'Recursos utilizados' },
     { key: 'material_used', title: 'Material utilizado' },
     { key: 'teaching_material', title: 'Material didático' },
+    { key: 'target_audience', title: 'Público-alvo' },
   ]
 
   const renderContentWithLineBreaks = (content: string) => {
