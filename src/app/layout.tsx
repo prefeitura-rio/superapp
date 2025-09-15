@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { VLibrasWidget } from '@/components/vlibras-widget'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -66,6 +67,7 @@ export default async function RootLayout({
         className={`${dmSans.className} antialiased`}
         suppressHydrationWarning
       >
+        <VLibrasWidget />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
