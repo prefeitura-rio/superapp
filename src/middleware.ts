@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
     "'self'",
     `'nonce-${nonce}'`,
     "'strict-dynamic'",
+    "'wasm-unsafe-eval'", 
     ...scriptHashes.map(hash => `'${hash}'`),
     ...(isDevelopment ? ["'unsafe-eval'"] : []),
   ]
@@ -66,6 +67,7 @@ export async function middleware(request: NextRequest) {
   media-src 'self' https://*.gov.br https://storage.googleapis.com data: blob:;
   object-src 'none';
   base-uri 'self';
+  worker-src 'self' blob:;  
   form-action 'self' https://*.gov.br https://*.acesso.gov.br/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googletagmanager.com/* https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
   frame-ancestors 'self' https://*.gov.br https://*.acesso.gov.br/;
   upgrade-insecure-requests;
