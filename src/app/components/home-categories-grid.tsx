@@ -84,6 +84,7 @@ export default function HomeCategoriesGrid({
                           category={category}
                           position={globalPosition}
                           href={categoriesUrl(category.categorySlug)}
+                          aria-label={`Acessar serviços de ${category.name}`}
                         >
                           <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
                             <div className="flex items-center justify-center text-3xl mb-1">

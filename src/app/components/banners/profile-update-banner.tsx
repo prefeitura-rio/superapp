@@ -30,7 +30,7 @@ export const ProfileUpdateBanner = ({
           src={atualizarCadastroIcon}
           width={100}
           height={100}
-          alt="Mão segurando o celular com check azul."
+          alt="Celular com confirmação de cadastro atualizado"
           className="h-30 w-auto absolute bottom-0 -right-6 z-20  md:right-4"
         />
       }

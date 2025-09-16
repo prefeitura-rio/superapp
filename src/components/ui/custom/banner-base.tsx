@@ -35,6 +35,17 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
     if (route) router.push(route)
   }
 
+  const getAriaLabel = () => {
+    if (!route) return undefined
+
+    let label = `${title}`
+    if (subtitle) label += ` - ${subtitle}`
+    if (badge) label += ` (${badge})`
+    label += '. Clique para acessar.'
+
+    return label
+  }
+
   return (
     <div
       onClick={handleClick}
@@ -47,6 +58,7 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       role={route ? 'button' : undefined}
       tabIndex={route ? 0 : undefined}
       className={`relative rounded-xl pt-4 pl-[23px] pr-[23px] h-[104px] min-w-[320px] sm:min-w-[300px] overflow-visible w-full ${route ? 'cursor-pointer' : ''}`}
+      aria-label={getAriaLabel()}
       style={{ backgroundColor: color }}
     >
       {/* Blur */}

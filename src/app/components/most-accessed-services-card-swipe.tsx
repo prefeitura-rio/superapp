@@ -90,12 +90,13 @@ export function MostAccessedServiceCardsSwipe() {
                         key={service.id}
                         service={service}
                         position={globalPosition}
+                        aria-label={`Acessar o serviço ${service.title}`}
                       >
                         <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between w-full max-h-[140px] aspect-square">
                           <div className="mb-4">
                             <img
                               src={service.icon}
-                              alt={service.title}
+                              alt={`Ícone do serviço ${service.title}`}
                               className="w-10 h-10"
                             />
                           </div>
