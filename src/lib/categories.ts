@@ -1,5 +1,8 @@
 import serviceIcon from '@/constants/bucket'
-import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
+import {
+  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
+  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
+} from '@/constants/venvs'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
 
@@ -58,7 +61,7 @@ function getIconForCategory(nomeNormalizado: string): ReactNode {
 
   return createElement(Image, {
     src: iconSrc,
-    alt: nomeNormalizado,
+    alt: `Ícone de ${nomeNormalizado}`,
     width: 48,
     height: 48,
     className: 'w-12 h-12',
