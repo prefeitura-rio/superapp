@@ -29,14 +29,14 @@ export const CursosBanner = ({
           width={123}
           className="-mt-1 w-auto h-auto"
           height={123}
-          alt="Cursos"
+          alt="Logo Ciclo Carioca - Plataforma de Cursos"
         />
       }
       onBannerClick={onBannerClick}
       image={
         <Image
           src={cursosBannerIcon}
-          alt="Pessoa sentada com livros estudando."
+          alt="Ilustração de pessoa estudando com livros e materiais didáticos"
           width={90}
           height={90}
           className="h-30 w-auto absolute bottom-0 right-1.5 z-20  md:right-12"
