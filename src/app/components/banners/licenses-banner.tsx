@@ -30,7 +30,7 @@ export const LicensesBanner = ({
           src={cariocaIcon}
           width={100}
           height={100}
-          alt="Pessoa de capacete segurando documentos."
+          alt="Profissional com documentos de regularização."
           className="h-28 w-auto absolute bottom-0 right-0 z-20  md:right-7"
         />
       }
