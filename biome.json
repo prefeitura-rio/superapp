@@ -28,7 +28,8 @@
         "useKeyWithClickEvents": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noUnusedTemplateLiteral": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
@@ -37,6 +38,9 @@
       },
       "security": {
         "noDangerouslySetInnerHtml": "off"
+      },
+      "complexity": {
+        "noForEach": "off"
       }
     }
   },
@@ -46,9 +50,7 @@
       "next.config.js",
       "next-env.d.ts",
       "node_modules/**",
-      "package-lock.json",
-      "src/http/**",
-      "src/http-courses/**"
+      "package-lock.json"
     ]
   }
 }
