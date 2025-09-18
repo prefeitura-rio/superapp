@@ -1,5 +1,7 @@
-'use-client'
+'use client'
+
 import { ChevronRightIcon } from '@/assets/icons'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { MenuItemProps } from '@/types/menu-items'
 import Link from 'next/link'
@@ -10,7 +12,12 @@ const variantStyles = {
   danger: 'text-destructive',
 } as const
 
-export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
+interface ExtendedMenuItemProps extends MenuItemProps {
+  showBadge?: boolean
+  badgeText?: string
+}
+
+export const MenuItem = forwardRef<HTMLAnchorElement, ExtendedMenuItemProps>(
   (
     {
       icon,
@@ -21,6 +28,8 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
       isLast = false,
       disabled = false,
       variant = 'default',
+      showBadge = false,
+      badgeText = 'Atualizar',
       className,
       ...props
     },
@@ -31,7 +40,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
         ref={ref}
         href={disabled ? '#' : href}
         className={cn(
-          'flex items-center justify-between py-5 text-foreground',
+          'flex items-center justify-between py-5 text-foreground gap-4',
           'border-b border-border',
           isLast && 'border-b-0',
           disabled && 'opacity-50 cursor-not-allowed',
@@ -42,16 +51,26 @@ export const MenuItem = forwardRef<HTMLAnchorElement, MenuItemProps>(
         tabIndex={disabled ? -1 : 0}
         {...props}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
           {icon}
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0 flex-1">
             {title && (
               <span className="text-sm text-muted-foreground">{title}</span>
             )}
-            <span>{label}</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="min-w-0 truncate">{label}</span>
+              {showBadge && (
+                <Badge
+                  variant="destructive"
+                  className="px-3 py-0.5 text-sm rounded-full flex-shrink-0"
+                >
+                  {badgeText}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
-        <ChevronRightIcon className="h-5 w-5 text-primary" />
+        <ChevronRightIcon className="h-5 w-5 text-primary flex-shrink-0" />
       </Link>
     )
   }
