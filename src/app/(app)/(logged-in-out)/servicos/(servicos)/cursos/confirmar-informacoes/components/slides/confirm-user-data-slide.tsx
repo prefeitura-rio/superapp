@@ -1,5 +1,6 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { formatCpf } from '@/lib/format-cpf'
@@ -55,39 +56,51 @@ export default function ConfirmUserDataSlide({
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            Celular {!hasPhone && '*'}
+            Celular {(!hasPhone || phoneNeedsUpdate) && '*'}
           </p>
-          <p
-            className={`font-normal ${
-              hasPhone && !phoneNeedsUpdate
-                ? 'text-foreground'
-                : 'text-destructive'
-            }`}
-          >
-            {!hasPhone
-              ? 'celular não cadastrado'
-              : phoneNeedsUpdate
-                ? 'celular desatualizado'
+          <div className="flex items-center gap-2">
+            <p
+              className={`font-normal ${
+                hasPhone ? 'text-foreground' : 'text-destructive'
+              }`}
+            >
+              {!hasPhone
+                ? 'celular não cadastrado'
                 : (getPhoneValue(userInfo.phone) as string)}
-          </p>
+            </p>
+            {phoneNeedsUpdate && (
+              <Badge
+                variant="destructive"
+                className="px-3 py-0.5 text-sm rounded-full"
+              >
+                Atualizar
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="py-1">
           <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-            E-mail {!hasEmail && '*'}
+            E-mail {(!hasEmail || emailNeedsUpdate) && '*'}
           </p>
-          <p
-            className={`font-normal ${
-              hasEmail && !emailNeedsUpdate
-                ? 'text-foreground'
-                : 'text-destructive'
-            }`}
-          >
-            {!hasEmail
-              ? 'e-mail não cadastrado'
-              : emailNeedsUpdate
-                ? 'e-mail desatualizado'
+          <div className="flex items-center gap-2 min-w-0">
+            <p
+              className={`font-normal min-w-0 truncate ${
+                hasEmail ? 'text-foreground' : 'text-destructive'
+              }`}
+            >
+              {!hasEmail
+                ? 'e-mail não cadastrado'
                 : getEmailValue(userInfo.email)}
-          </p>
+            </p>
+            {emailNeedsUpdate && hasEmail && (
+              <Badge
+                variant="destructive"
+                className="px-3 py-0.5 text-sm rounded-full flex-shrink-0"
+              >
+                Atualizar
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
     </div>
