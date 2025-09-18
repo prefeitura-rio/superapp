@@ -2,7 +2,12 @@ import { extractCourseId } from '@/actions/courses/utils-mock'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import type {
+  ModelsEmailPrincipal,
+  ModelsTelefonePrincipal,
+} from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
+import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'
 import { ConfirmInscriptionClient } from '../components/confirm-inscription-client'
@@ -40,6 +45,25 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
     phone: normalizePhoneData(userInfo.telefone),
   }
 
+  const phoneNeedsUpdate = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
+        ?.updated_at || null,
+    months: 6,
+  })
+
+  const emailNeedsUpdate = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.email.principal as ModelsEmailPrincipal)
+        ?.updated_at || null,
+    months: 6,
+  })
+
+  const contactUpdateStatus = {
+    phoneNeedsUpdate,
+    emailNeedsUpdate,
+  }
+
   const nearbyUnits =
     (courseInfo as any).data?.locations?.map((location: any) => ({
       id: location.id,
@@ -58,6 +82,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
   return (
     <ConfirmInscriptionClient
       userInfo={transformedUserInfo}
+      contactUpdateStatus={contactUpdateStatus}
       userAuthInfo={userAuthInfo}
       nearbyUnits={nearbyUnits}
       courseInfo={courseInfo}
