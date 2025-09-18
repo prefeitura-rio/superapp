@@ -29,7 +29,7 @@ import {
   createInscriptionSchema,
 } from '../types'
 
-type ContactUpdateStatus = {
+export type ContactUpdateStatus = {
   phoneNeedsUpdate: boolean
   emailNeedsUpdate: boolean
 }

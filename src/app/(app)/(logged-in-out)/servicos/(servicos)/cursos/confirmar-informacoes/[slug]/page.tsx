@@ -49,14 +49,14 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
     updatedAt:
       (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
         ?.updated_at || null,
-    months: 6,
+    months: 6, // Phone must be updated every 6 months
   })
 
   const emailNeedsUpdate = !isUpdatedWithin({
     updatedAt:
       (transformedUserInfo.email.principal as ModelsEmailPrincipal)
         ?.updated_at || null,
-    months: 6,
+    months: 6, // Email must be updated every 6 months
   })
 
   const contactUpdateStatus = {

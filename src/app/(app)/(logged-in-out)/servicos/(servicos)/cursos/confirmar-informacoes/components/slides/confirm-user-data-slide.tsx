@@ -5,11 +5,7 @@ import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatTitleCase } from '@/lib/utils'
 import type { CourseUserInfo } from '../../types'
-
-type ContactUpdateStatus = {
-  phoneNeedsUpdate: boolean
-  emailNeedsUpdate: boolean
-}
+import type { ContactUpdateStatus } from '../confirm-inscription-client'
 
 interface ConfirmUserDataSlideProps {
   userInfo: CourseUserInfo
