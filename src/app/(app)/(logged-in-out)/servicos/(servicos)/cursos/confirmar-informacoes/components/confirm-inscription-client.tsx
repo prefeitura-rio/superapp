@@ -348,7 +348,7 @@ export function ConfirmInscriptionClient({
 
       {!showSuccess && (
         <div className="flex-shrink-0 pb-12">
-          {needsContactUpdate ? (
+          {needsContactUpdate && hasEmail && hasPhone ? (
             <p className="mb-8">
               <span className="text-muted-foreground text-sm">
                 * Atualização Obrigatória
