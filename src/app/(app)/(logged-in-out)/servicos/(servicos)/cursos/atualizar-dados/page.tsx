@@ -5,13 +5,20 @@ import {
   type EmailData,
   getEmailValue,
   hasValidEmail,
+  normalizeEmailData,
 } from '@/helpers/email-data-helpers'
 import {
   type PhoneData,
   getPhoneValue,
   hasValidPhone,
+  normalizePhoneData,
 } from '@/helpers/phone-data-helpers'
+import type {
+  ModelsEmailPrincipal,
+  ModelsTelefonePrincipal,
+} from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
+import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 interface PageProps {
@@ -48,11 +55,32 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
     }
   }
 
-  const phoneDisplay = hasValidPhone(userInfoObj?.telefone)
+  // Normalize data for update checking
+  const transformedUserInfo = {
+    email: normalizeEmailData(userInfoObj?.email),
+    phone: normalizePhoneData(userInfoObj?.telefone),
+  }
+
+  // Check if phone/email need updates
+  const phoneNeedsUpdate = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
+        ?.updated_at || null,
+    months: 6, // Phone must be updated every 6 months
+  })
+
+  const emailNeedsUpdate = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.email.principal as ModelsEmailPrincipal)
+        ?.updated_at || null,
+    months: 6, // Email must be updated every 6 months
+  })
+
+  const phoneDisplay = hasValidPhone(transformedUserInfo.phone)
     ? getPhoneValue(userInfoObj.telefone)
     : 'Informação pendente'
 
-  const emailDisplay = hasValidEmail(userInfoObj?.email)
+  const emailDisplay = hasValidEmail(transformedUserInfo.email)
     ? getEmailValue(userInfoObj.email)
     : 'Informação pendente'
 
@@ -80,6 +108,8 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
             href={`/meu-perfil/informacoes-pessoais/atualizar-telefone${
               courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
             }`}
+            showBadge={phoneNeedsUpdate}
+            badgeText="Atualizar"
           />
 
           <MenuItem
@@ -89,6 +119,9 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
             href={`/meu-perfil/informacoes-pessoais/atualizar-email${
               courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
             }`}
+            showBadge={emailNeedsUpdate}
+            badgeText="Atualizar"
+            isLast
           />
         </div>
 
