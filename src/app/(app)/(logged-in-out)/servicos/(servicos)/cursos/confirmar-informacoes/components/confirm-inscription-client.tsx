@@ -29,6 +29,11 @@ import {
   createInscriptionSchema,
 } from '../types'
 
+export type ContactUpdateStatus = {
+  phoneNeedsUpdate: boolean
+  emailNeedsUpdate: boolean
+}
+
 interface ConfirmInscriptionClientProps {
   userInfo: CourseUserInfo
   userAuthInfo: {
@@ -39,6 +44,7 @@ interface ConfirmInscriptionClientProps {
   courseInfo: any // Add courseInfo prop
   courseId: string
   courseSlug?: string
+  contactUpdateStatus?: ContactUpdateStatus
 }
 
 const TRANSITIONS = {
@@ -54,6 +60,7 @@ export function ConfirmInscriptionClient({
   courseInfo,
   courseId,
   courseSlug,
+  contactUpdateStatus,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -69,6 +76,11 @@ export function ConfirmInscriptionClient({
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
   const hasValidContactInfo = hasEmail && hasPhone
+
+  // Check if any contact info needs update
+  const needsContactUpdate =
+    contactUpdateStatus?.phoneNeedsUpdate ||
+    contactUpdateStatus?.emailNeedsUpdate
 
   // Extract custom fields from course info
   const customFields: CustomField[] =
@@ -95,7 +107,7 @@ export function ConfirmInscriptionClient({
     {
       id: 'confirm-user-data',
       component: ConfirmUserDataSlide,
-      props: { userInfo, userAuthInfo },
+      props: { userInfo, userAuthInfo, contactUpdateStatus },
       showPagination: true,
       showBackButton: true,
     },
@@ -336,12 +348,20 @@ export function ConfirmInscriptionClient({
 
       {!showSuccess && (
         <div className="flex-shrink-0 pb-12">
-          {(!hasEmail || !hasPhone) && (
+          {needsContactUpdate ? (
             <p className="mb-8">
               <span className="text-muted-foreground text-sm">
-                * Campo Obrigatório
+                * Atualização Obrigatória
               </span>
             </p>
+          ) : (
+            (!hasEmail || !hasPhone) && (
+              <p className="mb-8">
+                <span className="text-muted-foreground text-sm">
+                  * Campo Obrigatório
+                </span>
+              </p>
+            )
           )}
           <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
             {showUpdateButton && (
@@ -352,7 +372,7 @@ export function ConfirmInscriptionClient({
                       ? 'opacity-100 translate-x-0 scale-100 text-foreground'
                       : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
                   }
-                  ${!hasValidContactInfo && '!text-background bg-primary hover:bg-primary'}
+                  ${(!hasValidContactInfo || needsContactUpdate) && '!text-background bg-primary hover:bg-primary'}
                   `}
                   href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
                 >
@@ -371,7 +391,7 @@ export function ConfirmInscriptionClient({
             ? 'opacity-100 translate-x-0 scale-100'
             : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
         }
-        ${showUpdateButton && !hasValidContactInfo && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
+        ${showUpdateButton && (!hasValidContactInfo || needsContactUpdate) && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
         `}
             >
               {buttonText}
