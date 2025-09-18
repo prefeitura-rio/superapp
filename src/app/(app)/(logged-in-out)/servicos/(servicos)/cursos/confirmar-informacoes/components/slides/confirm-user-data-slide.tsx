@@ -68,7 +68,7 @@ export default function ConfirmUserDataSlide({
                 ? 'celular não cadastrado'
                 : (getPhoneValue(userInfo.phone) as string)}
             </p>
-            {phoneNeedsUpdate && (
+            {phoneNeedsUpdate && hasPhone && (
               <Badge
                 variant="destructive"
                 className="px-3 py-0.5 text-sm rounded-full"
