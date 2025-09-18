@@ -6,20 +6,31 @@ import { formatCpf } from '@/lib/format-cpf'
 import { formatTitleCase } from '@/lib/utils'
 import type { CourseUserInfo } from '../../types'
 
+type ContactUpdateStatus = {
+  phoneNeedsUpdate: boolean
+  emailNeedsUpdate: boolean
+}
+
 interface ConfirmUserDataSlideProps {
   userInfo: CourseUserInfo
   userAuthInfo: {
     cpf: string
     name: string
   }
+  contactUpdateStatus?: ContactUpdateStatus
 }
 
 export default function ConfirmUserDataSlide({
   userInfo,
   userAuthInfo,
+  contactUpdateStatus,
 }: ConfirmUserDataSlideProps) {
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
+
+  const phoneNeedsUpdate = contactUpdateStatus?.phoneNeedsUpdate || false
+  const emailNeedsUpdate = contactUpdateStatus?.emailNeedsUpdate || false
+
   return (
     <div className="w-full space-y-10">
       <div className="text-left">
@@ -52,12 +63,16 @@ export default function ConfirmUserDataSlide({
           </p>
           <p
             className={`font-normal ${
-              hasPhone ? 'text-foreground' : 'text-destructive'
+              hasPhone && !phoneNeedsUpdate
+                ? 'text-foreground'
+                : 'text-destructive'
             }`}
           >
-            {hasPhone
-              ? (getPhoneValue(userInfo.phone) as string)
-              : 'celular não cadastrado'}
+            {!hasPhone
+              ? 'celular não cadastrado'
+              : phoneNeedsUpdate
+                ? 'celular desatualizado'
+                : (getPhoneValue(userInfo.phone) as string)}
           </p>
         </div>
         <div className="py-1">
@@ -66,10 +81,16 @@ export default function ConfirmUserDataSlide({
           </p>
           <p
             className={`font-normal ${
-              hasEmail ? 'text-foreground' : 'text-destructive'
+              hasEmail && !emailNeedsUpdate
+                ? 'text-foreground'
+                : 'text-destructive'
             }`}
           >
-            {hasEmail ? getEmailValue(userInfo.email) : 'e-mail não cadastrado'}
+            {!hasEmail
+              ? 'e-mail não cadastrado'
+              : emailNeedsUpdate
+                ? 'e-mail desatualizado'
+                : getEmailValue(userInfo.email)}
           </p>
         </div>
       </div>
