@@ -1,4 +1,3 @@
-// components/ui/custom/pet-card-front-content.tsx
 'use client'
 
 import { PrefLogo } from '@/assets/icons/pref-logo'
@@ -39,7 +38,6 @@ export function PetCardFrontContent({
     <div className="h-[140px] relative">
       <PrefLogo fill="#406BCC" className="absolute top-0 right-0" />
 
-      {/* Primeiro container: Título e Nome do pet */}
       <div className="mb-4">
         <p className="text-xs font-normal text-[#2A2D32] mb-1 leading-4">
           {title}
@@ -49,9 +47,7 @@ export function PetCardFrontContent({
         </p>
       </div>
 
-      {/* Segundo container: Foto e informações */}
       <div className="flex gap-4">
-        {/* Foto do pet */}
         <div className="w-20 h-20 rounded-xl overflow-hidden text-[#2A2D32] flex-shrink-0">
           {petImageUrl ? (
             <Image
@@ -68,9 +64,7 @@ export function PetCardFrontContent({
           )}
         </div>
 
-        {/* Informações do pet */}
         <div className="flex flex-col justify-between flex-1">
-          {/* Primeira linha: Espécie e Sexo */}
           <div className="flex gap-8">
             <div>
               <p className="text-xs font-normal text-[#2A2D32]">Espécie</p>
