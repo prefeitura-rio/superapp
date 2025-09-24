@@ -19,6 +19,7 @@ import {
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { StatusIndicatorMessage } from './components/status-indicator-message'
 
 interface TeamPageProps {
   healthData?: {
@@ -204,6 +205,8 @@ export default async function HealthCardDetail() {
       ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
       : '#'
 
+  const isNormalRiskStatus = riskStatus?.risco === 'Verde'
+
   return (
     <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
       <SecondaryHeader title="Carteira" className="max-w-xl" />
@@ -216,7 +219,7 @@ export default async function HealthCardDetail() {
             primaryValue={statusValue}
             secondaryLabel="Horário de atendimento"
             secondaryValue={operatingHours}
-            riskStatus={riskStatus?.risco}
+            riskStatus={!isNormalRiskStatus ? riskStatus?.risco : undefined}
             address={address}
             phone={phone}
             email={email}
@@ -299,6 +302,14 @@ export default async function HealthCardDetail() {
             </a>
           </div>
         </div>
+
+        {!isNormalRiskStatus && (
+          <div className="mt-6 mb-2 px-4">
+            <StatusIndicatorMessage
+              status={riskStatus?.risco as 'Amarelo' | 'Laranja' | 'Vermelho'}
+            />
+          </div>
+        )}
       </div>
       <TeamPage healthData={healthData as any} />
     </div>
