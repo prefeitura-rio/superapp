@@ -62,6 +62,8 @@ export function WalletCardsWrapper({
     riskStatus = getHealthUnitRiskStatus(healthUnitRiskData)
   }
 
+  const isNormalRiskStatus = riskStatus?.risco === 'Verde'
+
   return (
     <div className="grid w-full gap-2">
       {/* Health Card - only show if wallet has health data */}
@@ -79,7 +81,7 @@ export function WalletCardsWrapper({
             address={walletData!.saude!.clinica_familia!.endereco}
             phone={walletData!.saude!.clinica_familia!.telefone}
             email={walletData!.saude!.clinica_familia!.email}
-            riskStatus={riskStatus?.risco}
+            riskStatus={!isNormalRiskStatus ? riskStatus?.risco : undefined}
             enableFlip={false}
             asLink
             href="/carteira/clinica-da-familia"

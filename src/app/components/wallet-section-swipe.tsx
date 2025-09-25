@@ -126,6 +126,9 @@ export default function CarteiraSectionSwipe({
       walletData,
       maintenanceStats
     )
+
+    const isNormalRiskStatus = healthCardData?.risco === 'Verde'
+
     walletCards.push(
       <HealthCard
         key="health"
@@ -139,7 +142,7 @@ export default function CarteiraSectionSwipe({
         address={walletData.saude.clinica_familia.endereco}
         phone={walletData.saude.clinica_familia.telefone}
         email={walletData.saude.clinica_familia.email}
-        riskStatus={healthCardData?.risco}
+        riskStatus={!isNormalRiskStatus ? healthCardData?.risco : undefined}
         enableFlip={false}
         showInitialShine={false}
         asLink

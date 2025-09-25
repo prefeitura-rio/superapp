@@ -82,6 +82,8 @@ export default function CarteiraSection({
     setIsLoaded(true)
   }, [])
 
+  const isNormalRiskStatus = healthCardData?.risco === 'Verde'
+
   if (!isLoaded) {
     return <CarteiraSectionSkeleton />
   }
@@ -112,7 +114,9 @@ export default function CarteiraSection({
                   address={walletData.saude.clinica_familia.endereco}
                   phone={walletData.saude.clinica_familia.telefone}
                   email={walletData.saude.clinica_familia.email}
-                  riskStatus={healthCardData?.risco}
+                  riskStatus={
+                    !isNormalRiskStatus ? healthCardData?.risco : undefined
+                  }
                   enableFlip={false}
                   showInitialShine={false}
                   asLink
