@@ -16,7 +16,12 @@ export type {
 } from './service'
 
 // Course and Job types
-export type { Course } from './course'
+export type {
+  Course,
+  CourseScheduleInfo,
+  CourseSearchPageProps,
+  UserEnrollment,
+} from './course'
 export type { Job } from './job'
 
 // Address types
