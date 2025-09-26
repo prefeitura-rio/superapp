@@ -121,7 +121,7 @@ export function CustomFieldSlide({
               <Checkbox
                 checked={selectedValues.includes(option.id)}
                 onCheckedChange={() => toggleOption(option.id)}
-                className="size-"
+                className="size-6"
               />
             </div>
           ))}
