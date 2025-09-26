@@ -1,5 +1,6 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
 import type { RiskStatusProps } from '@/types/health'
@@ -8,6 +9,21 @@ import { useState } from 'react'
 import { CardBase } from '../card-base'
 import { CardWrapper } from '../card-wrapper'
 import { WalletHealthStatusDrawerContent } from '../drawer-contents/wallet-health-status-drawer-content'
+
+const BADGE_COLOR_BY_STATUS: Record<
+  Exclude<RiskStatusProps, 'Verde'>,
+  string
+> = {
+  Amarelo: 'bg-[#D79A00]',
+  Laranja: 'bg-card-5',
+  Vermelho: 'bg-destructive',
+}
+
+const RISK_LEVEL: Record<Exclude<RiskStatusProps, 'Verde'>, string> = {
+  Amarelo: 'Área em risco moderado',
+  Laranja: 'Área em risco alto',
+  Vermelho: 'Área em risco grave',
+}
 
 interface WalletCardProps {
   href?: string
@@ -69,14 +85,18 @@ export function HealthCard({
         primaryValue={primaryValue}
         secondaryLabel={secondaryLabel}
         secondaryValue={secondaryValue}
-        // primaryValueSlot={
-        //   shouldRenderHealthStatusIndicator ? (
-        //     <HealthStatusIndicator
-        //       riskStatus={riskStatus}
-        //       onClick={e => handleStatusClick(e)}
-        //     />
-        //   ) : null
-        // }
+        primaryValueSlot={
+          riskStatus && (
+            <Badge
+              className={`
+        ${BADGE_COLOR_BY_STATUS[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']} 
+        text-white -mb-6 text-xs
+      `}
+            >
+              {RISK_LEVEL[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']}
+            </Badge>
+          )
+        }
       />
     </CardBase>
   )
