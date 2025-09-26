@@ -23,12 +23,18 @@ export interface NearbyUnit {
   updated_at: string
 }
 
+export interface CustomFieldOption {
+  id: string
+  value: string
+}
+
 export interface CustomField {
   id: string
   curso_id: number
   title: string
-  field_type: string
+  field_type: 'text' | 'radio' | 'select' | 'multiselect'
   required: boolean
+  options?: CustomFieldOption[]
   created_at: string
   updated_at: string
 }
@@ -55,12 +61,25 @@ export const createInscriptionSchema = (
   const customFieldSchema: Record<string, any> = {}
   for (const field of customFields) {
     const fieldKey = `custom_${field.id}`
-    if (field.required) {
-      customFieldSchema[fieldKey] = z
-        .string()
-        .min(1, 'Este campo é obrigatório')
+
+    if (field.field_type === 'multiselect') {
+      // For multiselect, use array of strings
+      if (field.required) {
+        customFieldSchema[fieldKey] = z
+          .array(z.string())
+          .min(1, 'Selecione pelo menos uma opção')
+      } else {
+        customFieldSchema[fieldKey] = z.array(z.string()).optional()
+      }
     } else {
-      customFieldSchema[fieldKey] = z.string().optional()
+      // For other field types, use string
+      if (field.required) {
+        customFieldSchema[fieldKey] = z
+          .string()
+          .min(1, 'Este campo é obrigatório')
+      } else {
+        customFieldSchema[fieldKey] = z.string().optional()
+      }
     }
   }
 
