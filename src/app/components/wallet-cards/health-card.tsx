@@ -19,6 +19,12 @@ const BADGE_COLOR_BY_STATUS: Record<
   Vermelho: 'bg-destructive',
 }
 
+const RISK_LEVEL: Record<Exclude<RiskStatusProps, 'Verde'>, string> = {
+  Amarelo: 'Área em risco moderado',
+  Laranja: 'Área em risco alto',
+  Vermelho: 'Área em risco grave',
+}
+
 interface WalletCardProps {
   href?: string
   title: string
@@ -87,7 +93,7 @@ export function HealthCard({
         text-white -mb-6 text-xs
       `}
             >
-              Área em risco
+              {RISK_LEVEL[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']}
             </Badge>
           )
         }
