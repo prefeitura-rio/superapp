@@ -250,29 +250,6 @@ function CourseContent({ course }: CourseContentProps) {
     { key: 'target_audience', title: 'Público-alvo' },
   ]
 
-  const renderContentWithLineBreaks = (content: string) => {
-    const parts = content
-      .split(';')
-      .map(part => part.trim())
-      .filter(part => part.length > 0)
-
-    if (parts.length === 1) {
-      return (
-        <p className="text-xs md:text-sm text-muted-foreground">{content}</p>
-      )
-    }
-
-    return (
-      <div className="text-xs md:text-sm text-muted-foreground">
-        {parts.map((part, index) => (
-          <p key={index} className={index > 0 ? 'mt-1' : ''}>
-            {part}
-          </p>
-        ))}
-      </div>
-    )
-  }
-
   return (
     <div className="px-4 space-y-6">
       {contentSections.map(({ key, title }) => {
@@ -284,7 +261,9 @@ function CourseContent({ course }: CourseContentProps) {
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
-            {renderContentWithLineBreaks(content)}
+            <div className="text-xs md:text-sm text-muted-foreground">
+              {content}
+            </div>
           </div>
         )
       })}
