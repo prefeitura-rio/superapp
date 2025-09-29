@@ -280,7 +280,7 @@ function CourseContent({ course }: CourseContentProps) {
         if (!content) return null
 
         return (
-          <div key={key}>
+          <div key={key} className="whitespace-pre-line">
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
