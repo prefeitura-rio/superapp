@@ -51,7 +51,6 @@ export async function middleware(request: NextRequest) {
     "'self'",
     `'nonce-${nonce}'`,
     "'strict-dynamic'",
-    "'wasm-unsafe-eval'", 
     ...scriptHashes.map(hash => `'${hash}'`),
     ...(isDevelopment ? ["'unsafe-eval'"] : []),
   ]
@@ -59,17 +58,16 @@ export async function middleware(request: NextRequest) {
   const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
   script-src ${scriptSrcDirectives.join(' ')};
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data: https://*.gov.br https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/vlibras-portal@dev/* https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com;
-  font-src 'self' data: https://*.gov.br https://*.gov.br https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/* https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com;
-  connect-src 'self' https://*.gov.br https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/* https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com;
-  frame-src 'self' https://*.gov.br https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net;
-  media-src 'self' https://*.gov.br https://storage.googleapis.com data: blob:;
+  style-src 'self' 'unsafe-inline' https://*.googleapis.com;
+  img-src 'self' blob: data: https://*.handtalk.me/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com;
+  font-src 'self' data: https://*.handtalk.me/ https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com;
+  connect-src 'self' https://*.handtalk.me/ https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com;
+  frame-src 'self' https://*.handtalk.me/ https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net;
+  media-src 'self' https://*.handtalk.me/ https://storage.googleapis.com data: blob:;
   object-src 'none';
   base-uri 'self';
-  worker-src 'self' blob:;  
-  form-action 'self' https://*.gov.br https://*.acesso.gov.br/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googletagmanager.com/* https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
-  frame-ancestors 'self' https://*.gov.br https://*.acesso.gov.br/;
+  form-action 'self' https://*.acesso.gov.br/ https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googletagmanager.com/* https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net;
+  frame-ancestors 'self' https://*.acesso.gov.br/;
   upgrade-insecure-requests;
 `.trim()
 
