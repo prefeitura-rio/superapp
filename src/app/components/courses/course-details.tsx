@@ -466,16 +466,8 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
-        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
-          {course.description ? (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: course.description.replace(/\n/g, '<br>'),
-              }}
-            />
-          ) : (
-            'Descrição não disponível'
-          )}
+        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6 whitespace-pre-line">
+          {course.description || 'Descrição não disponível'}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
