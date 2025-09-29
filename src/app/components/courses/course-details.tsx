@@ -280,7 +280,7 @@ function CourseContent({ course }: CourseContentProps) {
         if (!content) return null
 
         return (
-          <div key={key}>
+          <div key={key} className="whitespace-pre-line">
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
@@ -466,7 +466,7 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
-        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
+        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6 whitespace-pre-line">
           {course.description || 'Descrição não disponível'}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
