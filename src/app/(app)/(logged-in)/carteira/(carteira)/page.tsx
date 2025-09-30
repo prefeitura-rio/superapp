@@ -16,7 +16,7 @@ import { getWalletDataInfo } from '@/lib/wallet-utils'
 export default async function Wallet({
   searchParams,
 }: {
-  searchParams: { pets?: string }
+  searchParams: Promise<{ pets?: string }>
 }) {
   const userAuthInfo = await getUserInfoFromToken()
   const petParams = await searchParams
