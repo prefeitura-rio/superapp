@@ -8,12 +8,17 @@
 import type {
   GetCitizenCpfLegalEntitiesParams,
   GetCitizenCpfMaintenanceRequestParams,
+  GetCitizenCpfPetsParams,
   HandlersErrorResponse,
   HandlersSuccessResponse,
   ModelsCitizen,
   ModelsCitizenWallet,
   ModelsPaginatedLegalEntities,
   ModelsPaginatedMaintenanceRequests,
+  ModelsPaginatedPets,
+  ModelsPet,
+  ModelsPetClinicResponse,
+  ModelsPetStatsResponse,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
   ModelsSelfDeclaredEmailInput,
@@ -21,10 +26,10 @@ import type {
   ModelsSelfDeclaredPhoneInput,
   ModelsSelfDeclaredRacaInput,
   ModelsUserConfigOptInResponse,
-  ModelsUserConfigResponse,
-} from '.././models'
+  ModelsUserConfigResponse
+} from '.././models';
 
-import { customFetch } from '../../../custom-fetch'
+import { customFetch } from '../../../custom-fetch';
 
 /**
  * Retorna a lista de opções válidas de etnia para autodeclaração. Esta lista é usada para validar as atualizações de etnia autodeclarada.
@@ -39,31 +44,32 @@ export type getCitizenEthnicityOptionsResponse500 = {
   data: HandlersErrorResponse
   status: 500
 }
-
-export type getCitizenEthnicityOptionsResponseComposite =
-  | getCitizenEthnicityOptionsResponse200
-  | getCitizenEthnicityOptionsResponse500
-
-export type getCitizenEthnicityOptionsResponse =
-  getCitizenEthnicityOptionsResponseComposite & {
-    headers: Headers
-  }
+    
+export type getCitizenEthnicityOptionsResponseComposite = getCitizenEthnicityOptionsResponse200 | getCitizenEthnicityOptionsResponse500;
+    
+export type getCitizenEthnicityOptionsResponse = getCitizenEthnicityOptionsResponseComposite & {
+  headers: Headers;
+}
 
 export const getGetCitizenEthnicityOptionsUrl = () => {
+
+
+  
+
   return `/citizen/ethnicity/options`
 }
 
-export const getCitizenEthnicityOptions = async (
-  options?: RequestInit
-): Promise<getCitizenEthnicityOptionsResponse> => {
-  return customFetch<getCitizenEthnicityOptionsResponse>(
-    getGetCitizenEthnicityOptionsUrl(),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenEthnicityOptions = async ( options?: RequestInit): Promise<getCitizenEthnicityOptionsResponse> => {
+  
+  return customFetch<getCitizenEthnicityOptionsResponse>(getGetCitizenEthnicityOptionsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Recupera os dados do cidadão por CPF, incluindo informações básicas e dados autodeclarados.
@@ -78,28 +84,32 @@ export type getCitizenCpfResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-
-export type getCitizenCpfResponseComposite =
-  | getCitizenCpfResponse200
-  | getCitizenCpfResponse400
-
+    
+export type getCitizenCpfResponseComposite = getCitizenCpfResponse200 | getCitizenCpfResponse400;
+    
 export type getCitizenCpfResponse = getCitizenCpfResponseComposite & {
-  headers: Headers
+  headers: Headers;
 }
 
-export const getGetCitizenCpfUrl = (cpf: string) => {
+export const getGetCitizenCpfUrl = (cpf: string,) => {
+
+
+  
+
   return `/citizen/${cpf}`
 }
 
-export const getCitizenCpf = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfResponse> => {
-  return customFetch<getCitizenCpfResponse>(getGetCitizenCpfUrl(cpf), {
+export const getCitizenCpf = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfResponse> => {
+  
+  return customFetch<getCitizenCpfResponse>(getGetCitizenCpfUrl(cpf),
+  {      
     ...options,
-    method: 'GET',
-  })
-}
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Atualiza ou cria o endereço autodeclarado de um cidadão por CPF. Apenas o campo de endereço é atualizado.
@@ -114,35 +124,34 @@ export type putCitizenCpfAddressResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type putCitizenCpfAddressResponseComposite = putCitizenCpfAddressResponse200 | putCitizenCpfAddressResponse400;
+    
+export type putCitizenCpfAddressResponse = putCitizenCpfAddressResponseComposite & {
+  headers: Headers;
+}
 
-export type putCitizenCpfAddressResponseComposite =
-  | putCitizenCpfAddressResponse200
-  | putCitizenCpfAddressResponse400
+export const getPutCitizenCpfAddressUrl = (cpf: string,) => {
 
-export type putCitizenCpfAddressResponse =
-  putCitizenCpfAddressResponseComposite & {
-    headers: Headers
-  }
 
-export const getPutCitizenCpfAddressUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/address`
 }
 
-export const putCitizenCpfAddress = async (
-  cpf: string,
-  modelsSelfDeclaredAddressInput: ModelsSelfDeclaredAddressInput,
-  options?: RequestInit
-): Promise<putCitizenCpfAddressResponse> => {
-  return customFetch<putCitizenCpfAddressResponse>(
-    getPutCitizenCpfAddressUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsSelfDeclaredAddressInput),
-    }
-  )
-}
+export const putCitizenCpfAddress = async (cpf: string,
+    modelsSelfDeclaredAddressInput: ModelsSelfDeclaredAddressInput, options?: RequestInit): Promise<putCitizenCpfAddressResponse> => {
+  
+  return customFetch<putCitizenCpfAddressResponse>(getPutCitizenCpfAddressUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsSelfDeclaredAddressInput,)
+  }
+);}
+
 
 /**
  * Atualiza ou cria o email autodeclarado de um cidadão por CPF. Apenas o campo de email é atualizado.
@@ -157,40 +166,34 @@ export type putCitizenCpfEmailResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-//forced
-export type putCitizenCpfEmailResponse409 = {
-  data: HandlersErrorResponse
-  status: 409
-}
-
-export type putCitizenCpfEmailResponseComposite =
-  | putCitizenCpfEmailResponse200
-  | putCitizenCpfEmailResponse400
-  | putCitizenCpfEmailResponse409 //forced
-
+    
+export type putCitizenCpfEmailResponseComposite = putCitizenCpfEmailResponse200 | putCitizenCpfEmailResponse400;
+    
 export type putCitizenCpfEmailResponse = putCitizenCpfEmailResponseComposite & {
-  headers: Headers
+  headers: Headers;
 }
 
-export const getPutCitizenCpfEmailUrl = (cpf: string) => {
+export const getPutCitizenCpfEmailUrl = (cpf: string,) => {
+
+
+  
+
   return `/citizen/${cpf}/email`
 }
 
-export const putCitizenCpfEmail = async (
-  cpf: string,
-  modelsSelfDeclaredEmailInput: ModelsSelfDeclaredEmailInput,
-  options?: RequestInit
-): Promise<putCitizenCpfEmailResponse> => {
-  return customFetch<putCitizenCpfEmailResponse>(
-    getPutCitizenCpfEmailUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsSelfDeclaredEmailInput),
-    }
-  )
-}
+export const putCitizenCpfEmail = async (cpf: string,
+    modelsSelfDeclaredEmailInput: ModelsSelfDeclaredEmailInput, options?: RequestInit): Promise<putCitizenCpfEmailResponse> => {
+  
+  return customFetch<putCitizenCpfEmailResponse>(getPutCitizenCpfEmailUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsSelfDeclaredEmailInput,)
+  }
+);}
+
 
 /**
  * Atualiza ou cria a etnia autodeclarada de um cidadão por CPF. Apenas o campo de etnia é atualizado. O valor deve ser uma das opções válidas retornadas pelo endpoint /citizen/ethnicity/options.
@@ -205,35 +208,34 @@ export type putCitizenCpfEthnicityResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type putCitizenCpfEthnicityResponseComposite = putCitizenCpfEthnicityResponse200 | putCitizenCpfEthnicityResponse400;
+    
+export type putCitizenCpfEthnicityResponse = putCitizenCpfEthnicityResponseComposite & {
+  headers: Headers;
+}
 
-export type putCitizenCpfEthnicityResponseComposite =
-  | putCitizenCpfEthnicityResponse200
-  | putCitizenCpfEthnicityResponse400
+export const getPutCitizenCpfEthnicityUrl = (cpf: string,) => {
 
-export type putCitizenCpfEthnicityResponse =
-  putCitizenCpfEthnicityResponseComposite & {
-    headers: Headers
-  }
 
-export const getPutCitizenCpfEthnicityUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/ethnicity`
 }
 
-export const putCitizenCpfEthnicity = async (
-  cpf: string,
-  modelsSelfDeclaredRacaInput: ModelsSelfDeclaredRacaInput,
-  options?: RequestInit
-): Promise<putCitizenCpfEthnicityResponse> => {
-  return customFetch<putCitizenCpfEthnicityResponse>(
-    getPutCitizenCpfEthnicityUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsSelfDeclaredRacaInput),
-    }
-  )
-}
+export const putCitizenCpfEthnicity = async (cpf: string,
+    modelsSelfDeclaredRacaInput: ModelsSelfDeclaredRacaInput, options?: RequestInit): Promise<putCitizenCpfEthnicityResponse> => {
+  
+  return customFetch<putCitizenCpfEthnicityResponse>(getPutCitizenCpfEthnicityUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsSelfDeclaredRacaInput,)
+  }
+);}
+
 
 /**
  * Atualiza ou cria o nome de exibição autodeclarado de um cidadão por CPF. Apenas o campo de nome de exibição é atualizado. O nome de exibição é o nome que aparece na interface do usuário, permitindo ao cidadão controlar como seu nome é exibido no aplicativo.
@@ -248,35 +250,34 @@ export type putCitizenCpfExhibitionNameResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type putCitizenCpfExhibitionNameResponseComposite = putCitizenCpfExhibitionNameResponse200 | putCitizenCpfExhibitionNameResponse400;
+    
+export type putCitizenCpfExhibitionNameResponse = putCitizenCpfExhibitionNameResponseComposite & {
+  headers: Headers;
+}
 
-export type putCitizenCpfExhibitionNameResponseComposite =
-  | putCitizenCpfExhibitionNameResponse200
-  | putCitizenCpfExhibitionNameResponse400
+export const getPutCitizenCpfExhibitionNameUrl = (cpf: string,) => {
 
-export type putCitizenCpfExhibitionNameResponse =
-  putCitizenCpfExhibitionNameResponseComposite & {
-    headers: Headers
-  }
 
-export const getPutCitizenCpfExhibitionNameUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/exhibition-name`
 }
 
-export const putCitizenCpfExhibitionName = async (
-  cpf: string,
-  modelsSelfDeclaredNomeExibicaoInput: ModelsSelfDeclaredNomeExibicaoInput,
-  options?: RequestInit
-): Promise<putCitizenCpfExhibitionNameResponse> => {
-  return customFetch<putCitizenCpfExhibitionNameResponse>(
-    getPutCitizenCpfExhibitionNameUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsSelfDeclaredNomeExibicaoInput),
-    }
-  )
-}
+export const putCitizenCpfExhibitionName = async (cpf: string,
+    modelsSelfDeclaredNomeExibicaoInput: ModelsSelfDeclaredNomeExibicaoInput, options?: RequestInit): Promise<putCitizenCpfExhibitionNameResponse> => {
+  
+  return customFetch<putCitizenCpfExhibitionNameResponse>(getPutCitizenCpfExhibitionNameUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsSelfDeclaredNomeExibicaoInput,)
+  }
+);}
+
 
 /**
  * Verifica se este é o primeiro login do usuário
@@ -291,32 +292,32 @@ export type getCitizenCpfFirstloginResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type getCitizenCpfFirstloginResponseComposite = getCitizenCpfFirstloginResponse200 | getCitizenCpfFirstloginResponse400;
+    
+export type getCitizenCpfFirstloginResponse = getCitizenCpfFirstloginResponseComposite & {
+  headers: Headers;
+}
 
-export type getCitizenCpfFirstloginResponseComposite =
-  | getCitizenCpfFirstloginResponse200
-  | getCitizenCpfFirstloginResponse400
+export const getGetCitizenCpfFirstloginUrl = (cpf: string,) => {
 
-export type getCitizenCpfFirstloginResponse =
-  getCitizenCpfFirstloginResponseComposite & {
-    headers: Headers
-  }
 
-export const getGetCitizenCpfFirstloginUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/firstlogin`
 }
 
-export const getCitizenCpfFirstlogin = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfFirstloginResponse> => {
-  return customFetch<getCitizenCpfFirstloginResponse>(
-    getGetCitizenCpfFirstloginUrl(cpf),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenCpfFirstlogin = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfFirstloginResponse> => {
+  
+  return customFetch<getCitizenCpfFirstloginResponse>(getGetCitizenCpfFirstloginUrl(cpf),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Define o status do primeiro login como falso para um usuário
@@ -331,32 +332,32 @@ export type putCitizenCpfFirstloginResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type putCitizenCpfFirstloginResponseComposite = putCitizenCpfFirstloginResponse200 | putCitizenCpfFirstloginResponse400;
+    
+export type putCitizenCpfFirstloginResponse = putCitizenCpfFirstloginResponseComposite & {
+  headers: Headers;
+}
 
-export type putCitizenCpfFirstloginResponseComposite =
-  | putCitizenCpfFirstloginResponse200
-  | putCitizenCpfFirstloginResponse400
+export const getPutCitizenCpfFirstloginUrl = (cpf: string,) => {
 
-export type putCitizenCpfFirstloginResponse =
-  putCitizenCpfFirstloginResponseComposite & {
-    headers: Headers
-  }
 
-export const getPutCitizenCpfFirstloginUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/firstlogin`
 }
 
-export const putCitizenCpfFirstlogin = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<putCitizenCpfFirstloginResponse> => {
-  return customFetch<putCitizenCpfFirstloginResponse>(
-    getPutCitizenCpfFirstloginUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-    }
-  )
-}
+export const putCitizenCpfFirstlogin = async (cpf: string, options?: RequestInit): Promise<putCitizenCpfFirstloginResponse> => {
+  
+  return customFetch<putCitizenCpfFirstloginResponse>(getPutCitizenCpfFirstloginUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT'
+    
+    
+  }
+);}
+
 
 /**
  * Recupera a lista paginada de entidades jurídicas (pessoas jurídicas) associadas ao CPF do cidadão. A busca é feita através do campo 'cpf_socio' no array 'socios' de cada entidade.
@@ -371,48 +372,41 @@ export type getCitizenCpfLegalEntitiesResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type getCitizenCpfLegalEntitiesResponseComposite = getCitizenCpfLegalEntitiesResponse200 | getCitizenCpfLegalEntitiesResponse400;
+    
+export type getCitizenCpfLegalEntitiesResponse = getCitizenCpfLegalEntitiesResponseComposite & {
+  headers: Headers;
+}
 
-export type getCitizenCpfLegalEntitiesResponseComposite =
-  | getCitizenCpfLegalEntitiesResponse200
-  | getCitizenCpfLegalEntitiesResponse400
-
-export type getCitizenCpfLegalEntitiesResponse =
-  getCitizenCpfLegalEntitiesResponseComposite & {
-    headers: Headers
-  }
-
-export const getGetCitizenCpfLegalEntitiesUrl = (
-  cpf: string,
-  params?: GetCitizenCpfLegalEntitiesParams
-) => {
-  const normalizedParams = new URLSearchParams()
+export const getGetCitizenCpfLegalEntitiesUrl = (cpf: string,
+    params?: GetCitizenCpfLegalEntitiesParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/citizen/${cpf}/legal-entities?${stringifiedParams}`
-    : `/citizen/${cpf}/legal-entities`
+  return stringifiedParams.length > 0 ? `/citizen/${cpf}/legal-entities?${stringifiedParams}` : `/citizen/${cpf}/legal-entities`
 }
 
-export const getCitizenCpfLegalEntities = async (
-  cpf: string,
-  params?: GetCitizenCpfLegalEntitiesParams,
-  options?: RequestInit
-): Promise<getCitizenCpfLegalEntitiesResponse> => {
-  return customFetch<getCitizenCpfLegalEntitiesResponse>(
-    getGetCitizenCpfLegalEntitiesUrl(cpf, params),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenCpfLegalEntities = async (cpf: string,
+    params?: GetCitizenCpfLegalEntitiesParams, options?: RequestInit): Promise<getCitizenCpfLegalEntitiesResponse> => {
+  
+  return customFetch<getCitizenCpfLegalEntitiesResponse>(getGetCitizenCpfLegalEntitiesUrl(cpf,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Recupera os chamados do 1746 de um cidadão por CPF com paginação. Cada documento representa um chamado individual.
@@ -427,48 +421,41 @@ export type getCitizenCpfMaintenanceRequestResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type getCitizenCpfMaintenanceRequestResponseComposite = getCitizenCpfMaintenanceRequestResponse200 | getCitizenCpfMaintenanceRequestResponse400;
+    
+export type getCitizenCpfMaintenanceRequestResponse = getCitizenCpfMaintenanceRequestResponseComposite & {
+  headers: Headers;
+}
 
-export type getCitizenCpfMaintenanceRequestResponseComposite =
-  | getCitizenCpfMaintenanceRequestResponse200
-  | getCitizenCpfMaintenanceRequestResponse400
-
-export type getCitizenCpfMaintenanceRequestResponse =
-  getCitizenCpfMaintenanceRequestResponseComposite & {
-    headers: Headers
-  }
-
-export const getGetCitizenCpfMaintenanceRequestUrl = (
-  cpf: string,
-  params?: GetCitizenCpfMaintenanceRequestParams
-) => {
-  const normalizedParams = new URLSearchParams()
+export const getGetCitizenCpfMaintenanceRequestUrl = (cpf: string,
+    params?: GetCitizenCpfMaintenanceRequestParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/citizen/${cpf}/maintenance-request?${stringifiedParams}`
-    : `/citizen/${cpf}/maintenance-request`
+  return stringifiedParams.length > 0 ? `/citizen/${cpf}/maintenance-request?${stringifiedParams}` : `/citizen/${cpf}/maintenance-request`
 }
 
-export const getCitizenCpfMaintenanceRequest = async (
-  cpf: string,
-  params?: GetCitizenCpfMaintenanceRequestParams,
-  options?: RequestInit
-): Promise<getCitizenCpfMaintenanceRequestResponse> => {
-  return customFetch<getCitizenCpfMaintenanceRequestResponse>(
-    getGetCitizenCpfMaintenanceRequestUrl(cpf, params),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenCpfMaintenanceRequest = async (cpf: string,
+    params?: GetCitizenCpfMaintenanceRequestParams, options?: RequestInit): Promise<getCitizenCpfMaintenanceRequestResponse> => {
+  
+  return customFetch<getCitizenCpfMaintenanceRequestResponse>(getGetCitizenCpfMaintenanceRequestUrl(cpf,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Verifica se o usuário optou por receber notificações
@@ -483,31 +470,32 @@ export type getCitizenCpfOptinResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-
-export type getCitizenCpfOptinResponseComposite =
-  | getCitizenCpfOptinResponse200
-  | getCitizenCpfOptinResponse400
-
+    
+export type getCitizenCpfOptinResponseComposite = getCitizenCpfOptinResponse200 | getCitizenCpfOptinResponse400;
+    
 export type getCitizenCpfOptinResponse = getCitizenCpfOptinResponseComposite & {
-  headers: Headers
+  headers: Headers;
 }
 
-export const getGetCitizenCpfOptinUrl = (cpf: string) => {
+export const getGetCitizenCpfOptinUrl = (cpf: string,) => {
+
+
+  
+
   return `/citizen/${cpf}/optin`
 }
 
-export const getCitizenCpfOptin = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfOptinResponse> => {
-  return customFetch<getCitizenCpfOptinResponse>(
-    getGetCitizenCpfOptinUrl(cpf),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenCpfOptin = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfOptinResponse> => {
+  
+  return customFetch<getCitizenCpfOptinResponse>(getGetCitizenCpfOptinUrl(cpf),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Atualiza o status de opt-in do usuário para notificações
@@ -522,34 +510,205 @@ export type putCitizenCpfOptinResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-
-export type putCitizenCpfOptinResponseComposite =
-  | putCitizenCpfOptinResponse200
-  | putCitizenCpfOptinResponse400
-
+    
+export type putCitizenCpfOptinResponseComposite = putCitizenCpfOptinResponse200 | putCitizenCpfOptinResponse400;
+    
 export type putCitizenCpfOptinResponse = putCitizenCpfOptinResponseComposite & {
-  headers: Headers
+  headers: Headers;
 }
 
-export const getPutCitizenCpfOptinUrl = (cpf: string) => {
+export const getPutCitizenCpfOptinUrl = (cpf: string,) => {
+
+
+  
+
   return `/citizen/${cpf}/optin`
 }
 
-export const putCitizenCpfOptin = async (
-  cpf: string,
-  modelsUserConfigOptInResponse: ModelsUserConfigOptInResponse,
-  options?: RequestInit
-): Promise<putCitizenCpfOptinResponse> => {
-  return customFetch<putCitizenCpfOptinResponse>(
-    getPutCitizenCpfOptinUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsUserConfigOptInResponse),
-    }
-  )
+export const putCitizenCpfOptin = async (cpf: string,
+    modelsUserConfigOptInResponse: ModelsUserConfigOptInResponse, options?: RequestInit): Promise<putCitizenCpfOptinResponse> => {
+  
+  return customFetch<putCitizenCpfOptinResponse>(getPutCitizenCpfOptinUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsUserConfigOptInResponse,)
+  }
+);}
+
+
+/**
+ * Recupera a lista paginada de pets associados ao CPF do cidadão.
+ * @summary Obter pets associados ao CPF
+ */
+export type getCitizenCpfPetsResponse200 = {
+  data: ModelsPaginatedPets
+  status: 200
 }
+
+export type getCitizenCpfPetsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+    
+export type getCitizenCpfPetsResponseComposite = getCitizenCpfPetsResponse200 | getCitizenCpfPetsResponse400;
+    
+export type getCitizenCpfPetsResponse = getCitizenCpfPetsResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetCitizenCpfPetsUrl = (cpf: string,
+    params?: GetCitizenCpfPetsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/citizen/${cpf}/pets?${stringifiedParams}` : `/citizen/${cpf}/pets`
+}
+
+export const getCitizenCpfPets = async (cpf: string,
+    params?: GetCitizenCpfPetsParams, options?: RequestInit): Promise<getCitizenCpfPetsResponse> => {
+  
+  return customFetch<getCitizenCpfPetsResponse>(getGetCitizenCpfPetsUrl(cpf,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+/**
+ * Recupera informações da clínica credenciada associada aos pets do cidadão.
+ * @summary Obter dados da clínica credenciada para pets do CPF
+ */
+export type getCitizenCpfPetsClinicResponse200 = {
+  data: ModelsPetClinicResponse
+  status: 200
+}
+
+export type getCitizenCpfPetsClinicResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+    
+export type getCitizenCpfPetsClinicResponseComposite = getCitizenCpfPetsClinicResponse200 | getCitizenCpfPetsClinicResponse400;
+    
+export type getCitizenCpfPetsClinicResponse = getCitizenCpfPetsClinicResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetCitizenCpfPetsClinicUrl = (cpf: string,) => {
+
+
+  
+
+  return `/citizen/${cpf}/pets/clinic`
+}
+
+export const getCitizenCpfPetsClinic = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfPetsClinicResponse> => {
+  
+  return customFetch<getCitizenCpfPetsClinicResponse>(getGetCitizenCpfPetsClinicUrl(cpf),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+/**
+ * Recupera as estatísticas de quantidade de pets por tipo associadas ao CPF do cidadão.
+ * @summary Obter estatísticas de pets do CPF
+ */
+export type getCitizenCpfPetsStatsResponse200 = {
+  data: ModelsPetStatsResponse
+  status: 200
+}
+
+export type getCitizenCpfPetsStatsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+    
+export type getCitizenCpfPetsStatsResponseComposite = getCitizenCpfPetsStatsResponse200 | getCitizenCpfPetsStatsResponse400;
+    
+export type getCitizenCpfPetsStatsResponse = getCitizenCpfPetsStatsResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetCitizenCpfPetsStatsUrl = (cpf: string,) => {
+
+
+  
+
+  return `/citizen/${cpf}/pets/stats`
+}
+
+export const getCitizenCpfPetsStats = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfPetsStatsResponse> => {
+  
+  return customFetch<getCitizenCpfPetsStatsResponse>(getGetCitizenCpfPetsStatsUrl(cpf),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+/**
+ * Recupera um pet específico associado ao CPF do cidadão pelo ID do pet.
+ * @summary Obter pet específico por ID
+ */
+export type getCitizenCpfPetsPetIdResponse200 = {
+  data: ModelsPet
+  status: 200
+}
+
+export type getCitizenCpfPetsPetIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+    
+export type getCitizenCpfPetsPetIdResponseComposite = getCitizenCpfPetsPetIdResponse200 | getCitizenCpfPetsPetIdResponse400;
+    
+export type getCitizenCpfPetsPetIdResponse = getCitizenCpfPetsPetIdResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetCitizenCpfPetsPetIdUrl = (cpf: string,
+    petId: number,) => {
+
+
+  
+
+  return `/citizen/${cpf}/pets/${petId}`
+}
+
+export const getCitizenCpfPetsPetId = async (cpf: string,
+    petId: number, options?: RequestInit): Promise<getCitizenCpfPetsPetIdResponse> => {
+  
+  return customFetch<getCitizenCpfPetsPetIdResponse>(getGetCitizenCpfPetsPetIdUrl(cpf,petId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
 
 /**
  * Atualiza ou cria o telefone autodeclarado de um cidadão por CPF. Apenas o campo de telefone é atualizado (armazenado como pendente até verificado).
@@ -564,40 +723,34 @@ export type putCitizenCpfPhoneResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
-//forced
-export type putCitizenCpfPhoneResponse409 = {
-  data: HandlersErrorResponse
-  status: 409
-}
-
-export type putCitizenCpfPhoneResponseComposite =
-  | putCitizenCpfPhoneResponse200
-  | putCitizenCpfPhoneResponse400
-  | putCitizenCpfPhoneResponse409 //forced
-
+    
+export type putCitizenCpfPhoneResponseComposite = putCitizenCpfPhoneResponse200 | putCitizenCpfPhoneResponse400;
+    
 export type putCitizenCpfPhoneResponse = putCitizenCpfPhoneResponseComposite & {
-  headers: Headers
+  headers: Headers;
 }
 
-export const getPutCitizenCpfPhoneUrl = (cpf: string) => {
+export const getPutCitizenCpfPhoneUrl = (cpf: string,) => {
+
+
+  
+
   return `/citizen/${cpf}/phone`
 }
 
-export const putCitizenCpfPhone = async (
-  cpf: string,
-  modelsSelfDeclaredPhoneInput: ModelsSelfDeclaredPhoneInput,
-  options?: RequestInit
-): Promise<putCitizenCpfPhoneResponse> => {
-  return customFetch<putCitizenCpfPhoneResponse>(
-    getPutCitizenCpfPhoneUrl(cpf),
-    {
-      ...options,
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsSelfDeclaredPhoneInput),
-    }
-  )
-}
+export const putCitizenCpfPhone = async (cpf: string,
+    modelsSelfDeclaredPhoneInput: ModelsSelfDeclaredPhoneInput, options?: RequestInit): Promise<putCitizenCpfPhoneResponse> => {
+  
+  return customFetch<putCitizenCpfPhoneResponse>(getPutCitizenCpfPhoneUrl(cpf),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsSelfDeclaredPhoneInput,)
+  }
+);}
+
 
 /**
  * Valida o código de verificação enviado para o número de telefone
@@ -612,35 +765,34 @@ export type postCitizenCpfPhoneValidateResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type postCitizenCpfPhoneValidateResponseComposite = postCitizenCpfPhoneValidateResponse200 | postCitizenCpfPhoneValidateResponse400;
+    
+export type postCitizenCpfPhoneValidateResponse = postCitizenCpfPhoneValidateResponseComposite & {
+  headers: Headers;
+}
 
-export type postCitizenCpfPhoneValidateResponseComposite =
-  | postCitizenCpfPhoneValidateResponse200
-  | postCitizenCpfPhoneValidateResponse400
+export const getPostCitizenCpfPhoneValidateUrl = (cpf: string,) => {
 
-export type postCitizenCpfPhoneValidateResponse =
-  postCitizenCpfPhoneValidateResponseComposite & {
-    headers: Headers
-  }
 
-export const getPostCitizenCpfPhoneValidateUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/phone/validate`
 }
 
-export const postCitizenCpfPhoneValidate = async (
-  cpf: string,
-  modelsPhoneVerificationValidateRequest: ModelsPhoneVerificationValidateRequest,
-  options?: RequestInit
-): Promise<postCitizenCpfPhoneValidateResponse> => {
-  return customFetch<postCitizenCpfPhoneValidateResponse>(
-    getPostCitizenCpfPhoneValidateUrl(cpf),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(modelsPhoneVerificationValidateRequest),
-    }
-  )
-}
+export const postCitizenCpfPhoneValidate = async (cpf: string,
+    modelsPhoneVerificationValidateRequest: ModelsPhoneVerificationValidateRequest, options?: RequestInit): Promise<postCitizenCpfPhoneValidateResponse> => {
+  
+  return customFetch<postCitizenCpfPhoneValidateResponse>(getPostCitizenCpfPhoneValidateUrl(cpf),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modelsPhoneVerificationValidateRequest,)
+  }
+);}
+
 
 /**
  * Recupera os dados da carteira do cidadão por CPF, incluindo informações de saúde e outros dados da carteira.
@@ -655,29 +807,30 @@ export type getCitizenCpfWalletResponse400 = {
   data: HandlersErrorResponse
   status: 400
 }
+    
+export type getCitizenCpfWalletResponseComposite = getCitizenCpfWalletResponse200 | getCitizenCpfWalletResponse400;
+    
+export type getCitizenCpfWalletResponse = getCitizenCpfWalletResponseComposite & {
+  headers: Headers;
+}
 
-export type getCitizenCpfWalletResponseComposite =
-  | getCitizenCpfWalletResponse200
-  | getCitizenCpfWalletResponse400
+export const getGetCitizenCpfWalletUrl = (cpf: string,) => {
 
-export type getCitizenCpfWalletResponse =
-  getCitizenCpfWalletResponseComposite & {
-    headers: Headers
-  }
 
-export const getGetCitizenCpfWalletUrl = (cpf: string) => {
+  
+
   return `/citizen/${cpf}/wallet`
 }
 
-export const getCitizenCpfWallet = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfWalletResponse> => {
-  return customFetch<getCitizenCpfWalletResponse>(
-    getGetCitizenCpfWalletUrl(cpf),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
+export const getCitizenCpfWallet = async (cpf: string, options?: RequestInit): Promise<getCitizenCpfWalletResponse> => {
+  
+  return customFetch<getCitizenCpfWalletResponse>(getGetCitizenCpfWalletUrl(cpf),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
