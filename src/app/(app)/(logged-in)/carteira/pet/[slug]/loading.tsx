@@ -11,29 +11,62 @@ export default function PetPageLoading() {
       />
 
       <div className="pt-25">
-        <div className="px-4 space-y-6">
-          {/* Pet Card */}
+        {/* Pet Card */}
+        <div className="px-4 flex flex-col gap-4">
           <Skeleton className="w-full h-[185px] rounded-2xl" />
-
-          {/* Icon Buttons */}
-          <div className="flex gap-3">
-            <Skeleton className="w-16 h-16 rounded-full" />
-            <Skeleton className="w-16 h-16 rounded-full" />
-            <Skeleton className="w-16 h-16 rounded-full" />
-            <Skeleton className="w-16 h-16 rounded-full" />
+          <div className="flex justify-center gap-1">
+            <Skeleton className="w-2 h-2 rounded-full" />
+            <Skeleton className="w-2 h-2 rounded-full" />
           </div>
+        </div>
 
-          {/* Status Card */}
-          <Skeleton className="w-full h-24 rounded-lg" />
-
-          {/* Tutor Info */}
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-20 w-full rounded-lg" />
+        {/* Icons Buttons Row */}
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex flex-row pl-4 gap-4 justify-start mt-8 min-w-max">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex flex-col items-center">
+                <Skeleton className="w-16 h-16 rounded-full" />
+                <Skeleton className="h-4 w-16 mt-2" />
+                <Skeleton className="h-3 w-12 mt-1" />
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* QR Code */}
-          <Skeleton className="w-full h-64 rounded-lg" />
+        {/* Tutor Info */}
+        <div className="px-4 mt-6">
+          <Skeleton className="h-6 w-48" />
+        </div>
+
+        <div className="mb-8 px-4 mt-4">
+          <div className="bg-card rounded-lg p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+        </div>
+
+        {/* QR Code */}
+        <div className="px-4">
+          <div className="w-full py-8 px-6 bg-card flex flex-col justify-center items-center gap-4 rounded-md">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="w-32 h-32 rounded-lg" />
+            <Skeleton className="h-4 w-32 mt-2" />
+            <Skeleton className="h-5 w-40 -mt-1" />
+          </div>
         </div>
       </div>
     </div>
