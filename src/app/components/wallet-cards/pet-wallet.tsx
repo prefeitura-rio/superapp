@@ -64,7 +64,7 @@ export function PetCard({
         birthDate={birthDate}
         castrated={petData.indicador_castrado ? 'Sim' : 'Não'}
         registrationDate={registerDate}
-        communityAnimal={'Não disponível'}
+        communityAnimal={'Não disponível'} // without endpoint prop yet
         breed={petData.raca_nome!}
       />
     </PetCardBase>
