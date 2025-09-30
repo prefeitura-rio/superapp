@@ -43,14 +43,16 @@ export function PetCardBackContent({
             {registrationDate || 'Não disponível'}
           </span>
         </div>
-        <div>
-          <span className="text-xs text-[#2A2D32] opacity-70 block">
-            Animal Comunitário
-          </span>
-          <span className="text-sm text-[#2A2D32] block leading-5">
-            {communityAnimal || 'Não disponível'}
-          </span>
-        </div>
+        {communityAnimal === 'Não disponível' ? null : (
+          <div>
+            <span className="text-xs text-[#2A2D32] opacity-70 block">
+              Animal Comunitário
+            </span>
+            <span className="text-sm text-[#2A2D32] block leading-5">
+              {communityAnimal || 'Não disponível'}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="mt-2">
