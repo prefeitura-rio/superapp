@@ -11,9 +11,9 @@ import { PetClientPage } from './pet-client-page'
 import { PetNotFound } from './pet-not-found'
 
 interface PetPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default async function PetPage({ params }: PetPageProps) {

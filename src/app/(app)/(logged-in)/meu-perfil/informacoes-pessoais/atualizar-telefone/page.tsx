@@ -58,7 +58,7 @@ export default function PhoneNumberForm() {
           toast.success('Token enviado')
         } else {
           // Handle specific error statuses
-          if (result.status === 409) {
+          if ((result.status as number) === 409) {
             toast.error('Número já cadastrado')
           } else {
             // For other API errors, redirect to session expired
