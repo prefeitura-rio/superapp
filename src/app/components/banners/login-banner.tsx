@@ -29,7 +29,7 @@ export const LoginBanner = ({
           src={deslogadoIcon}
           width={80}
           height={80}
-          alt="Dois cartões."
+          alt="Ilustração de carteira digital com documentos gov.br"
           className="h-15 w-24 absolute bottom-5 right-2 z-20 md:right-12"
         />
       }

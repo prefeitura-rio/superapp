@@ -28,7 +28,7 @@ export const IptuBanner = ({
       image={
         <Image
           src={iptuBannerIcon}
-          alt="Pessoa acessando serviços pelo celular."
+          alt="Pessoa consultando IPTU no celular"
           width={100}
           height={100}
           className="h-31 w-auto absolute bottom-0 -right-2 z-20  md:right-12"

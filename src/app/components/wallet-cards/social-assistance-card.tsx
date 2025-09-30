@@ -89,7 +89,14 @@ export function SocialAssistanceCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block" onClick={onClick}>
+      <Link
+        href={href}
+        className="block"
+        onClick={onClick}
+        aria-label={`${title}: ${
+          number || ''
+        }. ${primaryLabel}: ${primaryValue}. Clique para mais detalhes.`}
+      >
         {cardContent}
       </Link>
     )

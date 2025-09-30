@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { HandTalkProvider } from '@/components/handtalk-provider'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -74,6 +75,7 @@ export default async function RootLayout({
         >
           <PWAProvider>{children}</PWAProvider>
           <ThemeColorMeta />
+          <HandTalkProvider nonce={nonce} />
           <Toaster
             position="bottom-center"
             toastOptions={{

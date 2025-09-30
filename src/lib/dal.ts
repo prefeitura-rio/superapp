@@ -2,7 +2,7 @@
 // This file is used to cache the data fetching functions
 
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
-import { getV1Avatars, getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
+import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
   getCitizenCpfFirstlogin,
@@ -114,7 +114,7 @@ export const getDalHealthUnitRisk = unstable_cache(
 // 30-minute cache since avatar list doesn't change frequently
 // Using standard Next.js caching instead of unstable_cache to avoid cookie issues
 export async function getDalAvatars() {
-  return await getV1Avatars(
+  return await getAvatars(
     { per_page: 100 },
     {
       cache: 'force-cache',
@@ -129,7 +129,7 @@ export async function getDalAvatars() {
 // User avatar caching (user-specific data)
 // 30-minute cache since user avatar can be updated
 export async function getDalCitizenCpfAvatar(cpf: string) {
-  return await getV1CitizenCpfAvatar(cpf, {
+  return await getCitizenCpfAvatar(cpf, {
     cache: 'force-cache',
     next: {
       revalidate: 600, // 10 minutes - optimal for user data

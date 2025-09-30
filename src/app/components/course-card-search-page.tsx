@@ -2,7 +2,7 @@
 
 import googleIcon from '@/assets/google.svg'
 import { CourseDrawer } from '@/components/ui/custom/course-drawer'
-import type { Course } from '@/types/course'
+import type { CourseSearchPageProps } from '@/types'
 import { BookmarkIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -12,7 +12,11 @@ export default function CourseCardSearchPage({
   course,
   subscribed = false,
   favorite = false,
-}: { course: Course; subscribed?: boolean; favorite?: boolean }) {
+}: {
+  course: CourseSearchPageProps
+  subscribed?: boolean
+  favorite?: boolean
+}) {
   const color = getCourseCardColor(course.type)
   const icon = providerIcons[course.provider] || googleIcon
   const [isSaved, setIsSaved] = useState(favorite)

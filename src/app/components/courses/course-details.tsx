@@ -11,83 +11,13 @@ import { Separator } from '@/components/ui/separator'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
+import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-
-// Types
-interface UserEnrollment {
-  id: string
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'concluded'
-  course_id: number
-  certificate_url?: string
-}
-
-interface RemoteClass {
-  id: string
-  curso_id: number
-  vacancies: number
-  class_start_date: string
-  class_end_date: string
-  class_time: string
-  class_days: string
-  created_at: string
-  updated_at: string
-}
-
-interface Location {
-  id: string
-  curso_id: number
-  address: string
-  neighborhood: string
-  vacancies: number
-  class_start_date: string
-  class_end_date: string
-  class_time: string
-  class_days: string
-  created_at: string
-  updated_at: string
-}
-
-interface Course {
-  id: number
-  title: string
-  description: string
-  enrollment_start_date: string
-  enrollment_end_date: string
-  organization: string
-  modalidade: string
-  theme: string
-  workload: string
-  target_audience: string
-  institutional_logo: string
-  cover_image: string
-  status: string
-  has_certificate: boolean
-  pre_requisitos?: string
-  facilitator?: string
-  objectives?: string
-  expected_results?: string
-  program_content?: string
-  methodology?: string
-  resources_used?: string
-  material_used?: string
-  teaching_material?: string
-  remote_class?: RemoteClass | null
-  locations?: Location[]
-}
-
-interface CourseScheduleInfo {
-  startDate: string | null
-  endDate: string | null
-  time: string | null
-  days: string | null
-  vacancies: number | null
-  address: string | null
-  neighborhood: string | null
-}
+import { ExternalPartnerCourseDrawer } from '../drawer-contents/external-partner-course-drawer'
 
 interface CourseDetailsProps {
   course: Course
@@ -320,29 +250,6 @@ function CourseContent({ course }: CourseContentProps) {
     { key: 'target_audience', title: 'Público-alvo' },
   ]
 
-  const renderContentWithLineBreaks = (content: string) => {
-    const parts = content
-      .split(';')
-      .map(part => part.trim())
-      .filter(part => part.length > 0)
-
-    if (parts.length === 1) {
-      return (
-        <p className="text-xs md:text-sm text-muted-foreground">{content}</p>
-      )
-    }
-
-    return (
-      <div className="text-xs md:text-sm text-muted-foreground">
-        {parts.map((part, index) => (
-          <p key={index} className={index > 0 ? 'mt-1' : ''}>
-            {part}
-          </p>
-        ))}
-      </div>
-    )
-  }
-
   return (
     <div className="px-4 space-y-6">
       {contentSections.map(({ key, title }) => {
@@ -350,11 +257,13 @@ function CourseContent({ course }: CourseContentProps) {
         if (!content) return null
 
         return (
-          <div key={key}>
+          <div key={key} className="whitespace-pre-line">
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
-            {renderContentWithLineBreaks(content)}
+            <div className="text-xs md:text-sm text-muted-foreground">
+              {content}
+            </div>
           </div>
         )
       })}
@@ -380,6 +289,7 @@ export function CourseDetails({
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
 
   const enrollmentInfo = getCourseEnrollmentInfo(
     course as any,
@@ -463,6 +373,26 @@ export function CourseDetails({
       )
     }
 
+    if (course.is_external_partner && course.external_partner_url) {
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsExternalDrawerOpen(true)}
+            className={buttonClasses}
+          >
+            {enrollmentInfo.buttonText}
+          </button>
+
+          <ExternalPartnerCourseDrawer
+            open={isExternalDrawerOpen}
+            onOpenChange={setIsExternalDrawerOpen}
+            externalPartnerUrl={course.external_partner_url}
+          />
+        </>
+      )
+    }
+
     return (
       <Link href={courseSubscriptionHref} className={buttonClasses}>
         {enrollmentInfo.buttonText}
@@ -515,7 +445,7 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
-        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6">
+        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6 whitespace-pre-line">
           {course.description || 'Descrição não disponível'}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (

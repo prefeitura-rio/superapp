@@ -89,16 +89,25 @@ export function ConfirmInscriptionClient({
   const form = useForm<InscriptionFormData>({
     resolver: zodResolver(
       createInscriptionSchema(
-        nearbyUnits && nearbyUnits.length > 0,
+        nearbyUnits && nearbyUnits.length > 1, // Only require selection if more than 1 unit
         customFields
       )
     ),
     defaultValues: {
-      unitId: nearbyUnits && nearbyUnits.length > 0 ? '' : 'no-units-available',
+      // If there's only one unit, automatically select it
+      unitId:
+        nearbyUnits && nearbyUnits.length === 1
+          ? nearbyUnits[0].id
+          : nearbyUnits && nearbyUnits.length > 1
+            ? ''
+            : 'no-units-available',
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
-        customFields.map(field => [`custom_${field.id}`, ''])
+        customFields.map(field => [
+          `custom_${field.id}`,
+          field.field_type === 'multiselect' ? [] : '',
+        ])
       ),
     },
   })
@@ -114,8 +123,8 @@ export function ConfirmInscriptionClient({
     // Only include subsequent slides if user has valid contact info
     ...(hasValidContactInfo
       ? [
-          // Only show select-unit slide if there are nearby units available
-          ...(nearbyUnits && nearbyUnits.length > 0
+          // Only show select-unit slide if there are multiple nearby units available
+          ...(nearbyUnits && nearbyUnits.length > 1
             ? [
                 {
                   id: 'select-unit',
@@ -157,7 +166,7 @@ export function ConfirmInscriptionClient({
       if (
         currentSlide.id === 'select-unit' &&
         nearbyUnits &&
-        nearbyUnits.length > 0
+        nearbyUnits.length > 1
       ) {
         const isValid = await form.trigger('unitId')
         if (!isValid) return
@@ -195,8 +204,8 @@ export function ConfirmInscriptionClient({
 
   // Function to find the first slide with missing required fields
   const findFirstInvalidSlide = async (): Promise<number | null> => {
-    // Check unit selection if required
-    if (nearbyUnits && nearbyUnits.length > 0) {
+    // Check unit selection if required (only for multiple units)
+    if (nearbyUnits && nearbyUnits.length > 1) {
       const unitSlideIndex = slides.findIndex(
         slide => slide.id === 'select-unit'
       )
@@ -257,13 +266,47 @@ export function ConfirmInscriptionClient({
           },
           unitId:
             nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
-          customFields: customFields.map(field => ({
-            id: field.id,
-            title: field.title,
-            value:
-              formData[`custom_${field.id}` as keyof InscriptionFormData] || '',
-            required: field.required,
-          })),
+          enrolledUnit:
+            nearbyUnits && nearbyUnits.length > 0 && formData.unitId
+              ? nearbyUnits.find(unit => unit.id === formData.unitId)
+              : undefined,
+          customFields: customFields.map(field => {
+            const fieldValue =
+              formData[`custom_${field.id}` as keyof InscriptionFormData]
+            let value: string
+
+            if (field.field_type === 'text') {
+              // For text, use the value directly
+              value = (fieldValue as string) || ''
+            } else if (field.field_type === 'multiselect') {
+              // For multiselect, map IDs to values and join
+              if (Array.isArray(fieldValue)) {
+                const selectedOptions = fieldValue
+                  .map(
+                    selectedId =>
+                      field.options?.find(option => option.id === selectedId)
+                        ?.value
+                  )
+                  .filter(Boolean)
+                value = selectedOptions.join(', ')
+              } else {
+                value = ''
+              }
+            } else {
+              // For radio and select, map ID to value
+              const selectedOption = field.options?.find(
+                option => option.id === fieldValue
+              )
+              value = selectedOption?.value || ''
+            }
+
+            return {
+              id: field.id,
+              title: field.title,
+              value,
+              required: field.required,
+            }
+          }),
           reason:
             formData.description ||
             'Inscrição realizada através do portal do cidadão',

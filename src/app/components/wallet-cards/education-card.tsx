@@ -94,7 +94,12 @@ export function EducationCard({
 
   if (asLink && href) {
     return (
-      <Link href={href} className="block" onClick={onClick}>
+      <Link
+        href={href}
+        className="block"
+        onClick={onClick}
+        aria-label={`${title}: ${name || ''}. ${primaryLabel}: ${primaryValue}. ${secondaryLabel}: ${secondaryValue}. Clique para mais detalhes.`}
+      >
         {cardContent}
       </Link>
     )
