@@ -8,12 +8,17 @@
 import type {
   GetCitizenCpfLegalEntitiesParams,
   GetCitizenCpfMaintenanceRequestParams,
+  GetCitizenCpfPetsParams,
   HandlersErrorResponse,
   HandlersSuccessResponse,
   ModelsCitizen,
   ModelsCitizenWallet,
   ModelsPaginatedLegalEntities,
   ModelsPaginatedMaintenanceRequests,
+  ModelsPaginatedPets,
+  ModelsPet,
+  ModelsPetClinicResponse,
+  ModelsPetStatsResponse,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
   ModelsSelfDeclaredEmailInput,
@@ -871,6 +876,182 @@ export const putCitizenCpfOptin = async (
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(modelsUserConfigOptInResponse),
+    }
+  )
+}
+
+/**
+ * Recupera a lista paginada de pets associados ao CPF do cidadão.
+ * @summary Obter pets associados ao CPF
+ */
+export type getCitizenCpfPetsResponse200 = {
+  data: ModelsPaginatedPets
+  status: 200
+}
+
+export type getCitizenCpfPetsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfPetsResponseComposite =
+  | getCitizenCpfPetsResponse200
+  | getCitizenCpfPetsResponse400
+
+export type getCitizenCpfPetsResponse = getCitizenCpfPetsResponseComposite & {
+  headers: Headers
+}
+
+export const getGetCitizenCpfPetsUrl = (
+  cpf: string,
+  params?: GetCitizenCpfPetsParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/citizen/${cpf}/pets?${stringifiedParams}`
+    : `/citizen/${cpf}/pets`
+}
+
+export const getCitizenCpfPets = async (
+  cpf: string,
+  params?: GetCitizenCpfPetsParams,
+  options?: RequestInit
+): Promise<getCitizenCpfPetsResponse> => {
+  return customFetch<getCitizenCpfPetsResponse>(
+    getGetCitizenCpfPetsUrl(cpf, params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Recupera informações da clínica credenciada associada aos pets do cidadão.
+ * @summary Obter dados da clínica credenciada para pets do CPF
+ */
+export type getCitizenCpfPetsClinicResponse200 = {
+  data: ModelsPetClinicResponse
+  status: 200
+}
+
+export type getCitizenCpfPetsClinicResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfPetsClinicResponseComposite =
+  | getCitizenCpfPetsClinicResponse200
+  | getCitizenCpfPetsClinicResponse400
+
+export type getCitizenCpfPetsClinicResponse =
+  getCitizenCpfPetsClinicResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfPetsClinicUrl = (cpf: string) => {
+  return `/citizen/${cpf}/pets/clinic`
+}
+
+export const getCitizenCpfPetsClinic = async (
+  cpf: string,
+  options?: RequestInit
+): Promise<getCitizenCpfPetsClinicResponse> => {
+  return customFetch<getCitizenCpfPetsClinicResponse>(
+    getGetCitizenCpfPetsClinicUrl(cpf),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Recupera as estatísticas de quantidade de pets por tipo associadas ao CPF do cidadão.
+ * @summary Obter estatísticas de pets do CPF
+ */
+export type getCitizenCpfPetsStatsResponse200 = {
+  data: ModelsPetStatsResponse
+  status: 200
+}
+
+export type getCitizenCpfPetsStatsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfPetsStatsResponseComposite =
+  | getCitizenCpfPetsStatsResponse200
+  | getCitizenCpfPetsStatsResponse400
+
+export type getCitizenCpfPetsStatsResponse =
+  getCitizenCpfPetsStatsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfPetsStatsUrl = (cpf: string) => {
+  return `/citizen/${cpf}/pets/stats`
+}
+
+export const getCitizenCpfPetsStats = async (
+  cpf: string,
+  options?: RequestInit
+): Promise<getCitizenCpfPetsStatsResponse> => {
+  return customFetch<getCitizenCpfPetsStatsResponse>(
+    getGetCitizenCpfPetsStatsUrl(cpf),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Recupera um pet específico associado ao CPF do cidadão pelo ID do pet.
+ * @summary Obter pet específico por ID
+ */
+export type getCitizenCpfPetsPetIdResponse200 = {
+  data: ModelsPet
+  status: 200
+}
+
+export type getCitizenCpfPetsPetIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfPetsPetIdResponseComposite =
+  | getCitizenCpfPetsPetIdResponse200
+  | getCitizenCpfPetsPetIdResponse400
+
+export type getCitizenCpfPetsPetIdResponse =
+  getCitizenCpfPetsPetIdResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenCpfPetsPetIdUrl = (cpf: string, petId: number) => {
+  return `/citizen/${cpf}/pets/${petId}`
+}
+
+export const getCitizenCpfPetsPetId = async (
+  cpf: string,
+  petId: number,
+  options?: RequestInit
+): Promise<getCitizenCpfPetsPetIdResponse> => {
+  return customFetch<getCitizenCpfPetsPetIdResponse>(
+    getGetCitizenCpfPetsPetIdUrl(cpf, petId),
+    {
+      ...options,
+      method: 'GET',
     }
   )
 }

@@ -2,6 +2,7 @@
 
 import { PrefLogo } from '@/assets/icons/pref-logo'
 import Image from 'next/image'
+import { createElement, useState } from 'react'
 import { Badge } from '../badge'
 
 interface PetCardFrontContentProps {
@@ -9,8 +10,30 @@ interface PetCardFrontContentProps {
   name: string
   species: string
   sex: string
-  microchipStatus: 'Pendente' | 'Ativo' | 'Inativo'
+  microchipStatus: string
   petImageUrl?: string
+}
+
+interface FallbackImageProps {
+  src?: string
+  alt?: string
+  width?: number
+  height?: number
+  className?: string
+}
+
+const FallbackImage = ({ src, alt, ...props }: FallbackImageProps) => {
+  const fallback =
+    'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar9.png'
+
+  const [imgSrc, setImgSrc] = useState(src)
+
+  return createElement(Image, {
+    ...props,
+    src: imgSrc || fallback,
+    alt: alt || 'Imagem',
+    onError: () => setImgSrc(fallback),
+  })
 }
 
 export function PetCardFrontContent({
@@ -21,19 +44,6 @@ export function PetCardFrontContent({
   microchipStatus,
   petImageUrl,
 }: PetCardFrontContentProps) {
-  const getMicrochipStatusColor = (status: string) => {
-    switch (status) {
-      case 'Ativo':
-        return 'bg-green-500'
-      case 'Pendente':
-        return 'bg-red-500'
-      case 'Inativo':
-        return 'bg-gray-500'
-      default:
-        return 'bg-gray-500'
-    }
-  }
-
   return (
     <div className="h-[140px] relative">
       <PrefLogo fill="#406BCC" className="absolute top-0 right-0" />
@@ -50,7 +60,7 @@ export function PetCardFrontContent({
       <div className="flex gap-4">
         <div className="w-20 h-20 rounded-xl overflow-hidden text-[#2A2D32] flex-shrink-0">
           {petImageUrl ? (
-            <Image
+            <FallbackImage
               src={petImageUrl}
               alt={`Foto de ${name}`}
               width={80}
@@ -76,16 +86,18 @@ export function PetCardFrontContent({
             </div>
           </div>
 
-          {/* Segunda linha: Microchip */}
+          {/* Microchip */}
           <div>
             <p className="text-xs font-normal text-[#2A2D32] mt-1">Microchip</p>
-            <Badge
-              className={`text-xs font-medium ${getMicrochipStatusColor(
-                microchipStatus
-              )} text-white`}
-            >
-              {microchipStatus}
-            </Badge>
+            {microchipStatus === 'Pendente' ? (
+              <Badge className="text-xs font-medium bg-destructive text-white">
+                {microchipStatus}
+              </Badge>
+            ) : (
+              <p className="leading-5 text-sm font-normal tracking-normal text-[#2A2D32]">
+                {microchipStatus}
+              </p>
+            )}
           </div>
         </div>
       </div>
