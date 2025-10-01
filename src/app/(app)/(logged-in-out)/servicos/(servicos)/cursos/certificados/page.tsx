@@ -35,9 +35,10 @@ export default async function CoursesCertifiedPage() {
 
     // Filter enrollments that are concluded and have certificate available
     const certificatesWithEnrollments = enrollments
-      .filter((enrollment: any) => 
-        enrollment.status === 'concluded' && 
-        enrollment.curso.has_certificate === true
+      .filter(
+        (enrollment: any) =>
+          enrollment.status === 'concluded' &&
+          enrollment.curso.has_certificate === true
       )
       .map((enrollment: any) => ({
         ...enrollment.curso,
@@ -47,9 +48,10 @@ export default async function CoursesCertifiedPage() {
         imageUrl: enrollment.curso?.cover_image,
         institutionalLogo: enrollment.curso?.institutional_logo,
         provider: enrollment.curso?.organization,
-        status: enrollment.certificate_url && enrollment.certificate_url.trim() !== '' 
-          ? 'certificate_available' 
-          : 'certificate_pending',
+        status:
+          enrollment.certificate_url && enrollment.certificate_url.trim() !== ''
+            ? 'certificate_available'
+            : 'certificate_pending',
         enrollmentId: enrollment.id,
         enrolledAt: enrollment.enrolled_at,
         updatedAt: enrollment.updated_at,
@@ -57,13 +59,18 @@ export default async function CoursesCertifiedPage() {
         modalidade: enrollment.curso?.modalidade,
         workload: enrollment.curso?.workload,
         hasCertificate: enrollment.has_certificate,
+        // Dados necessários para geração do certificado
+        studentName: userInfo.name || 'Usuário',
+        courseDuration: enrollment.curso?.workload || 'Duração não informada',
+        issuingOrganization:
+          enrollment.curso?.organization || 'Organização não informada',
       }))
       .filter((course: any) => course.id)
 
     return (
       <div className="max-w-4xl mx-auto py-6">
         <SecondaryHeader title="Certificados" />
-        
+
         {certificatesWithEnrollments.length === 0 ? (
           <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
             <p className="block text-lg text-muted-foreground text-center">
