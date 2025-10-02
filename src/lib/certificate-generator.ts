@@ -126,22 +126,84 @@ async function addTextToCertificate(
   // Calcula a altura total ocupada pelo nome do aluno
   const studentNameHeight = studentNameLines.length * studentLineHeight
 
-  // 3. Texto do curso - 12px, peso normal, cor foregroundLight
-  const courseText = `participou do curso "${data.courseTitle}", com ${data.courseDuration} de duração, sob a coordenação da ${data.issuingOrganization}`
-  const courseTextLines = wrapText(courseText, font, 12, maxTextWidth)
+  // 3. Texto do curso - 12px, com título em cor preta, resto em cinza
+  const courseTextParts = [
+    'participou do curso "',
+    data.courseTitle,
+    '", com ',
+    data.courseDuration,
+    ' de duração, sob a coordenação da ',
+    data.issuingOrganization,
+  ]
+
+  // Quebra o texto completo em linhas considerando a largura máxima
+  const fullCourseText = courseTextParts.join('')
+  const courseTextLines = wrapText(fullCourseText, font, 12, maxTextWidth)
   const courseLineHeight = 16 // Altura da linha baseada no design system
 
   // Posição Y do texto do curso baseada na altura real do nome do aluno
   const courseTextY = studentNameY - studentNameHeight - 20 // 20px de espaçamento
 
+  // Para cada linha, desenha o texto com o título em cor preta
   courseTextLines.forEach((line, index) => {
-    page.drawText(line, {
-      x: centerX - getTextWidth(line, font, 12) / 2,
-      y: courseTextY - index * courseLineHeight,
-      size: 12,
-      font: font,
-      color: foregroundLight,
-    })
+    const lineX = centerX - getTextWidth(line, font, 12) / 2
+
+    // Se a linha contém o título do curso, desenha com formatação mista
+    if (line.includes(`"${data.courseTitle}"`)) {
+      // Encontra a posição do título na linha
+      const beforeTitle = line.substring(
+        0,
+        line.indexOf(`"${data.courseTitle}"`)
+      )
+      const title = `"${data.courseTitle}"`
+      const afterTitle = line.substring(
+        line.indexOf(`"${data.courseTitle}"`) + title.length
+      )
+
+      let currentX = lineX
+
+      // Desenha a parte antes do título
+      if (beforeTitle) {
+        page.drawText(beforeTitle, {
+          x: currentX,
+          y: courseTextY - index * courseLineHeight,
+          size: 12,
+          font: font,
+          color: foregroundLight,
+        })
+        currentX += getTextWidth(beforeTitle, font, 12)
+      }
+
+      // Desenha o título em cor preta
+      page.drawText(title, {
+        x: currentX,
+        y: courseTextY - index * courseLineHeight,
+        size: 12,
+        font: font,
+        color: foreground,
+      })
+      currentX += getTextWidth(title, font, 12)
+
+      // Desenha a parte depois do título
+      if (afterTitle) {
+        page.drawText(afterTitle, {
+          x: currentX,
+          y: courseTextY - index * courseLineHeight,
+          size: 12,
+          font: font,
+          color: foregroundLight,
+        })
+      }
+    } else {
+      // Linha sem o título, desenha normalmente
+      page.drawText(line, {
+        x: lineX,
+        y: courseTextY - index * courseLineHeight,
+        size: 12,
+        font: font,
+        color: foregroundLight,
+      })
+    }
   })
 
   // 4. Data e local - 12px, peso normal, cor foregroundLight
