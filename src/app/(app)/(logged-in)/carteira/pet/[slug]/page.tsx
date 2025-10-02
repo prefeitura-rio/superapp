@@ -1,7 +1,6 @@
 import { getEmailValue, normalizeEmailData } from '@/helpers/email-data-helpers'
 import { getPhoneValue, normalizePhoneData } from '@/helpers/phone-data-helpers'
 import {
-  getCitizenCpfPets,
   getCitizenCpfPetsClinic,
   getCitizenCpfPetsPetId,
 } from '@/http/citizen/citizen'
@@ -62,12 +61,7 @@ export default async function PetPage({ params }: PetPageProps) {
 
   const uniquePetData = uniquePet.data
 
-  const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
-  const petsData = petsResponse.data
-
-  const pets =
-    'data' in petsData && Array.isArray(petsData.data) ? petsData.data : []
-  const petHasMicrochip = !!pets[0]?.microchip_numero
+  const petHasMicrochip = !!uniquePetData?.microchip_numero
 
   const clinicResponse = await getCitizenCpfPetsClinic(userAuthInfo.cpf)
   const petsClinic = clinicResponse.data
