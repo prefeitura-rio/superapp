@@ -118,6 +118,7 @@ export default function CarteiraSection({
                     !isNormalRiskStatus ? healthCardData?.risco : undefined
                   }
                   enableFlip={false}
+                  origin={walletData.saude?.clinica_familia?.fonte}
                   showInitialShine={false}
                   asLink
                   onClick={() =>
