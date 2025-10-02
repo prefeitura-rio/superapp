@@ -82,6 +82,7 @@ export function WalletCardsWrapper({
             phone={walletData!.saude!.clinica_familia!.telefone}
             email={walletData!.saude!.clinica_familia!.email}
             riskStatus={!isNormalRiskStatus ? riskStatus?.risco : undefined}
+            origin={walletData!.saude?.clinica_familia?.fonte}
             enableFlip={false}
             asLink
             href="/carteira/clinica-da-familia"

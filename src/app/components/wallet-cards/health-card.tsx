@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
+import { isBigQueryOrigin, isMCPOrigin } from '@/helpers/health'
 import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -41,6 +42,7 @@ interface WalletCardProps {
   riskStatus?: RiskStatusProps
   asLink?: boolean
   showInitialShine?: boolean
+  origin?: string
   onClick?: () => void
 }
 
@@ -55,6 +57,7 @@ export function HealthCard({
   address,
   phone,
   email,
+  origin,
   riskStatus,
   enableFlip = true,
   asLink = false,
@@ -73,6 +76,28 @@ export function HealthCard({
     }
   }
 
+  const getPrimaryValueSlot = () => {
+    if (isMCPOrigin(origin)) {
+      return (
+        <Badge className="text-xs -mb-6 bg-white/15 text-white">
+          Efetue seu cadastro na CF
+        </Badge>
+      )
+    }
+
+    if (isBigQueryOrigin(origin) && riskStatus) {
+      return (
+        <Badge
+          className={`${BADGE_COLOR_BY_STATUS[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']} text-white -mb-6 text-xs`}
+        >
+          {RISK_LEVEL[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']}
+        </Badge>
+      )
+    }
+
+    return null
+  }
+
   const shouldRenderHealthStatusIndicator =
     primaryValue !== 'Fechado' && riskStatus
 
@@ -85,18 +110,7 @@ export function HealthCard({
         primaryValue={primaryValue}
         secondaryLabel={secondaryLabel}
         secondaryValue={secondaryValue}
-        primaryValueSlot={
-          riskStatus && (
-            <Badge
-              className={`
-        ${BADGE_COLOR_BY_STATUS[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']} 
-        text-white -mb-6 text-xs
-      `}
-            >
-              {RISK_LEVEL[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']}
-            </Badge>
-          )
-        }
+        primaryValueSlot={getPrimaryValueSlot()}
       />
     </CardBase>
   )

@@ -142,6 +142,7 @@ export default function CarteiraSectionSwipe({
         address={walletData.saude.clinica_familia.endereco}
         phone={walletData.saude.clinica_familia.telefone}
         email={walletData.saude.clinica_familia.email}
+        origin={walletData.saude?.clinica_familia?.fonte}
         riskStatus={!isNormalRiskStatus ? healthCardData?.risco : undefined}
         enableFlip={false}
         showInitialShine={false}
