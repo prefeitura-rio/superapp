@@ -198,7 +198,9 @@ export default async function HealthCardDetail() {
 
   // Build dynamic links with real data
   const phoneUrl = phone ? `tel:${phone}` : '#'
-  const whatsappNumber = healthData?.equipe_saude_familia?.telefone
+  const whatsappNumber =
+    healthData?.equipe_saude_familia?.telefone ||
+    healthData?.clinica_familia?.telefone
   const whatsappUrl = whatsappNumber
     ? `https://wa.me/55${whatsappNumber.replace(/\D/g, '')}`
     : '#'
@@ -251,26 +253,26 @@ export default async function HealthCardDetail() {
                 </span>
               </div>
             </a>
-            <a
-              href={whatsappUrl !== '#' ? whatsappUrl : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
-            >
-              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <WhatsappIcon
-                  className={`h-6.5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="mt-2 text-foreground text-sm font-normal">
-                  Whatsapp
-                </span>
-                <span className="text-gray-300 text-xs font-normal">
-                  equipe
-                </span>
-              </div>
-            </a>
+            {whatsappUrl !== '#' && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center"
+              >
+                <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                  <WhatsappIcon className="h-6.5" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="mt-2 text-foreground text-sm font-normal">
+                    Whatsapp
+                  </span>
+                  <span className="text-gray-300 text-xs font-normal">
+                    equipe
+                  </span>
+                </div>
+              </a>
+            )}
             <a
               href={mapUrl !== '#' ? mapUrl : undefined}
               target="_blank"
