@@ -110,27 +110,34 @@ async function addTextToCertificate(
     36,
     maxTextWidth
   )
-  const lineHeight = 40 // Altura da linha baseada no design system
+  const studentLineHeight = 40 // Altura da linha baseada no design system
+  const studentNameY = height - 335 // Posição Y inicial do nome do aluno
 
   studentNameLines.forEach((line, index) => {
     page.drawText(line, {
       x: centerX - getTextWidth(line, mediumFont, 36) / 2,
-      y: height - 335 - index * lineHeight,
+      y: studentNameY - index * studentLineHeight,
       size: 36,
       font: mediumFont,
       color: foreground,
     })
   })
 
+  // Calcula a altura total ocupada pelo nome do aluno
+  const studentNameHeight = studentNameLines.length * studentLineHeight
+
   // 3. Texto do curso - 12px, peso normal, cor foregroundLight
   const courseText = `participou do curso "${data.courseTitle}", com ${data.courseDuration} de duração, sob a coordenação da ${data.issuingOrganization}`
   const courseTextLines = wrapText(courseText, font, 12, maxTextWidth)
   const courseLineHeight = 16 // Altura da linha baseada no design system
 
+  // Posição Y do texto do curso baseada na altura real do nome do aluno
+  const courseTextY = studentNameY - studentNameHeight - 20 // 20px de espaçamento
+
   courseTextLines.forEach((line, index) => {
     page.drawText(line, {
       x: centerX - getTextWidth(line, font, 12) / 2,
-      y: height - 380 - index * courseLineHeight,
+      y: courseTextY - index * courseLineHeight,
       size: 12,
       font: font,
       color: foregroundLight,
@@ -141,14 +148,14 @@ async function addTextToCertificate(
   const dateText = `Rio de Janeiro, ${data.issueDate}`
   const dateTextLines = wrapText(dateText, font, 12, maxTextWidth)
 
-  // Calcula a posição Y baseada no número de linhas do texto do curso
+  // Calcula a posição Y baseada na altura real do texto do curso
   const courseTextHeight = courseTextLines.length * courseLineHeight
-  const baseY = height - 380 - courseTextHeight - 20 // 20px de espaçamento
+  const dateTextY = courseTextY - courseTextHeight - 20 // 20px de espaçamento
 
   dateTextLines.forEach((line, index) => {
     page.drawText(line, {
       x: centerX - getTextWidth(line, font, 12) / 2,
-      y: baseY - index * courseLineHeight,
+      y: dateTextY - index * courseLineHeight,
       size: 12,
       font: font,
       color: foregroundLight,
