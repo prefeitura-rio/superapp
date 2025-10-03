@@ -60,10 +60,8 @@ export default async function PetPage({ params }: PetPageProps) {
 
   const petHasMicrochip = !!uniquePetData?.microchip_numero
 
-  console.log(JSON.stringify(uniquePetData, null, 2))
-
-  let petClinicName =
-    uniquePetData.clinica_credenciada.nome || 'Clínica Microchipadora'
+  const petClinicName =
+    uniquePetData?.clinica_credenciada?.nome || 'Clínica Microchipadora'
 
   return (
     <PetClientPage
