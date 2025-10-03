@@ -20,22 +20,14 @@ export function WalletTabs({ activeTab }: WalletTabsProps) {
 
       <Link
         href="/carteira"
-        className={`relative z-10 flex-1 px-6 py-2 text-sm rounded-full transition-colors duration-300 text-center ${
-          activeTab === 'cards'
-            ? 'text-foreground'
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
+        className="relative z-10 flex-1 px-6 py-2 text-sm rounded-full transition-colors duration-300 text-center text-foreground"
       >
         Meus Cartões
       </Link>
 
       <Link
         href="/carteira?pets=true"
-        className={`relative z-10 flex-1 px-6 py-2 text-sm rounded-full transition-colors duration-300 text-center ${
-          activeTab === 'pets'
-            ? 'text-foreground'
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
+        className="relative z-10 flex-1 px-6 py-2 text-sm rounded-full transition-colors duration-300 text-center text-foreground"
       >
         Meus Pets
       </Link>
