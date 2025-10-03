@@ -1,9 +1,6 @@
 import { getEmailValue, normalizeEmailData } from '@/helpers/email-data-helpers'
 import { getPhoneValue, normalizePhoneData } from '@/helpers/phone-data-helpers'
-import {
-  getCitizenCpfPetsClinic,
-  getCitizenCpfPetsPetId,
-} from '@/http/citizen/citizen'
+import { getCitizenCpfPetsPetId } from '@/http/citizen/citizen'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { PetClientPage } from './pet-client-page'
@@ -63,13 +60,10 @@ export default async function PetPage({ params }: PetPageProps) {
 
   const petHasMicrochip = !!uniquePetData?.microchip_numero
 
-  const clinicResponse = await getCitizenCpfPetsClinic(userAuthInfo.cpf)
-  const petsClinic = clinicResponse.data
+  console.log(JSON.stringify(uniquePetData, null, 2))
 
-  let petClinicName = 'Clínica Microchipadora'
-  if ('clinic' in petsClinic) {
-    petClinicName = petsClinic.clinic?.nome as string
-  }
+  let petClinicName =
+    uniquePetData.clinica_credenciada.nome || 'Clínica Microchipadora'
 
   return (
     <PetClientPage
