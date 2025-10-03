@@ -17,7 +17,6 @@ import type {
   ModelsPaginatedMaintenanceRequests,
   ModelsPaginatedPets,
   ModelsPet,
-  ModelsPetClinicResponse,
   ModelsPetStatsResponse,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
@@ -894,9 +893,33 @@ export type getCitizenCpfPetsResponse400 = {
   status: 400
 }
 
+export type getCitizenCpfPetsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getCitizenCpfPetsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getCitizenCpfPetsResponse429 = {
+  data: HandlersErrorResponse
+  status: 429
+}
+
+export type getCitizenCpfPetsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
 export type getCitizenCpfPetsResponseComposite =
   | getCitizenCpfPetsResponse200
   | getCitizenCpfPetsResponse400
+  | getCitizenCpfPetsResponse401
+  | getCitizenCpfPetsResponse403
+  | getCitizenCpfPetsResponse429
+  | getCitizenCpfPetsResponse500
 
 export type getCitizenCpfPetsResponse = getCitizenCpfPetsResponseComposite & {
   headers: Headers
@@ -936,46 +959,6 @@ export const getCitizenCpfPets = async (
 }
 
 /**
- * Recupera informações da clínica credenciada associada aos pets do cidadão.
- * @summary Obter dados da clínica credenciada para pets do CPF
- */
-export type getCitizenCpfPetsClinicResponse200 = {
-  data: ModelsPetClinicResponse
-  status: 200
-}
-
-export type getCitizenCpfPetsClinicResponse400 = {
-  data: HandlersErrorResponse
-  status: 400
-}
-
-export type getCitizenCpfPetsClinicResponseComposite =
-  | getCitizenCpfPetsClinicResponse200
-  | getCitizenCpfPetsClinicResponse400
-
-export type getCitizenCpfPetsClinicResponse =
-  getCitizenCpfPetsClinicResponseComposite & {
-    headers: Headers
-  }
-
-export const getGetCitizenCpfPetsClinicUrl = (cpf: string) => {
-  return `/citizen/${cpf}/pets/clinic`
-}
-
-export const getCitizenCpfPetsClinic = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfPetsClinicResponse> => {
-  return customFetch<getCitizenCpfPetsClinicResponse>(
-    getGetCitizenCpfPetsClinicUrl(cpf),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-/**
  * Recupera as estatísticas de quantidade de pets por tipo associadas ao CPF do cidadão.
  * @summary Obter estatísticas de pets do CPF
  */
@@ -989,9 +972,33 @@ export type getCitizenCpfPetsStatsResponse400 = {
   status: 400
 }
 
+export type getCitizenCpfPetsStatsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getCitizenCpfPetsStatsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getCitizenCpfPetsStatsResponse429 = {
+  data: HandlersErrorResponse
+  status: 429
+}
+
+export type getCitizenCpfPetsStatsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
 export type getCitizenCpfPetsStatsResponseComposite =
   | getCitizenCpfPetsStatsResponse200
   | getCitizenCpfPetsStatsResponse400
+  | getCitizenCpfPetsStatsResponse401
+  | getCitizenCpfPetsStatsResponse403
+  | getCitizenCpfPetsStatsResponse429
+  | getCitizenCpfPetsStatsResponse500
 
 export type getCitizenCpfPetsStatsResponse =
   getCitizenCpfPetsStatsResponseComposite & {
@@ -1029,9 +1036,39 @@ export type getCitizenCpfPetsPetIdResponse400 = {
   status: 400
 }
 
+export type getCitizenCpfPetsPetIdResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getCitizenCpfPetsPetIdResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getCitizenCpfPetsPetIdResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type getCitizenCpfPetsPetIdResponse429 = {
+  data: HandlersErrorResponse
+  status: 429
+}
+
+export type getCitizenCpfPetsPetIdResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
 export type getCitizenCpfPetsPetIdResponseComposite =
   | getCitizenCpfPetsPetIdResponse200
   | getCitizenCpfPetsPetIdResponse400
+  | getCitizenCpfPetsPetIdResponse401
+  | getCitizenCpfPetsPetIdResponse403
+  | getCitizenCpfPetsPetIdResponse404
+  | getCitizenCpfPetsPetIdResponse429
+  | getCitizenCpfPetsPetIdResponse500
 
 export type getCitizenCpfPetsPetIdResponse =
   getCitizenCpfPetsPetIdResponseComposite & {
