@@ -4,6 +4,7 @@ import PetsCardsDetail from '@/app/components/pets-cards'
 import { SearchButton } from '@/app/components/search-button'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { WalletTabs } from '@/app/components/wallet-tabs'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
 import {
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -22,6 +23,14 @@ export default async function Wallet({
   const petParams = await searchParams
   const isPetsView = petParams.pets === 'true'
 
+  // Check if user has pets
+  const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
+  const hasPets =
+    petsResponse.status === 200 &&
+    'data' in petsResponse.data &&
+    Array.isArray(petsResponse.data.data) &&
+    petsResponse.data.data.length > 0
+
   if (isPetsView) {
     return (
       <main className="max-w-xl mx-auto text-white">
@@ -33,7 +42,7 @@ export default async function Wallet({
             <SearchButton />
           </div>
 
-          <WalletTabs activeTab="pets" />
+          {hasPets && <WalletTabs activeTab="pets" />}
 
           <div className="mt-6">
             <PetsCardsDetail />
@@ -131,7 +140,7 @@ export default async function Wallet({
             <SearchButton />
           </div>
 
-          <WalletTabs activeTab="cards" />
+          {hasPets && <WalletTabs activeTab="cards" />}
 
           <div className="mt-6">
             <WalletCardsWrapper
