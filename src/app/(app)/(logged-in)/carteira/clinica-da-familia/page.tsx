@@ -8,6 +8,7 @@ import {
 } from '@/assets/icons'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { isMCPOrigin } from '@/helpers/health'
 import {
   getDalCitizenCpfWallet,
   getDalHealthUnitInfo,
@@ -19,6 +20,7 @@ import {
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { RegistrationRequirementsCard } from './components/registration-requirements-card'
 import { StatusIndicatorMessage } from './components/status-indicator-message'
 
 interface TeamPageProps {
@@ -220,6 +222,7 @@ export default async function HealthCardDetail() {
             secondaryLabel="Horário de atendimento"
             secondaryValue={operatingHours}
             riskStatus={!isNormalRiskStatus ? riskStatus?.risco : undefined}
+            origin={clinicaFamilia.fonte}
             address={address}
             phone={phone}
             email={email}
@@ -248,26 +251,26 @@ export default async function HealthCardDetail() {
                 </span>
               </div>
             </a>
-            <a
-              href={whatsappUrl !== '#' ? whatsappUrl : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex flex-col items-center ${whatsappUrl === '#' ? 'pointer-events-none' : ''}`}
-            >
-              <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
-                <WhatsappIcon
-                  className={`h-6.5 ${whatsappUrl === '#' ? 'text-muted-foreground' : ''}`}
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="mt-2 text-foreground text-sm font-normal">
-                  Whatsapp
-                </span>
-                <span className="text-gray-300 text-xs font-normal">
-                  equipe
-                </span>
-              </div>
-            </a>
+            {whatsappUrl !== '#' && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center"
+              >
+                <div className="rounded-full w-16 h-16 flex justify-center items-center bg-card hover:bg-card hover:text-black transition-colors">
+                  <WhatsappIcon className="h-6.5" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="mt-2 text-foreground text-sm font-normal">
+                    Whatsapp
+                  </span>
+                  <span className="text-gray-300 text-xs font-normal">
+                    equipe
+                  </span>
+                </div>
+              </a>
+            )}
             <a
               href={mapUrl !== '#' ? mapUrl : undefined}
               target="_blank"
@@ -302,12 +305,17 @@ export default async function HealthCardDetail() {
             </a>
           </div>
         </div>
-
         {!isNormalRiskStatus && (
           <div className="mt-6 mb-2 px-4">
             <StatusIndicatorMessage
               status={riskStatus?.risco as 'Amarelo' | 'Laranja' | 'Vermelho'}
             />
+          </div>
+        )}
+
+        {isMCPOrigin(clinicaFamilia?.fonte) && (
+          <div className="px-4 mt-6">
+            <RegistrationRequirementsCard />
           </div>
         )}
       </div>

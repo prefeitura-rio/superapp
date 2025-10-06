@@ -18,3 +18,18 @@ export const getRiskStatusDescription = (
   const config = getRiskStatusConfig(riskLevel)
   return config.description || DEFAULT_RISK_STATUS.description
 }
+
+/**
+ * origin - mcp
+ * Indicates that the user does not have a registered CF (Clínica da Família)
+ * and will see a recommendation for a nearby CF.
+ */
+export const isMCPOrigin = (origin: string | undefined) => origin === 'mcp'
+
+/**
+ * origin - bigquery
+ * Indicates that the user has a registered CF (Clínica da Família)
+ * and will see their actual registered CF.
+ */
+export const isBigQueryOrigin = (origin: string | undefined) =>
+  origin === 'bigquery'
