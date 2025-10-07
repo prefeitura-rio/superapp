@@ -44,6 +44,7 @@ export function CourseCard({
             <Image
               src={institutionaLogo}
               alt="Logo da instituição"
+              className="object-fit"
               width={15}
               height={15}
             />
