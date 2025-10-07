@@ -79,7 +79,7 @@ export function HealthCard({
   const getPrimaryValueSlot = () => {
     if (isMCPOrigin(origin)) {
       return (
-        <Badge className="text-xs -mb-6 bg-white/15 text-white">
+        <Badge className="text-xs bg-white/15 text-white">
           Efetue seu cadastro na CF
         </Badge>
       )
@@ -88,7 +88,7 @@ export function HealthCard({
     if (isBigQueryOrigin(origin) && riskStatus) {
       return (
         <Badge
-          className={`${BADGE_COLOR_BY_STATUS[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']} text-white -mb-6 text-xs`}
+          className={`${BADGE_COLOR_BY_STATUS[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']} text-white text-xs`}
         >
           {RISK_LEVEL[riskStatus as 'Amarelo' | 'Laranja' | 'Vermelho']}
         </Badge>
