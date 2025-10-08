@@ -39,15 +39,16 @@ export function CourseCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
+        <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden">
           {institutionaLogo ? (
-            <Image
-              src={institutionaLogo}
-              alt="Logo da instituição"
-              className="object-fit"
-              width={15}
-              height={15}
-            />
+            <div className="relative w-full h-full">
+              <Image
+                src={institutionaLogo}
+                alt="Logo da instituição"
+                className="object-contain"
+                fill
+              />
+            </div>
           ) : (
             <span className="text-[10px] font-semibold text-foreground uppercase">
               {title?.charAt(0)}
