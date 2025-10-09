@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏛️ SuperApp – PrefRio
 
-## Getting Started
+**PrefRio** is the main web application of the Rio de Janeiro City Hall's digital ecosystem, digital wallets, courses and customer service.
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> 📘 Full Documentation:  
+> 🇧🇷 [Read in Portuguese](./docs/pt-br/README.pt.md)  
+> 🇺🇸 [Read in English](./docs/en-us/README.en.md)
+
+---
+
+## 🚀 Tech Stack
+
+| Category       | Technology                    |
+| -------------- | ----------------------------- |
+| Framework      | Next.js 15.4.6 + React 19     |
+| Language       | TypeScript                    |
+| Styling        | TailwindCSS 4 + shadcn/ui     |
+| Authentication | Keycloak (Identidade Carioca) |
+| API Client     | Orval (OpenAPI Generator)     |
+| Validation     | Zod + React Hook Form         |
+| Infrastructure | Docker + Kubernetes           |
+| Lint & Format  | Biome                         |
+
+---
+
+## 🧩 Project Structure
+
+```
+superapp/
+├── src/ # Main source code
+├── docs/ # Detailed documentation
+├── k8s/ # Kubernetes manifests
+├── Dockerfile # Production build configuration
+└── README.md # This file
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧠 Quick Start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Requires Node 23.7.0+
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+# 1. Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 2. Start the development server
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Then open: http://localhost:3000
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Made with ❤️ by IplanRio
