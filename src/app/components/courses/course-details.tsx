@@ -228,7 +228,7 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
     <div className="flex flex-col items-start px-4 gap-2">
       <InfoRow label="Data início" value={formatDate(scheduleInfo.startDate)} />
       <InfoRow label="Data final" value={formatDate(scheduleInfo.endDate)} />
-      <InfoRow label="Horário" value={formatTimeRange('14:30-16:00')} />
+      <InfoRow label="Horário" value={formatTimeRange(scheduleInfo.time!)} />
       <InfoRow label="Dias de aula" value={scheduleInfo.days} />
       <InfoRow label="Vagas" value={scheduleInfo.vacancies} />
       {scheduleInfo.address && (
