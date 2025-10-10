@@ -70,6 +70,7 @@ export interface Course {
   is_external_partner?: boolean
   external_partner_name?: string
   external_partner_url?: string
+  external_partner_logo_url?: string
 }
 
 export interface UserEnrollment {

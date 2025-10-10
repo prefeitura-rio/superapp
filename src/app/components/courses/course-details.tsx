@@ -150,13 +150,14 @@ interface CourseInfoProps {
 
 function CourseInfo({ course }: CourseInfoProps) {
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex flex-row-reverse p-4 gap-5 justify-end">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
           {course.institutional_logo ? (
             <Image
               src={course.institutional_logo}
-              alt="provider"
+              alt="Logo da instituição"
+              className="object-contain"
               width={25}
               height={25}
             />
@@ -170,6 +171,29 @@ function CourseInfo({ course }: CourseInfoProps) {
           {course.organization || 'Instituição não informada'}
         </p>
       </div>
+
+      {course.is_external_partner && (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+            {course.external_partner_logo_url ? (
+              <Image
+                src={course.external_partner_logo_url}
+                alt="Logo do parceiro"
+                className="object-contain"
+                width={25}
+                height={25}
+              />
+            ) : (
+              <span className="text-2.5 font-semibold text-foreground uppercase">
+                {course.external_partner_name?.charAt(0)}
+              </span>
+            )}
+          </div>
+          <p className="text-xs md:text-sm">
+            {course.external_partner_name || 'Parceiro não informado'}
+          </p>
+        </div>
+      )}
     </div>
   )
 }
