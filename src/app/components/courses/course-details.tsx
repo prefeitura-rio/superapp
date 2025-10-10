@@ -150,16 +150,16 @@ interface CourseInfoProps {
 
 function CourseInfo({ course }: CourseInfoProps) {
   return (
-    <div className="flex flex-row-reverse p-4 gap-5 justify-end">
+    <div className="flex p-4 gap-2">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
           {course.institutional_logo ? (
             <Image
               src={course.institutional_logo}
               alt="Logo da instituição"
-              className="object-contain"
-              width={25}
-              height={25}
+              className="w-full h-full object-cover rounded-full"
+              width={40}
+              height={40}
             />
           ) : (
             <span className="text-2.5 font-semibold text-foreground uppercase">
@@ -174,14 +174,14 @@ function CourseInfo({ course }: CourseInfoProps) {
 
       {course.is_external_partner && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
             {course.external_partner_logo_url ? (
               <Image
                 src={course.external_partner_logo_url}
                 alt="Logo do parceiro"
-                className="object-contain"
-                width={25}
-                height={25}
+                className="w-full h-full object-cover rounded-full"
+                width={40}
+                height={40}
               />
             ) : (
               <span className="text-2.5 font-semibold text-foreground uppercase">
