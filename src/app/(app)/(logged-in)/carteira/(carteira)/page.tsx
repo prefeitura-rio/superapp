@@ -1,7 +1,10 @@
 import EmptyWallet from '@/app/components/empty-wallet'
 import { FloatNavigation } from '@/app/components/float-navigation'
+import PetsCardsDetail from '@/app/components/pets-cards'
 import { SearchButton } from '@/app/components/search-button'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
+import { WalletTabs } from '@/app/components/wallet-tabs'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
 import {
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -11,8 +14,45 @@ import {
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 
-export default async function Wallet() {
+export default async function Wallet({
+  searchParams,
+}: {
+  searchParams: Promise<{ pets?: string }>
+}) {
   const userAuthInfo = await getUserInfoFromToken()
+  const petParams = await searchParams
+  const isPetsView = petParams.pets === 'true'
+
+  // Check if user has pets
+  const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
+  const hasPets =
+    petsResponse.status === 200 &&
+    'data' in petsResponse.data &&
+    Array.isArray(petsResponse.data.data) &&
+    petsResponse.data.data.length > 0
+
+  if (isPetsView) {
+    return (
+      <main className="max-w-xl mx-auto text-white">
+        <section className="pb-30 px-4 relative h-full">
+          <div className="flex items-start justify-between pt-6 pb-4">
+            <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+              Carteira
+            </h2>
+            <SearchButton />
+          </div>
+
+          {hasPets && <WalletTabs activeTab="pets" />}
+
+          <div className="mt-6">
+            <PetsCardsDetail />
+          </div>
+        </section>
+        <FloatNavigation />
+      </main>
+    )
+  }
+
   let walletData
   let maintenanceRequests: any[] | undefined = []
   let healthUnitData
@@ -67,7 +107,7 @@ export default async function Wallet() {
         userAuthInfo.cpf,
         {
           page: 1,
-          per_page: 100, // Get all requests: TODO: paginate
+          per_page: 100,
         }
       )
       if (maintenanceResponse.status === 200) {
@@ -90,33 +130,31 @@ export default async function Wallet() {
   )
 
   return (
-    <>
-      {/* <MainHeader /> */}
-      <main className="max-w-xl mx-auto text-white">
-        {walletInfo?.hasData ? (
-          <section className="pb-30 px-4 relative h-full ">
-            <div className="flex items-start justify-between pt-6 pb-6">
-              <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
-                Carteira
-              </h2>
+    <main className="max-w-xl mx-auto text-white">
+      {walletInfo?.hasData ? (
+        <section className="pb-30 px-4 relative h-full">
+          <div className="flex items-start justify-between pt-6 pb-4">
+            <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+              Carteira
+            </h2>
+            <SearchButton />
+          </div>
 
-              <SearchButton />
-            </div>
+          {hasPets && <WalletTabs activeTab="cards" />}
 
-            {walletInfo && (
-              <WalletCardsWrapper
-                walletData={walletData}
-                maintenanceRequests={maintenanceRequests}
-                healthUnitData={healthUnitData}
-                healthUnitRiskData={healthUnitRiskData}
-              />
-            )}
-          </section>
-        ) : (
-          <EmptyWallet />
-        )}
-        <FloatNavigation />
-      </main>
-    </>
+          <div className="mt-6">
+            <WalletCardsWrapper
+              walletData={walletData}
+              maintenanceRequests={maintenanceRequests}
+              healthUnitData={healthUnitData}
+              healthUnitRiskData={healthUnitRiskData}
+            />
+          </div>
+        </section>
+      ) : (
+        <EmptyWallet />
+      )}
+      <FloatNavigation />
+    </main>
   )
 }
