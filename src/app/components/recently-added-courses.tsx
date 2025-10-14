@@ -1,6 +1,7 @@
 'use client'
 
 import type { ModelsCurso } from '@/http-courses/models'
+import type { AccessibilityProps } from '@/types/course'
 import { CourseCard } from './courses/courses-card'
 
 interface RecentlyAddedCoursesProps {
@@ -26,7 +27,9 @@ export default function RecentlyAddedCourses({
               workload={course.workload as string}
               institutionaLogo={course.institutional_logo as string}
               provider={course.organization as string}
+              accessibility={course.accessibility as AccessibilityProps}
               coverImage={course.cover_image as string}
+              isExternalPartner={course.is_external_partner as boolean}
             />
           ))}
         </div>

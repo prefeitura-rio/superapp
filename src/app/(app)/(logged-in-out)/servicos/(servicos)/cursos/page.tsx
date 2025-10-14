@@ -61,6 +61,7 @@ export default async function CoursesPage() {
               provider: enrollment.curso?.organization,
               status: enrollment.status,
               enrollmentId: enrollment.id,
+              accessibility: enrollment.curso?.accessibility,
               enrolledAt: enrollment.enrolled_at,
               updatedAt: enrollment.updated_at,
             }))
