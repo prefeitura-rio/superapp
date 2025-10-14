@@ -41,6 +41,20 @@ interface Location {
   updated_at: string
 }
 
+export type AccessibilityTypes = 'ACESSIVEL' | 'EXCLUSIVO' | 'NAO_ACESSIVEL'
+export const ACCESSIBILITY_OPTIONS: AccessibilityTypes[] = [
+  'ACESSIVEL',
+  'EXCLUSIVO',
+  'NAO_ACESSIVEL',
+] as const
+export const accessibilityLabel: Record<AccessibilityTypes, string> = {
+  ACESSIVEL: 'Acessível PCD',
+  EXCLUSIVO: 'Exclusivo PCD',
+  NAO_ACESSIVEL: 'Não acessível PCD',
+}
+
+export type AccessibilityProps = AccessibilityTypes | undefined | ''
+
 export interface Course {
   id: number
   title: string
@@ -56,6 +70,7 @@ export interface Course {
   cover_image: string
   status: string
   has_certificate: boolean
+  accessibility?: AccessibilityTypes | undefined | ''
   pre_requisitos?: string
   facilitator?: string
   objectives?: string

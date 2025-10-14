@@ -1,4 +1,5 @@
 import type { ModelsCurso } from '@/http-courses/models'
+import type { AccessibilityProps } from '@/types/course'
 import { CourseCard } from '../courses/courses-card'
 
 interface MyCoursesHomeProps {
@@ -23,6 +24,8 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
               institutionaLogo={course.institutional_logo as string}
               provider={course.organization as string}
               coverImage={course.cover_image as string}
+              accessibility={course.accessibility as AccessibilityProps}
+              isExternalPartner={course.is_external_partner as boolean}
             />
           ))}
         </div>
