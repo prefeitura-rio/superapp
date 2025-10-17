@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { ExternalPartnerCourseDrawer } from '../drawer-contents/external-partner-course-drawer'
+import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
 
 interface CourseDetailsProps {
   course: Course
@@ -115,12 +116,20 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
         />
       </div>
       {course.cover_image && (
-        <Image
-          src={course.cover_image}
-          alt={course.title || ''}
-          fill
-          className="object-cover"
-        />
+        <>
+          <Image
+            src={course.cover_image}
+            alt={course.title || ''}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute top-6 right-2 flex flex-col gap-1">
+            {course.accessibility && (
+              <AccessibilityBadge accessibility={course.accessibility} />
+            )}
+            {course.is_external_partner && <IsExternalPartnerBadge />}
+          </div>
+        </>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
         {course.theme && (

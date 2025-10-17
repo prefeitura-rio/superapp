@@ -1,7 +1,9 @@
 'use client'
 
+import type { AccessibilityProps } from '@/types/course'
 import Image from 'next/image'
 import Link from 'next/link'
+import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
 
 interface CourseCardProps {
   courseId?: number
@@ -10,6 +12,8 @@ interface CourseCardProps {
   workload?: string
   provider?: string
   institutionaLogo?: string
+  accessibility?: AccessibilityProps
+  isExternalPartner?: boolean
   coverImage?: string
 }
 
@@ -20,6 +24,8 @@ export function CourseCard({
   workload,
   provider,
   institutionaLogo,
+  accessibility,
+  isExternalPartner,
   coverImage,
 }: CourseCardProps) {
   return (
@@ -29,12 +35,20 @@ export function CourseCard({
     >
       <div className="relative w-full h-[120px] overflow-hidden rounded-xl">
         {coverImage && (
-          <Image
-            src={coverImage}
-            alt="Imagem de capa do curso"
-            fill
-            className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-          />
+          <>
+            <Image
+              src={coverImage}
+              alt="Imagem de capa do curso"
+              fill
+              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
+            <div className="absolute bottom-2 left-2 flex flex-col gap-1">
+              {accessibility && (
+                <AccessibilityBadge accessibility={accessibility} />
+              )}
+              {isExternalPartner && <IsExternalPartnerBadge />}
+            </div>
+          </>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
