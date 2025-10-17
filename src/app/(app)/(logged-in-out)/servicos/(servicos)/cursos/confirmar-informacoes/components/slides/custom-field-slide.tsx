@@ -141,7 +141,7 @@ export function CustomFieldSlide({
         </h2>
       </div>
 
-      <div className="space-y-4 max-h-[400px] overflow-y-scroll">
+      <div className="space-y-4 max-h-[400px] overflow-y-scroll scrollbar-hide">
         {field.field_type === 'text' && renderTextField()}
         {field.field_type === 'radio' && renderRadioField()}
         {field.field_type === 'select' && renderSelectField()}
