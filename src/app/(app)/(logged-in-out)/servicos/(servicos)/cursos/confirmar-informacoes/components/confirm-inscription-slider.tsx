@@ -92,7 +92,7 @@ export const ConfirmInscriptionSlider = forwardRef<
           onSlideChange={swiper => onSlideChange(swiper.activeIndex)}
           pagination={showPagination ? { clickable: true } : false}
           modules={showPagination ? [Pagination] : []}
-          className="relative h-full course__confirm-user-info__slider"
+          className="relative h-[500px] course__confirm-user-info__slider"
           allowTouchMove={true}
         >
           {slides.map((slide, idx) => {

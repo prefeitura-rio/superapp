@@ -29,7 +29,7 @@ export function CustomFieldSlide({
   const watchedValue = watch(fieldName)
 
   const renderTextField = () => (
-    <div className="space-y-2">
+    <div className="space-y-2 overflow-y-auto">
       <Textarea
         {...register(fieldName)}
         placeholder="Escreva aqui ..."
@@ -135,13 +135,13 @@ export function CustomFieldSlide({
 
   return (
     <div className="w-full space-y-5">
-      <div className="text-left">
+      <div className="text-left pb-2">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           {field.title}
         </h2>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[400px] overflow-y-scroll scrollbar-hide">
         {field.field_type === 'text' && renderTextField()}
         {field.field_type === 'radio' && renderRadioField()}
         {field.field_type === 'select' && renderSelectField()}
