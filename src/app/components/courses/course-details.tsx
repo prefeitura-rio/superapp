@@ -10,6 +10,7 @@ import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
+import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
 import Image from 'next/image'
@@ -26,15 +27,6 @@ interface CourseDetailsProps {
 }
 
 // Utility functions
-const formatDate = (dateString: string | null): string | null => {
-  if (!dateString) return null
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('pt-BR').replace(/\//g, '.')
-  } catch {
-    return null
-  }
-}
 
 const getCourseScheduleInfo = (course: Course): CourseScheduleInfo => {
   const modality = course.modalidade?.toLowerCase()
@@ -150,15 +142,16 @@ interface CourseInfoProps {
 
 function CourseInfo({ course }: CourseInfoProps) {
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex p-4 gap-2">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
           {course.institutional_logo ? (
             <Image
               src={course.institutional_logo}
-              alt="provider"
-              width={25}
-              height={25}
+              alt="Logo da instituição"
+              className="w-full h-full object-cover rounded-full"
+              width={40}
+              height={40}
             />
           ) : (
             <span className="text-2.5 font-semibold text-foreground uppercase">
@@ -170,6 +163,29 @@ function CourseInfo({ course }: CourseInfoProps) {
           {course.organization || 'Instituição não informada'}
         </p>
       </div>
+
+      {course.is_external_partner && (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
+            {course.external_partner_logo_url ? (
+              <Image
+                src={course.external_partner_logo_url}
+                alt="Logo do parceiro"
+                className="w-full h-full object-cover rounded-full"
+                width={40}
+                height={40}
+              />
+            ) : (
+              <span className="text-2.5 font-semibold text-foreground uppercase">
+                {course.external_partner_name?.charAt(0)}
+              </span>
+            )}
+          </div>
+          <p className="text-xs md:text-sm">
+            {course.external_partner_name || 'Parceiro não informado'}
+          </p>
+        </div>
+      )}
     </div>
   )
 }
@@ -194,9 +210,7 @@ function CourseMetadata({ course }: CourseMetadataProps) {
           <div>
             <p className="text-muted-foreground">Inscrições até</p>
             <p className="font-medium">
-              {new Date(course.enrollment_end_date)
-                .toLocaleDateString('pt-BR')
-                .replace(/\//g, '.')}
+              {formatDate(course.enrollment_end_date)}
             </p>
           </div>
         )}
@@ -214,7 +228,7 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
     <div className="flex flex-col items-start px-4 gap-2">
       <InfoRow label="Data início" value={formatDate(scheduleInfo.startDate)} />
       <InfoRow label="Data final" value={formatDate(scheduleInfo.endDate)} />
-      <InfoRow label="Horário" value={scheduleInfo.time} />
+      <InfoRow label="Horário" value={formatTimeRange(scheduleInfo.time!)} />
       <InfoRow label="Dias de aula" value={scheduleInfo.days} />
       <InfoRow label="Vagas" value={scheduleInfo.vacancies} />
       {scheduleInfo.address && (
