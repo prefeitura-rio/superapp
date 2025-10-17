@@ -100,6 +100,15 @@ html::-webkit-scrollbar {
   height: 19px;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* .grecaptcha-badge { visibility: hidden; } */
 
 @keyframes shine-reverse {
@@ -275,7 +284,7 @@ select:-webkit-autofill:focus {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
-  --card-gov: #EBECF0;
+  --card-gov: #ebecf0;
 
   --wallet-1: #6993c2;
   --wallet-1b: #4a7cb5;
@@ -353,7 +362,7 @@ select:-webkit-autofill:focus {
   --card-3: #009966;
   --card-4: #ff2056;
   --card-5: #e17100;
-  --card-gov: #18181B;
+  --card-gov: #18181b;
 
   --wallet-1: #6993c2;
   --wallet-1b: #4a7cb5;
