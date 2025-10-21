@@ -1,6 +1,6 @@
 import { MyCertificatesCard } from '@/app/components/courses/certified-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { buildAuthUrl } from '@/constants/url'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
@@ -9,7 +9,7 @@ export default async function CoursesCertifiedPage() {
   const userInfo = await getUserInfoFromToken()
 
   if (!userInfo.cpf) {
-    return redirect(`${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`)
+    return redirect(buildAuthUrl('/servicos/cursos/certificados'))
   }
 
   try {
@@ -35,9 +35,10 @@ export default async function CoursesCertifiedPage() {
 
     // Filter enrollments that are concluded and have certificate available
     const certificatesWithEnrollments = enrollments
-      .filter((enrollment: any) => 
-        enrollment.status === 'concluded' && 
-        enrollment.curso.has_certificate === true
+      .filter(
+        (enrollment: any) =>
+          enrollment.status === 'concluded' &&
+          enrollment.curso.has_certificate === true
       )
       .map((enrollment: any) => ({
         ...enrollment.curso,
@@ -47,9 +48,10 @@ export default async function CoursesCertifiedPage() {
         imageUrl: enrollment.curso?.cover_image,
         institutionalLogo: enrollment.curso?.institutional_logo,
         provider: enrollment.curso?.organization,
-        status: enrollment.certificate_url && enrollment.certificate_url.trim() !== '' 
-          ? 'certificate_available' 
-          : 'certificate_pending',
+        status:
+          enrollment.certificate_url && enrollment.certificate_url.trim() !== ''
+            ? 'certificate_available'
+            : 'certificate_pending',
         enrollmentId: enrollment.id,
         enrolledAt: enrollment.enrolled_at,
         updatedAt: enrollment.updated_at,
@@ -63,7 +65,7 @@ export default async function CoursesCertifiedPage() {
     return (
       <div className="max-w-4xl mx-auto py-6">
         <SecondaryHeader title="Certificados" />
-        
+
         {certificatesWithEnrollments.length === 0 ? (
           <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
             <p className="block text-lg text-muted-foreground text-center">

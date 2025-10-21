@@ -1,4 +1,5 @@
 import { extractCourseId } from '@/actions/courses/utils-mock'
+import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
@@ -9,7 +10,7 @@ import type {
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { ConfirmInscriptionClient } from '../components/confirm-inscription-client'
 
 interface PageProps {
@@ -23,7 +24,9 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
-    notFound()
+    // Redirect to auth with return URL to come back here after login
+    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
+    redirect(buildAuthUrl(returnUrl))
   }
 
   const [userInfoResponse, courseInfoResponse] = await Promise.all([
