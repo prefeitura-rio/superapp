@@ -1,6 +1,6 @@
 import { MyCoursesCard } from '@/app/components/courses/my-course-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { buildAuthUrl } from '@/constants/url'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
@@ -9,7 +9,7 @@ export default async function MyCoursesPage() {
   const userInfo = await getUserInfoFromToken()
 
   if (!userInfo.cpf) {
-    return redirect(`${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`)
+    return redirect(buildAuthUrl('/servicos/cursos/meus-cursos'))
   }
 
   try {

@@ -1,5 +1,5 @@
 import { extractCourseId } from '@/actions/courses/utils-mock'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
+import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
@@ -24,7 +24,9 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
-    redirect(REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE)
+    // Redirect to auth with return URL to come back here after login
+    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
+    redirect(buildAuthUrl(returnUrl))
   }
 
   const [userInfoResponse, courseInfoResponse] = await Promise.all([
