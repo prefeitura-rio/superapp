@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 import { ServicesIcon, WalletIcon } from '@/assets/icons'
 import { Home2Icon } from '@/assets/icons/home2-icon'
 import { usePathname } from 'next/navigation'
-import * as React from 'react'
 import { NavigationLink } from './navigation-link'
 
 interface NavItem {
@@ -22,8 +21,6 @@ export function FloatNavigationClient({
   walletUrl,
 }: FloatNavigationClientProps) {
   const pathname = usePathname()
-
-  const [open, setOpen] = React.useState(false)
 
   // Create navigation items with the correct wallet URL
   const navItems: NavItem[] = [
