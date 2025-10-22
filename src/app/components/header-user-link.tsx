@@ -1,7 +1,6 @@
 'use client'
 
 import { UserIcon } from '@/assets/icons'
-import { REDIRECT_DIRECT_TO_GOVBR_ROUTE } from '@/constants/url'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -33,7 +32,7 @@ export default function HeaderUserLink({
 
   return (
     <Link
-      href={isLoggedIn ? '/meu-perfil' : REDIRECT_DIRECT_TO_GOVBR_ROUTE}
+      href="/meu-perfil"
       className="flex items-center space-x-3"
       onClick={handleClick}
     >

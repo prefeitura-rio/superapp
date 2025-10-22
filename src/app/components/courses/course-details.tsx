@@ -8,7 +8,6 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
@@ -320,9 +319,7 @@ export function CourseDetails({
   )
   const scheduleInfo = getCourseScheduleInfo(course)
 
-  const courseSubscriptionHref = userInfo.cpf
-    ? `/servicos/cursos/confirmar-informacoes/${course.id}`
-    : `${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`
+  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
 
   const handleCancelEnrollment = async () => {
     if (!userEnrollment || isDeleting) return

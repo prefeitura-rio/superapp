@@ -6,6 +6,8 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const code = searchParams.get('code')
+    const state = searchParams.get('state') // Contains the return URL
+
     if (!code) return NextResponse.redirect('/')
 
     const tokenUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/token`
@@ -26,12 +28,29 @@ export async function GET(req: NextRequest) {
     if (!response.ok) return NextResponse.redirect('/')
 
     const data = await response.json()
+
+    // Determine redirect destination
     const redirectUri = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI!
     const baseRedirect = redirectUri.replace(
       /\/api\/auth\/callback\/keycloak$/,
       ''
     )
-    const res = NextResponse.redirect(baseRedirect)
+
+    // Use return URL from state if available, otherwise go to home
+    let finalRedirectUrl = baseRedirect
+    if (state) {
+      try {
+        const decodedState = decodeURIComponent(state)
+        // Validate it's a relative URL to prevent open redirect
+        if (decodedState.startsWith('/') && !decodedState.startsWith('//')) {
+          finalRedirectUrl = `${baseRedirect}${decodedState}`
+        }
+      } catch {
+        // If decode fails, just use base redirect
+      }
+    }
+
+    const res = NextResponse.redirect(finalRedirectUrl)
     res.cookies.set('access_token', data.access_token, {
       httpOnly: true,
       path: '/',
