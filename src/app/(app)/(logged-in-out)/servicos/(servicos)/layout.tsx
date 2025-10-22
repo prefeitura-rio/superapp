@@ -1,5 +1,3 @@
-import { FloatNavigation } from '../../../../components/float-navigation'
-
 export default function ServicosLayout({
   children,
 }: Readonly<{
@@ -7,10 +5,7 @@ export default function ServicosLayout({
 }>) {
   return (
     <div>
-      <main>
-        {children}
-        <FloatNavigation />
-      </main>
+      <main>{children}</main>
     </div>
   )
 }

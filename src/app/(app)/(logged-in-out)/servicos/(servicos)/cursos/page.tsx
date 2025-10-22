@@ -1,4 +1,5 @@
 import CoursePageClient from '@/app/components/courses/courses-client'
+import { FloatNavigation } from '@/app/components/float-navigation'
 import { getApiV1Courses } from '@/http-courses/courses/courses'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import type { ModelsCurso } from '@/http-courses/models'
@@ -77,11 +78,14 @@ export default async function CoursesPage() {
     }
 
     return (
-      <CoursePageClient
-        courses={visibleCourses}
-        myCourses={myCourses}
-        userInfo={userInfo}
-      />
+      <>
+        <CoursePageClient
+          courses={visibleCourses}
+          myCourses={myCourses}
+          userInfo={userInfo}
+        />
+        <FloatNavigation />
+      </>
     )
   } catch (error) {
     console.error('Error fetching courses:', error)
