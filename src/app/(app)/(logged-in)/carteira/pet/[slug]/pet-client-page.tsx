@@ -1,5 +1,4 @@
 import { MicroshippingStatusCard } from '@/app/(app)/(logged-in)/carteira/pet/components/microchipping-status-card'
-import { PetQRCode } from '@/app/(app)/(logged-in)/carteira/pet/components/pet-qrcode'
 import { TutorInfo } from '@/app/(app)/(logged-in)/carteira/pet/components/tutor-info'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
@@ -134,12 +133,6 @@ export function PetClientPage({
           email={tutorInfoObj?.email!}
         />
       </div>
-
-      {petHasMicrochip && (
-        <div className="px-4">
-          <PetQRCode clinicName={petClinicName} />
-        </div>
-      )}
     </div>
   )
 }
