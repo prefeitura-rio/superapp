@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
+  ModelsPet,
 } from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
@@ -25,6 +26,7 @@ import { useEffect, useState } from 'react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
+import { PetCard } from './wallet-cards/pet-wallet'
 import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
 
 interface CartereiraSectionProps {
@@ -43,6 +45,7 @@ interface CartereiraSectionProps {
     email?: string
     risco?: RiskStatusProps
   }
+  pets: ModelsPet[]
 }
 
 export function CarteiraSectionSkeleton() {
@@ -70,6 +73,7 @@ export default function CarteiraSection({
   walletData,
   maintenanceRequests,
   healthCardData,
+  pets,
 }: CartereiraSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   // Calculate maintenance requests statistics
@@ -238,6 +242,18 @@ export default function CarteiraSection({
                 />
               </div>
             )}
+
+            {/* Pets cards */}
+            {pets.map(pet => (
+              <PetCard
+                key={pet.id_animal}
+                petData={{ ...pet }}
+                enableFlip={false}
+                asLink
+                showInitialShine
+                href={`/carteira/pet/${pet.id_animal}`}
+              />
+            ))}
           </div>
         </div>
       ) : (
