@@ -28,7 +28,7 @@ export default async function CoursePage({
     const course = response.data.data
 
     // Check if course should be visible using the new logic
-    if (!shouldShowCourse(course)) {
+    if (!shouldShowCourse({ course, renderByUrl: true })) {
       notFound()
     }
 
