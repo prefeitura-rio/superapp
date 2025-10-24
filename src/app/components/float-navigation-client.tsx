@@ -25,7 +25,7 @@ export function FloatNavigationClient({
   // Create navigation items with the correct wallet URL
   const navItems: NavItem[] = [
     { href: '/', icon: Home2Icon, label: 'Home' },
-    { href: '/servicos', icon: ServicesIcon, label: 'Servicos' },
+    { href: '/servicos', icon: ServicesIcon, label: 'Serviços' },
     { href: walletUrl, icon: WalletIcon, label: 'Carteira' },
   ]
 
@@ -60,8 +60,8 @@ export function FloatNavigationClient({
                   </div>
                   <p
                     className={cn(
-                      'text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 text-primary',
-                      isActive ? 'opacity-100' : 'opacity-0'
+                      'text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 opcity-100',
+                      isActive ? 'text-primary' : 'text-foreground-light/80'
                     )}
                   >
                     {item.label}
