@@ -1,7 +1,7 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 // import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
 import govbrLogo from '@/assets/govbr.svg'
-import { REDIRECT_DIRECT_TO_GOVBR_ROUTE } from '@/constants/url'
+import { buildAuthUrl } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -9,6 +9,8 @@ const authReqWalletCardsPng =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/carteira/carteira-deslogada.png'
 
 export default async function WalletAuthenticationRequired() {
+  // Build auth URL that will redirect back to /carteira after login
+  const authUrlWithReturn = buildAuthUrl('/carteira')
   return (
     <>
       <main className="flex max-w-xl mx-auto min-h-lvh flex-col bg-background text-foreground pb-32">
@@ -53,7 +55,7 @@ export default async function WalletAuthenticationRequired() {
             {/* Gov.br Button - Figma Specs */}
             <div className="flex justify-center pb-2">
               <Link
-                href={REDIRECT_DIRECT_TO_GOVBR_ROUTE}
+                href={authUrlWithReturn}
                 className="flex w-[216px] h-[55px] px-6 py-4 justify-center items-center gap-3 rounded-2xl bg-card-gov transition-colors"
               >
                 <Image
@@ -69,7 +71,7 @@ export default async function WalletAuthenticationRequired() {
             {/* Create Account Link */}
             <div className="text-center">
               <Link
-                href={REDIRECT_DIRECT_TO_GOVBR_ROUTE}
+                href={authUrlWithReturn}
                 className="text-sm text-foreground-light font-normal"
               >
                 Crie uma conta

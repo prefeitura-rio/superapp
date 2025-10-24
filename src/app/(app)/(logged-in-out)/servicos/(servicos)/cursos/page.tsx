@@ -24,7 +24,10 @@ export default async function CoursesPage() {
 
   try {
     // Fetch all courses
-    const response = await getApiV1Courses()
+    const response = await getApiV1Courses({
+      page: 1,
+      limit: 100,
+    })
     const data = response.data as CoursesApiResponse
 
     // Extract courses array from the API response

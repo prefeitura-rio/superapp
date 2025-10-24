@@ -3,8 +3,8 @@ import {
   type NextRequest,
   NextResponse,
 } from 'next/server'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from './constants/url'
-import { isJwtExpired, handleExpiredToken } from './lib'
+import { buildAuthUrl } from './constants/url'
+import { handleExpiredToken, isJwtExpired } from './lib'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -182,8 +182,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!authToken && !publicRoute) {
+    // Capture the original URL (pathname + search params) for post-login redirect
+    const returnUrl = `${path}${request.nextUrl.search}`
+    const authUrlWithReturn = buildAuthUrl(returnUrl)
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.href = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
+    redirectUrl.href = authUrlWithReturn
     const response = NextResponse.redirect(redirectUrl)
     response.headers.set(
       'Content-Security-Policy',

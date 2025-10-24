@@ -8,7 +8,6 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
-import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
@@ -237,7 +236,7 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
     <div className="flex flex-col items-start px-4 gap-2">
       <InfoRow label="Data início" value={formatDate(scheduleInfo.startDate)} />
       <InfoRow label="Data final" value={formatDate(scheduleInfo.endDate)} />
-      <InfoRow label="Horário" value={formatTimeRange(scheduleInfo.time!)} />
+      <InfoRow label="Horário" value={formatTimeRange(scheduleInfo.time)} />
       <InfoRow label="Dias de aula" value={scheduleInfo.days} />
       <InfoRow label="Vagas" value={scheduleInfo.vacancies} />
       {scheduleInfo.address && (
@@ -320,9 +319,7 @@ export function CourseDetails({
   )
   const scheduleInfo = getCourseScheduleInfo(course)
 
-  const courseSubscriptionHref = userInfo.cpf
-    ? `/servicos/cursos/confirmar-informacoes/${course.id}`
-    : `${REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE}`
+  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
 
   const handleCancelEnrollment = async () => {
     if (!userEnrollment || isDeleting) return

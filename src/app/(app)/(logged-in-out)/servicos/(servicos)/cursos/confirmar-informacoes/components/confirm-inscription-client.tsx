@@ -361,7 +361,7 @@ export function ConfirmInscriptionClient({
         </CustomButton>
       </div>
 
-      <div className="flex-1 flex flex-col mt-8">
+      <div className="my-8 flex flex-col">
         {!showSuccess && (
           <div
             className={`transition-opacity duration-600 ${
