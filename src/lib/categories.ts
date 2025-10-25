@@ -1,5 +1,9 @@
 import serviceIcon from '@/constants/bucket'
-import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
+import {
+  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
+  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
+  NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION,
+} from '@/constants/venvs'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
 
@@ -69,7 +73,7 @@ export async function fetchCategories(): Promise<Category[]> {
   const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
   try {
     const response = await fetch(
-      `${rootUrl}api/v1/categorias-relevancia?collections=${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION}`,
+      `${rootUrl}api/v1/categorias-relevancia?collections=${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION},${NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION}`,
       {
         cache: 'force-cache',
         next: { revalidate: 86400 }, // Cache for 1 day

@@ -52,6 +52,7 @@ jobs:
             --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="https://services.staging.app.dados.rio/go" \
             --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746_v2_llm \
             --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital_v2_llm \
+            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
@@ -76,6 +77,7 @@ jobs:
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746 \
             --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital \
+            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
             --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="https://services.pref.rio/go" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-6FY8VVMJ5T" \
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-WTQV6K6W" \
