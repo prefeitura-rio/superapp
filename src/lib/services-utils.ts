@@ -1,4 +1,7 @@
-import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
+import {
+  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
+  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
+} from '@/constants/venvs'
 import type { Service1746 } from '@/types/1746'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
 import type { ServicesApiResponse } from '@/types/service'
@@ -29,9 +32,9 @@ export async function fetchServicesByCategory(
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 86400 }, // Revalidate every 1 day
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
     })
-console.log(url)
+    console.log(url)
     if (!response.ok) {
       throw new Error(`Failed to fetch services: ${response.status}`)
     }
@@ -52,7 +55,7 @@ export async function fetchServiceById(
 
     const response = await fetch(url, {
       cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
     })
 
     if (!response.ok) {
