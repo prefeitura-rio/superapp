@@ -1,5 +1,7 @@
-import { convertUrlsToLinks } from '@/lib/url-utils'
+import { Button } from '@/components/ui/button'
+import { convertUrlsToLinks, ensureUrlProtocol } from '@/lib/url-utils'
 import type { ServiceFromPortalInterno } from '@/types/portal-interno'
+import Link from 'next/link'
 import { CollapsibleText } from './collapsible-text'
 
 interface PortalInternoServiceProps {
@@ -20,6 +22,23 @@ export function PortalInternoServiceComponent({
       <p className="text-sm text-foreground-light leading-5 mb-6 max-w-4xl">
         {serviceData.resumo}
       </p>
+
+      {serviceData?.service_url && (
+        <Button
+          asChild
+          variant="default"
+          size="lg"
+          className="mb-6 rounded-full text-background"
+        >
+          <Link
+            href={ensureUrlProtocol(serviceData.service_url)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Acessar serviço
+          </Link>
+        </Button>
+      )}
 
       {/* Divider */}
       <div className="border-b border-border mb-6" />
