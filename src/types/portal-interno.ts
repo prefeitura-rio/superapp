@@ -25,4 +25,5 @@ export interface ServiceFromPortalInterno {
   status?: number // 0=Draft, 1=Published
   tema_geral: string
   tempo_atendimento: string
+  service_url?: string
 }
