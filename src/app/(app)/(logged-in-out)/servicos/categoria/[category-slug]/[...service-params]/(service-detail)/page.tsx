@@ -1,11 +1,16 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
+import {
+  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
+  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
+} from '@/constants/venvs'
 import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import type { Service1746 } from '@/types/1746'
 import type { CariocaDigitalService } from '@/types/carioca-digital'
+import type { ServiceFromPortalInterno } from '@/types/portal-interno'
 import { notFound } from 'next/navigation'
 import { Service1746Component } from './components/1746-service'
 import { CariocaDigitalServiceComponent } from './components/carioca-digital-service'
+import { PortalInternoServiceComponent } from './components/portal-interno-service'
 
 export default async function ServicePage({
   params,
@@ -20,7 +25,8 @@ export default async function ServicePage({
 
   if (
     !serviceId ||
-    (collection !== NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION && collection !== NEXT_PUBLIC_BUSCA_1746_COLLECTION)
+    (collection !== NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION &&
+      collection !== NEXT_PUBLIC_BUSCA_1746_COLLECTION)
   ) {
     notFound()
   }
@@ -40,17 +46,20 @@ export default async function ServicePage({
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pt-20 md:pt-22 pb-20">
-          {collection === NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION && (
+          {/* Check if it's a service from portal interno by looking for nome_servico field */}
+          {'nome_servico' in serviceData ? (
+            <PortalInternoServiceComponent
+              serviceData={serviceData as unknown as ServiceFromPortalInterno}
+            />
+          ) : collection === NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION ? (
             <CariocaDigitalServiceComponent
               serviceData={serviceData as unknown as CariocaDigitalService}
             />
-          )}
-
-          {collection === NEXT_PUBLIC_BUSCA_1746_COLLECTION && (
+          ) : collection === NEXT_PUBLIC_BUSCA_1746_COLLECTION ? (
             <Service1746Component
               serviceData={serviceData as unknown as Service1746}
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>

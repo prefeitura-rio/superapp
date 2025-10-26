@@ -74,7 +74,7 @@ export default function EmailForm() {
           setDrawerOpen(true)
         } else {
           // Handle specific error statuses
-          if (result.status === 409) {
+          if ((result.status as number) === 409) {
             toast.error('Email já cadastrado')
           } else {
             // For other API errors, redirect to session expired
