@@ -1,4 +1,8 @@
-import { NEXT_PUBLIC_BUSCA_1746_COLLECTION, NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION } from '@/constants/venvs'
+import {
+  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
+  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
+  NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION,
+} from '@/constants/venvs'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -16,7 +20,7 @@ export async function GET(request: Request) {
   try {
     // Use fetch with explicit caching
     const response = await fetch(
-      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION}&page=1&per_page=20`,
+      `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION},${NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION}&page=1&per_page=20`,
       {
         // Cache the response for 1 hour
         next: {
