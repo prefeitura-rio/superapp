@@ -1,7 +1,8 @@
 'use client'
 
-import CicloCariocaIcon from '@/assets/ciclocarioca-icon.png'
+import { HomeIcon } from '@/assets/icons'
 import { MenuIcon } from '@/assets/icons/menu-icon'
+import OportunidadesCariocas from '@/assets/oportunidades-cariocas-icon.png'
 import type { UserInfo } from '@/lib/user-info'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,8 +13,8 @@ export default function CoursesHeader({ userInfo }: { userInfo: UserInfo }) {
       <div className="mx-auto md:px-4 flex max-w-4xl items-center justify-between">
         <div className="flex justify-center">
           <Image
-            src={CicloCariocaIcon}
-            alt="Ciclo Carioca Logo"
+            src={OportunidadesCariocas}
+            alt="Oportunidades Cariocas Logo"
             width={170}
             height={38}
             className="rounded-full"
