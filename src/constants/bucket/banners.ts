@@ -11,4 +11,4 @@ export const atualizarCadastroIcon =
 export const cursosBannerIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/ciclo-3d.png'
 export const cicloCariocaIcon =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas.png'
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/ciclo-logo.png'
