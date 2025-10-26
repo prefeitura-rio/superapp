@@ -3,9 +3,9 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 export default function FaqPageCourses() {
   const sections = [
     {
-      title: 'O que é a Plataforma Oportunidas Cariocas?',
+      title: 'O que é a Plataforma Ciclo Carioca?',
       content:
-        'O Oportunidas Cariocas é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos oferecidos pela Prefeitura do Rio e instituições parceiras. ',
+        'O Ciclo Carioca é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos oferecidos pela Prefeitura do Rio e instituições parceiras. ',
     },
     {
       title: 'Quem pode se inscrever?',
@@ -30,18 +30,18 @@ export default function FaqPageCourses() {
     {
       title: 'Como faço para cancelar minha inscrição?',
       content:
-        'Para cancelar sua inscrição, basta ir até a página do curso desejado no Oportunidas Cariocas e clicar em “Cancelar inscrição”. ',
+        'Para cancelar sua inscrição, basta ir até a página do curso desejado no Ciclo Carioca e clicar em “Cancelar inscrição”. ',
     },
     {
       title: 'Receberei certificado de conclusão do curso?',
       content:
-        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. \n\n Ele será disponibilizado aqui mesmo, na plataforma Oportunidas Cariocas, na aba “Certificados”.',
+        'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão, emitido pela instituição responsável. \n\n Ele será disponibilizado aqui mesmo, na plataforma Ciclo Carioca, na aba “Certificados”.',
     },
     {
       title:
         'O que é a conta Gov.br e por que preciso dela para me inscrever nos cursos?',
       content:
-        'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Oportunidas Cariocas, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
+        'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Ciclo Carioca, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
     },
     {
       title: 'Não tenho uma conta Gov.br. Como posso criar uma?',

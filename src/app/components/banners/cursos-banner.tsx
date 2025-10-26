@@ -27,7 +27,7 @@ export const CursosBanner = ({
         <Image
           src={cicloCariocaIcon}
           width={123}
-          className="-mt-1 w-auto h-auto brightness-0 invert"
+          className="-mt-1 w-auto h-auto"
           height={123}
           alt="Cursos"
         />
