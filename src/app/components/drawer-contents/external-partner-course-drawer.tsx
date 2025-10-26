@@ -32,8 +32,7 @@ export function ExternalPartnerCourseDrawer({
           </h2>
           <p className="text-muted-foreground text-sm font-normal leading-5 tracking-normal">
             Este curso é gerenciado por um de nossos parceiros externos. O
-            processo de inscrição e acompanhamento é feito fora do Oportunidades
-            Cariocas
+            processo de inscrição e acompanhamento é feito fora do Ciclocarioca
           </p>
         </div>
 
