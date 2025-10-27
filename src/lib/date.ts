@@ -19,7 +19,9 @@ export function isUpdatedWithin({
   return updatedDate >= limitDate
 }
 
-export function formatTimeRange(timeRange: string): string {
+export function formatTimeRange(timeRange: string | null): string {
+  if (!timeRange) return ''
+
   const times = timeRange.trim().split('-')
 
   if (times.length !== 2) {
