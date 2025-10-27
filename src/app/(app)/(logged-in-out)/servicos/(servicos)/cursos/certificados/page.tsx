@@ -59,6 +59,11 @@ export default async function CoursesCertifiedPage() {
         modalidade: enrollment.curso?.modalidade,
         workload: enrollment.curso?.workload,
         hasCertificate: enrollment.has_certificate,
+        // Dados necessários para geração do certificado
+        studentName: userInfo.name || 'Usuário',
+        courseDuration: enrollment.curso?.workload || 'Duração não informada',
+        issuingOrganization:
+          enrollment.curso?.organization || 'Organização não informada',
       }))
       .filter((course: any) => course.id)
 
