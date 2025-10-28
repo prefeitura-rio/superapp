@@ -5,13 +5,12 @@ import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollmen
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
 
-interface CoursesCertifiedPageProps {
-  searchParams: { courseId?: string }
-}
-
 export default async function CoursesCertifiedPage({
   searchParams,
-}: CoursesCertifiedPageProps) {
+}: {
+  searchParams: Promise<{ courseId?: string }>
+}) {
+  const resolvedSearchParams = await searchParams
   const userInfo = await getUserInfoFromToken()
 
   if (!userInfo.cpf) {
@@ -90,7 +89,7 @@ export default async function CoursesCertifiedPage({
           <div className="relative overflow-hidden mt-16 px-4">
             <MyCertificatesCard
               certificates={certificatesWithEnrollments}
-              autoOpenCourseId={searchParams.courseId}
+              autoOpenCourseId={resolvedSearchParams.courseId}
             />
           </div>
         )}
