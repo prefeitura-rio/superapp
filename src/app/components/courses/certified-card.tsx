@@ -3,8 +3,11 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { useState } from 'react'
-import { CoursesCertifiedDrawer, CoursesUnavailableDrawer } from '../drawer-contents/courses-certified-drawers'
+import { useEffect, useState } from 'react'
+import {
+  CoursesCertifiedDrawer,
+  CoursesUnavailableDrawer,
+} from '../drawer-contents/courses-certified-drawers'
 
 interface Certificate {
   id: number
@@ -14,23 +17,28 @@ interface Certificate {
   provider?: string
   status: string
   enrollmentId: string
+  certificateUrl?: string
   enrolledAt: string
   updatedAt: string
-  certificateUrl: string
   modalidade?: string
   workload?: string
   institutionalLogo?: string
   hasCertificate: boolean
+  // Dados necessários para geração do certificado
+  studentName: string
+  courseDuration: string
+  issuingOrganization: string
 }
 
 interface MyCertificatesCardProps {
   certificates: Certificate[]
+  autoOpenCourseId?: string
 }
 
 function getCertificateStatusColor(status: string) {
   switch (status.toLowerCase()) {
     case 'certificate_available':
-            return 'bg-card-3 text-background dark:text-white'
+      return 'bg-card-3 text-background dark:text-white'
     case 'certificate_pending':
       return 'bg-secondary text-foreground dark:text-white'
     default:
@@ -49,10 +57,30 @@ function getCertificateStatusText(status: string) {
   }
 }
 
-export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
+export function MyCertificatesCard({
+  certificates,
+  autoOpenCourseId,
+}: MyCertificatesCardProps) {
   const [openCertified, setOpenCertified] = useState(false)
   const [openUnavailable, setOpenUnavailable] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<Certificate | null>(null)
+
+  // Auto-open modal if courseId is provided
+  useEffect(() => {
+    if (autoOpenCourseId) {
+      const courseToOpen = certificates.find(
+        cert => cert.id.toString() === autoOpenCourseId
+      )
+      if (courseToOpen) {
+        setSelectedCourse(courseToOpen)
+        if (courseToOpen.status === 'certificate_available') {
+          setOpenCertified(true)
+        } else if (courseToOpen.status === 'certificate_pending') {
+          setOpenUnavailable(true)
+        }
+      }
+    }
+  }, [autoOpenCourseId, certificates])
 
   const handleCourseClick = (certificate: Certificate) => {
     if (certificate.status === 'certificate_available') {
@@ -65,13 +93,13 @@ export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {certificates.map((certificate) => (
+      {certificates.map(certificate => (
         <button
           type="button"
           key={certificate.id}
           onClick={() => handleCourseClick(certificate)}
           className={cn(
-            "flex items-center gap-4 rounded-lg p-3 bg-background  transition cursor-pointer group w-full text-left"
+            'flex items-center gap-4 rounded-lg p-3 bg-background  transition cursor-pointer group w-full text-left'
           )}
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl flex-shrink-0">
@@ -123,7 +151,11 @@ export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
         open={openCertified}
         onOpenChange={setOpenCertified}
         courseTitle={selectedCourse?.title || ''}
-        certificateUrl={selectedCourse?.certificateUrl || ''}
+        studentName={selectedCourse?.studentName || ''}
+        courseDuration={selectedCourse?.courseDuration || ''}
+        issuingOrganization={selectedCourse?.issuingOrganization || ''}
+        provider={selectedCourse?.provider || ''}
+        certificateUrl={selectedCourse?.certificateUrl}
       />
       <CoursesUnavailableDrawer
         open={openUnavailable}
@@ -132,4 +164,3 @@ export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
     </div>
   )
 }
-
