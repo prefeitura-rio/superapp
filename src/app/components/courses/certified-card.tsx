@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   CoursesCertifiedDrawer,
   CoursesUnavailableDrawer,
@@ -32,6 +32,7 @@ interface Certificate {
 
 interface MyCertificatesCardProps {
   certificates: Certificate[]
+  autoOpenCourseId?: string
 }
 
 function getCertificateStatusColor(status: string) {
@@ -56,10 +57,30 @@ function getCertificateStatusText(status: string) {
   }
 }
 
-export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
+export function MyCertificatesCard({
+  certificates,
+  autoOpenCourseId,
+}: MyCertificatesCardProps) {
   const [openCertified, setOpenCertified] = useState(false)
   const [openUnavailable, setOpenUnavailable] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<Certificate | null>(null)
+
+  // Auto-open modal if courseId is provided
+  useEffect(() => {
+    if (autoOpenCourseId) {
+      const courseToOpen = certificates.find(
+        cert => cert.id.toString() === autoOpenCourseId
+      )
+      if (courseToOpen) {
+        setSelectedCourse(courseToOpen)
+        if (courseToOpen.status === 'certificate_available') {
+          setOpenCertified(true)
+        } else if (courseToOpen.status === 'certificate_pending') {
+          setOpenUnavailable(true)
+        }
+      }
+    }
+  }, [autoOpenCourseId, certificates])
 
   const handleCourseClick = (certificate: Certificate) => {
     if (certificate.status === 'certificate_available') {

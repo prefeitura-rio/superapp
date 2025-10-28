@@ -357,7 +357,10 @@ export function CourseDetails({
     // Handle certificate available status
     if (enrollmentInfo.status === 'certificate_available') {
       return (
-        <Link href="/servicos/cursos/certificados" className={buttonClasses}>
+        <Link
+          href={`/servicos/cursos/certificados?courseId=${course.id}`}
+          className={buttonClasses}
+        >
           {enrollmentInfo.buttonText}
         </Link>
       )
