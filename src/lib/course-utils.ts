@@ -93,9 +93,13 @@ export function getCourseEnrollmentInfo(
   // Check if user has concluded the course
   if (userEnrollment?.status === 'concluded') {
     const latestClassEndDate = getLatestClassEndDate(course)
-    
+
     // If class has ended and user has certificate URL, show certificate available
-    if (latestClassEndDate && now > latestClassEndDate && userEnrollment.certificate_url) {
+    if (
+      latestClassEndDate &&
+      now > latestClassEndDate &&
+      userEnrollment.certificate_url
+    ) {
       return {
         status: 'certificate_available',
         buttonText: 'Acessar certificado',
@@ -104,7 +108,7 @@ export function getCourseEnrollmentInfo(
         certificateUrl: userEnrollment.certificate_url,
       }
     }
-    
+
     // If user has concluded but certificate is pending (has_certificate = true but no URL yet)
     if (course.has_certificate && !userEnrollment.certificate_url) {
       return {
@@ -113,6 +117,16 @@ export function getCourseEnrollmentInfo(
         isDisabled: true,
         canEnroll: false,
       }
+    }
+  }
+
+  // Check if user is approved and course has certificate (shows as pending until concluded)
+  if (userEnrollment?.status === 'approved' && course.has_certificate) {
+    return {
+      status: 'certificate_pending',
+      buttonText: 'Aguardando certificado',
+      isDisabled: true,
+      canEnroll: false,
     }
   }
 

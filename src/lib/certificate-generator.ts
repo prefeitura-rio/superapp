@@ -1,19 +1,32 @@
+import { getTemplateUrl } from '@/lib/certificate-template-mapping'
 import type {
   CertificateData,
   CertificateGenerationOptions,
 } from '@/types/certificate'
 import { PDFDocument, type PDFPage, StandardFonts, rgb } from 'pdf-lib'
 
-const TEMPLATE_URL = '/templates/certificate-template.pdf'
-
 /**
- * Carrega o template PDF
+ * Carrega o template PDF baseado na organização
+ *
+ * @param organization Nome da organização fornecedora do curso
+ * @returns Bytes do template PDF
  */
-async function loadTemplate(): Promise<Uint8Array> {
+async function loadTemplate(organization?: string): Promise<Uint8Array> {
   try {
-    const response = await fetch(TEMPLATE_URL)
+    const templateUrl = getTemplateUrl(organization || '')
+
+    // Se não encontrar template mapeado, lança erro
+    if (!templateUrl) {
+      throw new Error(
+        `Template não encontrado para organização: ${organization}`
+      )
+    }
+
+    const response = await fetch(templateUrl)
     if (!response.ok) {
-      throw new Error('Falha ao carregar o template do certificado')
+      throw new Error(
+        `Falha ao carregar o template do certificado: ${templateUrl}`
+      )
     }
     return new Uint8Array(await response.arrayBuffer())
   } catch (error) {
@@ -226,15 +239,19 @@ async function addTextToCertificate(
 }
 
 /**
- * Gera um certificado PDF baseado no template
+ * Gera um certificado PDF baseado no template da organização
+ *
+ * @param data Dados do certificado (incluindo organização para seleção do template)
+ * @param options Opções de geração
+ * @returns Bytes do PDF gerado
  */
 export async function generateCertificate(
   data: CertificateData,
   options: CertificateGenerationOptions = {}
 ): Promise<Uint8Array> {
   try {
-    // Carrega o template PDF
-    const templateBytes = await loadTemplate()
+    // Carrega o template PDF baseado na organização
+    const templateBytes = await loadTemplate(data.organization)
     const pdfDoc = await PDFDocument.load(templateBytes)
 
     // Obtém a primeira página do template

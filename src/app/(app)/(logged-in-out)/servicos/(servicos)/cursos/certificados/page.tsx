@@ -33,11 +33,12 @@ export default async function CoursesCertifiedPage() {
     // Extract enrollments array from the API response
     const enrollments = data?.data?.enrollments || []
 
-    // Filter enrollments that are concluded and have certificate available
+    // Filter enrollments that are concluded or approved and have certificate available
     const certificatesWithEnrollments = enrollments
       .filter(
         (enrollment: any) =>
-          enrollment.status === 'concluded' &&
+          (enrollment.status === 'concluded' ||
+            enrollment.status === 'approved') &&
           enrollment.curso.has_certificate === true
       )
       .map((enrollment: any) => ({
@@ -48,8 +49,10 @@ export default async function CoursesCertifiedPage() {
         imageUrl: enrollment.curso?.cover_image,
         institutionalLogo: enrollment.curso?.institutional_logo,
         provider: enrollment.curso?.organization,
+        // Só permite geração de certificado se status for 'concluded'
+        // Se 'approved', mostra como pendente até admin marcar como concluded
         status:
-          enrollment.certificate_url && enrollment.certificate_url.trim() !== ''
+          enrollment.status === 'concluded'
             ? 'certificate_available'
             : 'certificate_pending',
         enrollmentId: enrollment.id,
@@ -58,7 +61,7 @@ export default async function CoursesCertifiedPage() {
         certificateUrl: enrollment.certificate_url,
         modalidade: enrollment.curso?.modalidade,
         workload: enrollment.curso?.workload,
-        hasCertificate: enrollment.has_certificate,
+        hasCertificate: enrollment.curso?.has_certificate === true,
         // Dados necessários para geração do certificado
         studentName: userInfo.name || 'Usuário',
         courseDuration: enrollment.curso?.workload || 'Duração não informada',

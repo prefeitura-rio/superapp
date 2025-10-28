@@ -17,6 +17,7 @@ interface Certificate {
   provider?: string
   status: string
   enrollmentId: string
+  certificateUrl?: string
   enrolledAt: string
   updatedAt: string
   modalidade?: string
@@ -132,6 +133,8 @@ export function MyCertificatesCard({ certificates }: MyCertificatesCardProps) {
         studentName={selectedCourse?.studentName || ''}
         courseDuration={selectedCourse?.courseDuration || ''}
         issuingOrganization={selectedCourse?.issuingOrganization || ''}
+        provider={selectedCourse?.provider || ''}
+        certificateUrl={selectedCourse?.certificateUrl}
       />
       <CoursesUnavailableDrawer
         open={openUnavailable}
