@@ -23,7 +23,7 @@ export function PortalInternoServiceComponent({
         {serviceData.resumo}
       </p>
 
-      {serviceData?.service_url && (
+      {serviceData?.url_servico && (
         <Button
           asChild
           variant="default"
@@ -31,7 +31,7 @@ export function PortalInternoServiceComponent({
           className="mb-6 rounded-full text-background"
         >
           <Link
-            href={ensureUrlProtocol(serviceData.service_url)}
+            href={ensureUrlProtocol(serviceData.url_servico)}
             target="_blank"
             rel="noopener noreferrer"
           >
