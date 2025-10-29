@@ -1,6 +1,6 @@
 /**
  * Mapping between organization/provider names and their corresponding certificate templates
- * Each organization should have its own PDF template in public/templates/
+ * Each organization should have its own PDF template in src/lib/templates/
  */
 export type CertificateTemplate = 'juvrio' | 'planetario' | 'smac' | 'smpd'
 
@@ -67,12 +67,12 @@ export function getCertificateTemplate(
  * Constrói a URL do template baseado no nome da organização
  *
  * @param organization Nome da organização fornecedora do curso
- * @returns Caminho para o arquivo de template ou null se não encontrado
+ * @returns URL da rota API para o template ou null se não encontrado
  */
 export function getTemplateUrl(organization: string): string | null {
   const template = getCertificateTemplate(organization)
   if (!template) {
     return null
   }
-  return `/templates/${template}.pdf`
+  return `/api/templates/${template}`
 }
