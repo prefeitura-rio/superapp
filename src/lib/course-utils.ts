@@ -59,9 +59,21 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
  * Check if a course should be visible in the course list
  * Only shows courses with status "opened" and handles class end date logic
  */
-export function shouldShowCourse(course: ModelsCurso): boolean {
+export interface ShouldShowCourseProps {
+  course: ModelsCurso
+  renderByUrl?: boolean
+}
+export function shouldShowCourse({
+  course,
+  renderByUrl = false,
+}: ShouldShowCourseProps): boolean {
   // Only show courses with "opened" status
   if (course.status !== 'opened') {
+    return false
+  }
+
+  // Check visibility flag; if false and not rendering by URL, hide the course
+  if (course.is_visible === false && !renderByUrl) {
     return false
   }
 
@@ -166,5 +178,5 @@ export function getCourseEnrollmentInfo(
  * Filter courses to only show those that should be visible
  */
 export function filterVisibleCourses(courses: ModelsCurso[]): ModelsCurso[] {
-  return courses.filter(shouldShowCourse)
+  return courses.filter(course => shouldShowCourse({ course }))
 }
