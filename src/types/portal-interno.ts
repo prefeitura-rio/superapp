@@ -1,3 +1,11 @@
+export interface PortalInternoButton {
+  descricao: string
+  is_enabled: boolean
+  ordem: number
+  titulo: string
+  url_service: string
+}
+
 export interface ServiceFromPortalInterno {
   id?: string
   autor: string
@@ -26,4 +34,5 @@ export interface ServiceFromPortalInterno {
   tema_geral: string
   tempo_atendimento: string
   url_servico?: string
+  buttons?: PortalInternoButton[]
 }
