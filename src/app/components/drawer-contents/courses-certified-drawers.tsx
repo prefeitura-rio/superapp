@@ -2,13 +2,25 @@
 
 import { DownloadIcon, EyeIcon, PrinterIcon, ShareIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import {
+  formatDate,
+  generateAndDownload,
+  generateCertificate,
+} from '@/lib/certificate-generator'
+import type { CertificateData } from '@/types/certificate'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { CertificateMenuItem } from './certificate-menu-item'
 
 interface CoursesCertifiedDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   courseTitle: string
-  certificateUrl: string
+  studentName: string
+  courseDuration: string
+  issuingOrganization: string
+  provider: string
+  certificateUrl?: string // URL direta do certificado se disponível
 }
 
 interface CoursesUnavailableDrawerProps {
@@ -20,46 +32,190 @@ export function CoursesCertifiedDrawer({
   open,
   onOpenChange,
   courseTitle,
+  studentName,
+  courseDuration,
+  issuingOrganization,
+  provider,
   certificateUrl,
 }: CoursesCertifiedDrawerProps) {
-  const handleDownload = () => {
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  const getCertificateData = (): CertificateData => {
+    const data = {
+      studentName,
+      courseTitle,
+      courseDuration,
+      issuingOrganization,
+      issueDate: formatDate(new Date()),
+      organization: provider, // Passa o provider para selecionar o template correto
+    }
+
+    // Log para debug
+    console.log('Dados do certificado:', data)
+
+    return data
+  }
+
+  /**
+   * Versão interna do handleDownload que não exibe toast de erro
+   * Usada como fallback em outras funções
+   */
+  const handleDownloadInternal = async (): Promise<void> => {
+    if (isGenerating) return
+
+    // Se já existe uma URL de certificado, faz download direto
     if (certificateUrl) {
-      const link = document.createElement('a')
-      link.href = certificateUrl
-      link.download = `${courseTitle}-certificado.pdf`
-      link.target = '_blank'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      try {
+        const link = document.createElement('a')
+        link.href = certificateUrl
+        link.download = `${courseTitle}-certificado.pdf`
+        link.target = '_blank'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Erro ao baixar certificado:', error)
+      }
+      return
+    }
+
+    // Gera o certificado dinamicamente
+    setIsGenerating(true)
+    try {
+      const certificateData = getCertificateData()
+      await generateAndDownload(certificateData, {
+        fileName: `${courseTitle}-certificado.pdf`,
+        download: true,
+      })
+    } catch (error) {
+      console.error('Erro ao gerar certificado:', error)
+      // Não exibe toast aqui - usado como fallback
+      throw error
+    } finally {
+      setIsGenerating(false)
     }
   }
 
-  const handleView = () => {
+  /**
+   * Se o curso já possui uma URL de certificado, usa diretamente
+   * Caso contrário, gera o certificado dinamicamente
+   */
+  const handleDownload = async () => {
+    try {
+      await handleDownloadInternal()
+    } catch (error) {
+      // Exibe toast de erro apenas aqui
+      toast.error('Erro ao gerar certificado')
+    }
+  }
+
+  const handleView = async () => {
+    if (isGenerating) return
+
+    // Se já existe uma URL de certificado, abre diretamente
     if (certificateUrl) {
       window.open(certificateUrl, '_blank')
+      return
+    }
+
+    // Gera o certificado dinamicamente
+    setIsGenerating(true)
+    try {
+      const certificateData = getCertificateData()
+      const pdfBytes = await generateCertificate(certificateData)
+
+      // Cria um blob e abre em nova aba
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+
+      const newWindow = window.open(url, '_blank')
+      if (newWindow) {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(url)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao visualizar certificado:', error)
+      // Exibe toast de erro
+      toast.error('Erro ao gerar certificado')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
   const handleShare = async () => {
-    if (navigator.share && certificateUrl) {
+    if (isGenerating) return
+
+    // Se já existe uma URL de certificado, compartilha a URL diretamente
+    if (certificateUrl) {
       try {
+        if (navigator.share) {
+          await navigator.share({
+            title: `Certificado: ${courseTitle}`,
+            text: `Confira meu certificado de conclusão do curso: ${courseTitle}`,
+            url: certificateUrl,
+          })
+        } else {
+          // Fallback: copia URL para clipboard ou abre em nova aba
+          try {
+            await navigator.clipboard.writeText(certificateUrl)
+            toast.success(
+              'URL do certificado copiada para a área de transferência'
+            )
+          } catch (clipboardError) {
+            // Se não conseguir copiar, abre em nova aba
+            window.open(certificateUrl, '_blank')
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao compartilhar certificado:', error)
+        // Fallback: abre a URL em nova aba
+        window.open(certificateUrl, '_blank')
+      }
+      return
+    }
+
+    // Gera o certificado dinamicamente
+    setIsGenerating(true)
+    try {
+      const certificateData = getCertificateData()
+      const pdfBytes = await generateCertificate(certificateData)
+
+      // Cria um arquivo para compartilhar
+      const file = new File([pdfBytes], `${courseTitle}-certificado.pdf`, {
+        type: 'application/pdf',
+      })
+
+      if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: `Certificado: ${courseTitle}`,
           text: `Confira meu certificado de conclusão do curso: ${courseTitle}`,
-          url: certificateUrl,
+          files: [file],
         })
-      } catch (error) {
-        console.log('Erro ao compartilhar:', error)
-        // Fallback para copiar URL
-        navigator.clipboard.writeText(certificateUrl)
+      } else {
+        // Fallback: gera e faz download
+        await handleDownloadInternal()
       }
-    } else if (certificateUrl) {
-      // Fallback para copiar URL
-      navigator.clipboard.writeText(certificateUrl)
+    } catch (error) {
+      console.error('Erro ao compartilhar certificado:', error)
+      // Exibe toast de erro
+      toast.error('Erro ao gerar certificado')
+      // Fallback para download (sem mostrar outro toast)
+      try {
+        await handleDownloadInternal()
+      } catch (fallbackError) {
+        // Não exibe outro toast, apenas loga o erro
+        console.error('Erro no fallback de download:', fallbackError)
+      }
+    } finally {
+      setIsGenerating(false)
     }
   }
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    if (isGenerating) return
+
+    // Se já existe uma URL de certificado, abre para impressão
     if (certificateUrl) {
       const printWindow = window.open(certificateUrl, '_blank')
       if (printWindow) {
@@ -67,6 +223,32 @@ export function CoursesCertifiedDrawer({
           printWindow.print()
         }
       }
+      return
+    }
+
+    // Gera o certificado dinamicamente
+    setIsGenerating(true)
+    try {
+      const certificateData = getCertificateData()
+      const pdfBytes = await generateCertificate(certificateData)
+
+      // Cria um blob e abre para impressão
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+
+      const printWindow = window.open(url, '_blank')
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+          URL.revokeObjectURL(url)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao imprimir certificado:', error)
+      // Exibe toast de erro
+      toast.error('Erro ao gerar certificado')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -93,24 +275,28 @@ export function CoursesCertifiedDrawer({
         <div className="space-y-0">
           <CertificateMenuItem
             icon={<DownloadIcon className="h-5 w-5" />}
-            label="Baixar"
+            label={isGenerating ? 'Gerando...' : 'Baixar'}
             onClick={handleDownload}
+            disabled={isGenerating}
             isFirst
           />
           <CertificateMenuItem
             icon={<ShareIcon className="h-5 w-5" />}
-            label="Compartilhar"
+            label={isGenerating ? 'Gerando...' : 'Compartilhar'}
             onClick={handleShare}
+            disabled={isGenerating}
           />
           <CertificateMenuItem
             icon={<EyeIcon className="h-5 w-5" />}
-            label="Visualizar"
+            label={isGenerating ? 'Gerando...' : 'Visualizar'}
             onClick={handleView}
+            disabled={isGenerating}
           />
           <CertificateMenuItem
             icon={<PrinterIcon className="h-5 w-5" />}
-            label="Imprimir"
+            label={isGenerating ? 'Gerando...' : 'Imprimir'}
             onClick={handlePrint}
+            disabled={isGenerating}
             isLast
           />
         </div>
@@ -132,7 +318,7 @@ export function CoursesUnavailableDrawer({
     >
       <div className="text-left md:text-center py-4">
         <p className="text-sm text-popover-foreground leading-5">
-          O certificado ainda não está disponível. 
+          O certificado ainda não está disponível.
         </p>
       </div>
     </BottomSheet>

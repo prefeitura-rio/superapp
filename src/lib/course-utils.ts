@@ -59,9 +59,21 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
  * Check if a course should be visible in the course list
  * Only shows courses with status "opened" and handles class end date logic
  */
-export function shouldShowCourse(course: ModelsCurso): boolean {
+export interface ShouldShowCourseProps {
+  course: ModelsCurso
+  renderByUrl?: boolean
+}
+export function shouldShowCourse({
+  course,
+  renderByUrl = false,
+}: ShouldShowCourseProps): boolean {
   // Only show courses with "opened" status
   if (course.status !== 'opened') {
+    return false
+  }
+
+  // Check visibility flag; if false and not rendering by URL, hide the course
+  if (course.is_visible === false && !renderByUrl) {
     return false
   }
 
@@ -93,26 +105,26 @@ export function getCourseEnrollmentInfo(
   // Check if user has concluded the course
   if (userEnrollment?.status === 'concluded') {
     const latestClassEndDate = getLatestClassEndDate(course)
-    
-    // If class has ended and user has certificate URL, show certificate available
-    if (latestClassEndDate && now > latestClassEndDate && userEnrollment.certificate_url) {
+
+    // If user has concluded and course has certificate, show certificate available
+    if (course.has_certificate) {
       return {
         status: 'certificate_available',
         buttonText: 'Acessar certificado',
         isDisabled: false,
         canEnroll: false,
-        certificateUrl: userEnrollment.certificate_url,
+        certificateUrl: userEnrollment.certificate_url, // Pode ser undefined
       }
     }
-    
-    // If user has concluded but certificate is pending (has_certificate = true but no URL yet)
-    if (course.has_certificate && !userEnrollment.certificate_url) {
-      return {
-        status: 'certificate_pending',
-        buttonText: 'Aguardando certificado',
-        isDisabled: true,
-        canEnroll: false,
-      }
+  }
+
+  // Check if user is approved and course has certificate (shows as pending until concluded)
+  if (userEnrollment?.status === 'approved' && course.has_certificate) {
+    return {
+      status: 'certificate_pending',
+      buttonText: 'Aguardando certificado',
+      isDisabled: true,
+      canEnroll: false,
     }
   }
 
@@ -166,5 +178,5 @@ export function getCourseEnrollmentInfo(
  * Filter courses to only show those that should be visible
  */
 export function filterVisibleCourses(courses: ModelsCurso[]): ModelsCurso[] {
-  return courses.filter(shouldShowCourse)
+  return courses.filter(course => shouldShowCourse({ course }))
 }
