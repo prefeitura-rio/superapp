@@ -17,6 +17,7 @@ import CarteiraSectionSwipe, {
 } from '@/app/components/wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
 import { fetchCategories } from '@/lib/categories'
 import {
   getDalCitizenCpf,
@@ -190,6 +191,16 @@ export default async function Home() {
   // Check if wallet section should be displayed
   const shouldShowWallet = isLoggedIn && walletInfo.hasData
 
+  //pets
+  const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
+
+  const pets =
+    petsResponse.status === 200 &&
+    'data' in petsResponse.data &&
+    Array.isArray(petsResponse.data.data)
+      ? petsResponse.data.data
+      : []
+
   return (
     <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
       <HeaderWrapper
@@ -224,6 +235,7 @@ export default async function Home() {
               walletData={walletData}
               maintenanceRequests={maintenanceRequests}
               healthCardData={healthCardData}
+              pets={pets}
             />
           }
           desktopComponent={
@@ -231,6 +243,7 @@ export default async function Home() {
               walletData={walletData}
               maintenanceRequests={maintenanceRequests}
               healthCardData={healthCardData}
+              pets={pets}
             />
           }
           desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}
