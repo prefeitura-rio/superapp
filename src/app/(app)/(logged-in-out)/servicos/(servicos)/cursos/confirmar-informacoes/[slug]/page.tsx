@@ -73,11 +73,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
       curso_id: location.curso_id,
       address: location.address,
       neighborhood: location.neighborhood,
-      vacancies: location.vacancies,
-      class_start_date: location.class_start_date,
-      class_end_date: location.class_end_date,
-      class_time: location.class_time,
-      class_days: location.class_days,
+      schedules: location.schedules || [],
       created_at: location.created_at,
       updated_at: location.updated_at,
     })) || []

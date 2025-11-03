@@ -26,7 +26,7 @@ export interface UserEnrollmentExtended {
 }
 
 /**
- * Get the latest class end date from either remote_class or locations
+ * Get the latest class end date from either remote_class or locations (with schedules)
  */
 function getLatestClassEndDate(course: ModelsCurso): Date | null {
   const endDates: Date[] = []
@@ -36,10 +36,19 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
     endDates.push(new Date((course.remote_class as any).class_end_date))
   }
 
-  // Check locations (in-person/semi-in-person courses)
+  // Check locations and their schedules (in-person/semi-in-person courses)
   if ((course.locations as any) && (course.locations as any).length > 0) {
     for (const location of course.locations as any) {
-      if ((location as any).class_end_date) {
+      // New structure: check schedules array
+      if ((location as any).schedules && Array.isArray((location as any).schedules)) {
+        for (const schedule of (location as any).schedules) {
+          if (schedule.class_end_date) {
+            endDates.push(new Date(schedule.class_end_date))
+          }
+        }
+      }
+      // Legacy structure: check location directly (for backward compatibility)
+      else if ((location as any).class_end_date) {
         endDates.push(new Date((location as any).class_end_date))
       }
     }

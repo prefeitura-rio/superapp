@@ -20,6 +20,7 @@ export type {
   Course,
   CourseScheduleInfo,
   CourseSearchPageProps,
+  Schedule,
   UserEnrollment,
 } from './course'
 export type { Job } from './job'

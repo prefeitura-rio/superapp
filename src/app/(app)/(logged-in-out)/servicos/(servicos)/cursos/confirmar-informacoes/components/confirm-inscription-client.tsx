@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { CustomFieldSlide } from './slides/custom-field-slide'
+import { SelectScheduleSlide } from './slides/select-schedule-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
 
@@ -86,10 +87,14 @@ export function ConfirmInscriptionClient({
   const customFields: CustomField[] =
     (courseInfo as any)?.data?.custom_fields || []
 
+  // Determine if we need to show unit/schedule selection
+  const hasMultipleUnits = nearbyUnits && nearbyUnits.length > 1
+
   const form = useForm<InscriptionFormData>({
     resolver: zodResolver(
       createInscriptionSchema(
-        nearbyUnits && nearbyUnits.length > 1, // Only require selection if more than 1 unit
+        hasMultipleUnits, // Only require selection if more than 1 unit
+        false, // Will be validated dynamically
         customFields
       )
     ),
@@ -101,6 +106,11 @@ export function ConfirmInscriptionClient({
           : nearbyUnits && nearbyUnits.length > 1
             ? ''
             : 'no-units-available',
+      // If there's only one schedule in the selected unit, automatically select it
+      scheduleId:
+        nearbyUnits && nearbyUnits.length === 1 && nearbyUnits[0].schedules.length === 1
+          ? nearbyUnits[0].schedules[0].id
+          : '',
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
@@ -111,6 +121,11 @@ export function ConfirmInscriptionClient({
       ),
     },
   })
+
+  // Get selected unit after form is initialized
+  const selectedUnitId = form.watch('unitId')
+  const selectedUnit = nearbyUnits?.find(unit => unit.id === selectedUnitId)
+  const hasMultipleSchedules = selectedUnit ? selectedUnit.schedules.length > 1 : false
 
   const slides = [
     {
@@ -133,6 +148,22 @@ export function ConfirmInscriptionClient({
                     nearbyUnits,
                     form,
                     fieldName: 'unitId',
+                  },
+                  showPagination: true,
+                  showBackButton: true,
+                },
+              ]
+            : []),
+          // Only show select-schedule slide if there are multiple schedules in the selected unit
+          ...(selectedUnit && selectedUnit.schedules.length > 1
+            ? [
+                {
+                  id: 'select-schedule',
+                  component: SelectScheduleSlide,
+                  props: {
+                    selectedUnit,
+                    form,
+                    fieldName: 'scheduleId',
                   },
                   showPagination: true,
                   showBackButton: true,
@@ -169,6 +200,15 @@ export function ConfirmInscriptionClient({
         nearbyUnits.length > 1
       ) {
         const isValid = await form.trigger('unitId')
+        if (!isValid) return
+      }
+
+      if (
+        currentSlide.id === 'select-schedule' &&
+        selectedUnit &&
+        selectedUnit.schedules.length > 1
+      ) {
+        const isValid = await form.trigger('scheduleId')
         if (!isValid) return
       }
 
@@ -256,6 +296,10 @@ export function ConfirmInscriptionClient({
       try {
         const formData = form.getValues()
 
+        // Get the selected schedule ID (if applicable)
+        const finalScheduleId = formData.scheduleId || 
+          (selectedUnit && selectedUnit.schedules.length === 1 ? selectedUnit.schedules[0].id : undefined)
+
         const result = await submitCourseInscription({
           courseId,
           userInfo: {
@@ -266,6 +310,7 @@ export function ConfirmInscriptionClient({
           },
           unitId:
             nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
+          scheduleId: finalScheduleId,
           enrolledUnit:
             nearbyUnits && nearbyUnits.length > 0 && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)

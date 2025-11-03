@@ -27,16 +27,24 @@ interface RemoteClass {
   updated_at: string
 }
 
-interface Location {
+export interface Schedule {
   id: string
-  curso_id: number
-  address: string
-  neighborhood: string
+  location_id?: string
   vacancies: number
   class_start_date: string
   class_end_date: string
   class_time: string
   class_days: string
+  created_at: string
+  updated_at: string
+}
+
+interface Location {
+  id: string
+  curso_id: number
+  address: string
+  neighborhood: string
+  schedules: Schedule[]
   created_at: string
   updated_at: string
 }
