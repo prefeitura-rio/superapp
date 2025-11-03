@@ -23,21 +23,41 @@ export function PortalInternoServiceComponent({
         {serviceData.resumo}
       </p>
 
-      {serviceData?.url_servico && (
-        <Button
-          asChild
-          variant="default"
-          size="lg"
-          className="mb-6 rounded-full text-background"
-        >
-          <Link
-            href={ensureUrlProtocol(serviceData.url_servico)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Acessar serviço
-          </Link>
-        </Button>
+      {serviceData?.buttons && serviceData.buttons.length > 0 && (
+        <div className="mb-6 space-y-5">
+          {serviceData.buttons
+            .slice()
+            .sort((a, b) => a.ordem - b.ordem)
+            .map((btn, idx) => (
+              <div key={`${btn.titulo}-${idx}`} className="">
+                <div>
+                  <h2 className="text-base font-medium text-foreground leading-5 mb-2">
+                    {btn.titulo}
+                  </h2>
+                  {btn.descricao && (
+                    <p className="text-sm text-foreground-light leading-5">
+                      {btn.descricao}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  asChild
+                  variant="default"
+                  size="lg"
+                  className="mt-3 rounded-full text-background"
+                  disabled={!btn.is_enabled}
+                >
+                  <Link
+                    href={ensureUrlProtocol(btn.url_service)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Acessar serviço
+                  </Link>
+                </Button>
+              </div>
+            ))}
+        </div>
       )}
 
       {/* Divider */}
