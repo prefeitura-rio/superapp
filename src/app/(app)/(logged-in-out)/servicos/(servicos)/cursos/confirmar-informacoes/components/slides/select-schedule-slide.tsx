@@ -4,16 +4,18 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-import type { InscriptionFormData, NearbyUnit, Schedule } from '../../types'
+import type { InscriptionFormData, NearbyUnit } from '../../types'
 
 interface SelectScheduleSlideProps {
   selectedUnit: NearbyUnit | null
+  nearbyUnits?: NearbyUnit[]
   form: UseFormReturn<InscriptionFormData>
   fieldName: keyof InscriptionFormData
 }
 
 export const SelectScheduleSlide = ({
-  selectedUnit,
+  selectedUnit: initialSelectedUnit,
+  nearbyUnits,
   form,
   fieldName,
 }: SelectScheduleSlideProps) => {
@@ -21,9 +23,24 @@ export const SelectScheduleSlide = ({
     formState: { errors },
     setValue,
     watch,
+    clearErrors,
+    trigger,
   } = form
 
   const selectedValue = watch(fieldName as any)
+  const selectedUnitId = watch('unitId')
+
+  // Get the currently selected unit from form, or fall back to initialSelectedUnit
+  const selectedUnit =
+    nearbyUnits?.find(unit => unit.id === selectedUnitId) || initialSelectedUnit
+
+  // Handle schedule selection with validation
+  const handleScheduleChange = async (value: string) => {
+    setValue(fieldName as any, value)
+    // Clear errors and revalidate immediately
+    clearErrors(fieldName as any)
+    await trigger(fieldName as any)
+  }
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
@@ -52,7 +69,11 @@ export const SelectScheduleSlide = ({
     return () => window.removeEventListener('resize', updateMaxHeight)
   }, [selectedUnit])
 
-  if (!selectedUnit || !selectedUnit.schedules || selectedUnit.schedules.length === 0) {
+  if (
+    !selectedUnit ||
+    !selectedUnit.schedules ||
+    selectedUnit.schedules.length === 0
+  ) {
     return (
       <div className="w-full space-y-5">
         <div className="text-left">
@@ -87,7 +108,7 @@ export const SelectScheduleSlide = ({
         >
           <RadioGroup
             value={selectedValue}
-            onValueChange={value => setValue(fieldName as any, value)}
+            onValueChange={handleScheduleChange}
             className="w-full"
           >
             {selectedUnit.schedules.map((schedule, index) => (
@@ -152,4 +173,3 @@ export const SelectScheduleSlide = ({
     </div>
   )
 }
-

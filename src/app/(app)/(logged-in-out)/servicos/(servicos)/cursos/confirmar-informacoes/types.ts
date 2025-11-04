@@ -63,9 +63,13 @@ export const createInscriptionSchema = (
     unitId: hasNearbyUnits
       ? z.string().min(1, 'Selecione uma unidade')
       : z.string().optional(),
+    // Only require scheduleId if there are multiple schedules (when user needs to choose)
+    // If there's only one schedule, it's auto-selected and sent to backend
     scheduleId: hasMultipleSchedules
       ? z.string().min(1, 'Selecione uma turma')
-      : z.string().optional(),
+      : hasNearbyUnits
+        ? z.string().optional() // Optional but will be auto-filled if only one schedule
+        : z.string().optional(),
     description: z.string().optional(),
   }
 

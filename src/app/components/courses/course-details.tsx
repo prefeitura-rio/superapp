@@ -493,7 +493,14 @@ export function CourseDetails({
     userEnrollment as any
   )
 
-  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
+  // Build subscription href with selected location if available
+  const buildCourseSubscriptionHref = () => {
+    const baseUrl = `/servicos/cursos/confirmar-informacoes/${course.id}`
+    if (selectedLocationId) {
+      return `${baseUrl}?locationId=${selectedLocationId}`
+    }
+    return baseUrl
+  }
 
   // Handle location selection
   const handleLocationSelect = (locationId: string) => {
@@ -596,7 +603,7 @@ export function CourseDetails({
     }
 
     return (
-      <Link href={courseSubscriptionHref} className={buttonClasses}>
+      <Link href={buildCourseSubscriptionHref()} className={buttonClasses}>
         {enrollmentInfo.buttonText}
       </Link>
     )

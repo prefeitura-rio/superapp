@@ -20,9 +20,19 @@ export const SelectUnitSlide = ({
     formState: { errors },
     setValue,
     watch,
+    clearErrors,
+    trigger,
   } = form
 
   const selectedValue = watch(fieldName as any)
+
+  // Handle unit selection with validation
+  const handleUnitChange = async (value: string) => {
+    setValue(fieldName as any, value)
+    // Clear errors and revalidate immediately
+    clearErrors(fieldName as any)
+    await trigger(fieldName as any)
+  }
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
@@ -69,7 +79,7 @@ export const SelectUnitSlide = ({
         >
           <RadioGroup
             value={selectedValue}
-            onValueChange={value => setValue(fieldName as any, value)}
+            onValueChange={handleUnitChange}
             className="w-full"
           >
             {nearbyUnits.map((unit, index) => (
