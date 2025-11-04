@@ -32,7 +32,7 @@ export function FloatNavigationClient({
   return (
     <>
       <div className="w-full fixed bottom-0 left-1/2 -translate-x-1/2 z-50">
-        <nav className="flex items-center shadow-float-navigation justify-center gap-5 bg-background px-2 py-2 backdrop-blur-sm">
+        <nav className="flex items-center shadow-float-navigation justify-center gap-8 bg-background px-2 py-2 backdrop-blur-sm">
           {navItems.map(item => {
             // Special case: wallet button should be active on both wallet routes
             const isActive =
@@ -60,7 +60,7 @@ export function FloatNavigationClient({
                   </div>
                   <p
                     className={cn(
-                      'text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 opcity-100',
+                      'hidden sm:block text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 opcity-100',
                       isActive ? 'text-primary' : 'text-foreground-light/80'
                     )}
                   >
