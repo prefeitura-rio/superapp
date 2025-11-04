@@ -429,3 +429,36 @@ select:-webkit-autofill:focus {
     font-size: 16px;
   }
 }
+
+/* Markdown Styles */
+.markdown-content > * + * {
+  margin-top: 0.5em;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content del {
+  text-decoration: line-through;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 1.5em 0;
+}
+
+/* Remove bullet points from task lists (lists with checkboxes) */
+.markdown-content ul:has(input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-content ul:has(input[type="checkbox"]) li {
+  padding-left: 0;
+}
