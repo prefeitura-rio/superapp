@@ -270,6 +270,9 @@ export function ConfirmInscriptionClient({
         ) {
           const isScheduleValid = await form.trigger('scheduleId')
           if (!isScheduleValid) {
+            // Mark field as touched so error appears
+            form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+
             // Don't advance, stay on current slide or go to schedule slide if it exists
             const scheduleSlideIndex = slides.findIndex(
               slide => slide.id === 'select-schedule'
@@ -291,7 +294,11 @@ export function ConfirmInscriptionClient({
         selectedUnit.schedules.length > 1
       ) {
         const isValid = await form.trigger('scheduleId')
-        if (!isValid) return
+        if (!isValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+          return
+        }
       }
 
       if (currentSlide.id.startsWith('custom-field-')) {
@@ -347,6 +354,9 @@ export function ConfirmInscriptionClient({
     ) {
       const isScheduleValid = await form.trigger('scheduleId')
       if (!isScheduleValid) {
+        // Mark field as touched so error appears
+        form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+
         // Try to find the schedule slide first
         const scheduleSlideIndex = slides.findIndex(
           slide => slide.id === 'select-schedule'

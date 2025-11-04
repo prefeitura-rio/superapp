@@ -20,7 +20,7 @@ export const SelectScheduleSlide = ({
   fieldName,
 }: SelectScheduleSlideProps) => {
   const {
-    formState: { errors },
+    formState: { errors, touchedFields },
     setValue,
     watch,
     clearErrors,
@@ -36,11 +36,14 @@ export const SelectScheduleSlide = ({
 
   // Handle schedule selection with validation
   const handleScheduleChange = async (value: string) => {
-    setValue(fieldName as any, value)
+    setValue(fieldName as any, value, { shouldTouch: true })
     // Clear errors and revalidate immediately
     clearErrors(fieldName as any)
     await trigger(fieldName as any)
   }
+
+  // Only show error if the field has been touched or if an error exists after trigger
+  const shouldShowError = touchedFields[fieldName as keyof typeof touchedFields] && errors[fieldName as keyof typeof errors]
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
@@ -92,9 +95,9 @@ export const SelectScheduleSlide = ({
     <div className="w-full space-y-5">
       <div className="text-left">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
-          Agora selecione sua <span className="text-primary">turma</span>
+          Agora <span className="text-primary">selecione sua turma</span>
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm pt-8 text-muted-foreground">
           {selectedUnit.address} - {selectedUnit.neighborhood}
         </p>
       </div>
@@ -165,7 +168,7 @@ export const SelectScheduleSlide = ({
         )}
       </div>
 
-      {errors[fieldName as keyof typeof errors] && (
+      {shouldShowError && (
         <p className="text-destructive text-sm -mt-2">
           {errors[fieldName as keyof typeof errors]?.message}
         </p>
