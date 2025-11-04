@@ -24,21 +24,6 @@ import toast from 'react-hot-toast'
 import { ExternalPartnerCourseDrawer } from '../drawer-contents/external-partner-course-drawer'
 import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
 
-/**
- * Flag para mostrar dados mockados de múltiplas unidades e turmas
- *
- * USE_MOCK_DATA = true:  Mostra 3 unidades com turmas mockadas
- * USE_MOCK_DATA = false: Usa dados reais da API
- *
- * Os dados mockados incluem:
- * - Unidade 1: Centro Educacional Estácio (1 turma)
- * - Unidade 2: Escola de Estudantes (2 turmas) ← Com múltiplas turmas
- * - Unidade 3: Centro de Formação (1 turma)
- *
- * IMPORTANTE: Mude para false em produção!
- */
-const USE_MOCK_DATA = true
-
 interface CourseDetailsProps {
   course: Course
   userEnrollment: UserEnrollment | null
@@ -341,7 +326,7 @@ function LocationSelection({
                   : 'border-none bg-card cursor-pointer'
               }`}
             >
-              <h4 className="font-medium text-foreground text-sm md:text-base">
+              <h4 className="font-medium text-foreground text-sm md:text-base line-clamp-2">
                 {location.address}
               </h4>
               <p className="text-xs md:text-sm text-foreground-light mt-1">
@@ -485,84 +470,6 @@ function CourseContent({ course }: CourseContentProps) {
   )
 }
 
-// Mock data para visualização
-const MOCK_LOCATIONS = [
-  {
-    id: 'mock-loc-1',
-    curso_id: 123,
-    address: 'Centro Educacional Estácio',
-    neighborhood: 'Praça Veluza',
-    schedules: [
-      {
-        id: 'mock-sch-1-1',
-        location_id: 'mock-loc-1',
-        vacancies: 60,
-        class_start_date: '2026-03-07T00:00:00Z',
-        class_end_date: '2026-04-29T00:00:00Z',
-        class_time: '14h às 16h',
-        class_days: 'Segunda e Quarta',
-        created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z',
-      },
-    ],
-    created_at: '2025-01-01T00:00:00Z',
-    updated_at: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: 'mock-loc-2',
-    curso_id: 123,
-    address: 'Escola de Estudantes',
-    neighborhood: 'Rua das Laranjeiras, 211 - Laranjeiras',
-    schedules: [
-      {
-        id: 'mock-sch-2-1',
-        location_id: 'mock-loc-2',
-        vacancies: 60,
-        class_start_date: '2026-03-07T00:00:00Z',
-        class_end_date: '2026-04-29T00:00:00Z',
-        class_time: '14h às 16h',
-        class_days: 'Terça e Quinta',
-        created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z',
-      },
-      {
-        id: 'mock-sch-2-2',
-        location_id: 'mock-loc-2',
-        vacancies: 60,
-        class_start_date: '2026-03-08T00:00:00Z',
-        class_end_date: '2026-04-30T00:00:00Z',
-        class_time: '16h às 18h',
-        class_days: 'Quarta e Sexta',
-        created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z',
-      },
-    ],
-    created_at: '2025-01-01T00:00:00Z',
-    updated_at: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: 'mock-loc-3',
-    curso_id: 123,
-    address: 'Centro de Formação',
-    neighborhood: 'Tijuca',
-    schedules: [
-      {
-        id: 'mock-sch-3-1',
-        location_id: 'mock-loc-3',
-        vacancies: 50,
-        class_start_date: '2026-03-10T00:00:00Z',
-        class_end_date: '2026-05-02T00:00:00Z',
-        class_time: '18h às 20h',
-        class_days: 'Segunda, Quarta e Sexta',
-        created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z',
-      },
-    ],
-    created_at: '2025-01-01T00:00:00Z',
-    updated_at: '2025-01-01T00:00:00Z',
-  },
-]
-
 // Main component
 export function CourseDetails({
   course,
@@ -574,21 +481,15 @@ export function CourseDetails({
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
 
-  // Aplicar dados mockados se a flag estiver ativa
-  const courseWithMockData =
-    USE_MOCK_DATA && course.modalidade?.toLowerCase() === 'presencial'
-      ? { ...course, locations: MOCK_LOCATIONS as any }
-      : course
-
   // State for location selection
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    courseWithMockData.locations && courseWithMockData.locations.length > 0
-      ? courseWithMockData.locations[0].id
+    course.locations && course.locations.length > 0
+      ? course.locations[0].id
       : null
   )
 
   const enrollmentInfo = getCourseEnrollmentInfo(
-    courseWithMockData as any,
+    course as any,
     userEnrollment as any
   )
 
@@ -737,9 +638,9 @@ export function CourseDetails({
             </CustomButton>
           </div>
         </BottomSheet>
-        <CourseHeader course={courseWithMockData} />
-        <CourseInfo course={courseWithMockData} />
-        <CourseMetadata course={courseWithMockData} />
+        <CourseHeader course={course} />
+        <CourseInfo course={course} />
+        <CourseMetadata course={course} />
         {userEnrollment?.status && (
           <CourseStatusCard
             status={userEnrollment.status as any}
@@ -747,7 +648,7 @@ export function CourseDetails({
           />
         )}
         <div className="px-4 py-6 pb-0 text-foreground-light text-base leading-4 md:leading-6 whitespace-pre-line">
-          {courseWithMockData.description || 'Descrição não disponível'}
+          {course.description || 'Descrição não disponível'}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
@@ -755,12 +656,12 @@ export function CourseDetails({
           </div>
         )}
         <LocationSelection
-          course={courseWithMockData}
+          course={course}
           selectedLocationId={selectedLocationId}
           onLocationSelect={handleLocationSelect}
         />
         <div className="my-12" />
-        <CourseContent course={courseWithMockData} />
+        <CourseContent course={course} />
         <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
       </div>
     </div>
