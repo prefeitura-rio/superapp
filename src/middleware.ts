@@ -5,6 +5,7 @@ import {
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
 import { handleExpiredToken, isJwtExpired } from './lib'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -34,8 +35,16 @@ function matchRoute(pathname: string, routePath: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  // Generate nonce for CSP
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const tracer = trace.getTracer('citizen-portal-middleware', '0.1.0')
+
+  return tracer.startActiveSpan('middleware.request', async (span) => {
+    try {
+      const path = request.nextUrl.pathname
+      span.setAttribute('http.route', path)
+      span.setAttribute('http.method', request.method)
+
+      // Generate nonce for CSP
+      const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
   // Define CSP header with nonce support
   const isDevelopment = process.env.NODE_ENV === 'development'
@@ -77,10 +86,13 @@ export async function middleware(request: NextRequest) {
     .replace(/\s{2,}/g, ' ')
     .trim()
 
-  const path = request.nextUrl.pathname
-  const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
-  const authToken = request.cookies.get('access_token')
-  const refreshToken = request.cookies.get('refresh_token')
+      const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
+      const authToken = request.cookies.get('access_token')
+      const refreshToken = request.cookies.get('refresh_token')
+
+      span.setAttribute('route.public', !!publicRoute)
+      span.setAttribute('auth.has_token', !!authToken)
+      span.setAttribute('auth.has_refresh_token', !!refreshToken)
 
   // Set up request headers with nonce and CSP
   const requestHeaders = new Headers(request.headers)
@@ -90,111 +102,153 @@ export async function middleware(request: NextRequest) {
     contentSecurityPolicyHeaderValue
   )
 
-  // Special handling for wallet routes
-  if (path === '/carteira') {
-    if (!authToken) {
-      // Unauthenticated user trying to access wallet → redirect to auth required page
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/autenticacao-necessaria/carteira'
-      redirectUrl.search = ''
-      const response = NextResponse.redirect(redirectUrl)
-      response.headers.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
-      return response
+      // Special handling for wallet routes
+      if (path === '/carteira') {
+        span.addEvent('wallet.route.check')
+        if (!authToken) {
+          // Unauthenticated user trying to access wallet → redirect to auth required page
+          span.addEvent('wallet.redirect.unauthenticated')
+          const redirectUrl = request.nextUrl.clone()
+          redirectUrl.pathname = '/autenticacao-necessaria/carteira'
+          redirectUrl.search = ''
+          const response = NextResponse.redirect(redirectUrl)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          span.setStatus({ code: SpanStatusCode.OK })
+          span.end()
+          return response
+        }
+        // Authenticated user accessing wallet → continue normally (will be handled below)
+      }
+
+      if (!authToken && publicRoute) {
+        span.addEvent('public.route.unauthenticated')
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
+
+      // Handle other authenticated cases
+      if (
+        authToken &&
+        publicRoute &&
+        publicRoute.whenAuthenticated === 'redirect'
+      ) {
+        span.addEvent('authenticated.redirect')
+        // Handle other authenticated cases
+        const redirectUrl = request.nextUrl.clone()
+        // If authenticated user tries to access wallet auth page → redirect to actual wallet
+        if (path === '/autenticacao-necessaria/carteira') {
+          redirectUrl.pathname = '/carteira'
+          span.setAttribute('redirect.target', '/carteira')
+        } else {
+          redirectUrl.pathname = '/'
+          span.setAttribute('redirect.target', '/')
+        }
+        const response = NextResponse.redirect(redirectUrl)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
+
+      // logged-in-out pages (home, courses and jobs)
+      if (
+        authToken &&
+        publicRoute &&
+        (path === '/' || path.startsWith('/servicos/cursos'))
+      ) {
+        // Checar se o JWT está EXPIRADO
+        span.addEvent('jwt.expiration.check')
+        if (isJwtExpired(authToken.value)) {
+          span.addEvent('jwt.expired')
+          const result = await handleExpiredToken(
+            request,
+            refreshToken?.value,
+            requestHeaders,
+            contentSecurityPolicyHeaderValue
+          )
+          span.setStatus({ code: SpanStatusCode.OK })
+          span.end()
+          return result
+        }
+      }
+
+      if (authToken && !publicRoute) {
+        // Check if JWT is expired
+        span.addEvent('protected.route.jwt.check')
+        if (isJwtExpired(authToken.value)) {
+          span.addEvent('jwt.expired')
+          const result = await handleExpiredToken(
+            request,
+            refreshToken?.value,
+            requestHeaders,
+            contentSecurityPolicyHeaderValue
+          )
+          span.setStatus({ code: SpanStatusCode.OK })
+          span.end()
+          return result
+        }
+
+        span.addEvent('protected.route.allowed')
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
+
+      if (!authToken && !publicRoute) {
+        // Capture the original URL (pathname + search params) for post-login redirect
+        span.addEvent('unauthenticated.redirect_to_login')
+        const returnUrl = `${path}${request.nextUrl.search}`
+        const authUrlWithReturn = buildAuthUrl(returnUrl)
+        const redirectUrl = request.nextUrl.clone()
+        redirectUrl.href = authUrlWithReturn
+        span.setAttribute('redirect.return_url', returnUrl)
+        const response = NextResponse.redirect(redirectUrl)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
+
+      span.setStatus({ code: SpanStatusCode.OK })
+      span.end()
+    } catch (error) {
+      span.recordException(error as Error)
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
+      span.end()
+      throw error
     }
-    // Authenticated user accessing wallet → continue normally (will be handled below)
-  }
-
-  if (!authToken && publicRoute) {
-    const response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    })
-    response.headers.set(
-      'Content-Security-Policy',
-      contentSecurityPolicyHeaderValue
-    )
-    return response
-  }
-
-  // Handle other authenticated cases
-  if (
-    authToken &&
-    publicRoute &&
-    publicRoute.whenAuthenticated === 'redirect'
-  ) {
-    // Handle other authenticated cases
-    const redirectUrl = request.nextUrl.clone()
-    // If authenticated user tries to access wallet auth page → redirect to actual wallet
-    if (path === '/autenticacao-necessaria/carteira') {
-      redirectUrl.pathname = '/carteira'
-    } else {
-      redirectUrl.pathname = '/'
-    }
-    const response = NextResponse.redirect(redirectUrl)
-    response.headers.set(
-      'Content-Security-Policy',
-      contentSecurityPolicyHeaderValue
-    )
-    return response
-  }
-
-  // logged-in-out pages (home, courses and jobs)
-  if (
-    authToken &&
-    publicRoute &&
-    (path === '/' || path.startsWith('/servicos/cursos'))
-  ) {
-    // Checar se o JWT está EXPIRADO
-    if (isJwtExpired(authToken.value)) {
-      return await handleExpiredToken(
-        request,
-        refreshToken?.value,
-        requestHeaders,
-        contentSecurityPolicyHeaderValue
-      )
-    }
-  }
-
-  if (authToken && !publicRoute) {
-    // Check if JWT is expired
-    if (isJwtExpired(authToken.value)) {
-      return await handleExpiredToken(
-        request,
-        refreshToken?.value,
-        requestHeaders,
-        contentSecurityPolicyHeaderValue
-      )
-    }
-
-    const response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    })
-    response.headers.set(
-      'Content-Security-Policy',
-      contentSecurityPolicyHeaderValue
-    )
-    return response
-  }
-
-  if (!authToken && !publicRoute) {
-    // Capture the original URL (pathname + search params) for post-login redirect
-    const returnUrl = `${path}${request.nextUrl.search}`
-    const authUrlWithReturn = buildAuthUrl(returnUrl)
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.href = authUrlWithReturn
-    const response = NextResponse.redirect(redirectUrl)
-    response.headers.set(
-      'Content-Security-Policy',
-      contentSecurityPolicyHeaderValue
-    )
-    return response
-  }
+  })
 }
 
 export const config: MiddlewareConfig = {

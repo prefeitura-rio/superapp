@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -42,3 +43,12 @@ next-env.d.ts
 
 # claude
 .claude
+
+# direnv
+.direnv/
+.envrc.local
+
+# k6 test results and analysis
+k6/results/
+k6/analysis-*/
+.github/scripts/test-output/
