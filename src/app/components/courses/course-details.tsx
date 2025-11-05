@@ -1,9 +1,13 @@
 'use client'
 
 import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
-import { ChevronLeftIcon } from '@/assets/icons'
+import { CalendarIcon, ChevronLeftIcon, MapPinIcon } from '@/assets/icons'
 import { CourseStatusCard } from './course-status-card'
 
+import { ClockIcon } from '@/assets/icons/clock-icon'
+import { CycleIcon } from '@/assets/icons/cycle-icon'
+import { GroupIcon } from '@/assets/icons/group-icon'
+import { PersonIcon } from '@/assets/icons/person-icon'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
@@ -28,7 +32,11 @@ interface CourseDetailsProps {
 
 // Utility functions
 
-const getCourseScheduleInfo = (course: Course): CourseScheduleInfo => {
+const getCourseScheduleInfo = (
+  course: Course,
+  selectedLocationId?: string,
+  selectedScheduleId?: string
+): CourseScheduleInfo => {
   const modality = course.modalidade?.toLowerCase()
 
   // Check for remote/online courses
@@ -50,15 +58,29 @@ const getCourseScheduleInfo = (course: Course): CourseScheduleInfo => {
     course.locations &&
     course.locations.length > 0
   ) {
-    const firstLocation = course.locations[0]
-    return {
-      startDate: firstLocation.class_start_date,
-      endDate: firstLocation.class_end_date,
-      time: firstLocation.class_time,
-      days: firstLocation.class_days,
-      vacancies: firstLocation.vacancies,
-      address: firstLocation.address,
-      neighborhood: firstLocation.neighborhood,
+    // Find selected location or use first one
+    const location = selectedLocationId
+      ? course.locations.find(loc => loc.id === selectedLocationId) ||
+        course.locations[0]
+      : course.locations[0]
+
+    // Find selected schedule or use first one
+    const schedule =
+      selectedScheduleId && location.schedules
+        ? location.schedules.find(sch => sch.id === selectedScheduleId) ||
+          location.schedules[0]
+        : location.schedules?.[0]
+
+    if (schedule) {
+      return {
+        startDate: schedule.class_start_date,
+        endDate: schedule.class_end_date,
+        time: schedule.class_time,
+        days: schedule.class_days,
+        vacancies: schedule.vacancies,
+        address: location.address,
+        neighborhood: location.neighborhood,
+      }
     }
   }
 
@@ -84,7 +106,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 
   return (
     <div className="flex flex-row items-start justify-start gap-1">
-      <div className="text-muted-foreground text-xs md:text-sm">{label}</div>
+      <div className="text-foreground-light text-xs md:text-sm">{label}</div>
       <div className="text-xs text-foreground md:text-sm">{value}</div>
     </div>
   )
@@ -167,7 +189,7 @@ function CourseInfo({ course }: CourseInfoProps) {
             </span>
           )}
         </div>
-        <p className="text-xs md:text-sm">
+        <p className="text-sm">
           {course.organization || 'Instituição não informada'}
         </p>
       </div>
@@ -189,7 +211,7 @@ function CourseInfo({ course }: CourseInfoProps) {
               </span>
             )}
           </div>
-          <p className="text-xs md:text-sm">
+          <p className="text-sm">
             {course.external_partner_name || 'Parceiro não informado'}
           </p>
         </div>
@@ -204,19 +226,19 @@ interface CourseMetadataProps {
 
 function CourseMetadata({ course }: CourseMetadataProps) {
   return (
-    <div className="flex justify-between px-4 text-xs md:text-sm">
+    <div className="flex justify-between px-4 text-sm">
       <div className="flex gap-4">
         <div>
-          <p className="text-muted-foreground">Modalidade</p>
+          <p className="text-foreground-light">Modalidade</p>
           <p className="font-medium">{course.modalidade || 'Não informado'}</p>
         </div>
         <div>
-          <p className="text-muted-foreground">Carga horária</p>
+          <p className="text-foreground-light">Carga horária</p>
           <p className="font-medium">{course.workload || 'Não informado'}</p>
         </div>
         {course.enrollment_end_date && (
           <div>
-            <p className="text-muted-foreground">Inscrições até</p>
+            <p className="text-foreground-light">Inscrições até</p>
             <p className="font-medium">
               {formatDate(course.enrollment_end_date)}
             </p>
@@ -246,6 +268,154 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
             scheduleInfo.neighborhood ? ` - ${scheduleInfo.neighborhood}` : ''
           }`}
         />
+      )}
+    </div>
+  )
+}
+
+interface LocationSelectionProps {
+  course: Course
+  selectedLocationId: string | null
+  onLocationSelect: (locationId: string) => void
+}
+
+function LocationSelection({
+  course,
+  selectedLocationId,
+  onLocationSelect,
+}: LocationSelectionProps) {
+  const modality = course.modalidade?.toLowerCase()
+
+  // Only show for presencial/semipresencial courses
+  if (modality !== 'presencial' && modality !== 'semipresencial') {
+    return null
+  }
+
+  if (!course.locations || course.locations.length === 0) {
+    return null
+  }
+
+  const selectedLocation = course.locations.find(
+    loc => loc.id === selectedLocationId
+  )
+
+  const hasMultipleSchedules =
+    selectedLocation &&
+    selectedLocation.schedules &&
+    selectedLocation.schedules.length > 1
+
+  return (
+    <div className="space-y-4">
+      {/* Location Icon Label */}
+      <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
+        <MapPinIcon />
+        <span>Selecione a unidade</span>
+      </div>
+
+      {/* Horizontal Scrollable Location Cards */}
+      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex gap-3 pl-4 pb-2">
+          {course.locations.map(location => (
+            <button
+              type="button"
+              key={location.id}
+              onClick={() => onLocationSelect(location.id)}
+              className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
+                selectedLocationId === location.id
+                  ? 'border-muted-foreground bg-secondary'
+                  : 'border-none bg-card cursor-pointer'
+              }`}
+            >
+              <h4 className="font-medium text-foreground text-sm md:text-base line-clamp-2">
+                {location.address}
+              </h4>
+              <p className="text-xs md:text-sm text-foreground-light mt-1">
+                {location.neighborhood}
+              </p>
+            </button>
+          ))}
+          {/* Spacer for right padding in horizontal scroll */}
+          <div className="flex-shrink-0 w-4" aria-hidden="true" />
+        </div>
+      </div>
+
+      {/* Separator */}
+      <Separator className="max-w-[90%] md:max-w-[96%] mx-auto" />
+
+      {/* Schedule Information with Icons */}
+      {selectedLocation?.schedules && selectedLocation.schedules.length > 0 && (
+        <div className="px-4 space-y-4 text-sm">
+          {selectedLocation.schedules.map((schedule, index) => (
+            <div key={schedule.id} className="w-full">
+              <div className="space-y-3">
+                {/* Show "Turma n" only if there are multiple schedules */}
+                {hasMultipleSchedules && (
+                  <div className="flex items-center gap-3  text-foreground-light">
+                    <GroupIcon />
+                    <span className="flex flex-row gap-3">
+                      Turma{' '}
+                      <span className="text-foreground block">{index + 1}</span>
+                    </span>
+                  </div>
+                )}
+
+                {/* Schedule Details with Icons */}
+                <div className="space-y-2.5 text-sm text-foreground-light">
+                  {/* Data início */}
+                  <div className="flex items-center gap-3">
+                    <CalendarIcon />
+                    <span>Data início</span>
+                    <span className="text-foreground">
+                      {formatDate(schedule.class_start_date)}
+                    </span>
+                  </div>
+
+                  {/* Data final */}
+                  <div className="flex items-center gap-3">
+                    <CalendarIcon />
+                    <span>Data final</span>
+                    <span className="text-foreground">
+                      {formatDate(schedule.class_end_date)}
+                    </span>
+                  </div>
+
+                  {/* Horário */}
+                  <div className="flex items-center gap-3">
+                    <ClockIcon />
+                    <span>Horário</span>
+                    <span className="text-foreground">
+                      {formatTimeRange(schedule.class_time)}
+                    </span>
+                  </div>
+
+                  {/* Dias de aula */}
+                  <div className="flex items-center gap-3">
+                    <CycleIcon />
+                    <span>Dias de aula</span>
+                    <span className="text-foreground">
+                      {schedule.class_days}
+                    </span>
+                  </div>
+
+                  {/* Vagas */}
+                  <div className="flex items-center gap-3">
+                    <PersonIcon />
+                    <span>Vagas</span>
+                    <span className="text-foreground">
+                      {schedule.vacancies}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Separator between schedules (only if there are multiple schedules and not the last one) */}
+              {hasMultipleSchedules &&
+                index < selectedLocation.schedules.length - 1 && (
+                  <Separator className="mt-4" />
+                )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )
@@ -283,16 +453,14 @@ function CourseContent({ course }: CourseContentProps) {
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
-            <div className="text-xs md:text-sm text-muted-foreground">
-              {content}
-            </div>
+            <div className="text-sm text-foreground-light">{content}</div>
           </div>
         )
       })}
 
       {/* <div>
         <h2 className="text-sm font-semibold mb-2">Certificado</h2>
-        <p className="text-xs md:text-sm text-muted-foreground">
+        <p className="text-xs md:text-sm text-foreground-light">
           {course.has_certificate
             ? 'Os participantes que concluírem o curso com aproveitamento receberão certificado válido emitido pela instituição promotora.'
             : 'Este curso não oferece certificado.'}
@@ -313,13 +481,31 @@ export function CourseDetails({
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
 
+  // State for location selection
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    course.locations && course.locations.length > 0
+      ? course.locations[0].id
+      : null
+  )
+
   const enrollmentInfo = getCourseEnrollmentInfo(
     course as any,
     userEnrollment as any
   )
-  const scheduleInfo = getCourseScheduleInfo(course)
 
-  const courseSubscriptionHref = `/servicos/cursos/confirmar-informacoes/${course.id}`
+  // Build subscription href with selected location if available
+  const buildCourseSubscriptionHref = () => {
+    const baseUrl = `/servicos/cursos/confirmar-informacoes/${course.id}`
+    if (selectedLocationId) {
+      return `${baseUrl}?locationId=${selectedLocationId}`
+    }
+    return baseUrl
+  }
+
+  // Handle location selection
+  const handleLocationSelect = (locationId: string) => {
+    setSelectedLocationId(locationId)
+  }
 
   const handleCancelEnrollment = async () => {
     if (!userEnrollment || isDeleting) return
@@ -417,7 +603,7 @@ export function CourseDetails({
     }
 
     return (
-      <Link href={courseSubscriptionHref} className={buttonClasses}>
+      <Link href={buildCourseSubscriptionHref()} className={buttonClasses}>
         {enrollmentInfo.buttonText}
       </Link>
     )
@@ -435,7 +621,7 @@ export function CourseDetails({
         >
           <div className="text-center p-2">
             <h2 className="text-base mb-4">Confirmar cancelamento</h2>
-            <p className="text-muted-foreground mb-2">
+            <p className="text-foreground-light mb-2">
               Tem certeza que deseja cancelar sua inscrição neste curso?
             </p>
           </div>
@@ -468,7 +654,7 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
-        <div className="px-4 py-6 pb-0 text-muted-foreground text-xs md:text-base leading-4 md:leading-6 whitespace-pre-line">
+        <div className="px-4 py-6 pb-0 text-foreground-light text-base leading-4 md:leading-6 whitespace-pre-line">
           {course.description || 'Descrição não disponível'}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
@@ -476,9 +662,12 @@ export function CourseDetails({
             {renderActionButton()}
           </div>
         )}
-        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
-        <CourseSchedule scheduleInfo={scheduleInfo} />
-        <Separator className="my-6 max-w-[90%] md:max-w-[96%] mx-auto" />
+        <LocationSelection
+          course={course}
+          selectedLocationId={selectedLocationId}
+          onLocationSelect={handleLocationSelect}
+        />
+        <div className="my-12" />
         <CourseContent course={course} />
         <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
       </div>
