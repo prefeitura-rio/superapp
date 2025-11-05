@@ -8,10 +8,30 @@ interface MarkdownRendererProps {
   className?: string
 }
 
+// Normalize markdown content by removing spaces inside bold/italic markers
+function normalizeMarkdown(content: string): string {
+  return content
+    // Move trailing spaces before closing bold markers to outside: **text **next -> **text** next
+    // This handles cases where there's text after the closing marker
+    .replace(/\*\*([^*\n]+?)\s+\*\*([^\s])/g, '**$1** $2')
+    // Remove trailing spaces before closing bold markers (end of text or followed by whitespace): **text ** -> **text**
+    .replace(/\*\*([^*\n]+?)\s+\*\*/g, '**$1**')
+    // Move trailing spaces before closing bold italic markers to outside: ***text ***next -> ***text*** next
+    .replace(/\*\*\*([^*\n]+?)\s+\*\*\*([^\s])/g, '***$1*** $2')
+    // Remove trailing spaces before closing bold italic markers: ***text *** -> ***text***
+    .replace(/\*\*\*([^*\n]+?)\s+\*\*\*/g, '***$1***')
+    // Move trailing spaces before closing italic markers to outside: *text *next -> *text* next
+    .replace(/(?<!\*)\*([^*\n]+?)\s+\*([^\s])(?!\*)/g, '*$1* $2')
+    // Remove trailing spaces before closing italic markers: *text * -> *text*
+    .replace(/(?<!\*)\*([^*\n]+?)\s+\*(?!\*)/g, '*$1*')
+}
+
 export function MarkdownRenderer({
   content,
   className = '',
 }: MarkdownRendererProps) {
+  const normalizedContent = normalizeMarkdown(content)
+
   return (
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown
@@ -90,7 +110,7 @@ export function MarkdownRenderer({
           },
         }}
       >
-        {content}
+        {normalizedContent}
       </ReactMarkdown>
     </div>
   )

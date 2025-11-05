@@ -84,7 +84,7 @@ export function PortalInternoServiceComponent({
           <p className="text-sm text-foreground-light leading-5 capitalize">
             {serviceData.custo_servico}
             {serviceData.is_free && (
-              <span className="block mt-1 text-green-600 font-medium">
+              <span className="block mt-1 text-foreground font-medium">
                 Serviço gratuito
               </span>
             )}
