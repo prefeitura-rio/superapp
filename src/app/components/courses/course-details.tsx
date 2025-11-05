@@ -4,6 +4,7 @@ import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
 import { CalendarIcon, ChevronLeftIcon, MapPinIcon } from '@/assets/icons'
 import { CourseStatusCard } from './course-status-card'
 
+import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { ClockIcon } from '@/assets/icons/clock-icon'
 import { CycleIcon } from '@/assets/icons/cycle-icon'
 import { GroupIcon } from '@/assets/icons/group-icon'
@@ -304,12 +305,14 @@ function LocationSelection({
     selectedLocation.schedules &&
     selectedLocation.schedules.length > 1
 
+  const hasMultipleLocations = course.locations.length > 1
+
   return (
     <div className="space-y-4">
       {/* Location Icon Label */}
       <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
         <MapPinIcon />
-        <span>Selecione a unidade</span>
+        <span>{hasMultipleLocations ? 'Selecione a unidade' : 'Unidade'}</span>
       </div>
 
       {/* Horizontal Scrollable Location Cards */}
@@ -430,30 +433,45 @@ function CourseContent({ course }: CourseContentProps) {
     {
       key: 'pre_requisitos',
       title: 'Pré-requisitos para obtenção do certificado',
+      useMarkdown: true,
     },
-    { key: 'facilitator', title: 'Facilitador' },
-    { key: 'objectives', title: 'Objetivos da capacitação' },
-    { key: 'expected_results', title: 'Resultados esperados' },
-    { key: 'program_content', title: 'Conteúdo programático' },
-    { key: 'methodology', title: 'Metodologia' },
-    { key: 'resources_used', title: 'Recursos utilizados' },
-    { key: 'material_used', title: 'Material utilizado' },
-    { key: 'teaching_material', title: 'Material didático' },
-    { key: 'target_audience', title: 'Público-alvo' },
+    { key: 'facilitator', title: 'Facilitador', useMarkdown: false },
+    { key: 'objectives', title: 'Objetivos da capacitação', useMarkdown: true },
+    {
+      key: 'expected_results',
+      title: 'Resultados esperados',
+      useMarkdown: true,
+    },
+    {
+      key: 'program_content',
+      title: 'Conteúdo programático',
+      useMarkdown: true,
+    },
+    { key: 'methodology', title: 'Metodologia', useMarkdown: true },
+    { key: 'resources_used', title: 'Recursos utilizados', useMarkdown: true },
+    { key: 'material_used', title: 'Material utilizado', useMarkdown: true },
+    { key: 'teaching_material', title: 'Material didático', useMarkdown: true },
+    { key: 'target_audience', title: 'Público-alvo', useMarkdown: true },
   ]
 
   return (
     <div className="px-4 space-y-6">
-      {contentSections.map(({ key, title }) => {
+      {contentSections.map(({ key, title, useMarkdown }) => {
         const content = course[key as keyof Course] as string
         if (!content) return null
 
         return (
-          <div key={key} className="whitespace-pre-line">
+          <div key={key}>
             <h2 className="text-sm md:text-base leading-4 font-semibold mb-2">
               {title}
             </h2>
-            <div className="text-sm text-foreground-light">{content}</div>
+            {useMarkdown ? (
+              <MarkdownRenderer content={content} />
+            ) : (
+              <div className="text-sm text-foreground-light whitespace-pre-line">
+                {content}
+              </div>
+            )}
           </div>
         )
       })}
@@ -654,8 +672,14 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
-        <div className="px-4 py-6 pb-0 text-foreground-light text-base leading-4 md:leading-6 whitespace-pre-line">
-          {course.description || 'Descrição não disponível'}
+        <div className="px-4 py-6 pb-0">
+          {course.description ? (
+            <MarkdownRenderer content={course.description} />
+          ) : (
+            <div className="text-foreground-light text-base leading-4 md:leading-6">
+              Descrição não disponível
+            </div>
+          )}
         </div>
         {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
           <div className="px-4 pb-2 py-8 w-full max-w-4xl">
