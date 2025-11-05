@@ -2,7 +2,7 @@
 // This file is used to cache the data fetching functions
 
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
-import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
+import { getV1Avatars, getV1CitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
   getCitizenCpfFirstlogin,
@@ -10,76 +10,83 @@ import {
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
-import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import { revalidateTag, unstable_cache } from 'next/cache'
+import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 // Recommended caching strategy for high traffic (500K+ users/month)
 // 30-minute cache provides optimal balance of performance and data freshness
 export async function getDalCitizenCpfWallet(cpf: string) {
-  return withSpan('dal.getCitizenCpfWallet', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('cache.strategy', 'no-store')
+  return withSpan(
+    'dal.getCitizenCpfWallet',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('cache.strategy', 'no-store')
 
-    const result = await getCitizenCpfWallet(cpf, {
-      cache: 'no-store',
-      // next: {
-      //   revalidate: 600, // 10 minutes - optimal for high traffic
-      //   tags: [`wallet-${cpf}`], // Tag for selective revalidation
-      // },
-    })
+      const result = await getCitizenCpfWallet(cpf, {
+        cache: 'no-store',
+        // next: {
+        //   revalidate: 600, // 10 minutes - optimal for high traffic
+        //   tags: [`wallet-${cpf}`], // Tag for selective revalidation
+        // },
+      })
 
-    addSpanEvent('wallet.fetched', {
-      'wallet.items_count': Array.isArray(result?.data)
-        ? result.data.length
-        : 0,
-    })
+      addSpanEvent('wallet.fetched', {
+        'wallet.items_count': Array.isArray(result?.data) ? result.data.length : 0,
+      })
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // User info caching (user-specific data)
 // 30-minute cache since user info can be updated frequently
 export async function getDalCitizenCpf(cpf: string) {
-  return withSpan('dal.getCitizenCpf', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('cache.strategy', 'force-cache')
-    span.setAttribute('cache.revalidate', 600)
+  return withSpan(
+    'dal.getCitizenCpf',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('cache.strategy', 'force-cache')
+      span.setAttribute('cache.revalidate', 600)
 
-    const result = await getCitizenCpf(cpf, {
-      cache: 'force-cache',
-      next: {
-        revalidate: 600, // 10 minutes - optimal for high traffic
-        tags: [`user-info-${cpf}`], // Tag for selective revalidation
-      },
-    })
+      const result = await getCitizenCpf(cpf, {
+        cache: 'force-cache',
+        next: {
+          revalidate: 600, // 10 minutes - optimal for high traffic
+          tags: [`user-info-${cpf}`], // Tag for selective revalidation
+        },
+      })
 
-    addSpanEvent('user.info.fetched')
+      addSpanEvent('user.info.fetched')
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // First login status caching (user-specific data)
 // 30-minute cache since first login status can change once per user
 export async function getDalCitizenCpfFirstlogin(cpf: string) {
-  return withSpan('dal.getCitizenCpfFirstlogin', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('cache.strategy', 'force-cache')
-    span.setAttribute('cache.revalidate', 600)
+  return withSpan(
+    'dal.getCitizenCpfFirstlogin',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('cache.strategy', 'force-cache')
+      span.setAttribute('cache.revalidate', 600)
 
-    const result = await getCitizenCpfFirstlogin(cpf, {
-      cache: 'force-cache',
-      next: {
-        revalidate: 600, // 10 minutes - optimal for high traffic
-        tags: [`firstlogin-${cpf}`], // Tag for selective revalidation
-      },
-    })
+      const result = await getCitizenCpfFirstlogin(cpf, {
+        cache: 'force-cache',
+        next: {
+          revalidate: 600, // 10 minutes - optimal for high traffic
+          tags: [`firstlogin-${cpf}`], // Tag for selective revalidation
+        },
+      })
 
-    addSpanEvent('user.firstlogin.checked')
+      addSpanEvent('user.firstlogin.checked')
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // Maintenance requests caching (user-specific data)
@@ -88,62 +95,64 @@ export async function getDalCitizenCpfMaintenanceRequest(
   cpf: string,
   params?: { page?: number; per_page?: number }
 ) {
-  return withSpan('dal.getCitizenCpfMaintenanceRequest', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('cache.strategy', 'force-cache')
-    span.setAttribute('cache.revalidate', 600)
-    if (params?.page) span.setAttribute('pagination.page', params.page)
-    if (params?.per_page)
-      span.setAttribute('pagination.per_page', params.per_page)
+  return withSpan(
+    'dal.getCitizenCpfMaintenanceRequest',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('cache.strategy', 'force-cache')
+      span.setAttribute('cache.revalidate', 600)
+      if (params?.page) span.setAttribute('pagination.page', params.page)
+      if (params?.per_page) span.setAttribute('pagination.per_page', params.per_page)
 
-    const result = await getCitizenCpfMaintenanceRequest(cpf, params, {
-      cache: 'force-cache',
-      next: {
-        revalidate: 600, // 10 minutes - optimal for high traffic
-        tags: [`maintenance-${cpf}`], // Tag for selective revalidation
-      },
-    })
+      const result = await getCitizenCpfMaintenanceRequest(cpf, params, {
+        cache: 'force-cache',
+        next: {
+          revalidate: 600, // 10 minutes - optimal for high traffic
+          tags: [`maintenance-${cpf}`], // Tag for selective revalidation
+        },
+      })
 
-    addSpanEvent('maintenance.requests.fetched', {
-      'requests.count': Array.isArray(result?.data) ? result.data.length : 0,
-    })
+      addSpanEvent('maintenance.requests.fetched', {
+        'requests.count': Array.isArray(result?.data) ? result.data.length : 0,
+      })
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // Course enrollment caching (user-specific data)
 // 5-minute cache since enrollment status can change frequently
 export async function getDalCourseEnrollment(courseId: number, cpf: string) {
-  return withSpan('dal.getCourseEnrollment', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('course.id', courseId)
-    span.setAttribute('cache.strategy', 'no-store')
+  return withSpan(
+    'dal.getCourseEnrollment',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('course.id', courseId)
+      span.setAttribute('cache.strategy', 'no-store')
 
-    const result = await getApiV1CoursesCourseIdEnrollments(
-      courseId,
-      {
-        search: cpf,
-        limit: 1,
-      },
-      {
-        cache: 'no-store',
-        // next: {
-        //   revalidate: 600, // 10 minutes - optimal for enrollment status changes
-        //   tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
-        // },
-      }
-    )
+      const result = await getApiV1CoursesCourseIdEnrollments(
+        courseId,
+        {
+          search: cpf,
+          limit: 1,
+        },
+        {
+          cache: 'no-store',
+          // next: {
+          //   revalidate: 600, // 10 minutes - optimal for enrollment status changes
+          //   tags: [`course-enrollment-${courseId}-${cpf}`], // Tag for selective revalidation
+          // },
+        }
+      )
 
-    addSpanEvent('course.enrollment.checked', {
-      'enrollment.found':
-        Array.isArray(result?.data) && result.data.length > 0
-          ? 'true'
-          : 'false',
-    })
+      addSpanEvent('course.enrollment.checked', {
+        'enrollment.found': Array.isArray(result?.data) && result.data.length > 0 ? 'true' : 'false',
+      })
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // Health unit info caching (shared across all users)
@@ -178,49 +187,55 @@ export const getDalHealthUnitRisk = unstable_cache(
 // 30-minute cache since avatar list doesn't change frequently
 // Using standard Next.js caching instead of unstable_cache to avoid cookie issues
 export async function getDalAvatars() {
-  return withSpan('dal.getAvatars', async span => {
-    span.setAttribute('cache.strategy', 'force-cache')
-    span.setAttribute('cache.revalidate', 600)
+  return withSpan(
+    'dal.getAvatars',
+    async (span) => {
+      span.setAttribute('cache.strategy', 'force-cache')
+      span.setAttribute('cache.revalidate', 600)
 
-    const result = await getAvatars(
-      { per_page: 100 },
-      {
-        cache: 'force-cache',
-        next: {
-          revalidate: 600, // 10 minutes
-          tags: ['available-avatars'],
-        },
-      }
-    )
+      const result = await getV1Avatars(
+        { per_page: 100 },
+        {
+          cache: 'force-cache',
+          next: {
+            revalidate: 600, // 10 minutes
+            tags: ['available-avatars'],
+          },
+        }
+      )
 
-    addSpanEvent('avatars.list.fetched', {
-      'avatars.count': Array.isArray(result?.data) ? result.data.length : 0,
-    })
+      addSpanEvent('avatars.list.fetched', {
+        'avatars.count': Array.isArray(result?.data) ? result.data.length : 0,
+      })
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // User avatar caching (user-specific data)
 // 30-minute cache since user avatar can be updated
 export async function getDalCitizenCpfAvatar(cpf: string) {
-  return withSpan('dal.getCitizenCpfAvatar', async span => {
-    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
-    span.setAttribute('cache.strategy', 'force-cache')
-    span.setAttribute('cache.revalidate', 600)
+  return withSpan(
+    'dal.getCitizenCpfAvatar',
+    async (span) => {
+      span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+      span.setAttribute('cache.strategy', 'force-cache')
+      span.setAttribute('cache.revalidate', 600)
 
-    const result = await getCitizenCpfAvatar(cpf, {
-      cache: 'force-cache',
-      next: {
-        revalidate: 600, // 10 minutes - optimal for user data
-        tags: [`user-avatar-${cpf}`], // Tag for selective revalidation
-      },
-    })
+      const result = await getV1CitizenCpfAvatar(cpf, {
+        cache: 'force-cache',
+        next: {
+          revalidate: 600, // 10 minutes - optimal for user data
+          tags: [`user-avatar-${cpf}`], // Tag for selective revalidation
+        },
+      })
 
-    addSpanEvent('user.avatar.fetched')
+      addSpanEvent('user.avatar.fetched')
 
-    return result
-  })
+      return result
+    }
+  )
 }
 
 // Helper function to revalidate wallet data when needed
