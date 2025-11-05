@@ -15,10 +15,15 @@ import { ConfirmInscriptionClient } from '../components/confirm-inscription-clie
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ConfirmInscriptionPage({ params }: PageProps) {
+export default async function ConfirmInscriptionPage({ params, searchParams }: PageProps) {
   const { slug: courseSlug } = await params
+  const searchParamsData = await searchParams
+  const preselectedLocationId = typeof searchParamsData.locationId === 'string' 
+    ? searchParamsData.locationId 
+    : undefined
   const courseUuid = extractCourseId(courseSlug)
 
   const userAuthInfo = await getUserInfoFromToken()
@@ -73,11 +78,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
       curso_id: location.curso_id,
       address: location.address,
       neighborhood: location.neighborhood,
-      vacancies: location.vacancies,
-      class_start_date: location.class_start_date,
-      class_end_date: location.class_end_date,
-      class_time: location.class_time,
-      class_days: location.class_days,
+      schedules: location.schedules || [],
       created_at: location.created_at,
       updated_at: location.updated_at,
     })) || []
@@ -91,6 +92,7 @@ export default async function ConfirmInscriptionPage({ params }: PageProps) {
       courseInfo={courseInfo}
       courseId={courseUuid}
       courseSlug={courseSlug}
+      preselectedLocationId={preselectedLocationId}
     />
   )
 }

@@ -1,18 +1,18 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { CustomFieldSlide } from './slides/custom-field-slide'
+import { SelectScheduleSlide } from './slides/select-schedule-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
 
@@ -45,6 +45,7 @@ interface ConfirmInscriptionClientProps {
   courseId: string
   courseSlug?: string
   contactUpdateStatus?: ContactUpdateStatus
+  preselectedLocationId?: string
 }
 
 const TRANSITIONS = {
@@ -61,6 +62,7 @@ export function ConfirmInscriptionClient({
   courseId,
   courseSlug,
   contactUpdateStatus,
+  preselectedLocationId,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -70,7 +72,6 @@ export function ConfirmInscriptionClient({
   const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
-  const { isBelowBreakpoint } = useViewportHeight(648)
 
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
@@ -86,21 +87,59 @@ export function ConfirmInscriptionClient({
   const customFields: CustomField[] =
     (courseInfo as any)?.data?.custom_fields || []
 
+  // Determine if we need to show unit/schedule selection
+  // Always show unit selection if there are units available (even if just one)
+  const hasUnits = nearbyUnits && nearbyUnits.length > 0
+
+  // Check if any unit has multiple schedules (needed for schema validation)
+  const hasAnyUnitWithMultipleSchedules =
+    nearbyUnits?.some(unit => unit.schedules && unit.schedules.length > 1) ||
+    false
+
+  // Determine initial unit selection
+  const getInitialUnitId = () => {
+    // If preselectedLocationId is provided and exists in nearbyUnits, use it
+    if (preselectedLocationId) {
+      const preselectedUnit = nearbyUnits.find(
+        unit => unit.id === preselectedLocationId
+      )
+      if (preselectedUnit) {
+        return preselectedLocationId
+      }
+    }
+    // Otherwise, if there's only one unit, automatically select it
+    if (nearbyUnits && nearbyUnits.length === 1) {
+      return nearbyUnits[0].id
+    }
+    // If multiple units, start with empty (user must select)
+    if (nearbyUnits && nearbyUnits.length > 1) {
+      return ''
+    }
+    return 'no-units-available'
+  }
+
+  const initialUnitId = getInitialUnitId()
+  const initialUnit = nearbyUnits?.find(unit => unit.id === initialUnitId)
+
+  // Determine initial schedule selection
+  const getInitialScheduleId = () => {
+    if (initialUnit && initialUnit.schedules.length === 1) {
+      return initialUnit.schedules[0].id
+    }
+    return ''
+  }
+
   const form = useForm<InscriptionFormData>({
     resolver: zodResolver(
       createInscriptionSchema(
-        nearbyUnits && nearbyUnits.length > 1, // Only require selection if more than 1 unit
+        hasUnits, // Require selection if there are units available
+        hasAnyUnitWithMultipleSchedules, // Only require scheduleId if any unit has multiple schedules
         customFields
       )
     ),
     defaultValues: {
-      // If there's only one unit, automatically select it
-      unitId:
-        nearbyUnits && nearbyUnits.length === 1
-          ? nearbyUnits[0].id
-          : nearbyUnits && nearbyUnits.length > 1
-            ? ''
-            : 'no-units-available',
+      unitId: initialUnitId,
+      scheduleId: getInitialScheduleId(),
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
@@ -111,6 +150,42 @@ export function ConfirmInscriptionClient({
       ),
     },
   })
+
+  // Get selected unit after form is initialized
+  const selectedUnitId = form.watch('unitId')
+  const selectedUnit = nearbyUnits?.find(unit => unit.id === selectedUnitId)
+  const hasMultipleSchedules = selectedUnit
+    ? selectedUnit.schedules.length > 1
+    : false
+
+  // Auto-select scheduleId when unit changes
+  useEffect(() => {
+    if (selectedUnitId && selectedUnit) {
+      const currentScheduleId = form.getValues('scheduleId')
+
+      // If there's only one schedule, always auto-select it
+      if (selectedUnit.schedules.length === 1) {
+        form.setValue('scheduleId', selectedUnit.schedules[0].id)
+      } else if (selectedUnit.schedules.length > 1) {
+        // If multiple schedules, check if current selection is valid
+        const scheduleExists = selectedUnit.schedules.some(
+          s => s.id === currentScheduleId
+        )
+        if (!scheduleExists) {
+          // Reset to empty so user must select from multiple options
+          form.setValue('scheduleId', '')
+        }
+      }
+    }
+  }, [selectedUnitId, selectedUnit, form])
+
+  // Use initialUnit for initial slide construction, or selectedUnit if it exists
+  const unitForScheduleSlide = selectedUnit || initialUnit
+  // Only show schedule slide if the selected unit has multiple schedules
+  const shouldShowScheduleSlide =
+    unitForScheduleSlide &&
+    unitForScheduleSlide.schedules &&
+    unitForScheduleSlide.schedules.length > 1
 
   const slides = [
     {
@@ -123,8 +198,8 @@ export function ConfirmInscriptionClient({
     // Only include subsequent slides if user has valid contact info
     ...(hasValidContactInfo
       ? [
-          // Only show select-unit slide if there are multiple nearby units available
-          ...(nearbyUnits && nearbyUnits.length > 1
+          // Always show select-unit slide if there are units available (even if just one)
+          ...(hasUnits
             ? [
                 {
                   id: 'select-unit',
@@ -133,6 +208,24 @@ export function ConfirmInscriptionClient({
                     nearbyUnits,
                     form,
                     fieldName: 'unitId',
+                  },
+                  showPagination: true,
+                  showBackButton: true,
+                },
+              ]
+            : []),
+          // Only show select-schedule slide if the selected unit has multiple schedules
+          // If there's only one schedule, it's automatically selected and no slide is needed
+          ...(shouldShowScheduleSlide
+            ? [
+                {
+                  id: 'select-schedule',
+                  component: SelectScheduleSlide,
+                  props: {
+                    selectedUnit: unitForScheduleSlide,
+                    nearbyUnits,
+                    form,
+                    fieldName: 'scheduleId',
                   },
                   showPagination: true,
                   showBackButton: true,
@@ -163,13 +256,47 @@ export function ConfirmInscriptionClient({
       }
     } else {
       const currentSlide = slides[currentIndex]
+      if (currentSlide.id === 'select-unit' && hasUnits) {
+        const isUnitValid = await form.trigger('unitId')
+        if (!isUnitValid) return
+
+        // After selecting unit, if it has multiple schedules, ensure schedule is selected
+        if (
+          selectedUnit &&
+          selectedUnit.schedules &&
+          selectedUnit.schedules.length > 1
+        ) {
+          const isScheduleValid = await form.trigger('scheduleId')
+          if (!isScheduleValid) {
+            // Mark field as touched so error appears
+            form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+
+            // Don't advance, stay on current slide or go to schedule slide if it exists
+            const scheduleSlideIndex = slides.findIndex(
+              slide => slide.id === 'select-schedule'
+            )
+            if (scheduleSlideIndex !== -1) {
+              // Navigate to schedule slide to show error
+              setCurrentIndex(scheduleSlideIndex)
+              swiperRef.current?.swiper?.slideTo(scheduleSlideIndex)
+            }
+            return
+          }
+        }
+      }
+
       if (
-        currentSlide.id === 'select-unit' &&
-        nearbyUnits &&
-        nearbyUnits.length > 1
+        currentSlide.id === 'select-schedule' &&
+        selectedUnit &&
+        selectedUnit.schedules &&
+        selectedUnit.schedules.length > 1
       ) {
-        const isValid = await form.trigger('unitId')
-        if (!isValid) return
+        const isValid = await form.trigger('scheduleId')
+        if (!isValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+          return
+        }
       }
 
       if (currentSlide.id.startsWith('custom-field-')) {
@@ -204,14 +331,42 @@ export function ConfirmInscriptionClient({
 
   // Function to find the first slide with missing required fields
   const findFirstInvalidSlide = async (): Promise<number | null> => {
-    // Check unit selection if required (only for multiple units)
-    if (nearbyUnits && nearbyUnits.length > 1) {
+    // Check unit selection if required (when there are units available)
+    if (hasUnits) {
       const unitSlideIndex = slides.findIndex(
         slide => slide.id === 'select-unit'
       )
       if (unitSlideIndex !== -1) {
         const isUnitValid = await form.trigger('unitId')
         if (!isUnitValid) {
+          return unitSlideIndex
+        }
+      }
+    }
+
+    // Check schedule selection if required (when selected unit has multiple schedules)
+    if (
+      selectedUnit &&
+      selectedUnit.schedules &&
+      selectedUnit.schedules.length > 1
+    ) {
+      const isScheduleValid = await form.trigger('scheduleId')
+      if (!isScheduleValid) {
+        // Mark field as touched so error appears
+        form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+
+        // Try to find the schedule slide first
+        const scheduleSlideIndex = slides.findIndex(
+          slide => slide.id === 'select-schedule'
+        )
+        if (scheduleSlideIndex !== -1) {
+          return scheduleSlideIndex
+        }
+        // If schedule slide doesn't exist in slides array, find unit slide to show error
+        const unitSlideIndex = slides.findIndex(
+          slide => slide.id === 'select-unit'
+        )
+        if (unitSlideIndex !== -1) {
           return unitSlideIndex
         }
       }
@@ -256,6 +411,17 @@ export function ConfirmInscriptionClient({
       try {
         const formData = form.getValues()
 
+        // Get the selected schedule ID
+        // If there's only one schedule in the selected unit, use it automatically
+        // Otherwise, use the scheduleId from the form (user selected it)
+        let finalScheduleId = formData.scheduleId
+        if (!finalScheduleId && selectedUnit) {
+          if (selectedUnit.schedules.length === 1) {
+            // Auto-select if only one schedule
+            finalScheduleId = selectedUnit.schedules[0].id
+          }
+        }
+
         const result = await submitCourseInscription({
           courseId,
           userInfo: {
@@ -264,10 +430,10 @@ export function ConfirmInscriptionClient({
             email: getEmailValue(userInfo.email),
             phone: getPhoneValue(userInfo.phone),
           },
-          unitId:
-            nearbyUnits && nearbyUnits.length > 0 ? formData.unitId : undefined,
+          unitId: hasUnits && formData.unitId ? formData.unitId : undefined,
+          scheduleId: finalScheduleId,
           enrolledUnit:
-            nearbyUnits && nearbyUnits.length > 0 && formData.unitId
+            hasUnits && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)
               : undefined,
           customFields: customFields.map(field => {
@@ -346,51 +512,51 @@ export function ConfirmInscriptionClient({
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
-    <div className="relative min-h-lvh w-full px-4 mx-auto bg-background max-w-xl text-foreground flex flex-col overflow-hidden">
-      <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
-        <CustomButton
-          className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
-            showBackButton
-              ? 'opacity-100 translate-x-0'
-              : 'opacity-0 -translate-x-2 pointer-events-none'
-          }`}
-          onClick={handleBack}
-          disabled={isPending}
-        >
-          <ChevronLeftIcon className="text-foreground" />
-        </CustomButton>
-      </div>
+    <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
+      <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
+        <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
+          <CustomButton
+            className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
+              showBackButton
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 -translate-x-2 pointer-events-none'
+            }`}
+            onClick={handleBack}
+            disabled={isPending}
+          >
+            <ChevronLeftIcon className="text-foreground" />
+          </CustomButton>
+        </div>
 
-      <div className="my-8 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden py-8">
+          {!showSuccess && (
+            <div
+              className={`h-full transition-opacity duration-600 ${
+                fadeOut ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <ConfirmInscriptionSlider
+                ref={swiperRef}
+                slides={slides}
+                onSlideChange={index => setCurrentIndex(index)}
+                showPagination={currentSlide?.showPagination !== false}
+              />
+            </div>
+          )}
+
+          {showSuccess && (
+            <div
+              className={`flex justify-center transition-opacity duration-600 ${
+                fadeOut ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <SuccessSlide onFinish={handleFinish} />
+            </div>
+          )}
+        </div>
+
         {!showSuccess && (
-          <div
-            className={`transition-opacity duration-600 ${
-              fadeOut ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            <ConfirmInscriptionSlider
-              ref={swiperRef}
-              slides={slides}
-              onSlideChange={index => setCurrentIndex(index)}
-              isBelowBreakpoint={isBelowBreakpoint}
-              showPagination={currentSlide?.showPagination !== false}
-            />
-          </div>
-        )}
-
-        {showSuccess && (
-          <div
-            className={`flex justify-center transition-opacity duration-600 ${
-              fadeOut ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            <SuccessSlide onFinish={handleFinish} />
-          </div>
-        )}
-      </div>
-
-      {!showSuccess && (
-        <div className="flex-shrink-0 pb-12">
+          <div className="flex-shrink-0 pb-12">
           {needsContactUpdate && hasEmail && hasPhone ? (
             <p className="mb-8">
               <span className="text-muted-foreground text-sm">
@@ -441,7 +607,8 @@ export function ConfirmInscriptionClient({
             </CustomButton>
           </div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

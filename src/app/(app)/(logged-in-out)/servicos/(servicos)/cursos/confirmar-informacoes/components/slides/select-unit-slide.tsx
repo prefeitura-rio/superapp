@@ -20,13 +20,22 @@ export const SelectUnitSlide = ({
     formState: { errors },
     setValue,
     watch,
+    clearErrors,
+    trigger,
   } = form
 
   const selectedValue = watch(fieldName as any)
 
+  // Handle unit selection with validation
+  const handleUnitChange = async (value: string) => {
+    setValue(fieldName as any, value)
+    // Clear errors and revalidate immediately
+    clearErrors(fieldName as any)
+    await trigger(fieldName as any)
+  }
+
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
-  const [maxHeight, setMaxHeight] = useState('300px')
   const listRef = useRef<HTMLDivElement>(null)
 
   const checkScroll = () => {
@@ -37,39 +46,32 @@ export const SelectUnitSlide = ({
     setShowBottomFade(scrollTop + clientHeight < scrollHeight - 1)
   }
 
-  const updateMaxHeight = () => {
-    const vh = window.innerHeight
-    const offset = 320
-    setMaxHeight(`${vh - offset}px`)
-    checkScroll()
-  }
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
   useEffect(() => {
-    updateMaxHeight()
-    window.addEventListener('resize', updateMaxHeight)
-    return () => window.removeEventListener('resize', updateMaxHeight)
+    checkScroll()
+    const handleResize = () => checkScroll()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [nearbyUnits])
 
   return (
-    <div className="w-full space-y-5">
-      <div className="text-left">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-left flex-shrink-0 pb-5">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           Escolha a <span className="text-primary">unidade mais próxima</span>{' '}
           de sua residência
         </h2>
       </div>
 
-      <div className="relative">
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         <div
           ref={listRef}
           onScroll={checkScroll}
-          style={{ maxHeight }}
-          className="overflow-y-auto pr-1 space-y-0"
+          className="overflow-y-auto pr-1 space-y-0 h-full"
         >
           <RadioGroup
             value={selectedValue}
-            onValueChange={value => setValue(fieldName as any, value)}
+            onValueChange={handleUnitChange}
             className="w-full"
           >
             {nearbyUnits.map((unit, index) => (
