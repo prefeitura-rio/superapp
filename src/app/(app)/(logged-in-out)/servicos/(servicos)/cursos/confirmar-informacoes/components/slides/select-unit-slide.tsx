@@ -55,19 +55,19 @@ export const SelectUnitSlide = ({
   }, [nearbyUnits])
 
   return (
-    <div className="w-full space-y-5">
-      <div className="text-left">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-left flex-shrink-0 pb-5">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           Escolha a <span className="text-primary">unidade mais próxima</span>{' '}
           de sua residência
         </h2>
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         <div
           ref={listRef}
           onScroll={checkScroll}
-          className="overflow-y-auto pr-1 space-y-0 h-full max-h-[60vh]"
+          className="overflow-y-auto pr-1 space-y-0 h-full"
         >
           <RadioGroup
             value={selectedValue}

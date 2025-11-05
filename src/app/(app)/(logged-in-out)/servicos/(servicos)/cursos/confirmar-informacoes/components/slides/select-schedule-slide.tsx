@@ -85,21 +85,21 @@ export const SelectScheduleSlide = ({
   }
 
   return (
-    <div className="w-full space-y-5">
-      <div className="text-left">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-left flex-shrink-0">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           Agora <span className="text-primary">selecione sua turma</span>
         </h2>
-        <p className="text-sm pt-8 text-muted-foreground">
+        <p className="text-sm pt-8 pb-5 text-muted-foreground">
           {selectedUnit.address} - {selectedUnit.neighborhood}
         </p>
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         <div
           ref={listRef}
           onScroll={checkScroll}
-          className="overflow-y-auto pr-1 space-y-0 h-full max-h-[60vh]"
+          className="overflow-y-auto pr-1 space-y-0 h-full"
         >
           <RadioGroup
             value={selectedValue}
@@ -160,7 +160,7 @@ export const SelectScheduleSlide = ({
       </div>
 
       {shouldShowError && (
-        <p className="text-destructive text-sm -mt-2">
+        <p className="text-destructive text-sm mt-3 flex-shrink-0">
           {errors[fieldName as keyof typeof errors]?.message}
         </p>
       )}
