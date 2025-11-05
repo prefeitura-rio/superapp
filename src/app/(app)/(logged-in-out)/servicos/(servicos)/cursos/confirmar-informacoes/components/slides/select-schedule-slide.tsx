@@ -47,7 +47,6 @@ export const SelectScheduleSlide = ({
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
-  const [maxHeight, setMaxHeight] = useState('300px')
   const listRef = useRef<HTMLDivElement>(null)
 
   const checkScroll = () => {
@@ -58,18 +57,12 @@ export const SelectScheduleSlide = ({
     setShowBottomFade(scrollTop + clientHeight < scrollHeight - 1)
   }
 
-  const updateMaxHeight = () => {
-    const vh = window.innerHeight
-    const offset = 320
-    setMaxHeight(`${vh - offset}px`)
-    checkScroll()
-  }
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
   useEffect(() => {
-    updateMaxHeight()
-    window.addEventListener('resize', updateMaxHeight)
-    return () => window.removeEventListener('resize', updateMaxHeight)
+    checkScroll()
+    const handleResize = () => checkScroll()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [selectedUnit])
 
   if (
@@ -102,12 +95,11 @@ export const SelectScheduleSlide = ({
         </p>
       </div>
 
-      <div className="relative">
+      <div className="relative flex-1 overflow-hidden">
         <div
           ref={listRef}
           onScroll={checkScroll}
-          style={{ maxHeight }}
-          className="overflow-y-auto pr-1 space-y-0"
+          className="overflow-y-auto pr-1 space-y-0 h-full max-h-[60vh]"
         >
           <RadioGroup
             value={selectedValue}
@@ -129,20 +121,19 @@ export const SelectScheduleSlide = ({
                     Turma {index + 1}
                   </h3>
                   <div className="text-sm text-muted-foreground space-y-0.5">
-                    <p>
-                      <span className="font-medium">Data início:</span>{' '}
+                   <div className="flex items-center gap-1">
+                    <p className="font-medium">
                       {formatDate(schedule.class_start_date)}
                     </p>
+                    <span className="font-medium">-</span>
                     <p>
-                      <span className="font-medium">Data final:</span>{' '}
                       {formatDate(schedule.class_end_date)}
                     </p>
+                    </div>
                     <p>
-                      <span className="font-medium">Horário:</span>{' '}
                       {formatTimeRange(schedule.class_time)}
                     </p>
                     <p>
-                      <span className="font-medium">Dias de aula:</span>{' '}
                       {schedule.class_days}
                     </p>
                     <p>

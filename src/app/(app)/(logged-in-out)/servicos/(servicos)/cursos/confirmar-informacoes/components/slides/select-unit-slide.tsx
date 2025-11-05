@@ -36,7 +36,6 @@ export const SelectUnitSlide = ({
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
-  const [maxHeight, setMaxHeight] = useState('300px')
   const listRef = useRef<HTMLDivElement>(null)
 
   const checkScroll = () => {
@@ -47,18 +46,12 @@ export const SelectUnitSlide = ({
     setShowBottomFade(scrollTop + clientHeight < scrollHeight - 1)
   }
 
-  const updateMaxHeight = () => {
-    const vh = window.innerHeight
-    const offset = 320
-    setMaxHeight(`${vh - offset}px`)
-    checkScroll()
-  }
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
   useEffect(() => {
-    updateMaxHeight()
-    window.addEventListener('resize', updateMaxHeight)
-    return () => window.removeEventListener('resize', updateMaxHeight)
+    checkScroll()
+    const handleResize = () => checkScroll()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [nearbyUnits])
 
   return (
@@ -70,12 +63,11 @@ export const SelectUnitSlide = ({
         </h2>
       </div>
 
-      <div className="relative">
+      <div className="relative flex-1 overflow-hidden">
         <div
           ref={listRef}
           onScroll={checkScroll}
-          style={{ maxHeight }}
-          className="overflow-y-auto pr-1 space-y-0"
+          className="overflow-y-auto pr-1 space-y-0 h-full max-h-[60vh]"
         >
           <RadioGroup
             value={selectedValue}

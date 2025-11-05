@@ -7,7 +7,6 @@ import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { useViewportHeight } from '@/hooks/useViewport'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
@@ -73,7 +72,6 @@ export function ConfirmInscriptionClient({
   const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
-  const { isBelowBreakpoint } = useViewportHeight(648)
 
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
@@ -514,51 +512,51 @@ export function ConfirmInscriptionClient({
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
-    <div className="relative min-h-lvh w-full px-4 mx-auto bg-background max-w-xl text-foreground flex flex-col overflow-hidden">
-      <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
-        <CustomButton
-          className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
-            showBackButton
-              ? 'opacity-100 translate-x-0'
-              : 'opacity-0 -translate-x-2 pointer-events-none'
-          }`}
-          onClick={handleBack}
-          disabled={isPending}
-        >
-          <ChevronLeftIcon className="text-foreground" />
-        </CustomButton>
-      </div>
+    <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
+      <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
+        <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
+          <CustomButton
+            className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
+              showBackButton
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 -translate-x-2 pointer-events-none'
+            }`}
+            onClick={handleBack}
+            disabled={isPending}
+          >
+            <ChevronLeftIcon className="text-foreground" />
+          </CustomButton>
+        </div>
 
-      <div className="my-8 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden py-8">
+          {!showSuccess && (
+            <div
+              className={`h-full transition-opacity duration-600 ${
+                fadeOut ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <ConfirmInscriptionSlider
+                ref={swiperRef}
+                slides={slides}
+                onSlideChange={index => setCurrentIndex(index)}
+                showPagination={currentSlide?.showPagination !== false}
+              />
+            </div>
+          )}
+
+          {showSuccess && (
+            <div
+              className={`flex justify-center transition-opacity duration-600 ${
+                fadeOut ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <SuccessSlide onFinish={handleFinish} />
+            </div>
+          )}
+        </div>
+
         {!showSuccess && (
-          <div
-            className={`transition-opacity duration-600 ${
-              fadeOut ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            <ConfirmInscriptionSlider
-              ref={swiperRef}
-              slides={slides}
-              onSlideChange={index => setCurrentIndex(index)}
-              isBelowBreakpoint={isBelowBreakpoint}
-              showPagination={currentSlide?.showPagination !== false}
-            />
-          </div>
-        )}
-
-        {showSuccess && (
-          <div
-            className={`flex justify-center transition-opacity duration-600 ${
-              fadeOut ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            <SuccessSlide onFinish={handleFinish} />
-          </div>
-        )}
-      </div>
-
-      {!showSuccess && (
-        <div className="flex-shrink-0 pb-12">
+          <div className="flex-shrink-0 pb-12">
           {needsContactUpdate && hasEmail && hasPhone ? (
             <p className="mb-8">
               <span className="text-muted-foreground text-sm">
@@ -609,7 +607,8 @@ export function ConfirmInscriptionClient({
             </CustomButton>
           </div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
