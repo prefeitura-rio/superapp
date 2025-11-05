@@ -8,6 +8,7 @@ import { handleExpiredToken, isJwtExpired } from './lib'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
+  { path: '/faq', whenAuthenticated: 'next' },
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
   { path: '/ouvidoria/*', whenAuthenticated: 'next' },
