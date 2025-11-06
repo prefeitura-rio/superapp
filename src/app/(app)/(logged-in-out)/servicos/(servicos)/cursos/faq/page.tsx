@@ -100,9 +100,9 @@ FormattedContent.displayName = 'FormattedContent'
 const FAQ_SECTIONS = [
   {
     id: 'plataforma',
-    title: 'O que é a Plataforma Oportunidas Cariocas?',
+    title: 'O que é a Plataforma Oportunidades Cariocas?',
     content:
-      'O Oportunidas Cariocas é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos, oficinas, palestras e quaisquer atividades educativas oferecidas pela Prefeitura do Rio e instituições parceiras. ',
+      'O Oportunidades Cariocas é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos, oficinas, palestras e quaisquer atividades educativas oferecidas pela Prefeitura do Rio e instituições parceiras. ',
   },
   {
     id: 'quem-pode',
@@ -115,7 +115,7 @@ const FAQ_SECTIONS = [
     title:
       'O que é a conta Gov.br e por que preciso dela para me inscrever nos cursos?',
     content:
-      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Oportunidas Cariocas, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
+      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n Para o Oportunidades Cariocas, ela é o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de inscrição nos cursos e demais ações ofertadas.',
   },
   {
     id: 'criar-conta',
@@ -156,7 +156,7 @@ const FAQ_SECTIONS = [
     id: 'certificado',
     title: 'Receberei certificado de conclusão do curso?',
     content:
-      'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão. \n\n Ele será disponibilizado aqui mesmo, na plataforma Oportunidas Cariocas, na aba "Certificados" e/ou por e-mail pela unidade responsável.',
+      'Sim. Ao finalizar o curso, você terá direito a um certificado digital de participação ou conclusão. \n\n Ele será disponibilizado aqui mesmo, na plataforma Oportunidades Cariocas, na aba "Certificados" e/ou por e-mail pela unidade responsável.',
   },
 ] as const
 
