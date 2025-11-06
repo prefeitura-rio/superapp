@@ -8,6 +8,11 @@ import {
 import { SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } from '@opentelemetry/semantic-conventions'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch'
+import {
+  TraceIdRatioBasedSampler,
+  AlwaysOnSampler,
+  ParentBasedSampler,
+} from '@opentelemetry/sdk-trace-base'
 
 export async function register() {
   // Check if OpenTelemetry is enabled
@@ -23,13 +28,35 @@ export async function register() {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317'
   const serviceName = process.env.OTEL_SERVICE_NAME || 'citizen-portal'
   const serviceVersion = process.env.OTEL_SERVICE_VERSION || '0.1.0'
-  const environment = process.env.OTEL_ENVIRONMENT || process.env.NODE_ENV || 'development'
+  const environment =
+    process.env.OTEL_ENVIRONMENT || process.env.NODE_ENV || 'development'
+
+  // Configure trace sampling
+  // OTEL_TRACES_SAMPLER can be: always_on, always_off, traceidratio
+  // OTEL_TRACES_SAMPLER_ARG is the ratio for traceidratio (0.0 to 1.0)
+  const samplerType = process.env.OTEL_TRACES_SAMPLER || 'always_on'
+  const samplerArg = parseFloat(process.env.OTEL_TRACES_SAMPLER_ARG || '1.0')
+
+  let sampler
+  if (samplerType === 'traceidratio') {
+    // Sample a percentage of traces (e.g., 0.1 = 10%)
+    sampler = new ParentBasedSampler({
+      root: new TraceIdRatioBasedSampler(samplerArg),
+    })
+  } else {
+    // Default: always sample (development/staging)
+    sampler = new ParentBasedSampler({
+      root: new AlwaysOnSampler(),
+    })
+  }
 
   console.log('[OpenTelemetry] Initializing tracing...', {
     serviceName,
     serviceVersion,
     environment,
     collectorUrl,
+    sampler: samplerType,
+    samplerArg: samplerType === 'traceidratio' ? samplerArg : 'N/A',
   })
 
   // Create OTLP gRPC exporter
@@ -48,6 +75,7 @@ export async function register() {
   const sdk = new NodeSDK({
     resource,
     traceExporter,
+    sampler,
     instrumentations: [
       // Auto-instrument HTTP requests (both incoming and outgoing)
       new HttpInstrumentation({
