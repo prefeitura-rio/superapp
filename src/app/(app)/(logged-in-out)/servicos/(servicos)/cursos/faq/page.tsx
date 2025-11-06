@@ -133,7 +133,7 @@ const FAQ_SECTIONS = [
     id: 'apto-aulas',
     title: 'Ao solicitar a inscrição, já estou apto(a) para as aulas?',
     content:
-      'Não. Ao solicitar sua inscrição, você deverá aguardar a confirmação por e-mail ou telefone da unidade responsável pelo curso. \n\n Por isso, é muito importante manter seus dados de contato sempre atualizados.',
+      'Não. Ao solicitar sua inscrição, você deverá aguardar a confirmação por e-mail ou telefone da unidade responsável pela atividade. \n\n Por isso, é muito importante manter seus dados de contato sempre atualizados.',
   },
   {
     id: 'varios-cursos',
@@ -150,7 +150,7 @@ const FAQ_SECTIONS = [
     id: 'cancelar',
     title: 'Como faço para cancelar minha inscrição?',
     content:
-      'Para cancelar sua inscrição, basta ir até a página do curso desejado no Oportunidas Cariocas e clicar em "Cancelar inscrição". ',
+      'Para cancelar sua inscrição, basta ir até a página da atividade desejada no Oportunidades Cariocas e clicar em “Cancelar inscrição”.',
   },
   {
     id: 'certificado',
