@@ -9,16 +9,24 @@ export interface CourseUserInfo {
   phone: PhoneData
 }
 
-export interface NearbyUnit {
+export interface Schedule {
   id: string
-  curso_id: number
-  address: string
-  neighborhood: string
+  location_id?: string
   vacancies: number
   class_start_date: string
   class_end_date: string
   class_time: string
   class_days: string
+  created_at: string
+  updated_at: string
+}
+
+export interface NearbyUnit {
+  id: string
+  curso_id: number
+  address: string
+  neighborhood: string
+  schedules: Schedule[]
   created_at: string
   updated_at: string
 }
@@ -48,12 +56,20 @@ export const inscriptionSchema = z.object({
 // and includes all custom fields dynamically
 export const createInscriptionSchema = (
   hasNearbyUnits: boolean,
+  hasMultipleSchedules: boolean,
   customFields: CustomField[] = []
 ) => {
   const baseSchema = {
     unitId: hasNearbyUnits
       ? z.string().min(1, 'Selecione uma unidade')
       : z.string().optional(),
+    // Only require scheduleId if there are multiple schedules (when user needs to choose)
+    // If there's only one schedule, it's auto-selected and sent to backend
+    scheduleId: hasMultipleSchedules
+      ? z.string().min(1, 'Selecione uma turma')
+      : hasNearbyUnits
+        ? z.string().optional() // Optional but will be auto-filled if only one schedule
+        : z.string().optional(),
     description: z.string().optional(),
   }
 

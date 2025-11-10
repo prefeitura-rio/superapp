@@ -8,7 +8,6 @@ import type { SlideData } from '../types'
 interface ConfirmInscriptionSliderProps {
   slides: SlideData[]
   onSlideChange: (index: number) => void
-  isBelowBreakpoint?: boolean
   showPagination?: boolean
 }
 
@@ -17,7 +16,7 @@ export const ConfirmInscriptionSlider = forwardRef<
   ConfirmInscriptionSliderProps
 >(
   (
-    { slides, onSlideChange, isBelowBreakpoint = false, showPagination = true },
+    { slides, onSlideChange, showPagination = true },
     ref
   ) => {
     /* --Pagination Bullets Positioning--
@@ -92,18 +91,14 @@ export const ConfirmInscriptionSlider = forwardRef<
           onSlideChange={swiper => onSlideChange(swiper.activeIndex)}
           pagination={showPagination ? { clickable: true } : false}
           modules={showPagination ? [Pagination] : []}
-          className="relative h-[500px] course__confirm-user-info__slider"
+          className="relative h-full course__confirm-user-info__slider"
           allowTouchMove={true}
         >
           {slides.map((slide, idx) => {
             const SlideComponent = slide.component
             return (
               <SwiperSlide key={slide.id || idx}>
-                <div
-                  className={`flex flex-col items-center min-h-[70dvh] md:min-h-[80dvh] max-h-lvh mt-5 md:mt-0 ${
-                    isBelowBreakpoint && 'max-h-[410px]'
-                  }`}
-                >
+                <div className="flex flex-col h-full">
                   <SlideComponent
                     slideIndex={idx}
                     isActive={true}

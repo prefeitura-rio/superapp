@@ -19,16 +19,23 @@ interface SubmitInscriptionData {
     phone?: string
   }
   unitId?: string
+  scheduleId?: string
   enrolledUnit?: {
     id: string
     curso_id: number
     address: string
     neighborhood: string
-    vacancies: number
-    class_start_date: string
-    class_end_date: string
-    class_time: string
-    class_days: string
+    schedules: Array<{
+      id: string
+      location_id?: string
+      vacancies: number
+      class_start_date: string
+      class_end_date: string
+      class_time: string
+      class_days: string
+      created_at: string
+      updated_at: string
+    }>
     created_at: string
     updated_at: string
   }
@@ -69,6 +76,7 @@ export async function submitCourseInscription(
       updated_at: new Date().toISOString(),
       custom_fields: data.customFields,
       enrolled_unit: data.enrolledUnit,
+      schedule_id: data.scheduleId,
     }
 
     console.log('Submitting inscription with payload:', inscriptionPayload)
