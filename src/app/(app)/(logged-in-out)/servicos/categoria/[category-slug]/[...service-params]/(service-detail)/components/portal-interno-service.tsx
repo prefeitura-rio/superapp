@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button'
-import { convertUrlsToLinks, ensureUrlProtocol } from '@/lib/url-utils'
+import { ensureUrlProtocol } from '@/lib/url-utils'
 import type { ServiceFromPortalInterno } from '@/types/portal-interno'
 import Link from 'next/link'
-import { CollapsibleText } from './collapsible-text'
+import { MarkdownRenderer } from './markdown-renderer'
 
 interface PortalInternoServiceProps {
   serviceData: ServiceFromPortalInterno
@@ -19,9 +19,9 @@ export function PortalInternoServiceComponent({
       </h1>
 
       {/* Service Summary */}
-      <p className="text-sm text-foreground-light leading-5 mb-6 max-w-4xl">
-        {serviceData.resumo}
-      </p>
+      <div className="mb-6 max-w-4xl">
+        <MarkdownRenderer content={serviceData.resumo} />
+      </div>
 
       {serviceData?.buttons && serviceData.buttons.length > 0 && (
         <div className="mb-6 space-y-5">
@@ -84,7 +84,7 @@ export function PortalInternoServiceComponent({
           <p className="text-sm text-foreground-light leading-5 capitalize">
             {serviceData.custo_servico}
             {serviceData.is_free && (
-              <span className="block mt-1 text-green-600 font-medium">
+              <span className="block mt-1 text-foreground font-medium">
                 Serviço gratuito
               </span>
             )}
@@ -98,7 +98,7 @@ export function PortalInternoServiceComponent({
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Descrição Completa
           </h2>
-          <CollapsibleText text={serviceData.descricao_completa} />
+          <MarkdownRenderer content={serviceData.descricao_completa} />
         </div>
       )}
 
@@ -108,9 +108,7 @@ export function PortalInternoServiceComponent({
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Instruções para o Solicitante
           </h2>
-          <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
-            {convertUrlsToLinks(serviceData.instrucoes_solicitante)}
-          </div>
+          <MarkdownRenderer content={serviceData.instrucoes_solicitante} />
         </div>
       )}
 
@@ -121,9 +119,7 @@ export function PortalInternoServiceComponent({
             <h2 className="text-base font-medium text-foreground leading-5 mb-2">
               Documentos Necessários
             </h2>
-            <div className="text-sm text-foreground-light leading-5 whitespace-pre-wrap">
-              {serviceData.documentos_necessarios[0]}
-            </div>
+            <MarkdownRenderer content={serviceData.documentos_necessarios[0]} />
           </div>
         )}
 
@@ -133,7 +129,7 @@ export function PortalInternoServiceComponent({
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Este serviço não cobre
           </h2>
-          <CollapsibleText text={serviceData.servico_nao_cobre} />
+          <MarkdownRenderer content={serviceData.servico_nao_cobre} />
         </div>
       )}
 
@@ -143,9 +139,7 @@ export function PortalInternoServiceComponent({
           <h2 className="text-base font-medium text-foreground leading-5 mb-2">
             Resultado da Solicitação
           </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            {serviceData.resultado_solicitacao}
-          </p>
+          <MarkdownRenderer content={serviceData.resultado_solicitacao} />
         </div>
       )}
 
