@@ -329,7 +329,7 @@ function LocationSelection({
                   : 'border-none bg-card cursor-pointer'
               }`}
             >
-              <h4 className="font-medium text-foreground text-sm md:text-base line-clamp-2">
+              <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
                 {location.address}
               </h4>
               <p className="text-xs md:text-sm text-foreground-light mt-1">
