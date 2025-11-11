@@ -15,11 +15,6 @@ import {
 } from '@opentelemetry/sdk-trace-base'
 
 export async function register() {
-  // Skip instrumentation in Edge runtime (only run in Node.js runtime)
-  if (typeof EdgeRuntime !== 'undefined') {
-    return
-  }
-
   // Check if OpenTelemetry is enabled
   const isOtelEnabled = process.env.OTEL_ENABLED === 'true'
 
