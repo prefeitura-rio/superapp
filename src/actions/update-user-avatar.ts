@@ -1,6 +1,6 @@
 'use server'
 
-import { putV1CitizenCpfAvatar } from '@/http/avatars/avatars'
+import { putCitizenCpfAvatar } from '@/http/avatars/avatars'
 import { revalidateDalCitizenCpfAvatar } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -12,7 +12,7 @@ export async function updateUserAvatar(avatarId: string) {
       return { success: false, error: 'Usuário não autenticado' }
     }
 
-    const response = await putV1CitizenCpfAvatar(userInfo.cpf, {
+    const response = await putCitizenCpfAvatar(userInfo.cpf, {
       avatar_id: avatarId,
     })
 
