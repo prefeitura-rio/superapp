@@ -4,34 +4,34 @@ on:
   workflow_dispatch:
     inputs:
       target_url:
-        description: 'Target URL to test'
+        description: "Target URL to test"
         required: true
-        default: 'https://staging.app.dados.rio'
+        default: "https://staging.app.dados.rio"
         type: string
       peak_vus:
-        description: 'Peak virtual users (VUs)'
+        description: "Peak virtual users (VUs)"
         required: true
-        default: '100'
+        default: "100"
         type: string
       ramp_up_minutes:
-        description: 'Ramp up time (minutes)'
+        description: "Ramp up time (minutes)"
         required: true
-        default: '2'
+        default: "2"
         type: string
       sustained_minutes:
-        description: 'Sustained load time (minutes)'
+        description: "Sustained load time (minutes)"
         required: true
-        default: '5'
+        default: "5"
         type: string
       ramp_down_minutes:
-        description: 'Ramp down time (minutes)'
+        description: "Ramp down time (minutes)"
         required: true
-        default: '2'
+        default: "2"
         type: string
       environment:
-        description: 'Environment (staging/production)'
+        description: "Environment (staging/production)"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
@@ -68,7 +68,7 @@ jobs:
       - name: Configure kubectl for GKE
         run: |
           gcloud container clusters get-credentials ${{ vars.GKE_CLUSTER_NAME }} \
-            --zone=${{ vars.GKE_CLUSTER_ZONE }} \
+            --region=${{ vars.GKE_CLUSTER_REGION }} \
             --project="${{ vars.GCP_PROJECT_ID }}"
 
       - name: Verify cluster connection

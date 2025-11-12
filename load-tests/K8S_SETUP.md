@@ -47,7 +47,7 @@ Add the following variables to **each** environment:
 |--------------|-------------|---------|
 | `GCP_PROJECT_ID` | Your GCP project ID | `my-project-123` |
 | `GKE_CLUSTER_NAME` | GKE cluster name | `superapp-staging-cluster` |
-| `GKE_CLUSTER_ZONE` | GKE cluster zone | `us-central1-a` |
+| `GKE_CLUSTER_REGION` | GKE cluster region | `us-central1-a` |
 | `K6_NAMESPACE` | Kubernetes namespace for k6 tests | `k6-load-testing` |
 | `GCS_RESULTS_BUCKET` | GCS bucket name (without gs://) | `superapp-load-test-results` |
 
@@ -181,7 +181,7 @@ gsutil -m cp -r gs://YOUR_BUCKET/load-tests/staging/20240312-153045-load-test-* 
 **Cause**: Cluster not found or insufficient permissions.
 
 **Solution:**
-1. Verify `GKE_CLUSTER_NAME` and `GKE_CLUSTER_ZONE` are correct
+1. Verify `GKE_CLUSTER_NAME` and `GKE_CLUSTER_REGION` are correct
 2. Check service account has `container.clusters.getCredentials` permission
 3. Ensure cluster exists and is running
 
