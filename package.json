@@ -54,14 +54,21 @@
     "tailwindcss": "^4.1.5",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.57"
+    "zod": "^3.25.57",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.54.2",
+    "@opentelemetry/instrumentation-http": "^0.54.2",
+    "@opentelemetry/instrumentation-fetch": "^0.54.2",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.54.2",
+    "@opentelemetry/resources": "^1.28.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "orval": "^7.9.0",
+    "orval": "7.11.2",
     "tw-animate-css": "^1.2.8",
     "typescript": "^5"
   }

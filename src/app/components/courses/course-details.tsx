@@ -13,6 +13,7 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
+import type { ModelsDepartmentResponse } from '@/http/models'
 import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
@@ -29,6 +30,7 @@ interface CourseDetailsProps {
   course: Course
   userEnrollment: UserEnrollment | null
   userInfo: UserInfo
+  department: ModelsDepartmentResponse | null
 }
 
 // Utility functions
@@ -169,9 +171,15 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
 
 interface CourseInfoProps {
   course: Course
+  department: ModelsDepartmentResponse | null
 }
 
-function CourseInfo({ course }: CourseInfoProps) {
+function CourseInfo({ course, department }: CourseInfoProps) {
+  // Use department data if available, otherwise fall back to course.organization
+  const organizationName =
+    department?.nome_ua || course.organization || 'Instituição não informada'
+  const organizationInitial = organizationName.charAt(0)
+
   return (
     <div className="flex p-4 gap-2">
       <div className="flex items-center gap-3">
@@ -186,13 +194,11 @@ function CourseInfo({ course }: CourseInfoProps) {
             />
           ) : (
             <span className="text-2.5 font-semibold text-foreground uppercase">
-              {course.organization?.charAt(0)}
+              {organizationInitial}
             </span>
           )}
         </div>
-        <p className="text-sm">
-          {course.organization || 'Instituição não informada'}
-        </p>
+        <p className="text-sm">{organizationName}</p>
       </div>
 
       {course.is_external_partner && (
@@ -493,6 +499,7 @@ export function CourseDetails({
   course,
   userEnrollment,
   userInfo,
+  department,
 }: CourseDetailsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
@@ -664,7 +671,7 @@ export function CourseDetails({
           </div>
         </BottomSheet>
         <CourseHeader course={course} />
-        <CourseInfo course={course} />
+        <CourseInfo course={course} department={department} />
         <CourseMetadata course={course} />
         {userEnrollment?.status && (
           <CourseStatusCard

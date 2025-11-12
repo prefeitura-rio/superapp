@@ -3,6 +3,7 @@
 import { getUserEnrollment } from '@/actions/courses/get-user-enrollment'
 import { CourseDetails } from '@/app/components/courses/course-details'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getDepartmentsCdUa } from '@/http/departments/departments'
 import {
   type UserEnrollmentExtended,
   shouldShowCourse,
@@ -44,11 +45,28 @@ export default async function CoursePage({
       // Continue without enrollment data - user will see "Inscreva-se" button
     }
 
+    // Fetch department/organization data if orgao_id exists
+    let departmentData = null
+    if (course.orgao_id) {
+      try {
+        const departmentResponse = await getDepartmentsCdUa(course.orgao_id)
+        if (departmentResponse.status === 200 && departmentResponse.data) {
+          departmentData = departmentResponse.data
+        }
+      } catch (departmentError) {
+        console.error(
+          'Error fetching department data, continuing without it:',
+          departmentError
+        )
+      }
+    }
+
     return (
       <CourseDetails
         course={course}
         userEnrollment={userEnrollment}
         userInfo={userInfo}
+        department={departmentData}
       />
     )
   } catch (error) {
