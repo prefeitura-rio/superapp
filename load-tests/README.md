@@ -34,6 +34,7 @@ The default test runs for **21 minutes** with the following stages:
 ```
 load-tests/
 ├── README.md              # This file
+├── K8S_SETUP.md           # Kubernetes load testing setup guide
 ├── config.js              # Test configuration (weights, thresholds, data)
 ├── main.js                # Main k6 test script
 ├── requirements.txt       # Python dependencies for analysis
@@ -92,6 +93,39 @@ just analyze-results
 ```
 
 That's it! Two simple commands.
+
+## Large-Scale Load Testing (Kubernetes)
+
+For testing with higher load (hundreds or thousands of VUs), use the Kubernetes-based load testing infrastructure:
+
+**👉 See [K8S_SETUP.md](./K8S_SETUP.md) for complete setup instructions.**
+
+### Quick Start (K8s)
+
+1. **Set up GitHub Actions** (one-time):
+   - Configure GitHub environments (`k6-staging`, `k6-production`)
+   - Add GCP credentials and cluster details
+   - Create private GCS bucket for results
+
+2. **Run load test**:
+   - Go to **Actions** → **K6 Load Test (K8s)**
+   - Click **Run workflow**
+   - Specify parameters:
+     - Target URL
+     - Peak VUs (e.g., `500`, `1000`)
+     - Ramp up/sustained/ramp down times
+     - Environment (staging/production)
+
+3. **View results**:
+   - Results stored privately in GCS bucket
+   - Download and analyze locally with `just analyze-results`
+
+**Benefits over local testing:**
+- ✅ Test with thousands of VUs (vs 100-200 locally)
+- ✅ Distributed load from Kubernetes cluster
+- ✅ No impact on local machine performance
+- ✅ Automated cleanup
+- ✅ Results stored securely in private GCS bucket
 
 ### Manual Execution (without just)
 

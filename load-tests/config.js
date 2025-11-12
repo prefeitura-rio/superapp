@@ -1,21 +1,29 @@
+// Parse stages from environment variable if provided, otherwise use defaults
+function getStages() {
+  if (__ENV.K6_STAGES) {
+    try {
+      return JSON.parse(__ENV.K6_STAGES);
+    } catch (e) {
+      console.error('Failed to parse K6_STAGES environment variable:', e);
+      console.log('Falling back to default stages');
+    }
+  }
+
+  // Default stages for local testing
+  return [
+    { duration: '1m', target: 100 },
+    { duration: '1m', target: 100 },
+    { duration: '1m', target: 0 },
+  ];
+}
+
 // Load Test Configuration
 export const config = {
   // Base URL - override with K6_BASE_URL environment variable
   baseUrl: __ENV.K6_BASE_URL || 'http://localhost:3000',
 
-  // Load test stages - ramp-up then sustained load
-  stages: [
-    { duration: '1m', target: 100 },   // Ramp up to 50 users
-    { duration: '1m', target: 100 },   //
-    { duration: '1m', target: 0 },    // Ramp down to 0 users
-    // { duration: '2m', target: 50 },   // Ramp up to 50 users
-    // { duration: '5m', target: 50 },   // Stay at 50 users for 5 minutes
-    // { duration: '2m', target: 100 },  // Ramp up to 100 users
-    // { duration: '5m', target: 100 },  // Stay at 100 users for 5 minutes
-    // { duration: '2m', target: 150 },  // Spike to 150 users
-    // { duration: '3m', target: 150 },  // Maintain spike
-    // { duration: '2m', target: 0 },    // Ramp down to 0
-  ],
+  // Load test stages - override with K6_STAGES environment variable (JSON)
+  stages: getStages(),
 
   // Performance thresholds
   thresholds: {
