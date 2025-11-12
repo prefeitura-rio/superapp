@@ -70,6 +70,7 @@ export interface Course {
   enrollment_start_date: string
   enrollment_end_date: string
   organization: string
+  orgao_id?: string
   modalidade: string
   theme: string
   workload: string
