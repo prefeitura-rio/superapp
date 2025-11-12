@@ -1,5 +1,5 @@
 /**
- * Main Load Test Script for Carioca Digital Superapp
+ * Main Load Test Script for pref.rio
  *
  * This script simulates realistic user journeys based on weighted probabilities:
  * - Service Seeker: 35% - Citizens looking for specific services (IPTU, Multas, etc.)
@@ -45,7 +45,7 @@ export const options = {
 // Test setup
 export function setup() {
   console.log('========================================');
-  console.log('Carioca Digital Load Test');
+  console.log('pref.rio Load Test');
   console.log('========================================');
   console.log(`Target: ${config.baseUrl}`);
   console.log('Journey Distribution:');

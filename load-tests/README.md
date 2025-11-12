@@ -1,6 +1,6 @@
-# Load Testing for Carioca Digital Superapp
+# Load Testing for pref.rio
 
-This directory contains load testing infrastructure for performance testing and analysis of the Carioca Digital citizen portal.
+This directory contains load testing infrastructure for performance testing and analysis of the pref.rio citizen portal.
 
 ## Overview
 
