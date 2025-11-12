@@ -25,6 +25,7 @@
             # Python for analytics and charting
             python311
             python311Packages.pandas
+            python311Packages.numpy
             python311Packages.matplotlib
             python311Packages.seaborn
             python311Packages.tabulate
@@ -63,7 +64,8 @@
             echo "📦 Install dependencies: npm install"
             echo "🚀 Start dev server: npm run dev"
             echo "🏗️  Build: npm run build"
-            echo "🧪 Load tests: just test-smoke-protocol http://localhost:3000"
+            echo "🧪 Load test: just load-test"
+            echo "📊 Analyze results: just analyze-results"
             echo ""
 
             # Load .env files if they exist

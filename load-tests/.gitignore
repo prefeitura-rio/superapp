@@ -1,0 +1,29 @@
+# k6 test results
+data/
+*.json
+
+# Generated reports
+reports/
+*.png
+*.txt
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,247 @@
+name: K6 Load Test (K8s)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target URL to test"
+        required: true
+        default: "https://staging.app.dados.rio"
+        type: string
+      peak_vus:
+        description: "Peak virtual users (VUs)"
+        required: true
+        default: "100"
+        type: string
+      ramp_up_minutes:
+        description: "Ramp up time (minutes)"
+        required: true
+        default: "2"
+        type: string
+      sustained_minutes:
+        description: "Sustained load time (minutes)"
+        required: true
+        default: "5"
+        type: string
+      ramp_down_minutes:
+        description: "Ramp down time (minutes)"
+        required: true
+        default: "2"
+        type: string
+      environment:
+        description: "Environment (staging/production)"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  k6-load-test:
+    name: Run K6 Load Test
+    runs-on: ubuntu-latest
+    environment: k6-${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Install gke-gcloud-auth-plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: latest
+
+      - name: Configure kubectl for GKE
+        run: |
+          gcloud container clusters get-credentials ${{ vars.GKE_CLUSTER_NAME }} \
+            --region=${{ vars.GKE_CLUSTER_REGION }} \
+            --project="${{ vars.GCP_PROJECT_ID }}"
+
+      - name: Verify cluster connection
+        run: kubectl cluster-info
+
+      - name: Create k6 namespace if not exists
+        run: kubectl create namespace ${{ vars.K6_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Generate test run ID
+        id: test-run
+        run: |
+          TEST_RUN_ID="load-test-$(date +%Y%m%d-%H%M%S)"
+          echo "test_run_id=$TEST_RUN_ID" >> $GITHUB_OUTPUT
+          echo "📝 Test Run ID: $TEST_RUN_ID"
+
+      - name: Create ConfigMap with k6 test scripts
+        run: |
+          kubectl create configmap k6-scripts-${{ steps.test-run.outputs.test_run_id }} \
+            --from-file=config.js=load-tests/config.js \
+            --from-file=main.js=load-tests/main.js \
+            --from-file=service-seeker.js=load-tests/journeys/service-seeker.js \
+            --from-file=course-explorer.js=load-tests/journeys/course-explorer.js \
+            --from-file=browser.js=load-tests/journeys/browser.js \
+            --from-file=searcher.js=load-tests/journeys/searcher.js \
+            --namespace=${{ vars.K6_NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create k6 TestRun CRD
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: k6.io/v1alpha1
+          kind: TestRun
+          metadata:
+            name: ${{ steps.test-run.outputs.test_run_id }}
+            namespace: ${{ vars.K6_NAMESPACE }}
+          spec:
+            parallelism: ${{ inputs.peak_vus }}
+            script:
+              configMap:
+                name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
+                file: main.js
+            arguments: --out json=/tmp/results.json
+            runner:
+              image: grafana/k6:latest
+              env:
+                - name: K6_BASE_URL
+                  value: "${{ inputs.target_url }}"
+                - name: K6_STAGES
+                  value: |
+                    [
+                      { "duration": "${{ inputs.ramp_up_minutes }}m", "target": ${{ inputs.peak_vus }} },
+                      { "duration": "${{ inputs.sustained_minutes }}m", "target": ${{ inputs.peak_vus }} },
+                      { "duration": "${{ inputs.ramp_down_minutes }}m", "target": 0 }
+                    ]
+              volumeMounts:
+                - name: k6-scripts
+                  mountPath: /test
+              volumes:
+                - name: k6-scripts
+                  configMap:
+                    name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
+          EOF
+
+      - name: Wait for test completion
+        timeout-minutes: 60
+        run: |
+          echo "⏳ Waiting for test to complete..."
+
+          while true; do
+            STATUS=$(kubectl get testrun ${{ steps.test-run.outputs.test_run_id }} \
+              -n ${{ vars.K6_NAMESPACE }} \
+              -o jsonpath='{.status.stage}' 2>/dev/null || echo "")
+
+            echo "Status: $STATUS"
+
+            if [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
+              echo "✓ Test completed with status: $STATUS"
+              break
+            fi
+
+            sleep 10
+          done
+
+      - name: Collect test results
+        if: always()
+        run: |
+          # Get pod logs containing results
+          PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
+            -l testrun=${{ steps.test-run.outputs.test_run_id }} \
+            -o jsonpath='{.items[*].metadata.name}')
+
+          mkdir -p test-results
+
+          for POD in $PODS; do
+            echo "📊 Collecting results from pod: $POD"
+            kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log || true
+
+            # Try to extract JSON results if they exist
+            kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
+              test-results/${POD}-results.json 2>/dev/null || true
+          done
+
+          # Merge all JSON results
+          if ls test-results/*-results.json 1> /dev/null 2>&1; then
+            cat test-results/*-results.json > test-results/combined-results.json
+          fi
+
+      - name: Upload results to GCS
+        if: always()
+        run: |
+          BUCKET="${{ vars.GCS_RESULTS_BUCKET }}"
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          RESULTS_PATH="load-tests/${{ inputs.environment }}/${TIMESTAMP}-${{ steps.test-run.outputs.test_run_id }}"
+
+          echo "📤 Uploading results to gs://${BUCKET}/${RESULTS_PATH}/"
+
+          gsutil -m cp -r test-results/* "gs://${BUCKET}/${RESULTS_PATH}/" || true
+
+          # Create a summary file with test metadata
+          cat > test-results/metadata.json <<EOF
+          {
+            "test_run_id": "${{ steps.test-run.outputs.test_run_id }}",
+            "timestamp": "${TIMESTAMP}",
+            "environment": "${{ inputs.environment }}",
+            "target_url": "${{ inputs.target_url }}",
+            "peak_vus": ${{ inputs.peak_vus }},
+            "ramp_up_minutes": ${{ inputs.ramp_up_minutes }},
+            "sustained_minutes": ${{ inputs.sustained_minutes }},
+            "ramp_down_minutes": ${{ inputs.ramp_down_minutes }},
+            "github_run_id": "${{ github.run_id }}",
+            "github_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
+
+          gsutil cp test-results/metadata.json "gs://${BUCKET}/${RESULTS_PATH}/metadata.json"
+
+          echo "✓ Results uploaded to: gs://${BUCKET}/${RESULTS_PATH}/"
+          echo "📊 View results: https://console.cloud.google.com/storage/browser/${BUCKET}/${RESULTS_PATH}"
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 📊 Load Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Run ID:** \`${{ steps.test-run.outputs.test_run_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Peak VUs:** ${{ inputs.peak_vus }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ramp Up:** ${{ inputs.ramp_up_minutes }} minutes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sustained:** ${{ inputs.sustained_minutes }} minutes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ramp Down:** ${{ inputs.ramp_down_minutes }} minutes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Duration:** $(( ${{ inputs.ramp_up_minutes }} + ${{ inputs.sustained_minutes }} + ${{ inputs.ramp_down_minutes }} )) minutes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+
+          BUCKET="${{ vars.GCS_RESULTS_BUCKET }}"
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          RESULTS_PATH="load-tests/${{ inputs.environment }}/${TIMESTAMP}-${{ steps.test-run.outputs.test_run_id }}"
+
+          echo "📦 Results stored at: \`gs://${BUCKET}/${RESULTS_PATH}/\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View in GCS Console: https://console.cloud.google.com/storage/browser/${BUCKET}/${RESULTS_PATH}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup test resources
+        if: always()
+        run: |
+          echo "🧹 Cleaning up test resources..."
+
+          kubectl delete testrun ${{ steps.test-run.outputs.test_run_id }} \
+            -n ${{ vars.K6_NAMESPACE }} --ignore-not-found=true
+
+          kubectl delete configmap k6-scripts-${{ steps.test-run.outputs.test_run_id }} \
+            -n ${{ vars.K6_NAMESPACE }} --ignore-not-found=true
+
+          echo "✓ Cleanup complete"
