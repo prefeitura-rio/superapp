@@ -116,7 +116,7 @@ jobs:
               env:
                 - name: K6_BASE_URL
                   value: "${{ inputs.target_url }}"
-                - name: K6_STAGES
+                - name: TEST_STAGES
                   value: |
                     [
                       { "duration": "${{ inputs.ramp_up_minutes }}m", "target": ${{ inputs.peak_vus }} },

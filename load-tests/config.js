@@ -1,10 +1,10 @@
 // Parse stages from environment variable if provided, otherwise use defaults
 function getStages() {
-  if (__ENV.K6_STAGES) {
+  if (__ENV.TEST_STAGES) {
     try {
-      return JSON.parse(__ENV.K6_STAGES);
+      return JSON.parse(__ENV.TEST_STAGES);
     } catch (e) {
-      console.error('Failed to parse K6_STAGES environment variable:', e);
+      console.error('Failed to parse TEST_STAGES environment variable:', e);
       console.log('Falling back to default stages');
     }
   }
