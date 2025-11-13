@@ -123,13 +123,6 @@ jobs:
                       { "duration": "${{ inputs.sustained_minutes }}m", "target": ${{ inputs.peak_vus }} },
                       { "duration": "${{ inputs.ramp_down_minutes }}m", "target": 0 }
                     ]
-              volumeMounts:
-                - name: k6-scripts
-                  mountPath: /test
-              volumes:
-                - name: k6-scripts
-                  configMap:
-                    name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
           EOF
 
       - name: Wait for test completion
