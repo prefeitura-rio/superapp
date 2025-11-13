@@ -162,7 +162,8 @@ jobs:
               if [ "$LOGS_COLLECTED" = "false" ]; then
                 echo "📊 Attempting to collect logs and results from running/completed pods..."
                 PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
-                  -l testrun=${{ steps.test-run.outputs.test_run_id }} \
+                  -l k6_cr=${{ steps.test-run.outputs.test_run_id }},runner=true \
+                  --field-selector=status.phase=Running \
                   -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
 
                 if [ -n "$PODS" ]; then
@@ -191,7 +192,7 @@ jobs:
           # Final attempt to collect any remaining logs and results
           echo "📋 Final collection attempt..."
           PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
-            -l testrun=${{ steps.test-run.outputs.test_run_id }} \
+            -l k6_cr=${{ steps.test-run.outputs.test_run_id }},runner=true \
             --sort-by=.metadata.creationTimestamp \
             -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
 
