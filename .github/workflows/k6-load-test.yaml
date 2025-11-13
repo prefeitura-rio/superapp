@@ -160,18 +160,22 @@ jobs:
             # If test is running or finished, try to collect logs immediately
             if [ "$STATUS" = "started" ] || [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
               if [ "$LOGS_COLLECTED" = "false" ]; then
-                echo "📊 Attempting to collect logs from running/completed pods..."
+                echo "📊 Attempting to collect logs and results from running/completed pods..."
                 PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
                   -l testrun=${{ steps.test-run.outputs.test_run_id }} \
                   -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
 
                 if [ -n "$PODS" ]; then
                   for POD in $PODS; do
-                    echo "  - Collecting logs from: $POD"
+                    echo "  - Collecting from: $POD"
+                    # Collect logs
                     kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log 2>&1 || true
+                    # Collect JSON results
+                    kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
+                      test-results/${POD}-results.json 2>/dev/null || echo "    (no results.json in ${POD})"
                   done
                   LOGS_COLLECTED=true
-                  echo "✓ Logs collected from $( echo $PODS | wc -w ) pod(s)"
+                  echo "✓ Collected from $( echo $PODS | wc -w ) pod(s)"
                 fi
               fi
             fi
@@ -184,8 +188,8 @@ jobs:
             sleep 10
           done
 
-          # Final attempt to collect any remaining logs
-          echo "📋 Final log collection attempt..."
+          # Final attempt to collect any remaining logs and results
+          echo "📋 Final collection attempt..."
           PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
             -l testrun=${{ steps.test-run.outputs.test_run_id }} \
             --sort-by=.metadata.creationTimestamp \
@@ -197,7 +201,19 @@ jobs:
                 echo "  - Collecting logs from: $POD"
                 kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} --tail=-1 > test-results/${POD}.log 2>&1 || true
               fi
+              if [ ! -f "test-results/${POD}-results.json" ]; then
+                echo "  - Attempting to collect JSON results from: $POD"
+                kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
+                  test-results/${POD}-results.json 2>/dev/null || true
+              fi
             done
+          fi
+
+          # Merge all JSON results into combined-results.json
+          echo "🔗 Merging JSON results..."
+          if ls test-results/*-results.json 1> /dev/null 2>&1; then
+            cat test-results/*-results.json > test-results/combined-results.json
+            echo "  ✓ Created combined-results.json from $(ls test-results/*-results.json | wc -l) file(s)"
           fi
 
           # Create a k6 summary from the logs
@@ -213,7 +229,7 @@ jobs:
             done
           fi
 
-          echo "✓ Log collection complete"
+          echo "✓ Collection complete"
           ls -lh test-results/ || true
 
       - name: Upload results to GCS
