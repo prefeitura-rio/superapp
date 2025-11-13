@@ -128,7 +128,6 @@ jobs:
               configMap:
                 name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
                 file: main.js
-            arguments: --out json=/tmp/results.json
             runner:
               image: grafana/k6:latest
               env:
@@ -168,15 +167,11 @@ jobs:
 
                 if [ -n "$PODS" ]; then
                   for POD in $PODS; do
-                    echo "  - Collecting from: $POD"
-                    # Collect logs
+                    echo "  - Collecting logs from: $POD"
                     kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log 2>&1 || true
-                    # Collect JSON results
-                    kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
-                      test-results/${POD}-results.json 2>/dev/null || echo "    (no results.json in ${POD})"
                   done
                   LOGS_COLLECTED=true
-                  echo "✓ Collected from $( echo $PODS | wc -w ) pod(s)"
+                  echo "✓ Collected logs from $( echo $PODS | wc -w ) pod(s)"
                 fi
               fi
             fi
@@ -202,19 +197,7 @@ jobs:
                 echo "  - Collecting logs from: $POD"
                 kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} --tail=-1 > test-results/${POD}.log 2>&1 || true
               fi
-              if [ ! -f "test-results/${POD}-results.json" ]; then
-                echo "  - Attempting to collect JSON results from: $POD"
-                kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
-                  test-results/${POD}-results.json 2>/dev/null || true
-              fi
             done
-          fi
-
-          # Merge all JSON results into combined-results.json
-          echo "🔗 Merging JSON results..."
-          if ls test-results/*-results.json 1> /dev/null 2>&1; then
-            cat test-results/*-results.json > test-results/combined-results.json
-            echo "  ✓ Created combined-results.json from $(ls test-results/*-results.json | wc -l) file(s)"
           fi
 
           # Create a k6 summary from the logs
