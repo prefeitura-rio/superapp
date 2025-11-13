@@ -6,7 +6,6 @@ metadata:
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: app
@@ -39,8 +38,6 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: app-scaled-object
-  annotations:
-    autoscaling.keda.sh/trigger-authentication: "default"
 spec:
   scaleTargetRef:
     name: app
@@ -81,7 +78,7 @@ spec:
         metricName: http_requests_total
         threshold: "70"
         query: sum(rate(istio_requests_total{destination_workload="app"}[30s]))
-        activationThreshold: "200"
+        activationThreshold: "40"
 
 ---
 apiVersion: v1
