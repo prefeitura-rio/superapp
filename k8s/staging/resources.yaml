@@ -79,7 +79,7 @@ spec:
       metadata:
         serverAddress: http://prometheus.istio-system.svc.cluster.local:9090
         metricName: http_requests_total
-        threshold: "200"
+        threshold: "70"
         query: sum(rate(istio_requests_total{destination_workload="app"}[30s]))
         activationThreshold: "200"
 
