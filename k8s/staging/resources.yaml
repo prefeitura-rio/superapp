@@ -42,7 +42,7 @@ spec:
   scaleTargetRef:
     name: app
   minReplicaCount: 1
-  maxReplicaCount: 10
+  maxReplicaCount: 20
   cooldownPeriod: 30
   pollingInterval: 10
   fallback:
@@ -76,7 +76,7 @@ spec:
       metadata:
         serverAddress: http://prometheus.istio-system.svc.cluster.local:9090
         metricName: http_requests_total
-        threshold: "70"
+        threshold: "75"
         query: sum(rate(istio_requests_total{destination_workload="app"}[30s]))
         activationThreshold: "40"
 
