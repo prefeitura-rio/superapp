@@ -24,10 +24,10 @@
  *   k6 run --out json=data/results.json main.js
  */
 
-import { serviceSeeker } from './journeys/service-seeker.js';
-import { courseExplorer } from './journeys/course-explorer.js';
-import { browser } from './journeys/browser.js';
-import { searcher } from './journeys/searcher.js';
+import { serviceSeeker } from './service-seeker.js';
+import { courseExplorer } from './course-explorer.js';
+import { browser } from './browser.js';
+import { searcher } from './searcher.js';
 import { config, getJourneyName } from './config.js';
 
 // Test configuration

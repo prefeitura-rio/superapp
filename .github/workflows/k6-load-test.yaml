@@ -89,10 +89,10 @@ jobs:
           kubectl create configmap k6-scripts-${{ steps.test-run.outputs.test_run_id }} \
             --from-file=config.js=load-tests/config.js \
             --from-file=main.js=load-tests/main.js \
-            --from-file=journeys/service-seeker.js=load-tests/journeys/service-seeker.js \
-            --from-file=journeys/course-explorer.js=load-tests/journeys/course-explorer.js \
-            --from-file=journeys/browser.js=load-tests/journeys/browser.js \
-            --from-file=journeys/searcher.js=load-tests/journeys/searcher.js \
+            --from-file=service-seeker.js=load-tests/journeys/service-seeker.js \
+            --from-file=course-explorer.js=load-tests/journeys/course-explorer.js \
+            --from-file=browser.js=load-tests/journeys/browser.js \
+            --from-file=searcher.js=load-tests/journeys/searcher.js \
             --namespace=${{ vars.K6_NAMESPACE }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
