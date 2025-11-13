@@ -105,7 +105,7 @@ jobs:
             name: ${{ steps.test-run.outputs.test_run_id }}
             namespace: ${{ vars.K6_NAMESPACE }}
           spec:
-            parallelism: ${{ inputs.peak_vus }}
+            parallelism: 10
             script:
               configMap:
                 name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
