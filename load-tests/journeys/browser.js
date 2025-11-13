@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Trend } from 'k6/metrics';
-import { config, randomItem, randomThinkTime } from '../config.js';
+import { config, randomItem, randomThinkTime } from './config.js';
 
 // Custom metric for this journey's duration
 const journeyDuration = new Trend('journey_duration_browser', true);
