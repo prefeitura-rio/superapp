@@ -147,7 +147,6 @@ jobs:
         run: |
           echo "⏳ Waiting for test to complete..."
           mkdir -p test-results
-          LOGS_COLLECTED=false
 
           while true; do
             STATUS=$(kubectl get testrun ${{ steps.test-run.outputs.test_run_id }} \
@@ -155,26 +154,6 @@ jobs:
               -o jsonpath='{.status.stage}' 2>/dev/null || echo "")
 
             echo "Status: $STATUS"
-
-            # If test is running or finished, try to collect logs immediately
-            if [ "$STATUS" = "started" ] || [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
-              if [ "$LOGS_COLLECTED" = "false" ]; then
-                echo "📊 Attempting to collect logs and results from running/completed pods..."
-                PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
-                  -l k6_cr=${{ steps.test-run.outputs.test_run_id }},runner=true \
-                  --field-selector=status.phase=Running \
-                  -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
-
-                if [ -n "$PODS" ]; then
-                  for POD in $PODS; do
-                    echo "  - Collecting logs from: $POD"
-                    kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log 2>&1 || true
-                  done
-                  LOGS_COLLECTED=true
-                  echo "✓ Collected logs from $( echo $PODS | wc -w ) pod(s)"
-                fi
-              fi
-            fi
 
             if [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
               echo "✓ Test completed with status: $STATUS"
@@ -184,8 +163,8 @@ jobs:
             sleep 10
           done
 
-          # Final attempt to collect any remaining logs and results
-          echo "📋 Final collection attempt..."
+          # Collect logs after test completion
+          echo "📊 Collecting logs from completed test..."
           PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
             -l k6_cr=${{ steps.test-run.outputs.test_run_id }},runner=true \
             --sort-by=.metadata.creationTimestamp \
@@ -193,11 +172,12 @@ jobs:
 
           if [ -n "$PODS" ]; then
             for POD in $PODS; do
-              if [ ! -f "test-results/${POD}.log" ]; then
-                echo "  - Collecting logs from: $POD"
-                kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} --tail=-1 > test-results/${POD}.log 2>&1 || true
-              fi
+              echo "  - Collecting logs from: $POD"
+              kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} --tail=-1 > test-results/${POD}.log 2>&1 || true
             done
+            echo "✓ Collected logs from $( echo $PODS | wc -w ) pod(s)"
+          else
+            echo "⚠️ No pods found with label k6_cr=${{ steps.test-run.outputs.test_run_id }},runner=true"
           fi
 
           # Create a k6 summary from the logs
