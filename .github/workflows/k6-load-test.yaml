@@ -96,6 +96,24 @@ jobs:
             --namespace=${{ vars.K6_NAMESPACE }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Calculate parallelism
+        id: parallelism
+        run: |
+          # Calculate parallelism with max 250 VUs per pod
+          # Formula: ceil(peak_vus / 250), capped at 50 pods max
+          PEAK_VUS=${{ inputs.peak_vus }}
+          PARALLELISM=$(( (PEAK_VUS + 249) / 250 ))
+
+          # Ensure at least 1 pod, max 50 pods
+          if [ $PARALLELISM -lt 1 ]; then
+            PARALLELISM=1
+          elif [ $PARALLELISM -gt 50 ]; then
+            PARALLELISM=50
+          fi
+
+          echo "parallelism=$PARALLELISM" >> $GITHUB_OUTPUT
+          echo "📊 Calculated parallelism: $PARALLELISM pods for $PEAK_VUS VUs (~$(( PEAK_VUS / PARALLELISM )) VUs per pod)"
+
       - name: Create k6 TestRun CRD
         run: |
           cat <<EOF | kubectl apply -f -
@@ -105,7 +123,7 @@ jobs:
             name: ${{ steps.test-run.outputs.test_run_id }}
             namespace: ${{ vars.K6_NAMESPACE }}
           spec:
-            parallelism: 10
+            parallelism: ${{ steps.parallelism.outputs.parallelism }}
             script:
               configMap:
                 name: k6-scripts-${{ steps.test-run.outputs.test_run_id }}
@@ -125,10 +143,12 @@ jobs:
                     ]
           EOF
 
-      - name: Wait for test completion
+      - name: Wait for test completion and collect logs
         timeout-minutes: 60
         run: |
           echo "⏳ Waiting for test to complete..."
+          mkdir -p test-results
+          LOGS_COLLECTED=false
 
           while true; do
             STATUS=$(kubectl get testrun ${{ steps.test-run.outputs.test_run_id }} \
@@ -136,6 +156,25 @@ jobs:
               -o jsonpath='{.status.stage}' 2>/dev/null || echo "")
 
             echo "Status: $STATUS"
+
+            # If test is running or finished, try to collect logs immediately
+            if [ "$STATUS" = "started" ] || [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
+              if [ "$LOGS_COLLECTED" = "false" ]; then
+                echo "📊 Attempting to collect logs from running/completed pods..."
+                PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
+                  -l testrun=${{ steps.test-run.outputs.test_run_id }} \
+                  -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
+
+                if [ -n "$PODS" ]; then
+                  for POD in $PODS; do
+                    echo "  - Collecting logs from: $POD"
+                    kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log 2>&1 || true
+                  done
+                  LOGS_COLLECTED=true
+                  echo "✓ Logs collected from $( echo $PODS | wc -w ) pod(s)"
+                fi
+              fi
+            fi
 
             if [ "$STATUS" = "finished" ] || [ "$STATUS" = "error" ]; then
               echo "✓ Test completed with status: $STATUS"
@@ -145,29 +184,37 @@ jobs:
             sleep 10
           done
 
-      - name: Collect test results
-        if: always()
-        run: |
-          # Get pod logs containing results
+          # Final attempt to collect any remaining logs
+          echo "📋 Final log collection attempt..."
           PODS=$(kubectl get pods -n ${{ vars.K6_NAMESPACE }} \
             -l testrun=${{ steps.test-run.outputs.test_run_id }} \
-            -o jsonpath='{.items[*].metadata.name}')
+            --sort-by=.metadata.creationTimestamp \
+            -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
 
-          mkdir -p test-results
-
-          for POD in $PODS; do
-            echo "📊 Collecting results from pod: $POD"
-            kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} > test-results/${POD}.log || true
-
-            # Try to extract JSON results if they exist
-            kubectl cp ${{ vars.K6_NAMESPACE }}/${POD}:/tmp/results.json \
-              test-results/${POD}-results.json 2>/dev/null || true
-          done
-
-          # Merge all JSON results
-          if ls test-results/*-results.json 1> /dev/null 2>&1; then
-            cat test-results/*-results.json > test-results/combined-results.json
+          if [ -n "$PODS" ]; then
+            for POD in $PODS; do
+              if [ ! -f "test-results/${POD}.log" ]; then
+                echo "  - Collecting logs from: $POD"
+                kubectl logs $POD -n ${{ vars.K6_NAMESPACE }} --tail=-1 > test-results/${POD}.log 2>&1 || true
+              fi
+            done
           fi
+
+          # Create a k6 summary from the logs
+          echo "📊 Extracting k6 summary from logs..."
+          if ls test-results/*.log 1> /dev/null 2>&1; then
+            # Find the log with the k6 summary (look for the checks or http_req_duration metrics)
+            for LOG in test-results/*.log; do
+              if grep -q "http_req_duration" "$LOG" 2>/dev/null; then
+                echo "  Found k6 summary in: $(basename $LOG)"
+                grep -A 50 "http_req_duration" "$LOG" > test-results/k6-summary.txt 2>/dev/null || true
+                break
+              fi
+            done
+          fi
+
+          echo "✓ Log collection complete"
+          ls -lh test-results/ || true
 
       - name: Upload results to GCS
         if: always()
