@@ -155,9 +155,15 @@ export default function Search() {
     })
 
     // Navigate to the item
-    if (item.category && item.id && item.collection) {
+    if (item.category && item.id) {
+      // Normalize category name to slug format
+      const categorySlug = item.category
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
       router.push(
-        `/servicos/categoria/${encodeURIComponent(item.category)}/${item.id}/${item.collection}`
+        `/servicos/categoria/${encodeURIComponent(categorySlug)}/${item.id}`
       )
     } else if (item.url) {
       window.open(item.url, '_blank')

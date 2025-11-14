@@ -1,8 +1,5 @@
-import {
-  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
-  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
-  NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION,
-} from '@/constants/venvs'
+import { getApiV1Search } from '@/http-busca-search/search/search'
+import { ModelsSearchType } from '@/http-busca-search/models/modelsSearchType'
 import { NextResponse } from 'next/server'
 import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
@@ -21,19 +18,23 @@ export async function GET(request: Request) {
       )
     }
 
-    const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
-    span.setAttribute('external.api.url', rootUrl || '')
-
     try {
       addSpanEvent('search.api.request.start')
 
-      // Use fetch with explicit caching
-      const response = await fetch(
-        `${rootUrl}api/v1/busca-hibrida-multi?q=${q}&collections=${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION},${NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION}&page=1&per_page=20`,
+      // Use semantic search with threshold for best results
+      const response = await getApiV1Search(
         {
-          // Cache the response for 1 hour
+          q,
+          type: ModelsSearchType.SearchTypeSemantic,
+          page: 1,
+          per_page: 20,
+          include_inactive: true,
+          threshold_semantic: 0.4,
+        },
+        {
+          // Cache the response for 10 minutes
           next: {
-            revalidate: 3600,
+            revalidate: 600,
             tags: ['search-api'],
           },
         }
@@ -41,15 +42,20 @@ export async function GET(request: Request) {
 
       span.setAttribute('http.status_code', response.status)
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
+      if (response.status !== 200) {
+        throw new Error(`Search API returned status ${response.status}`)
       }
-
-      const data = await response.json()
 
       // Transform the new format to the old format expected by the frontend
       const transformedData = {
-        result: data.hits ? data.hits.map((hit: any) => hit.document) : [],
+        result:
+          response.data.results?.map((service) => ({
+            id: service.id,
+            titulo: service.title,
+            descricao: service.description,
+            category: service.category,
+            tipo: 'servico',
+          })) || [],
       }
 
       addSpanEvent('search.results.transformed', {
