@@ -12,7 +12,7 @@ export default defineConfig({
       biome: true,
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.NEXT_PUBLIC_BUSCA_SEARCH_API_URL,
+      baseUrl: process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH,
       override: {
         mutator: {
           path: './custom-fetch-busca-search.ts',

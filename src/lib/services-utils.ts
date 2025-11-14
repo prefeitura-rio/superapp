@@ -1,14 +1,8 @@
-import {
-  NEXT_PUBLIC_BUSCA_1746_COLLECTION,
-  NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION,
-  NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION,
-} from '@/constants/venvs'
-import type { Service1746 } from '@/types/1746'
-import type { CariocaDigitalService } from '@/types/carioca-digital'
-import type { ServicesApiResponse } from '@/types/service'
+import { getApiV1Categories } from '@/http-busca-search/categories/categories'
+import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
+import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import { getApiV1SearchId } from '@/http-busca-search/search/search'
 import { fetchCategories } from './categories'
-
-const rootUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
 
 export async function getCategoryNameBySlug(
   categorySlug: string
@@ -23,24 +17,44 @@ export async function getCategoryNameBySlug(
   )
 }
 
+export interface ServicesByCategoryResponse {
+  filtered_category?: ModelsFilteredCategoryResult
+}
+
 export async function fetchServicesByCategory(
   categorySlug: string
-): Promise<ServicesApiResponse | null> {
+): Promise<ServicesByCategoryResponse | null> {
   try {
-    // Decode the URL-encoded category slug - no need to encode again
+    // Decode the URL-encoded category slug
     const decodedSlug = decodeURIComponent(categorySlug)
-    const url = `${rootUrl}api/v1/categoria/${NEXT_PUBLIC_BUSCA_1746_COLLECTION},${NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION},${NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION}?categoria=${decodedSlug}&page=1&per_page=20`
 
-    const response = await fetch(url, {
-      cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
-    })
-    console.log(url)
-    if (!response.ok) {
+    // First, get the category name from the slug
+    const categoryName = await getCategoryNameBySlug(decodedSlug)
+
+    // Use the categories endpoint with filter_category parameter
+    const response = await getApiV1Categories(
+      {
+        filter_category: categoryName,
+        page: 1,
+        per_page: 20,
+        include_inactive: true,
+      },
+      {
+        // Cache the response for 10 minutes
+        next: {
+          revalidate: 600,
+          tags: ['category-services', categorySlug],
+        },
+      }
+    )
+
+    if (response.status !== 200) {
       throw new Error(`Failed to fetch services: ${response.status}`)
     }
 
-    return await response.json()
+    return {
+      filtered_category: response.data.filtered_category,
+    }
   } catch (error) {
     console.error('Error fetching services:', error)
     return null
@@ -48,22 +62,32 @@ export async function fetchServicesByCategory(
 }
 
 export async function fetchServiceById(
-  collection: string,
   id: string
-): Promise<CariocaDigitalService | Service1746 | null> {
+): Promise<ModelsPrefRioService | null> {
   try {
-    const url = `${rootUrl}api/v1/documento/${collection}/${id}`
-
-    const response = await fetch(url, {
-      cache: 'force-cache', // Cache for performance in production
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
+    const response = await getApiV1SearchId(id, {
+      // Cache the response for 10 minutes
+      next: {
+        revalidate: 600,
+        tags: ['service', id],
+      },
     })
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch service: ${response.status}`)
+    if (response.status === 404) {
+      // Service not found - return null to trigger notFound()
+      return null
     }
 
-    return await response.json()
+    if (response.status !== 200) {
+      console.error(
+        `Failed to fetch service ${id}: Status ${response.status}`,
+        response.data
+      )
+      return null
+    }
+
+    // Return the API response directly - no mapping needed
+    return response.data
   } catch (error) {
     console.error('Error fetching service:', error)
     return null

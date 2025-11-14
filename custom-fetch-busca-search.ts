@@ -17,11 +17,11 @@ const getBody = <T>(c: Response | Request): Promise<T> => {
 
 // NOTE: Update just base url
 const getUrl = (contextUrl: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BUSCA_SEARCH_API_URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH
 
   if (!baseUrl) {
     throw new Error(
-      'NEXT_PUBLIC_BUSCA_SEARCH_API_URL environment variable is not set.'
+      'NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH environment variable is not set.'
     )
   }
 

@@ -11,8 +11,8 @@ import type {
   GetApiV1SearchId404,
   GetApiV1SearchId500,
   GetApiV1SearchParams,
+  ModelsPrefRioService,
   ModelsSearchResponse,
-  ModelsServiceDocument,
 } from '.././models'
 
 import { customFetchBuscaSearch } from '../../../custom-fetch-busca-search'
@@ -75,11 +75,11 @@ export const getApiV1Search = async (
 }
 
 /**
- * Retorna os detalhes completos de um serviço específico
- * @summary Busca um serviço por ID
+ * Retorna os detalhes completos de um serviço específico através de busca direta por UUID no Typesense
+ * @summary Busca um serviço por ID (UUID)
  */
 export type getApiV1SearchIdResponse200 = {
-  data: ModelsServiceDocument
+  data: ModelsPrefRioService
   status: 200
 }
 
