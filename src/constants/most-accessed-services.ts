@@ -25,7 +25,7 @@ export const MOST_ACCESSED_SERVICES = [
   },
   {
     id: 'multas',
-    href: `/servicos/categoria/transporte/b774f0a8-53dd-44d3-850f-50087f9b62c3`,
+    href: '/servicos/categoria/transporte/b774f0a8-53dd-44d3-850f-50087f9b62c3',
     icon: multasIcon,
     title: 'Multas',
     description: 'Consulta de multas de trânsito',
