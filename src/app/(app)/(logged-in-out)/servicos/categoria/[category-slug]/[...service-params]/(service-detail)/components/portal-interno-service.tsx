@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { ensureUrlProtocol } from '@/lib/url-utils'
-import type { ServiceFromPortalInterno } from '@/types/portal-interno'
+import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import Link from 'next/link'
 import { MarkdownRenderer } from './markdown-renderer'
 
 interface PortalInternoServiceProps {
-  serviceData: ServiceFromPortalInterno
+  serviceData: ModelsPrefRioService
 }
 
 export function PortalInternoServiceComponent({
@@ -27,7 +27,7 @@ export function PortalInternoServiceComponent({
         <div className="mb-6 space-y-5">
           {serviceData.buttons
             .slice()
-            .sort((a, b) => a.ordem - b.ordem)
+            .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))
             .map((btn, idx) => (
               <div key={`${btn.titulo}-${idx}`} className="">
                 <div>
@@ -48,7 +48,7 @@ export function PortalInternoServiceComponent({
                   disabled={!btn.is_enabled}
                 >
                   <Link
-                    href={ensureUrlProtocol(btn.url_service)}
+                    href={ensureUrlProtocol(btn.url_service ?? '')}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -160,14 +160,34 @@ export function PortalInternoServiceComponent({
                     Canais Digitais:
                   </span>
                   <ul className="mt-1 space-y-1">
-                    {serviceData.canais_digitais.map((canal, index) => (
-                      <li
-                        key={index}
-                        className="text-sm text-foreground-light leading-5"
-                      >
-                        • {canal}
-                      </li>
-                    ))}
+                    {serviceData.canais_digitais.map((canal, index) => {
+                      const isUrl =
+                        /^https?:\/\//i.test(canal) ||
+                        /^www\./i.test(canal) ||
+                        /\.(com|org|net|gov|br|io|co|edu)(\/|$)/i.test(canal)
+                      const url = isUrl ? ensureUrlProtocol(canal) : null
+
+                      return (
+                        <li
+                          key={index}
+                          className="text-sm text-foreground-light leading-5"
+                        >
+                          •{' '}
+                          {url ? (
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {canal}
+                            </a>
+                          ) : (
+                            canal
+                          )}
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               )}
@@ -207,19 +227,6 @@ export function PortalInternoServiceComponent({
           </div>
         )}
 
-      {/* General Theme */}
-      {serviceData.tema_geral && (
-        <div className="mb-4">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Tema Geral
-          </h2>
-          <p className="text-sm text-foreground-light leading-5">
-            {serviceData.tema_geral.charAt(0).toUpperCase() +
-              serviceData.tema_geral.slice(1)}
-          </p>
-        </div>
-      )}
-
       {/* Related Legislation */}
       {serviceData.legislacao_relacionada &&
         serviceData.legislacao_relacionada.length > 0 && (
@@ -239,18 +246,6 @@ export function PortalInternoServiceComponent({
             </ul>
           </div>
         )}
-
-      {/* Responsible Agency */}
-      {serviceData.orgao_gestor && serviceData.orgao_gestor.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-base font-medium text-foreground leading-5 mb-2">
-            Órgão Gestor
-          </h2>
-          <p className="text-sm text-foreground-light leading-5 uppercase">
-            {serviceData.orgao_gestor[0]}
-          </p>
-        </div>
-      )}
     </>
   )
 }
