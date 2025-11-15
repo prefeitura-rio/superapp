@@ -25,6 +25,11 @@ export default async function ServicePage({
     notFound()
   }
 
+  // Check if service status is different from 1 (Published) or awaiting approval
+  if (serviceData.status !== 1 || serviceData.awaiting_approval === true) {
+    notFound()
+  }
+
   await getCategoryNameBySlug(categorySlug)
 
   return (

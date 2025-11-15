@@ -1,10 +1,10 @@
-import { getApiV1Search } from '@/http-busca-search/search/search'
 import { ModelsSearchType } from '@/http-busca-search/models/modelsSearchType'
+import { getApiV1Search } from '@/http-busca-search/search/search'
+import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import { NextResponse } from 'next/server'
-import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 export async function GET(request: Request) {
-  return withSpan('api.search', async (span) => {
+  return withSpan('api.search', async span => {
     const { searchParams } = new URL(request.url)
     const q = searchParams.get('q')
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
           type: ModelsSearchType.SearchTypeSemantic,
           page: 1,
           per_page: 20,
-          include_inactive: true,
+          include_inactive: false,
           threshold_semantic: 0.4,
         },
         {
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       // Transform the new format to the old format expected by the frontend
       const transformedData = {
         result:
-          response.data.results?.map((service) => ({
+          response.data.results?.map(service => ({
             id: service.id,
             titulo: service.title,
             descricao: service.description,
@@ -66,7 +66,10 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error('Error fetching data:', error)
       span.recordException(error as Error)
-      return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Failed to fetch data' },
+        { status: 500 }
+      )
     }
   })
 }
