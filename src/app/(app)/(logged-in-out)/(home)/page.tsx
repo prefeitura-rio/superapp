@@ -178,7 +178,8 @@ export default async function Home() {
   }
 
   const categories = await fetchCategories()
-  const categoriesSlice = categories.slice(0, -3)
+  // const categoriesSlice = categories.slice(0, -3)
+  const categoriesSlice = categories
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   // Calculate maintenance requests statistics

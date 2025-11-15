@@ -37,7 +37,7 @@ export async function fetchServicesByCategory(
         filter_category: categoryName,
         page: 1,
         per_page: 20,
-        include_inactive: true,
+        include_inactive: false,
       },
       {
         // Cache the response for 10 minutes

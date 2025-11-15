@@ -68,7 +68,8 @@ export async function fetchCategories(): Promise<Category[]> {
       {
         sort_by: GetApiV1CategoriesSortBy.popularity,
         order: GetApiV1CategoriesOrder.desc,
-        include_inactive: true,
+        include_inactive: false,
+        include_empty: false,
       },
       {
         // Cache the response for 10 minutes
