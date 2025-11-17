@@ -72,7 +72,6 @@ export function ConfirmInscriptionClient({
   const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
-
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
@@ -269,7 +268,9 @@ export function ConfirmInscriptionClient({
           const isScheduleValid = await form.trigger('scheduleId')
           if (!isScheduleValid) {
             // Mark field as touched so error appears
-            form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+            form.setValue('scheduleId', form.getValues('scheduleId'), {
+              shouldTouch: true,
+            })
 
             // Don't advance, stay on current slide or go to schedule slide if it exists
             const scheduleSlideIndex = slides.findIndex(
@@ -294,7 +295,9 @@ export function ConfirmInscriptionClient({
         const isValid = await form.trigger('scheduleId')
         if (!isValid) {
           // Mark field as touched so error appears
-          form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+          form.setValue('scheduleId', form.getValues('scheduleId'), {
+            shouldTouch: true,
+          })
           return
         }
       }
@@ -353,7 +356,9 @@ export function ConfirmInscriptionClient({
       const isScheduleValid = await form.trigger('scheduleId')
       if (!isScheduleValid) {
         // Mark field as touched so error appears
-        form.setValue('scheduleId', form.getValues('scheduleId'), { shouldTouch: true })
+        form.setValue('scheduleId', form.getValues('scheduleId'), {
+          shouldTouch: true,
+        })
 
         // Try to find the schedule slide first
         const scheduleSlideIndex = slides.findIndex(
@@ -436,43 +441,47 @@ export function ConfirmInscriptionClient({
             hasUnits && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)
               : undefined,
-          customFields: customFields.map(field => {
-            const fieldValue =
-              formData[`custom_${field.id}` as keyof InscriptionFormData]
-            let value: string
+          customFields: customFields.reduce(
+            (acc, field) => {
+              const fieldValue =
+                formData[`custom_${field.id}` as keyof InscriptionFormData]
+              let value: string
 
-            if (field.field_type === 'text') {
-              // For text, use the value directly
-              value = (fieldValue as string) || ''
-            } else if (field.field_type === 'multiselect') {
-              // For multiselect, map IDs to values and join
-              if (Array.isArray(fieldValue)) {
-                const selectedOptions = fieldValue
-                  .map(
-                    selectedId =>
-                      field.options?.find(option => option.id === selectedId)
-                        ?.value
-                  )
-                  .filter(Boolean)
-                value = selectedOptions.join(', ')
+              if (field.field_type === 'text') {
+                // For text, use the value directly
+                value = (fieldValue as string) || ''
+              } else if (field.field_type === 'multiselect') {
+                // For multiselect, map IDs to values and join
+                if (Array.isArray(fieldValue)) {
+                  const selectedOptions = fieldValue
+                    .map(
+                      selectedId =>
+                        field.options?.find(option => option.id === selectedId)
+                          ?.value
+                    )
+                    .filter(Boolean)
+                  value = selectedOptions.join(', ')
+                } else {
+                  value = ''
+                }
               } else {
-                value = ''
+                // For radio and select, map ID to value
+                const selectedOption = field.options?.find(
+                  option => option.id === fieldValue
+                )
+                value = selectedOption?.value || ''
               }
-            } else {
-              // For radio and select, map ID to value
-              const selectedOption = field.options?.find(
-                option => option.id === fieldValue
-              )
-              value = selectedOption?.value || ''
-            }
 
-            return {
-              id: field.id,
-              title: field.title,
-              value,
-              required: field.required,
-            }
-          }),
+              acc[field.id] = {
+                id: field.id,
+                title: field.title,
+                value,
+                required: field.required,
+              }
+              return acc
+            },
+            {} as Record<string, unknown>
+          ),
           reason:
             formData.description ||
             'Inscrição realizada através do portal do cidadão',
@@ -557,43 +566,43 @@ export function ConfirmInscriptionClient({
 
         {!showSuccess && (
           <div className="flex-shrink-0 pb-12">
-          {needsContactUpdate && hasEmail && hasPhone ? (
-            <p className="mb-8">
-              <span className="text-muted-foreground text-sm">
-                * Atualização Obrigatória
-              </span>
-            </p>
-          ) : (
-            (!hasEmail || !hasPhone) && (
+            {needsContactUpdate && hasEmail && hasPhone ? (
               <p className="mb-8">
                 <span className="text-muted-foreground text-sm">
-                  * Campo Obrigatório
+                  * Atualização Obrigatória
                 </span>
               </p>
-            )
-          )}
-          <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
-            {showUpdateButton && (
-              <div className="flex flex-col items-center w-[50%]">
-                <Link
-                  className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
-                    showUpdateButton
-                      ? 'opacity-100 translate-x-0 scale-100 text-foreground'
-                      : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                  }
+            ) : (
+              (!hasEmail || !hasPhone) && (
+                <p className="mb-8">
+                  <span className="text-muted-foreground text-sm">
+                    * Campo Obrigatório
+                  </span>
+                </p>
+              )
+            )}
+            <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
+              {showUpdateButton && (
+                <div className="flex flex-col items-center w-[50%]">
+                  <Link
+                    className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
+                      showUpdateButton
+                        ? 'opacity-100 translate-x-0 scale-100 text-foreground'
+                        : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
+                    }
                   ${(!hasValidContactInfo || needsContactUpdate) && '!text-background bg-primary hover:bg-primary'}
                   `}
-                  href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
-                >
-                  Atualizar
-                </Link>
-              </div>
-            )}
+                    href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
+                  >
+                    Atualizar
+                  </Link>
+                </div>
+              )}
 
-            <CustomButton
-              onClick={isLastSlide ? goToSuccess : handleNext}
-              disabled={isPending}
-              className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
+              <CustomButton
+                onClick={isLastSlide ? goToSuccess : handleNext}
+                disabled={isPending}
+                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
         ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
         ${
           !showSuccess
@@ -602,11 +611,11 @@ export function ConfirmInscriptionClient({
         }
         ${showUpdateButton && (!hasValidContactInfo || needsContactUpdate) && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
         `}
-            >
-              {buttonText}
-            </CustomButton>
+              >
+                {buttonText}
+              </CustomButton>
+            </div>
           </div>
-        </div>
         )}
       </div>
     </div>
