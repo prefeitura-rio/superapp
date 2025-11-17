@@ -55,7 +55,6 @@ export default async function RootLayout({
           nonce={nonce}
           gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
         />
-
         {/* Google Tag Manager */}
         <GoogleTagManager
           nonce={nonce}

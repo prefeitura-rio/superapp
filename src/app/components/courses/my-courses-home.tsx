@@ -14,10 +14,10 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
       </h3>
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar">
         <div className="flex gap-4 px-4 w-max">
-          {courses.map(course => (
+          {courses.map((course, index) => (
             <CourseCard
-              courseId={course.id as number}
-              key={course.id as string}
+              courseId={course.id}
+              key={course.id != null ? String(course.id) : `course-${index}`}
               title={course.title as string}
               modality={course.modalidade as string}
               workload={course.workload as string}

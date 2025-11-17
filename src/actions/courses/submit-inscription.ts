@@ -2,6 +2,7 @@
 
 import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao'
+import type { ModelsInscricaoCustomFields } from '@/http-courses/models/modelsInscricaoCustomFields'
 import { revalidateDalCourseEnrollment } from '@/lib/dal'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -39,12 +40,7 @@ interface SubmitInscriptionData {
     created_at: string
     updated_at: string
   }
-  customFields?: Array<{
-    id: string
-    title: string
-    value: string
-    required: boolean
-  }>
+  customFields?: ModelsInscricaoCustomFields
   reason: string
 }
 

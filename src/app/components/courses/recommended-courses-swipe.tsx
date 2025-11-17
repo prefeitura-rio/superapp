@@ -35,10 +35,14 @@ export function RecommendedCoursesSwipe({
                 key={`slide-${slideIndex}`}
                 className="grid grid-cols-4 gap-4"
               >
-                {slideCourses.map(course => (
+                {slideCourses.map((course, courseIndex) => (
                   <CourseCard
-                    key={course.id as string}
-                    courseId={course.id as number}
+                    key={
+                      course.id != null
+                        ? String(course.id)
+                        : `course-${slideIndex}-${courseIndex}`
+                    }
+                    courseId={course.id}
                     title={course.title as string}
                     modality={course.modalidade as string}
                     workload={course.workload as string}
