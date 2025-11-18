@@ -20,6 +20,42 @@ spec:
           envFrom:
             - secretRef:
                 name: app-secrets
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 2
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 15
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
       restartPolicy: Always
 
 ---
@@ -28,7 +64,7 @@ kind: PodDisruptionBudget
 metadata:
   name: app-pdb
 spec:
-  minAvailable: 1
+  minAvailable: 3
   selector:
     matchLabels:
       app: app
@@ -41,25 +77,25 @@ metadata:
 spec:
   scaleTargetRef:
     name: app
-  minReplicaCount: 1
+  minReplicaCount: 3
   maxReplicaCount: 20
   cooldownPeriod: 30
-  pollingInterval: 10
+  pollingInterval: 5
   fallback:
     failureThreshold: 3
-    replicas: 1
+    replicas: 3
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
         scaleUp:
-          stabilizationWindowSeconds: 60
+          stabilizationWindowSeconds: 0
           policies:
             - type: Percent
               value: 100
-              periodSeconds: 15
+              periodSeconds: 10
             - type: Pods
-              value: 2
-              periodSeconds: 15
+              value: 4
+              periodSeconds: 10
           selectPolicy: Max
         scaleDown:
           stabilizationWindowSeconds: 300
