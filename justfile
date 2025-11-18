@@ -138,34 +138,87 @@ analyze-results results_dir="":
         echo ""
     fi
 
-    # Extract metrics from log files
-    LOG_FILE=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | head -n1)
+    # Count total log files
+    LOG_COUNT=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | wc -l | tr -d ' ')
 
-    if [ -z "$LOG_FILE" ]; then
+    if [ "$LOG_COUNT" -eq 0 ]; then
         echo "❌ No log files found in $RESULTS_DIR"
         exit 1
     fi
 
     echo "=== Load Test Results ==="
     echo ""
+    echo "📊 Test executed across $LOG_COUNT k6 worker pods"
+    echo ""
 
-    # Extract and display the summary sections
-    if grep -q "THRESHOLDS" "$LOG_FILE"; then
-        echo "--- Thresholds ---"
-        sed -n '/█ THRESHOLDS/,/█ TOTAL RESULTS/p' "$LOG_FILE" | grep -v "█" | head -n -1
-        echo ""
+    # Aggregate metrics from all log files
+    echo "--- Aggregated Metrics (All Pods) ---"
+    echo ""
+
+    # Extract key metrics from all logs and aggregate
+    TOTAL_CHECKS=0
+    TOTAL_CHECKS_PASSED=0
+    TOTAL_CHECKS_FAILED=0
+    TOTAL_HTTP_REQS=0
+    TOTAL_HTTP_FAILED=0
+    TOTAL_ITERATIONS=0
+    TOTAL_DATA_RECEIVED=0
+    TOTAL_DATA_SENT=0
+
+    for LOG in "$RESULTS_DIR"/*.log; do
+        # Extract checks
+        CHECKS=$(grep "checks_total" "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+        CHECKS_PASSED=$(grep "checks_succeeded" "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+        CHECKS_FAILED=$(grep "checks_failed" "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+
+        # Extract HTTP metrics
+        HTTP_REQS=$(grep "http_reqs\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+        HTTP_FAILED=$(grep "http_req_failed\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+
+        # Extract iterations
+        ITERATIONS=$(grep "iterations\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+
+        # Sum up
+        TOTAL_CHECKS=$((TOTAL_CHECKS + CHECKS))
+        TOTAL_CHECKS_PASSED=$((TOTAL_CHECKS_PASSED + CHECKS_PASSED))
+        TOTAL_CHECKS_FAILED=$((TOTAL_CHECKS_FAILED + CHECKS_FAILED))
+        TOTAL_HTTP_REQS=$((TOTAL_HTTP_REQS + HTTP_REQS))
+        TOTAL_HTTP_FAILED=$((TOTAL_HTTP_FAILED + HTTP_FAILED))
+        TOTAL_ITERATIONS=$((TOTAL_ITERATIONS + ITERATIONS))
+    done
+
+    # Calculate aggregated percentages
+    if [ $TOTAL_CHECKS -gt 0 ]; then
+        CHECK_PASS_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_CHECKS_PASSED / $TOTAL_CHECKS) * 100}")
+        CHECK_FAIL_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_CHECKS_FAILED / $TOTAL_CHECKS) * 100}")
+    else
+        CHECK_PASS_PCT="0.00"
+        CHECK_FAIL_PCT="0.00"
     fi
 
-    if grep -q "TOTAL RESULTS" "$LOG_FILE"; then
-        echo "--- Metrics ---"
-        sed -n '/█ TOTAL RESULTS/,/^time=/p' "$LOG_FILE" | grep -v "█" | grep -v "^time="
-        echo ""
+    if [ $TOTAL_HTTP_REQS -gt 0 ]; then
+        HTTP_FAIL_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_HTTP_FAILED / $TOTAL_HTTP_REQS) * 100}")
+    else
+        HTTP_FAIL_PCT="0.00"
     fi
 
-    # Check for k6 summary file
-    if [ -f "$RESULTS_DIR/k6-summary.txt" ]; then
-        echo "--- K6 Summary ---"
-        cat "$RESULTS_DIR/k6-summary.txt"
+    # Display aggregated results
+    echo "TOTALS ACROSS ALL PODS:"
+    echo "  checks_total.........: $TOTAL_CHECKS"
+    echo "  checks_succeeded.....: ${CHECK_PASS_PCT}% ($TOTAL_CHECKS_PASSED out of $TOTAL_CHECKS)"
+    echo "  checks_failed........: ${CHECK_FAIL_PCT}% ($TOTAL_CHECKS_FAILED out of $TOTAL_CHECKS)"
+    echo ""
+    echo "  http_reqs............: $TOTAL_HTTP_REQS"
+    echo "  http_req_failed......: ${HTTP_FAIL_PCT}%"
+    echo ""
+    echo "  iterations...........: $TOTAL_ITERATIONS"
+    echo ""
+
+    # Show percentiles from first log (these should be similar across pods)
+    FIRST_LOG=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | head -n1)
+    if [ -n "$FIRST_LOG" ] && grep -q "http_req_duration" "$FIRST_LOG"; then
+        echo "LATENCY (from representative pod):"
+        grep "http_req_duration\.\.\.\.\.\.\.\.\.\.\.: " "$FIRST_LOG" | tail -1 || true
         echo ""
     fi
 
