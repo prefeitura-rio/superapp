@@ -78,7 +78,7 @@ spec:
   scaleTargetRef:
     name: app
   minReplicaCount: 3
-  maxReplicaCount: 20
+  maxReplicaCount: 30
   cooldownPeriod: 30
   pollingInterval: 5
   fallback:
