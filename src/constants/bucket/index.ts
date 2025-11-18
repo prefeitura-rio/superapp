@@ -35,12 +35,15 @@ import {
   licencaBannerIcon,
 } from './banners'
 
+import { brasaoPrefHeaderIcon, logoPrefHeaderIcon } from './logos'
+
 // Named exports
 export {
   alvaraIcon,
   ambienteIcon,
   animaisIcon,
   atualizarCadastroIcon,
+  brasaoPrefHeaderIcon,
   cadrioIcon,
   cadunicoIcon,
   cariocaIcon,
@@ -59,6 +62,7 @@ export {
   licencaBannerIcon,
   licencaIcon,
   licencaSanitariaIcon,
+  logoPrefHeaderIcon,
   multasIcon,
   saudeIcon,
   segurancaIcon,
