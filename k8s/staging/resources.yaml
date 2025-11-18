@@ -78,7 +78,7 @@ spec:
         metricName: http_requests_total
         threshold: "75"
         query: sum(rate(istio_requests_total{destination_workload="app"}[30s]))
-        activationThreshold: "40"
+        activationThreshold: "25"
 
 ---
 apiVersion: v1
