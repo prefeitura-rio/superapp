@@ -134,6 +134,11 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
+        // Set cache headers for public pages (2 minutes, allow stale for 5 min)
+        response.headers.set(
+          'Cache-Control',
+          'public, max-age=120, stale-while-revalidate=300'
+        )
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
