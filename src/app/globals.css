@@ -172,6 +172,7 @@ select:-webkit-autofill:focus {
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-terciary: var(--terciary);
+  --color-terciary-foreground: var(--terciary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -254,6 +255,7 @@ select:-webkit-autofill:focus {
   --secondary: #e4e4e7;
   --secondary-foreground: #0f172b;
   --terciary: #d4d4d8;
+  --terciary-foreground: #52525C;
   --muted: #f5f5f5;
   --muted-foreground: #a1a1a1;
   --accent: #f1f5f9;
@@ -332,6 +334,7 @@ select:-webkit-autofill:focus {
   --secondary: #27272a;
   --secondary-foreground: #0f172b;
   --terciary: #3f3f46;
+  --terciary-foreground: #737373;
   --muted: #57534d;
   --muted-foreground: #737373;
   --accent: #f1f5f9;

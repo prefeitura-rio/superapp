@@ -67,22 +67,33 @@ export function getDisplayName(
 /**
  * Formata qualquer texto com a primeira letra de cada palavra em maiúscula
  * @param text - Texto a ser formatado (ex: "joao silva", "JOAO SILVA")
- * @returns Texto formatado com primeira letra de cada palavra em maiúscula (ex: "Joao Silva")
+ * @param mode - 'all' (padrão) capitaliza cada palavra, 'first' capitaliza apenas a primeira letra
+ * @returns Texto formatado
+ * - mode='all': "Joao Silva"
+ * - mode='first': "Joao silva"
  */
-export function formatTitleCase(text: string): string {
+export function formatTitleCase(
+  text: string,
+  mode: 'all' | 'first' = 'all'
+): string {
   if (!text || typeof text !== 'string') {
     return ''
   }
 
-  // Remove espaços extras e divide por espaços
-  const words = text.trim().split(/\s+/)
+  const trimmed = text.trim()
 
-  // Formata cada palavra: primeira letra maiúscula, resto minúscula
+  if (mode === 'first') {
+    // Capitalize only the first letter, rest to lowercase
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+  }
+
+  // mode === 'all': Capitalize first letter of each word
+  const words = trimmed.split(/\s+/)
+
   const formattedWords = words.map(word => {
     if (!word) return ''
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
   })
 
-  // Retorna as palavras formatadas separadas por espaço
   return formattedWords.join(' ')
 }
