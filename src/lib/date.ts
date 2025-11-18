@@ -43,3 +43,33 @@ export const formatDate = (dateString: string | null): string | null => {
     return null
   }
 }
+
+/**
+ * Format a Unix timestamp (in seconds) to Brazilian date format (DD/MM/YYYY)
+ * @param timestamp - Unix timestamp in **seconds**
+ * @returns Formatted date string or null if invalid
+ */
+export const formatTimestamp = (
+  timestamp: number | string | null
+): string | null => {
+  if (!timestamp) return null
+
+  try {
+    // Convert to number if it's a string
+    const numericTimestamp =
+      typeof timestamp === 'string' ? Number(timestamp) : timestamp
+
+    // Check if it's a valid number
+    if (Number.isNaN(numericTimestamp)) return null
+
+    // Convert seconds to milliseconds (JavaScript Date expects milliseconds)
+    const date = new Date(numericTimestamp * 1000)
+
+    // Check if date is valid
+    if (Number.isNaN(date.getTime())) return null
+
+    return date.toLocaleDateString('pt-BR')
+  } catch {
+    return null
+  }
+}
