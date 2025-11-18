@@ -85,7 +85,7 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
   return (
     <div ref={bannerRef} className="w-full sticky top-0 z-[60] bg-background">
       <Collapsible open={expanded} onOpenChange={setExpanded}>
-        <div className="bg-card h-[65px] md:h-[45px] py-2 flex items-center justify-center rounded-none">
+        <div className="bg-card h-[75px] md:h-[45px] py-3 flex items-center justify-center rounded-none">
           <div className="w-full max-w-4xl px-4 flex items-center justify-between gap-2">
             <div className="flex items-center gap-4 flex-1">
               <div className="flex-shrink-0">
@@ -117,7 +117,7 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-primary text-sm underline hover:no-underline"
+                    className="flex items-center gap-1 text-primary text-sm underline cursor-pointer"
                   >
                     <span>Saiba mais</span>
                     <ChevronDown
