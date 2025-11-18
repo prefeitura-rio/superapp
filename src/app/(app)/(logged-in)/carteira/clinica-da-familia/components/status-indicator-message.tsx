@@ -1,5 +1,5 @@
 interface StatusIndicatorMessageProps {
-  status: 'Amarelo' | 'Laranja' | 'Vermelho'
+  status?: 'Amarelo' | 'Laranja' | 'Vermelho'
 }
 
 const STATUS_CONFIG = {
@@ -32,7 +32,15 @@ const STATUS_CONFIG = {
 export function StatusIndicatorMessage({
   status,
 }: StatusIndicatorMessageProps) {
+  if (!status) {
+    return null
+  }
+
   const config = STATUS_CONFIG[status]
+
+  if (!config) {
+    return null
+  }
 
   return (
     <div
