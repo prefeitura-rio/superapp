@@ -6,6 +6,35 @@ import {
 import { buildAuthUrl } from './constants/url'
 import { handleExpiredToken, isJwtExpired } from './lib'
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { jwtDecode } from 'jwt-decode'
+
+/**
+ * Generate a cache variant identifier for CDN based on user identity
+ * Returns 'unauthenticated' for non-authenticated users, or a hash of the username for authenticated users
+ */
+function getUserCacheVariant(authToken?: string): string {
+  if (!authToken) {
+    return 'unauthenticated'
+  }
+
+  try {
+    const decoded = jwtDecode<{ preferred_username?: string; sub?: string }>(authToken)
+    const userIdentifier = decoded.preferred_username || decoded.sub || 'unknown'
+
+    // Create a short hash of the user identifier for cache key
+    // Using simple hash to avoid importing crypto in edge runtime
+    let hash = 0
+    for (let i = 0; i < userIdentifier.length; i++) {
+      const char = userIdentifier.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32-bit integer
+    }
+
+    return Math.abs(hash).toString(16).substring(0, 8)
+  } catch {
+    return 'unauthenticated'
+  }
+}
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -90,9 +119,13 @@ export async function middleware(request: NextRequest) {
       const authToken = request.cookies.get('access_token')
       const refreshToken = request.cookies.get('refresh_token')
 
+      // Generate cache variant for CDN
+      const cacheVariant = getUserCacheVariant(authToken?.value)
+
       span.setAttribute('route.public', !!publicRoute)
       span.setAttribute('auth.has_token', !!authToken)
       span.setAttribute('auth.has_refresh_token', !!refreshToken)
+      span.setAttribute('cache.variant', cacheVariant)
 
   // Set up request headers with nonce and CSP
   const requestHeaders = new Headers(request.headers)
@@ -116,6 +149,8 @@ export async function middleware(request: NextRequest) {
             'Content-Security-Policy',
             contentSecurityPolicyHeaderValue
           )
+          // Set cache variant for CDN
+          response.headers.set('X-User-Variant', cacheVariant)
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return response
@@ -139,6 +174,8 @@ export async function middleware(request: NextRequest) {
           'Cache-Control',
           'public, max-age=120, stale-while-revalidate=300'
         )
+        // Set cache variant for CDN
+        response.headers.set('X-User-Variant', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -166,6 +203,8 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
+        // Set cache variant for CDN
+        response.headers.set('X-User-Variant', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -185,7 +224,8 @@ export async function middleware(request: NextRequest) {
             request,
             refreshToken?.value,
             requestHeaders,
-            contentSecurityPolicyHeaderValue
+            contentSecurityPolicyHeaderValue,
+            cacheVariant
           )
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
@@ -202,7 +242,8 @@ export async function middleware(request: NextRequest) {
             request,
             refreshToken?.value,
             requestHeaders,
-            contentSecurityPolicyHeaderValue
+            contentSecurityPolicyHeaderValue,
+            cacheVariant
           )
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
@@ -219,6 +260,8 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
+        // Set cache variant for CDN
+        response.headers.set('X-User-Variant', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response

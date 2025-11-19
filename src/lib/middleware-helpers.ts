@@ -6,7 +6,8 @@ export async function handleExpiredToken(
   request: NextRequest,
   refreshToken: string | undefined,
   requestHeaders: Headers,
-  contentSecurityPolicyHeaderValue: string
+  contentSecurityPolicyHeaderValue: string,
+  cacheVariant: string
 ): Promise<NextResponse> {
   // Try to refresh the token if we have a refresh token
   if (refreshToken) {
@@ -37,10 +38,12 @@ export async function handleExpiredToken(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
+      // Set cache variant for CDN
+      response.headers.set('X-User-Variant', cacheVariant)
       return response
     }
   }
-  
+
   // Token refresh failed or no refresh token, redirect to session expired
   const redirectUrl = request.nextUrl.clone()
   redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
@@ -49,5 +52,7 @@ export async function handleExpiredToken(
     'Content-Security-Policy',
     contentSecurityPolicyHeaderValue
   )
+  // Set cache variant for CDN
+  response.headers.set('X-User-Variant', cacheVariant)
   return response
 }
