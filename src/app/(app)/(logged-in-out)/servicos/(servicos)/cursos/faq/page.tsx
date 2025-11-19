@@ -160,6 +160,8 @@ const FAQ_SECTIONS = [
   },
 ] as const
 
+export const dynamic = 'force-static'
+
 export default function FaqPageCourses() {
   return (
     <main className="max-w-4xl min-h-lvh mx-auto pt-15 text-foreground pb-10">

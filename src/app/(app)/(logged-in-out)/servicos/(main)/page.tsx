@@ -10,6 +10,8 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { additionalCategories } from '@/constants/aditional-services'
 import { fetchCategories } from '@/lib/categories'
 
+export const revalidate = 600
+
 export default async function ServicesPage() {
   const categories = await fetchCategories()
   const allCategories = [...categories, ...additionalCategories]
