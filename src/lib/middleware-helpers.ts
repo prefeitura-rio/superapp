@@ -6,8 +6,7 @@ export async function handleExpiredToken(
   request: NextRequest,
   refreshToken: string | undefined,
   requestHeaders: Headers,
-  contentSecurityPolicyHeaderValue: string,
-  cacheVariant: string
+  contentSecurityPolicyHeaderValue: string
 ): Promise<NextResponse> {
   // Try to refresh the token if we have a refresh token
   if (refreshToken) {
@@ -38,8 +37,6 @@ export async function handleExpiredToken(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
-      // Set cache variant for CDN using Origin header
-      response.headers.set('Origin', cacheVariant)
       return response
     }
   }
@@ -52,7 +49,5 @@ export async function handleExpiredToken(
     'Content-Security-Policy',
     contentSecurityPolicyHeaderValue
   )
-  // Set cache variant for CDN using Origin header
-  response.headers.set('Origin', cacheVariant)
   return response
 }
