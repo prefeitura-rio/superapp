@@ -29,26 +29,26 @@ spec:
               path: /api/health
               port: http
             initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /api/health
               port: http
             initialDelaySeconds: 0
-            periodSeconds: 2
-            timeoutSeconds: 2
+            periodSeconds: 10
+            timeoutSeconds: 5
             successThreshold: 1
-            failureThreshold: 2
+            failureThreshold: 3
           startupProbe:
             httpGet:
               path: /api/health
               port: http
             initialDelaySeconds: 0
-            periodSeconds: 2
-            timeoutSeconds: 2
-            failureThreshold: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
           resources:
             requests:
               cpu: 500m
