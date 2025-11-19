@@ -10,7 +10,7 @@ import {
   brasaoPrefHeaderIcon,
   logoPrefHeaderIcon,
 } from '@/constants/bucket/logos'
-import { AlertCircle, ChevronDown, Globe, Lock } from 'lucide-react'
+import { ChevronDown, Globe, Lock } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
@@ -86,7 +86,7 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
     <div ref={bannerRef} className="w-full sticky top-0 z-[60] bg-background">
       <Collapsible open={expanded} onOpenChange={setExpanded}>
         <div className="bg-card h-[75px] md:h-[45px] py-3 flex items-center justify-center rounded-none">
-          <div className="w-full max-w-4xl px-4 flex items-center justify-between gap-2">
+          <div className="w-full max-w-[584px] px-4 flex items-center justify-between gap-2">
             <div className="flex items-center gap-4 flex-1">
               <div className="flex-shrink-0">
                 {/* Logo mobile/tablet */}
@@ -117,7 +117,7 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-primary text-sm underline cursor-pointer"
+                    className="flex items-center gap-1 text-primary text-sm underline cursor-pointer md:text-xs"
                   >
                     <span>Saiba mais</span>
                     <ChevronDown
@@ -136,14 +136,14 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
               className="text-foreground hover:text-muted-foreground transition-colors flex-shrink-0 text-sm md:text-xs"
               aria-label="Fechar banner"
             >
-              X
+              x
             </button>
           </div>
         </div>
 
         <CollapsibleContent>
           <div className="bg-card">
-            <div className="w-full max-w-4xl mx-auto px-4 py-4 space-y-4">
+            <div className="w-full max-w-[584px] mx-auto px-4 py-4 space-y-4">
               {/* Item 1*/}
               <div className="flex gap-3">
                 <Globe className="w-5 h-5 text-foreground flex-shrink-0 mt-0.5" />
@@ -171,22 +171,6 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                   <p className="text-terciary-foreground text-sm">
                     Procure pelo ícone de cadeado ou pelo prefixo acima antes de
                     inserir dados pessoais.
-                  </p>
-                </div>
-              </div>
-
-              {/* Item 3 */}
-              <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-foreground flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-foreground font-medium leading-4 text-sm">
-                    Alerta de golpe
-                  </p>
-                  <p className="text-terciary-foreground text-sm">
-                    A Prefeitura do Rio de Janeiro nunca solicita pagamentos ou
-                    dados pessoais por telefone, e-mail ou redes sociais. Em
-                    caso de dúvida, entre em contato pelos canais oficiais ou
-                    ligue para o 1746.
                   </p>
                 </div>
               </div>

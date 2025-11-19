@@ -87,23 +87,29 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                 </a>
               </Button>
             ) : (
-              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-center">
                 {enabledButtons.map((button, index) => (
                   <Card
                     key={index}
-                    className="min-w-[280px] md:min-w-0 md:flex-1 flex-shrink-0 border-0 shadow-none bg-card"
+                    className="min-w-[268px] max-w-[268px] md:max-w-[268px] min-h-[188px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col"
                   >
-                    <CardHeader>
+                    <CardHeader className="p-6 pb-0 flex-1">
                       {button.descricao && (
-                        <CardDescription>{button.descricao}</CardDescription>
+                        <CardDescription className="text-sm">
+                          {button.descricao}
+                        </CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
-                      <Button asChild className="w-full rounded-full h-11">
+                    <CardContent className="p-6 pt-4 mt-auto">
+                      <Button
+                        asChild
+                        className="w-full rounded-full h-11 text-background"
+                      >
                         <a
                           href={button.url_service}
                           target="_blank"
                           rel="noopener noreferrer"
+                          className="text-background"
                         >
                           Acessar informação
                         </a>

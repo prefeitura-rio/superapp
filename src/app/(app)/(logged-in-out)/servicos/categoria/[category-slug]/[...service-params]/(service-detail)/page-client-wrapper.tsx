@@ -22,10 +22,11 @@ export function PageClientWrapper({
     <>
       <OfficialBanner onHeightChange={setBannerHeight} />
 
-      <div className="min-h-lvh max-w-4xl mx-auto">
+      <div className="min-h-lvh max-w-[584px] mx-auto">
         <SecondaryHeader
           logo={<PrefLogo fill="var(--primary)" className="h-8 w-20" />}
           showSearchButton
+          className="max-w-[584px]"
           style={{ top: `${bannerHeight}px` }}
         />
 
