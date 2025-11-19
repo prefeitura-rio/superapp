@@ -65,7 +65,7 @@ function QuickInfoItem({
 
       <div className="flex flex-col flex-1 min-w-0">
         <span className="text-xs text-foreground-light">{label}</span>
-        <span className="text-sm text-primary font-normal leading-5 truncate">
+        <span className="text-sm text-primary font-normal leading-5 break-words">
           {value}
         </span>
       </div>
