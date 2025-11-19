@@ -214,11 +214,115 @@ analyze-results results_dir="":
     echo "  iterations...........: $TOTAL_ITERATIONS"
     echo ""
 
-    # Show percentiles from first log (these should be similar across pods)
+    # Show detailed metrics from first log (representative sample)
     FIRST_LOG=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | head -n1)
-    if [ -n "$FIRST_LOG" ] && grep -q "http_req_duration" "$FIRST_LOG"; then
-        echo "LATENCY (from representative pod):"
-        grep "http_req_duration\.\.\.\.\.\.\.\.\.\.\.: " "$FIRST_LOG" | tail -1 || true
+    if [ -n "$FIRST_LOG" ]; then
+        echo "DETAILED METRICS (from representative pod):"
+        echo ""
+
+        # HTTP Request Duration (Latency)
+        if grep -q "http_req_duration" "$FIRST_LOG"; then
+            echo "  HTTP Request Latency:"
+            grep "http_req_duration\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Iteration Duration
+        if grep -q "iteration_duration" "$FIRST_LOG"; then
+            echo "  User Journey Duration:"
+            grep "iteration_duration\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Data Transfer
+        if grep -q "data_received" "$FIRST_LOG"; then
+            echo "  Network Transfer:"
+            grep "data_received\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            grep "data_sent\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # VUs (Virtual Users)
+        if grep -q "vus\.\." "$FIRST_LOG"; then
+            echo "  Virtual Users:"
+            grep "vus\..*: " "$FIRST_LOG" | grep -v "vus_max" | tail -1 | sed 's/^/  /' || true
+            grep "vus_max\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Requests per second
+        if grep -q "http_reqs\.\." "$FIRST_LOG"; then
+            echo "  Throughput:"
+            grep "http_reqs\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+    fi
+
+    echo "--- Error Analysis (All Pods) ---"
+    echo ""
+
+    # Aggregate errors across all logs
+    TOTAL_ERRORS=0
+    TOTAL_WARNINGS=0
+    TOTAL_TIMEOUTS=0
+    TOTAL_CONNECTION_ERRORS=0
+
+    for LOG in "$RESULTS_DIR"/*.log; do
+        ERRORS=$(grep -c "level=error" "$LOG" 2>/dev/null || echo "0")
+        WARNINGS=$(grep -c "level=warning" "$LOG" 2>/dev/null || echo "0")
+        TIMEOUTS=$(grep -c "i/o timeout\|context deadline exceeded" "$LOG" 2>/dev/null || echo "0")
+        CONN_ERRORS=$(grep -c "connection refused\|connection reset" "$LOG" 2>/dev/null || echo "0")
+
+        # Handle empty strings
+        ERRORS=${ERRORS:-0}
+        WARNINGS=${WARNINGS:-0}
+        TIMEOUTS=${TIMEOUTS:-0}
+        CONN_ERRORS=${CONN_ERRORS:-0}
+
+        TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))
+        TOTAL_WARNINGS=$((TOTAL_WARNINGS + WARNINGS))
+        TOTAL_TIMEOUTS=$((TOTAL_TIMEOUTS + TIMEOUTS))
+        TOTAL_CONNECTION_ERRORS=$((TOTAL_CONNECTION_ERRORS + CONN_ERRORS))
+    done
+
+    echo "ERROR SUMMARY:"
+    echo "  Total errors.........: $TOTAL_ERRORS"
+    echo "  Total warnings.......: $TOTAL_WARNINGS"
+    echo "  Timeout errors.......: $TOTAL_TIMEOUTS"
+    echo "  Connection errors....: $TOTAL_CONNECTION_ERRORS"
+    echo ""
+
+    # Most common error types (from first log as sample)
+    if [ -n "$FIRST_LOG" ]; then
+        echo "TOP ERROR PATTERNS (sample from one pod):"
+        grep "level=error\|level=warning" "$FIRST_LOG" 2>/dev/null | \
+            sed 's/time="[^"]*"//' | \
+            sed 's/level=[^ ]*//' | \
+            sed 's/msg="//' | \
+            sed 's/" .*//' | \
+            sort | uniq -c | sort -rn | head -5 | \
+            awk '{printf "  %5d x %s\n", $1, substr($0, index($0,$2))}' || true
+        echo ""
+    fi
+
+    # Timeline: Errors per minute (from first log)
+    if [ -n "$FIRST_LOG" ]; then
+        echo "ERROR TIMELINE (errors per minute, sample from one pod):"
+        grep "level=error\|level=warning" "$FIRST_LOG" 2>/dev/null | \
+            sed 's/time="\([^:]*:[^:]*\):[^"]*".*/\1/' | \
+            sort | uniq -c | \
+            awk '{printf "  %s: %d errors\n", $2, $1}' | \
+            head -10 || true
+        echo ""
+    fi
+
+    # Generate visualizations if Python is available
+    if command -v python3 &> /dev/null; then
+        echo "--- Generating Visualizations ---"
+        echo ""
+        python3 {{scripts_dir}}/generate_charts.py "$RESULTS_DIR" "$FIRST_LOG" || echo "⚠️  Chart generation failed"
+    else
+        echo "⚠️  Python not available - skipping visualizations"
         echo ""
     fi
 
