@@ -25,16 +25,14 @@ spec:
               containerPort: 3000
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /api/health
+            tcpSocket:
               port: http
             initialDelaySeconds: 0
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 6
           readinessProbe:
-            httpGet:
-              path: /api/health
+            tcpSocket:
               port: http
             initialDelaySeconds: 0
             periodSeconds: 10
@@ -42,8 +40,7 @@ spec:
             successThreshold: 1
             failureThreshold: 3
           startupProbe:
-            httpGet:
-              path: /api/health
+            tcpSocket:
               port: http
             initialDelaySeconds: 0
             periodSeconds: 5
