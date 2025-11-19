@@ -38,8 +38,8 @@ export async function handleExpiredToken(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
-      // Set cache variant for CDN
-      response.headers.set('X-User-Variant', cacheVariant)
+      // Set cache variant for CDN using Origin header
+      response.headers.set('Origin', cacheVariant)
       return response
     }
   }
@@ -52,7 +52,7 @@ export async function handleExpiredToken(
     'Content-Security-Policy',
     contentSecurityPolicyHeaderValue
   )
-  // Set cache variant for CDN
-  response.headers.set('X-User-Variant', cacheVariant)
+  // Set cache variant for CDN using Origin header
+  response.headers.set('Origin', cacheVariant)
   return response
 }

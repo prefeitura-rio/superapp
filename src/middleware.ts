@@ -149,8 +149,8 @@ export async function middleware(request: NextRequest) {
             'Content-Security-Policy',
             contentSecurityPolicyHeaderValue
           )
-          // Set cache variant for CDN
-          response.headers.set('X-User-Variant', cacheVariant)
+          // Set cache variant for CDN using Origin header
+          response.headers.set('Origin', cacheVariant)
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return response
@@ -174,8 +174,8 @@ export async function middleware(request: NextRequest) {
           'Cache-Control',
           'public, max-age=120, stale-while-revalidate=300'
         )
-        // Set cache variant for CDN
-        response.headers.set('X-User-Variant', cacheVariant)
+        // Set cache variant for CDN using Origin header
+        response.headers.set('Origin', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -203,8 +203,8 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
-        // Set cache variant for CDN
-        response.headers.set('X-User-Variant', cacheVariant)
+        // Set cache variant for CDN using Origin header
+        response.headers.set('Origin', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -260,8 +260,8 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
-        // Set cache variant for CDN
-        response.headers.set('X-User-Variant', cacheVariant)
+        // Set cache variant for CDN using Origin header
+        response.headers.set('Origin', cacheVariant)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
