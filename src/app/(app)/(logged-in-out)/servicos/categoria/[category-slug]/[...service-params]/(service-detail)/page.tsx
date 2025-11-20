@@ -1,7 +1,7 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { getDepartmentsCdUa } from '@/http/departments/departments'
 import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
-import { PortalInternoServiceComponent } from './components/portal-interno-service'
+import { PageClientWrapper } from './page-client-wrapper'
 
 const SERVICE_WHITELIST = [
   '94ff5567-17e5-47f3-8336-4ae209f1a601',
@@ -31,6 +31,7 @@ export default async function ServicePage({
 
   // Fetch the service data using the new endpoint
   const serviceData = await fetchServiceById(serviceId)
+  console.log(`DATAAA${JSON.stringify(serviceData)}`)
 
   if (!serviceData) {
     notFound()
@@ -47,15 +48,45 @@ export default async function ServicePage({
 
   await getCategoryNameBySlug(categorySlug)
 
-  return (
-    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
-      <SecondaryHeader title="Descrição do Serviço" showSearchButton />
+  // Fetch orgao gestor name from Departments API
+  let orgaoGestorName: string | null = null
+  const orgaoGestorValue = serviceData?.orgao_gestor?.[0]
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-4 pt-20 md:pt-22 pb-20">
-          <PortalInternoServiceComponent serviceData={serviceData} />
-        </div>
-      </div>
-    </div>
+  if (orgaoGestorValue) {
+    // Check if it's a number (ID) or a string (name)
+    const numericValue = Number(orgaoGestorValue)
+    const isNumericId =
+      !Number.isNaN(numericValue) && String(orgaoGestorValue).trim() !== ''
+
+    if (isNumericId) {
+      // It's an ID - fetch from API
+      try {
+        const departmentResult = await getDepartmentsCdUa(
+          String(orgaoGestorValue)
+        )
+
+        if (departmentResult.status === 200 && departmentResult.data) {
+          const { nome_ua, sigla_ua } = departmentResult.data
+
+          if (nome_ua) {
+            orgaoGestorName = sigla_ua ? `${nome_ua} (${sigla_ua})` : nome_ua
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching orgao gestor:', error)
+        // Fallback to the ID
+        orgaoGestorName = String(orgaoGestorValue)
+      }
+    } else {
+      // It's already a name - use it directly
+      orgaoGestorName = String(orgaoGestorValue)
+    }
+  }
+
+  return (
+    <PageClientWrapper
+      serviceData={serviceData}
+      orgaoGestorName={orgaoGestorName}
+    />
   )
 }
