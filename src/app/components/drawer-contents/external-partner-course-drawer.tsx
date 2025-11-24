@@ -28,7 +28,7 @@ export function ExternalPartnerCourseDrawer({
       <div className="flex flex-col gap-6 pt-6 px-2">
         <div className="text-left">
           <h2 className="text-xl font-medium leading-6 tracking-normal mb-3 text-popover-foreground">
-            Vamos lhe redirecionar para um link externo
+          Vamos redirecionar você para um link externo
           </h2>
           <p className="text-muted-foreground text-sm font-normal leading-5 tracking-normal">
             Este curso é gerenciado por um de nossos parceiros externos. O

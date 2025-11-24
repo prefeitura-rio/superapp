@@ -32,13 +32,13 @@ export const suggestedBanners: BannerProps[] = [
     subtitle: 'Faça login em gov.br',
     route: '/autenticacao-necessaria/carteira',
   },
-  {
-    id: 'iptu',
-    component: IptuBanner,
-    title: 'Fique em dia!',
-    subtitle: 'Emita sua guia ou saiba mais',
-    route: '/servicos/categoria/taxas/94ff5567-17e5-47f3-8336-4ae209f1a601',
-  },
+  // {
+  //   id: 'iptu',
+  //   component: IptuBanner,
+  //   title: 'Fique em dia!',
+  //   subtitle: 'Emita sua guia ou saiba mais',
+  //   route: '/servicos/categoria/taxas/94ff5567-17e5-47f3-8336-4ae209f1a601',
+  // },
   {
     id: 'update',
     component: ProfileUpdateBanner,
@@ -53,11 +53,11 @@ export const suggestedBanners: BannerProps[] = [
   //   subtitle: 'Desconto até 30 de agosto',
   //   route: '/',
   // },
-  {
-    id: 'licenses',
-    component: LicensesBanner,
-    title: 'Regularize sua obra!',
-    subtitle: 'E ganhe até 50% de desconto',
-    route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
-  },
+  // {
+  //   id: 'licenses',
+  //   component: LicensesBanner,
+  //   title: 'Regularize sua obra!',
+  //   subtitle: 'E ganhe até 50% de desconto',
+  //   route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
+  // },
 ]
