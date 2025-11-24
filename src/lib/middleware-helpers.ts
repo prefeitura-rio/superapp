@@ -11,7 +11,7 @@ export async function handleExpiredToken(
   // Try to refresh the token if we have a refresh token
   if (refreshToken) {
     const refreshResult = await refreshAccessToken(refreshToken)
-
+    
     if (refreshResult.success && refreshResult.accessToken) {
       // Token refresh successful, create response with new tokens
       const response = NextResponse.next({
@@ -19,30 +19,24 @@ export async function handleExpiredToken(
           headers: requestHeaders,
         },
       })
-
+      
       // Set new tokens in cookies
       response.cookies.set('access_token', refreshResult.accessToken, {
         httpOnly: true,
         path: '/',
       })
-
+      
       if (refreshResult.newRefreshToken) {
         response.cookies.set('refresh_token', refreshResult.newRefreshToken, {
           httpOnly: true,
           path: '/',
         })
       }
-
+      
       response.headers.set(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
-      // Prevent CDN caching for authenticated users (token was just refreshed)
-      response.headers.set(
-        'Cache-Control',
-        'private, no-cache, no-store, must-revalidate, max-age=0'
-      )
-      response.headers.set('Vary', 'Cookie, Accept-Encoding')
       return response
     }
   }

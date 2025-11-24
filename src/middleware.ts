@@ -1,4 +1,3 @@
-import { SpanStatusCode, trace } from '@opentelemetry/api'
 import {
   type MiddlewareConfig,
   type NextRequest,
@@ -6,6 +5,7 @@ import {
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
 import { handleExpiredToken, isJwtExpired } from './lib'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -34,27 +34,10 @@ function matchRoute(pathname: string, routePath: string): boolean {
   return false
 }
 
-// Helper function to set cache-control headers for authenticated users
-// This prevents CDN from caching user-specific content
-function setCacheHeadersForAuthenticatedUser(
-  response: NextResponse,
-  hasAuthToken: boolean
-): void {
-  if (hasAuthToken) {
-    // Prevent CDN and browser caching for authenticated users
-    // This ensures each user gets their personalized content
-    response.headers.set(
-      'Cache-Control',
-      'private, no-cache, no-store, must-revalidate, max-age=0'
-    )
-    response.headers.set('Vary', 'Cookie, Accept-Encoding')
-  }
-}
-
 export async function middleware(request: NextRequest) {
   const tracer = trace.getTracer('citizen-portal-middleware', '0.1.0')
 
-  return tracer.startActiveSpan('middleware.request', async span => {
+  return tracer.startActiveSpan('middleware.request', async (span) => {
     try {
       const path = request.nextUrl.pathname
       span.setAttribute('http.route', path)
@@ -63,26 +46,26 @@ export async function middleware(request: NextRequest) {
       // Generate nonce for CSP
       const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
-      // Define CSP header with nonce support
-      const isDevelopment = process.env.NODE_ENV === 'development'
+  // Define CSP header with nonce support
+  const isDevelopment = process.env.NODE_ENV === 'development'
 
-      // SHA256 hashes for inline scripts
-      const scriptHashes = [
-        'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
-        'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
-        'sha256-QaDv8TLjywIM3mKcA73bK0btmqNpUfcuwzqZ4U9KTsk=',
-        'sha256-J9cZHZf5nVZbsm7Pqxc8RsURv1AIXkMgbhfrZvoOs/A=',
-      ]
+  // SHA256 hashes for inline scripts
+  const scriptHashes = [
+    'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
+    'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
+    'sha256-QaDv8TLjywIM3mKcA73bK0btmqNpUfcuwzqZ4U9KTsk=',
+    'sha256-J9cZHZf5nVZbsm7Pqxc8RsURv1AIXkMgbhfrZvoOs/A=',
+  ]
 
-      const scriptSrcDirectives = [
-        "'self'",
-        `'nonce-${nonce}'`,
-        "'strict-dynamic'",
-        ...scriptHashes.map(hash => `'${hash}'`),
-        ...(isDevelopment ? ["'unsafe-eval'"] : []),
-      ]
+  const scriptSrcDirectives = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    ...scriptHashes.map(hash => `'${hash}'`),
+    ...(isDevelopment ? ["'unsafe-eval'"] : []),
+  ]
 
-      const cspHeader = `
+  const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
   script-src ${scriptSrcDirectives.join(' ')};
   style-src 'self' 'unsafe-inline';
@@ -98,14 +81,12 @@ export async function middleware(request: NextRequest) {
   upgrade-insecure-requests;
 `.trim()
 
-      // Clean up CSP header
-      const contentSecurityPolicyHeaderValue = cspHeader
-        .replace(/\s{2,}/g, ' ')
-        .trim()
+  // Clean up CSP header
+  const contentSecurityPolicyHeaderValue = cspHeader
+    .replace(/\s{2,}/g, ' ')
+    .trim()
 
-      const publicRoute = publicRoutes.find(route =>
-        matchRoute(path, route.path)
-      )
+      const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
       const authToken = request.cookies.get('access_token')
       const refreshToken = request.cookies.get('refresh_token')
 
@@ -113,13 +94,13 @@ export async function middleware(request: NextRequest) {
       span.setAttribute('auth.has_token', !!authToken)
       span.setAttribute('auth.has_refresh_token', !!refreshToken)
 
-      // Set up request headers with nonce and CSP
-      const requestHeaders = new Headers(request.headers)
-      requestHeaders.set('x-nonce', nonce)
-      requestHeaders.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
+  // Set up request headers with nonce and CSP
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-nonce', nonce)
+  requestHeaders.set(
+    'Content-Security-Policy',
+    contentSecurityPolicyHeaderValue
+  )
 
       // Special handling for wallet routes
       if (path === '/carteira') {
@@ -153,7 +134,11 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
-        // Public routes without auth can be cached
+        // Set cache headers for public pages (2 minutes, allow stale for 5 min)
+        response.headers.set(
+          'Cache-Control',
+          'public, max-age=120, stale-while-revalidate=300'
+        )
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -202,29 +187,10 @@ export async function middleware(request: NextRequest) {
             requestHeaders,
             contentSecurityPolicyHeaderValue
           )
-          // Set cache headers for authenticated users even on token refresh
-          if (result instanceof NextResponse) {
-            setCacheHeadersForAuthenticatedUser(result, true)
-          }
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return result
         }
-        // Authenticated user on public route - prevent caching
-        span.addEvent('authenticated.public.route')
-        const response = NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
-        setCacheHeadersForAuthenticatedUser(response, true)
-        span.setStatus({ code: SpanStatusCode.OK })
-        span.end()
-        return response
       }
 
       if (authToken && !publicRoute) {
@@ -253,7 +219,6 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
-        setCacheHeadersForAuthenticatedUser(response, true)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -277,21 +242,8 @@ export async function middleware(request: NextRequest) {
         return response
       }
 
-      // Default case: continue with request
-      const response = NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      })
-      response.headers.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
-      // Set cache headers if authenticated
-      setCacheHeadersForAuthenticatedUser(response, !!authToken)
       span.setStatus({ code: SpanStatusCode.OK })
       span.end()
-      return response
     } catch (error) {
       span.recordException(error as Error)
       span.setStatus({
