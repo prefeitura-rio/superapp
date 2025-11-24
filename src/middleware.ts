@@ -34,6 +34,23 @@ function matchRoute(pathname: string, routePath: string): boolean {
   return false
 }
 
+// Helper function to set cache-control headers for authenticated users
+// This prevents CDN from caching user-specific content
+function setCacheHeadersForAuthenticatedUser(
+  response: NextResponse,
+  hasAuthToken: boolean
+): void {
+  if (hasAuthToken) {
+    // Prevent CDN and browser caching for authenticated users
+    // This ensures each user gets their personalized content
+    response.headers.set(
+      'Cache-Control',
+      'private, no-cache, no-store, must-revalidate, max-age=0'
+    )
+    response.headers.set('Vary', 'Cookie, Accept-Encoding')
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const tracer = trace.getTracer('citizen-portal-middleware', '0.1.0')
 
@@ -134,6 +151,7 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
+        // Public routes without auth can be cached
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -182,10 +200,29 @@ export async function middleware(request: NextRequest) {
             requestHeaders,
             contentSecurityPolicyHeaderValue
           )
+          // Set cache headers for authenticated users even on token refresh
+          if (result instanceof NextResponse) {
+            setCacheHeadersForAuthenticatedUser(result, true)
+          }
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return result
         }
+        // Authenticated user on public route - prevent caching
+        span.addEvent('authenticated.public.route')
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        setCacheHeadersForAuthenticatedUser(response, true)
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
       }
 
       if (authToken && !publicRoute) {
@@ -214,6 +251,7 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
+        setCacheHeadersForAuthenticatedUser(response, true)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -237,8 +275,21 @@ export async function middleware(request: NextRequest) {
         return response
       }
 
+      // Default case: continue with request
+      const response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      })
+      response.headers.set(
+        'Content-Security-Policy',
+        contentSecurityPolicyHeaderValue
+      )
+      // Set cache headers if authenticated
+      setCacheHeadersForAuthenticatedUser(response, !!authToken)
       span.setStatus({ code: SpanStatusCode.OK })
       span.end()
+      return response
     } catch (error) {
       span.recordException(error as Error)
       span.setStatus({

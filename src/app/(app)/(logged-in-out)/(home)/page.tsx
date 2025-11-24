@@ -36,6 +36,11 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { getDisplayName } from '@/lib/utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 
+// Force dynamic rendering to prevent CDN from caching user-specific content
+// This ensures each user gets their own personalized page
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function Home() {
   const userAuthInfo = await getUserInfoFromToken()
   const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)

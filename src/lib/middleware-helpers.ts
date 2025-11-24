@@ -37,6 +37,12 @@ export async function handleExpiredToken(
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
+      // Prevent CDN caching for authenticated users (token was just refreshed)
+      response.headers.set(
+        'Cache-Control',
+        'private, no-cache, no-store, must-revalidate, max-age=0'
+      )
+      response.headers.set('Vary', 'Cookie, Accept-Encoding')
       return response
     }
   }
