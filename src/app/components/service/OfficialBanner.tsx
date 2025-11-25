@@ -1,5 +1,6 @@
 'use client'
 
+import { XIcon } from '@/assets/icons'
 import { Badge } from '@/components/ui/badge'
 import {
   Collapsible,
@@ -93,8 +94,8 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                 <Image
                   src={logoPrefHeaderIcon}
                   alt="Logo Prefeitura do Rio de Janeiro"
-                  width={45}
-                  height={55}
+                  width={29}
+                  height={37}
                   className="md:hidden object-contain"
                   priority
                 />
@@ -109,15 +110,12 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                 />
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-terciary-foreground text-sm md:text-xs">
-                  Página oficial da Prefeitura do Rio de Janeiro.
-                </p>
-
+              <p className="text-terciary-foreground text-sm">
+                Página oficial da Prefeitura do Rio de Janeiro.{' '}
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-primary text-sm underline cursor-pointer md:text-xs"
+                    className="inline-flex items-center gap-1 text-primary text-sm underline cursor-pointer whitespace-nowrap"
                   >
                     <span>Saiba mais</span>
                     <ChevronDown
@@ -127,16 +125,16 @@ export function OfficialBanner({ onHeightChange }: OfficialBannerProps = {}) {
                     />
                   </button>
                 </CollapsibleTrigger>
-              </div>
+              </p>
             </div>
 
             <button
               type="button"
               onClick={handleClose}
-              className="text-foreground hover:text-muted-foreground transition-colors flex-shrink-0 text-sm md:text-xs"
+              className="text-foreground hover:text-muted-foreground transition-colors flex-shrink-0 pr-2"
               aria-label="Fechar banner"
             >
-              x
+              <XIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
