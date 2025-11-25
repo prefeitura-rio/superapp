@@ -74,20 +74,20 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
             {enabledButtons.length === 1 ? (
               <Button
                 asChild
-                className="w-full rounded-full text-background"
+                className="w-full rounded-full text-background py-4 h-[52px]"
                 size="lg"
               >
                 <a
                   href={enabledButtons[0].url_service}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-background"
+                  className="text-background text-sm leading-5 font-normal"
                 >
                   {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
                 </a>
               </Button>
             ) : (
-              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-center">
+              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-left">
                 {enabledButtons.map((button, index) => (
                   <Card
                     key={index}
