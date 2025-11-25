@@ -1,6 +1,8 @@
 'use client'
 
-import { ChevronRight, Clock, Coins, LandmarkIcon, Tag } from 'lucide-react'
+import { CostIcon } from '@/assets/icons/cost-icon'
+import { DepartmentIcon } from '@/assets/icons/department-icon'
+import { ChevronRight, Clock, Tag } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface QuickInfoItemProps {
@@ -42,7 +44,7 @@ function QuickInfoItem({
         </span>
 
         {/* Value */}
-        <span className="text-sm text-primary font-normal ml-auto leading-5">
+        <span className="text-sm text-primary font-normal ml-auto leading-5 text-right">
           {value}
         </span>
 
@@ -84,7 +86,7 @@ interface QuickInfoCostProps {
 export function QuickInfoCost({ value }: QuickInfoCostProps) {
   return (
     <QuickInfoItem
-      icon={<Coins className="w-5 h-5 text-foreground-light" />}
+      icon={<CostIcon className="w-5 h-5 text-foreground-light" />}
       label="Custo"
       value={value}
       layout="row"
@@ -129,7 +131,7 @@ interface QuickInfoDepartmentProps {
 export function QuickInfoDepartment({ value }: QuickInfoDepartmentProps) {
   return (
     <QuickInfoItem
-      icon={<LandmarkIcon className="w-5 h-5 text-foreground-light" />}
+      icon={<DepartmentIcon className="w-5 h-5 text-foreground-light" />}
       label="Órgão gestor"
       value={value}
     />
