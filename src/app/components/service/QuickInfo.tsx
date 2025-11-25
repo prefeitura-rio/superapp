@@ -11,7 +11,7 @@ interface QuickInfoItemProps {
   value: string
   showArrow?: boolean
   onClick?: () => void
-  layout?: 'row' | 'column' // Novo: controla o layout
+  layout?: 'row' | 'column'
 }
 
 function QuickInfoItem({
@@ -39,12 +39,12 @@ function QuickInfoItem({
         <div className="flex-shrink-0 text-foreground">{icon}</div>
 
         {/* Label */}
-        <span className="text-xs text-foreground-light flex-shrink-0 leading-4">
+        <span className="text-base text-foreground-light flex-shrink-0 leading-4">
           {label}
         </span>
 
         {/* Value */}
-        <span className="text-sm text-primary font-normal ml-auto leading-5 text-right">
+        <span className="text-base text-primary font-normal ml-auto leading-5 text-right">
           {value}
         </span>
 
@@ -66,8 +66,8 @@ function QuickInfoItem({
       <div className="flex-shrink-0 text-foreground">{icon}</div>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <span className="text-xs text-foreground-light">{label}</span>
-        <span className="text-sm text-primary font-normal leading-5 break-words">
+        <span className="text-base text-foreground-light">{label}</span>
+        <span className="text-base text-primary font-normal leading-5 break-words">
           {value}
         </span>
       </div>
