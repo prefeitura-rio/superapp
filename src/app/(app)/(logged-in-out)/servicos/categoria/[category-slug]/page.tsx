@@ -5,6 +5,8 @@ import {
 } from '@/lib/services-utils'
 import { MenuItemClient } from './components/menu-item-client'
 
+export const revalidate = 600
+
 export default async function CategoryPage({
   params,
 }: {

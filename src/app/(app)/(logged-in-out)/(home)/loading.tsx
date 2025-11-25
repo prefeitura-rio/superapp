@@ -9,7 +9,7 @@ export default function HomeLoading() {
         <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
           {/* Left side - User info skeleton */}
           <div className="flex items-center space-x-3">
-            <Skeleton className="rounded-full h-12 w-12" />
+            <Skeleton className="rounded-full h-10 w-10" />
             <div className="flex flex-col space-y-1">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-3 w-20" />

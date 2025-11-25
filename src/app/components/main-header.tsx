@@ -7,6 +7,7 @@ interface MainHeaderProps {
   showSearchIcon?: boolean
   userAvatarUrl?: string | null
   userAvatarName?: string | null
+  isLoading?: boolean
 }
 
 export default function MainHeader({
@@ -15,16 +16,18 @@ export default function MainHeader({
   showSearchIcon = true,
   userAvatarUrl,
   userAvatarName,
+  isLoading = false,
 }: MainHeaderProps) {
   return (
     <header className="relative  w-full z-50 bg-background text-foreground py-4">
       <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
         {/* Left side - User info with icon */}
-        <HeaderUserLink 
-          userName={userName} 
-          isLoggedIn={isLoggedIn} 
+        <HeaderUserLink
+          userName={userName}
+          isLoggedIn={isLoggedIn}
           userAvatarUrl={userAvatarUrl}
           userAvatarName={userAvatarName}
+          isLoading={isLoading}
         />
 
         {/* Right side - Search icon with fade transition and debug background */}

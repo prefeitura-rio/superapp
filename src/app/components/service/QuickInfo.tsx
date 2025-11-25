@@ -1,6 +1,8 @@
 'use client'
 
-import { ChevronRight, Clock, Coins, LandmarkIcon, Tag } from 'lucide-react'
+import { CostIcon } from '@/assets/icons/cost-icon'
+import { DepartmentIcon } from '@/assets/icons/department-icon'
+import { ChevronRight, Clock, Tag } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface QuickInfoItemProps {
@@ -9,7 +11,7 @@ interface QuickInfoItemProps {
   value: string
   showArrow?: boolean
   onClick?: () => void
-  layout?: 'row' | 'column' // Novo: controla o layout
+  layout?: 'row' | 'column'
 }
 
 function QuickInfoItem({
@@ -37,12 +39,12 @@ function QuickInfoItem({
         <div className="flex-shrink-0 text-foreground">{icon}</div>
 
         {/* Label */}
-        <span className="text-xs text-foreground-light flex-shrink-0 leading-4">
+        <span className="text-sm text-foreground-light flex-shrink-0 leading-4">
           {label}
         </span>
 
         {/* Value */}
-        <span className="text-sm text-primary font-normal ml-auto leading-5">
+        <span className="text-sm text-primary font-normal ml-auto leading-5 text-right">
           {value}
         </span>
 
@@ -64,7 +66,7 @@ function QuickInfoItem({
       <div className="flex-shrink-0 text-foreground">{icon}</div>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <span className="text-xs text-foreground-light">{label}</span>
+        <span className="text-sm text-foreground-light">{label}</span>
         <span className="text-sm text-primary font-normal leading-5 break-words">
           {value}
         </span>
@@ -84,7 +86,7 @@ interface QuickInfoCostProps {
 export function QuickInfoCost({ value }: QuickInfoCostProps) {
   return (
     <QuickInfoItem
-      icon={<Coins className="w-5 h-5 text-foreground-light" />}
+      icon={<CostIcon className="w-5 h-5 text-foreground-light" />}
       label="Custo"
       value={value}
       layout="row"
@@ -129,7 +131,7 @@ interface QuickInfoDepartmentProps {
 export function QuickInfoDepartment({ value }: QuickInfoDepartmentProps) {
   return (
     <QuickInfoItem
-      icon={<LandmarkIcon className="w-5 h-5 text-foreground-light" />}
+      icon={<DepartmentIcon className="w-5 h-5 text-foreground-light" />}
       label="Órgão gestor"
       value={value}
     />

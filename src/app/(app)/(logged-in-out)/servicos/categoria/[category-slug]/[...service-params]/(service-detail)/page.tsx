@@ -3,6 +3,8 @@ import { fetchServiceById, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
 import { PageClientWrapper } from './page-client-wrapper'
 
+export const revalidate = 1800
+
 const SERVICE_WHITELIST = [
   '94ff5567-17e5-47f3-8336-4ae209f1a601',
   '5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',

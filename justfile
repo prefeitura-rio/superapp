@@ -138,34 +138,191 @@ analyze-results results_dir="":
         echo ""
     fi
 
-    # Extract metrics from log files
-    LOG_FILE=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | head -n1)
+    # Count total log files
+    LOG_COUNT=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | wc -l | tr -d ' ')
 
-    if [ -z "$LOG_FILE" ]; then
+    if [ "$LOG_COUNT" -eq 0 ]; then
         echo "❌ No log files found in $RESULTS_DIR"
         exit 1
     fi
 
     echo "=== Load Test Results ==="
     echo ""
+    echo "📊 Test executed across $LOG_COUNT k6 worker pods"
+    echo ""
 
-    # Extract and display the summary sections
-    if grep -q "THRESHOLDS" "$LOG_FILE"; then
-        echo "--- Thresholds ---"
-        sed -n '/█ THRESHOLDS/,/█ TOTAL RESULTS/p' "$LOG_FILE" | grep -v "█" | head -n -1
+    # Aggregate metrics from all log files
+    echo "--- Aggregated Metrics (All Pods) ---"
+    echo ""
+
+    # Extract key metrics from all logs and aggregate
+    TOTAL_CHECKS=0
+    TOTAL_CHECKS_PASSED=0
+    TOTAL_CHECKS_FAILED=0
+    TOTAL_HTTP_REQS=0
+    TOTAL_HTTP_FAILED=0
+    TOTAL_ITERATIONS=0
+    TOTAL_DATA_RECEIVED=0
+    TOTAL_DATA_SENT=0
+
+    for LOG in "$RESULTS_DIR"/*.log; do
+        # Extract checks
+        CHECKS=$(grep "checks_total" "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+        CHECKS_PASSED=$(grep "checks_succeeded" "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+        CHECKS_FAILED=$(grep "checks_failed" "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+
+        # Extract HTTP metrics
+        HTTP_REQS=$(grep "http_reqs\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+        HTTP_FAILED=$(grep "http_req_failed\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $3}' || echo "0")
+
+        # Extract iterations
+        ITERATIONS=$(grep "iterations\\.\\." "$LOG" 2>/dev/null | tail -1 | awk '{print $2}' || echo "0")
+
+        # Sum up
+        TOTAL_CHECKS=$((TOTAL_CHECKS + CHECKS))
+        TOTAL_CHECKS_PASSED=$((TOTAL_CHECKS_PASSED + CHECKS_PASSED))
+        TOTAL_CHECKS_FAILED=$((TOTAL_CHECKS_FAILED + CHECKS_FAILED))
+        TOTAL_HTTP_REQS=$((TOTAL_HTTP_REQS + HTTP_REQS))
+        TOTAL_HTTP_FAILED=$((TOTAL_HTTP_FAILED + HTTP_FAILED))
+        TOTAL_ITERATIONS=$((TOTAL_ITERATIONS + ITERATIONS))
+    done
+
+    # Calculate aggregated percentages
+    if [ $TOTAL_CHECKS -gt 0 ]; then
+        CHECK_PASS_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_CHECKS_PASSED / $TOTAL_CHECKS) * 100}")
+        CHECK_FAIL_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_CHECKS_FAILED / $TOTAL_CHECKS) * 100}")
+    else
+        CHECK_PASS_PCT="0.00"
+        CHECK_FAIL_PCT="0.00"
+    fi
+
+    if [ $TOTAL_HTTP_REQS -gt 0 ]; then
+        HTTP_FAIL_PCT=$(awk "BEGIN {printf \"%.2f\", ($TOTAL_HTTP_FAILED / $TOTAL_HTTP_REQS) * 100}")
+    else
+        HTTP_FAIL_PCT="0.00"
+    fi
+
+    # Display aggregated results
+    echo "TOTALS ACROSS ALL PODS:"
+    echo "  checks_total.........: $TOTAL_CHECKS"
+    echo "  checks_succeeded.....: ${CHECK_PASS_PCT}% ($TOTAL_CHECKS_PASSED out of $TOTAL_CHECKS)"
+    echo "  checks_failed........: ${CHECK_FAIL_PCT}% ($TOTAL_CHECKS_FAILED out of $TOTAL_CHECKS)"
+    echo ""
+    echo "  http_reqs............: $TOTAL_HTTP_REQS"
+    echo "  http_req_failed......: ${HTTP_FAIL_PCT}%"
+    echo ""
+    echo "  iterations...........: $TOTAL_ITERATIONS"
+    echo ""
+
+    # Show detailed metrics from first log (representative sample)
+    FIRST_LOG=$(ls "$RESULTS_DIR"/*.log 2>/dev/null | head -n1)
+    if [ -n "$FIRST_LOG" ]; then
+        echo "DETAILED METRICS (from representative pod):"
+        echo ""
+
+        # HTTP Request Duration (Latency)
+        if grep -q "http_req_duration" "$FIRST_LOG"; then
+            echo "  HTTP Request Latency:"
+            grep "http_req_duration\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Iteration Duration
+        if grep -q "iteration_duration" "$FIRST_LOG"; then
+            echo "  User Journey Duration:"
+            grep "iteration_duration\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Data Transfer
+        if grep -q "data_received" "$FIRST_LOG"; then
+            echo "  Network Transfer:"
+            grep "data_received\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            grep "data_sent\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # VUs (Virtual Users)
+        if grep -q "vus\.\." "$FIRST_LOG"; then
+            echo "  Virtual Users:"
+            grep "vus\..*: " "$FIRST_LOG" | grep -v "vus_max" | tail -1 | sed 's/^/  /' || true
+            grep "vus_max\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+
+        # Requests per second
+        if grep -q "http_reqs\.\." "$FIRST_LOG"; then
+            echo "  Throughput:"
+            grep "http_reqs\..*: " "$FIRST_LOG" | tail -1 | sed 's/^/  /' || true
+            echo ""
+        fi
+    fi
+
+    echo "--- Error Analysis (All Pods) ---"
+    echo ""
+
+    # Aggregate errors across all logs
+    TOTAL_ERRORS=0
+    TOTAL_WARNINGS=0
+    TOTAL_TIMEOUTS=0
+    TOTAL_CONNECTION_ERRORS=0
+
+    for LOG in "$RESULTS_DIR"/*.log; do
+        ERRORS=$(grep -c "level=error" "$LOG" 2>/dev/null || echo "0")
+        WARNINGS=$(grep -c "level=warning" "$LOG" 2>/dev/null || echo "0")
+        TIMEOUTS=$(grep -c "i/o timeout\|context deadline exceeded" "$LOG" 2>/dev/null || echo "0")
+        CONN_ERRORS=$(grep -c "connection refused\|connection reset" "$LOG" 2>/dev/null || echo "0")
+
+        # Handle empty strings
+        ERRORS=${ERRORS:-0}
+        WARNINGS=${WARNINGS:-0}
+        TIMEOUTS=${TIMEOUTS:-0}
+        CONN_ERRORS=${CONN_ERRORS:-0}
+
+        TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))
+        TOTAL_WARNINGS=$((TOTAL_WARNINGS + WARNINGS))
+        TOTAL_TIMEOUTS=$((TOTAL_TIMEOUTS + TIMEOUTS))
+        TOTAL_CONNECTION_ERRORS=$((TOTAL_CONNECTION_ERRORS + CONN_ERRORS))
+    done
+
+    echo "ERROR SUMMARY:"
+    echo "  Total errors.........: $TOTAL_ERRORS"
+    echo "  Total warnings.......: $TOTAL_WARNINGS"
+    echo "  Timeout errors.......: $TOTAL_TIMEOUTS"
+    echo "  Connection errors....: $TOTAL_CONNECTION_ERRORS"
+    echo ""
+
+    # Most common error types (from first log as sample)
+    if [ -n "$FIRST_LOG" ]; then
+        echo "TOP ERROR PATTERNS (sample from one pod):"
+        grep "level=error\|level=warning" "$FIRST_LOG" 2>/dev/null | \
+            sed 's/time="[^"]*"//' | \
+            sed 's/level=[^ ]*//' | \
+            sed 's/msg="//' | \
+            sed 's/" .*//' | \
+            sort | uniq -c | sort -rn | head -5 | \
+            awk '{printf "  %5d x %s\n", $1, substr($0, index($0,$2))}' || true
         echo ""
     fi
 
-    if grep -q "TOTAL RESULTS" "$LOG_FILE"; then
-        echo "--- Metrics ---"
-        sed -n '/█ TOTAL RESULTS/,/^time=/p' "$LOG_FILE" | grep -v "█" | grep -v "^time="
+    # Timeline: Errors per minute (from first log)
+    if [ -n "$FIRST_LOG" ]; then
+        echo "ERROR TIMELINE (errors per minute, sample from one pod):"
+        grep "level=error\|level=warning" "$FIRST_LOG" 2>/dev/null | \
+            sed 's/time="\([^:]*:[^:]*\):[^"]*".*/\1/' | \
+            sort | uniq -c | \
+            awk '{printf "  %s: %d errors\n", $2, $1}' | \
+            head -10 || true
         echo ""
     fi
 
-    # Check for k6 summary file
-    if [ -f "$RESULTS_DIR/k6-summary.txt" ]; then
-        echo "--- K6 Summary ---"
-        cat "$RESULTS_DIR/k6-summary.txt"
+    # Generate visualizations if Python is available
+    if command -v python3 &> /dev/null; then
+        echo "--- Generating Visualizations ---"
+        echo ""
+        python3 {{scripts_dir}}/generate_charts.py "$RESULTS_DIR" "$FIRST_LOG" || echo "⚠️  Chart generation failed"
+    else
+        echo "⚠️  Python not available - skipping visualizations"
         echo ""
     fi
 

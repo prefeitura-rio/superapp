@@ -6,6 +6,8 @@ import lampada from "@/assets/lampada.png";
 import Image from "next/image";
 import Link from "next/link";
 
+export const dynamic = 'force-static'
+
 export default function OuvidoriaPage() {
    return (
     <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">

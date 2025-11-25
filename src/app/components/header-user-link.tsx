@@ -1,6 +1,7 @@
 'use client'
 
 import { UserIcon } from '@/assets/icons'
+import { Skeleton } from '@/components/ui/skeleton'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ interface HeaderUserLinkProps {
   isLoggedIn: boolean
   userAvatarUrl?: string | null
   userAvatarName?: string | null
+  isLoading?: boolean
 }
 
 export default function HeaderUserLink({
@@ -17,6 +19,7 @@ export default function HeaderUserLink({
   isLoggedIn,
   userAvatarUrl,
   userAvatarName,
+  isLoading = false,
 }: HeaderUserLinkProps) {
   const handleClick = () => {
     if (isLoggedIn) {
@@ -28,6 +31,18 @@ export default function HeaderUserLink({
         event_timestamp: new Date().toISOString(),
       })
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-3">
+        <Skeleton className="rounded-full h-10 w-10" />
+        <div className="flex flex-col space-y-1">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -156,11 +156,6 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
         </>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-        {course.theme && (
-          <span className="text-white/80 text-sm capitalize">
-            {course.theme}
-          </span>
-        )}
         <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
           {course.title || 'Título não disponível'}
         </h1>
@@ -438,7 +433,7 @@ function CourseContent({ course }: CourseContentProps) {
   const contentSections = [
     {
       key: 'pre_requisitos',
-      title: 'Pré-requisitos para obtenção do certificado',
+      title: 'Pré-requisitos para o certificado',
       useMarkdown: true,
     },
     { key: 'facilitator', title: 'Facilitador', useMarkdown: false },
@@ -472,7 +467,10 @@ function CourseContent({ course }: CourseContentProps) {
               {title}
             </h2>
             {useMarkdown ? (
-              <MarkdownRenderer content={content} />
+              <MarkdownRenderer
+                className="text-sm text-foreground-light"
+                content={content}
+              />
             ) : (
               <div className="text-sm text-foreground-light whitespace-pre-line">
                 {content}
@@ -681,7 +679,10 @@ export function CourseDetails({
         )}
         <div className="px-4 py-6 pb-0">
           {course.description ? (
-            <MarkdownRenderer content={course.description} />
+            <MarkdownRenderer
+              className="text-sm text-foreground-light"
+              content={course.description}
+            />
           ) : (
             <div className="text-foreground-light text-base leading-4 md:leading-6">
               Descrição não disponível

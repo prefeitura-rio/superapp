@@ -61,6 +61,8 @@ export const customFetch = async <T>(
   const requestInit: RequestInit = {
     ...options,
     headers: requestHeaders,
+    // Enable keep-alive for connection reuse
+    keepalive: true,
   }
 
   const response = await fetch(requestUrl, requestInit)

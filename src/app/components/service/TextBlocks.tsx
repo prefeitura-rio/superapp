@@ -58,7 +58,7 @@ export function TextBlock({ title, content, renderMarkdown }: TextBlockProps) {
       <div className="bg-card rounded-2xl p-6 w-full">
         <h3 className="text-foreground font-medium text-base mb-5">{title}</h3>
 
-        <div className="text-tertiary-foreground">
+        <div className="text-terciary-foreground text-sm">
           {shouldTruncate ? (
             !isExpanded ? (
               <div className="relative">

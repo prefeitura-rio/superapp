@@ -130,6 +130,13 @@ jobs:
                 file: main.js
             runner:
               image: grafana/k6:latest
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
               env:
                 - name: K6_BASE_URL
                   value: "${{ inputs.target_url }}"

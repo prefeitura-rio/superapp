@@ -40,7 +40,7 @@ export async function handleExpiredToken(
       return response
     }
   }
-  
+
   // Token refresh failed or no refresh token, redirect to session expired
   const redirectUrl = request.nextUrl.clone()
   redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE

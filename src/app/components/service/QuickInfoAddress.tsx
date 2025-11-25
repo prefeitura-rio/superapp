@@ -81,7 +81,7 @@ export function QuickInfoAddress({ addresses }: QuickInfoAddressProps) {
           <MapPin className="w-5 h-5 text-foreground-light" />
         </div>
 
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-col flex-1 min-w-0 items-start">
           <span className="text-xs font-normal text-foreground-light">
             Endereço
           </span>
