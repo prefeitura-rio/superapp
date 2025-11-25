@@ -77,7 +77,8 @@ export function MarkdownViewer({ content, className }: MarkdownViewerProps) {
     <div
       className={cn(
         'prose prose-sm max-w-none',
-        'prose-headings:font-semibold',
+        'prose-headings:font-bold',
+        'prose-h1:text-base prose-h2:text-base prose-h3:text-base prose-h4:text-base prose-h5:text-base prose-h6:text-base',
         'prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800',
         'prose-ul:list-disc prose-ol:list-decimal',
         'prose-li:marker:text-foreground',
