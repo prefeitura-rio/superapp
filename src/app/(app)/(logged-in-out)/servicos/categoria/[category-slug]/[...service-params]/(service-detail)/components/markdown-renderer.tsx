@@ -20,6 +20,8 @@ function normalizeMarkdown(content: string): string {
         return trimmed !== '-' && trimmed !== '•' && trimmed !== '*'
       })
       .join('\n')
+      // Remove bold markers from headings: ## **text** -> ## text
+      .replace(/^(#{1,6})\s+\*\*(.+?)\*\*\s*$/gm, '$1 $2')
       // Move trailing spaces before closing bold markers to outside: **text **next -> **text** next
       // This handles cases where there's text after the closing marker
       .replace(/\*\*([^*\n]+?)\s+\*\*([^\s])/g, '**$1** $2')
@@ -57,7 +59,10 @@ export function MarkdownRenderer({
             />
           ),
           p: ({ node, ...props }) => (
-            <p {...props} className="text-sm text-foreground-light leading-5 break-words" />
+            <p
+              {...props}
+              className="text-sm text-foreground-light leading-5 break-words"
+            />
           ),
           ul: ({ node, ...props }) => (
             <ul {...props} className="list-disc pl-6 space-y-1" />
@@ -75,6 +80,15 @@ export function MarkdownRenderer({
             <strong {...props} className="font-semibold text-foreground" />
           ),
           em: ({ node, ...props }) => <em {...props} className="italic" />,
+          h1: ({ node, ...props }) => (
+            <h1 {...props} className="font-normal text-foreground" />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 {...props} className="font-normal text-foreground" />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 {...props} className="font-normal text-foreground" />
+          ),
           table: ({ node, ...props }) => (
             <div className="w-full overflow-x-auto my-4 -mx-2 px-2">
               <table {...props} className="min-w-full border-collapse" />
