@@ -433,7 +433,7 @@ function CourseContent({ course }: CourseContentProps) {
   const contentSections = [
     {
       key: 'pre_requisitos',
-      title: 'Pré-requisitos para o certificado"("',
+      title: 'Pré-requisitos para o certificado',
       useMarkdown: true,
     },
     { key: 'facilitator', title: 'Facilitador', useMarkdown: false },
@@ -467,7 +467,10 @@ function CourseContent({ course }: CourseContentProps) {
               {title}
             </h2>
             {useMarkdown ? (
-              <MarkdownRenderer content={content} />
+              <MarkdownRenderer
+                className="text-sm text-foreground-light"
+                content={content}
+              />
             ) : (
               <div className="text-sm text-foreground-light whitespace-pre-line">
                 {content}
@@ -676,7 +679,10 @@ export function CourseDetails({
         )}
         <div className="px-4 py-6 pb-0">
           {course.description ? (
-            <MarkdownRenderer content={course.description} />
+            <MarkdownRenderer
+              className="text-sm text-foreground-light"
+              content={course.description}
+            />
           ) : (
             <div className="text-foreground-light text-base leading-4 md:leading-6">
               Descrição não disponível
