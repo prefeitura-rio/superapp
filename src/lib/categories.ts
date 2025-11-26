@@ -26,7 +26,7 @@ function normalizeCategoryName(name: string): string {
 
 // Icon mapping based on normalized category name
 const iconMap: Record<string, any> = {
-  ambiente: serviceIcon.ambienteIcon,
+  'meio ambiente': serviceIcon.ambienteIcon,
   animais: serviceIcon.animaisIcon,
   cidadania: serviceIcon.cidadaniaIcon,
   cidade: serviceIcon.cidadeIcon,
