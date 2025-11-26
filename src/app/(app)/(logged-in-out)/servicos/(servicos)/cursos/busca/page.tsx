@@ -1,12 +1,13 @@
 'use client'
 
-import coursesApi from '@/actions/courses'
+import { searchCourses } from '@/actions/courses/search-courses'
 import { createCourseSlug } from '@/actions/courses/utils-mock'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
+import type { ModelsCurso } from '@/http-courses/models'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,22 +15,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 const SEARCH_HISTORY_KEY = 'courses-search-history'
 const MAX_HISTORY_ITEMS = 8
 
-type Course = {
-  id: string
-  title: string
-  description?: string
-  requirements?: string[]
-  spots?: number
-  status?: string
-  date?: string
+// Use ModelsCurso from API, but extend it for UI purposes
+type Course = ModelsCurso & {
+  // Additional fields that might be needed for display
   provider?: string
-  workload?: string
   modality?: string
-  type?: string
-  certificate?: boolean
   period?: string
-  imageUrl?: string
-  [k: string]: any
 }
 
 import { FILTER_LABELS } from '@/actions/courses/utils-mock'
@@ -80,7 +71,7 @@ export default function CoursesSearchPage() {
   }
 
   // Função para fazer busca na API
-  const searchCourses = useCallback(
+  const performSearch = useCallback(
     async (filters: {
       q?: string
       modalidade?: string
@@ -90,14 +81,20 @@ export default function CoursesSearchPage() {
     }) => {
       setIsLoading(true)
       try {
-        const courses = await coursesApi.getCoursesWithFilters({
-          query: filters.q,
+        const result = await searchCourses({
+          q: filters.q,
           modalidade: filters.modalidade,
           certificado: filters.certificado,
           categoria: filters.categoria,
           periodo: filters.periodo,
         })
-        setFilteredCourses(courses)
+        // Transform API courses to UI format
+        const transformedCourses: Course[] = result.courses.map(course => ({
+          ...course,
+          provider: course.organization || undefined,
+          modality: course.modalidade || undefined,
+        }))
+        setFilteredCourses(transformedCourses)
       } catch (error) {
         console.error('Erro ao buscar cursos:', error)
         setFilteredCourses([])
@@ -136,11 +133,11 @@ export default function CoursesSearchPage() {
     // Fazer busca se houver filtros ou query com mais de 2 caracteres
     const shouldSearch = q.length >= 3 || Object.values(applied).some(Boolean)
     if (shouldSearch) {
-      searchCourses({ q, ...applied })
+      performSearch({ q, ...applied })
     } else {
       setFilteredCourses([])
     }
-  }, [searchParams, searchCourses, isFilterOpen])
+  }, [searchParams, performSearch, isFilterOpen])
 
   useEffect(() => {
     if (isFilterOpen) setDraftFilters(selectedFilters)
@@ -401,16 +398,19 @@ export default function CoursesSearchPage() {
               {filteredCourses.map(course => (
                 <li key={course.id} className="py-2">
                   <Link
-                    href={`/servicos/cursos/${createCourseSlug(course.id, course.title)}`}
+                    href={`/servicos/cursos/${createCourseSlug(
+                      course.id?.toString() || '',
+                      course.title || ''
+                    )}`}
                     className="block rounded-md -mx-2 px-2 py-2 hover:bg-muted/40 focus:outline-none focus:ring-primary"
                   >
                     <h3 className="text-base font-medium truncate">
-                      {course.title}
+                      {course.title || 'Curso sem título'}
                     </h3>
                     <p className="text-xs text-muted-foreground truncate">
-                      {course.provider ?? '—'}
+                      {course.provider || course.organization || '—'}
                       {' • '}
-                      {course.modality ?? '—'}
+                      {course.modality || '—'}
                       {course.period ? ` • ${course.period}` : ''}
                     </p>
                   </Link>
