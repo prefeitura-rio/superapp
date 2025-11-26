@@ -81,6 +81,12 @@ function jsonToMarkdown(
           jsonToMarkdown(child, listLevel, parentListType, orderedListIndex)
         )
         .join('')
+        .trim()
+      // Skip empty headings (headings with no content or only whitespace)
+      if (headingText === '') {
+        result = ''
+        break
+      }
       result = `${'#'.repeat(level)} ${headingText}`
       break
     }
@@ -340,6 +346,50 @@ function jsonToMarkdown(
 }
 
 /**
+ * Remove empty headings and their adjacent empty lines from markdown
+ * This preprocesses the markdown to remove patterns like: \n\n## \n\n
+ */
+function removeEmptyHeadings(markdown: string): string {
+  const lines = markdown.split('\n')
+  const result: string[] = []
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+    const trimmed = line.trim()
+
+    // Check if this is an empty heading (only # and optional spaces, no text after)
+    // Match patterns like: ##, ## , ###, etc. (but not ## texto)
+    const headingMatch = trimmed.match(/^#{1,6}\s*$/)
+
+    // Also check explicitly: if it starts with #, remove all # and spaces, and see if anything remains
+    const isHeading = trimmed.match(/^#{1,6}\s/)
+    const isEmptyHeading =
+      isHeading && trimmed.replace(/^#+\s*/, '').trim() === ''
+
+    if (headingMatch || isEmptyHeading) {
+      // This is an empty heading - remove it and empty lines after it
+      // DO NOT remove empty lines before it - those are valid spacing
+
+      // Skip the empty heading itself
+      i++
+
+      // Skip all empty lines immediately after the empty heading
+      while (i < lines.length && lines[i].trim() === '') {
+        i++
+      }
+
+      continue
+    }
+
+    result.push(line)
+    i++
+  }
+
+  return result.join('\n')
+}
+
+/**
  * Parse Markdown to HTML for Tiptap
  * This is a simple parser for basic markdown features
  * Supports nested lists with proper indentation handling
@@ -349,6 +399,9 @@ export function parseMarkdownToHtml(markdown: string): string {
 
   // Normalize line endings and multiple newlines
   const normalized = markdown.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  // Note: We don't pre-process to remove empty headings here because it can affect spacing.
+  // Instead, we handle empty headings during parsing to preserve spacing structure.
 
   // Split into lines for processing
   const lines = normalized.split('\n')
@@ -371,9 +424,59 @@ export function parseMarkdownToHtml(markdown: string): string {
         j++
       }
 
-      // Check if next content is a heading
+      // Check if next content is a heading (with or without space after #)
       const nextLine = j < lines.length ? lines[j].trim() : ''
-      const nextIsHeading = nextLine.match(/^#{1,6}\s/)
+      const nextIsHeading = nextLine.match(/^#{1,6}(\s|$)/)
+
+      // Check if the heading is empty (only # with optional spaces, no text)
+      let nextIsEmptyHeading = false
+      if (nextIsHeading) {
+        // Remove all # and any spaces after them
+        const headingText = nextLine.replace(/^#+\s*/, '').trim()
+        nextIsEmptyHeading = headingText === ''
+      }
+
+      // If next is an empty heading, process empty lines normally (preserve spacing)
+      // but then skip the empty heading and empty lines after it
+      // Also handle multiple consecutive empty headings
+      if (nextIsEmptyHeading) {
+        // Process empty lines normally to preserve spacing
+        const paragraphsToAdd =
+          emptyLineCount >= 1 ? emptyLineCount : emptyLineCount - 1
+        for (let k = 0; k < paragraphsToAdd; k++) {
+          blocks.push('<h2></h2>')
+        }
+
+        // Skip the empty heading
+        j++
+
+        // Skip empty lines after the empty heading
+        while (j < lines.length && lines[j].trim() === '') {
+          j++
+        }
+
+        // Check if there are more consecutive empty headings and skip them too
+        while (j < lines.length) {
+          const checkLine = lines[j].trim()
+          const checkIsHeading = checkLine.match(/^#{1,6}(\s|$)/)
+          if (checkIsHeading) {
+            const checkHeadingText = checkLine.replace(/^#+\s*/, '').trim()
+            if (checkHeadingText === '') {
+              // Another empty heading, skip it
+              j++
+              // Skip empty lines after this empty heading too
+              while (j < lines.length && lines[j].trim() === '') {
+                j++
+              }
+              continue
+            }
+          }
+          break
+        }
+
+        i = j
+        continue
+      }
 
       // For headings: add (emptyLineCount - 1) empty paragraphs
       // For other blocks: add (emptyLineCount - 1) empty paragraphs
@@ -393,10 +496,39 @@ export function parseMarkdownToHtml(markdown: string): string {
       continue
     }
 
-    // Headings
-    if (trimmed.match(/^#{1,6}\s/)) {
+    // Headings (with or without space after #)
+    if (trimmed.match(/^#{1,6}(\s|$)/)) {
       const level = trimmed.match(/^#+/)?.[0].length || 1
-      const text = trimmed.replace(/^#+\s/, '')
+      // Remove all # and any spaces after them
+      const text = trimmed.replace(/^#+\s*/, '').trim()
+      // Skip empty headings (headings with no content or only whitespace)
+      if (text === '') {
+        // Skip this empty heading
+        i++
+        // Skip any empty lines after it
+        while (i < lines.length && lines[i].trim() === '') {
+          i++
+        }
+        // Check if there are more consecutive empty headings and skip them too
+        while (i < lines.length) {
+          const checkLine = lines[i].trim()
+          const checkIsHeading = checkLine.match(/^#{1,6}(\s|$)/)
+          if (checkIsHeading) {
+            const checkHeadingText = checkLine.replace(/^#+\s*/, '').trim()
+            if (checkHeadingText === '') {
+              // Another empty heading, skip it
+              i++
+              // Skip empty lines after this empty heading too
+              while (i < lines.length && lines[i].trim() === '') {
+                i++
+              }
+              continue
+            }
+          }
+          break
+        }
+        continue
+      }
       blocks.push(`<h${level}>${parseInlineMarkdown(text, false)}</h${level}>`)
       i++
       continue
@@ -406,7 +538,6 @@ export function parseMarkdownToHtml(markdown: string): string {
     if (trimmed.startsWith('```')) {
       const codeLines: string[] = []
       i++ // Skip opening ```
-
       while (i < lines.length && !lines[i].trim().startsWith('```')) {
         codeLines.push(lines[i])
         i++
@@ -653,6 +784,7 @@ function parseList(
       }
 
       // Check if it's continuation text (same indent, not a list marker)
+      // Continuation text should come immediately after the item, not after empty lines
       if (
         nextIndent === indent &&
         !nextTrimmed.match(/^[-*]\s/) &&
