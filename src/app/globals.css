@@ -442,6 +442,11 @@ select:-webkit-autofill:focus {
   margin-top: 0.75em;
 }
 
+/* Empty paragraphs for spacing */
+.ProseMirror p:empty {
+  min-height: 0.75em;
+}
+
 
 /* Headings - Only apply bold, no font size changes */
 .ProseMirror h1,
@@ -456,7 +461,7 @@ select:-webkit-autofill:focus {
 .prose h4,
 .prose h5,
 .prose h6 {
-  font-size: inherit !important;
+  /* font-size: inherit !important; */
   font-weight: 700 !important;
   line-height: inherit !important;
   margin: 0 !important;
