@@ -1,13 +1,67 @@
 import type { Editor } from '@tiptap/react'
 
 /**
+ * Normalize multiple consecutive newlines to maximum of 2 (single blank line)
+ * This prevents accumulation of extra newlines when saving
+ */
+function normalizeNewlines(markdown: string): string {
+  // Replace 3 or more consecutive newlines with exactly 2 newlines
+  return markdown.replace(/\n{4,}/g, '\n\n\n')
+}
+
+/**
+ * Ensure headings always have exactly 2 newlines before them
+ * Maximum of 3 newlines total (2 empty lines) before any heading
+ */
+function normalizeHeadingSpacing(markdown: string): string {
+  const lines = markdown.split('\n')
+  const result: string[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const trimmed = line.trim()
+
+    // Check if this is a heading with actual content
+    const headingMatch = trimmed.match(/^#{1,6}\s+(.+)/)
+    const isHeading = headingMatch && headingMatch[1].trim().length > 0
+
+    if (isHeading && result.length > 0) {
+      // Count empty lines before this heading
+      let emptyLinesBefore = 0
+      let j = result.length - 1
+      while (j >= 0 && result[j].trim() === '') {
+        emptyLinesBefore++
+        j--
+      }
+
+      // Remove all empty lines before heading
+      for (let k = 0; k < emptyLinesBefore; k++) {
+        result.pop()
+      }
+
+      // Add exactly 2 empty lines before heading (represents \n\n before heading)
+      result.push('')
+      result.push('')
+    }
+
+    result.push(line)
+  }
+
+  return result.join('\n')
+}
+
+/**
  * Convert Tiptap JSON to Markdown
  */
 export function getMarkdownFromEditor(editor: Editor): string {
   const json = editor.getJSON()
   const markdown = jsonToMarkdown(json)
+  // Normalize multiple consecutive newlines to prevent accumulation
+  const normalized = normalizeNewlines(markdown)
+  // Ensure headings always have exactly 2 newlines before them
+  const withHeadingSpacing = normalizeHeadingSpacing(normalized)
   // Trim the result to handle empty content properly
-  return markdown.trim()
+  return withHeadingSpacing.trim()
 }
 
 /**
@@ -436,17 +490,8 @@ export function parseMarkdownToHtml(markdown: string): string {
         nextIsEmptyHeading = headingText === ''
       }
 
-      // If next is an empty heading, process empty lines normally (preserve spacing)
-      // but then skip the empty heading and empty lines after it
-      // Also handle multiple consecutive empty headings
+      // If next is an empty heading, skip it completely (don't add any spacing)
       if (nextIsEmptyHeading) {
-        // Process empty lines normally to preserve spacing
-        const paragraphsToAdd =
-          emptyLineCount >= 1 ? emptyLineCount : emptyLineCount - 1
-        for (let k = 0; k < paragraphsToAdd; k++) {
-          blocks.push('<h2></h2>')
-        }
-
         // Skip the empty heading
         j++
 
@@ -478,17 +523,18 @@ export function parseMarkdownToHtml(markdown: string): string {
         continue
       }
 
-      // For headings: add (emptyLineCount - 1) empty paragraphs
+      // For empty lines before headings: add exactly 1 empty paragraph (for \n\n spacing)
       // For other blocks: add (emptyLineCount - 1) empty paragraphs
-      // This is because the natural spacing between blocks (margin-top: 0.75em) already provides one "gap"
-      // But we need at least one empty paragraph for \n\n before headings to show spacing
       if (j < lines.length) {
-        const paragraphsToAdd =
-          nextIsHeading && emptyLineCount >= 1
-            ? emptyLineCount
-            : emptyLineCount - 1
-        for (let k = 0; k < paragraphsToAdd; k++) {
-          blocks.push('<h2></h2>')
+        if (nextIsHeading) {
+          // Always add exactly 1 empty paragraph before headings (represents \n\n)
+          blocks.push('<p></p>')
+        } else {
+          // For non-headings, add spacing based on empty line count
+          const paragraphsToAdd = emptyLineCount - 1
+          for (let k = 0; k < paragraphsToAdd; k++) {
+            blocks.push('<p></p>')
+          }
         }
       }
 

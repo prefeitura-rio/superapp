@@ -439,13 +439,9 @@ select:-webkit-autofill:focus {
 }
 
 .ProseMirror > * + * {
-  margin-top: 0.75em;
+  /* No margin between elements - spacing controlled by individual elements */
 }
 
-/* Empty paragraphs for spacing */
-.ProseMirror p:empty {
-  min-height: 0.75em;
-}
 
 
 /* Headings - Only apply bold, no font size changes */
@@ -466,7 +462,8 @@ select:-webkit-autofill:focus {
   line-height: inherit !important;
   margin: 0 !important;
   margin-top: 0 !important;
-  margin-bottom: 0 !important;
+  margin-bottom: 4px !important;
+  font-size: 0.9rem !important;
 }
 
 .ProseMirror ul,
