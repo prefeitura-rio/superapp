@@ -361,9 +361,35 @@ export function parseMarkdownToHtml(markdown: string): string {
     const line = lines[i]
     const trimmed = line.trim()
 
-    // Skip empty lines (they'll be handled as paragraph separators)
+    // Handle empty lines - preserve them as spacing elements
     if (trimmed === '') {
-      i++
+      // Count consecutive empty lines
+      let emptyLineCount = 0
+      let j = i
+      while (j < lines.length && lines[j].trim() === '') {
+        emptyLineCount++
+        j++
+      }
+
+      // Check if next content is a heading
+      const nextLine = j < lines.length ? lines[j].trim() : ''
+      const nextIsHeading = nextLine.match(/^#{1,6}\s/)
+
+      // For headings: add (emptyLineCount - 1) empty paragraphs
+      // For other blocks: add (emptyLineCount - 1) empty paragraphs
+      // This is because the natural spacing between blocks (margin-top: 0.75em) already provides one "gap"
+      // But we need at least one empty paragraph for \n\n before headings to show spacing
+      if (j < lines.length) {
+        const paragraphsToAdd =
+          nextIsHeading && emptyLineCount >= 1
+            ? emptyLineCount
+            : emptyLineCount - 1
+        for (let k = 0; k < paragraphsToAdd; k++) {
+          blocks.push('<h2></h2>')
+        }
+      }
+
+      i = j
       continue
     }
 
