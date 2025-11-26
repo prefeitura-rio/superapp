@@ -44,7 +44,7 @@ function QuickInfoItem({
         </span>
 
         {/* Value */}
-        <span className="text-sm text-primary font-normal ml-auto leading-5 text-right">
+        <span className="text-sm text-primary font-normal ml-auto leading-5 text-right break-words min-w-0">
           {value}
         </span>
 
