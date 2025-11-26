@@ -24,11 +24,23 @@ export type GetApiV1CoursesParams = {
    */
   modalidade?: string
   /**
-   * Filtrar por organização
+   * Filtrar por organização (provedor do curso)
    */
   organization?: string
   /**
    * Buscar no título
    */
   search?: string
+  /**
+   * Filtrar por categoria
+   */
+  categoria_id?: number
+  /**
+   * Filtrar por acessibilidade
+   */
+  acessibilidade_id?: number
+  /**
+   * Filtrar por zona do bairro
+   */
+  neighborhood_zone?: string
 }

@@ -23,4 +23,16 @@ export type GetApiV1UsersUserIdCoursesParams = {
    * Filtrar por modalidade
    */
   modalidade?: string
+  /**
+   * Filtrar por categoria
+   */
+  categoria_id?: number
+  /**
+   * Filtrar por acessibilidade
+   */
+  acessibilidade_id?: number
+  /**
+   * Filtrar por zona do bairro
+   */
+  neighborhood_zone?: string
 }

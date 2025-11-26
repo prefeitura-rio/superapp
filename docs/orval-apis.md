@@ -47,8 +47,8 @@
     input:
       'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/staging/docs/swagger.json',
     output: {
-      target: './src/http-gorio/api.ts',
-      schemas: './src/http-gorio/models',
+      target: './src/http-courses/api.ts',
+      schemas: './src/http-courses/models',
       mode: 'tags-split',
       client: 'fetch',
       biome: true,
@@ -57,8 +57,8 @@
       baseUrl: process.env.NEXT_PUBLIC_COURSES_BASE_API_URL,
       override: {
         mutator: {
-          path: './custom-fetch-gorio.ts',
-          name: 'customFetchGoRio',
+          path: './custom-fetch-course.ts',
+          name: 'customFetch',
         },
       },
     },

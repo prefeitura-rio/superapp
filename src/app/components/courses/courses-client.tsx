@@ -6,6 +6,8 @@ import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { UserInfo } from '@/lib/user-info'
+import Link from 'next/link'
+import SearchPlaceholder from '../search-placeholder'
 import { MyCoursesHome } from './my-courses-home'
 import { MyCoursesHomeSwipe } from './my-courses-home-swipe'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
@@ -44,11 +46,11 @@ export default function CoursePageClient({
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
       <main className="max-w-4xl mx-auto pt-25 pb-20 text-white">
-        {/* <div className="mt-4">
+        <div className="mt-4">
           <SearchPlaceholder isCourseSearch />
-        </div> */}
+        </div>
 
-        {/* <section className="mt-4 pb-8">
+        <section className="mt-4 pb-8">
           <div className="w-full overflow-x-auto no-scrollbar">
             <div className="flex px-4 gap-4 w-max">
               {FILTERS.map(filter => (
@@ -69,7 +71,7 @@ export default function CoursePageClient({
               ))}
             </div>
           </div>
-        </section> */}
+        </section>
 
         {myCourses.length > 0 && (
           <ResponsiveWrapper

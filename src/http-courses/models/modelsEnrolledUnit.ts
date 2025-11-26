@@ -13,6 +13,7 @@ export interface ModelsEnrolledUnit {
   curso_id?: number
   id?: string
   neighborhood?: string
+  neighborhood_zone?: string
   schedules?: ModelsEnrolledUnitSchedule[]
   updated_at?: string
 }
