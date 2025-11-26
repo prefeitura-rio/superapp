@@ -49,6 +49,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
             --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746_v2_llm \
             --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital_v2_llm \
@@ -74,6 +75,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://pref.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_HOME_URL="https://pref.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="true" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746 \
             --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital \
