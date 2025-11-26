@@ -91,11 +91,11 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                 {enabledButtons.map((button, index) => (
                   <Card
                     key={index}
-                    className="min-w-[268px] max-w-[268px] md:max-w-[268px] min-h-[188px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col"
+                    className="min-w-[268px] w-[268px] md:w-[268px] min-h-[188px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col"
                   >
-                    <CardHeader className="p-6 pb-0 flex-1">
+                    <CardHeader className="p-6 pb-0 flex-1 min-w-0">
                       {button.descricao && (
-                        <CardDescription className="text-sm">
+                        <CardDescription className="text-sm break-words hyphens-auto">
                           {button.descricao}
                         </CardDescription>
                       )}
