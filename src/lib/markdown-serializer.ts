@@ -578,8 +578,38 @@ function parseList(
       const nextIndent = nextLine.length - nextLine.trimStart().length
 
       if (nextTrimmed === '') {
-        j++
-        continue
+        // Empty line found - check what comes after
+        let nextNonEmpty = j + 1
+        while (
+          nextNonEmpty < lines.length &&
+          lines[nextNonEmpty].trim() === ''
+        ) {
+          nextNonEmpty++
+        }
+
+        if (nextNonEmpty >= lines.length) {
+          // End of file, stop processing this item
+          break
+        }
+
+        const afterEmptyLine = lines[nextNonEmpty]
+        const afterEmptyTrimmed = afterEmptyLine.trim()
+        const afterEmptyIndent =
+          afterEmptyLine.length - afterEmptyLine.trimStart().length
+
+        // Check if what comes after the empty line is a list item
+        const isListItemAfterEmpty =
+          afterEmptyTrimmed.match(/^[-*]\s/) ||
+          afterEmptyTrimmed.match(/^\d+\.\s/) ||
+          afterEmptyTrimmed.match(/^- \[[ x]\]/)
+
+        // An empty line in markdown typically ends a list item
+        // Only continue if the next line is a list item at the same indent level
+        // (which would be a continuation of the same list, but a new item)
+        // or if it's a nested list item that comes immediately after (no empty line)
+        // Since we found an empty line, we should stop processing this item
+        // The outer loop will handle what comes next
+        break
       }
 
       // Check if it's a nested list (more indent)
