@@ -4,6 +4,7 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { OfficialBanner } from '@/app/components/service'
 import { PrefLogo } from '@/assets/icons/pref-logo'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import Link from 'next/link'
 import { useState } from 'react'
 import { PageClient } from './page-client'
 
@@ -24,7 +25,11 @@ export function PageClientWrapper({
 
       <div className="min-h-lvh max-w-[896px] mx-auto">
         <SecondaryHeader
-          logo={<PrefLogo fill="var(--primary)" className="h-8 w-20" />}
+          logo={
+            <Link href="/" className="cursor-pointer">
+              <PrefLogo fill="var(--primary)" className="h-8 w-20" />
+            </Link>
+          }
           showSearchButton
           className="max-w-[896px]"
           style={{ top: `${bannerHeight}px` }}
