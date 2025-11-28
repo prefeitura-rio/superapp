@@ -1,4 +1,4 @@
-import { slugify } from '@/actions/courses/utils-mock'
+import { slugify } from '@/actions/courses/utils'
 import artesImage from '@/assets/course-categories/artes.png'
 // Import category images
 import astronomiaImage from '@/assets/course-categories/astronomia.png'

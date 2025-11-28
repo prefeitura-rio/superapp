@@ -1,5 +1,3 @@
-'use server'
-
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import {
@@ -9,6 +7,7 @@ import {
 import { filterVisibleCourses } from '@/lib/course-utils'
 import { getDalCategorias } from '@/lib/dal'
 import { getDalCourses } from '@/lib/dal'
+import { NextResponse } from 'next/server'
 
 // Type for the expected API response structure
 interface CoursesApiResponse {
@@ -44,18 +43,26 @@ export interface SearchCoursesResult {
   }
 }
 
-/**
- * Search courses with filters using the real API
- */
-export async function searchCourses(
-  filters: SearchCoursesFilters
-): Promise<SearchCoursesResult> {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const q = searchParams.get('q') || undefined
+    const categoria = searchParams.get('categoria') || undefined
+    const modalidade = searchParams.get('modalidade') || undefined
+    const local_curso = searchParams.get('local_curso') || undefined
+    const acessibilidade = searchParams.get('acessibilidade') || undefined
+    const page = searchParams.get('page')
+      ? Number.parseInt(searchParams.get('page')!, 10)
+      : undefined
+    const limit = searchParams.get('limit')
+      ? Number.parseInt(searchParams.get('limit')!, 10)
+      : undefined
+
     // Get categories to map slug to ID
     let categoryFilters: CategoryFilter[] = []
     let categoriaId: number | undefined
 
-    if (filters.categoria) {
+    if (categoria) {
       try {
         const categoriesResponse = await getDalCategorias({
           page: 1,
@@ -68,7 +75,7 @@ export async function searchCourses(
           categoryFilters = transformCategoriesToFilters(
             categoriesResponse.data.data
           )
-          categoriaId = getCategoryIdBySlug(categoryFilters, filters.categoria)
+          categoriaId = getCategoryIdBySlug(categoryFilters, categoria)
         }
       } catch (error) {
         console.error('Error fetching categories for search:', error)
@@ -83,8 +90,8 @@ export async function searchCourses(
       'zona-sul': 'Zona Sul',
       centro: 'Centro',
     }
-    const neighborhood_zone = filters.local_curso
-      ? neighborhoodZoneMap[filters.local_curso] || filters.local_curso
+    const neighborhood_zone = local_curso
+      ? neighborhoodZoneMap[local_curso] || local_curso
       : undefined
 
     // Map acessibilidade to acessibilidade_id
@@ -94,17 +101,17 @@ export async function searchCourses(
       acessivel: 1, // Assuming ID 1 for "Acessível PCD"
       exclusivo: 2, // Assuming ID 2 for "Exclusivo PCD"
     }
-    const acessibilidade_id = filters.acessibilidade
-      ? acessibilidadeMap[filters.acessibilidade]
+    const acessibilidade_id = acessibilidade
+      ? acessibilidadeMap[acessibilidade]
       : undefined
 
     // Build API params
     const apiParams: Parameters<typeof getDalCourses>[0] = {
-      page: filters.page || 1,
-      limit: filters.limit || 100,
-      search: filters.q,
+      page: page || 1,
+      limit: limit || 100,
+      search: q,
       categoria_id: categoriaId,
-      modalidade: filters.modalidade,
+      modalidade: modalidade,
       neighborhood_zone,
       acessibilidade_id,
     }
@@ -120,7 +127,7 @@ export async function searchCourses(
     const response = await getDalCourses(apiParams)
 
     if (response.status !== 200) {
-      return { courses: [] }
+      return NextResponse.json({ courses: [] }, { status: 200 })
     }
 
     // Cast through unknown first since GetApiV1Courses200 is { [key: string]: unknown }
@@ -132,12 +139,14 @@ export async function searchCourses(
     // Filter courses to only show those that should be visible
     const visibleCourses = filterVisibleCourses(allCourses)
 
-    return {
+    const result: SearchCoursesResult = {
       courses: visibleCourses,
       pagination: data?.data?.pagination,
     }
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error searching courses:', error)
-    return { courses: [] }
+    return NextResponse.json({ courses: [] }, { status: 200 })
   }
 }

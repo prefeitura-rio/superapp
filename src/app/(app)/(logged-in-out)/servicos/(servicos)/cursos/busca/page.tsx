@@ -4,14 +4,15 @@ import {
   addVisitedCourse,
   getVisitedCourses,
 } from '@/actions/courses/course-history'
-import { getCourseCategories } from '@/actions/courses/get-categories'
-import { searchCourses } from '@/actions/courses/search-courses'
-import { createCourseSlug } from '@/actions/courses/utils-mock'
+import { createCourseSlug, isValidFilter } from '@/actions/courses/utils'
+import { AccessibilityBadge } from '@/app/components/courses/badges'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
 import { ChevronRightIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import Image from 'next/image'
@@ -30,6 +31,57 @@ type Course = ModelsCurso & {
   period?: string
 }
 
+// Types for API responses
+interface SearchCoursesResult {
+  courses: ModelsCurso[]
+  pagination?: {
+    limit: number
+    page: number
+    total: number
+    total_pages: number
+  }
+}
+
+interface SearchCoursesFilters {
+  q?: string
+  modalidade?: string
+  local_curso?: string
+  categoria?: string
+  acessibilidade?: string
+  page?: number
+  limit?: number
+}
+
+// Helper function to search courses via route handler
+async function searchCourses(
+  filters: SearchCoursesFilters
+): Promise<SearchCoursesResult> {
+  const params = new URLSearchParams()
+  if (filters.q) params.set('q', filters.q)
+  if (filters.modalidade) params.set('modalidade', filters.modalidade)
+  if (filters.local_curso) params.set('local_curso', filters.local_curso)
+  if (filters.categoria) params.set('categoria', filters.categoria)
+  if (filters.acessibilidade)
+    params.set('acessibilidade', filters.acessibilidade)
+  if (filters.page) params.set('page', filters.page.toString())
+  if (filters.limit) params.set('limit', filters.limit.toString())
+
+  const response = await fetch(`/api/courses/search?${params.toString()}`)
+  if (!response.ok) {
+    throw new Error('Failed to search courses')
+  }
+  return response.json()
+}
+
+// Helper function to get categories via route handler
+async function getCourseCategories(): Promise<CategoryFilter[]> {
+  const response = await fetch('/api/courses/categories')
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories')
+  }
+  return response.json()
+}
+
 export default function CoursesSearchPage() {
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -45,6 +97,8 @@ export default function CoursesSearchPage() {
     Record<string, string>
   >({})
   const [draftFilters, setDraftFilters] = useState<Record<string, string>>({})
+  const [initialCourses, setInitialCourses] = useState<Course[]>([])
+  const [isLoadingInitial, setIsLoadingInitial] = useState(false)
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -69,6 +123,48 @@ export default function CoursesSearchPage() {
   useEffect(() => {
     setVisitedCourses(getVisitedCourses())
   }, [])
+
+  // Load initial courses when there's no search
+  useEffect(() => {
+    async function loadInitialCourses() {
+      const sp = new URLSearchParams(searchParams.toString())
+      const q = sp.get('q') || sp.get('query') || ''
+      const modalidade = sp.get('modalidade') || ''
+      const local_curso = sp.get('local_curso') || ''
+      const categoria = sp.get('categoria') || ''
+      const acessibilidade = sp.get('acessibilidade') || ''
+
+      const hasFilters = Boolean(
+        modalidade || local_curso || categoria || acessibilidade
+      )
+      const hasQuery = q.length >= 3
+
+      // Only load initial courses if there's no search or filters
+      if (!hasQuery && !hasFilters) {
+        setIsLoadingInitial(true)
+        try {
+          const result = await searchCourses({
+            limit: 4,
+          })
+          const transformedCourses: Course[] = result.courses.map(course => ({
+            ...course,
+            provider: course.organization || undefined,
+            modality: course.modalidade || undefined,
+          }))
+          setInitialCourses(transformedCourses)
+        } catch (error) {
+          console.error('Error loading initial courses:', error)
+          setInitialCourses([])
+        } finally {
+          setIsLoadingInitial(false)
+        }
+      } else {
+        setInitialCourses([])
+        setIsLoadingInitial(false)
+      }
+    }
+    loadInitialCourses()
+  }, [searchParams])
 
   const updateUrl = (
     patch: Partial<
@@ -162,8 +258,6 @@ export default function CoursesSearchPage() {
     }
     setSelectedFilters(applied)
 
-    if (!isFilterOpen) setDraftFilters(applied)
-
     // Fazer busca se houver filtros ou query com mais de 2 caracteres
     const hasFilters = Object.values(applied).some(val =>
       Array.isArray(val) ? val.length > 0 : Boolean(val)
@@ -171,13 +265,22 @@ export default function CoursesSearchPage() {
     const shouldSearch = q.length >= 3 || hasFilters
     if (shouldSearch) {
       performSearch({ q, ...applied })
-    } else {
+    } else if (q.length === 0 && !hasFilters) {
+      // Only clear filtered courses when query is completely empty and no filters
+      // This prevents flickering when typing 1-2 characters
       setFilteredCourses([])
     }
-  }, [searchParams, performSearch, isFilterOpen])
+  }, [searchParams, performSearch])
 
+  // Sincronizar draftFilters quando o drawer abre/fecha (sem disparar busca)
   useEffect(() => {
-    if (isFilterOpen) setDraftFilters(selectedFilters)
+    if (isFilterOpen) {
+      // Quando abre, copiar filtros aplicados para o draft
+      setDraftFilters(selectedFilters)
+    } else {
+      // Quando fecha sem aplicar, resetar draft para os filtros aplicados
+      setDraftFilters(selectedFilters)
+    }
   }, [isFilterOpen, selectedFilters])
 
   // -------- Histórico --------
@@ -219,9 +322,11 @@ export default function CoursesSearchPage() {
         saveSearchToHistory(newQuery)
         updateUrl({ q: newQuery }, true)
       }, 500)
-    } else {
-      updateUrl({ q: newQuery })
+    } else if (newQuery.length === 0) {
+      // Only update URL when clearing the search
+      updateUrl({ q: '' })
     }
+    // Don't update URL for 1-2 characters to prevent flickering
   }
 
   const clearSearch = () => {
@@ -245,7 +350,16 @@ export default function CoursesSearchPage() {
     })
   }
 
-  const clearDraftFilters = () => setDraftFilters({})
+  const clearDraftFilters = () => {
+    setDraftFilters({})
+    setSelectedFilters({})
+    updateUrl({
+      modalidade: '',
+      local_curso: '',
+      categoria: '',
+      acessibilidade: '',
+    })
+  }
 
   const applyFilters = () => {
     setSelectedFilters(draftFilters)
@@ -258,16 +372,37 @@ export default function CoursesSearchPage() {
     setIsFilterOpen(false)
   }
 
-  // Count active filters
+  // Count active filters (only valid ones)
   const activeFiltersCount = useMemo(() => {
-    return Object.values(selectedFilters).filter(Boolean).length
-  }, [selectedFilters])
+    return Object.entries(selectedFilters).filter(([key, value]) => {
+      if (!value) return false
+
+      // For categoria, check both COURSE_FILTERS and categoryFilters from API
+      if (key === 'categoria') {
+        const isValidInStatic = isValidFilter(key, value)
+        const isValidInApi = categoryFilters.some(cat => cat.value === value)
+        return isValidInStatic || isValidInApi
+      }
+
+      // For other filters, use isValidFilter
+      return isValidFilter(key, value)
+    }).length
+  }, [selectedFilters, categoryFilters])
 
   const showResults = useMemo(() => {
     const hasFilters = activeFiltersCount > 0
     const hasQuery = (query?.trim().length ?? 0) >= 3
     return hasFilters || hasQuery
   }, [activeFiltersCount, query])
+
+  // Detect if we're waiting for search to start (query changed but searchParams not updated yet)
+  const isWaitingForSearch = useMemo(() => {
+    const queryFromParams =
+      searchParams.get('q') || searchParams.get('query') || ''
+    const currentQuery = query?.trim() || ''
+    // If current query has 3+ chars but doesn't match params, we're waiting
+    return currentQuery.length >= 3 && currentQuery !== queryFromParams
+  }, [query, searchParams])
 
   // Top 5 courses for "Mais pesquisados" - only show if we have search results
   const topCourses = useMemo(() => {
@@ -311,7 +446,7 @@ export default function CoursesSearchPage() {
             }
           }}
           onBack={() => {
-            router.back()
+            router.push('/servicos/cursos')
           }}
           className="flex-1 min-w-0"
         />
@@ -332,7 +467,7 @@ export default function CoursesSearchPage() {
       </section>
 
       {!showResults && (
-        <div className="px-4 mt-6 space-y-6">
+        <div className="px-4 pb-30 mt-6 space-y-6">
           {/* Mais pesquisados - Top 5 cursos empilhados */}
           {topCourses.length > 0 && (
             <div>
@@ -350,9 +485,9 @@ export default function CoursesSearchPage() {
                     onClick={() => handleCourseClick(course)}
                     className="block mb-3 last:mb-0"
                   >
-                    <div className="flex gap-3 bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
+                    <div className="flex gap-3 items-center">
                       {course.cover_image && (
-                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
+                        <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
                           <Image
                             src={course.cover_image}
                             alt={course.title || 'Curso'}
@@ -366,15 +501,89 @@ export default function CoursesSearchPage() {
                           {course.title || 'Curso sem título'}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {course.organization || '—'}
-                          {course.modalidade && ` • ${course.modalidade}`}
+                          {course.modalidade && ` ${course.modalidade}`}
                           {course.workload && ` • ${course.workload}`}
                         </p>
+                        <AccessibilityBadge
+                          accessibility={course.accessibility}
+                          className="mt-2"
+                        />
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Cursos iniciais - 4 cursos quando não há pesquisa */}
+          {topCourses.length === 0 && (
+            <div>
+              {isLoadingInitial ? (
+                <>
+                  <h2 className="text-base font-medium text-foreground mb-4">
+                    Cursos mais procurados
+                  </h2>
+                  <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="flex gap-3 items-center">
+                          <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="h-4 bg-muted rounded w-3/4" />
+                            <div className="h-3 bg-muted/70 rounded w-1/2" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : initialCourses.length > 0 ? (
+                <>
+                  <h2 className="text-base font-medium text-foreground mb-4">
+                    Cursos mais procurados
+                  </h2>
+                  <div className="space-y-3">
+                    {initialCourses.map(course => (
+                      <Link
+                        key={course.id}
+                        href={`/servicos/cursos/${createCourseSlug(
+                          course.id?.toString() || '',
+                          course.title || ''
+                        )}`}
+                        onClick={() => handleCourseClick(course)}
+                        className="block"
+                      >
+                        <div className="flex gap-3 items-center">
+                          {course.cover_image && (
+                            <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
+                              <Image
+                                src={course.cover_image}
+                                alt={course.title || 'Curso'}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-foreground line-clamp-2">
+                              {course.title || 'Curso sem título'}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {course.modalidade && `${course.modalidade}`}
+                              {course.workload && ` • ${course.workload}`}
+                            </p>
+                            <AccessibilityBadge
+                              accessibility={course.accessibility}
+                              className="mt-2"
+                            />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              ) : null}
             </div>
           )}
 
@@ -395,9 +604,9 @@ export default function CoursesSearchPage() {
                     onClick={() => handleCourseClick(course as Course)}
                     className="block"
                   >
-                    <div className="flex gap-3 bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
+                    <div className="flex gap-3 items-center">
                       {course.cover_image && (
-                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
+                        <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
                           <Image
                             src={course.cover_image}
                             alt={course.title}
@@ -411,10 +620,13 @@ export default function CoursesSearchPage() {
                           {course.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {course.organization || '—'}
-                          {course.modalidade && ` • ${course.modalidade}`}
+                          {course.modalidade && ` ${course.modalidade}`}
                           {course.workload && ` • ${course.workload}`}
                         </p>
+                        <AccessibilityBadge
+                          accessibility={(course as Course).accessibility}
+                          className="mt-2"
+                        />
                       </div>
                     </div>
                   </Link>
@@ -422,122 +634,77 @@ export default function CoursesSearchPage() {
               </div>
             </div>
           )}
-
-          {/* Fallback: Most searched queries if no courses */}
-          {topCourses.length === 0 && visitedCourses.length === 0 && (
-            <>
-              <div>
-                <h2 className="text-base font-medium text-foreground">
-                  Mais pesquisados
-                </h2>
-                <ul>
-                  {[
-                    'Curso de IA',
-                    'Excel Essencial',
-                    'Meio Ambiente',
-                    'Educação básica',
-                  ].map((text, idx) => (
-                    <li
-                      key={idx}
-                      className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
-                      onClick={() => handleSearch(text)}
-                    >
-                      <span>{text}</span>
-                      <ChevronRightIcon className="text-primary h-6 w-6" />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {searchHistory.length > 0 && (
-                <div>
-                  <h2 className="text-base font-medium text-foreground">
-                    Pesquisados por você
-                  </h2>
-                  <ul>
-                    {searchHistory.map((text, idx) => (
-                      <li
-                        key={idx}
-                        className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
-                      >
-                        <span
-                          className="flex-1"
-                          onClick={() => handleSearch(text)}
-                        >
-                          {text}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={e => {
-                            e.stopPropagation()
-                            removeFromHistory(text)
-                          }}
-                          className="text-primary h-5 w-5 hover:text-destructive transition-colors"
-                          aria-label={`Remover ${text} do histórico`}
-                        >
-                          <ChevronRightIcon className="h-5 w-5" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </>
-          )}
         </div>
       )}
 
       {showResults && (
         <section className="px-4 mt-6">
-          <div className="text-sm text-muted-foreground mb-2">
-            {isLoading ? (
-              'Buscando...'
-            ) : (
-              <>
-                {filteredCourses.length} resultado
-                {filteredCourses.length === 1 ? '' : 's'}
-              </>
-            )}
-          </div>
-
-          {isLoading ? (
+          {isLoading || isWaitingForSearch ? (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-5 bg-muted rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-muted/70 rounded w-1/2" />
+                  <div className="flex gap-3 items-center">
+                    <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted/70 rounded w-1/2" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          ) : filteredCourses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum curso encontrado com os critérios aplicados.
-            </p>
+          ) : !isLoading &&
+            !isWaitingForSearch &&
+            filteredCourses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <ThemeAwareVideo
+                source={VIDEO_SOURCES.emptyAddress}
+                containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+              />
+              <p className="text-lg text-muted-foreground">
+                Curso não encontrado
+              </p>
+            </div>
           ) : (
-            <ul className="divide-y divide-border">
+            <div className="space-y-3">
               {filteredCourses.map(course => (
-                <li key={course.id} className="py-2">
-                  <Link
-                    href={`/servicos/cursos/${createCourseSlug(
-                      course.id?.toString() || '',
-                      course.title || ''
-                    )}`}
-                    onClick={() => handleCourseClick(course)}
-                    className="block rounded-md -mx-2 px-2 py-2 hover:bg-muted/40 focus:outline-none focus:ring-primary"
-                  >
-                    <h3 className="text-base font-medium truncate">
-                      {course.title || 'Curso sem título'}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {course.provider || course.organization || '—'}
-                      {' • '}
-                      {course.modality || '—'}
-                      {course.period ? ` • ${course.period}` : ''}
-                    </p>
-                  </Link>
-                </li>
+                <Link
+                  key={course.id}
+                  href={`/servicos/cursos/${createCourseSlug(
+                    course.id?.toString() || '',
+                    course.title || ''
+                  )}`}
+                  onClick={() => handleCourseClick(course)}
+                  className="block"
+                >
+                  <div className="flex gap-3 items-center">
+                    {course.cover_image && (
+                      <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
+                        <Image
+                          src={course.cover_image}
+                          alt={course.title || 'Curso'}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-foreground line-clamp-2">
+                        {course.title || 'Curso sem título'}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {course.modalidade && `${course.modalidade}`}
+                        {course.workload && ` • ${course.workload}`}
+                      </p>
+                      <AccessibilityBadge
+                        accessibility={course.accessibility}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </ul>
+            </div>
           )}
         </section>
       )}

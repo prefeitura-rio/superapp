@@ -1,4 +1,4 @@
-import { extractCourseId } from '@/actions/courses/utils-mock'
+import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'

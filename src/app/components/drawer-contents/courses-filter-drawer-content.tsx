@@ -1,10 +1,10 @@
-import { COURSE_FILTERS } from '@/actions/courses/utils-mock'
-import type { CategoryFilter } from '@/lib/course-category-helpers'
+import { COURSE_FILTERS } from '@/actions/courses/utils'
 import {
   BottomSheet,
   BottomSheetFooter,
 } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
 
 interface CoursesFilterDrawerContentProps {
   open: boolean
@@ -32,7 +32,7 @@ export default function CoursesFilterDrawerContent({
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Filtros">
-      <div className="space-y-6">
+      <div className="space-y-6 pb-10">
         {/* Modalidade */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
@@ -114,7 +114,7 @@ export default function CoursesFilterDrawerContent({
         </div>
 
         {/* Acessibilidade */}
-        <div>
+        {/* <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
             Acessibilidade
           </h3>
@@ -133,14 +133,14 @@ export default function CoursesFilterDrawerContent({
               </CustomButton>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
       <BottomSheetFooter>
         <CustomButton
           variant="outline"
           onClick={onClearFilters}
-          className="flex-1"
+          className="flex-1 focus:outline-none! focus:ring-0! focus:ring-offset-0!"
         >
           Limpar filtros
         </CustomButton>

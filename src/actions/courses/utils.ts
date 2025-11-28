@@ -11,10 +11,6 @@ export const extractCourseId = (slug: string): string => {
   return slug.substring(0, 36)
 }
 
-// Simula um atraso para simular requisições assíncronas
-export const simulateDelay = (ms = 800) =>
-  new Promise(resolve => setTimeout(resolve, ms))
-
 /*
  * ================================================
  * LOCAL STORAGE - GESTÃO DE DADOS LOCAIS
@@ -57,11 +53,11 @@ export function createCourseSlug(id: string | number, title: string): string {
  * ================================================
  */
 
-// Mock de filtros de cursos - usados no drawer, badges, query params
+// Filtros de cursos - usados no drawer, badges, query params
 export const COURSE_FILTERS = {
   modalidade: [
-    { label: 'Presencial', value: 'presencial' },
-    { label: 'Remoto', value: 'remoto' },
+    { label: 'Presencial', value: 'Presencial' },
+    { label: 'Remoto', value: 'Remoto' },
   ],
   local_curso: [
     { label: 'Zona Oeste', value: 'zona-oeste' },

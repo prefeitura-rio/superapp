@@ -1,26 +1,27 @@
-'use server'
-
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
 import { getDalCategorias } from '@/lib/dal'
+import { NextResponse } from 'next/server'
 
 /**
- * Server action to fetch course categories
- * Can be called from client components
+ * Route handler to fetch course categories
  */
-export async function getCourseCategories(): Promise<CategoryFilter[]> {
+export async function GET() {
   try {
     const response = await getDalCategorias({
       page: 1,
       pageSize: 50,
     })
     if (response.status === 200 && response.data?.data) {
-      return transformCategoriesToFilters(response.data.data)
+      const categories: CategoryFilter[] = transformCategoriesToFilters(
+        response.data.data
+      )
+      return NextResponse.json(categories)
     }
-    return []
+    return NextResponse.json([])
   } catch (error) {
     console.error('Error fetching course categories:', error)
-    return []
+    return NextResponse.json([], { status: 500 })
   }
 }
 
