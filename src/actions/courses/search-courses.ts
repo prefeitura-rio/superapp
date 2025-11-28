@@ -28,8 +28,8 @@ export interface SearchCoursesFilters {
   q?: string
   categoria?: string
   modalidade?: string
-  certificado?: string
-  periodo?: string
+  local_curso?: string
+  acessibilidade?: string
   page?: number
   limit?: number
 }
@@ -75,6 +75,29 @@ export async function searchCourses(
       }
     }
 
+    // Map local_curso to neighborhood_zone
+    // Map zone values to API format
+    const neighborhoodZoneMap: Record<string, string> = {
+      'zona-oeste': 'Zona Oeste',
+      'zona-norte': 'Zona Norte',
+      'zona-sul': 'Zona Sul',
+      centro: 'Centro',
+    }
+    const neighborhood_zone = filters.local_curso
+      ? neighborhoodZoneMap[filters.local_curso] || filters.local_curso
+      : undefined
+
+    // Map acessibilidade to acessibilidade_id
+    // Note: This is a simplified mapping. In production, you might want to
+    // fetch accessibility options from the API to get the correct IDs
+    const acessibilidadeMap: Record<string, number> = {
+      acessivel: 1, // Assuming ID 1 for "Acessível PCD"
+      exclusivo: 2, // Assuming ID 2 for "Exclusivo PCD"
+    }
+    const acessibilidade_id = filters.acessibilidade
+      ? acessibilidadeMap[filters.acessibilidade]
+      : undefined
+
     // Build API params
     const apiParams: Parameters<typeof getDalCourses>[0] = {
       page: filters.page || 1,
@@ -82,8 +105,8 @@ export async function searchCourses(
       search: filters.q,
       categoria_id: categoriaId,
       modalidade: filters.modalidade,
-      // Note: certificado and periodo might need to be mapped to API fields
-      // Adjust based on actual API capabilities
+      neighborhood_zone,
+      acessibilidade_id,
     }
 
     // Remove undefined values

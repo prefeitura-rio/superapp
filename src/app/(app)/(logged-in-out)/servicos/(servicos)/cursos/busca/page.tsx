@@ -1,13 +1,20 @@
 'use client'
 
+import {
+  addVisitedCourse,
+  getVisitedCourses,
+} from '@/actions/courses/course-history'
+import { getCourseCategories } from '@/actions/courses/get-categories'
 import { searchCourses } from '@/actions/courses/search-courses'
 import { createCourseSlug } from '@/actions/courses/utils-mock'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
-import { ChevronRightIcon, XIcon } from '@/assets/icons'
+import { ChevronRightIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import type { ModelsCurso } from '@/http-courses/models'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -23,14 +30,16 @@ type Course = ModelsCurso & {
   period?: string
 }
 
-import { FILTER_LABELS } from '@/actions/courses/utils-mock'
-
 export default function CoursesSearchPage() {
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [categoryFilters, setCategoryFilters] = useState<CategoryFilter[]>([])
+  const [visitedCourses, setVisitedCourses] = useState<
+    ReturnType<typeof getVisitedCourses>
+  >([])
 
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string>
@@ -43,10 +52,28 @@ export default function CoursesSearchPage() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  // Load categories on mount
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const filters = await getCourseCategories()
+        setCategoryFilters(filters)
+      } catch (error) {
+        console.error('Error loading categories:', error)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  // Load visited courses on mount
+  useEffect(() => {
+    setVisitedCourses(getVisitedCourses())
+  }, [])
+
   const updateUrl = (
     patch: Partial<
       Record<
-        'q' | 'modalidade' | 'certificado' | 'categoria' | 'periodo',
+        'q' | 'modalidade' | 'local_curso' | 'categoria' | 'acessibilidade',
         string
       >
     >,
@@ -56,14 +83,15 @@ export default function CoursesSearchPage() {
     for (const key of [
       'q',
       'modalidade',
-      'certificado',
+      'local_curso',
       'categoria',
-      'periodo',
+      'acessibilidade',
     ] as const) {
       const next = patch[key]
-      if (typeof next === 'string') {
-        if (next) params.set(key, next)
-        else params.delete(key)
+      if (next) {
+        params.set(key, next)
+      } else {
+        params.delete(key)
       }
     }
     const url = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
@@ -75,18 +103,18 @@ export default function CoursesSearchPage() {
     async (filters: {
       q?: string
       modalidade?: string
-      certificado?: string
+      local_curso?: string
       categoria?: string
-      periodo?: string
+      acessibilidade?: string
     }) => {
       setIsLoading(true)
       try {
         const result = await searchCourses({
           q: filters.q,
           modalidade: filters.modalidade,
-          certificado: filters.certificado,
+          local_curso: filters.local_curso,
           categoria: filters.categoria,
-          periodo: filters.periodo,
+          acessibilidade: filters.acessibilidade,
         })
         // Transform API courses to UI format
         const transformedCourses: Course[] = result.courses.map(course => ({
@@ -120,18 +148,27 @@ export default function CoursesSearchPage() {
     const sp = new URLSearchParams(searchParams.toString())
     const q = sp.get('q') || sp.get('query') || ''
     const modalidade = sp.get('modalidade') || ''
-    const certificado = sp.get('certificado') || ''
-    const categoria = sp.get('categoria') || sp.get('category') || ''
-    const periodo = sp.get('periodo') || ''
+    const local_curso = sp.get('local_curso') || ''
+    const categoria = sp.get('categoria') || ''
+    const acessibilidade = sp.get('acessibilidade') || ''
 
     setQuery(q)
-    const applied = { modalidade, certificado, categoria, periodo }
+
+    const applied = {
+      modalidade,
+      local_curso,
+      categoria,
+      acessibilidade,
+    }
     setSelectedFilters(applied)
 
     if (!isFilterOpen) setDraftFilters(applied)
 
     // Fazer busca se houver filtros ou query com mais de 2 caracteres
-    const shouldSearch = q.length >= 3 || Object.values(applied).some(Boolean)
+    const hasFilters = Object.values(applied).some(val =>
+      Array.isArray(val) ? val.length > 0 : Boolean(val)
+    )
+    const shouldSearch = q.length >= 3 || hasFilters
     if (shouldSearch) {
       performSearch({ q, ...applied })
     } else {
@@ -193,10 +230,19 @@ export default function CoursesSearchPage() {
   }
 
   const handleDraftFilterSelect = (category: string, value: string) => {
-    setDraftFilters(prev => ({
-      ...prev,
-      [category]: prev[category] === value ? '' : value,
-    }))
+    setDraftFilters(prev => {
+      const current = prev[category]
+      // If clicking the same value, deselect it
+      if (current === value) {
+        const { [category]: _, ...rest } = prev
+        return rest
+      }
+      // Otherwise, select the new value (replacing any previous selection)
+      return {
+        ...prev,
+        [category]: value,
+      }
+    })
   }
 
   const clearDraftFilters = () => setDraftFilters({})
@@ -205,60 +251,53 @@ export default function CoursesSearchPage() {
     setSelectedFilters(draftFilters)
     updateUrl({
       modalidade: draftFilters.modalidade || '',
-      certificado: draftFilters.certificado || '',
+      local_curso: draftFilters.local_curso || '',
       categoria: draftFilters.categoria || '',
-      periodo: draftFilters.periodo || '',
+      acessibilidade: draftFilters.acessibilidade || '',
     })
     setIsFilterOpen(false)
   }
 
-  // Função para remover um filtro específico
-  const removeFilter = (filterKey: string) => {
-    const newFilters = { ...selectedFilters, [filterKey]: '' }
-    setSelectedFilters(newFilters)
-    setDraftFilters(newFilters)
-    updateUrl({
-      modalidade:
-        filterKey === 'modalidade' ? '' : selectedFilters.modalidade || '',
-      certificado:
-        filterKey === 'certificado' ? '' : selectedFilters.certificado || '',
-      categoria:
-        filterKey === 'categoria' ? '' : selectedFilters.categoria || '',
-      periodo: filterKey === 'periodo' ? '' : selectedFilters.periodo || '',
-    })
-  }
-
-  const hasAnyAppliedFilter = useMemo(
-    () => Object.values(selectedFilters).some(Boolean),
-    [selectedFilters]
-  )
-
-  // Gera os badges de filtros ativos
-  const activeFilterBadges = useMemo(() => {
-    const badges = []
-
-    for (const [key, value] of Object.entries(selectedFilters)) {
-      if (value) {
-        const label = FILTER_LABELS[key]?.[value] || value
-        badges.push({
-          key,
-          value,
-          label,
-        })
-      }
-    }
-
-    return badges
+  // Count active filters
+  const activeFiltersCount = useMemo(() => {
+    return Object.values(selectedFilters).filter(Boolean).length
   }, [selectedFilters])
 
-  const showResults = hasAnyAppliedFilter || (query?.trim().length ?? 0) >= 3
+  const showResults = useMemo(() => {
+    const hasFilters = activeFiltersCount > 0
+    const hasQuery = (query?.trim().length ?? 0) >= 3
+    return hasFilters || hasQuery
+  }, [activeFiltersCount, query])
+
+  // Top 5 courses for "Mais pesquisados" - only show if we have search results
+  const topCourses = useMemo(() => {
+    // Only show top courses if we have a search query or filters applied
+    const hasSearch = (query?.trim().length ?? 0) >= 3 || activeFiltersCount > 0
+    return hasSearch ? filteredCourses.slice(0, 5) : []
+  }, [filteredCourses, query, activeFiltersCount])
+
+  // Handle course click to add to visited history
+  const handleCourseClick = (course: Course) => {
+    if (course.id && course.title) {
+      addVisitedCourse({
+        id: course.id,
+        title: course.title,
+        cover_image: course.cover_image,
+        organization: course.organization,
+        modalidade: course.modalidade,
+        workload: course.workload,
+      })
+      // Refresh visited courses
+      setVisitedCourses(getVisitedCourses())
+    }
+  }
 
   return (
     <main className="min-h-lvh max-w-4xl mx-auto text-foreground">
       <section className="relative pt-5 px-4 flex items-center gap-4">
         <SearchInput
           ref={searchInputRef}
-          placeholder="Pesquise um curso"
+          placeholder="Encontre seu curso"
           value={query}
           onChange={e => onQueryChange(e.target.value)}
           onClear={clearSearch}
@@ -276,93 +315,174 @@ export default function CoursesSearchPage() {
           }}
           className="flex-1 min-w-0"
         />
-        <CustomButton
-          className="bg-card w-14 h-14 p-4 rounded-full flex items-center justify-center hover:bg-card/80 transition-colors shrink-0"
-          onClick={() => setIsFilterOpen(true)}
-          aria-label="Abrir filtros"
-        >
-          <FilterIcon />
-        </CustomButton>
+        <div className="relative shrink-0">
+          <CustomButton
+            className="bg-card w-14 h-14 p-4 rounded-full flex items-center justify-center hover:bg-card/80 transition-colors"
+            onClick={() => setIsFilterOpen(true)}
+            aria-label="Abrir filtros"
+          >
+            <FilterIcon />
+          </CustomButton>
+          {activeFiltersCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+              {activeFiltersCount}
+            </span>
+          )}
+        </div>
       </section>
-
-      {/* Badges de filtros ativos */}
-      {activeFilterBadges.length > 0 && (
-        <section className="px-4 mt-4 pl-10">
-          <div className="flex flex-wrap gap-2">
-            {activeFilterBadges.map(({ key, label }) => (
-              <div
-                key={key}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-card text-muted-foreground rounded-full text-sm font-normal"
-              >
-                <span>{label}</span>
-                <button
-                  type="button"
-                  onClick={() => removeFilter(key)}
-                  className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                  aria-label={`Remover filtro ${label}`}
-                >
-                  <XIcon className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {!showResults && (
         <div className="px-4 mt-6 space-y-6">
-          <div>
-            <h2 className="text-base font-medium text-foreground">
-              Mais pesquisados
-            </h2>
-            <ul>
-              {[
-                'Curso de IA',
-                'Excel Essencial',
-                'Meio Ambiente',
-                'Educação básica',
-              ].map((text, idx) => (
-                <li
-                  key={idx}
-                  className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
-                  onClick={() => handleSearch(text)}
-                >
-                  <span>{text}</span>
-                  <ChevronRightIcon className="text-primary h-6 w-6" />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {searchHistory.length > 0 && (
+          {/* Mais pesquisados - Top 5 cursos empilhados */}
+          {topCourses.length > 0 && (
             <div>
-              <h2 className="text-base font-medium text-foreground">
+              <h2 className="text-base font-medium text-foreground mb-4">
+                Mais pesquisados
+              </h2>
+              <div className="relative">
+                {topCourses.map((course, index) => (
+                  <Link
+                    key={course.id}
+                    href={`/servicos/cursos/${createCourseSlug(
+                      course.id?.toString() || '',
+                      course.title || ''
+                    )}`}
+                    onClick={() => handleCourseClick(course)}
+                    className="block mb-3 last:mb-0"
+                  >
+                    <div className="flex gap-3 bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
+                      {course.cover_image && (
+                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
+                          <Image
+                            src={course.cover_image}
+                            alt={course.title || 'Curso'}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-foreground line-clamp-2">
+                          {course.title || 'Curso sem título'}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {course.organization || '—'}
+                          {course.modalidade && ` • ${course.modalidade}`}
+                          {course.workload && ` • ${course.workload}`}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pesquisados por você - 10 cursos visitados */}
+          {visitedCourses.length > 0 && (
+            <div>
+              <h2 className="text-base font-medium text-foreground mb-4">
                 Pesquisados por você
               </h2>
-              <ul>
-                {searchHistory.map((text, idx) => (
-                  <li
-                    key={idx}
-                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
+              <div className="space-y-3">
+                {visitedCourses.slice(0, 10).map(course => (
+                  <Link
+                    key={course.id}
+                    href={`/servicos/cursos/${createCourseSlug(
+                      course.id.toString(),
+                      course.title
+                    )}`}
+                    onClick={() => handleCourseClick(course as Course)}
+                    className="block"
                   >
-                    <span className="flex-1" onClick={() => handleSearch(text)}>
-                      {text}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={e => {
-                        e.stopPropagation()
-                        removeFromHistory(text)
-                      }}
-                      className="text-primary h-5 w-5 hover:text-destructive transition-colors"
-                      aria-label={`Remover ${text} do histórico`}
-                    >
-                      <XIcon className="h-5 w-5" />
-                    </button>
-                  </li>
+                    <div className="flex gap-3 bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
+                      {course.cover_image && (
+                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
+                          <Image
+                            src={course.cover_image}
+                            alt={course.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-foreground line-clamp-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {course.organization || '—'}
+                          {course.modalidade && ` • ${course.modalidade}`}
+                          {course.workload && ` • ${course.workload}`}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
-              </ul>
+              </div>
             </div>
+          )}
+
+          {/* Fallback: Most searched queries if no courses */}
+          {topCourses.length === 0 && visitedCourses.length === 0 && (
+            <>
+              <div>
+                <h2 className="text-base font-medium text-foreground">
+                  Mais pesquisados
+                </h2>
+                <ul>
+                  {[
+                    'Curso de IA',
+                    'Excel Essencial',
+                    'Meio Ambiente',
+                    'Educação básica',
+                  ].map((text, idx) => (
+                    <li
+                      key={idx}
+                      className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                      onClick={() => handleSearch(text)}
+                    >
+                      <span>{text}</span>
+                      <ChevronRightIcon className="text-primary h-6 w-6" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {searchHistory.length > 0 && (
+                <div>
+                  <h2 className="text-base font-medium text-foreground">
+                    Pesquisados por você
+                  </h2>
+                  <ul>
+                    {searchHistory.map((text, idx) => (
+                      <li
+                        key={idx}
+                        className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
+                      >
+                        <span
+                          className="flex-1"
+                          onClick={() => handleSearch(text)}
+                        >
+                          {text}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation()
+                            removeFromHistory(text)
+                          }}
+                          className="text-primary h-5 w-5 hover:text-destructive transition-colors"
+                          aria-label={`Remover ${text} do histórico`}
+                        >
+                          <ChevronRightIcon className="h-5 w-5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -402,6 +522,7 @@ export default function CoursesSearchPage() {
                       course.id?.toString() || '',
                       course.title || ''
                     )}`}
+                    onClick={() => handleCourseClick(course)}
                     className="block rounded-md -mx-2 px-2 py-2 hover:bg-muted/40 focus:outline-none focus:ring-primary"
                   >
                     <h3 className="text-base font-medium truncate">
@@ -428,6 +549,7 @@ export default function CoursesSearchPage() {
         onFilterSelect={handleDraftFilterSelect}
         onClearFilters={clearDraftFilters}
         onApplyFilters={applyFilters}
+        categoryFilters={categoryFilters}
       />
     </main>
   )

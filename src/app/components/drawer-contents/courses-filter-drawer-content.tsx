@@ -1,4 +1,5 @@
 import { COURSE_FILTERS } from '@/actions/courses/utils-mock'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
 import {
   BottomSheet,
   BottomSheetFooter,
@@ -12,6 +13,7 @@ interface CoursesFilterDrawerContentProps {
   onFilterSelect: (category: string, value: string) => void
   onClearFilters: () => void
   onApplyFilters: () => void
+  categoryFilters?: CategoryFilter[]
 }
 
 export default function CoursesFilterDrawerContent({
@@ -21,7 +23,13 @@ export default function CoursesFilterDrawerContent({
   onFilterSelect,
   onClearFilters,
   onApplyFilters,
+  categoryFilters = [],
 }: CoursesFilterDrawerContentProps) {
+  // Helper to check if a value is selected
+  const isSelected = (category: string, value: string) => {
+    return selectedFilters[category] === value
+  }
+
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Filtros">
       <div className="space-y-6">
@@ -36,7 +44,7 @@ export default function CoursesFilterDrawerContent({
                 key={option.value}
                 onClick={() => onFilterSelect('modalidade', option.value)}
                 className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.modalidade === option.value
+                  isSelected('modalidade', option.value)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
@@ -47,18 +55,18 @@ export default function CoursesFilterDrawerContent({
           </div>
         </div>
 
-        {/* Certificado */}
+        {/* Local do curso */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
-            Certificado
+            Local do curso
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.certificado.map(option => (
+            {COURSE_FILTERS.local_curso.map(option => (
               <CustomButton
                 key={option.value}
-                onClick={() => onFilterSelect('certificado', option.value)}
+                onClick={() => onFilterSelect('local_curso', option.value)}
                 className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.certificado === option.value
+                  isSelected('local_curso', option.value)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
@@ -75,34 +83,48 @@ export default function CoursesFilterDrawerContent({
             Categoria
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.categoria.map(option => (
-              <CustomButton
-                key={option.value}
-                onClick={() => onFilterSelect('categoria', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.categoria === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {option.label}
-              </CustomButton>
-            ))}
+            {categoryFilters.length > 0
+              ? categoryFilters.map(category => (
+                  <CustomButton
+                    key={category.value}
+                    onClick={() => onFilterSelect('categoria', category.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                      isSelected('categoria', category.value)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    {category.label}
+                  </CustomButton>
+                ))
+              : COURSE_FILTERS.categoria.map(option => (
+                  <CustomButton
+                    key={option.value}
+                    onClick={() => onFilterSelect('categoria', option.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                      isSelected('categoria', option.value)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    {option.label}
+                  </CustomButton>
+                ))}
           </div>
         </div>
 
-        {/* Período do dia */}
+        {/* Acessibilidade */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
-            Período do dia
+            Acessibilidade
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.periodo.map(option => (
+            {COURSE_FILTERS.acessibilidade.map(option => (
               <CustomButton
                 key={option.value}
-                onClick={() => onFilterSelect('periodo', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors flex items-center align-middle ${
-                  selectedFilters.periodo === option.value
+                onClick={() => onFilterSelect('acessibilidade', option.value)}
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                  isSelected('acessibilidade', option.value)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}

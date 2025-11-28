@@ -62,11 +62,12 @@ export const COURSE_FILTERS = {
   modalidade: [
     { label: 'Presencial', value: 'presencial' },
     { label: 'Remoto', value: 'remoto' },
-    { label: 'Híbrido', value: 'hibrido' },
   ],
-  certificado: [
-    { label: 'Sim', value: 'sim' },
-    { label: 'Não', value: 'nao' },
+  local_curso: [
+    { label: 'Zona Oeste', value: 'zona-oeste' },
+    { label: 'Zona Norte', value: 'zona-norte' },
+    { label: 'Zona Sul', value: 'zona-sul' },
+    { label: 'Centro', value: 'centro' },
   ],
   categoria: [
     { label: 'Todos', value: 'todos' },
@@ -80,10 +81,9 @@ export const COURSE_FILTERS = {
     { label: 'Imunização', value: 'imunizacao' },
     { label: 'Radiologia', value: 'radiologia' },
   ],
-  periodo: [
-    { label: 'Manhã', value: 'manha' },
-    { label: 'Tarde', value: 'tarde' },
-    { label: 'Noite', value: 'noite' },
+  acessibilidade: [
+    { label: 'Acessível PCD', value: 'acessivel' },
+    { label: 'Exclusivo PCD', value: 'exclusivo' },
   ],
 } as const
 
@@ -100,13 +100,7 @@ export const generateFilterLabels = () => {
   for (const [filterKey, options] of Object.entries(COURSE_FILTERS)) {
     labels[filterKey] = {}
     for (const option of options) {
-      // Para certificado, usar labels customizadas
-      if (filterKey === 'certificado') {
-        labels[filterKey][option.value] =
-          option.value === 'sim' ? 'Com certificado' : 'Sem certificado'
-      } else {
-        labels[filterKey][option.value] = option.label
-      }
+      labels[filterKey][option.value] = option.label
     }
   }
 
