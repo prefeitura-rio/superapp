@@ -5,27 +5,24 @@ import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
 import type { UserInfo } from '@/lib/user-info'
+import { AllCourses } from './all-courses'
+import { CategoryFiltersMobile } from './category-filters-mobile'
+import { CategoryFiltersSwipe } from './category-filters-swipe'
 import { MyCoursesHome } from './my-courses-home'
-import { MyCoursesHomeSwipe } from './my-courses-home-swipe'
-import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
-import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
-import { RecommendedCoursesSwipe } from './recommended-courses-swipe'
-import { RecommendedCoursesSwipeSkeleton } from './recommended-courses-swipe-skeleton'
-
-const FILTERS = [
-  { label: 'Tecnologia', value: 'tecnologia', icon: '💻' },
-  { label: 'Construção', value: 'construcao', icon: '🏗️' },
-  { label: 'Meio Ambiente', value: 'meio-ambiente', icon: '🌱' },
-  { label: 'Educação', value: 'educacao', icon: '📚' },
-  { label: 'Saúde', value: 'saude', icon: '🏥' },
-]
 
 export default function CoursePageClient({
   courses,
   userInfo,
   myCourses,
-}: { courses: ModelsCurso[]; userInfo: UserInfo; myCourses: ModelsCurso[] }) {
+  categoryFilters,
+}: {
+  courses: ModelsCurso[]
+  userInfo: UserInfo
+  myCourses: ModelsCurso[]
+  categoryFilters: CategoryFilter[]
+}) {
   if (courses.length === 0) {
     return (
       <div className="min-h-lvh">
@@ -43,52 +40,23 @@ export default function CoursePageClient({
   return (
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
-      <main className="max-w-4xl mx-auto pt-25 pb-20 text-white">
-        {/* <div className="mt-4">
-          <SearchPlaceholder isCourseSearch />
-        </div> */}
-
-        {/* <section className="mt-4 pb-8">
-          <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="flex px-4 gap-4 w-max">
-              {FILTERS.map(filter => (
-                <Link
-                  key={filter.value}
-                  href={`/servicos/cursos/busca?categoria=${filter.value}`}
-                  className="flex flex-col items-center cursor-pointer shrink"
-                >
-                  <div className="flex flex-col items-center justify-center p-2 rounded-2xl aspect-square transition-all h-20 border-2 border-card bg-card hover:bg-card/80">
-                    <div className="flex items-center justify-center text-3xl mb-1">
-                      {filter.icon}
-                    </div>
-                  </div>
-                  <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground/90 text-center leading-tight font-medium">
-                    {filter.label}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section> */}
-
-        {myCourses.length > 0 && (
+      <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
+        {categoryFilters.length > 0 && (
           <ResponsiveWrapper
-            mobileComponent={<MyCoursesHome courses={myCourses} />}
-            desktopComponent={<MyCoursesHomeSwipe courses={myCourses} />}
-            desktopSkeletonComponent={<RecommendedCoursesSwipeSkeleton />}
+            mobileComponent={
+              <CategoryFiltersMobile categoryFilters={categoryFilters} />
+            }
+            desktopComponent={
+              <CategoryFiltersSwipe categoryFilters={categoryFilters} />
+            }
           />
         )}
 
-        <ResponsiveWrapper
-          mobileComponent={<RecommendedCoursesCards courses={courses} />}
-          desktopComponent={<RecommendedCoursesSwipe courses={courses} />}
-          desktopSkeletonComponent={<RecommendedCoursesSwipeSkeleton />}
-        />
-        <ResponsiveWrapper
-          mobileComponent={<RecentlyAddedCourses courses={courses} />}
-          desktopComponent={<RecentlyAddedCoursesSwipe courses={courses} />}
-          desktopSkeletonComponent={<RecentlyAddedCoursesSwipeSkeleton />}
-        />
+        {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
+
+        <RecommendedCoursesCards courses={courses} />
+        <RecentlyAddedCourses courses={courses} />
+        <AllCourses courses={courses} />
       </main>
     </div>
   )

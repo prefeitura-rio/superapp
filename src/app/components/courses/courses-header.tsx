@@ -1,7 +1,7 @@
 'use client'
 
 import CicloCariocaIcon from '@/assets/ciclocarioca-icon.png'
-import { HomeIcon } from '@/assets/icons'
+import { HomeIcon, SearchIcon } from '@/assets/icons'
 import { MenuIcon } from '@/assets/icons/menu-icon'
 import OportunidadesCariocas from '@/assets/oportunidades-cariocas-icon.png'
 import type { UserInfo } from '@/lib/user-info'
@@ -23,6 +23,13 @@ export default function CoursesHeader({ userInfo }: { userInfo: UserInfo }) {
         </div>
 
         <div className="flex items-center space-x-2">
+          <Link
+            href="/servicos/cursos/busca"
+            className="rounded-full bg-card p-4"
+          >
+            <SearchIcon className="h-5 w-5 text-foreground" />
+            <span className="sr-only">Buscar cursos</span>
+          </Link>
           <Link
             href="/servicos/cursos/opcoes"
             className="rounded-full bg-card p-4"

@@ -11,10 +11,6 @@ export const extractCourseId = (slug: string): string => {
   return slug.substring(0, 36)
 }
 
-// Simula um atraso para simular requisições assíncronas
-export const simulateDelay = (ms = 800) =>
-  new Promise(resolve => setTimeout(resolve, ms))
-
 /*
  * ================================================
  * LOCAL STORAGE - GESTÃO DE DADOS LOCAIS
@@ -57,16 +53,17 @@ export function createCourseSlug(id: string | number, title: string): string {
  * ================================================
  */
 
-// Mock de filtros de cursos - usados no drawer, badges, query params
+// Filtros de cursos - usados no drawer, badges, query params
 export const COURSE_FILTERS = {
   modalidade: [
-    { label: 'Presencial', value: 'presencial' },
-    { label: 'Remoto', value: 'remoto' },
-    { label: 'Híbrido', value: 'hibrido' },
+    { label: 'Presencial', value: 'Presencial' },
+    { label: 'Remoto', value: 'Remoto' },
   ],
-  certificado: [
-    { label: 'Sim', value: 'sim' },
-    { label: 'Não', value: 'nao' },
+  local_curso: [
+    { label: 'Zona Oeste', value: 'zona-oeste' },
+    { label: 'Zona Norte', value: 'zona-norte' },
+    { label: 'Zona Sul', value: 'zona-sul' },
+    { label: 'Centro', value: 'centro' },
   ],
   categoria: [
     { label: 'Todos', value: 'todos' },
@@ -80,10 +77,9 @@ export const COURSE_FILTERS = {
     { label: 'Imunização', value: 'imunizacao' },
     { label: 'Radiologia', value: 'radiologia' },
   ],
-  periodo: [
-    { label: 'Manhã', value: 'manha' },
-    { label: 'Tarde', value: 'tarde' },
-    { label: 'Noite', value: 'noite' },
+  acessibilidade: [
+    { label: 'Acessível PCD', value: 'acessivel' },
+    { label: 'Exclusivo PCD', value: 'exclusivo' },
   ],
 } as const
 
@@ -100,13 +96,7 @@ export const generateFilterLabels = () => {
   for (const [filterKey, options] of Object.entries(COURSE_FILTERS)) {
     labels[filterKey] = {}
     for (const option of options) {
-      // Para certificado, usar labels customizadas
-      if (filterKey === 'certificado') {
-        labels[filterKey][option.value] =
-          option.value === 'sim' ? 'Com certificado' : 'Sem certificado'
-      } else {
-        labels[filterKey][option.value] = option.label
-      }
+      labels[filterKey][option.value] = option.label
     }
   }
 
