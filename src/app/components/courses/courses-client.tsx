@@ -7,14 +7,10 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import type { UserInfo } from '@/lib/user-info'
+import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
 import { CategoryFiltersSwipe } from './category-filters-swipe'
 import { MyCoursesHome } from './my-courses-home'
-import { MyCoursesHomeSwipe } from './my-courses-home-swipe'
-import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
-import { RecentlyAddedCoursesSwipe } from './recently-added-courses-swipe'
-import { RecommendedCoursesSwipe } from './recommended-courses-swipe'
-import { RecommendedCoursesSwipeSkeleton } from './recommended-courses-swipe-skeleton'
 
 export default function CoursePageClient({
   courses,
@@ -56,24 +52,11 @@ export default function CoursePageClient({
           />
         )}
 
-        {myCourses.length > 0 && (
-          <ResponsiveWrapper
-            mobileComponent={<MyCoursesHome courses={myCourses} />}
-            desktopComponent={<MyCoursesHomeSwipe courses={myCourses} />}
-            desktopSkeletonComponent={<RecommendedCoursesSwipeSkeleton />}
-          />
-        )}
+        {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
 
-        <ResponsiveWrapper
-          mobileComponent={<RecommendedCoursesCards courses={courses} />}
-          desktopComponent={<RecommendedCoursesSwipe courses={courses} />}
-          desktopSkeletonComponent={<RecommendedCoursesSwipeSkeleton />}
-        />
-        <ResponsiveWrapper
-          mobileComponent={<RecentlyAddedCourses courses={courses} />}
-          desktopComponent={<RecentlyAddedCoursesSwipe courses={courses} />}
-          desktopSkeletonComponent={<RecentlyAddedCoursesSwipeSkeleton />}
-        />
+        <RecommendedCoursesCards courses={courses} />
+        <RecentlyAddedCourses courses={courses} />
+        <AllCourses courses={courses} />
       </main>
     </div>
   )
