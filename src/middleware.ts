@@ -43,6 +43,12 @@ export async function middleware(request: NextRequest) {
       span.setAttribute('http.route', path)
       span.setAttribute('http.method', request.method)
 
+      // Detect RSC requests (React Server Components)
+      const isRSCRequest = request.headers.get('RSC') === '1'
+      const isPrefetchRequest = request.headers.get('Next-Router-Prefetch') === '1'
+      span.setAttribute('request.is_rsc', isRSCRequest)
+      span.setAttribute('request.is_prefetch', isPrefetchRequest)
+
       // Generate nonce for CSP
       const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
@@ -134,11 +140,25 @@ export async function middleware(request: NextRequest) {
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
         )
-        // Set cache headers for public pages (2 minutes, allow stale for 5 min)
-        response.headers.set(
-          'Cache-Control',
-          'public, max-age=120, stale-while-revalidate=300'
-        )
+
+        // RSC/Prefetch requests - bypass CDN cache to prevent serving wrong content type
+        if (isRSCRequest || isPrefetchRequest) {
+          response.headers.set('Cache-Control', 'private, no-cache')
+          response.headers.set('CDN-Cache-Control', 'no-store')
+          span.setAttribute('cache.bypassed', true)
+        } else {
+          // Regular HTML requests - cache aggressively
+          response.headers.set(
+            'Cache-Control',
+            'public, max-age=120, stale-while-revalidate=300'
+          )
+          // CDN-specific header to cache for longer at edge
+          response.headers.set(
+            'CDN-Cache-Control',
+            'public, max-age=300, stale-while-revalidate=600'
+          )
+        }
+
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -191,6 +211,29 @@ export async function middleware(request: NextRequest) {
           span.end()
           return result
         }
+
+        // Authenticated users on public routes - cache in browser only
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        // Private caching - browser can cache but CDN should not
+        response.headers.set(
+          'Cache-Control',
+          'private, max-age=60'
+        )
+        response.headers.set(
+          'CDN-Cache-Control',
+          'no-store'
+        )
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
       }
 
       if (authToken && !publicRoute) {
@@ -218,6 +261,15 @@ export async function middleware(request: NextRequest) {
         response.headers.set(
           'Content-Security-Policy',
           contentSecurityPolicyHeaderValue
+        )
+        // Protected routes - NEVER cache at CDN, browser only
+        response.headers.set(
+          'Cache-Control',
+          'private, no-store, must-revalidate'
+        )
+        response.headers.set(
+          'CDN-Cache-Control',
+          'no-store'
         )
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
