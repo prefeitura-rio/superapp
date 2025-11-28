@@ -30,3 +30,19 @@ export const trabalhoIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Trabalho.png'
 export const transporteIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Transporte.png'
+export const lgpdIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/LGPD.png'
+export const anticorrupcaoIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Anticorrup%C3%A7%C3%A3o.png'
+export const obrasIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Obras.png'
+export const ordemPublicaIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Ordem%20P%C3%BAblica.png'
+export const peticionamentosIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Peti%C3%A7%C3%A3o.png'
+export const transitoIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Tr%C3%A2nsito.png'
+export const cursosIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Cursos.png'
+export const ouvidoriaIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Ouvidoria.png'
