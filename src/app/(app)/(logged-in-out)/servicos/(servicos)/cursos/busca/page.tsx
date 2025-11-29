@@ -176,6 +176,7 @@ export default function CoursesSearchPage() {
     push = false
   ) => {
     const params = new URLSearchParams(searchParams.toString())
+    // Only update parameters that are in the patch, preserve others
     for (const key of [
       'q',
       'modalidade',
@@ -183,12 +184,15 @@ export default function CoursesSearchPage() {
       'categoria',
       'acessibilidade',
     ] as const) {
-      const next = patch[key]
-      if (next) {
-        params.set(key, next)
-      } else {
-        params.delete(key)
+      if (key in patch) {
+        const next = patch[key]
+        if (next) {
+          params.set(key, next)
+        } else {
+          params.delete(key)
+        }
       }
+      // If key is not in patch, keep existing value (don't delete)
     }
     const url = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
     ;(push ? router.push : router.replace)(url, { scroll: false })
