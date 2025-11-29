@@ -1,7 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import type { AccessibilityProps } from '@/types/course'
+import type { AccessibilityProps, CourseManagementType } from '@/types/course'
+import { shouldShowExternalPartnerBadge } from '@/types/course'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
@@ -14,7 +15,9 @@ interface CourseCardProps {
   provider?: string
   institutionaLogo?: string
   accessibility?: AccessibilityProps
+  /** @deprecated Use courseManagementType instead */
   isExternalPartner?: boolean
+  courseManagementType?: CourseManagementType
   coverImage?: string
   className?: string
   variant?: 'vertical' | 'horizontal'
@@ -30,11 +33,17 @@ export function CourseCard({
   institutionaLogo,
   accessibility,
   isExternalPartner,
+  courseManagementType,
   coverImage,
   className = '',
   variant = 'vertical',
   badgesOutside = false,
 }: CourseCardProps) {
+  // Use courseManagementType if available, otherwise fall back to isExternalPartner for backward compatibility
+  const showExternalBadge =
+    courseManagementType !== undefined
+      ? shouldShowExternalPartnerBadge(courseManagementType)
+      : isExternalPartner === true
   // Layout horizontal: imagem à esquerda, texto à direita
   if (variant === 'horizontal') {
     return (
@@ -61,7 +70,7 @@ export function CourseCard({
                   {accessibility && (
                     <AccessibilityBadge accessibility={accessibility} />
                   )}
-                  {isExternalPartner && <IsExternalPartnerBadge />}
+                  {showExternalBadge && <IsExternalPartnerBadge />}
                 </div>
               )}
             </>
@@ -101,7 +110,7 @@ export function CourseCard({
               {accessibility && (
                 <AccessibilityBadge accessibility={accessibility} />
               )}
-              {isExternalPartner && <IsExternalPartnerBadge />}
+              {showExternalBadge && <IsExternalPartnerBadge />}
             </div>
           )}
         </div>
@@ -131,7 +140,7 @@ export function CourseCard({
               {accessibility && (
                 <AccessibilityBadge accessibility={accessibility} />
               )}
-              {isExternalPartner && <IsExternalPartnerBadge />}
+              {showExternalBadge && <IsExternalPartnerBadge />}
             </div>
           </>
         )}

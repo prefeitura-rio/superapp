@@ -31,7 +31,7 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
                 provider={course.organization as string}
                 coverImage={course.cover_image as string}
                 accessibility={course.accessibility as AccessibilityProps}
-                isExternalPartner={course.is_external_partner as boolean}
+                courseManagementType={course.course_management_type}
               />
             </div>
           ))}
@@ -51,7 +51,7 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
               provider={course.organization as string}
               coverImage={course.cover_image as string}
               accessibility={course.accessibility as AccessibilityProps}
-              isExternalPartner={course.is_external_partner as boolean}
+              courseManagementType={course.course_management_type}
               className="w-full"
             />
           ))}

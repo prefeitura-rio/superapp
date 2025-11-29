@@ -23,7 +23,10 @@ export default function RecommendedCoursesCards({
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
-            <div key={course.id != null ? String(course.id) : `course-${index}`} className="shrink-0">
+            <div
+              key={course.id != null ? String(course.id) : `course-${index}`}
+              className="shrink-0"
+            >
               <CourseCard
                 courseId={course.id}
                 title={course.title as string}
@@ -33,7 +36,7 @@ export default function RecommendedCoursesCards({
                 provider={course.organization as string}
                 coverImage={course.cover_image as string}
                 accessibility={course.accessibility as AccessibilityProps}
-                isExternalPartner={course.is_external_partner as boolean}
+                courseManagementType={course.course_management_type}
               />
             </div>
           ))}
@@ -53,7 +56,7 @@ export default function RecommendedCoursesCards({
               provider={course.organization as string}
               coverImage={course.cover_image as string}
               accessibility={course.accessibility as AccessibilityProps}
-              isExternalPartner={course.is_external_partner as boolean}
+              courseManagementType={course.course_management_type}
               className="w-full"
             />
           ))}

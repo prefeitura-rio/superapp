@@ -18,6 +18,10 @@ import { getCourseEnrollmentInfo } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
+import {
+  shouldShowExternalPartnerBadge,
+  shouldShowExternalPartnerModal,
+} from '@/types/course'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -151,7 +155,9 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
             {course.accessibility && (
               <AccessibilityBadge accessibility={course.accessibility} />
             )}
-            {course.is_external_partner && <IsExternalPartnerBadge />}
+            {shouldShowExternalPartnerBadge(course.course_management_type) && (
+              <IsExternalPartnerBadge />
+            )}
           </div>
         </>
       )}
@@ -196,7 +202,7 @@ function CourseInfo({ course, department }: CourseInfoProps) {
         <p className="text-sm">{organizationName}</p>
       </div>
 
-      {course.is_external_partner && (
+      {shouldShowExternalPartnerBadge(course.course_management_type) && (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
             {course.external_partner_logo_url ? (
@@ -605,7 +611,10 @@ export function CourseDetails({
       )
     }
 
-    if (course.is_external_partner && course.external_partner_url) {
+    if (
+      shouldShowExternalPartnerModal(course.course_management_type) &&
+      course.external_partner_url
+    ) {
       return (
         <>
           <button

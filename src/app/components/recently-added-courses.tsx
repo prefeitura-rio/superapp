@@ -35,7 +35,7 @@ export default function RecentlyAddedCourses({
                 provider={course.organization as string}
                 accessibility={course.accessibility as AccessibilityProps}
                 coverImage={course.cover_image as string}
-                isExternalPartner={course.is_external_partner as boolean}
+                courseManagementType={course.course_management_type}
               />
             </div>
           ))}
@@ -55,7 +55,7 @@ export default function RecentlyAddedCourses({
               provider={course.organization as string}
               accessibility={course.accessibility as AccessibilityProps}
               coverImage={course.cover_image as string}
-              isExternalPartner={course.is_external_partner as boolean}
+              courseManagementType={course.course_management_type}
               className="w-full"
             />
           ))}
