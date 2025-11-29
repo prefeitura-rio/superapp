@@ -49,10 +49,10 @@ export default function CoursesFilterDrawerContent({
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('modalidade', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
                   isSelected('modalidade', option.value)
-                    ? 'bg-primary text-primary-foreground hover:bg-primary'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    ? 'bg-primary text-background hover:bg-primary'
+                    : 'bg-background text-foreground hover:bg-background'
                 }`}
               >
                 {option.label}
@@ -71,10 +71,10 @@ export default function CoursesFilterDrawerContent({
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('local_curso', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
                   isSelected('local_curso', option.value)
-                    ? 'bg-primary text-primary-foreground hover:bg-primary'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    ? 'bg-primary text-background hover:bg-primary'
+                    : 'bg-background text-foreground hover:bg-background'
                 }`}
               >
                 {option.label}
@@ -94,10 +94,10 @@ export default function CoursesFilterDrawerContent({
                   <CustomButton
                     key={category.value}
                     onClick={() => onFilterSelect('categoria', category.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
                       isSelected('categoria', category.value)
-                        ? 'bg-primary text-primary-foreground hover:bg-primary'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        ? 'bg-primary text-background hover:bg-primary'
+                        : 'bg-background text-foreground hover:bg-background'
                     }`}
                   >
                     {category.label}
@@ -107,10 +107,10 @@ export default function CoursesFilterDrawerContent({
                   <CustomButton
                     key={option.value}
                     onClick={() => onFilterSelect('categoria', option.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
                       isSelected('categoria', option.value)
-                        ? 'bg-primary text-primary-foreground hover:bg-primary'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        ? 'bg-primary text-background hover:bg-primary'
+                        : 'bg-background text-foreground hover:bg-background'
                     }`}
                   >
                     {option.label}
