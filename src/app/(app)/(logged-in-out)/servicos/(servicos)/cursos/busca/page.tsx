@@ -13,6 +13,7 @@ import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { Skeleton } from '@/components/ui/skeleton'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
@@ -488,7 +489,7 @@ export default function CoursesSearchPage() {
                       course.title || ''
                     )}`}
                     onClick={() => handleCourseClick(course)}
-                    className="block mb-3 last:mb-0"
+                    className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                   >
                     <div className="flex gap-3 items-center">
                       {course.cover_image && (
@@ -529,14 +530,19 @@ export default function CoursesSearchPage() {
                   <h2 className="text-base font-medium text-foreground mb-4">
                     Cursos mais procurados
                   </h2>
-                  <div className="space-y-3">
+                  <div>
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="animate-pulse">
+                      <div
+                        key={i}
+                        className={`border-b border-border py-4 ${
+                          i === 3 ? 'border-b-0 pb-0' : ''
+                        }`}
+                      >
                         <div className="flex gap-3 items-center">
-                          <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
+                          <Skeleton className="w-28 h-28 shrink-0 rounded-lg" />
                           <div className="flex-1 min-w-0 space-y-2">
-                            <div className="h-4 bg-muted rounded w-3/4" />
-                            <div className="h-3 bg-muted/70 rounded w-1/2" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
                           </div>
                         </div>
                       </div>
@@ -548,7 +554,7 @@ export default function CoursesSearchPage() {
                   <h2 className="text-base font-medium text-foreground mb-4">
                     Cursos mais procurados
                   </h2>
-                  <div className="space-y-3">
+                  <div>
                     {initialCourses.map(course => (
                       <Link
                         key={course.id}
@@ -557,7 +563,7 @@ export default function CoursesSearchPage() {
                           course.title || ''
                         )}`}
                         onClick={() => handleCourseClick(course)}
-                        className="block"
+                        className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                       >
                         <div className="flex gap-3 items-center">
                           {course.cover_image && (
@@ -598,11 +604,15 @@ export default function CoursesSearchPage() {
               <h2 className="text-base font-medium text-foreground mb-4">
                 Pesquisados por você
               </h2>
-              <div className="space-y-3">
-                {visitedCourses.slice(0, 10).map(course => (
+              <div>
+                {visitedCourses.slice(0, 10).map((course, index) => (
                   <div
                     key={course.id}
-                    className="flex gap-3 items-center group relative"
+                    className={`flex gap-3 items-center group relative border-b border-border py-4 ${
+                      index === visitedCourses.slice(0, 10).length - 1
+                        ? 'border-b-0 pb-0'
+                        : ''
+                    }`}
                   >
                     <Link
                       href={`/servicos/cursos/${createCourseSlug(
@@ -662,13 +672,11 @@ export default function CoursesSearchPage() {
           {isLoading || isWaitingForSearch ? (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="flex gap-3 items-center">
-                    <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted/70 rounded w-1/2" />
-                    </div>
+                <div key={i} className="flex gap-3 items-center">
+                  <Skeleton className="w-28 h-28 shrink-0 rounded-lg" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
               ))}

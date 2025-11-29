@@ -16,22 +16,28 @@ export function AllCourses({ courses }: AllCoursesProps) {
       </h3>
       {/* Mobile: layout horizontal (até max-w-xl = 576px) */}
       <div className="px-4 pb-6 max-[576px]:block min-[577px]:hidden">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col">
           {courses.map((course, index) => (
-            <CourseCard
-              courseId={course.id}
+            <div
               key={course.id != null ? String(course.id) : `course-${index}`}
-              title={course.title as string}
-              modality={course.modalidade as string}
-              workload={course.workload as string}
-              institutionaLogo={course.institutional_logo as string}
-              provider={course.organization as string}
-              coverImage={course.cover_image as string}
-              accessibility={course.accessibility as AccessibilityProps}
-              isExternalPartner={course.is_external_partner as boolean}
-              variant="horizontal"
-              badgesOutside={true}
-            />
+              className={`border-b border-border py-4 ${
+                index === courses.length - 1 ? 'border-b-0 pb-0' : ''
+              }`}
+            >
+              <CourseCard
+                courseId={course.id}
+                title={course.title as string}
+                modality={course.modalidade as string}
+                workload={course.workload as string}
+                institutionaLogo={course.institutional_logo as string}
+                provider={course.organization as string}
+                coverImage={course.cover_image as string}
+                accessibility={course.accessibility as AccessibilityProps}
+                isExternalPartner={course.is_external_partner as boolean}
+                variant="horizontal"
+                badgesOutside={true}
+              />
+            </div>
           ))}
         </div>
       </div>
