@@ -3,11 +3,12 @@
 import {
   addVisitedCourse,
   getVisitedCourses,
+  removeVisitedCourse,
 } from '@/actions/courses/course-history'
 import { createCourseSlug, isValidFilter } from '@/actions/courses/utils'
 import { AccessibilityBadge } from '@/app/components/courses/badges'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
-import { ChevronRightIcon } from '@/assets/icons'
+import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
@@ -599,16 +600,18 @@ export default function CoursesSearchPage() {
               </h2>
               <div className="space-y-3">
                 {visitedCourses.slice(0, 10).map(course => (
-                  <Link
+                  <div
                     key={course.id}
-                    href={`/servicos/cursos/${createCourseSlug(
-                      course.id.toString(),
-                      course.title
-                    )}`}
-                    onClick={() => handleCourseClick(course as Course)}
-                    className="block"
+                    className="flex gap-3 items-center group relative"
                   >
-                    <div className="flex gap-3 items-center">
+                    <Link
+                      href={`/servicos/cursos/${createCourseSlug(
+                        course.id.toString(),
+                        course.title
+                      )}`}
+                      onClick={() => handleCourseClick(course as Course)}
+                      className="flex gap-3 items-center flex-1 min-w-0"
+                    >
                       {course.cover_image && (
                         <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
                           <Image
@@ -632,8 +635,21 @@ export default function CoursesSearchPage() {
                           className="mt-2"
                         />
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        removeVisitedCourse(course.id)
+                        setVisitedCourses(getVisitedCourses())
+                      }}
+                      className="shrink-0 w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
+                      aria-label="Remover do histórico"
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

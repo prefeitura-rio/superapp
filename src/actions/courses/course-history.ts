@@ -40,13 +40,28 @@ export function addVisitedCourse(course: Omit<VisitedCourse, 'visitedAt'>) {
     // Remove if already exists
     const filtered = history.filter(c => c.id !== course.id)
     // Add to beginning with current timestamp
-    const updated = [
-      { ...course, visitedAt: Date.now() },
-      ...filtered,
-    ].slice(0, MAX_HISTORY_ITEMS)
+    const updated = [{ ...course, visitedAt: Date.now() }, ...filtered].slice(
+      0,
+      MAX_HISTORY_ITEMS
+    )
     localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(updated))
   } catch (error) {
     console.error('Error saving visited course:', error)
+  }
+}
+
+/**
+ * Remove a specific course from visited history
+ */
+export function removeVisitedCourse(courseId: number) {
+  if (typeof window === 'undefined') return
+
+  try {
+    const history = getVisitedCourses()
+    const filtered = history.filter(c => c.id !== courseId)
+    localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(filtered))
+  } catch (error) {
+    console.error('Error removing visited course:', error)
   }
 }
 
@@ -57,4 +72,3 @@ export function clearVisitedCourses() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(COURSE_HISTORY_KEY)
 }
-
