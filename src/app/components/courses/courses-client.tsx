@@ -9,7 +9,9 @@ import type { CategoryFilter } from '@/lib/course-category-helpers'
 import type { UserInfo } from '@/lib/user-info'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
+import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
 import { CategoryFiltersSwipe } from './category-filters-swipe'
+import { CategoryFiltersSwipeSkeleton } from './category-filters-swipe-skeleton'
 import { MyCoursesHome } from './my-courses-home'
 
 export default function CoursePageClient({
@@ -17,11 +19,13 @@ export default function CoursePageClient({
   userInfo,
   myCourses,
   categoryFilters,
+  isLoadingCategories = false,
 }: {
   courses: ModelsCurso[]
   userInfo: UserInfo
   myCourses: ModelsCurso[]
   categoryFilters: CategoryFilter[]
+  isLoadingCategories?: boolean
 }) {
   if (courses.length === 0) {
     return (
@@ -41,15 +45,22 @@ export default function CoursePageClient({
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
       <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
-        {categoryFilters.length > 0 && (
+        {isLoadingCategories ? (
           <ResponsiveWrapper
-            mobileComponent={
-              <CategoryFiltersMobile categoryFilters={categoryFilters} />
-            }
-            desktopComponent={
-              <CategoryFiltersSwipe categoryFilters={categoryFilters} />
-            }
+            mobileComponent={<CategoryFiltersMobileSkeleton />}
+            desktopComponent={<CategoryFiltersSwipeSkeleton />}
           />
+        ) : (
+          categoryFilters.length > 0 && (
+            <ResponsiveWrapper
+              mobileComponent={
+                <CategoryFiltersMobile categoryFilters={categoryFilters} />
+              }
+              desktopComponent={
+                <CategoryFiltersSwipe categoryFilters={categoryFilters} />
+              }
+            />
+          )
         )}
 
         {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
