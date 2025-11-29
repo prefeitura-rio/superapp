@@ -656,13 +656,13 @@ export default function CoursesSearchPage() {
           ) : !isLoading &&
             !isWaitingForSearch &&
             filteredCourses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex flex-col items-center text-center justify-center py-8">
               <ThemeAwareVideo
                 source={VIDEO_SOURCES.emptyAddress}
                 containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
               />
               <p className="text-lg text-muted-foreground">
-                Curso não encontrado
+                Ops... nenhum curso encontrado para a sua busca
               </p>
             </div>
           ) : (
