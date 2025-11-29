@@ -6,7 +6,7 @@ export function CategoryFiltersMobileSkeleton() {
   return (
     <section className="mt-4 pb-8">
       <div className="w-full overflow-x-auto no-scrollbar">
-        <div className="flex px-4 gap-4 w-max">
+        <div className="flex px-4 gap-2 w-max">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}

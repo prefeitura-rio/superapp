@@ -28,7 +28,7 @@ export function CategoryFiltersSwipeSkeleton() {
           return (
             <div
               key={`skeleton-slide-${slideIndex}`}
-              className="grid px-2 grid-cols-8 gap-4 w-full"
+              className="grid px-2 grid-cols-8 gap-2 w-full"
             >
               {Array.from({ length: itemsInSlide }, (_, itemIndex) => (
                 <div

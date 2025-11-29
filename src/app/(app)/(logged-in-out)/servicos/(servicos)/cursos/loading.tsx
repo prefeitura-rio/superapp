@@ -35,7 +35,7 @@ export default function CoursesLoading() {
             <Skeleton className="h-5 w-24 mb-4" />
             {/* Mobile: horizontal scroll */}
             <div className="relative w-full overflow-x-auto pb-2 no-scrollbar max-[576px]:block min-[577px]:hidden">
-              <div className="flex gap-4 px-4 min-w-max">
+              <div className="flex gap-2 px-4 min-w-max">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
@@ -62,7 +62,7 @@ export default function CoursesLoading() {
             </div>
             {/* Desktop: grid */}
             <div className="hidden min-[577px]:block">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-2">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
@@ -100,7 +100,7 @@ export default function CoursesLoading() {
             <Skeleton className="h-5 w-32 mb-4" />
             {/* Mobile: vertical list */}
             <div className="max-[576px]:block min-[577px]:hidden">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
@@ -122,7 +122,7 @@ export default function CoursesLoading() {
             </div>
             {/* Desktop: grid */}
             <div className="hidden min-[577px]:block">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-2">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}

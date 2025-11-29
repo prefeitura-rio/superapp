@@ -16,7 +16,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
       </h3>
       {/* Mobile: layout horizontal (até max-w-xl = 576px) */}
       <div className="px-4 pb-6 max-[576px]:block min-[577px]:hidden">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {courses.map((course, index) => (
             <CourseCard
               courseId={course.id}
@@ -36,7 +36,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
       </div>
       {/* Desktop: grid de 4 colunas e n linhas (acima de max-w-xl = 576px) */}
       <div className="hidden min-[577px]:block px-4 pb-6">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-2">
           {courses.map((course, index) => (
             <CourseCard
               courseId={course.id}
