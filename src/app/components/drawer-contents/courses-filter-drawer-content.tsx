@@ -44,6 +44,10 @@ export default function CoursesFilterDrawerContent({
       className="flex-1 min-h-0"
     >
       <div className="space-y-6 pb-10">
+        <h2 className="flex justify-center items-center text-xl font-medium text-center my-6">
+          Filtros
+        </h2>
+
         {/* Modalidade */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">

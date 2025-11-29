@@ -12,13 +12,13 @@ export default function CoursesLoading() {
       <div className="min-h-lvh">
         {/* Header Skeleton */}
         <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3">
-          <div className="mx-auto md:px-4 flex max-w-4xl items-center justify-between">
+          <div className="mx-auto pt-2 md:px-4 flex max-w-4xl items-center justify-between">
             <div className="flex justify-center">
               <Skeleton className="h-9 w-44 rounded-full" />
             </div>
-            <div className="flex items-center space-x-2">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="flex items-center space-x-10 px-4">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-6 w-6 rounded-full" />
             </div>
           </div>
         </header>

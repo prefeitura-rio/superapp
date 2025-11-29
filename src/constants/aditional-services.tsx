@@ -19,19 +19,19 @@ const moreCategories = [
 ]
 
 export const additionalCategories: Category[] = [
-  {
-    name: 'Ouvidoria',
-    icon: createElement(Image, {
-      src: ouvidoriaIcon,
-      alt: 'ouvidoria',
-      width: 48,
-      height: 48,
-      className: 'w-12 h-12',
-    }),
-    categorySlug: 'ouvidoria',
-    relevanciaMedia: 0,
-    quantidadeServicos: 0,
-  },
+  // {
+  //   name: 'Ouvidoria',
+  //   icon: createElement(Image, {
+  //     src: ouvidoriaIcon,
+  //     alt: 'ouvidoria',
+  //     width: 48,
+  //     height: 48,
+  //     className: 'w-12 h-12',
+  //   }),
+  //   categorySlug: 'ouvidoria',
+  //   relevanciaMedia: 0,
+  //   quantidadeServicos: 0,
+  // },
   {
     name: 'Cursos',
     icon: createElement(Image, {
@@ -53,7 +53,7 @@ export const aditionalCategoriesFull = [
 ]
 
 export const categoriesRoute: Record<string, string> = {
-  ouvidoria: '/ouvidoria',
+  // ouvidoria: '/ouvidoria',
   cursos: '/servicos/cursos',
   mais: '/servicos',
 } as const

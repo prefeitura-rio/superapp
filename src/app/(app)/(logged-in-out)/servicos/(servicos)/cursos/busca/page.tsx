@@ -435,7 +435,7 @@ export default function CoursesSearchPage() {
 
   return (
     <main className="min-h-lvh max-w-4xl mx-auto text-foreground">
-      <section className="relative pt-5 px-4 flex items-center gap-4">
+      <section className="relative pt-5 px-4 flex items-center gap-2">
         <SearchInput
           ref={searchInputRef}
           placeholder="Encontre seu curso"
