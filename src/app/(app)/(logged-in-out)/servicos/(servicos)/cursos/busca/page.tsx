@@ -3,15 +3,17 @@
 import {
   addVisitedCourse,
   getVisitedCourses,
+  removeVisitedCourse,
 } from '@/actions/courses/course-history'
 import { createCourseSlug, isValidFilter } from '@/actions/courses/utils'
 import { AccessibilityBadge } from '@/app/components/courses/badges'
 import CoursesFilterDrawerContent from '@/app/components/drawer-contents/courses-filter-drawer-content'
-import { ChevronRightIcon } from '@/assets/icons'
+import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { FilterIcon } from '@/assets/icons/filter-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { Skeleton } from '@/components/ui/skeleton'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
@@ -176,6 +178,7 @@ export default function CoursesSearchPage() {
     push = false
   ) => {
     const params = new URLSearchParams(searchParams.toString())
+    // Only update parameters that are in the patch, preserve others
     for (const key of [
       'q',
       'modalidade',
@@ -183,12 +186,15 @@ export default function CoursesSearchPage() {
       'categoria',
       'acessibilidade',
     ] as const) {
-      const next = patch[key]
-      if (next) {
-        params.set(key, next)
-      } else {
-        params.delete(key)
+      if (key in patch) {
+        const next = patch[key]
+        if (next) {
+          params.set(key, next)
+        } else {
+          params.delete(key)
+        }
       }
+      // If key is not in patch, keep existing value (don't delete)
     }
     const url = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
     ;(push ? router.push : router.replace)(url, { scroll: false })
@@ -483,7 +489,7 @@ export default function CoursesSearchPage() {
                       course.title || ''
                     )}`}
                     onClick={() => handleCourseClick(course)}
-                    className="block mb-3 last:mb-0"
+                    className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                   >
                     <div className="flex gap-3 items-center">
                       {course.cover_image && (
@@ -524,14 +530,19 @@ export default function CoursesSearchPage() {
                   <h2 className="text-base font-medium text-foreground mb-4">
                     Cursos mais procurados
                   </h2>
-                  <div className="space-y-3">
+                  <div>
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="animate-pulse">
+                      <div
+                        key={i}
+                        className={`border-b border-border py-4 ${
+                          i === 3 ? 'border-b-0 pb-0' : ''
+                        }`}
+                      >
                         <div className="flex gap-3 items-center">
-                          <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
+                          <Skeleton className="w-28 h-28 shrink-0 rounded-lg" />
                           <div className="flex-1 min-w-0 space-y-2">
-                            <div className="h-4 bg-muted rounded w-3/4" />
-                            <div className="h-3 bg-muted/70 rounded w-1/2" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
                           </div>
                         </div>
                       </div>
@@ -543,7 +554,7 @@ export default function CoursesSearchPage() {
                   <h2 className="text-base font-medium text-foreground mb-4">
                     Cursos mais procurados
                   </h2>
-                  <div className="space-y-3">
+                  <div>
                     {initialCourses.map(course => (
                       <Link
                         key={course.id}
@@ -552,7 +563,7 @@ export default function CoursesSearchPage() {
                           course.title || ''
                         )}`}
                         onClick={() => handleCourseClick(course)}
-                        className="block"
+                        className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                       >
                         <div className="flex gap-3 items-center">
                           {course.cover_image && (
@@ -593,18 +604,24 @@ export default function CoursesSearchPage() {
               <h2 className="text-base font-medium text-foreground mb-4">
                 Pesquisados por você
               </h2>
-              <div className="space-y-3">
-                {visitedCourses.slice(0, 10).map(course => (
-                  <Link
+              <div>
+                {visitedCourses.slice(0, 10).map((course, index) => (
+                  <div
                     key={course.id}
-                    href={`/servicos/cursos/${createCourseSlug(
-                      course.id.toString(),
-                      course.title
-                    )}`}
-                    onClick={() => handleCourseClick(course as Course)}
-                    className="block"
+                    className={`flex gap-3 items-center group relative border-b border-border py-4 ${
+                      index === visitedCourses.slice(0, 10).length - 1
+                        ? 'border-b-0 pb-0'
+                        : ''
+                    }`}
                   >
-                    <div className="flex gap-3 items-center">
+                    <Link
+                      href={`/servicos/cursos/${createCourseSlug(
+                        course.id.toString(),
+                        course.title
+                      )}`}
+                      onClick={() => handleCourseClick(course as Course)}
+                      className="flex gap-3 items-center flex-1 min-w-0"
+                    >
                       {course.cover_image && (
                         <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
                           <Image
@@ -628,8 +645,21 @@ export default function CoursesSearchPage() {
                           className="mt-2"
                         />
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        removeVisitedCourse(course.id)
+                        setVisitedCourses(getVisitedCourses())
+                      }}
+                      className="shrink-0 w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
+                      aria-label="Remover do histórico"
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -642,13 +672,11 @@ export default function CoursesSearchPage() {
           {isLoading || isWaitingForSearch ? (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="flex gap-3 items-center">
-                    <div className="w-28 h-28 shrink-0 rounded-lg bg-muted" />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted/70 rounded w-1/2" />
-                    </div>
+                <div key={i} className="flex gap-3 items-center">
+                  <Skeleton className="w-28 h-28 shrink-0 rounded-lg" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
               ))}
@@ -656,13 +684,13 @@ export default function CoursesSearchPage() {
           ) : !isLoading &&
             !isWaitingForSearch &&
             filteredCourses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex flex-col items-center text-center justify-center py-8">
               <ThemeAwareVideo
                 source={VIDEO_SOURCES.emptyAddress}
                 containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
               />
               <p className="text-lg text-muted-foreground">
-                Curso não encontrado
+                Ops... nenhum curso encontrado para a sua busca
               </p>
             </div>
           ) : (

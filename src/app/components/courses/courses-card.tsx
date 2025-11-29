@@ -18,6 +18,7 @@ interface CourseCardProps {
   coverImage?: string
   className?: string
   variant?: 'vertical' | 'horizontal'
+  badgesOutside?: boolean // Se true, badges aparecem embaixo do texto no layout horizontal
 }
 
 export function CourseCard({
@@ -32,6 +33,7 @@ export function CourseCard({
   coverImage,
   className = '',
   variant = 'vertical',
+  badgesOutside = false,
 }: CourseCardProps) {
   // Layout horizontal: imagem à esquerda, texto à direita
   if (variant === 'horizontal') {
@@ -53,12 +55,15 @@ export function CourseCard({
                 fill
                 className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
-              <div className="absolute bottom-1 left-1 flex flex-col gap-1">
-                {accessibility && (
-                  <AccessibilityBadge accessibility={accessibility} />
-                )}
-                {isExternalPartner && <IsExternalPartnerBadge />}
-              </div>
+              {/* Badges dentro da imagem apenas se badgesOutside for false */}
+              {!badgesOutside && (
+                <div className="absolute bottom-1 left-1 flex flex-col gap-1">
+                  {accessibility && (
+                    <AccessibilityBadge accessibility={accessibility} />
+                  )}
+                  {isExternalPartner && <IsExternalPartnerBadge />}
+                </div>
+              )}
             </>
           )}
 
@@ -90,6 +95,15 @@ export function CourseCard({
           <p className="text-xs text-muted-foreground mt-1">
             {modality} • {workload}
           </p>
+          {/* Badges embaixo do texto se badgesOutside for true */}
+          {badgesOutside && (
+            <div className="flex flex-col gap-0.5 mt-2">
+              {accessibility && (
+                <AccessibilityBadge accessibility={accessibility} />
+              )}
+              {isExternalPartner && <IsExternalPartnerBadge />}
+            </div>
+          )}
         </div>
       </Link>
     )

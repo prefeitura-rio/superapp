@@ -21,7 +21,7 @@ export default function RecommendedCoursesCards({
       </h3>
       {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
-        <div className="flex gap-4 px-4 min-w-max">
+        <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
             <div key={course.id != null ? String(course.id) : `course-${index}`} className="shrink-0">
               <CourseCard
@@ -41,7 +41,7 @@ export default function RecommendedCoursesCards({
       </div>
       {/* Desktop: grid de 4 colunas sem scroll (acima de max-w-xl = 576px) */}
       <div className="hidden min-[577px]:block px-4 pb-6">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-2">
           {limitedCourses.map((course, index) => (
             <CourseCard
               courseId={course.id}

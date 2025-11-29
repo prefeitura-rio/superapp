@@ -38,7 +38,7 @@ export function CategoryFiltersSwipe({
             return (
               <div
                 key={`slide-${slideIndex}`}
-                className="grid px-2 grid-cols-8 gap-4 w-full"
+                className="grid px-2 grid-cols-8 gap-2 w-full"
               >
                 {slideFilters.map(filter => (
                   <Link
