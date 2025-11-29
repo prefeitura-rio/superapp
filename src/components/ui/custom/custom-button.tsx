@@ -48,7 +48,7 @@ export function CustomButton({
     <Button
       className={cn(
         'inline-flexitems-center justify-center gap-2 rounded-2xl font-normal text-sm cursor-pointer',
-        'border transition-all duration-200 focus:outline-none focus:ring-2',
+        'border transition-all duration-200 focus:outline-none focus:ring-none!',
         'disabled:cursor-not-allowed disabled:bg-card disabled:text-muted-foreground',
         variantStyles[variant],
         sizeStyles[size],

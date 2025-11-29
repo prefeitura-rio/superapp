@@ -31,7 +31,13 @@ export default function CoursesFilterDrawerContent({
   }
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Filtros">
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Filtros"
+      contentClassName="max-h-[80vh]! md:max-h-[90vh] flex flex-col"
+      className="flex-1 min-h-0"
+    >
       <div className="space-y-6 pb-10">
         {/* Modalidade */}
         <div>
@@ -43,9 +49,9 @@ export default function CoursesFilterDrawerContent({
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('modalidade', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
                   isSelected('modalidade', option.value)
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
@@ -65,9 +71,9 @@ export default function CoursesFilterDrawerContent({
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('local_curso', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
                   isSelected('local_curso', option.value)
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
@@ -88,9 +94,9 @@ export default function CoursesFilterDrawerContent({
                   <CustomButton
                     key={category.value}
                     onClick={() => onFilterSelect('categoria', category.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
                       isSelected('categoria', category.value)
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
@@ -101,9 +107,9 @@ export default function CoursesFilterDrawerContent({
                   <CustomButton
                     key={option.value}
                     onClick={() => onFilterSelect('categoria', option.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 ${
                       isSelected('categoria', option.value)
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
