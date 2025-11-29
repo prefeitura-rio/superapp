@@ -194,3 +194,56 @@ export function getCourseEnrollmentInfo(
 export function filterVisibleCourses(courses: ModelsCurso[]): ModelsCurso[] {
   return courses.filter(course => shouldShowCourse({ course }))
 }
+
+/**
+ * Sort courses prioritizing:
+ * 1. Courses with open enrollments (status 'available')
+ * 2. Then by created_at (most recent first)
+ * 3. Consider enrollment_end_date (data_limite_inscricoes) for secondary sorting
+ */
+export function sortCourses(courses: ModelsCurso[]): ModelsCurso[] {
+  return [...courses].sort((a, b) => {
+    // Get enrollment info for both courses (without user enrollment for sorting)
+    const enrollmentInfoA = getCourseEnrollmentInfo(a)
+    const enrollmentInfoB = getCourseEnrollmentInfo(b)
+
+    // Priority 1: Courses with open enrollments come first
+    const isAvailableA = enrollmentInfoA.status === 'available'
+    const isAvailableB = enrollmentInfoB.status === 'available'
+
+    if (isAvailableA && !isAvailableB) {
+      return -1 // A comes first
+    }
+    if (!isAvailableA && isAvailableB) {
+      return 1 // B comes first
+    }
+
+    // Priority 2: If both have same enrollment status, sort by created_at (most recent first)
+    const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0
+    const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0
+
+    if (createdAtA !== createdAtB) {
+      return createdAtB - createdAtA // Most recent first (descending)
+    }
+
+    // Priority 3: If created_at is the same, use enrollment_end_date as tiebreaker
+    // Courses with later enrollment_end_date come first (more time to enroll)
+    const enrollmentEndA = a.enrollment_end_date || a.data_limite_inscricoes
+    const enrollmentEndB = b.enrollment_end_date || b.data_limite_inscricoes
+
+    if (enrollmentEndA && enrollmentEndB) {
+      const dateA = new Date(enrollmentEndA).getTime()
+      const dateB = new Date(enrollmentEndB).getTime()
+      return dateB - dateA // Later date first
+    }
+
+    if (enrollmentEndA && !enrollmentEndB) {
+      return -1 // A comes first (has enrollment end date)
+    }
+    if (!enrollmentEndA && enrollmentEndB) {
+      return 1 // B comes first (has enrollment end date)
+    }
+
+    return 0 // Equal priority
+  })
+}

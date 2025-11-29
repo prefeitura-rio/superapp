@@ -5,7 +5,7 @@ import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollmen
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
-import { filterVisibleCourses } from '@/lib/course-utils'
+import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
 import { getDalCategorias } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -57,6 +57,9 @@ export default async function CoursesPage() {
     // Filter courses to only show those that should be visible
     const visibleCourses = filterVisibleCourses(allCourses)
 
+    // Sort courses: open enrollments first, then by created_at (most recent first)
+    const sortedCourses = sortCourses(visibleCourses)
+
     // Fetch user enrollments if authenticated
     let myCourses: any[] = []
     if (userInfo?.cpf) {
@@ -100,7 +103,7 @@ export default async function CoursesPage() {
     return (
       <>
         <CoursePageClient
-          courses={visibleCourses}
+          courses={sortedCourses}
           myCourses={myCourses}
           userInfo={userInfo}
           categoryFilters={categoriesFilters}
