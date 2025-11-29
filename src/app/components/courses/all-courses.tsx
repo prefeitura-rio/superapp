@@ -30,6 +30,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
               accessibility={course.accessibility as AccessibilityProps}
               isExternalPartner={course.is_external_partner as boolean}
               variant="horizontal"
+              badgesOutside={true}
             />
           ))}
         </div>
