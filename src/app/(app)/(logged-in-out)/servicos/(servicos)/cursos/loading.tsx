@@ -16,7 +16,7 @@ export default function CoursesLoading() {
             <div className="flex justify-center">
               <Skeleton className="h-9 w-44 rounded-full" />
             </div>
-            <div className="flex items-center space-x-10 px-4">
+            <div className="flex items-center space-x-8 px-4">
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-6 w-6 rounded-full" />
             </div>
