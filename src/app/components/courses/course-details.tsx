@@ -184,6 +184,12 @@ function CourseInfo({ course, department }: CourseInfoProps) {
     department?.nome_ua || course.organization || 'Instituição não informada'
   const organizationInitial = organizationName.charAt(0)
 
+  // Mobile: sigla_ua, Desktop: nome_ua
+  const mobileName =
+    department?.sigla_ua || course.organization || 'Instituição não informada'
+  const desktopName =
+    department?.nome_ua || course.organization || 'Instituição não informada'
+
   return (
     <div className="flex p-4 gap-2">
       <div className="flex items-center gap-3">
@@ -202,7 +208,8 @@ function CourseInfo({ course, department }: CourseInfoProps) {
             </span>
           )}
         </div>
-        <p className="text-sm">{organizationName}</p>
+        <p className="text-sm block sm:hidden">{mobileName}</p>
+        <p className="text-sm hidden sm:block">{desktopName}</p>
       </div>
 
       {shouldShowExternalPartnerBadge(course.course_management_type) && (
@@ -242,7 +249,9 @@ function CourseMetadata({ course }: CourseMetadataProps) {
         <div>
           <p className="text-foreground-light">Modalidade</p>
           <p className="font-medium">
-            {normalizeModalityDisplay(course.modalidade)}
+            {course.modalidade === 'LIVRE_FORMACAO_ONLINE'
+              ? 'Remoto'
+              : normalizeModalityDisplay(course.modalidade) || 'Não informado'}
           </p>
         </div>
         <div>
