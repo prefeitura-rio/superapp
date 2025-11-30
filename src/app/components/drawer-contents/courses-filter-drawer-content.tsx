@@ -40,7 +40,7 @@ export default function CoursesFilterDrawerContent({
       open={open}
       onOpenChange={onOpenChange}
       title="Filtros"
-      contentClassName="max-h-[80vh]! md:max-h-[90vh] flex flex-col"
+      contentClassName="max-h-[80vh]! md:min-h-[88vh] 3xl:min-h-auto flex flex-col"
       className="flex-1 min-h-0"
     >
       <div className="space-y-6 pb-10">

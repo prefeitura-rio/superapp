@@ -196,6 +196,23 @@ export function filterVisibleCourses(courses: ModelsCurso[]): ModelsCurso[] {
 }
 
 /**
+ * Normalize modality display name
+ * Maps technical modality values to user-friendly display names
+ */
+export function normalizeModalityDisplay(
+  modality: string | null | undefined
+): string {
+  if (!modality) return 'Não informado'
+
+  // Map LIVRE_FORMACAO_ONLINE to "Online" for display
+  if (modality === 'LIVRE_FORMACAO_ONLINE') {
+    return 'Remoto (Aulas Gravadas)'
+  }
+
+  return modality
+}
+
+/**
  * Sort courses prioritizing:
  * 1. Courses with open enrollments (status 'available')
  * 2. Then by created_at (most recent first)

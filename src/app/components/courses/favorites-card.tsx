@@ -4,6 +4,7 @@ import courseApi from '@/actions/courses'
 import { createCourseSlug } from '@/actions/courses/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ModelsCurso } from '@/http-courses/models'
+import { normalizeModalityDisplay } from '@/lib/course-utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -109,7 +110,7 @@ export function FavoritesCard() {
                 {course.title}
               </h3>
               <div className="text-xs text-muted-foreground">
-                {course.modalidade || 'N/A'} • {course.carga_horaria || 'N/A'}h
+                {normalizeModalityDisplay(course.modalidade)} • {course.carga_horaria || 'N/A'}h
               </div>
             </div>
           </Link>

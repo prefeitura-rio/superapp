@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
+import { normalizeModalityDisplay } from '@/lib/course-utils'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -132,7 +133,7 @@ export function MyCertificatesCard({
               {certificate.title}
             </p>
             <p className="text-xs text-muted-foreground mb-2">
-              {certificate.modalidade} • {certificate.workload}
+              {normalizeModalityDisplay(certificate.modalidade)} • {certificate.workload}
             </p>
             <Badge
               className={cn(

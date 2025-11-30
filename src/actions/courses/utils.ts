@@ -58,6 +58,7 @@ export const COURSE_FILTERS = {
   modalidade: [
     { label: 'Presencial', value: 'Presencial' },
     { label: 'Remoto', value: 'Remoto' },
+    { label: 'Remoto (Aulas Gravadas)', value: 'LIVRE_FORMACAO_ONLINE' },
   ],
   local_curso: [
     { label: 'Zona Oeste', value: 'zona-oeste' },

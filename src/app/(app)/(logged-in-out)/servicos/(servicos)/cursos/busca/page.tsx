@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
+import { normalizeModalityDisplay } from '@/lib/course-utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -507,7 +508,8 @@ export default function CoursesSearchPage() {
                           {course.title || 'Curso sem título'}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {course.modalidade && ` ${course.modalidade}`}
+                          {course.modalidade &&
+                            ` ${normalizeModalityDisplay(course.modalidade)}`}
                           {course.workload && ` • ${course.workload}`}
                         </p>
                         <AccessibilityBadge
@@ -581,7 +583,8 @@ export default function CoursesSearchPage() {
                               {course.title || 'Curso sem título'}
                             </h3>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {course.modalidade && `${course.modalidade}`}
+                              {course.modalidade &&
+                                `${normalizeModalityDisplay(course.modalidade)}`}
                               {course.workload && ` • ${course.workload}`}
                             </p>
                             <AccessibilityBadge
@@ -637,7 +640,8 @@ export default function CoursesSearchPage() {
                           {course.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {course.modalidade && ` ${course.modalidade}`}
+                          {course.modalidade &&
+                            ` ${normalizeModalityDisplay(course.modalidade)}`}
                           {course.workload && ` • ${course.workload}`}
                         </p>
                         <AccessibilityBadge
@@ -721,7 +725,8 @@ export default function CoursesSearchPage() {
                         {course.title || 'Curso sem título'}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {course.modalidade && `${course.modalidade}`}
+                        {course.modalidade &&
+                          `${normalizeModalityDisplay(course.modalidade)}`}
                         {course.workload && ` • ${course.workload}`}
                       </p>
                       <AccessibilityBadge

@@ -1,5 +1,6 @@
 'use client'
 
+import { normalizeModalityDisplay } from '@/lib/course-utils'
 import { cn } from '@/lib/utils'
 import type { AccessibilityProps, CourseManagementType } from '@/types/course'
 import { shouldShowExternalPartnerBadge } from '@/types/course'
@@ -102,7 +103,7 @@ export function CourseCard({
             {title}
           </h3>
           <p className="text-xs text-muted-foreground mt-1">
-            {modality} • {workload}
+            {normalizeModalityDisplay(modality)} • {workload}
           </p>
           {/* Badges embaixo do texto se badgesOutside for true */}
           {badgesOutside && (
@@ -170,7 +171,7 @@ export function CourseCard({
           {title}
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
-          {modality} • {workload}
+          {normalizeModalityDisplay(modality)} • {workload}
         </p>
       </div>
     </Link>

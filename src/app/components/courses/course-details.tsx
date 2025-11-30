@@ -14,7 +14,10 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
 import type { ModelsDepartmentResponse } from '@/http/models'
-import { getCourseEnrollmentInfo } from '@/lib/course-utils'
+import {
+  getCourseEnrollmentInfo,
+  normalizeModalityDisplay,
+} from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
@@ -238,7 +241,9 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       <div className="flex gap-4">
         <div>
           <p className="text-foreground-light">Modalidade</p>
-          <p className="font-medium">{course.modalidade || 'Não informado'}</p>
+          <p className="font-medium">
+            {normalizeModalityDisplay(course.modalidade)}
+          </p>
         </div>
         <div>
           <p className="text-foreground-light">Carga horária</p>
