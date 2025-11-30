@@ -1,7 +1,7 @@
 'use client'
 
 import { BannerBase } from '@/components/ui/custom/banner-base'
-import { cicloCariocaIcon, cursosBannerIcon } from '@/constants/bucket/banners'
+import { cursosBannerIcon } from '@/constants/bucket/banners'
 import Image from 'next/image'
 
 interface CursosBannerProps {
@@ -22,24 +22,33 @@ export const CursosBanner = ({
       title={title}
       subtitle={subtitle}
       color="#0A56A0"
+      gradient={{
+        from: '#125EBA',
+        to: '#1F7AE8',
+        direction: 'to right',
+      }}
+      showBlur={false}
       route={route}
       logo={
-        <Image
-          src={cicloCariocaIcon}
-          width={123}
-          className="-mt-1 w-auto h-auto brightness-0 invert"
-          height={123}
-          alt="Cursos"
-        />
+        <div className="flex flex-col">
+          <span className="text-white font-semibold text-base leading-5">
+            Cursos da Prefeitura
+          </span>
+          <span className="text-white/80 text-sm leading-4">
+            gratuito e com certificado
+          </span>
+        </div>
       }
+      badge="Ver cursos"
+      badgeClassName="bg-white text-[#0A3870] font-normal text-xs flex justify-center items-center"
       onBannerClick={onBannerClick}
       image={
         <Image
           src={cursosBannerIcon}
           alt="Pessoa sentada com livros estudando."
-          width={90}
-          height={90}
-          className="h-30 w-auto absolute bottom-0 right-1.5 z-20  md:right-12"
+          width={200}
+          height={200}
+          className="h-26 w-auto absolute bottom-0 right-0 z-20  md:right-0"
         />
       }
     />

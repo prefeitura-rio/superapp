@@ -21,15 +21,15 @@ export const suggestedBanners: BannerProps[] = [
   {
     id: 'cursos',
     component: CursosBanner,
-    title: 'Cursos',
-    subtitle: 'Conhecimento com certificação',
+    title: '',
+    subtitle: '',
     route: '/servicos/cursos/',
   },
   {
     id: 'login',
     component: LoginBanner,
-    title: 'Acesse sua carteira',
-    subtitle: 'Faça login em gov.br',
+    title: 'Acesse sua carteira e os serviços municipais',
+    subtitle: '',
     route: '/autenticacao-necessaria/carteira',
   },
   // {
