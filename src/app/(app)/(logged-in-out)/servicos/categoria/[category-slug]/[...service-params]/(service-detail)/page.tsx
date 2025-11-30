@@ -89,6 +89,7 @@ export default async function ServicePage({
     <PageClientWrapper
       serviceData={serviceData}
       orgaoGestorName={orgaoGestorName}
+      categorySlug={categorySlug}
     />
   )
 }

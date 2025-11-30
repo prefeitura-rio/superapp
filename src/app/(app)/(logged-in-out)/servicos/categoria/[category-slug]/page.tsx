@@ -22,7 +22,11 @@ export default async function CategoryPage({
 
   return (
     <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
-      <SecondaryHeader title={categoryName} showSearchButton />
+      <SecondaryHeader
+        title={categoryName}
+        showSearchButton
+        defaultRoute="/servicos"
+      />
       <div className="min-h-screen text-white">
         <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-20">
           <nav className="flex flex-col">
@@ -36,9 +40,7 @@ export default async function CategoryPage({
                   category={categoryName}
                   listPosition={index + 1}
                 >
-                  <span className="text-card-foreground">
-                    {service.title}
-                  </span>
+                  <span className="text-card-foreground">{service.title}</span>
                 </MenuItemClient>
               ))
             ) : (

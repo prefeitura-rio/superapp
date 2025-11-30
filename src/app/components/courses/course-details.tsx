@@ -20,6 +20,7 @@ import {
 } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
+import { getBackRoute } from '@/lib/utils'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
 import {
   shouldShowExternalPartnerBadge,
@@ -135,7 +136,8 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
       onBack()
       return
     }
-    router.push('/servicos/cursos/')
+    const backRoute = getBackRoute('/servicos/cursos/')
+    router.push(backRoute)
   }
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">

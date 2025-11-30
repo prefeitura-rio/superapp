@@ -11,11 +11,13 @@ import { PageClient } from './page-client'
 interface PageClientWrapperProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
+  categorySlug: string
 }
 
 export function PageClientWrapper({
   serviceData,
   orgaoGestorName,
+  categorySlug,
 }: PageClientWrapperProps) {
   const [bannerHeight, setBannerHeight] = useState(0)
 
@@ -32,6 +34,7 @@ export function PageClientWrapper({
           }
           showSearchButton
           className="max-w-[896px]"
+          defaultRoute="/"
           style={{ top: `${bannerHeight}px` }}
         />
 
