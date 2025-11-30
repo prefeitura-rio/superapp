@@ -3,7 +3,6 @@ import { CategoryFiltersSwipeSkeleton } from '@/app/components/courses/category-
 import { RecentlyAddedCoursesSwipeSkeleton } from '@/app/components/courses/recently-added-courses-skeleton'
 import { RecommendedCoursesSwipeSkeleton } from '@/app/components/courses/recommended-courses-swipe-skeleton'
 import { FloatNavigation } from '@/app/components/float-navigation'
-import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CoursesLoading() {
@@ -25,10 +24,12 @@ export default function CoursesLoading() {
 
         <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
           {/* Category Filters Skeleton */}
-          <ResponsiveWrapper
-            mobileComponent={<CategoryFiltersMobileSkeleton />}
-            desktopComponent={<CategoryFiltersSwipeSkeleton />}
-          />
+          <div className="block sm:hidden">
+            <CategoryFiltersMobileSkeleton />
+          </div>
+          <div className="hidden sm:block">
+            <CategoryFiltersSwipeSkeleton />
+          </div>
 
           {/* My Courses Skeleton */}
           <div className="px-4 pb-6">
