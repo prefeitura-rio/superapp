@@ -1,10 +1,6 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
-import {
-  MostAccessedServiceCardsSwipe,
-  MostAccessedServiceCardsSwipeSkeleton,
-} from '@/app/components/most-accessed-services-card-swipe'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import SuggestionCards from '@/app/components/suggestion-cards'
 import {
@@ -40,11 +36,7 @@ export default async function Home() {
       <HomeCategoriesGrid categories={allCategories} />
 
       {/* Most Accessed Service Cards*/}
-      <ResponsiveWrapper
-        mobileComponent={<MostAccessedServiceCards />}
-        desktopComponent={<MostAccessedServiceCardsSwipe />}
-        desktopSkeletonComponent={<MostAccessedServiceCardsSwipeSkeleton />}
-      />
+      <MostAccessedServiceCards />
 
       {/* Carteira section - fetched client-side to avoid cache issues */}
       <WalletSectionClient />

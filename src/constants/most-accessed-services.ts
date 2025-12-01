@@ -51,11 +51,11 @@ export const MOST_ACCESSED_SERVICES = [
     title: 'CadÚnico',
     description: 'Consulte e atualize seus dados',
   },
-  {
-    id: 'divida-ativa',
-    href: '/servicos/categoria/taxas/6a5daf79-0022-4cab-af61-96f3a10360e0',
-    icon: dividaAtivaIcon,
-    title: 'Dívida ativa',
-    description: 'Consulte dívidas de IPTU',
-  },
+  // {
+  //   id: 'divida-ativa',
+  //   href: '/servicos/categoria/taxas/6a5daf79-0022-4cab-af61-96f3a10360e0',
+  //   icon: dividaAtivaIcon,
+  //   title: 'Dívida ativa',
+  //   description: 'Consulte dívidas de IPTU',
+  // },
 ]
