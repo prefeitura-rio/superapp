@@ -136,6 +136,23 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
       onBack()
       return
     }
+
+    // Check if previous route contains "confirmar-informacoes"
+    let previousRoute: string | null = null
+    if (typeof window !== 'undefined') {
+      try {
+        previousRoute = sessionStorage.getItem('previousRoute')
+      } catch (error) {
+        // sessionStorage might be unavailable
+      }
+    }
+
+    // If previous route contains "confirmar-informacoes", go to courses list
+    if (previousRoute && previousRoute.includes('confirmar-informacoes')) {
+      router.push('/servicos/cursos/')
+      return
+    }
+
     const backRoute = getBackRoute('/servicos/cursos/')
     router.push(backRoute)
   }
