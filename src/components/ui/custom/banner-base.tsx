@@ -62,7 +62,7 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       }}
       role={route ? 'button' : undefined}
       tabIndex={route ? 0 : undefined}
-      className={`relative rounded-xl pt-4 pl-[23px] pr-[23px] h-[104px] min-w-[320px] sm:min-w-[300px] overflow-visible w-full ${route ? 'cursor-pointer' : ''}`}
+      className={`relative rounded-xl pt-4 pl-[23px] pr-[23px] h-[120px] min-w-[320px] sm:min-w-[300px] overflow-visible w-full ${route ? 'cursor-pointer' : ''}`}
       style={backgroundStyle}
     >
       {/* Blur */}
@@ -77,8 +77,8 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       {image}
 
       {/* Content */}
-      <div className="relative z-20 flex flex-col gap-3 h-full">
-        <div className="flex flex-col gap-3">
+      <div className="relative z-20 flex flex-col gap-7 h-full">
+        <div className="flex flex-col gap-7">
           <div className="flex items-center gap-2">
             {logo}
             {!badgeClassName && (
