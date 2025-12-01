@@ -52,8 +52,8 @@ export default function HomeCategoriesGrid({
         <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-5 w-20" />
         </div>
-        {/* Mobile skeleton */}
-        <div className="grid grid-cols-4 gap-2 md:hidden">
+        {/* Mobile/Tablet skeleton - below max-w-4xl */}
+        <div className="grid grid-cols-4 gap-2 lg:hidden">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={`skeleton-mobile-${i}`}
@@ -69,8 +69,8 @@ export default function HomeCategoriesGrid({
           ))}
         </div>
 
-        {/* Desktop skeleton */}
-        <div className="hidden md:grid md:grid-cols-6 lg:grid-cols-8 gap-2">
+        {/* Desktop skeleton - max-w-4xl and above */}
+        <div className="hidden lg:grid lg:grid-cols-8 gap-2">
           {Array.from({ length: categories?.length || 16 }).map((_, i) => (
             <div
               key={`skeleton-desktop-${i}`}
@@ -86,8 +86,8 @@ export default function HomeCategoriesGrid({
           ))}
         </div>
 
-        {/* Skeleton pagination bullets - mobile only */}
-        <div className="flex justify-center items-center h-12 md:hidden">
+        {/* Skeleton pagination bullets - mobile/tablet only */}
+        <div className="flex justify-center items-center h-12 lg:hidden">
           <div className="flex items-center gap-1.5">
             <Skeleton className="w-2 h-1.5 rounded-full" />
             <Skeleton className="w-2 h-1.5 rounded-full" />
@@ -107,8 +107,8 @@ export default function HomeCategoriesGrid({
         Serviços
       </h3>
 
-      {/* Mobile: Swiper with grid-cols-4 */}
-      <div className="pb-0 md:hidden">
+      {/* Mobile/Tablet: Swiper with grid-cols-4 - below max-w-4xl */}
+      <div className="pb-0 lg:hidden">
         <SwiperWrapper
           showArrows={true}
           showPagination={true}
@@ -145,9 +145,9 @@ export default function HomeCategoriesGrid({
         </SwiperWrapper>
       </div>
 
-      {/* Desktop: All cards in responsive grid without swiper */}
-      <div className="hidden md:block pb-0">
-        <div className="grid grid-cols-6 lg:grid-cols-8 gap-2 animate-fade-in">
+      {/* Desktop: All cards in grid without swiper - max-w-4xl and above */}
+      <div className="hidden lg:block pb-0">
+        <div className="grid grid-cols-8 gap-2 animate-fade-in">
           {categories.map((category, index) => (
             <CategoryCard
               key={category.categorySlug}
