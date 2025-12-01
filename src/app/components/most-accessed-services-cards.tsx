@@ -1,44 +1,34 @@
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
 import { MostAccessedServiceLink } from './most-accessed-service-link'
 
-export default function MostAccessedServiceCards() {
+interface MostAccessedServiceCardsProps {
+  limit?: number
+}
+
+export default function MostAccessedServiceCards({
+  limit,
+}: MostAccessedServiceCardsProps = {}) {
+  const services = limit
+    ? MOST_ACCESSED_SERVICES.slice(0, limit)
+    : MOST_ACCESSED_SERVICES
+
   return (
     <>
       <div className="flex items-center justify-between mb-2 px-4">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
       </div>
-      {/* Desktop (lg and above): 6 cards in one line, expanding to fill the entire line */}
-      <div className="hidden lg:flex gap-2 px-4">
-        {MOST_ACCESSED_SERVICES.map((service, index) => (
-          <MostAccessedServiceLink
-            key={service.id}
-            service={service}
-            position={index + 1}
-          >
-            <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-w-[140px] min-h-[140px] flex-1">
-              <div>
-                <h3 className="text-base font-medium break-words text-foreground">
-                  {service.title}
-                </h3>
-                <p className="text-foreground-light text-xs leading-4 break-words">
-                  {service.description}
-                </p>
-              </div>
-            </div>
-          </MostAccessedServiceLink>
-        ))}
-      </div>
-      {/* Mobile/Tablet (below lg): horizontal scroll with invisible scrollbar */}
-      <div className="lg:hidden relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-2 px-4 w-max">
-          {MOST_ACCESSED_SERVICES.map((service, index) => (
+      {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
+      <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex gap-2 px-4 min-w-full">
+          {services.map((service, index) => (
             <MostAccessedServiceLink
               key={service.id}
               service={service}
               position={index + 1}
+              className="flex-1 min-w-[140px] basis-0"
             >
-              <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-                <div>
+              <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-h-[140px] w-full h-full">
+                <div className="w-full">
                   <h3 className="text-base font-medium break-words text-foreground">
                     {service.title}
                   </h3>
