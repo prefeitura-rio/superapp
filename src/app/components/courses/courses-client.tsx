@@ -2,7 +2,6 @@
 
 import CoursesHeader from '@/app/components/courses/courses-header'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
-import RecommendedCoursesCards from '@/app/components/recommended-courses-cards'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
@@ -65,7 +64,6 @@ export default function CoursePageClient({
 
         {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
 
-        <RecommendedCoursesCards courses={courses} />
         <RecentlyAddedCourses courses={courses} />
         <AllCourses courses={courses} />
       </main>
