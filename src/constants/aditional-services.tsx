@@ -11,7 +11,7 @@ const cursosIcon =
 const moreCategories = [
   {
     name: 'Mais',
-    icon: <MoreVerticalIcon width={40} height={40} />,
+    icon: <MoreVerticalIcon width={32} height={32} />,
     categorySlug: 'mais',
     relevanciaMedia: 0,
     quantidadeServicos: 0,

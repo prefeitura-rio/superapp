@@ -22,8 +22,7 @@ export default async function Home() {
   const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
 
   const categories = await fetchCategories()
-  // const categoriesSlice = categories.slice(0, -3)
-  const categoriesSlice = categories
+  const categoriesSlice = categories.slice(0, 14)
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   return (

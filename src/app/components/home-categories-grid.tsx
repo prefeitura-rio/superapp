@@ -90,7 +90,7 @@ export default function HomeCategoriesGrid({
                               {category.icon}
                             </div>
                           </div>
-                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
+                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground-light text-center leading-tight font-medium">
                             {category.name}
                           </span>
                         </CategoryLink>
