@@ -31,10 +31,10 @@ export const CursosBanner = ({
       route={route}
       logo={
         <div className="flex flex-col">
-          <span className="text-white font-semibold text-base leading-5">
+          <span className="text-white font-medium text-base leading-5">
             Cursos da Prefeitura
           </span>
-          <span className="text-white/80 text-sm leading-4">
+          <span className="text-white text-sm leading-4">
             gratuito e com certificado
           </span>
         </div>
@@ -48,7 +48,7 @@ export const CursosBanner = ({
           alt="Pessoa sentada com livros estudando."
           width={200}
           height={200}
-          className="h-26 w-auto absolute bottom-0 right-0 z-20  md:right-0"
+          className="h-30 w-auto absolute bottom-0 right-0 z-20  md:right-0"
         />
       }
     />
