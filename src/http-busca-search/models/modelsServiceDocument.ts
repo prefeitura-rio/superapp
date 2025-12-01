@@ -14,6 +14,7 @@ export interface ModelsServiceDocument {
   id?: string
   metadata?: ModelsServiceDocumentMetadata
   status?: number
+  subcategory?: string
   title?: string
   updated_at?: number
 }

@@ -33,7 +33,6 @@ export default async function ServicePage({
 
   // Fetch the service data using the new endpoint
   const serviceData = await fetchServiceById(serviceId)
-  console.log(`DATAAA${JSON.stringify(serviceData)}`)
 
   if (!serviceData) {
     notFound()

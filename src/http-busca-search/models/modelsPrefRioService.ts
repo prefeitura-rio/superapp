@@ -51,6 +51,7 @@ export interface ModelsPrefRioService {
    * @maximum 1
    */
   status?: number
+  sub_categoria?: string
   /** @maxLength 20000 */
   tema_geral: string
   /** @maxLength 20000 */

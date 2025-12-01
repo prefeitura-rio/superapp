@@ -10,11 +10,14 @@ import type { ModelsSearchType } from './modelsSearchType'
 import type { ModelsServiceDocument } from './modelsServiceDocument'
 
 export interface ModelsSearchResponse {
+  /** Após aplicar thresholds */
+  filtered_count?: number
   /** Para AI search */
   metadata?: ModelsSearchResponseMetadata
   page?: number
   per_page?: number
   results?: ModelsServiceDocument[]
   search_type?: ModelsSearchType
+  /** Total original do Typesense */
   total_count?: number
 }
