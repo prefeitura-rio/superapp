@@ -39,6 +39,8 @@ export default function MostAccessedServiceCards({
               </div>
             </MostAccessedServiceLink>
           ))}
+          {/* Spacer to ensure padding at the end */}
+          <div className="flex-shrink-0 sm:hidden w-2" />
         </div>
       </div>
     </>
