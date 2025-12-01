@@ -60,6 +60,7 @@ export async function submitCourseInscription(
     }
 
     // Create the inscription payload according to ModelsInscricao
+    // For online courses without units, we should not send empty schedule_id or enrolled_unit
     const inscriptionPayload: ModelsInscricao = {
       id: uuidv4(),
       course_id: Number.parseInt(data.courseId),
@@ -71,8 +72,11 @@ export async function submitCourseInscription(
       enrolled_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       custom_fields: data.customFields,
-      enrolled_unit: data.enrolledUnit,
-      schedule_id: data.scheduleId,
+      // Only include enrolled_unit if it exists (for presencial/semipresencial courses)
+      ...(data.enrolledUnit && { enrolled_unit: data.enrolledUnit }),
+      // Only include schedule_id if it has a valid value (not empty string)
+      ...(data.scheduleId &&
+        data.scheduleId.trim() !== '' && { schedule_id: data.scheduleId }),
     }
 
     console.log('Submitting inscription with payload:', inscriptionPayload)
@@ -99,10 +103,23 @@ export async function submitCourseInscription(
       }
     }
 
-    console.error(`API returned status ${response.status}`)
+    // Extract error message from API response
+    let errorMessage = 'Erro ao inscrever-se no curso'
+    if (
+      response.status === 400 ||
+      response.status === 409 ||
+      response.status === 500
+    ) {
+      const errorData = 'data' in response ? response.data : null
+      if (errorData && 'message' in errorData && errorData.message) {
+        errorMessage = errorData.message
+      }
+    }
+
+    console.error(`API returned status ${response.status}:`, errorMessage)
     return {
       success: false,
-      error: 'Erro ao inscrever-se no curso',
+      error: errorMessage,
     }
   } catch (error) {
     console.error('Error submitting inscription:', error)
