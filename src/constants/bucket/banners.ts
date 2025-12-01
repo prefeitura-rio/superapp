@@ -7,7 +7,7 @@ export const iptuBannerIcon =
 export const licencaBannerIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/licen%C3%A7as.png'
 export const atualizarCadastroIcon =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/mao-com-celular.png'
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/atualize-seu-cadastro.png'
 export const cursosBannerIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/ciclo-3d-menino.png'
 export const cicloCariocaIcon =
