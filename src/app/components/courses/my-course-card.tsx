@@ -32,6 +32,7 @@ function getStatusColor(status: string) {
     case 'recusado':
       return 'bg-destructive'
     case 'cancelled':
+      return 'bg-destructive'
     case 'cancelado':
       return 'bg-secondary'
     default:
@@ -75,7 +76,7 @@ export function MyCoursesCard({
         <Link
           key={course.id}
           href={`/servicos/cursos/${course.id}`}
-          className="flex items-start gap-3 rounded-lg py-3 bg-background transition cursor-pointer group"
+          className="flex items-center gap-3 rounded-lg py-3 bg-background transition cursor-pointer group"
         >
           <div className="relative w-30 h-30 overflow-hidden rounded-xl">
             {course.imageUrl ? (
