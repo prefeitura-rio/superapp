@@ -18,15 +18,20 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ConfirmInscriptionPage({ params, searchParams }: PageProps) {
+export default async function ConfirmInscriptionPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug: courseSlug } = await params
   const searchParamsData = await searchParams
-  const preselectedLocationId = typeof searchParamsData.locationId === 'string' 
-    ? searchParamsData.locationId 
-    : undefined
-  const preselectedClassId = typeof searchParamsData.classId === 'string'
-    ? searchParamsData.classId
-    : undefined
+  const preselectedLocationId =
+    typeof searchParamsData.locationId === 'string'
+      ? searchParamsData.locationId
+      : undefined
+  const preselectedClassId =
+    typeof searchParamsData.classId === 'string'
+      ? searchParamsData.classId
+      : undefined
   const courseUuid = extractCourseId(courseSlug)
 
   const userAuthInfo = await getUserInfoFromToken()
@@ -78,21 +83,22 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
   const courseData = (courseInfo as any).data
   const modality = courseData?.modalidade?.toLowerCase()
   const isOnlineCourse = modality === 'online' || modality === 'remoto'
-  
+
   // Extract online classes from remote_class.schedules if available
-  const onlineClasses = isOnlineCourse && courseData?.remote_class?.schedules
-    ? courseData.remote_class.schedules.map((schedule: any) => ({
-        id: schedule.id,
-        location_id: schedule.location_id,
-        vacancies: schedule.vacancies,
-        class_start_date: schedule.class_start_date,
-        class_end_date: schedule.class_end_date,
-        class_time: schedule.class_time || '',
-        class_days: schedule.class_days || '',
-        created_at: schedule.created_at,
-        updated_at: schedule.updated_at,
-      }))
-    : []
+  const onlineClasses =
+    isOnlineCourse && courseData?.remote_class?.schedules
+      ? courseData.remote_class.schedules.map((schedule: any) => ({
+          id: schedule.id,
+          location_id: schedule.location_id,
+          vacancies: schedule.vacancies,
+          class_start_date: schedule.class_start_date,
+          class_end_date: schedule.class_end_date,
+          class_time: schedule.class_time || '',
+          class_days: schedule.class_days || '',
+          created_at: schedule.created_at,
+          updated_at: schedule.updated_at,
+        }))
+      : []
 
   const nearbyUnits =
     courseData?.locations?.map((location: any) => ({
