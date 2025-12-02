@@ -50,8 +50,32 @@ const getCourseScheduleInfo = (
 ): CourseScheduleInfo => {
   const modality = course.modalidade?.toLowerCase()
 
-  // Check for remote/online courses
+  // Check for remote/online courses with multiple schedules
   if ((modality === 'online' || modality === 'remoto') && course.remote_class) {
+    // If there are multiple schedules, find the selected one
+    if (
+      course.remote_class.schedules &&
+      course.remote_class.schedules.length > 0
+    ) {
+      const selectedSchedule = selectedScheduleId
+        ? course.remote_class.schedules.find(
+            sch => sch.id === selectedScheduleId
+          ) || course.remote_class.schedules[0]
+        : course.remote_class.schedules[0]
+
+      if (selectedSchedule) {
+        return {
+          startDate: selectedSchedule.class_start_date,
+          endDate: selectedSchedule.class_end_date,
+          time: selectedSchedule.class_time,
+          days: selectedSchedule.class_days,
+          vacancies: selectedSchedule.vacancies,
+          address: null,
+          neighborhood: null,
+        }
+      }
+    }
+    // Legacy structure: single remote_class
     return {
       startDate: course.remote_class.class_start_date,
       endDate: course.remote_class.class_end_date,
@@ -314,6 +338,185 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
   )
 }
 
+interface OnlineClassSelectionProps {
+  course: Course
+  selectedClassId: string | null
+  onClassSelect: (classId: string) => void
+}
+
+function OnlineClassSelection({
+  course,
+  selectedClassId,
+  onClassSelect,
+}: OnlineClassSelectionProps) {
+  const modality = course.modalidade?.toLowerCase()
+
+  // Only show for online/remote courses with multiple schedules
+  if (modality !== 'online' && modality !== 'remoto') {
+    return null
+  }
+
+  if (
+    !course.remote_class?.schedules ||
+    course.remote_class.schedules.length === 0
+  ) {
+    return null
+  }
+
+  const onlineClasses = course.remote_class.schedules
+  const hasMultipleClasses = onlineClasses.length > 1
+
+  // If only one class, don't show selection but show the class info
+  if (!hasMultipleClasses) {
+    const singleClass = onlineClasses[0]
+    return (
+      <div className="space-y-4">
+        <div className="pt-12 px-4 space-y-4 text-sm">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-foreground-light">
+              <GroupIcon />
+              <span>Turma</span>
+            </div>
+            <div className="space-y-2.5 text-sm text-foreground-light">
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data início</span>
+                <span className="text-foreground">
+                  {formatDate(singleClass.class_start_date)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data final</span>
+                <span className="text-foreground">
+                  {formatDate(singleClass.class_end_date)}
+                </span>
+              </div>
+              {singleClass.class_days && (
+                <div className="flex items-center gap-3">
+                  <CycleIcon />
+                  <span>Dias de aula</span>
+                  <span className="text-foreground">
+                    {singleClass.class_days}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <PersonIcon />
+                <span>Vagas</span>
+                <span className="text-foreground">{singleClass.vacancies}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedClass =
+    onlineClasses.find(cls => cls.id === selectedClassId) || onlineClasses[0]
+
+  return (
+    <div className="space-y-4">
+      {/* Class Icon Label */}
+      <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
+        <GroupIcon />
+        <span>Selecione a turma</span>
+      </div>
+
+      {/* Horizontal Scrollable Class Cards */}
+      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex gap-3 pl-4 pb-2">
+          {onlineClasses.map((onlineClass, index) => (
+            <button
+              type="button"
+              key={onlineClass.id}
+              onClick={() => onClassSelect(onlineClass.id)}
+              className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
+                selectedClassId === onlineClass.id
+                  ? 'border-muted-foreground bg-secondary'
+                  : 'border-none bg-card cursor-pointer'
+              }`}
+            >
+              <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
+                Turma {index + 1}
+              </h4>
+              <p className="text-xs md:text-sm text-foreground-light mt-1">
+                {formatDate(onlineClass.class_start_date)} -{' '}
+                {formatDate(onlineClass.class_end_date)}
+              </p>
+            </button>
+          ))}
+          {/* Spacer for right padding in horizontal scroll */}
+          <div className="flex-shrink-0 w-4" aria-hidden="true" />
+        </div>
+      </div>
+
+      {/* Separator */}
+      <Separator className="max-w-[90%] md:max-w-[96%] mx-auto" />
+
+      {/* Class Information with Icons */}
+      {selectedClass && (
+        <div className="px-4 space-y-4 text-sm">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-foreground-light">
+              <GroupIcon />
+              <span className="flex flex-row gap-3">
+                Turma{' '}
+                <span className="text-foreground block">
+                  {onlineClasses.findIndex(cls => cls.id === selectedClass.id) +
+                    1}
+                </span>
+              </span>
+            </div>
+
+            {/* Class Details with Icons */}
+            <div className="space-y-2.5 text-sm text-foreground-light">
+              {/* Data início */}
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data início</span>
+                <span className="text-foreground">
+                  {formatDate(selectedClass.class_start_date)}
+                </span>
+              </div>
+
+              {/* Data final */}
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data final</span>
+                <span className="text-foreground">
+                  {formatDate(selectedClass.class_end_date)}
+                </span>
+              </div>
+
+              {/* Dias de aula */}
+              {selectedClass.class_days && (
+                <div className="flex items-center gap-3">
+                  <CycleIcon />
+                  <span>Dias de aula</span>
+                  <span className="text-foreground">
+                    {selectedClass.class_days}
+                  </span>
+                </div>
+              )}
+
+              {/* Vagas */}
+              <div className="flex items-center gap-3">
+                <PersonIcon />
+                <span>Vagas</span>
+                <span className="text-foreground">
+                  {selectedClass.vacancies}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface LocationSelectionProps {
   course: Course
   selectedLocationId: string | null
@@ -543,10 +746,26 @@ export function CourseDetails({
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
 
-  // State for location selection
+  const modality = course.modalidade?.toLowerCase()
+  const isOnlineCourse = modality === 'online' || modality === 'remoto'
+  const hasOnlineClasses =
+    isOnlineCourse &&
+    course.remote_class?.schedules &&
+    course.remote_class.schedules.length > 0
+
+  // State for location selection (for presencial/semipresencial courses)
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     course.locations && course.locations.length > 0
       ? course.locations[0].id
+      : null
+  )
+
+  // State for online class selection (for online courses)
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(
+    hasOnlineClasses &&
+      course.remote_class?.schedules &&
+      course.remote_class.schedules.length > 0
+      ? course.remote_class.schedules[0].id
       : null
   )
 
@@ -555,18 +774,31 @@ export function CourseDetails({
     userEnrollment as any
   )
 
-  // Build subscription href with selected location if available
+  // Build subscription href with selected location or class if available
   const buildCourseSubscriptionHref = () => {
     const baseUrl = `/servicos/cursos/confirmar-informacoes/${course.id}`
+    const params = new URLSearchParams()
+
     if (selectedLocationId) {
-      return `${baseUrl}?locationId=${selectedLocationId}`
+      params.set('locationId', selectedLocationId)
     }
-    return baseUrl
+
+    if (selectedClassId && hasOnlineClasses) {
+      params.set('classId', selectedClassId)
+    }
+
+    const queryString = params.toString()
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl
   }
 
   // Handle location selection
   const handleLocationSelect = (locationId: string) => {
     setSelectedLocationId(locationId)
+  }
+
+  // Handle online class selection
+  const handleClassSelect = (classId: string) => {
+    setSelectedClassId(classId)
   }
 
   const handleCancelEnrollment = async () => {
@@ -745,6 +977,11 @@ export function CourseDetails({
           course={course}
           selectedLocationId={selectedLocationId}
           onLocationSelect={handleLocationSelect}
+        />
+        <OnlineClassSelection
+          course={course}
+          selectedClassId={selectedClassId}
+          onClassSelect={handleClassSelect}
         />
         <div className="my-12" />
         <CourseContent course={course} />

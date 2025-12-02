@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { CustomFieldSlide } from './slides/custom-field-slide'
+import { SelectOnlineClassSlide } from './slides/select-online-class-slide'
 import { SelectScheduleSlide } from './slides/select-schedule-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
@@ -26,6 +27,7 @@ import {
   type CustomField,
   type InscriptionFormData,
   type NearbyUnit,
+  type Schedule,
   createInscriptionSchema,
 } from '../types'
 
@@ -41,11 +43,13 @@ interface ConfirmInscriptionClientProps {
     name: string
   }
   nearbyUnits: NearbyUnit[]
+  onlineClasses?: Schedule[]
   courseInfo: any // Add courseInfo prop
   courseId: string
   courseSlug?: string
   contactUpdateStatus?: ContactUpdateStatus
   preselectedLocationId?: string
+  preselectedClassId?: string
 }
 
 const TRANSITIONS = {
@@ -58,11 +62,13 @@ export function ConfirmInscriptionClient({
   userInfo,
   userAuthInfo,
   nearbyUnits,
+  onlineClasses = [],
   courseInfo,
   courseId,
   courseSlug,
   contactUpdateStatus,
   preselectedLocationId,
+  preselectedClassId,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -89,6 +95,10 @@ export function ConfirmInscriptionClient({
   // Determine if we need to show unit/schedule selection
   // Always show unit selection if there are units available (even if just one)
   const hasUnits = nearbyUnits && nearbyUnits.length > 0
+
+  // Check if this is an online course with multiple classes
+  const hasOnlineClasses = onlineClasses && onlineClasses.length > 0
+  const hasMultipleOnlineClasses = onlineClasses && onlineClasses.length > 1
 
   // Check if any unit has multiple schedules (needed for schema validation)
   const hasAnyUnitWithMultipleSchedules =
@@ -128,17 +138,36 @@ export function ConfirmInscriptionClient({
     return ''
   }
 
+  // Determine initial online class selection
+  const getInitialOnlineClassId = () => {
+    // If preselectedClassId is provided and exists in onlineClasses, use it
+    if (preselectedClassId) {
+      const preselectedClass = onlineClasses.find(
+        cls => cls.id === preselectedClassId
+      )
+      if (preselectedClass) {
+        return preselectedClassId
+      }
+    }
+    // Otherwise, if there's only one online class, automatically select it
+    if (hasOnlineClasses && onlineClasses.length === 1) {
+      return onlineClasses[0].id
+    }
+    // If multiple classes, start with empty (user must select)
+    return ''
+  }
+
   const form = useForm<InscriptionFormData>({
     resolver: zodResolver(
       createInscriptionSchema(
         hasUnits, // Require selection if there are units available
-        hasAnyUnitWithMultipleSchedules, // Only require scheduleId if any unit has multiple schedules
+        hasAnyUnitWithMultipleSchedules || hasMultipleOnlineClasses, // Require scheduleId if multiple schedules or online classes
         customFields
       )
     ),
     defaultValues: {
       unitId: initialUnitId,
-      scheduleId: getInitialScheduleId(),
+      scheduleId: hasOnlineClasses ? getInitialOnlineClassId() : getInitialScheduleId(),
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
@@ -186,6 +215,10 @@ export function ConfirmInscriptionClient({
     unitForScheduleSlide.schedules &&
     unitForScheduleSlide.schedules.length > 1
 
+  // Only show online class slide if there are multiple online classes
+  // If there's only one online class, it's automatically selected and no slide is needed
+  const shouldShowOnlineClassSlide = hasMultipleOnlineClasses
+
   const slides = [
     {
       id: 'confirm-user-data',
@@ -197,6 +230,24 @@ export function ConfirmInscriptionClient({
     // Only include subsequent slides if user has valid contact info
     ...(hasValidContactInfo
       ? [
+          // For online courses: show online class selection if multiple classes
+          ...(hasOnlineClasses && !hasUnits
+            ? shouldShowOnlineClassSlide
+              ? [
+                  {
+                    id: 'select-online-class',
+                    component: SelectOnlineClassSlide,
+                    props: {
+                      onlineClasses,
+                      form,
+                      fieldName: 'scheduleId',
+                    },
+                    showPagination: true,
+                    showBackButton: true,
+                  },
+                ]
+              : []
+            : []),
           // Always show select-unit slide if there are units available (even if just one)
           ...(hasUnits
             ? [
@@ -255,6 +306,18 @@ export function ConfirmInscriptionClient({
       }
     } else {
       const currentSlide = slides[currentIndex]
+      // Handle online class selection validation
+      if (currentSlide.id === 'select-online-class' && hasOnlineClasses) {
+        const isValid = await form.trigger('scheduleId')
+        if (!isValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), {
+            shouldTouch: true,
+          })
+          return
+        }
+      }
+
       if (currentSlide.id === 'select-unit' && hasUnits) {
         const isUnitValid = await form.trigger('unitId')
         if (!isUnitValid) return
@@ -334,6 +397,23 @@ export function ConfirmInscriptionClient({
 
   // Function to find the first slide with missing required fields
   const findFirstInvalidSlide = async (): Promise<number | null> => {
+    // Check online class selection if required (when there are multiple online classes)
+    if (hasMultipleOnlineClasses && !hasUnits) {
+      const onlineClassSlideIndex = slides.findIndex(
+        slide => slide.id === 'select-online-class'
+      )
+      if (onlineClassSlideIndex !== -1) {
+        const isOnlineClassValid = await form.trigger('scheduleId')
+        if (!isOnlineClassValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), {
+            shouldTouch: true,
+          })
+          return onlineClassSlideIndex
+        }
+      }
+    }
+
     // Check unit selection if required (when there are units available)
     if (hasUnits) {
       const unitSlideIndex = slides.findIndex(
@@ -417,12 +497,16 @@ export function ConfirmInscriptionClient({
         const formData = form.getValues()
 
         // Get the selected schedule ID
-        // If there's only one schedule in the selected unit, use it automatically
+        // For online courses: if there's only one online class, use it automatically
+        // For in-person courses: if there's only one schedule in the selected unit, use it automatically
         // Otherwise, use the scheduleId from the form (user selected it)
         let finalScheduleId = formData.scheduleId
-        if (!finalScheduleId && selectedUnit) {
-          if (selectedUnit.schedules.length === 1) {
-            // Auto-select if only one schedule
+        if (!finalScheduleId) {
+          if (hasOnlineClasses && onlineClasses.length === 1) {
+            // Auto-select if only one online class
+            finalScheduleId = onlineClasses[0].id
+          } else if (selectedUnit && selectedUnit.schedules.length === 1) {
+            // Auto-select if only one schedule in selected unit
             finalScheduleId = selectedUnit.schedules[0].id
           }
         }

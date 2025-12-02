@@ -25,6 +25,7 @@ interface RemoteClass {
   class_days: string
   created_at: string
   updated_at: string
+  schedules?: Schedule[]
 }
 
 export interface Schedule {
