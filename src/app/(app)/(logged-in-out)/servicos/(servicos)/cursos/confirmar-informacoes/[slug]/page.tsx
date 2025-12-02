@@ -38,7 +38,18 @@ export default async function ConfirmInscriptionPage({
 
   if (!userAuthInfo.cpf) {
     // Redirect to auth with return URL to come back here after login
-    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
+    // Preserve query parameters (locationId or classId) in the return URL
+    const queryParams = new URLSearchParams()
+    if (preselectedLocationId) {
+      queryParams.set('locationId', preselectedLocationId)
+    }
+    if (preselectedClassId) {
+      queryParams.set('classId', preselectedClassId)
+    }
+    const queryString = queryParams.toString()
+    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}${
+      queryString ? `?${queryString}` : ''
+    }`
     redirect(buildAuthUrl(returnUrl))
   }
 

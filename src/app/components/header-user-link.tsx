@@ -2,6 +2,7 @@
 
 import { UserIcon } from '@/assets/icons'
 import { Skeleton } from '@/components/ui/skeleton'
+import { buildAuthUrl } from '@/constants/url'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -41,9 +42,13 @@ export default function HeaderUserLink({
     )
   }
 
+  // When not logged in, redirect to auth with home as return URL
+  // When logged in, go to profile page
+  const href = isLoggedIn ? '/meu-perfil' : buildAuthUrl('/')
+
   return (
     <Link
-      href="/meu-perfil"
+      href={href}
       className="flex items-center space-x-3"
       onClick={handleClick}
     >

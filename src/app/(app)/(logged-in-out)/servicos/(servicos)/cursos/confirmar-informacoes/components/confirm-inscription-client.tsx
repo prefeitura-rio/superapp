@@ -167,7 +167,9 @@ export function ConfirmInscriptionClient({
     ),
     defaultValues: {
       unitId: initialUnitId,
-      scheduleId: hasOnlineClasses ? getInitialOnlineClassId() : getInitialScheduleId(),
+      scheduleId: hasOnlineClasses
+        ? getInitialOnlineClassId()
+        : getInitialScheduleId(),
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
@@ -586,7 +588,7 @@ export function ConfirmInscriptionClient({
             ? error.message
             : 'Erro ao fazer inscrição. Tente novamente.'
         toast.error(errorMessage)
-        router.back()
+        router.push(`/servicos/cursos/${courseId}`)
         setFadeOut(false)
       }
     })

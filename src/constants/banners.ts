@@ -42,8 +42,8 @@ export const suggestedBanners: BannerProps[] = [
   {
     id: 'update',
     component: ProfileUpdateBanner,
-    title: 'Atualize seu cadastro',
-    subtitle: 'E personalize seu atendimento',
+    title: '',
+    subtitle: '',
     route: '/meu-perfil/informacoes-pessoais',
   },
   // {
