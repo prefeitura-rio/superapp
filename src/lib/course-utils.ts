@@ -119,7 +119,8 @@ export function shouldShowCourse({
 
   // Special handling for LIVRE_FORMACAO_ONLINE: use enrollment_end_date instead of class_end_date
   if (course.modalidade === 'LIVRE_FORMACAO_ONLINE') {
-    if (course.enrollment_end_date) {
+    // Skip 30-day rule when rendering by URL (direct access to course page)
+    if (!renderByUrl && course.enrollment_end_date) {
       const enrollmentEndDate = new Date(course.enrollment_end_date as string)
       const thirtyDaysAfterEnd = new Date(enrollmentEndDate)
       thirtyDaysAfterEnd.setDate(thirtyDaysAfterEnd.getDate() + 30)
@@ -141,7 +142,8 @@ export function shouldShowCourse({
 
   // Check if class has ended and if it's been more than 30 days (1 month)
   // If the last schedule ended more than 30 days ago, hide the course
-  if (latestClassEndDate) {
+  // Skip this check when rendering by URL (direct access to course page)
+  if (!renderByUrl && latestClassEndDate) {
     const thirtyDaysAfterEnd = new Date(latestClassEndDate)
     thirtyDaysAfterEnd.setDate(thirtyDaysAfterEnd.getDate() + 30)
 
