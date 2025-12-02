@@ -20,7 +20,7 @@ export function CategoryFiltersMobile({
           {categoryFilters.map(filter => (
             <Link
               key={filter.value}
-              href={`/servicos/cursos/busca?categoria=${filter.value}`}
+              href={`/servicos/cursos/categoria/${filter.value}`}
               className="flex flex-col items-center cursor-pointer shrink-0 w-20"
             >
               <div className="flex flex-col items-center justify-center p-2 rounded-2xl aspect-square transition-all h-20 border-2 border-card bg-card hover:bg-card/80 w-20">

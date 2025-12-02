@@ -11,6 +11,7 @@ interface SecondaryHeaderProps {
   title?: string
   logo?: ReactNode
   showSearchButton?: boolean
+  searchHref?: string
   className?: string
   route?: string
   defaultRoute?: string
@@ -21,6 +22,7 @@ export function SecondaryHeader({
   title,
   logo,
   showSearchButton,
+  searchHref,
   className = 'max-w-4xl',
   route,
   defaultRoute = '/',
@@ -62,7 +64,7 @@ export function SecondaryHeader({
 
           {/* Right column - SearchButton or empty space */}
           <div className="flex justify-end">
-            {showSearchButton && <SearchButton />}
+            {showSearchButton && <SearchButton href={searchHref} />}
           </div>
         </div>
       </header>
