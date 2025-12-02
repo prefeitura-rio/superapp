@@ -1,4 +1,6 @@
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { MostAccessedServiceLink } from './most-accessed-service-link'
 
 interface MostAccessedServiceCardsProps {
@@ -11,6 +13,27 @@ export default function MostAccessedServiceCards({
   const services = limit
     ? MOST_ACCESSED_SERVICES.slice(0, limit)
     : MOST_ACCESSED_SERVICES
+
+  if (services.length === 0) {
+    return (
+      <>
+        <div className="flex items-center justify-between mb-2 px-4">
+          <h2 className="text-md font-medium text-foreground">
+            Mais acessados
+          </h2>
+        </div>
+        <div className="flex flex-col items-center text-center justify-center py-8">
+          <ThemeAwareVideo
+            source={VIDEO_SOURCES.emptyAddress}
+            containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+          />
+          <p className="text-lg text-muted-foreground">
+            Ops... nenhum serviço encontrado
+          </p>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>

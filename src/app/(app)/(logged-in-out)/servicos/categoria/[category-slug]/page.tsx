@@ -2,7 +2,9 @@ import { CategorySubcategoriesAccordion } from '@/app/components/category-subcat
 import { MostAccessedServiceLink } from '@/app/components/most-accessed-service-link'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { PrefLogo } from '@/assets/icons/pref-logo'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { getCardColorForCategory } from '@/constants/category-color-palettes'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
 import {
   fetchServicesByCategory,
@@ -66,50 +68,58 @@ export default async function CategoryPage({
         <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-4">
           <h1 className="text-4xl font-bold text-foreground">{categoryName}</h1>
         </div>
-        <div className="flex items-center justify-between mb-2 px-4">
-          <h2 className="text-md font-medium text-foreground">
-            Mais acessados
-          </h2>
-        </div>
-        {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
-        <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-          <div className="flex gap-2 px-4 min-w-full">
-            {services.length > 0 ? (
-              services.map((service, index) => {
-                // Get color for this card position (0-3) based on category
-                const cardColor = getCardColorForCategory(categoryName, index)
+        {services.length > 0 ? (
+          <>
+            <div className="flex items-center justify-between mb-2 px-4">
+              <h2 className="text-md font-medium text-foreground">
+                Mais acessados
+              </h2>
+            </div>
+            {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
+            <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
+              <div className="flex gap-2 px-4 min-w-full">
+                {services.map((service, index) => {
+                  // Get color for this card position (0-3) based on category
+                  const cardColor = getCardColorForCategory(categoryName, index)
 
-                return (
-                  <MostAccessedServiceLink
-                    key={service.id}
-                    service={service}
-                    position={index + 1}
-                    className="flex-1 min-w-[140px] basis-0"
-                  >
-                    <div
-                      className="rounded-xl p-3.5 transition-all cursor-pointer flex flex-col items-start justify-end min-h-[140px] w-full h-full hover:brightness-110 hover:shadow-lg"
-                      style={{
-                        backgroundColor: cardColor,
-                      }}
+                  return (
+                    <MostAccessedServiceLink
+                      key={service.id}
+                      service={service}
+                      position={index + 1}
+                      className="flex-1 min-w-[140px] basis-0"
                     >
-                      <div className="w-full">
-                        <h3 className="text-sm line-clamp-2 font-medium break-words text-white">
-                          {service.title}
-                        </h3>
+                      <div
+                        className="rounded-xl p-3.5 transition-all cursor-pointer flex flex-col items-start justify-end min-h-[140px] w-full h-full hover:brightness-110 hover:shadow-lg"
+                        style={{
+                          backgroundColor: cardColor,
+                        }}
+                      >
+                        <div className="w-full">
+                          <h3 className="text-sm line-clamp-2 font-medium break-words text-white">
+                            {service.title}
+                          </h3>
+                        </div>
                       </div>
-                    </div>
-                  </MostAccessedServiceLink>
-                )
-              })
-            ) : (
-              <div className="px-4 py-8 text-center text-foreground-light">
-                Nenhum serviço encontrado nesta categoria.
+                    </MostAccessedServiceLink>
+                  )
+                })}
+                {/* Spacer to ensure padding at the end */}
+                <div className="flex-shrink-0 sm:hidden w-2" />
               </div>
-            )}
-            {/* Spacer to ensure padding at the end */}
-            <div className="flex-shrink-0 sm:hidden w-2" />
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center text-center justify-center py-8">
+            <ThemeAwareVideo
+              source={VIDEO_SOURCES.emptyAddress}
+              containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+            />
+            <p className="text-lg text-muted-foreground">
+              Ops... nenhum serviço encontrado nesta categoria
+            </p>
           </div>
-        </div>
+        )}
 
         {/* Subcategories Accordion */}
         {subcategories.length > 0 && (
