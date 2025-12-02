@@ -267,7 +267,7 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       <div className="flex gap-4">
         <div>
           <p className="text-foreground-light">Modalidade</p>
-          <p className="font-medium">
+          <p className="font-normal">
             {course.modalidade === 'LIVRE_FORMACAO_ONLINE'
               ? 'Remoto'
               : normalizeModalityDisplay(course.modalidade) || 'Não informado'}
@@ -275,12 +275,12 @@ function CourseMetadata({ course }: CourseMetadataProps) {
         </div>
         <div>
           <p className="text-foreground-light">Carga horária</p>
-          <p className="font-medium">{course.workload || 'Não informado'}</p>
+          <p className="font-normal">{course.workload || 'Não informado'}</p>
         </div>
         {course.enrollment_end_date && (
           <div>
             <p className="text-foreground-light">Inscrições até</p>
-            <p className="font-medium">
+            <p className="font-normal">
               {formatDate(course.enrollment_end_date)}
             </p>
           </div>
@@ -599,8 +599,13 @@ export function CourseDetails({
     )
 
   const renderActionButton = () => {
-    const buttonClasses =
-      'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+    const isAvailable = enrollmentInfo.status === 'available'
+    const baseButtonClasses =
+      'block text-sm md:text-base w-full py-3 text-center rounded-full hover:brightness-90 transition outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+
+    const buttonClasses = isAvailable
+      ? `${baseButtonClasses} bg-primary text-background hover:bg-primary`
+      : `${baseButtonClasses} bg-card text-foreground hover:bg-card`
 
     // Handle certificate available status
     if (enrollmentInfo.status === 'certificate_available') {
