@@ -96,7 +96,7 @@ export default async function CategoryPage({
                         }}
                       >
                         <div className="w-full">
-                          <h3 className="text-sm line-clamp-2 font-medium break-words text-white">
+                          <h3 className="text-sm line-clamp-5 font-medium break-words text-white">
                             {service.title}
                           </h3>
                         </div>
