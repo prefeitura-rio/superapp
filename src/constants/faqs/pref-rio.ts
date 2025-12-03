@@ -7,14 +7,13 @@ export interface FAQItem {
 
 export interface FAQSection {
   id: string
-  title: string
+  title?: string
   items: FAQItem[]
 }
 
 export const faqSections: FAQSection[] = [
   {
     id: 'perguntas-frequentes',
-    title: 'Perguntas Frequentes',
     items: [
       {
         title: 'O que é a Plataforma PrefRio?',
