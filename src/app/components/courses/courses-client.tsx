@@ -5,7 +5,9 @@ import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
+import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
+import { useMemo } from 'react'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
 import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
@@ -26,6 +28,16 @@ export default function CoursePageClient({
   categoryFilters: CategoryFilter[]
   isLoadingCategories?: boolean
 }) {
+  // Filter courses for "Mais recentes" - exclude myCourses
+  const recentlyAddedCourses = useMemo(() => {
+    return filterCoursesExcludingMyCourses(courses, myCourses)
+  }, [courses, myCourses])
+
+  // Filter courses for "Todos os cursos" - exclude only myCourses (include recentlyAddedCourses)
+  const allCoursesFiltered = useMemo(() => {
+    return filterCoursesExcludingMyCourses(courses, myCourses)
+  }, [courses, myCourses])
+
   if (courses.length === 0) {
     return (
       <div className="min-h-lvh">
@@ -64,8 +76,8 @@ export default function CoursePageClient({
 
         {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
 
-        <RecentlyAddedCourses courses={courses} />
-        <AllCourses courses={courses} />
+        <RecentlyAddedCourses courses={recentlyAddedCourses} />
+        <AllCourses courses={allCoursesFiltered} />
       </main>
     </div>
   )

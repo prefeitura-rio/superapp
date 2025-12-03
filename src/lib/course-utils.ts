@@ -312,3 +312,64 @@ export function sortCourses(courses: ModelsCurso[]): ModelsCurso[] {
     return 0 // Equal priority
   })
 }
+
+/**
+ * Extract course IDs from myCourses array
+ * Handles both direct id property and nested course_id
+ */
+function getMyCourseIds(myCourses: ModelsCurso[]): Set<number | string> {
+  const ids = new Set<number | string>()
+  for (const course of myCourses) {
+    if (course.id != null) {
+      ids.add(course.id)
+    }
+  }
+  return ids
+}
+
+/**
+ * Filter courses excluding those in myCourses
+ * Used for "Mais recentes" section
+ */
+export function filterCoursesExcludingMyCourses(
+  courses: ModelsCurso[],
+  myCourses: ModelsCurso[]
+): ModelsCurso[] {
+  if (myCourses.length === 0) return courses
+
+  const myCourseIds = getMyCourseIds(myCourses)
+  return courses.filter(course => {
+    if (course.id == null) return true
+    return !myCourseIds.has(course.id)
+  })
+}
+
+/**
+ * Filter courses excluding those in myCourses and recentlyAddedCourses
+ * Used for "Todos os cursos" section
+ */
+export function filterCoursesExcludingMyCoursesAndRecentlyAdded(
+  courses: ModelsCurso[],
+  myCourses: ModelsCurso[],
+  recentlyAddedCourses: ModelsCurso[]
+): ModelsCurso[] {
+  const excludedIds = new Set<number | string>()
+
+  // Add myCourses IDs
+  const myCourseIds = getMyCourseIds(myCourses)
+  myCourseIds.forEach(id => excludedIds.add(id))
+
+  // Add recentlyAddedCourses IDs
+  for (const course of recentlyAddedCourses) {
+    if (course.id != null) {
+      excludedIds.add(course.id)
+    }
+  }
+
+  if (excludedIds.size === 0) return courses
+
+  return courses.filter(course => {
+    if (course.id == null) return true
+    return !excludedIds.has(course.id)
+  })
+}
