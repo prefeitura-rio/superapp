@@ -8,12 +8,10 @@ interface SuggestionCardsProps {
 }
 
 export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
-  // Filter banners based on login status:
-  // - When logged in: show 'update' banner, hide 'login' banner
-  // - When logged out: show 'login' banner, hide 'update' banner
-  const filteredBanners = isLoggedIn
-    ? suggestedBanners.filter(banner => banner.id !== 'login')
-    : suggestedBanners.filter(banner => banner.id !== 'update')
+  // Filter out LoginBanner for logged-out users
+  const filteredBanners = !isLoggedIn
+    ? suggestedBanners.filter(banner => banner.id !== 'update')
+    : suggestedBanners.filter(banner => banner.id !== 'login')
 
   const handleBannerClick = (
     banner: (typeof suggestedBanners)[0],
