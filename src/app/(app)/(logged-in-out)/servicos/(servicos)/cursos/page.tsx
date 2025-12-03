@@ -33,6 +33,8 @@ export default async function CoursesPage() {
       const categoriesResponse = await getDalCategorias({
         page: 1,
         pageSize: 50,
+        onlyWithCourses: true,
+        daysTolerance: 30,
       })
       if (categoriesResponse.status === 200 && categoriesResponse.data?.data) {
         categoriesFilters = transformCategoriesToFilters(

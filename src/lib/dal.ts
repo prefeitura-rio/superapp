@@ -295,6 +295,8 @@ export async function revalidateDalCitizenCpfAvatar(cpf: string) {
 export async function getDalCategorias(params?: {
   page?: number
   pageSize?: number
+  onlyWithCourses?: boolean
+  daysTolerance?: number
 }) {
   return withSpan('dal.getCategorias', async span => {
     span.setAttribute('cache.strategy', 'force-cache')
@@ -302,6 +304,10 @@ export async function getDalCategorias(params?: {
     if (params?.page) span.setAttribute('pagination.page', params.page)
     if (params?.pageSize)
       span.setAttribute('pagination.page_size', params.pageSize)
+    if (params?.onlyWithCourses !== undefined)
+      span.setAttribute('filter.only_with_courses', params.onlyWithCourses.toString())
+    if (params?.daysTolerance)
+      span.setAttribute('filter.days_tolerance', params.daysTolerance)
 
     const result = await getApiV1Categorias(params, {
       cache: 'force-cache',
