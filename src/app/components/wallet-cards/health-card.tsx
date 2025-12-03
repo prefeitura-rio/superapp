@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { CardBackContent } from '@/components/ui/custom/card-back-content'
 import { CardFrontContent } from '@/components/ui/custom/card-front-content'
 import { isBigQueryOrigin, isMCPOrigin } from '@/helpers/health'
+import { formatTitleCase } from '@/lib/utils'
 import type { RiskStatusProps } from '@/types/health'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -121,7 +122,7 @@ export function HealthCard({
         fields={[
           {
             label: 'Endereço',
-            value: address,
+            value: formatTitleCase(address as string),
             fallback: 'Endereço não disponível',
           },
           {
