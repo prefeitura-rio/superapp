@@ -50,7 +50,7 @@ export default function MostAccessedServiceCards({
               position={index + 1}
               className="flex-1 min-w-[140px] basis-0"
             >
-              <div className="bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-h-[130px] w-full h-full">
+              <div className="bg-card rounded-2xl p-4 pt-8 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-start min-h-[130px] w-full h-full">
                 <div className="w-full">
                   <h3 className="text-sm font-normal break-words text-foreground leading-4.5">
                     {service.title}
