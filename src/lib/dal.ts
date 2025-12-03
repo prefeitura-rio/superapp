@@ -1,6 +1,12 @@
 // Data Access Layer (DAL)
 // This file is used to cache the data fetching functions
 
+import type { GetApiV1CategoriesCategorySubcategoriesParams } from '@/http-busca-search/models'
+import type { GetApiV1SubcategoriesSubcategoryServicesParams } from '@/http-busca-search/models'
+import {
+  getApiV1CategoriesCategorySubcategories,
+  getApiV1SubcategoriesSubcategoryServices,
+} from '@/http-busca-search/subcategories/subcategories'
 import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiV1Courses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
@@ -12,12 +18,6 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
-import type { GetApiV1CategoriesCategorySubcategoriesParams } from '@/http-busca-search/models'
-import type { GetApiV1SubcategoriesSubcategoryServicesParams } from '@/http-busca-search/models'
-import {
-  getApiV1CategoriesCategorySubcategories,
-  getApiV1SubcategoriesSubcategoryServices,
-} from '@/http-busca-search/subcategories/subcategories'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import { revalidateTag, unstable_cache } from 'next/cache'
@@ -305,7 +305,10 @@ export async function getDalCategorias(params?: {
     if (params?.pageSize)
       span.setAttribute('pagination.page_size', params.pageSize)
     if (params?.onlyWithCourses !== undefined)
-      span.setAttribute('filter.only_with_courses', params.onlyWithCourses.toString())
+      span.setAttribute(
+        'filter.only_with_courses',
+        params.onlyWithCourses.toString()
+      )
     if (params?.daysTolerance)
       span.setAttribute('filter.days_tolerance', params.daysTolerance)
 
@@ -415,8 +418,7 @@ export async function getDalCategoriesCategorySubcategories(
 
     addSpanEvent('subcategories.fetched', {
       'subcategories.count':
-        result.status === 200 &&
-        Array.isArray(result.data?.subcategories)
+        result.status === 200 && Array.isArray(result.data?.subcategories)
           ? result.data.subcategories.length
           : 0,
     })
@@ -450,6 +452,7 @@ export async function getDalSubcategoriesSubcategoryServices(
       span.setAttribute('pagination.per_page', params.per_page)
     if (params?.include_inactive !== undefined)
       span.setAttribute('include_inactive', params.include_inactive.toString())
+    if (params?.category) span.setAttribute('category', params.category)
 
     const result = await getApiV1SubcategoriesSubcategoryServices(
       subcategory,
@@ -458,7 +461,9 @@ export async function getDalSubcategoriesSubcategoryServices(
         cache: 'force-cache',
         next: {
           revalidate: 600, // 10 minutes - optimal for services that can change
-          tags: [`subcategory-services-${subcategory}`],
+          tags: [
+            `subcategory-services-${subcategory}${params?.category ? `-${params.category}` : ''}`,
+          ],
         },
       }
     )

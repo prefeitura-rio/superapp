@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 
 interface CategorySubcategoriesAccordionProps {
   categorySlug: string
+  categoryName?: string
   subcategories: ModelsSubcategory[]
 }
 
@@ -25,6 +26,7 @@ interface SubcategoryWithServices extends ModelsSubcategory {
 
 export function CategorySubcategoriesAccordion({
   categorySlug,
+  categoryName,
   subcategories,
 }: CategorySubcategoriesAccordionProps) {
   const [openItem, setOpenItem] = useState<string>('')
@@ -50,8 +52,11 @@ export function CategorySubcategoriesAccordion({
         const loadServices = async () => {
           try {
             const encodedSubcategory = encodeURIComponent(openItem)
+            const categoryParam = categoryName
+              ? `&category=${encodeURIComponent(categoryName)}`
+              : ''
             const response = await fetch(
-              `/api/subcategories/${encodedSubcategory}/services?page=1&per_page=50`
+              `/api/subcategories/${encodedSubcategory}/services?page=1&per_page=50${categoryParam}`
             )
 
             if (!response.ok) {
@@ -86,8 +91,7 @@ export function CategorySubcategoriesAccordion({
 
       return prev
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openItem])
+  }, [openItem, categoryName])
 
   return (
     <div className="px-4 mt-6 pb-20">

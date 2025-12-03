@@ -9,9 +9,11 @@ export async function GET(
   const { searchParams } = new URL(request.url)
   const page = Number.parseInt(searchParams.get('page') || '1', 10)
   const perPage = Number.parseInt(searchParams.get('per_page') || '50', 10)
+  const category = searchParams.get('category') || undefined
 
   try {
     const decodedSubcategory = decodeURIComponent(subcategory)
+    const decodedCategory = category ? decodeURIComponent(category) : undefined
 
     const response = await getDalSubcategoriesSubcategoryServices(
       decodedSubcategory,
@@ -19,6 +21,7 @@ export async function GET(
         page,
         per_page: perPage,
         include_inactive: false,
+        category: decodedCategory,
       }
     )
 

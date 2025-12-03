@@ -45,6 +45,8 @@ export interface ModelsPrefRioService {
   search_content?: string
   /** @maxLength 20000 */
   servico_nao_cobre?: string
+  slug?: string
+  slug_history?: string[]
   /**
    * 0=Draft, 1=Published
    * @minimum 0
