@@ -3,12 +3,8 @@
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { suggestedBanners } from '@/constants/banners'
+import { useAuthStatus } from '@/providers/auth-status-provider'
 import { sendGAEvent } from '@next/third-parties/google'
-import { useEffect, useState } from 'react'
-
-interface SuggestionCardsProps {
-  isLoggedIn: boolean
-}
 
 export function SuggestionCardsSwipeSkeleton() {
   return (
@@ -48,12 +44,13 @@ export function SuggestionCardsSwipeSkeleton() {
   )
 }
 
-export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
+export function SuggestionCardsSwipe() {
+  const { isLoggedIn, isLoading } = useAuthStatus()
 
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
+  // Show skeleton while loading
+  if (isLoading || isLoggedIn === null) {
+    return <SuggestionCardsSwipeSkeleton />
+  }
 
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
@@ -76,10 +73,6 @@ export function SuggestionCardsSwipe({ isLoggedIn }: SuggestionCardsProps) {
       position: position,
       ehFixo,
     })
-  }
-
-  if (!isLoaded) {
-    return <SuggestionCardsSwipeSkeleton />
   }
 
   return (

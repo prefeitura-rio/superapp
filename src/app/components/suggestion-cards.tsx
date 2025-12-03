@@ -1,13 +1,17 @@
 'use client'
 
 import { suggestedBanners } from '@/constants/banners'
+import { useAuthStatus } from '@/providers/auth-status-provider'
 import { sendGAEvent } from '@next/third-parties/google'
 
-interface SuggestionCardsProps {
-  isLoggedIn: boolean
-}
+export default function SuggestionCards() {
+  const { isLoggedIn, isLoading } = useAuthStatus()
 
-export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
+  // Show nothing while loading to avoid flash of wrong content
+  if (isLoading || isLoggedIn === null) {
+    return null
+  }
+
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
     ? suggestedBanners.filter(banner => banner.id !== 'update')
