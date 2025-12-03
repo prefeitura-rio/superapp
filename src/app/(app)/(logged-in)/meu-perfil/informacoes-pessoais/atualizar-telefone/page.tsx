@@ -102,6 +102,7 @@ export default function PhoneNumberForm() {
         <CustomButton
           size="xl"
           onClick={handleSave}
+          className="rounded-full"
           variant="primary"
           fullWidth
           disabled={isPending || !isPhoneValid}
@@ -131,7 +132,7 @@ export default function PhoneNumberForm() {
             />
             <Button
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal"
               onClick={handleDrawerClose}
             >
               Finalizar
