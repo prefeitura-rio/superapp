@@ -1,5 +1,6 @@
 import type { ModelsCurso } from '@/http-courses/models'
 import type { AccessibilityProps } from '@/types/course'
+import Link from 'next/link'
 import { CourseCard } from '../courses/courses-card'
 
 interface MyCoursesHomeProps {
@@ -14,14 +15,19 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
-        Meus Cursos
-      </h3>
+      <Link href="/servicos/cursos/meus-cursos">
+        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 cursor-pointer hover:opacity-80 transition-opacity">
+          Meus Cursos
+        </h3>
+      </Link>
       {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
-            <div key={course.id != null ? String(course.id) : `course-${index}`} className="shrink-0">
+            <div
+              key={course.id != null ? String(course.id) : `course-${index}`}
+              className="shrink-0"
+            >
               <CourseCard
                 courseId={course.id}
                 title={course.title as string}
