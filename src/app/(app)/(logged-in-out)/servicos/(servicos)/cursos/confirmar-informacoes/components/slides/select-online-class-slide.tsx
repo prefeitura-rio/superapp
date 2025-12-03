@@ -74,7 +74,8 @@ export const SelectOnlineClassSlide = ({
     <div className="w-full h-full flex flex-col">
       <div className="text-left flex-shrink-0 pb-5">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
-          Escolha a <span className="text-primary">turma</span> para sua inscrição
+          Escolha a <span className="text-primary">turma</span> para sua
+          inscrição
         </h2>
       </div>
 
@@ -104,20 +105,17 @@ export const SelectOnlineClassSlide = ({
                     Turma {index + 1}
                   </h3>
                   <div className="text-sm text-muted-foreground space-y-0.5">
-                    <div className="flex items-center gap-1">
-                      <p className="font-medium">
-                        {formatDate(onlineClass.class_start_date)}
-                      </p>
-                      <span className="font-medium">-</span>
-                      <p>
-                        {formatDate(onlineClass.class_end_date)}
-                      </p>
-                    </div>
-                    {onlineClass.class_days && (
-                      <p>
-                        {onlineClass.class_days}
-                      </p>
+                    {(onlineClass.class_start_date ||
+                      onlineClass.class_end_date) && (
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium">
+                          {formatDate(onlineClass.class_start_date)}
+                        </p>
+                        <span className="font-medium">-</span>
+                        <p>{formatDate(onlineClass.class_end_date)}</p>
+                      </div>
                     )}
+                    {onlineClass.class_days && <p>{onlineClass.class_days}</p>}
                     <p>
                       <span className="font-medium">Vagas:</span>{' '}
                       {onlineClass.vacancies}
@@ -149,4 +147,3 @@ export const SelectOnlineClassSlide = ({
     </div>
   )
 }
-
