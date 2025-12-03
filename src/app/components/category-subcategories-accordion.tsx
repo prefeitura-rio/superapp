@@ -90,7 +90,7 @@ export function CategorySubcategoriesAccordion({
   }, [openItem])
 
   return (
-    <div className="px-4 mt-6">
+    <div className="px-4 mt-6 pb-20">
       <Accordion
         type="single"
         collapsible
@@ -138,7 +138,7 @@ export function CategorySubcategoriesAccordion({
                           href={`/servicos/categoria/${categorySlug}/${service.id}`}
                           className="flex bg-secondary! items-center justify-between rounded-md p-4 transition-colors group"
                         >
-                          <span className="text-xs md:text-sm text-foreground flex-1 pr-2">
+                          <span className="text-sm text-foreground flex-1 pr-2">
                             {service.title}
                           </span>
                           <ArrowUpRight className="size-5 text-primary! shrink-0 group-hover:text-foreground transition-colors" />

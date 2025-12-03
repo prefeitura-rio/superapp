@@ -90,13 +90,13 @@ export default async function CategoryPage({
                       className="flex-1 min-w-[140px] basis-0"
                     >
                       <div
-                        className="rounded-xl p-3.5 transition-all cursor-pointer flex flex-col items-start justify-end min-h-[140px] w-full h-full hover:brightness-110 hover:shadow-lg"
+                        className="rounded-2xl p-4 transition-all cursor-pointer flex flex-col items-start justify-end min-h-[130px] w-full h-full hover:brightness-110 hover:shadow-lg"
                         style={{
                           backgroundColor: cardColor,
                         }}
                       >
                         <div className="w-full">
-                          <h3 className="text-sm line-clamp-5 font-medium break-words text-white">
+                          <h3 className="text-sm line-clamp-5 font-normal leading-4.5 break-words text-white">
                             {service.title}
                           </h3>
                         </div>

@@ -50,14 +50,14 @@ export default function MostAccessedServiceCards({
               position={index + 1}
               className="flex-1 min-w-[140px] basis-0"
             >
-              <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-h-[140px] w-full h-full">
+              <div className="bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-h-[130px] w-full h-full">
                 <div className="w-full">
-                  <h3 className="text-base font-medium break-words text-foreground">
+                  <h3 className="text-sm font-normal break-words text-foreground leading-4.5">
                     {service.title}
                   </h3>
-                  <p className="text-foreground-light text-xs leading-4 break-words">
+                  {/* <p className="text-foreground-light text-xs leading-4 break-words">
                     {service.description}
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </MostAccessedServiceLink>
