@@ -17,7 +17,7 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 /**
- * Retorna lista paginada de categorias
+ * Retorna lista paginada de categorias. Use onlyWithCourses=true para filtrar apenas categorias com cursos publicados e com inscrições abertas ou vencidas há no máximo N dias.
  * @summary Listar categorias
  */
 export type getApiV1CategoriasResponse200 = {
