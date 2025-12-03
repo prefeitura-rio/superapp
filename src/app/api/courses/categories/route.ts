@@ -11,6 +11,8 @@ export async function GET() {
     const response = await getDalCategorias({
       page: 1,
       pageSize: 50,
+      onlyWithCourses: true,
+      daysTolerance: 30,
     })
     if (response.status === 200 && response.data?.data) {
       const categories: CategoryFilter[] = transformCategoriesToFilters(
@@ -24,4 +26,3 @@ export async function GET() {
     return NextResponse.json([], { status: 500 })
   }
 }
-

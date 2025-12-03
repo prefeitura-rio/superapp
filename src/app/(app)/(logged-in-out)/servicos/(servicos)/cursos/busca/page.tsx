@@ -21,6 +21,8 @@ async function getCategoryFilters(): Promise<CategoryFilter[]> {
     const response = await getDalCategorias({
       page: 1,
       pageSize: 50,
+      onlyWithCourses: true,
+      daysTolerance: 30,
     })
     if (response.status === 200 && response.data?.data) {
       return transformCategoriesToFilters(response.data.data)
