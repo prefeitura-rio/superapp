@@ -118,11 +118,11 @@ export default function CoursesFilterDrawerContent({
         <CustomButton
           variant="outline"
           onClick={onClearFilters}
-          className="flex-1"
+          className="flex-1 rounded-full"
         >
           Limpar filtros
         </CustomButton>
-        <CustomButton onClick={onApplyFilters} className="flex-1">
+        <CustomButton onClick={onApplyFilters} className="flex-1 rounded-full">
           Filtrar
         </CustomButton>
       </BottomSheetFooter>

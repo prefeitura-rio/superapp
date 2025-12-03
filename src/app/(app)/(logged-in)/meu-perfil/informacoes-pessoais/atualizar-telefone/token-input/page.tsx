@@ -146,7 +146,7 @@ export default function TokenInputForm() {
             />
             <Button
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal"
               onClick={handleDrawerClose}
             >
               Finalizar

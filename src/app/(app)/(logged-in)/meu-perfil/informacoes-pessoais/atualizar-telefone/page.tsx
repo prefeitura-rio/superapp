@@ -1,6 +1,6 @@
 'use client'
 import { updateUserPhone } from '@/actions/update-user-phone'
-import PhoneInputForm from '@/app/components/phone-input-form'
+import PhoneInputMaskedForm from '@/app/components/phone-input-masked-form'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
 import { Button } from '@/components/ui/button'
@@ -86,13 +86,13 @@ export default function PhoneNumberForm() {
       <div>
         <SecondaryHeader title="" route={routeBackUrl} />
         <section className="relative">
-          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-            Escreva seu <br /> celular
+          <h2 className="text-3xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+            Escreva seu celular
           </h2>
         </section>
       </div>
-      <div className="flex flex-col gap-14 px-4 items-center">
-        <PhoneInputForm
+      <div className="flex flex-col gap-4 px-4 items-center">
+        <PhoneInputMaskedForm
           value={phone}
           onChange={setPhone}
           country={country}
@@ -101,12 +101,13 @@ export default function PhoneNumberForm() {
         />
         <CustomButton
           size="xl"
+          className="rounded-full"
           onClick={handleSave}
           variant="primary"
           fullWidth
           disabled={isPending || !isPhoneValid}
         >
-          {isPending ? 'Enviando...' : 'Enviar'}
+          {isPending ? 'Enviando...' : 'Confirmar'}
         </CustomButton>
       </div>
 
@@ -131,7 +132,7 @@ export default function PhoneNumberForm() {
             />
             <Button
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal"
               onClick={handleDrawerClose}
             >
               Finalizar
