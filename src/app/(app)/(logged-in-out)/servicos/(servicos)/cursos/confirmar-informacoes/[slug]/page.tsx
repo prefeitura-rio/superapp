@@ -1,4 +1,4 @@
-import { extractCourseId } from '@/actions/courses/utils-mock'
+import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
@@ -18,19 +18,38 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ConfirmInscriptionPage({ params, searchParams }: PageProps) {
+export default async function ConfirmInscriptionPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug: courseSlug } = await params
   const searchParamsData = await searchParams
-  const preselectedLocationId = typeof searchParamsData.locationId === 'string' 
-    ? searchParamsData.locationId 
-    : undefined
+  const preselectedLocationId =
+    typeof searchParamsData.locationId === 'string'
+      ? searchParamsData.locationId
+      : undefined
+  const preselectedClassId =
+    typeof searchParamsData.classId === 'string'
+      ? searchParamsData.classId
+      : undefined
   const courseUuid = extractCourseId(courseSlug)
 
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
     // Redirect to auth with return URL to come back here after login
-    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
+    // Preserve query parameters (locationId or classId) in the return URL
+    const queryParams = new URLSearchParams()
+    if (preselectedLocationId) {
+      queryParams.set('locationId', preselectedLocationId)
+    }
+    if (preselectedClassId) {
+      queryParams.set('classId', preselectedClassId)
+    }
+    const queryString = queryParams.toString()
+    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}${
+      queryString ? `?${queryString}` : ''
+    }`
     redirect(buildAuthUrl(returnUrl))
   }
 
@@ -72,8 +91,28 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
     emailNeedsUpdate,
   }
 
+  const courseData = (courseInfo as any).data
+  const modality = courseData?.modalidade?.toLowerCase()
+  const isOnlineCourse = modality === 'online' || modality === 'remoto'
+
+  // Extract online classes from remote_class.schedules if available
+  const onlineClasses =
+    isOnlineCourse && courseData?.remote_class?.schedules
+      ? courseData.remote_class.schedules.map((schedule: any) => ({
+          id: schedule.id,
+          location_id: schedule.location_id,
+          vacancies: schedule.vacancies,
+          class_start_date: schedule.class_start_date,
+          class_end_date: schedule.class_end_date,
+          class_time: schedule.class_time || '',
+          class_days: schedule.class_days || '',
+          created_at: schedule.created_at,
+          updated_at: schedule.updated_at,
+        }))
+      : []
+
   const nearbyUnits =
-    (courseInfo as any).data?.locations?.map((location: any) => ({
+    courseData?.locations?.map((location: any) => ({
       id: location.id,
       curso_id: location.curso_id,
       address: location.address,
@@ -89,10 +128,12 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
       contactUpdateStatus={contactUpdateStatus}
       userAuthInfo={userAuthInfo}
       nearbyUnits={nearbyUnits}
+      onlineClasses={onlineClasses}
       courseInfo={courseInfo}
       courseId={courseUuid}
       courseSlug={courseSlug}
       preselectedLocationId={preselectedLocationId}
+      preselectedClassId={preselectedClassId}
     />
   )
 }

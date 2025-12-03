@@ -5,6 +5,7 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
+import type { ModelsCourseManagementType } from './modelsCourseManagementType'
 import type { ModelsFormatoAula } from './modelsFormatoAula'
 import type { ModelsModalidade } from './modelsModalidade'
 import type { ModelsStatusCurso } from './modelsStatusCurso'
@@ -16,6 +17,7 @@ export interface ModelsCurso {
   carga_horaria?: number
   certificacao_oferecida?: boolean
   contato_duvidas?: string
+  course_management_type?: ModelsCourseManagementType
   cover_image?: string
   created_at?: string
   data_inicio?: string
@@ -30,6 +32,7 @@ export interface ModelsCurso {
   external_partner_name?: string
   external_partner_url?: string
   facilitator?: string
+  formacao_link?: string
   formato_aula?: ModelsFormatoAula
   /** Optional fields matching specification */
   has_certificate?: boolean

@@ -7,16 +7,12 @@ export default function HomeLoading() {
       {/* Header Skeleton */}
       <header className="relative w-full z-50 bg-background text-foreground py-4">
         <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
-          {/* Left side - User info skeleton */}
-          <div className="flex items-center space-x-3">
-            <Skeleton className="rounded-full h-10 w-10" />
-            <div className="flex flex-col space-y-1">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-20" />
-            </div>
-          </div>
-          {/* Right side - Pref logo skeleton */}
+          {/* Left side - Pref logo skeleton */}
           <Skeleton className="h-8 w-20" />
+          {/* Right side - User info skeleton */}
+          <div className="flex items-center space-x-3">
+            <Skeleton className="rounded-full h-11 w-11" />
+          </div>
         </div>
       </header>
 
@@ -33,7 +29,7 @@ export default function HomeLoading() {
             <div className="flex gap-2 px-4 py-2 w-max">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={`mobile-${i}`} className="flex flex-col">
-                  <Skeleton className="w-full h-[104px] rounded-xl min-w-[328px]" />
+                  <Skeleton className="w-full h-[120px] rounded-xl min-w-[328px]" />
                 </div>
               ))}
             </div>
@@ -44,10 +40,10 @@ export default function HomeLoading() {
         <div className="px-4 pb-0 mb-0 overflow-x-hidden mt-2 hidden sm:block">
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col">
-              <Skeleton className="w-full h-[104px] rounded-xl min-w-[328px]" />
+              <Skeleton className="w-full h-[120px] rounded-xl min-w-[328px]" />
             </div>
             <div className="flex flex-col">
-              <Skeleton className="w-full h-[104px] rounded-xl min-w-[328px]" />
+              <Skeleton className="w-full h-[120px] rounded-xl min-w-[328px]" />
             </div>
           </div>
           <div className="justify-center items-center h-12 w-full flex">

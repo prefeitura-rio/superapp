@@ -1,13 +1,30 @@
 'use client'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { suggestedBanners } from '@/constants/banners'
+import { useAuthStatus } from '@/providers/auth-status-provider'
 import { sendGAEvent } from '@next/third-parties/google'
 
-interface SuggestionCardsProps {
-  isLoggedIn: boolean
-}
+export default function SuggestionCards() {
+  const { isLoggedIn, isLoading } = useAuthStatus()
 
-export default function SuggestionCards({ isLoggedIn }: SuggestionCardsProps) {
+  // Show skeleton while loading to reserve space and avoid layout shift
+  if (isLoading || isLoggedIn === null) {
+    return (
+      <div className="relative w-full overflow-x-auto overflow-y-hidden pb-3 no-scrollbar">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 px-4 py-2 w-max">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={`mobile-skeleton-${i}`} className="flex flex-col">
+                <Skeleton className="w-full h-[120px] rounded-xl min-w-[328px]" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Filter out LoginBanner for logged-out users
   const filteredBanners = !isLoggedIn
     ? suggestedBanners.filter(banner => banner.id !== 'update')

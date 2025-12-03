@@ -20,20 +20,20 @@ export interface OrganizationTemplateMapping {
  */
 const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
   {
-    organization: 'Secretaria Especial da Juventude Carioca - JUV-RIO',
+    organization: 'Secretaria Especial da Juventude Carioca (JUV-RIO)',
     template: 'juvrio',
   },
   {
     organization:
-      'Fundacao Planetario da Cidade do Rio de Janeiro - PLANETARIO',
+      'Fundação Planetário da Cidade do Rio de Janeiro (PLANETÁRIO)',
     template: 'planetario',
   },
   {
-    organization: 'Secretaria Municipal do Ambiente e Clima - SMAC',
+    organization: 'Secretaria Municipal de Meio Ambiente e Clima (SMAC)',
     template: 'smac',
   },
   {
-    organization: 'Secretaria Municipal da Pessoa com Deficiência - SMPD',
+    organization: 'Secretaria Municipal da Pessoa com Deficiência (SMPD)',
     template: 'smpd',
   },
 ]

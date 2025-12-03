@@ -28,7 +28,7 @@ export default async function CoursePage({
 
     const course = response.data.data
 
-    // Check if course should be visible using the new logic
+    // Show course even when it is over 30 days since the last class ended
     if (!shouldShowCourse({ course, renderByUrl: true })) {
       notFound()
     }

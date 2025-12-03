@@ -3,7 +3,10 @@ import { FloatNavigation } from '@/app/components/float-navigation'
 import { getApiV1Courses } from '@/http-courses/courses/courses'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import type { ModelsCurso } from '@/http-courses/models'
-import { filterVisibleCourses } from '@/lib/course-utils'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
+import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
+import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
+import { getDalCategorias } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 // Type for the expected API response structure
@@ -24,6 +27,23 @@ export default async function CoursesPage() {
   const userInfo = await getUserInfoFromToken()
 
   try {
+    // Fetch categories with caching
+    let categoriesFilters: CategoryFilter[] = []
+    try {
+      const categoriesResponse = await getDalCategorias({
+        page: 1,
+        pageSize: 50,
+      })
+      if (categoriesResponse.status === 200 && categoriesResponse.data?.data) {
+        categoriesFilters = transformCategoriesToFilters(
+          categoriesResponse.data.data
+        )
+      }
+    } catch (categoriesError) {
+      console.error('Error fetching categories:', categoriesError)
+      // Continue with empty categories array
+    }
+
     // Fetch all courses
     const response = await getApiV1Courses({
       page: 1,
@@ -36,6 +56,9 @@ export default async function CoursesPage() {
 
     // Filter courses to only show those that should be visible
     const visibleCourses = filterVisibleCourses(allCourses)
+
+    // Sort courses: open enrollments first, then by created_at (most recent first)
+    const sortedCourses = sortCourses(visibleCourses)
 
     // Fetch user enrollments if authenticated
     let myCourses: any[] = []
@@ -80,15 +103,23 @@ export default async function CoursesPage() {
     return (
       <>
         <CoursePageClient
-          courses={visibleCourses}
+          courses={sortedCourses}
           myCourses={myCourses}
           userInfo={userInfo}
+          categoryFilters={categoriesFilters}
         />
         <FloatNavigation />
       </>
     )
   } catch (error) {
     console.error('Error fetching courses:', error)
-    return <CoursePageClient courses={[]} myCourses={[]} userInfo={userInfo} />
+    return (
+      <CoursePageClient
+        courses={[]}
+        myCourses={[]}
+        userInfo={userInfo}
+        categoryFilters={[]}
+      />
+    )
   }
 }

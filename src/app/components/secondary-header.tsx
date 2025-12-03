@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { getBackRoute } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { SearchButton } from './search-button'
@@ -10,8 +11,10 @@ interface SecondaryHeaderProps {
   title?: string
   logo?: ReactNode
   showSearchButton?: boolean
+  searchHref?: string
   className?: string
   route?: string
+  defaultRoute?: string
   style?: React.CSSProperties
 }
 
@@ -19,11 +22,22 @@ export function SecondaryHeader({
   title,
   logo,
   showSearchButton,
+  searchHref,
   className = 'max-w-4xl',
   route,
+  defaultRoute = '/',
   style,
 }: SecondaryHeaderProps) {
   const router = useRouter()
+
+  const handleBack = () => {
+    if (route) {
+      router.push(route)
+      return
+    }
+    const backRoute = getBackRoute(defaultRoute)
+    router.push(backRoute)
+  }
 
   return (
     <>
@@ -34,10 +48,7 @@ export function SecondaryHeader({
         <div className="grid grid-cols-3 items-center">
           {/* Left column - IconButton */}
           <div className="flex justify-start">
-            <IconButton
-              icon={ChevronLeftIcon}
-              onClick={() => (route ? router.push(route) : router.back())}
-            />
+            <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
           </div>
 
           {/* Center column - Title or Logo */}
@@ -53,7 +64,7 @@ export function SecondaryHeader({
 
           {/* Right column - SearchButton or empty space */}
           <div className="flex justify-end">
-            {showSearchButton && <SearchButton />}
+            {showSearchButton && <SearchButton href={searchHref} />}
           </div>
         </div>
       </header>

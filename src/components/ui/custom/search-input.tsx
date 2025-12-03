@@ -76,7 +76,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           <button
             type="button"
             onClick={onBack}
-            className="mr-4 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
+            className="shrink-0 mr-4 text-card-foreground hover:text-card-foreground/50 transition-all duration-200"
             aria-label="Back"
           >
             <ChevronLeftIcon className="h-6 w-6" />
@@ -85,18 +85,18 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
         <input
           ref={mergedRef}
-          className="flex-1 bg-transparent border-0 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 truncate pr-3"
+          className="flex-1 min-w-0 bg-transparent border-0 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 truncate pr-2"
           value={value}
           onChange={handleChange}
           {...props}
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {showIcons && value && (
             <button
               type="button"
               onClick={handleClear}
-              className="text-card-foreground  rounded-full"
+              className="shrink-0 text-card-foreground rounded-full"
               aria-label="Clear search"
             >
               <XIcon className="h-6 w-6 text-card-foreground" />
@@ -105,7 +105,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           {showIcons && (
             <button
               type="button"
-              className="text-card-foreground hover:text-card-foreground"
+              className="shrink-0 text-card-foreground hover:text-card-foreground"
               aria-label="Search"
             >
               <SearchIcon className="h-6 w-6 text-card-foreground" />

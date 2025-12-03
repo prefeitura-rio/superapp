@@ -16,12 +16,14 @@ interface MostAccessedServiceLinkProps {
   service: MostAccessedService
   position: number
   children: React.ReactNode
+  className?: string
 }
 
 export function MostAccessedServiceLink({
   service,
   position,
   children,
+  className,
 }: MostAccessedServiceLinkProps) {
   const handleClick = () => {
     sendGAEvent('event', 'most_accessed_service_click', {
@@ -34,7 +36,7 @@ export function MostAccessedServiceLink({
   }
 
   return (
-    <Link href={service.href} onClick={handleClick}>
+    <Link href={service.href} onClick={handleClick} className={className}>
       {children}
     </Link>
   )

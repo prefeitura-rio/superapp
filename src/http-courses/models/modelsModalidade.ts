@@ -17,4 +17,5 @@ export const ModelsModalidade = {
   ModalidadePresencialLegacy: 'PRESENCIAL',
   ModalidadeOnline: 'ONLINE',
   ModalidadeHibrido: 'HIBRIDO',
+  ModalidadeLivreFormacaoOnline: 'LIVRE_FORMACAO_ONLINE',
 } as const

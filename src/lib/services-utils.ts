@@ -2,6 +2,10 @@ import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import { getApiV1SearchId } from '@/http-busca-search/search/search'
+import {
+  getDalCategoriesCategorySubcategories,
+  getDalSubcategoriesSubcategoryServices,
+} from '@/lib/dal'
 import { fetchCategories } from './categories'
 
 export async function getCategoryNameBySlug(
@@ -90,6 +94,59 @@ export async function fetchServiceById(
     return response.data
   } catch (error) {
     console.error('Error fetching service:', error)
+    return null
+  }
+}
+
+export async function fetchSubcategoriesByCategory(categoryName: string) {
+  try {
+    const response = await getDalCategoriesCategorySubcategories(categoryName, {
+      sort_by: 'count',
+      order: 'desc',
+      include_empty: false,
+    })
+
+    if (response.status !== 200) {
+      console.error(
+        `Failed to fetch subcategories: ${response.status}`,
+        response.data
+      )
+      return null
+    }
+
+    return response.data
+  } catch (error) {
+    console.error('Error fetching subcategories:', error)
+    return null
+  }
+}
+
+export async function fetchServicesBySubcategory(
+  subcategoryName: string,
+  page = 1,
+  perPage = 50
+) {
+  try {
+    const response = await getDalSubcategoriesSubcategoryServices(
+      subcategoryName,
+      {
+        page,
+        per_page: perPage,
+        include_inactive: false,
+      }
+    )
+
+    if (response.status !== 200) {
+      console.error(
+        `Failed to fetch services for subcategory: ${response.status}`,
+        response.data
+      )
+      return null
+    }
+
+    return response.data
+  } catch (error) {
+    console.error('Error fetching services by subcategory:', error)
     return null
   }
 }

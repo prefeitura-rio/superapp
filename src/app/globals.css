@@ -155,6 +155,7 @@ select:-webkit-autofill:focus {
 
 @theme inline {
   /* --color-*: initial; */
+  --breakpoint-3xl: 120rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

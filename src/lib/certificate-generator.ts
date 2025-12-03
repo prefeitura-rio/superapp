@@ -16,6 +16,7 @@ import {
  */
 async function loadTemplate(organization?: string): Promise<Uint8Array> {
   const templateUrl = getTemplateUrl(organization || '')
+  console.log('organization', organization)
   if (!templateUrl)
     throw new Error(`Template não encontrado para organização: ${organization}`)
   const res = await fetch(templateUrl)
@@ -322,7 +323,7 @@ export async function generateAndDownload(
   } = {}
 ): Promise<void> {
   const pdfBytes = await generateCertificate(data, options)
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+  const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

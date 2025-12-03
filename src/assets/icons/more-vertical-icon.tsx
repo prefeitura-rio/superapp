@@ -8,7 +8,8 @@ export function MoreVerticalIcon(props: IconProps) {
       height="20"
       viewBox="0 0 20 20"
       fill="none"
-      className="text-foreground"
+      className="text-foreground mt-1"
+      transform="matrix(-1.8369701987210297e-16,-1,1,-1.8369701987210297e-16,0,0)"
       {...props}
     >
       <path

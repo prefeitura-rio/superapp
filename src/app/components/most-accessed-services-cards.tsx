@@ -1,41 +1,69 @@
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { MostAccessedServiceLink } from './most-accessed-service-link'
 
-export default function MostAccessedServiceCards() {
+interface MostAccessedServiceCardsProps {
+  limit?: number
+}
+
+export default function MostAccessedServiceCards({
+  limit,
+}: MostAccessedServiceCardsProps = {}) {
+  const services = limit
+    ? MOST_ACCESSED_SERVICES.slice(0, limit)
+    : MOST_ACCESSED_SERVICES
+
+  if (services.length === 0) {
+    return (
+      <>
+        <div className="flex items-center justify-between mb-2 px-4">
+          <h2 className="text-md font-medium text-foreground">
+            Mais acessados
+          </h2>
+        </div>
+        <div className="flex flex-col items-center text-center justify-center py-8">
+          <ThemeAwareVideo
+            source={VIDEO_SOURCES.emptyAddress}
+            containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+          />
+          <p className="text-lg text-muted-foreground">
+            Ops... nenhum serviço encontrado
+          </p>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <div className="flex items-center justify-between mb-2 px-4">
-        <h2 className="text-md font-medium text-foreground"> Mais acessados</h2>
+        <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
       </div>
+      {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="overflow-x-auto no-scrollbar">
-          <div className="flex gap-2 px-4 w-max ">
-            {MOST_ACCESSED_SERVICES.map((service, index) => (
-              <MostAccessedServiceLink
-                key={service.id}
-                service={service}
-                position={index + 1}
-              >
-                <div className="bg-card rounded-lg p-3.5 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px]">
-                  <div className="mb-4">
-                    <img
-                      src={service.icon}
-                      alt={service.title}
-                      className="w-10 h-10"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-medium break-words text-foreground">
-                      {service.title}
-                    </h3>
-                    <p className="text-foreground-light text-xs leading-4 break-words">
-                      {service.description}
-                    </p>
-                  </div>
+        <div className="flex gap-2 px-4 min-w-full">
+          {services.map((service, index) => (
+            <MostAccessedServiceLink
+              key={service.id}
+              service={service}
+              position={index + 1}
+              className="flex-1 min-w-[140px] basis-0"
+            >
+              <div className="bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-end min-h-[130px] w-full h-full">
+                <div className="w-full">
+                  <h3 className="text-sm font-normal break-words text-foreground leading-4.5">
+                    {service.title}
+                  </h3>
+                  {/* <p className="text-foreground-light text-xs leading-4 break-words">
+                    {service.description}
+                  </p> */}
                 </div>
-              </MostAccessedServiceLink>
-            ))}
-          </div>
+              </div>
+            </MostAccessedServiceLink>
+          ))}
+          {/* Spacer to ensure padding at the end */}
+          <div className="flex-shrink-0 sm:hidden w-2" />
         </div>
       </div>
     </>

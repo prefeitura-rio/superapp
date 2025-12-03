@@ -13,19 +13,34 @@ The system implements a comprehensive filtering mechanism for courses based on t
 - Courses with status "closed", "canceled", or any other status are hidden
 
 ### 2. Class End Date Logic
-The system handles both online and in-person courses:
+The system handles different course types with specific logic:
 
-#### Online Courses (`remote_class`)
-- Uses `remote_class.class_end_date` for end date checking
+#### Online Courses (modalidade "Online" or "Remoto")
+- Can have multiple classes (schedules) in two possible structures:
+  - `remote_class.schedules[].class_end_date` (new structure for remote courses)
+  - `locations[].schedules[].class_end_date` (new structure for online courses with locations)
+- Falls back to `remote_class.class_end_date` for backward compatibility (legacy structure)
+- Uses the **latest** class end date among all schedules
+- If at least one schedule is still ongoing, the course is considered active
+
+#### LIVRE_FORMACAO_ONLINE Courses (Special Handling)
+- **Uses `enrollment_end_date` instead of `class_end_date`**
+- Course is hidden 30 days after `enrollment_end_date` passes
+- This is because these courses don't have fixed class end dates
 
 #### In-Person/Semi-In-Person Courses (`locations`)
-- Checks all `locations[].class_end_date` values
-- Uses the **latest** class end date among all locations
-- If at least one location is still ongoing, the course is considered active
+- Checks all `locations[].schedules[].class_end_date` values (new structure)
+- Falls back to `locations[].class_end_date` for backward compatibility (legacy structure)
+- Uses the **latest** class end date among all schedules across all locations
+- If at least one schedule is still ongoing, the course is considered active
 
-#### 30-Day Rule
-- If a course has ended (latest class end date is in the past), it's still shown for **30 days** after the end date
-- After 30 days, the course is automatically hidden from the course list
+#### 30-Day Rule (1 Month)
+- **For regular courses (Online, Presencial, Semipresencial):**
+  - If a course has ended (latest class end date from the last schedule is in the past), it's still shown for **30 days (1 month)** after the end date
+  - After 30 days, the course is automatically hidden from the course list
+- **For LIVRE_FORMACAO_ONLINE courses:**
+  - Uses `enrollment_end_date` instead of class end date
+  - Course is hidden 30 days after `enrollment_end_date` passes
 - This allows users to see recently ended courses but prevents cluttering the list with old courses
 
 ## Enrollment Status Logic
@@ -66,7 +81,13 @@ The logic is implemented in `src/lib/course-utils.ts`:
 - `shouldShowCourse(course)`: Determines if a course should be visible
 - `getCourseEnrollmentInfo(course)`: Returns enrollment status and button configuration
 - `filterVisibleCourses(courses)`: Filters an array of courses to show only visible ones
-- `getLatestClassEndDate(course)`: Gets the latest class end date from either `remote_class` or `locations`
+- `getLatestClassEndDate(course)`: Gets the latest class end date from:
+  - `remote_class.schedules[].class_end_date` (new structure for remote courses with multiple classes)
+  - `remote_class.class_end_date` (legacy structure)
+  - `locations[].schedules[].class_end_date` (new structure for all course types)
+  - `locations[].class_end_date` (legacy structure)
+  Works for all course types including online courses with multiple classes.
+- `shouldShowCourse(course)`: Determines visibility with special handling for LIVRE_FORMACAO_ONLINE (uses enrollment_end_date)
 
 ### Usage Examples
 
@@ -86,9 +107,11 @@ console.log(enrollmentInfo.buttonText) // "Inscreva-se", "Disponível em breve",
 The system uses the following date fields from the course model:
 
 - `enrollment_start_date`: When enrollment opens
-- `enrollment_end_date`: When enrollment closes
-- `remote_class.class_end_date`: When the online course ends
-- `locations[].class_end_date`: When each in-person location ends
+- `enrollment_end_date`: When enrollment closes (also used for LIVRE_FORMACAO_ONLINE visibility)
+- `remote_class.class_end_date`: When the online course ends (legacy structure)
+- `locations[].schedules[].class_end_date`: When each schedule (class) ends (new structure, works for all course types)
+- `locations[].class_end_date`: When each location ends (legacy structure, for backward compatibility)
+- `modalidade`: Course modality ("Online", "LIVRE_FORMACAO_ONLINE", "Presencial", "Semipresencial")
 - `status`: Course status ("opened", "closed", "canceled")
 
 ## Testing Scenarios
@@ -110,17 +133,23 @@ The system uses the following date fields from the course model:
 - class_end_date: "2024-12-31" (future)
 - Result: Course shown, button "Inscrições encerradas" (disabled)
 
-### Scenario 4: In-Person Course with Multiple Locations
+### Scenario 4: In-Person Course with Multiple Locations and Schedules
 - Course status: "opened"
-- locations[0].class_end_date: "2024-01-10" (past)
-- locations[1].class_end_date: "2024-01-20" (future)
-- Result: Course shown, button "Inscreva-se" (enabled) - because at least one location is still active
+- locations[0].schedules[0].class_end_date: "2024-01-10" (past)
+- locations[1].schedules[0].class_end_date: "2024-01-20" (future)
+- Result: Course shown, button "Inscreva-se" (enabled) - because at least one schedule is still active
 
-### Scenario 5: All Locations Ended (Within 30 Days)
+### Scenario 5: All Schedules Ended (Within 30 Days)
 - Course status: "opened"
-- locations[0].class_end_date: "2024-01-10" (past)
-- locations[1].class_end_date: "2024-01-15" (past, but within 30 days)
+- locations[0].schedules[0].class_end_date: "2024-01-10" (past)
+- locations[1].schedules[0].class_end_date: "2024-01-15" (past, but within 30 days)
 - Result: Course shown, button "Curso encerrado" (disabled)
+
+### Scenario 4b: In-Person Course with Multiple Schedules in Same Location
+- Course status: "opened"
+- locations[0].schedules[0].class_end_date: "2024-01-10" (past)
+- locations[0].schedules[1].class_end_date: "2024-01-20" (future)
+- Result: Course shown, button "Inscreva-se" (enabled) - because at least one schedule is still active
 
 ### Scenario 6: Course Ended (After 30 Days)
 - Course status: "opened"
@@ -135,3 +164,22 @@ The system uses the following date fields from the course model:
 ### Scenario 8: Closed Course
 - Course status: "closed"
 - Result: Course hidden from list regardless of dates
+
+### Scenario 9: LIVRE_FORMACAO_ONLINE Course (Uses Enrollment End Date)
+- Course status: "opened"
+- modalidade: "LIVRE_FORMACAO_ONLINE"
+- enrollment_end_date: "2024-01-15" (past, but within 30 days)
+- Result: Course shown
+
+### Scenario 10: LIVRE_FORMACAO_ONLINE Course (Hidden After 30 Days)
+- Course status: "opened"
+- modalidade: "LIVRE_FORMACAO_ONLINE"
+- enrollment_end_date: "2024-01-01" (past, more than 30 days ago)
+- Result: Course hidden from list
+
+### Scenario 11: Online Course with Multiple Classes
+- Course status: "opened"
+- modalidade: "Online"
+- locations[0].schedules[0].class_end_date: "2024-01-10" (past)
+- locations[0].schedules[1].class_end_date: "2024-01-20" (future)
+- Result: Course shown, button "Inscreva-se" (enabled) - because at least one schedule is still active

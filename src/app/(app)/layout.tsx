@@ -1,5 +1,6 @@
 import { setFirstLoginFalse } from '@/actions/first-login'
 import { CookieConsent } from '@/components/cookie-consent'
+import { RouteTracker } from '@/components/route-tracker'
 import { getDalCitizenCpfFirstlogin } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import Onboarding from '../components/on-boarding'
@@ -41,6 +42,7 @@ export default async function AppLayout({
 
   return (
     <div>
+      <RouteTracker />
       <SessionExpiredHandler />
       <CookieConsent variant="mini" />
       <main>{children}</main>

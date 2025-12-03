@@ -14,10 +14,18 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
 import type { ModelsDepartmentResponse } from '@/http/models'
-import { getCourseEnrollmentInfo } from '@/lib/course-utils'
+import {
+  getCourseEnrollmentInfo,
+  normalizeModalityDisplay,
+} from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
+import { getBackRoute } from '@/lib/utils'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
+import {
+  shouldShowExternalPartnerBadge,
+  shouldShowExternalPartnerModal,
+} from '@/types/course'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -42,8 +50,32 @@ const getCourseScheduleInfo = (
 ): CourseScheduleInfo => {
   const modality = course.modalidade?.toLowerCase()
 
-  // Check for remote/online courses
+  // Check for remote/online courses with multiple schedules
   if ((modality === 'online' || modality === 'remoto') && course.remote_class) {
+    // If there are multiple schedules, find the selected one
+    if (
+      course.remote_class.schedules &&
+      course.remote_class.schedules.length > 0
+    ) {
+      const selectedSchedule = selectedScheduleId
+        ? course.remote_class.schedules.find(
+            sch => sch.id === selectedScheduleId
+          ) || course.remote_class.schedules[0]
+        : course.remote_class.schedules[0]
+
+      if (selectedSchedule) {
+        return {
+          startDate: selectedSchedule.class_start_date,
+          endDate: selectedSchedule.class_end_date,
+          time: selectedSchedule.class_time,
+          days: selectedSchedule.class_days,
+          vacancies: selectedSchedule.vacancies,
+          address: null,
+          neighborhood: null,
+        }
+      }
+    }
+    // Legacy structure: single remote_class
     return {
       startDate: course.remote_class.class_start_date,
       endDate: course.remote_class.class_end_date,
@@ -98,6 +130,12 @@ const getCourseScheduleInfo = (
   }
 }
 
+// Format date or return fallback text
+function formatDateOrFallback(dateString: string | null | undefined): string {
+  const formatted = formatDate(dateString ?? null)
+  return formatted || 'Data não informada'
+}
+
 // Sub-components
 interface InfoRowProps {
   label: string
@@ -128,7 +166,25 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
       onBack()
       return
     }
-    router.push('/servicos/cursos/')
+
+    // Check if previous route contains "confirmar-informacoes"
+    let previousRoute: string | null = null
+    if (typeof window !== 'undefined') {
+      try {
+        previousRoute = sessionStorage.getItem('previousRoute')
+      } catch (error) {
+        // sessionStorage might be unavailable
+      }
+    }
+
+    // If previous route contains "confirmar-informacoes", go to courses list
+    if (previousRoute && previousRoute.includes('confirmar-informacoes')) {
+      router.push('/servicos/cursos/')
+      return
+    }
+
+    const backRoute = getBackRoute('/servicos/cursos/')
+    router.push(backRoute)
   }
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
@@ -151,7 +207,9 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
             {course.accessibility && (
               <AccessibilityBadge accessibility={course.accessibility} />
             )}
-            {course.is_external_partner && <IsExternalPartnerBadge />}
+            {shouldShowExternalPartnerBadge(course.course_management_type) && (
+              <IsExternalPartnerBadge />
+            )}
           </div>
         </>
       )}
@@ -175,6 +233,12 @@ function CourseInfo({ course, department }: CourseInfoProps) {
     department?.nome_ua || course.organization || 'Instituição não informada'
   const organizationInitial = organizationName.charAt(0)
 
+  // Mobile: sigla_ua, Desktop: nome_ua
+  const mobileName =
+    department?.sigla_ua || course.organization || 'Instituição não informada'
+  const desktopName =
+    department?.nome_ua || course.organization || 'Instituição não informada'
+
   return (
     <div className="flex p-4 gap-2">
       <div className="flex items-center gap-3">
@@ -193,10 +257,11 @@ function CourseInfo({ course, department }: CourseInfoProps) {
             </span>
           )}
         </div>
-        <p className="text-sm">{organizationName}</p>
+        <p className="text-sm block sm:hidden">{mobileName}</p>
+        <p className="text-sm hidden sm:block">{desktopName}</p>
       </div>
 
-      {course.is_external_partner && (
+      {shouldShowExternalPartnerBadge(course.course_management_type) && (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
             {course.external_partner_logo_url ? (
@@ -232,16 +297,20 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       <div className="flex gap-4">
         <div>
           <p className="text-foreground-light">Modalidade</p>
-          <p className="font-medium">{course.modalidade || 'Não informado'}</p>
+          <p className="font-normal">
+            {course.modalidade === 'LIVRE_FORMACAO_ONLINE'
+              ? 'Remoto'
+              : normalizeModalityDisplay(course.modalidade) || 'Não informado'}
+          </p>
         </div>
         <div>
           <p className="text-foreground-light">Carga horária</p>
-          <p className="font-medium">{course.workload || 'Não informado'}</p>
+          <p className="font-normal">{course.workload || 'Não informado'}</p>
         </div>
         {course.enrollment_end_date && (
           <div>
             <p className="text-foreground-light">Inscrições até</p>
-            <p className="font-medium">
+            <p className="font-normal">
               {formatDate(course.enrollment_end_date)}
             </p>
           </div>
@@ -270,6 +339,190 @@ function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
             scheduleInfo.neighborhood ? ` - ${scheduleInfo.neighborhood}` : ''
           }`}
         />
+      )}
+    </div>
+  )
+}
+
+interface OnlineClassSelectionProps {
+  course: Course
+  selectedClassId: string | null
+  onClassSelect: (classId: string) => void
+}
+
+function OnlineClassSelection({
+  course,
+  selectedClassId,
+  onClassSelect,
+}: OnlineClassSelectionProps) {
+  const modality = course.modalidade?.toLowerCase()
+
+  // Only show for online/remote courses with multiple schedules
+  if (modality !== 'online' && modality !== 'remoto') {
+    return null
+  }
+
+  if (
+    !course.remote_class?.schedules ||
+    course.remote_class.schedules.length === 0
+  ) {
+    return null
+  }
+
+  const onlineClasses = course.remote_class.schedules
+  const hasMultipleClasses = onlineClasses.length > 1
+
+  // If only one class, don't show selection but show the class info
+  if (!hasMultipleClasses) {
+    const singleClass = onlineClasses[0]
+    return (
+      <div className="space-y-4">
+        <div className="pt-12 px-4 space-y-4 text-sm">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-foreground-light">
+              <GroupIcon />
+              <span>Turma</span>
+            </div>
+            <div className="space-y-2.5 text-sm text-foreground-light">
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data início</span>
+                <span className="text-foreground">
+                  {formatDate(singleClass.class_start_date)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CalendarIcon />
+                <span>Data final</span>
+                <span className="text-foreground">
+                  {formatDate(singleClass.class_end_date)}
+                </span>
+              </div>
+              {singleClass.class_days && (
+                <div className="flex items-center gap-3">
+                  <CycleIcon />
+                  <span>Dias de aula</span>
+                  <span className="text-foreground">
+                    {singleClass.class_days}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <PersonIcon />
+                <span>Vagas</span>
+                <span className="text-foreground">{singleClass.vacancies}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedClass =
+    onlineClasses.find(cls => cls.id === selectedClassId) || onlineClasses[0]
+
+  return (
+    <div className="space-y-4">
+      {/* Class Icon Label */}
+      <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
+        <GroupIcon />
+        <span>Selecione a turma</span>
+      </div>
+
+      {/* Horizontal Scrollable Class Cards */}
+      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex gap-3 pl-4 pb-2">
+          {onlineClasses.map((onlineClass, index) => (
+            <button
+              type="button"
+              key={onlineClass.id}
+              onClick={() => onClassSelect(onlineClass.id)}
+              className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
+                selectedClassId === onlineClass.id
+                  ? 'border-muted-foreground bg-secondary'
+                  : 'border-none bg-card cufrsor-pointer'
+              }`}
+            >
+              <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
+                Turma {index + 1}
+              </h4>
+              <p className="text-xs md:text-sm text-foreground-light mt-1">
+                {!onlineClass.class_start_date && !onlineClass.class_end_date
+                  ? 'Datas a serem definidas'
+                  : `${formatDateOrFallback(onlineClass.class_start_date)} - ${formatDateOrFallback(onlineClass.class_end_date)}`}
+              </p>
+            </button>
+          ))}
+          {/* Spacer for right padding in horizontal scroll */}
+          <div className="flex-shrink-0 w-4" aria-hidden="true" />
+        </div>
+      </div>
+
+      {/* Separator */}
+      <Separator className="max-w-[90%] md:max-w-[96%] mx-auto" />
+
+      {/* Class Information with Icons */}
+      {selectedClass && (
+        <div className="px-4 space-y-4 text-sm">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-foreground-light">
+              <GroupIcon />
+              <span className="flex flex-row gap-3">
+                Turma{' '}
+                <span className="text-foreground block">
+                  {onlineClasses.findIndex(cls => cls.id === selectedClass.id) +
+                    1}
+                </span>
+              </span>
+            </div>
+
+            {/* Class Details with Icons */}
+            <div className="space-y-2.5 text-sm text-foreground-light">
+              {/* Data início */}
+              {selectedClass.class_start_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data início</span>
+                  <span className="text-foreground">
+                    {formatDate(selectedClass.class_start_date)}
+                  </span>
+                </div>
+              )}
+
+              {/* Data final */}
+              {selectedClass.class_end_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data final</span>
+                  <span className="text-foreground">
+                    {formatDate(selectedClass.class_end_date)}
+                  </span>
+                </div>
+              )}
+
+              {/* Dias de aula */}
+              {selectedClass.class_days && (
+                <div className="flex items-center gap-3">
+                  <CycleIcon />
+                  <span>Dias de aula</span>
+                  <span className="text-foreground">
+                    {selectedClass.class_days}
+                  </span>
+                </div>
+              )}
+
+              {/* Vagas */}
+              <div className="flex items-center gap-3">
+                <PersonIcon />
+                <span>Vagas</span>
+                <span className="text-foreground">
+                  {selectedClass.vacancies}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -393,13 +646,15 @@ function LocationSelection({
                   </div>
 
                   {/* Dias de aula */}
-                  <div className="flex items-center gap-3">
-                    <CycleIcon />
-                    <span>Dias de aula</span>
-                    <span className="text-foreground">
-                      {schedule.class_days}
-                    </span>
-                  </div>
+                  {schedule.class_days && (
+                    <div className="flex items-center gap-3">
+                      <CycleIcon />
+                      <span>Dias de aula</span>
+                      <span className="text-foreground">
+                        {schedule.class_days}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Vagas */}
                   <div className="flex items-center gap-3">
@@ -504,10 +759,26 @@ export function CourseDetails({
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
 
-  // State for location selection
+  const modality = course.modalidade?.toLowerCase()
+  const isOnlineCourse = modality === 'online' || modality === 'remoto'
+  const hasOnlineClasses =
+    isOnlineCourse &&
+    course.remote_class?.schedules &&
+    course.remote_class.schedules.length > 0
+
+  // State for location selection (for presencial/semipresencial courses)
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     course.locations && course.locations.length > 0
       ? course.locations[0].id
+      : null
+  )
+
+  // State for online class selection (for online courses)
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(
+    hasOnlineClasses &&
+      course.remote_class?.schedules &&
+      course.remote_class.schedules.length > 0
+      ? course.remote_class.schedules[0].id
       : null
   )
 
@@ -516,18 +787,31 @@ export function CourseDetails({
     userEnrollment as any
   )
 
-  // Build subscription href with selected location if available
+  // Build subscription href with selected location or class if available
   const buildCourseSubscriptionHref = () => {
     const baseUrl = `/servicos/cursos/confirmar-informacoes/${course.id}`
+    const params = new URLSearchParams()
+
     if (selectedLocationId) {
-      return `${baseUrl}?locationId=${selectedLocationId}`
+      params.set('locationId', selectedLocationId)
     }
-    return baseUrl
+
+    if (selectedClassId && hasOnlineClasses) {
+      params.set('classId', selectedClassId)
+    }
+
+    const queryString = params.toString()
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl
   }
 
   // Handle location selection
   const handleLocationSelect = (locationId: string) => {
     setSelectedLocationId(locationId)
+  }
+
+  // Handle online class selection
+  const handleClassSelect = (classId: string) => {
+    setSelectedClassId(classId)
   }
 
   const handleCancelEnrollment = async () => {
@@ -560,8 +844,13 @@ export function CourseDetails({
     )
 
   const renderActionButton = () => {
-    const buttonClasses =
-      'block text-sm md:text-base w-full py-3 text-center text-foreground rounded-full hover:brightness-90 hover:bg-card transition bg-card outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+    const isAvailable = enrollmentInfo.status === 'available'
+    const baseButtonClasses =
+      'block text-sm md:text-base w-full py-3 text-center rounded-full hover:brightness-90 transition outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+
+    const buttonClasses = isAvailable
+      ? `${baseButtonClasses} bg-primary text-background hover:bg-primary`
+      : `${baseButtonClasses} bg-card text-foreground hover:bg-card`
 
     // Handle certificate available status
     if (enrollmentInfo.status === 'certificate_available') {
@@ -605,7 +894,10 @@ export function CourseDetails({
       )
     }
 
-    if (course.is_external_partner && course.external_partner_url) {
+    if (
+      shouldShowExternalPartnerModal(course.course_management_type) &&
+      course.external_partner_url
+    ) {
       return (
         <>
           <button
@@ -698,6 +990,11 @@ export function CourseDetails({
           course={course}
           selectedLocationId={selectedLocationId}
           onLocationSelect={handleLocationSelect}
+        />
+        <OnlineClassSelection
+          course={course}
+          selectedClassId={selectedClassId}
+          onClassSelect={handleClassSelect}
         />
         <div className="my-12" />
         <CourseContent course={course} />

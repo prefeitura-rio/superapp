@@ -25,6 +25,7 @@ interface RemoteClass {
   class_days: string
   created_at: string
   updated_at: string
+  schedules?: Schedule[]
 }
 
 export interface Schedule {
@@ -63,6 +64,11 @@ export const accessibilityLabel: Record<AccessibilityTypes, string> = {
 
 export type AccessibilityProps = AccessibilityTypes | undefined | ''
 
+export type CourseManagementType =
+  | 'OWN_ORG'
+  | 'EXTERNAL_MANAGED_BY_ORG'
+  | 'EXTERNAL_MANAGED_BY_PARTNER'
+
 export interface Course {
   id: number
   title: string
@@ -91,7 +97,9 @@ export interface Course {
   teaching_material?: string
   remote_class?: RemoteClass | null
   locations?: Location[]
+  /** @deprecated Use course_management_type instead */
   is_external_partner?: boolean
+  course_management_type?: CourseManagementType
   external_partner_name?: string
   external_partner_url?: string
   external_partner_logo_url?: string
@@ -112,4 +120,27 @@ export interface CourseScheduleInfo {
   vacancies: number | null
   address: string | null
   neighborhood: string | null
+}
+
+/**
+ * Determines if the external partner badge should be shown
+ * Badge is shown for EXTERNAL_MANAGED_BY_PARTNER and EXTERNAL_MANAGED_BY_ORG
+ */
+export function shouldShowExternalPartnerBadge(
+  courseManagementType?: CourseManagementType
+): boolean {
+  return (
+    courseManagementType === 'EXTERNAL_MANAGED_BY_PARTNER' ||
+    courseManagementType === 'EXTERNAL_MANAGED_BY_ORG'
+  )
+}
+
+/**
+ * Determines if the external partner redirect modal should be shown
+ * Modal is only shown for EXTERNAL_MANAGED_BY_PARTNER
+ */
+export function shouldShowExternalPartnerModal(
+  courseManagementType?: CourseManagementType
+): boolean {
+  return courseManagementType === 'EXTERNAL_MANAGED_BY_PARTNER'
 }

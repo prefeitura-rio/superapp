@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { type AccessibilityTypes, accessibilityLabel } from '@/types/course'
 
 interface AccessibilityBadgeProps {
-  accessibility?: AccessibilityTypes | undefined | ''
+  accessibility?: AccessibilityTypes | string | undefined | ''
   className?: string
 }
 
@@ -11,9 +11,23 @@ export function AccessibilityBadge({
   accessibility,
   className,
 }: AccessibilityBadgeProps) {
-  const text = accessibility ? accessibilityLabel[accessibility] || '' : ''
+  // Normalize the accessibility value to match AccessibilityTypes
+  const normalizedAccessibility = accessibility
+    ? (accessibility.toUpperCase().trim() as AccessibilityTypes)
+    : undefined
 
-  if (!text || !accessibility) {
+  // Only show badge for ACESSIVEL or EXCLUSIVO
+  if (
+    !normalizedAccessibility ||
+    (normalizedAccessibility !== 'ACESSIVEL' &&
+      normalizedAccessibility !== 'EXCLUSIVO')
+  ) {
+    return null
+  }
+
+  const text = accessibilityLabel[normalizedAccessibility]
+
+  if (!text) {
     return null
   }
 

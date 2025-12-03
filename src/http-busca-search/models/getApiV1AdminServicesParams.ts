@@ -28,6 +28,10 @@ export type GetApiV1AdminServicesParams = {
    */
   tema_geral?: string
   /**
+   * Filtrar por subcategoria
+   */
+  sub_categoria?: string
+  /**
    * Filtrar por aguardando aprovação
    */
   awaiting_approval?: boolean
