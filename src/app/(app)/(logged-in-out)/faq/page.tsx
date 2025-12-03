@@ -154,12 +154,14 @@ export default function FaqPagePrefRio() {
             ref={registerSection(section.id)}
             className={sIdx > 0 ? 'mt-14' : ''}
           >
-            <h2
-              className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10"
-              ref={sIdx === 0 ? firstH2Ref : undefined}
-            >
-              {section.title}
-            </h2>
+            {section.title && (
+              <h2
+                className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10"
+                ref={sIdx === 0 ? firstH2Ref : undefined}
+              >
+                {section.title}
+              </h2>
+            )}
 
             <div className="space-y-8 mt-6">
               {section.items.map((item, index) => (
@@ -170,13 +172,13 @@ export default function FaqPagePrefRio() {
                     </h3>
 
                     {Array.isArray(item.content) ? (
-                      <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed opacity-50 space-y-1">
+                      <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed space-y-1">
                         {item.content.map((line, i) => (
                           <li key={i}>{line}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-foreground-light text-sm leading-relaxed whitespace-pre-line opacity-50">
+                      <p className="text-foreground-light text-sm leading-relaxed whitespace-pre-line">
                         {item.content}
                       </p>
                     )}

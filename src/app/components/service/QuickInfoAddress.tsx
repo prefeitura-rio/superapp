@@ -85,7 +85,7 @@ export function QuickInfoAddress({ addresses }: QuickInfoAddressProps) {
           <span className="text-xs font-normal text-foreground-light">
             Endereço
           </span>
-          <span className="text-sm text-primary font-normal leading-5 tracking-normal">
+          <span className="text-sm text-primary font-normal leading-5 tracking-normal text-left">
             {addresses[0]}
           </span>
         </div>

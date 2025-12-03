@@ -151,20 +151,16 @@ export default function CoursesFilterDrawerContent({
         </div> */}
       </div>
 
-      <BottomSheetFooter className="flex flex-col px-0!">
-        <CustomButton
-          onClick={onApplyFilters}
-          className="rounded-full py-4 flex-1 w-full"
-        >
-          Filtrar
-        </CustomButton>
+      <BottomSheetFooter>
         <CustomButton
           variant="outline"
           onClick={onClearFilters}
-          disabled={!hasSelectedFilters}
-          className="flex-1 rounded-full py-4 w-full bg-card border-0 focus:outline-none! focus:ring-0! focus:ring-offset-0!"
+          className="flex-1 rounded-full"
         >
           Limpar filtros
+        </CustomButton>
+        <CustomButton onClick={onApplyFilters} className="flex-1 rounded-full">
+          Filtrar
         </CustomButton>
       </BottomSheetFooter>
     </BottomSheet>

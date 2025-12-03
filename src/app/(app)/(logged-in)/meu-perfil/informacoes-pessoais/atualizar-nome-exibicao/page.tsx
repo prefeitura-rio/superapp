@@ -163,10 +163,15 @@ export default function DisplayNameForm() {
               </DrawerTitle>
             </DrawerHeader>
             <ThemeAwareVideo
-              source={VIDEO_SOURCES.updatedEmail}
+              source={VIDEO_SOURCES.updateName}
               containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
-            <CustomButton size="xl" fullWidth onClick={handleDrawerClose}>
+            <CustomButton
+              size="xl"
+              fullWidth
+              onClick={handleDrawerClose}
+              className="rounded-full"
+            >
               Finalizar
             </CustomButton>
           </div>
