@@ -130,6 +130,12 @@ const getCourseScheduleInfo = (
   }
 }
 
+// Format date or return fallback text
+function formatDateOrFallback(dateString: string | null | undefined): string {
+  const formatted = formatDate(dateString ?? null)
+  return formatted || 'Data não informada'
+}
+
 // Sub-components
 interface InfoRowProps {
   label: string
@@ -435,15 +441,16 @@ function OnlineClassSelection({
               className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
                 selectedClassId === onlineClass.id
                   ? 'border-muted-foreground bg-secondary'
-                  : 'border-none bg-card cursor-pointer'
+                  : 'border-none bg-card cufrsor-pointer'
               }`}
             >
               <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
                 Turma {index + 1}
               </h4>
               <p className="text-xs md:text-sm text-foreground-light mt-1">
-                {formatDate(onlineClass.class_start_date)} -{' '}
-                {formatDate(onlineClass.class_end_date)}
+                {!onlineClass.class_start_date && !onlineClass.class_end_date
+                  ? 'Datas a serem definidas'
+                  : `${formatDateOrFallback(onlineClass.class_start_date)} - ${formatDateOrFallback(onlineClass.class_end_date)}`}
               </p>
             </button>
           ))}
@@ -473,22 +480,26 @@ function OnlineClassSelection({
             {/* Class Details with Icons */}
             <div className="space-y-2.5 text-sm text-foreground-light">
               {/* Data início */}
-              <div className="flex items-center gap-3">
-                <CalendarIcon />
-                <span>Data início</span>
-                <span className="text-foreground">
-                  {formatDate(selectedClass.class_start_date)}
-                </span>
-              </div>
+              {selectedClass.class_start_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data início</span>
+                  <span className="text-foreground">
+                    {formatDate(selectedClass.class_start_date)}
+                  </span>
+                </div>
+              )}
 
               {/* Data final */}
-              <div className="flex items-center gap-3">
-                <CalendarIcon />
-                <span>Data final</span>
-                <span className="text-foreground">
-                  {formatDate(selectedClass.class_end_date)}
-                </span>
-              </div>
+              {selectedClass.class_end_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data final</span>
+                  <span className="text-foreground">
+                    {formatDate(selectedClass.class_end_date)}
+                  </span>
+                </div>
+              )}
 
               {/* Dias de aula */}
               {selectedClass.class_days && (
@@ -635,13 +646,15 @@ function LocationSelection({
                   </div>
 
                   {/* Dias de aula */}
-                  <div className="flex items-center gap-3">
-                    <CycleIcon />
-                    <span>Dias de aula</span>
-                    <span className="text-foreground">
-                      {schedule.class_days}
-                    </span>
-                  </div>
+                  {schedule.class_days && (
+                    <div className="flex items-center gap-3">
+                      <CycleIcon />
+                      <span>Dias de aula</span>
+                      <span className="text-foreground">
+                        {schedule.class_days}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Vagas */}
                   <div className="flex items-center gap-3">
