@@ -91,16 +91,16 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                 {enabledButtons.map((button, index) => (
                   <Card
                     key={index}
-                    className="min-w-[268px] w-[268px] md:w-[268px] min-h-[188px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col"
+                    className="min-w-[268px] w-[268px] md:w-[268px] min-h-[128px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col gap-2"
                   >
-                    <CardHeader className="p-6 pb-0 flex-1 min-w-0">
+                    <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
                       {button.descricao && (
-                        <CardDescription className="text-sm break-words hyphens-auto">
+                        <CardDescription className="text-sm break-all text-foreground-light">
                           {button.descricao}
                         </CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent className="p-6 pt-4 mt-auto">
+                    <CardContent className="p-6 py-0 mt-auto">
                       <Button
                         asChild
                         className="w-full rounded-full h-11 text-background"
@@ -111,7 +111,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                           rel="noopener noreferrer"
                           className="text-background"
                         >
-                          Acessar informação
+                          {button.titulo}
                         </a>
                       </Button>
                     </CardContent>
