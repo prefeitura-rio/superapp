@@ -56,9 +56,9 @@ export const ACCESSIBILITY_OPTIONS: AccessibilityTypes[] = [
   'NAO_ACESSIVEL',
 ] as const
 export const accessibilityLabel: Record<AccessibilityTypes, string> = {
-  ACESSIVEL: 'Acessível PCD',
-  EXCLUSIVO: 'Exclusivo PCD',
-  NAO_ACESSIVEL: 'Não acessível PCD',
+  ACESSIVEL: 'Acessível PcD',
+  EXCLUSIVO: 'Exclusivo PcD',
+  NAO_ACESSIVEL: 'Não acessível PcD',
 }
 
 export type AccessibilityProps = AccessibilityTypes | undefined | ''
