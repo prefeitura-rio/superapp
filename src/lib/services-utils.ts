@@ -124,7 +124,8 @@ export async function fetchSubcategoriesByCategory(categoryName: string) {
 export async function fetchServicesBySubcategory(
   subcategoryName: string,
   page = 1,
-  perPage = 50
+  perPage = 50,
+  category?: string
 ) {
   try {
     const response = await getDalSubcategoriesSubcategoryServices(
@@ -133,6 +134,7 @@ export async function fetchServicesBySubcategory(
         page,
         per_page: perPage,
         include_inactive: false,
+        category,
       }
     )
 

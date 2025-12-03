@@ -125,6 +125,7 @@ export default async function CategoryPage({
         {subcategories.length > 0 && (
           <CategorySubcategoriesAccordion
             categorySlug={categorySlug}
+            categoryName={categoryName}
             subcategories={subcategories}
           />
         )}

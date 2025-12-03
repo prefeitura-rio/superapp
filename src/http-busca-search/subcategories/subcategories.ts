@@ -92,6 +92,7 @@ export const getApiV1CategoriesCategorySubcategories = async (
 1. Listar serviços: GET /api/v1/subcategories/Ensino%20Fundamental/services
 2. Paginar resultados: GET /api/v1/subcategories/Ensino%20Fundamental/services?page=2&per_page=20
 3. Incluir inativos: GET /api/v1/subcategories/Ensino%20Fundamental/services?include_inactive=true
+4. Filtrar por categoria pai: GET /api/v1/subcategories/Certidões/services?category=Documentos
  * @summary Lista serviços de uma subcategoria específica
  */
 export type getApiV1SubcategoriesSubcategoryServicesResponse200 = {

@@ -43,4 +43,12 @@ export type GetApiV2SearchParams = {
    * Score mínimo para busca hybrid (0-1, filtra score híbrido)
    */
   threshold_hybrid?: number
+  /**
+   * Override dos campos de busca (comma-separated). Ex: titulo,descricao,conteudo
+   */
+  search_fields?: string
+  /**
+   * Override dos pesos de busca (comma-separated). Ex: 4,2,1
+   */
+  search_weights?: string
 }

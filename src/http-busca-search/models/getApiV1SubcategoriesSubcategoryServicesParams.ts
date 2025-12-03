@@ -8,6 +8,10 @@
 
 export type GetApiV1SubcategoriesSubcategoryServicesParams = {
   /**
+   * Nome da categoria pai para desambiguar subcategorias com nomes iguais (ex: Documentos, Educação)
+   */
+  category?: string
+  /**
    * Número da página (mínimo: 1)
    * @minimum 1
    */
