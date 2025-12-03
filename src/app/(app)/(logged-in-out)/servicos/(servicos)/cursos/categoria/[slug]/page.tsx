@@ -81,7 +81,7 @@ export default async function CoursesCategoryPage({
 
   return (
     <>
-      <div className="min-h-lvh max-w-4xl mx-auto pt-26 pb-20">
+      <div className="min-h-lvh max-w-4xl mx-auto pt-20 md:pt-22 pb-20">
         <SecondaryHeader
           title={categoryName}
           className="max-w-4xl"
