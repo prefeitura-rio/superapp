@@ -65,11 +65,41 @@ export default async function ConfirmInscriptionPage({
   const userInfo = userInfoResponse.data
   const courseInfo = courseInfoResponse.data
 
+  // Type assertion for self-declared fields
+  const userInfoExtended = userInfo as typeof userInfo & {
+    genero?: string
+    renda_familiar?: string
+    escolaridade?: string
+    deficiencia?: string
+  }
+
   const transformedUserInfo = {
     cpf: userInfo.cpf || userAuthInfo.cpf,
     name: userInfo.nome || userAuthInfo.name,
     email: normalizeEmailData(userInfo.email),
     phone: normalizePhoneData(userInfo.telefone),
+    address: userInfo.endereco?.principal
+      ? {
+          logradouro: userInfo.endereco.principal.logradouro,
+          numero: userInfo.endereco.principal.numero,
+          bairro: userInfo.endereco.principal.bairro,
+          municipio: userInfo.endereco.principal.municipio,
+          estado: userInfo.endereco.principal.estado,
+          tipo_logradouro: userInfo.endereco.principal.tipo_logradouro,
+          complemento: userInfo.endereco.principal.complemento,
+          cep: userInfo.endereco.principal.cep,
+        }
+      : null,
+    genero: userInfoExtended.genero,
+    escolaridade: userInfoExtended.escolaridade,
+    renda_familiar: userInfoExtended.renda_familiar,
+    deficiencia: userInfoExtended.deficiencia,
+    nascimento: userInfo.nascimento
+      ? {
+          data: userInfo.nascimento.data,
+        }
+      : undefined,
+    raca: userInfo.raca,
   }
 
   const phoneNeedsUpdate = !isUpdatedWithin({

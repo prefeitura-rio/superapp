@@ -29,6 +29,7 @@ export default function TokenInputForm() {
   const ddd = searchParams.get('ddd') || ''
   const ddi = searchParams.get('ddi') || ''
   const courseSlug = searchParams.get('redirectFromCourses') || ''
+  const returnUrl = searchParams.get('returnUrl')
 
   const hasAutoSubmitted = useRef(false)
 
@@ -75,6 +76,10 @@ export default function TokenInputForm() {
 
   function handleDrawerClose() {
     setDrawerOpen(false)
+    if (returnUrl) {
+      router.push(returnUrl)
+      return
+    }
     if (courseSlug) {
       router.push(
         `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`

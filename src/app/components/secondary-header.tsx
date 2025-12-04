@@ -2,7 +2,6 @@
 
 import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
-import { getBackRoute } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { SearchButton } from './search-button'
@@ -19,6 +18,62 @@ interface SecondaryHeaderProps {
   fixed?: boolean
 }
 
+/**
+ * Checks if there's an internal previous route in the navigation history.
+ * Returns true if we can safely use router.back() to navigate to an internal page.
+ */
+function hasInternalHistory(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    // Check sessionStorage for previous route (client-side navigation)
+    const previousRoute = sessionStorage.getItem('previousRoute')
+    if (previousRoute) {
+      const currentPath = window.location.pathname
+      const previousPath = previousRoute.split('?')[0] // Get pathname only
+
+      // If previous route exists and is different from current, it's a valid internal route
+      if (previousPath && previousPath !== currentPath) {
+        // Check if it's not a child route (e.g., we don't want to go back to a child)
+        const isChildRoute = previousPath.startsWith(`${currentPath}/`)
+        if (!isChildRoute) {
+          return true
+        }
+      }
+    }
+
+    // Fallback to document.referrer check
+    const referrer = document.referrer
+    if (referrer) {
+      try {
+        const referrerUrl = new URL(referrer)
+        const currentUrl = new URL(window.location.href)
+
+        // Check if referrer is from the same domain
+        if (referrerUrl.origin === currentUrl.origin) {
+          const referrerPath =
+            referrerUrl.pathname + referrerUrl.search + referrerUrl.hash
+          const currentPath =
+            currentUrl.pathname + currentUrl.search + currentUrl.hash
+
+          // Check if referrer is different from current page
+          if (referrerPath !== currentPath) {
+            return true
+          }
+        }
+      } catch {
+        // Invalid URL, continue
+      }
+    }
+  } catch {
+    // sessionStorage or other errors, continue
+  }
+
+  return false
+}
+
 export function SecondaryHeader({
   title,
   logo,
@@ -33,12 +88,17 @@ export function SecondaryHeader({
   const router = useRouter()
 
   const handleBack = () => {
-    if (route) {
-      router.push(route)
+    // If a specific route is provided, use it as fallback
+    const fallbackRoute = route || defaultRoute
+
+    // Check if there's an internal history to go back to
+    if (hasInternalHistory()) {
+      router.back()
       return
     }
-    const backRoute = getBackRoute(defaultRoute)
-    router.push(backRoute)
+
+    // No internal history, navigate to the fallback route
+    router.push(fallbackRoute)
   }
 
   return (

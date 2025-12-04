@@ -7,6 +7,24 @@ export interface CourseUserInfo {
   name: string
   email: EmailData
   phone: PhoneData
+  address?: {
+    logradouro?: string
+    numero?: string
+    bairro?: string
+    municipio?: string
+    estado?: string
+    tipo_logradouro?: string
+    complemento?: string
+    cep?: string
+  } | null
+  genero?: string
+  escolaridade?: string
+  renda_familiar?: string
+  deficiencia?: string
+  nascimento?: {
+    data?: string
+  }
+  raca?: string
 }
 
 export interface Schedule {
@@ -68,7 +86,9 @@ export const createInscriptionSchema = (
     scheduleId: hasMultipleSchedules
       ? z.string().min(1, 'Selecione uma turma')
       : hasNearbyUnits
-        ? z.string().optional() // Optional but will be auto-filled if only one schedule
+        ? z
+            .string()
+            .optional() // Optional but will be auto-filled if only one schedule
         : z.string().optional(),
     description: z.string().optional(),
   }

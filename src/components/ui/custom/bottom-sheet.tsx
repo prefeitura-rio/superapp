@@ -62,7 +62,9 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
           )}
 
           {/* Content */}
-          <div className={cn('overflow-y-auto', className)}>{children}</div>
+          <div className={cn('overflow-y-auto max-h-[70vh]', className)}>
+            {children}
+          </div>
         </DrawerContent>
       </Drawer>
     )

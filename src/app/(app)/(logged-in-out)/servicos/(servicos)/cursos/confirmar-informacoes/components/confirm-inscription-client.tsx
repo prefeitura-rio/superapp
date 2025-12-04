@@ -21,7 +21,8 @@ import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
-import Link from 'next/link'
+import { calculateAge } from '@/lib/calculate-age'
+import { formatAddressComplete } from '@/lib/format-address-complete'
 import {
   type CourseUserInfo,
   type CustomField,
@@ -75,13 +76,30 @@ export function ConfirmInscriptionClient({
   const [fadeOut, setFadeOut] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
-  const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
-  const hasValidContactInfo = hasEmail && hasPhone
+  const hasAddress = !!(
+    userInfo.address?.logradouro &&
+    userInfo.address?.bairro &&
+    userInfo.address?.municipio
+  )
+  const hasGender = !!userInfo.genero
+  const hasEducation = !!userInfo.escolaridade
+  const hasFamilyIncome = !!userInfo.renda_familiar
+  const hasDisability = !!userInfo.deficiencia
+
+  // All required fields must be filled
+  const hasAllRequiredFields =
+    hasEmail &&
+    hasPhone &&
+    hasAddress &&
+    hasGender &&
+    hasEducation &&
+    hasFamilyIncome &&
+    hasDisability
 
   // Check if any contact info needs update
   const needsContactUpdate =
@@ -225,12 +243,12 @@ export function ConfirmInscriptionClient({
     {
       id: 'confirm-user-data',
       component: ConfirmUserDataSlide,
-      props: { userInfo, userAuthInfo, contactUpdateStatus },
-      showPagination: true,
+      props: { userInfo, userAuthInfo, contactUpdateStatus, courseSlug },
+      showPagination: false,
       showBackButton: true,
     },
-    // Only include subsequent slides if user has valid contact info
-    ...(hasValidContactInfo
+    // Only include subsequent slides if user has all required fields
+    ...(hasAllRequiredFields
       ? [
           // For online courses: show online class selection if multiple classes
           ...(hasOnlineClasses && !hasUnits
@@ -301,7 +319,7 @@ export function ConfirmInscriptionClient({
   ]
 
   const handleNext = async () => {
-    if (currentIndex === slides.length - 1 && hasValidContactInfo) {
+    if (currentIndex === slides.length - 1 && hasAllRequiredFields) {
       const isValid = await form.trigger()
       if (isValid) {
         await goToSuccess()
@@ -527,47 +545,100 @@ export function ConfirmInscriptionClient({
             hasUnits && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)
               : undefined,
-          customFields: customFields.reduce(
-            (acc, field) => {
-              const fieldValue =
-                formData[`custom_${field.id}` as keyof InscriptionFormData]
-              let value: string
+          customFields: {
+            // Add custom fields from form
+            ...customFields.reduce(
+              (acc, field) => {
+                const fieldValue =
+                  formData[`custom_${field.id}` as keyof InscriptionFormData]
+                let value: string
 
-              if (field.field_type === 'text') {
-                // For text, use the value directly
-                value = (fieldValue as string) || ''
-              } else if (field.field_type === 'multiselect') {
-                // For multiselect, map IDs to values and join
-                if (Array.isArray(fieldValue)) {
-                  const selectedOptions = fieldValue
-                    .map(
-                      selectedId =>
-                        field.options?.find(option => option.id === selectedId)
-                          ?.value
-                    )
-                    .filter(Boolean)
-                  value = selectedOptions.join(', ')
+                if (field.field_type === 'text') {
+                  // For text, use the value directly
+                  value = (fieldValue as string) || ''
+                } else if (field.field_type === 'multiselect') {
+                  // For multiselect, map IDs to values and join
+                  if (Array.isArray(fieldValue)) {
+                    const selectedOptions = fieldValue
+                      .map(
+                        selectedId =>
+                          field.options?.find(
+                            option => option.id === selectedId
+                          )?.value
+                      )
+                      .filter(Boolean)
+                    value = selectedOptions.join(', ')
+                  } else {
+                    value = ''
+                  }
                 } else {
-                  value = ''
+                  // For radio and select, map ID to value
+                  const selectedOption = field.options?.find(
+                    option => option.id === fieldValue
+                  )
+                  value = selectedOption?.value || ''
                 }
-              } else {
-                // For radio and select, map ID to value
-                const selectedOption = field.options?.find(
-                  option => option.id === fieldValue
-                )
-                value = selectedOption?.value || ''
-              }
 
-              acc[field.id] = {
-                id: field.id,
-                title: field.title,
-                value,
-                required: field.required,
-              }
-              return acc
+                acc[field.id] = {
+                  id: field.id,
+                  title: field.title,
+                  value,
+                  required: field.required,
+                }
+                return acc
+              },
+              {} as Record<string, unknown>
+            ),
+            // Add complementary information
+            idade: {
+              id: 'idade',
+              title: 'Idade',
+              value: calculateAge(userInfo.nascimento?.data)?.toString() || '',
+              required: false,
             },
-            {} as Record<string, unknown>
-          ),
+            endereco: {
+              id: 'endereco',
+              title: 'Endereço',
+              value: formatAddressComplete(userInfo.address),
+              required: false,
+            },
+            bairro: {
+              id: 'bairro',
+              title: 'Bairro',
+              value: userInfo.address?.bairro || '',
+              required: false,
+            },
+            pessoa_com_deficiencia: {
+              id: 'pessoa_com_deficiencia',
+              title: 'Pessoa com deficiência',
+              value: userInfo.deficiencia || '',
+              required: false,
+            },
+            raca: {
+              id: 'raca',
+              title: 'Raça',
+              value: userInfo.raca || '',
+              required: false,
+            },
+            genero: {
+              id: 'genero',
+              title: 'Gênero',
+              value: userInfo.genero || '',
+              required: false,
+            },
+            renda_familiar: {
+              id: 'renda_familiar',
+              title: 'Renda familiar',
+              value: userInfo.renda_familiar || '',
+              required: false,
+            },
+            escolaridade: {
+              id: 'escolaridade',
+              title: 'Escolaridade',
+              value: userInfo.escolaridade || '',
+              required: false,
+            },
+          },
           reason:
             formData.description ||
             'Inscrição realizada através do portal do cidadão',
@@ -603,13 +674,13 @@ export function ConfirmInscriptionClient({
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
-  const isLastSlide = currentIndex === slides.length - 1 && hasValidContactInfo
+  const isLastSlide = currentIndex === slides.length - 1 && hasAllRequiredFields
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
     <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
-      <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
-        <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
+      <div className="w-full max-w-4xl mx-auto px-4 flex flex-col h-full">
+        <div className="relative h-11 pb-4 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
           <CustomButton
             className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
               showBackButton
@@ -652,50 +723,26 @@ export function ConfirmInscriptionClient({
 
         {!showSuccess && (
           <div className="flex-shrink-0 pb-12">
-            {needsContactUpdate && hasEmail && hasPhone ? (
+            {!hasAllRequiredFields && currentIndex === 0 && (
               <p className="mb-8">
                 <span className="text-muted-foreground text-sm">
-                  * Atualização Obrigatória
+                  * Campos obrigatórios devem ser preenchidos
                 </span>
               </p>
-            ) : (
-              (!hasEmail || !hasPhone) && (
-                <p className="mb-8">
-                  <span className="text-muted-foreground text-sm">
-                    * Campo Obrigatório
-                  </span>
-                </p>
-              )
             )}
             <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
-              {showUpdateButton && (
-                <div className="flex flex-col items-center w-[50%]">
-                  <Link
-                    className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
-                      showUpdateButton
-                        ? 'opacity-100 translate-x-0 scale-100 text-foreground'
-                        : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                    }
-                  ${(!hasValidContactInfo || needsContactUpdate) && '!text-background bg-primary hover:bg-primary'}
-                  `}
-                    href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
-                  >
-                    Atualizar
-                  </Link>
-                </div>
-              )}
-
               <CustomButton
                 onClick={isLastSlide ? goToSuccess : handleNext}
-                disabled={isPending}
-                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
-        ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
+                disabled={
+                  isPending || (currentIndex === 0 && !hasAllRequiredFields)
+                }
+                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out w-full flex-grow
         ${
           !showSuccess
             ? 'opacity-100 translate-x-0 scale-100'
             : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
         }
-        ${showUpdateButton && (!hasValidContactInfo || needsContactUpdate) && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
+        ${currentIndex === 0 && !hasAllRequiredFields && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
         `}
               >
                 {buttonText}

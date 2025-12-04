@@ -29,6 +29,7 @@ export default function PhoneNumberForm() {
 
   const isPhoneValid = isValidPhone(phone, country)
   const courseSlug = searchParams.get('redirectFromCourses')
+  const returnUrl = searchParams.get('returnUrl')
   const redirectFromCourses = !!courseSlug
   let redirectFromCoursesUrl = ''
 
@@ -50,11 +51,10 @@ export default function PhoneNumberForm() {
         }
 
         if (result.success) {
-          router.push(
-            `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
-              parsedPhone.ddi
-            )}${redirectFromCoursesUrl}`
-          )
+          const tokenUrl = `/meu-perfil/informacoes-pessoais/atualizar-telefone/token-input?valor=${parsedPhone.valor}&ddd=${parsedPhone.ddd}&ddi=${encodeURIComponent(
+            parsedPhone.ddi
+          )}${redirectFromCoursesUrl}${returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : ''}`
+          router.push(tokenUrl)
           toast.success('Token enviado')
         } else {
           // Handle specific error statuses
@@ -72,9 +72,11 @@ export default function PhoneNumberForm() {
     })
   }
 
-  const routeBackUrl = redirectFromCourses
-    ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
-    : '/meu-perfil'
+  const routeBackUrl = returnUrl
+    ? returnUrl
+    : redirectFromCourses
+      ? `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
+      : '/meu-perfil'
 
   function handleDrawerClose() {
     setDrawerOpen(false)

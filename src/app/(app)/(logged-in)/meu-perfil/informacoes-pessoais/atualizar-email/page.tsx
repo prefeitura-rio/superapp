@@ -37,6 +37,7 @@ export default function EmailForm() {
   const searchParams = useSearchParams()
 
   const courseSlug = searchParams.get('redirectFromCourses')
+  const returnUrl = searchParams.get('returnUrl')
 
   const emailStateInput = useInputValidation({
     value: email,
@@ -91,6 +92,11 @@ export default function EmailForm() {
   function handleDrawerClose() {
     setDrawerOpen(false)
 
+    if (returnUrl) {
+      router.push(returnUrl)
+      return
+    }
+
     if (courseSlug) {
       router.push(`/servicos/cursos/confirmar-informacoes/${courseSlug}`)
       return
@@ -111,6 +117,9 @@ export default function EmailForm() {
   }
 
   const getRouteBackUrl = () => {
+    if (returnUrl) {
+      return returnUrl
+    }
     if (courseSlug) {
       return `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
     }

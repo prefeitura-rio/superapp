@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function ConfirmInscriptionLoading() {
   return (
     <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
-      <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
+      <div className="w-full max-w-4xl mx-auto px-4 flex flex-col h-full">
         {/* Back button skeleton */}
         <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
           <Skeleton className="rounded-full w-11 h-11" />
