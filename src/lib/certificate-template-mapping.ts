@@ -23,19 +23,19 @@ export interface OrganizationTemplateMapping {
  */
 const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
   {
-    orgao_id: '5300', // TODO: Substituir pelo cd_ua real quando disponível
+    orgao_id: '5300',
     template: 'juvrio',
   },
   {
-    orgao_id: '2641', // TODO: Substituir pelo cd_ua real quando disponível
+    orgao_id: '2641',
     template: 'planetario',
   },
   {
-    orgao_id: '2400', // TODO: Substituir pelo cd_ua real quando disponível
+    orgao_id: '2400',
     template: 'smac',
   },
   {
-    orgao_id: '4000', // TODO: Substituir pelo cd_ua real quando disponível
+    orgao_id: '4000',
     template: 'smpd',
   },
 ]

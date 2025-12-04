@@ -35,7 +35,6 @@ export default async function CoursesCertifiedPage({
 
     const data = response.data as any
 
-    // Extract enrollments array from the API response
     const enrollments = data?.data?.enrollments || []
 
     // Filter enrollments that are concluded or approved and have certificate available
