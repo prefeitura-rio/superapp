@@ -5,6 +5,7 @@ import { RadioList } from '@/components/ui/custom/radio-list'
 import { RACE_API_TO_DISPLAY } from '@/lib/format-race'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 const RACES = ['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Outra']
 
@@ -46,7 +47,7 @@ export function RaceDrawerContent({
         .replace(/\p{Diacritic}/gu, '')
       const result = await updateUserEthnicity(valueToSend)
       if (result.success) {
-        console.log('Etnia atualizada com sucesso:', result.message)
+        toast.success('Cor / Raça atualizada com sucesso')
         onClose?.()
       }
     } catch (error: any) {

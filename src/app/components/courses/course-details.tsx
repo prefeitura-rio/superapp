@@ -384,20 +384,24 @@ function OnlineClassSelection({
               <span>Turma</span>
             </div>
             <div className="space-y-2.5 text-sm text-foreground-light">
-              <div className="flex items-center gap-3">
-                <CalendarIcon />
-                <span>Data início</span>
-                <span className="text-foreground">
-                  {formatDate(singleClass.class_start_date)}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CalendarIcon />
-                <span>Data final</span>
-                <span className="text-foreground">
-                  {formatDate(singleClass.class_end_date)}
-                </span>
-              </div>
+              {singleClass.class_start_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data início</span>
+                  <span className="text-foreground">
+                    {formatDate(singleClass.class_start_date)}
+                  </span>
+                </div>
+              )}
+              {singleClass.class_end_date && (
+                <div className="flex items-center gap-3">
+                  <CalendarIcon />
+                  <span>Data final</span>
+                  <span className="text-foreground">
+                    {formatDate(singleClass.class_end_date)}
+                  </span>
+                </div>
+              )}
               {singleClass.class_days && (
                 <div className="flex items-center gap-3">
                   <CycleIcon />
@@ -619,22 +623,26 @@ function LocationSelection({
                 {/* Schedule Details with Icons */}
                 <div className="space-y-2.5 text-sm text-foreground-light">
                   {/* Data início */}
-                  <div className="flex items-center gap-3">
-                    <CalendarIcon />
-                    <span>Data início</span>
-                    <span className="text-foreground">
-                      {formatDate(schedule.class_start_date)}
-                    </span>
-                  </div>
+                  {schedule.class_start_date && (
+                    <div className="flex items-center gap-3">
+                      <CalendarIcon />
+                      <span>Data início</span>
+                      <span className="text-foreground">
+                        {formatDate(schedule.class_start_date)}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Data final */}
-                  <div className="flex items-center gap-3">
-                    <CalendarIcon />
-                    <span>Data final</span>
-                    <span className="text-foreground">
-                      {formatDate(schedule.class_end_date)}
-                    </span>
-                  </div>
+                  {schedule.class_end_date && (
+                    <div className="flex items-center gap-3">
+                      <CalendarIcon />
+                      <span>Data final</span>
+                      <span className="text-foreground">
+                        {formatDate(schedule.class_end_date)}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Horário */}
                   <div className="flex items-center gap-3">
