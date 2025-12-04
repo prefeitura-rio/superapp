@@ -325,7 +325,7 @@ export function CoursesUnavailableDrawer({
       headerClassName="text-center p-0 mb-6"
     >
       <div className="text-left md:text-center py-4">
-        <p className="text-sm text-popover-foreground leading-5">
+        <p className="text-normal text-popover-foreground leading-5">
           O certificado ainda não está disponível.
         </p>
       </div>
