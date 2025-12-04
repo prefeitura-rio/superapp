@@ -125,7 +125,7 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um blob e abre em nova aba
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
 
       const newWindow = window.open(url, '_blank')
@@ -182,7 +182,7 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um arquivo para compartilhar
-      const file = new File([pdfBytes], `${courseTitle}-certificado.pdf`, {
+      const file = new File([new Uint8Array(pdfBytes)], `${courseTitle}-certificado.pdf`, {
         type: 'application/pdf',
       })
 
@@ -233,7 +233,7 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um blob e abre para impressão
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
 
       const printWindow = window.open(url, '_blank')
