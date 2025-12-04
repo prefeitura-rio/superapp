@@ -1,5 +1,9 @@
 import { ActionDiv } from '@/app/components/action-div'
+import { DisabilityDrawerContent } from '@/app/components/drawer-contents/disability-drawer-content'
 import { DisplayNameDrawerContent } from '@/app/components/drawer-contents/display-name-drawer-content'
+import { EducationDrawerContent } from '@/app/components/drawer-contents/education-drawer-content'
+import { FamilyIncomeDrawerContent } from '@/app/components/drawer-contents/family-income-drawer-content'
+import { GenderDrawerContent } from '@/app/components/drawer-contents/gender-drawer-content'
 import { RaceDrawerContent } from '@/app/components/drawer-contents/race-drawer-content'
 import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social-name-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -7,6 +11,10 @@ import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
+import { formatDisability } from '@/lib/format-disability'
+import { formatEducation } from '@/lib/format-education'
+import { formatFamilyIncome } from '@/lib/format-family-income'
+import { formatGender } from '@/lib/format-gender'
 import { formatPhone } from '@/lib/format-phone'
 import { formatRace } from '@/lib/format-race'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -44,6 +52,17 @@ export default async function PersonalInfoForm() {
     ? shouldShowUpdateBadge(userInfo.email.principal.updated_at)
     : true // Show badge when email info is missing
   const showRaceBadge = !userInfo?.raca // Show badge when race info is missing
+  // Self-declared fields that may not be in the type definition
+  const userInfoExtended = userInfo as typeof userInfo & {
+    genero?: string
+    renda_familiar?: string
+    escolaridade?: string
+    deficiencia?: string
+  }
+  const showGenderBadge = !userInfoExtended?.genero // Show badge when gender info is missing
+  const showFamilyIncomeBadge = !userInfoExtended?.renda_familiar // Show badge when family income info is missing
+  const showEducationBadge = !userInfoExtended?.escolaridade // Show badge when education info is missing
+  const showDisabilityBadge = !userInfoExtended?.deficiencia // Show badge when disability info is missing
 
   return (
     <>
@@ -140,6 +159,86 @@ export default async function PersonalInfoForm() {
             rightIcon={<EditIcon />}
             drawerContent={<RaceDrawerContent currentRace={userInfo?.raca} />}
             drawerTitle="Cor / Raça"
+          />
+
+          <ActionDiv
+            label="Gênero"
+            optionalLabelVariant={showGenderBadge ? 'destructive' : undefined}
+            optionalLabel={showGenderBadge ? 'Atualizar' : undefined}
+            content={
+              formatGender(userInfoExtended?.genero) ||
+              'Informação indisponível'
+            }
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            drawerContent={
+              <GenderDrawerContent currentGender={userInfoExtended?.genero} />
+            }
+            drawerTitle="Gênero"
+          />
+
+          <ActionDiv
+            label="Renda familiar"
+            optionalLabelVariant={
+              showFamilyIncomeBadge ? 'destructive' : undefined
+            }
+            optionalLabel={showFamilyIncomeBadge ? 'Atualizar' : undefined}
+            content={
+              formatFamilyIncome(userInfoExtended?.renda_familiar) ||
+              'Informação indisponível'
+            }
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            drawerContent={
+              <FamilyIncomeDrawerContent
+                currentFamilyIncome={userInfoExtended?.renda_familiar}
+              />
+            }
+            drawerTitle="Renda familiar"
+          />
+
+          <ActionDiv
+            label="Escolaridade"
+            optionalLabelVariant={
+              showEducationBadge ? 'destructive' : undefined
+            }
+            optionalLabel={showEducationBadge ? 'Atualizar' : undefined}
+            content={
+              formatEducation(userInfoExtended?.escolaridade) ||
+              'Informação indisponível'
+            }
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            drawerContent={
+              <EducationDrawerContent
+                currentEducation={userInfoExtended?.escolaridade}
+              />
+            }
+            drawerTitle="Escolaridade"
+          />
+
+          <ActionDiv
+            label="Você tem alguma deficiência?"
+            optionalLabelVariant={
+              showDisabilityBadge ? 'destructive' : undefined
+            }
+            optionalLabel={showDisabilityBadge ? 'Atualizar' : undefined}
+            content={
+              formatDisability(userInfoExtended?.deficiencia) ||
+              'Informação indisponível'
+            }
+            variant="default"
+            disabled
+            rightIcon={<EditIcon />}
+            drawerContent={
+              <DisabilityDrawerContent
+                currentDisability={userInfoExtended?.deficiencia}
+              />
+            }
+            drawerTitle="Você tem alguma deficiência?"
           />
 
           <CustomInput
