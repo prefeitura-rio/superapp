@@ -4,6 +4,7 @@ import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { categoriesUrl } from '@/constants/aditional-services'
 import type { Category } from '@/lib/categories'
+import { getCategoryDisplayName } from '@/lib/category-display-name'
 import { useEffect, useState } from 'react'
 import { CategoryLink } from './category-link'
 
@@ -31,7 +32,7 @@ function CategoryCard({
         </div>
       </div>
       <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground-light text-center leading-tight font-medium">
-        {category.name}
+        {getCategoryDisplayName(category.name)}
       </span>
     </CategoryLink>
   )
