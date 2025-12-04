@@ -16,6 +16,7 @@ interface SecondaryHeaderProps {
   route?: string
   defaultRoute?: string
   style?: React.CSSProperties
+  fixed?: boolean
 }
 
 export function SecondaryHeader({
@@ -27,6 +28,7 @@ export function SecondaryHeader({
   route,
   defaultRoute = '/',
   style,
+  fixed = true,
 }: SecondaryHeaderProps) {
   const router = useRouter()
 
@@ -42,8 +44,8 @@ export function SecondaryHeader({
   return (
     <>
       <header
-        className={`px-4 py-4 md:py-6 fixed w-full ${className} mx-auto z-50 bg-background text-foreground h-auto transition-all duration-200`}
-        style={{ top: 0, ...style }}
+        className={`px-4 py-4 md:py-6 ${fixed ? 'fixed' : 'relative'} w-full ${className} mx-auto ${fixed ? 'z-50' : ''} bg-background text-foreground h-auto transition-all duration-200`}
+        style={fixed ? { top: 0, ...style } : style}
       >
         <div className="grid grid-cols-3 items-center">
           {/* Left column - IconButton */}
