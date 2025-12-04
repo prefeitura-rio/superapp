@@ -47,9 +47,20 @@ export default async function PersonalInfoForm() {
 
   return (
     <>
-      <div className="min-h-screen max-w-4xl mx-auto pt-24 pb-10 bg-background">
-        <SecondaryHeader title="Informações pessoais" route="/meu-perfil" />
+      <div className="min-h-screen max-w-4xl mx-auto pb-10 bg-background">
+        <SecondaryHeader
+          title="Informações pessoais"
+          className="relative"
+          route="/meu-perfil"
+        />
         <div className="space-y-6 p-4">
+          <CustomInput
+            id="cpf"
+            label="CPF"
+            defaultValue={formatCpf(userAuthInfo?.cpf)}
+            isEditable={false}
+          />
+
           <CustomInput
             id="fullName"
             label="Nome completo"
@@ -119,22 +130,6 @@ export default async function PersonalInfoForm() {
             redirectLink="/meu-perfil/informacoes-pessoais/atualizar-email"
           />
 
-          <CustomInput
-            id="cpf"
-            label="CPF"
-            defaultValue={formatCpf(userAuthInfo?.cpf)}
-            isEditable={false}
-          />
-
-          <CustomInput
-            id="nationality"
-            label="Nacionalidade"
-            defaultValue={
-              userInfo?.nascimento?.pais || 'Informação indisponível'
-            }
-            isEditable={false}
-          />
-
           <ActionDiv
             label="Cor / Raça"
             optionalLabelVariant={showRaceBadge ? 'destructive' : undefined}
@@ -158,12 +153,10 @@ export default async function PersonalInfoForm() {
           />
 
           <CustomInput
-            id="sexo"
-            label="Sexo"
+            id="nationality"
+            label="Nacionalidade"
             defaultValue={
-              userInfo?.sexo
-                ? formatTitleCase(userInfo.sexo)
-                : 'Informação indisponível'
+              userInfo?.nascimento?.pais || 'Informação indisponível'
             }
             isEditable={false}
           />

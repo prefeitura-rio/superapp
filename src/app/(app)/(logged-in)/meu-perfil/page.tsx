@@ -49,9 +49,9 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="pt-20 min-h-lvh max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
+    <div className="min-h-lvh max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
       {/* Header */}
-      <SecondaryHeader title="Perfil" route="/" />
+      <SecondaryHeader className="relative" title="Perfil" route="/" />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
