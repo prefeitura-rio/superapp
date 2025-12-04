@@ -32,6 +32,8 @@ export const transporteIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Transporte.png'
 export const lgpdIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/LGPD.png'
+export const laiIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/LAI.png'
 export const anticorrupcaoIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Anticorrup%C3%A7%C3%A3o.png'
 export const obrasIcon =
