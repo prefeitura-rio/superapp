@@ -51,7 +51,7 @@ export function CoursesCertifiedDrawer({
     }
 
     // Log para debug
-    console.log('Dados do certificado:', data)
+    // console.log('Dados do certificado:', data)
 
     return data
   }
