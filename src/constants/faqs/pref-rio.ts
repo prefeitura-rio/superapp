@@ -74,16 +74,6 @@ export const faqSections: FAQSection[] = [
         content:
           'Sim. A partir de 2026, parte dos serviços mais demandados pela população também estará disponível no WhatsApp, com atendimento automatizado e previsões de resposta rápidas.',
       },
-      {
-        title: 'Consigo solicitar algum serviço dentro do PrefRio?',
-        content:
-          'No momento, os cidadãos vão ser redirecionados para solicitar os serviços no portal do 1746 ou Carioca Digital. Estamos trabalhando para que você possa solicitar os serviços diretamente do PrefRio.',
-      },
-      {
-        title: 'Quando o portal estará 100% operacional?',
-        content:
-          'O portal será implantado em fases: primeiro com centralização de informações dos serviços mais acessados e, gradualmente, com os demais serviços. Até 2026 todos os serviços estarão disponíveis diretamente na nova plataforma.',
-      },
     ],
   },
   {
