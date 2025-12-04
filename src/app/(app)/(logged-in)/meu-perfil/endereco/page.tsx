@@ -31,7 +31,44 @@ export default async function UserAddress() {
     <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
       <SecondaryHeader title="Endereço" route="/meu-perfil" />
       {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
-        <AddressInfoCard address={addressInfo} showBadge={showAddressBadge} />
+        <>
+          <AddressInfoCard address={addressInfo} />
+          {showAddressBadge && (
+            <div className="px-4 pt-2">
+              <div className="bg-card p-4 rounded-xl flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z"
+                    fill="#E17100"
+                  />
+                  <path
+                    d="M12 8.99805L12 11.998"
+                    stroke="#F9FAFB"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12 14.6641H12.0067"
+                    stroke="#F9FAFB"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <p className="text-foreground text-sm leading-5 tracking-normal">
+                  Seu endereço precisa ser atualizado
+                </p>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <EmptyAddress />
       )}

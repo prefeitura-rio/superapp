@@ -4,10 +4,7 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
-import {
-  getCategoryIdBySlug,
-  transformCategoriesToFilters,
-} from '@/lib/course-category-helpers'
+import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
 import {
   filterVisibleCourses,
   normalizeModalityDisplay,
@@ -104,7 +101,7 @@ export default async function CoursesCategoryPage({
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-border">
               {courses.map(course => (
                 <Link
                   key={course.id}
@@ -112,7 +109,7 @@ export default async function CoursesCategoryPage({
                     course.id?.toString() || '',
                     course.title || ''
                   )}`}
-                  className="block"
+                  className="block py-3 first:pt-0 last:pb-0 group"
                 >
                   <div className="flex gap-3 items-center">
                     {course.cover_image && (
@@ -121,8 +118,9 @@ export default async function CoursesCategoryPage({
                           src={course.cover_image}
                           alt={course.title || 'Curso'}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
