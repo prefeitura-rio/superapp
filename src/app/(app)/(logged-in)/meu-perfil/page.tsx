@@ -49,9 +49,9 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="pt-20 min-h-lvh max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
+    <div className="min-h-lvh max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
       {/* Header */}
-      <SecondaryHeader title="Perfil" route="/" />
+      <SecondaryHeader title="Perfil" route="/" fixed={false} />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
@@ -74,14 +74,19 @@ export default async function ProfilePage() {
             <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <EditIcon className="h-8 w-8 text-white" />
             </div>
+
+            {/* Botão de edição fixo no canto inferior direito */}
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+              <EditIcon className="h-3.5 w-3.5 text-white" />
+            </div>
           </div>
         </Link>
-        <h2 className="text-xl font-semibold mb-1">{userDisplayName}</h2>
+        <h2 className="text-xl font-semibold">{userDisplayName}</h2>
         <p className="text-sm text-primary">{formatCpf(userInfo.cpf)}</p>
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 px-4">
+      <div className="flex-1 px-8">
         <nav className="space-y-1">
           {USER_PROFILE_MENU_ITEMS.map((item, index) => (
             <MenuItem
