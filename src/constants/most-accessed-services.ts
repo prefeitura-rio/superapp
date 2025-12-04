@@ -1,7 +1,6 @@
 import {
   alvaraIcon,
   cadrioIcon,
-  cadunicoIcon,
   dividaAtivaIcon,
   iptuIcon,
   licencaSanitariaIcon,
@@ -55,7 +54,7 @@ export const MOST_ACCESSED_SERVICES = [
     id: 'divida-ativa',
     href: '/servicos/categoria/tributos/4a98e610-eab0-4ec5-baab-e93cec6803fe',
     icon: dividaAtivaIcon,
-    title: 'Dívida Ativa: Consulta de débitos de IPTU em Dívida Ativa',
+    title: 'Dívida Ativa: Débitos de IPTU ',
     description: 'Consulta de débitos de IPTU em Dívida Ativa',
   },
 ]
