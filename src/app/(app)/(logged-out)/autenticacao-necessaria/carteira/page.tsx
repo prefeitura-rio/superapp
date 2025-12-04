@@ -5,8 +5,7 @@ import { buildAuthUrl } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
 
-const authReqWalletCardsPng =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/carteira/carteira-deslogada.png'
+const authReqWalletCardsPng = '/carteira-deslogada.png'
 
 export default async function WalletAuthenticationRequired() {
   // Build auth URL that will redirect back to /carteira after login

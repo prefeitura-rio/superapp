@@ -93,58 +93,82 @@ export function MyCertificatesCard({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {certificates.map(certificate => (
-        <button
-          type="button"
-          key={certificate.id}
-          onClick={() => handleCourseClick(certificate)}
-          className={cn(
-            'flex items-center gap-4 rounded-lg p-3 bg-background  transition cursor-pointer group w-full text-left'
-          )}
-        >
-          <div className="relative w-30 h-30 overflow-hidden rounded-xl flex-shrink-0">
-            <Image
-              src={certificate.imageUrl || ''}
-              alt={certificate.title}
-              fill
-              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-            <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
-              {certificate.institutionalLogo ? (
+    <div className="flex flex-col">
+      {certificates.map((certificate, index) => (
+        <div key={certificate.id}>
+          <button
+            type="button"
+            onClick={() => handleCourseClick(certificate)}
+            className="flex items-center gap-3 rounded-lg py-4 bg-background transition cursor-pointer group w-full text-left"
+          >
+            <div className="relative w-30 h-30 overflow-hidden rounded-xl">
+              {certificate.imageUrl ? (
                 <Image
-                  src={certificate.institutionalLogo}
-                  alt="provider"
-                  width={15}
-                  height={15}
+                  src={certificate.imageUrl}
+                  alt={certificate.title}
+                  fill
+                  className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  onError={e => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
                 />
               ) : (
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase">
-                  {certificate.provider?.charAt(0) || 'C'}
-                </span>
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <span className="text-muted-foreground text-xs font-medium">
+                    {certificate.title.charAt(0).toUpperCase()}
+                  </span>
+                </div>
               )}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full  flex items-center justify-center shadow-sm">
+                {certificate.institutionalLogo ? (
+                  <Image
+                    src={certificate.institutionalLogo}
+                    alt="institutional logo"
+                    width={36}
+                    height={36}
+                    className="object-contain rounded-full"
+                    onError={e => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const parent = target.parentElement
+                      if (parent) {
+                        parent.innerHTML = `<span class="text-[10px] font-semibold text-foreground uppercase">${certificate.provider?.charAt(0) || 'C'}</span>`
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-[10px] font-semibold text-foreground uppercase">
+                    {certificate.provider?.charAt(0) || 'C'}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col flex-1 min-w-0">
-            <p className="text-sm font-medium leading-snug text-foreground mb-2">
-              {certificate.title}
-            </p>
-            <p className="text-xs text-muted-foreground mb-2">
-              {normalizeModalityDisplay(certificate.modalidade)} • {certificate.workload}
-            </p>
-            <Badge
-              className={cn(
-                'inline-block px-3 text-xs font-normal rounded-full w-fit border',
-                getCertificateStatusColor(certificate.status)
-              )}
-            >
-              {getCertificateStatusText(certificate.status)}
-            </Badge>
-          </div>
-        </button>
+            <div className="flex flex-col flex-1 min-w-0 items-start">
+              <p className="text-sm font-medium line-clamp-2 leading-snug text-foreground mb-2 text-left">
+                {certificate.title}
+              </p>
+              <p className="text-xs text-muted-foreground mb-2 text-left">
+                {normalizeModalityDisplay(certificate.modalidade)} •{' '}
+                {certificate.workload}
+              </p>
+              <Badge
+                className={cn(
+                  'inline-block px-3 py-1 text-xs font-medium rounded-full w-fit self-start border',
+                  getCertificateStatusColor(certificate.status)
+                )}
+              >
+                {getCertificateStatusText(certificate.status)}
+              </Badge>
+            </div>
+          </button>
+          {index < certificates.length - 1 && (
+            <div className="h-[1px] bg-border" />
+          )}
+        </div>
       ))}
 
       {/* Bottom Sheets */}

@@ -79,7 +79,7 @@ export function CourseCard({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <div className="absolute top-1 left-1 z-20 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden">
+          <div className="absolute top-1 left-1 z-20 w-6 h-6 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
             {institutionaLogo ? (
               <div className="relative w-full h-full">
                 <Image
@@ -148,7 +148,7 @@ export function CourseCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden">
+        <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
           {institutionaLogo ? (
             <div className="relative w-full h-full">
               <Image

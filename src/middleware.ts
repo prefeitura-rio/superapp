@@ -1,3 +1,4 @@
+import { SpanStatusCode, trace } from '@opentelemetry/api'
 import {
   type MiddlewareConfig,
   type NextRequest,
@@ -5,7 +6,6 @@ import {
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
 import { handleExpiredToken, isJwtExpired } from './lib'
-import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -37,7 +37,7 @@ function matchRoute(pathname: string, routePath: string): boolean {
 export async function middleware(request: NextRequest) {
   const tracer = trace.getTracer('citizen-portal-middleware', '0.1.0')
 
-  return tracer.startActiveSpan('middleware.request', async (span) => {
+  return tracer.startActiveSpan('middleware.request', async span => {
     try {
       const path = request.nextUrl.pathname
       span.setAttribute('http.route', path)
@@ -46,26 +46,26 @@ export async function middleware(request: NextRequest) {
       // Generate nonce for CSP
       const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
-  // Define CSP header with nonce support
-  const isDevelopment = process.env.NODE_ENV === 'development'
+      // Define CSP header with nonce support
+      const isDevelopment = process.env.NODE_ENV === 'development'
 
-  // SHA256 hashes for inline scripts
-  const scriptHashes = [
-    'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
-    'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
-    'sha256-QaDv8TLjywIM3mKcA73bK0btmqNpUfcuwzqZ4U9KTsk=',
-    'sha256-J9cZHZf5nVZbsm7Pqxc8RsURv1AIXkMgbhfrZvoOs/A=',
-  ]
+      // SHA256 hashes for inline scripts
+      const scriptHashes = [
+        'sha256-UnthrFpGFotkvMOTp/ghVMSXoZZj9Y6epaMsaBAbUtg=',
+        'sha256-TtbCxulSBIRcXKJGEUTNzReCryzD01lKLU4IQV8Ips0=',
+        'sha256-QaDv8TLjywIM3mKcA73bK0btmqNpUfcuwzqZ4U9KTsk=',
+        'sha256-J9cZHZf5nVZbsm7Pqxc8RsURv1AIXkMgbhfrZvoOs/A=',
+      ]
 
-  const scriptSrcDirectives = [
-    "'self'",
-    `'nonce-${nonce}'`,
-    "'strict-dynamic'",
-    ...scriptHashes.map(hash => `'${hash}'`),
-    ...(isDevelopment ? ["'unsafe-eval'"] : []),
-  ]
+      const scriptSrcDirectives = [
+        "'self'",
+        `'nonce-${nonce}'`,
+        "'strict-dynamic'",
+        ...scriptHashes.map(hash => `'${hash}'`),
+        ...(isDevelopment ? ["'unsafe-eval'"] : []),
+      ]
 
-  const cspHeader = `
+      const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
   script-src ${scriptSrcDirectives.join(' ')};
   style-src 'self' 'unsafe-inline';
@@ -81,12 +81,14 @@ export async function middleware(request: NextRequest) {
   upgrade-insecure-requests;
 `.trim()
 
-  // Clean up CSP header
-  const contentSecurityPolicyHeaderValue = cspHeader
-    .replace(/\s{2,}/g, ' ')
-    .trim()
+      // Clean up CSP header
+      const contentSecurityPolicyHeaderValue = cspHeader
+        .replace(/\s{2,}/g, ' ')
+        .trim()
 
-      const publicRoute = publicRoutes.find(route => matchRoute(path, route.path))
+      const publicRoute = publicRoutes.find(route =>
+        matchRoute(path, route.path)
+      )
       const authToken = request.cookies.get('access_token')
       const refreshToken = request.cookies.get('refresh_token')
 
@@ -94,13 +96,13 @@ export async function middleware(request: NextRequest) {
       span.setAttribute('auth.has_token', !!authToken)
       span.setAttribute('auth.has_refresh_token', !!refreshToken)
 
-  // Set up request headers with nonce and CSP
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-nonce', nonce)
-  requestHeaders.set(
-    'Content-Security-Policy',
-    contentSecurityPolicyHeaderValue
-  )
+      // Set up request headers with nonce and CSP
+      const requestHeaders = new Headers(request.headers)
+      requestHeaders.set('x-nonce', nonce)
+      requestHeaders.set(
+        'Content-Security-Policy',
+        contentSecurityPolicyHeaderValue
+      )
 
       // Special handling for wallet routes
       if (path === '/carteira') {
@@ -264,10 +266,11 @@ export const config: MiddlewareConfig = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * - static assets (images, fonts, etc.)
      */
     {
       source:
-        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp)).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },
