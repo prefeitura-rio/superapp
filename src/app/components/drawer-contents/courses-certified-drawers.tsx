@@ -19,7 +19,7 @@ interface CoursesCertifiedDrawerProps {
   studentName: string
   courseDuration: string
   issuingOrganization: string
-  provider: string
+  orgao_id?: string
   certificateUrl?: string // URL direta do certificado se disponível
 }
 
@@ -35,7 +35,7 @@ export function CoursesCertifiedDrawer({
   studentName,
   courseDuration,
   issuingOrganization,
-  provider,
+  orgao_id,
   certificateUrl,
 }: CoursesCertifiedDrawerProps) {
   const [isGenerating, setIsGenerating] = useState(false)
@@ -47,7 +47,7 @@ export function CoursesCertifiedDrawer({
       courseDuration,
       issuingOrganization,
       issueDate: formatDate(new Date()),
-      organization: provider, // Passa o provider para selecionar o template correto
+      orgao_id, // Passa o orgao_id para buscar o nome do órgão e selecionar o template correto
     }
 
     // Log para debug

@@ -16,6 +16,7 @@ interface Certificate {
   description?: string
   imageUrl?: string
   provider?: string
+  orgao_id?: string
   status: string
   enrollmentId: string
   certificateUrl?: string
@@ -179,7 +180,7 @@ export function MyCertificatesCard({
         studentName={selectedCourse?.studentName || ''}
         courseDuration={selectedCourse?.courseDuration || ''}
         issuingOrganization={selectedCourse?.issuingOrganization || ''}
-        provider={selectedCourse?.provider || ''}
+        orgao_id={selectedCourse?.orgao_id}
         certificateUrl={selectedCourse?.certificateUrl}
       />
       <CoursesUnavailableDrawer

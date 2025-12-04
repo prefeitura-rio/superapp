@@ -12,13 +12,42 @@ import {
 } from 'pdf-lib'
 
 /**
- * Carrega o template PDF baseado na organização
+ * Busca o nome do órgão pelo orgao_id através da API route
+ * Usado apenas para exibir o nome no certificado (issuingOrganization)
  */
-async function loadTemplate(organization?: string): Promise<Uint8Array> {
-  const templateUrl = getTemplateUrl(organization || '')
-  console.log('organization', organization)
+async function getOrganizationName(orgao_id?: string): Promise<string | null> {
+  if (!orgao_id) {
+    return null
+  }
+
+  try {
+    const response = await fetch(`/api/departments/${orgao_id}`)
+    if (!response.ok) {
+      console.error(
+        `Erro ao buscar departamento: ${response.status} ${response.statusText}`
+      )
+      return null
+    }
+
+    const data = await response.json()
+    return data.nome_ua || null
+  } catch (error) {
+    console.error('Erro ao buscar nome do órgão:', error)
+    return null
+  }
+}
+
+/**
+ * Carrega o template PDF baseado no orgao_id
+ */
+async function loadTemplate(orgao_id?: string): Promise<Uint8Array> {
+  if (!orgao_id) {
+    throw new Error('orgao_id é obrigatório para carregar o template')
+  }
+
+  const templateUrl = getTemplateUrl(orgao_id)
   if (!templateUrl)
-    throw new Error(`Template não encontrado para organização: ${organization}`)
+    throw new Error(`Template não encontrado para orgao_id: ${orgao_id}`)
   const res = await fetch(templateUrl)
   if (!res.ok)
     throw new Error(
@@ -287,7 +316,31 @@ export async function generateCertificate(
     typography?: Partial<InternalTypography>
   } = {}
 ): Promise<Uint8Array> {
-  const templateBytes = await loadTemplate(data.organization)
+  // Valida se orgao_id foi fornecido
+  if (!data.orgao_id) {
+    throw new Error('orgao_id é obrigatório para gerar o certificado')
+  }
+
+  // Busca o nome do órgão pelo orgao_id para usar no texto do certificado
+  // (sempre busca se não tiver um nome válido ou se for o fallback padrão)
+  const hasValidOrganization =
+    data.issuingOrganization &&
+    data.issuingOrganization !== 'Organização não informada' &&
+    data.issuingOrganization.trim() !== ''
+
+  if (!hasValidOrganization) {
+    const organizationName = await getOrganizationName(data.orgao_id)
+    if (organizationName) {
+      data.issuingOrganization = organizationName
+    } else {
+      // Se não conseguir buscar, mantém o valor original ou usa um fallback
+      data.issuingOrganization =
+        data.issuingOrganization || 'Organização não informada'
+    }
+  }
+
+  // Carrega o template usando o orgao_id diretamente
+  const templateBytes = await loadTemplate(data.orgao_id)
   const pdfDoc = await PDFDocument.load(templateBytes)
 
   // embute fontes no DOC

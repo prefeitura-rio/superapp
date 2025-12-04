@@ -4,7 +4,7 @@ export interface CertificateData {
   courseDuration: string
   issuingOrganization: string
   issueDate: string
-  organization?: string // Nome da organização para selecionar o template
+  orgao_id?: string // ID do órgão para buscar o nome e selecionar o template
 }
 
 export interface CertificateGenerationOptions {
