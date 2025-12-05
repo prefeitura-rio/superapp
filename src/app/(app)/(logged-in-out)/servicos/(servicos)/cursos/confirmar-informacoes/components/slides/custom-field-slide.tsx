@@ -144,28 +144,30 @@ export function CustomFieldSlide({
   }
 
   return (
-    <div className="w-full space-y-5">
-      <div className="text-left pb-2">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-left pb-5 flex-shrink-0">
         <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
           {field.title}
         </h2>
       </div>
 
-      <div className="space-y-4 max-h-[400px] overflow-y-scroll scrollbar-hide">
-        {field.field_type === 'text' && renderTextField()}
-        {field.field_type === 'radio' && renderRadioField()}
-        {field.field_type === 'select' && renderSelectField()}
-        {field.field_type === 'multiselect' && renderMultiselectField()}
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        <div className="overflow-y-auto overflow-x-hidden pr-1 space-y-4 h-full">
+          {field.field_type === 'text' && renderTextField()}
+          {field.field_type === 'radio' && renderRadioField()}
+          {field.field_type === 'select' && renderSelectField()}
+          {field.field_type === 'multiselect' && renderMultiselectField()}
 
-        {!['text', 'radio', 'select', 'multiselect'].includes(
-          field.field_type
-        ) && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              Tipo de campo não suportado: {field.field_type}
-            </p>
-          </div>
-        )}
+          {!['text', 'radio', 'select', 'multiselect'].includes(
+            field.field_type
+          ) && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                Tipo de campo não suportado: {field.field_type}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
