@@ -236,7 +236,7 @@ export default function ConfirmUserDataSlide({
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-                  Gênero {!hasGender && '*'}
+                  Gênero
                 </p>
                 <p
                   className={`font-normal ${
@@ -266,7 +266,7 @@ export default function ConfirmUserDataSlide({
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-                  Escolaridade {!hasEducation && '*'}
+                  Escolaridade
                 </p>
                 <p
                   className={`font-normal ${
@@ -296,7 +296,7 @@ export default function ConfirmUserDataSlide({
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-                  Renda familiar {!hasFamilyIncome && '*'}
+                  Renda familiar
                 </p>
                 <p
                   className={`font-normal ${
@@ -326,7 +326,7 @@ export default function ConfirmUserDataSlide({
             <div className="flex items-center pb-4 justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
-                  Você tem alguma deficiência? {!hasDisability && '*'}
+                  Você tem alguma deficiência?
                 </p>
                 <p
                   className={`font-normal ${
