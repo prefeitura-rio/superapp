@@ -131,6 +131,66 @@ export default function Search() {
     setResults([])
   }
 
+  const handleBack = () => {
+    if (typeof window === 'undefined') {
+      router.push('/')
+      return
+    }
+
+    try {
+      // Check sessionStorage for previous route
+      const previousRoute = sessionStorage.getItem('previousRoute')
+      if (previousRoute) {
+        const previousPath = previousRoute.split('?')[0] // Get pathname only
+        const currentPath = window.location.pathname
+
+        // Check if previous route is different from current and is from the same app
+        if (previousPath && previousPath !== currentPath) {
+          // Check if it's not a child route
+          const isChildRoute = previousPath.startsWith(`${currentPath}/`)
+          if (!isChildRoute) {
+            // Valid previous route exists, use router.back()
+            router.back()
+            return
+          }
+        }
+      }
+
+      // Fallback to document.referrer check
+      const referrer = document.referrer
+      if (referrer) {
+        try {
+          const referrerUrl = new URL(referrer)
+          const currentUrl = new URL(window.location.href)
+
+          // Check if referrer is from the same domain
+          if (referrerUrl.origin === currentUrl.origin) {
+            const referrerPath = referrerUrl.pathname
+            const currentPath = currentUrl.pathname
+
+            // Check if referrer is different from current page
+            if (referrerPath !== currentPath) {
+              // Check if it's not a child route
+              const isChildRoute = referrerPath.startsWith(`${currentPath}/`)
+              if (!isChildRoute) {
+                // Valid referrer exists, use router.back()
+                router.back()
+                return
+              }
+            }
+          }
+        } catch {
+          // Invalid URL, continue to default
+        }
+      }
+    } catch {
+      // sessionStorage or other errors, continue to default
+    }
+
+    // No valid previous route (direct access), navigate to "/"
+    router.push('/')
+  }
+
   const displayTipo = (tipo: string) => {
     switch (tipo) {
       case 'servico':
@@ -160,7 +220,7 @@ export default function Search() {
       const categorySlug = item.category
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\p{Mn}/gu, '')
         .trim()
       router.push(
         `/servicos/categoria/${encodeURIComponent(categorySlug)}/${item.id}`
@@ -177,7 +237,7 @@ export default function Search() {
         placeholder="Do que você precisa?"
         value={query}
         onChange={e => onQueryChange(e.target.value)}
-        onBack={() => router.back()}
+        onBack={handleBack}
         onClear={clearSearch}
       />
 
