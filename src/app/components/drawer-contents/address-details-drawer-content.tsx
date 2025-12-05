@@ -91,6 +91,7 @@ export function AddressDetailsDrawerContent({
 
   return (
     <BottomSheet
+      className="max-h-[80vh]! md:min-h-auto"
       open={drawerOpen}
       onOpenChange={setDrawerOpen}
       title={<p>Detalhes do Endereço</p>}
