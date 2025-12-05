@@ -40,7 +40,7 @@ export function CardFrontContent({
 
         <div className="mt-auto">
           {primaryValueSlot && (
-            <div className="flex-shrink-0 mb-2">{primaryValueSlot}</div>
+            <div className="flex-shrink-0 mb-1">{primaryValueSlot}</div>
           )}
 
           <div className="flex items-center gap-7">
