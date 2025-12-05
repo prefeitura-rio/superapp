@@ -109,12 +109,28 @@ export const createInscriptionSchema = (
       }
     } else {
       // For other field types, use string
-      if (field.required) {
-        customFieldSchema[fieldKey] = z
-          .string()
-          .min(1, 'Este campo é obrigatório')
+      if (field.field_type === 'text') {
+        // Text fields have a max length of 50 characters
+        if (field.required) {
+          customFieldSchema[fieldKey] = z
+            .string()
+            .min(1, 'Este campo é obrigatório')
+            .max(50, 'O texto não pode ultrapassar 50 caracteres')
+        } else {
+          customFieldSchema[fieldKey] = z
+            .string()
+            .max(50, 'O texto não pode ultrapassar 50 caracteres')
+            .optional()
+        }
       } else {
-        customFieldSchema[fieldKey] = z.string().optional()
+        // For radio and select fields
+        if (field.required) {
+          customFieldSchema[fieldKey] = z
+            .string()
+            .min(1, 'Este campo é obrigatório')
+        } else {
+          customFieldSchema[fieldKey] = z.string().optional()
+        }
       }
     }
   }

@@ -28,22 +28,32 @@ export function CustomFieldSlide({
   const error = errors[fieldName]
   const watchedValue = watch(fieldName)
 
-  const renderTextField = () => (
-    <div className="space-y-2 overflow-y-auto">
-      <Textarea
-        {...register(fieldName)}
-        placeholder="Escreva aqui ..."
-        className="w-full border-0 min-h-[48px] mt-10 border-b border-border rounded-none shadow-none
-         bg-transparent resize-none px-0 py-2 leading-[1.5]
-         placeholder:text-muted-foreground
-         focus-visible:ring-0 focus-visible:border-primary"
-        rows={3}
-      />
-      {error && (
-        <p className="text-destructive text-sm">{String(error.message)}</p>
-      )}
-    </div>
-  )
+  const renderTextField = () => {
+    const textValue = watchedValue || ''
+    const characterCount = textValue.length
+    const maxCharacters = 50
+
+    return (
+      <div className="space-y-2 overflow-y-auto">
+        <Textarea
+          {...register(fieldName)}
+          placeholder="Escreva aqui ..."
+          className="w-full border-0 min-h-[48px] mt-10 border-b border-border rounded-none shadow-none
+           bg-transparent resize-none px-0 py-2 leading-[1.5]
+           placeholder:text-muted-foreground
+           focus-visible:ring-0 focus-visible:border-primary"
+          rows={3}
+          maxLength={maxCharacters}
+        />
+        <p className="text-muted-foreground text-sm">
+          Limite de {maxCharacters} caracteres
+        </p>
+        {error && (
+          <p className="text-destructive text-sm">{String(error.message)}</p>
+        )}
+      </div>
+    )
+  }
 
   const renderRadioField = () => (
     <div className="space-y-4 mt-10">
