@@ -21,8 +21,9 @@ interface SecondaryHeaderProps {
 /**
  * Checks if there's an internal previous route in the navigation history.
  * Returns true if we can safely use router.back() to navigate to an internal page.
+ * @param preferredRoute - If provided, checks if previousRoute should be ignored in favor of this route
  */
-function hasInternalHistory(): boolean {
+function hasInternalHistory(preferredRoute?: string): boolean {
   if (typeof window === 'undefined') {
     return false
   }
@@ -36,6 +37,23 @@ function hasInternalHistory(): boolean {
 
       // If previous route exists and is different from current, it's a valid internal route
       if (previousPath && previousPath !== currentPath) {
+        // Special case: If we're on a category page and previous route is a course detail page,
+        // and a preferred route is provided, ignore the history and use the preferred route
+        if (preferredRoute) {
+          const isCategoryPage = currentPath.match(
+            /^\/servicos\/cursos\/categoria\/[^/]+$/
+          )
+          // Course detail pages have format: /servicos/cursos/{id}-{slug}
+          const isCourseDetailPage = previousPath.match(
+            /^\/servicos\/cursos\/\d+-/
+          )
+
+          if (isCategoryPage && isCourseDetailPage) {
+            // Don't use router.back() - use the preferred route instead
+            return false
+          }
+        }
+
         // Check if it's not a child route (e.g., we don't want to go back to a child)
         const isChildRoute = previousPath.startsWith(`${currentPath}/`)
         if (!isChildRoute) {
@@ -60,6 +78,21 @@ function hasInternalHistory(): boolean {
 
           // Check if referrer is different from current page
           if (referrerPath !== currentPath) {
+            // Special case: If we're on a category page and referrer is a course detail page,
+            // and a preferred route is provided, ignore the history and use the preferred route
+            if (preferredRoute) {
+              const isCategoryPage = currentPath.match(
+                /^\/servicos\/cursos\/categoria\/[^/]+$/
+              )
+              // Course detail pages have format: /servicos/cursos/{id}-{slug}
+              const isCourseDetailPage = referrerUrl.pathname.match(
+                /^\/servicos\/cursos\/\d+-/
+              )
+
+              if (isCategoryPage && isCourseDetailPage) {
+                return false
+              }
+            }
             return true
           }
         }
@@ -92,7 +125,8 @@ export function SecondaryHeader({
     const fallbackRoute = route || defaultRoute
 
     // Check if there's an internal history to go back to
-    if (hasInternalHistory()) {
+    // Pass the preferred route so we can ignore history when appropriate
+    if (hasInternalHistory(fallbackRoute)) {
       router.back()
       return
     }
