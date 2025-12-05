@@ -4,7 +4,7 @@ import { putCitizenCpfDisability } from '@/http/citizen/citizen'
 import type { HandlersErrorResponse } from '@/http/models'
 import type { ModelsSelfDeclaredDeficienciaInput } from '@/http/models/modelsSelfDeclaredDeficienciaInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserDisability(disability: string) {
   const userInfo = await getUserInfoFromToken()
@@ -30,6 +30,7 @@ export async function updateUserDisability(disability: string) {
     }
     
     revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Deficiência atualizada com sucesso.' }
   } catch (error: any) {
     // If it's an API error response, throw it to be handled by the component

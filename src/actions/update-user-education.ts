@@ -4,7 +4,7 @@ import { putCitizenCpfEducation } from '@/http/citizen/citizen'
 import type { HandlersErrorResponse } from '@/http/models'
 import type { ModelsSelfDeclaredEscolaridadeInput } from '@/http/models/modelsSelfDeclaredEscolaridadeInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserEducation(education: string) {
   const userInfo = await getUserInfoFromToken()
@@ -30,6 +30,7 @@ export async function updateUserEducation(education: string) {
     }
     
     revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Escolaridade atualizada com sucesso.' }
   } catch (error: any) {
     // If it's an API error response, throw it to be handled by the component

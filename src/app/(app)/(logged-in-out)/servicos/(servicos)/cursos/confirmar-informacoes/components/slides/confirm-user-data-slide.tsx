@@ -355,8 +355,10 @@ export default function ConfirmUserDataSlide({
       >
         <GenderDrawerContent
           currentGender={userInfo.genero}
-          onClose={() => {
+          onClose={async () => {
             setGenderDrawerOpen(false)
+            // Wait a bit to ensure cache revalidation is processed
+            await new Promise(resolve => setTimeout(resolve, 200))
             // Refresh data from server without full page reload
             router.refresh()
           }}
@@ -371,8 +373,10 @@ export default function ConfirmUserDataSlide({
       >
         <EducationDrawerContent
           currentEducation={userInfo.escolaridade}
-          onClose={() => {
+          onClose={async () => {
             setEducationDrawerOpen(false)
+            // Wait a bit to ensure cache revalidation is processed
+            await new Promise(resolve => setTimeout(resolve, 200))
             // Refresh data from server without full page reload
             router.refresh()
           }}
@@ -387,8 +391,10 @@ export default function ConfirmUserDataSlide({
       >
         <FamilyIncomeDrawerContent
           currentFamilyIncome={userInfo.renda_familiar}
-          onClose={() => {
+          onClose={async () => {
             setFamilyIncomeDrawerOpen(false)
+            // Wait a bit to ensure cache revalidation is processed
+            await new Promise(resolve => setTimeout(resolve, 200))
             // Refresh data from server without full page reload
             router.refresh()
           }}
@@ -403,8 +409,10 @@ export default function ConfirmUserDataSlide({
       >
         <DisabilityDrawerContent
           currentDisability={userInfo.deficiencia}
-          onClose={() => {
+          onClose={async () => {
             setDisabilityDrawerOpen(false)
+            // Wait a bit to ensure cache revalidation is processed
+            await new Promise(resolve => setTimeout(resolve, 200))
             // Refresh data from server without full page reload
             router.refresh()
           }}

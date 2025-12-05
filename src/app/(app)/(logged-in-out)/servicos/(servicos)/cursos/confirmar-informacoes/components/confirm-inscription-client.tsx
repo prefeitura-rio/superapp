@@ -91,15 +91,8 @@ export function ConfirmInscriptionClient({
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
 
-  // All required fields must be filled
-  const hasAllRequiredFields =
-    hasEmail &&
-    hasPhone &&
-    hasAddress &&
-    hasGender &&
-    hasEducation &&
-    hasFamilyIncome &&
-    hasDisability
+  // Only require phone, email, and address for course enrollment
+  const hasAllRequiredFields = hasPhone && hasEmail && hasAddress
 
   // Check if any contact info needs update
   const needsContactUpdate =
