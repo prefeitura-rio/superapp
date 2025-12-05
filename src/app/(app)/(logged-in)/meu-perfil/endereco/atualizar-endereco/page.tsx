@@ -26,7 +26,7 @@ import type {
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
 import { MapPin } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -87,6 +87,9 @@ export default function AddressForm() {
   const inputRef = useRef<HTMLInputElement>(null)
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnUrl = searchParams.get('returnUrl')
+  const courseSlug = searchParams.get('redirectFromCourses')
 
   // Initialize react-hook-form
   const form = useForm<AddressFormSchema>({
@@ -400,10 +403,14 @@ export default function AddressForm() {
             />
             <Button
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-lg font-normal text-background"
+              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal text-background"
               onClick={() => {
                 setDrawerOpen(false)
-                router.back()
+                if (returnUrl) {
+                  router.push(returnUrl)
+                } else {
+                  router.back()
+                }
               }}
             >
               Finalizar

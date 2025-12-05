@@ -22,12 +22,19 @@ export function hasValidPhone(phone: PhoneData | null | undefined): boolean {
 
   const { ddi, ddd, valor } = principal
 
+  // Check if any value is the string "null" or empty
+  const isNullString = (val: string | null | undefined) =>
+    val === 'null' || val === null || val === undefined
+
   return (
     typeof ddi === 'string' &&
+    !isNullString(ddi) &&
     ddi.trim().length > 0 &&
     typeof ddd === 'string' &&
+    !isNullString(ddd) &&
     ddd.trim().length > 0 &&
     typeof valor === 'string' &&
+    !isNullString(valor) &&
     valor.trim().length > 0
   )
 }
@@ -43,6 +50,11 @@ export function getPhoneValue(
   const ddi = principal.ddi!.trim()
   const ddd = principal.ddd!.trim()
   const valor = principal.valor!.trim()
+
+  // Double check for "null" strings
+  if (ddi.toLowerCase() === 'null' || ddd.toLowerCase() === 'null' || valor.toLowerCase() === 'null') {
+    return undefined
+  }
 
   return `+${ddi} ${ddd} ${valor}`
 }

@@ -4,11 +4,38 @@ import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { categoriesUrl } from '@/constants/aditional-services'
 import type { Category } from '@/lib/categories'
+import { getCategoryDisplayName } from '@/lib/category-display-name'
 import { useEffect, useState } from 'react'
 import { CategoryLink } from './category-link'
 
 interface HomeCategoriesGridProps {
   categories?: Category[]
+}
+
+function CategoryCard({
+  category,
+  position,
+}: {
+  category: Category
+  position: number
+}) {
+  return (
+    <CategoryLink
+      key={category.categorySlug}
+      category={category}
+      position={position}
+      href={categoriesUrl(category.categorySlug)}
+    >
+      <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
+        <div className="flex items-center justify-center text-3xl mb-1">
+          {category.icon}
+        </div>
+      </div>
+      <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground-light text-center leading-tight font-medium">
+        {getCategoryDisplayName(category.name)}
+      </span>
+    </CategoryLink>
+  )
 }
 
 export default function HomeCategoriesGrid({
@@ -26,9 +53,13 @@ export default function HomeCategoriesGrid({
         <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-5 w-20" />
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        {/* Mobile/Tablet skeleton - below max-w-4xl */}
+        <div className="grid grid-cols-4 gap-2 lg:hidden">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="flex flex-col items-center">
+            <div
+              key={`skeleton-mobile-${i}`}
+              className="flex flex-col items-center"
+            >
               <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square w-full max-h-19 min-h-18">
                 <Skeleton className="text-3xl mb-1 h-6 w-6" />
               </div>
@@ -39,8 +70,25 @@ export default function HomeCategoriesGrid({
           ))}
         </div>
 
-        {/* Skeleton pagination bullets */}
-        <div className="flex justify-center items-center h-12">
+        {/* Desktop skeleton - max-w-4xl and above */}
+        <div className="hidden lg:grid lg:grid-cols-8 gap-2">
+          {Array.from({ length: categories?.length || 16 }).map((_, i) => (
+            <div
+              key={`skeleton-desktop-${i}`}
+              className="flex flex-col items-center"
+            >
+              <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square w-full max-h-19 min-h-18">
+                <Skeleton className="text-3xl mb-1 h-6 w-6" />
+              </div>
+              <div className="pt-2">
+                <Skeleton className="h-3 w-8 sm:w-12" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton pagination bullets - mobile/tablet only */}
+        <div className="flex justify-center items-center h-12 lg:hidden">
           <div className="flex items-center gap-1.5">
             <Skeleton className="w-2 h-1.5 rounded-full" />
             <Skeleton className="w-2 h-1.5 rounded-full" />
@@ -50,57 +98,65 @@ export default function HomeCategoriesGrid({
     )
   }
 
+  if (!categories || categories.length === 0) {
+    return null
+  }
+
   return (
     <div className="px-4 pb-4 overflow-x-hidden">
       <h3 className="pb-2 text-base font-medium text-foreground leading-5">
         Serviços
       </h3>
-      <div className="pb-0">
+
+      {/* Mobile/Tablet: Swiper with grid-cols-4 - below max-w-4xl */}
+      <div className="pb-0 lg:hidden">
         <SwiperWrapper
           showArrows={true}
           showPagination={true}
           className="animate-fade-in"
         >
-          {categories &&
-            Array.from(
-              { length: Math.ceil(categories.length / 8) },
-              (_, slideIndex) => {
-                const startIndex = slideIndex * 8
-                const slideCategories = categories.slice(
-                  startIndex,
-                  startIndex + 8
-                )
+          {Array.from(
+            { length: Math.ceil(categories.length / 8) },
+            (_, slideIndex) => {
+              const startIndex = slideIndex * 8
+              const slideCategories = categories.slice(
+                startIndex,
+                startIndex + 8
+              )
 
-                return (
-                  <div
-                    key={`slide-${slideIndex}`}
-                    className="grid grid-cols-4 gap-2"
-                  >
-                    {slideCategories.map((category, index) => {
-                      const globalPosition = startIndex + index + 1
-                      return (
-                        <CategoryLink
-                          key={category.categorySlug}
-                          category={category}
-                          position={globalPosition}
-                          href={categoriesUrl(category.categorySlug)}
-                        >
-                          <div className="flex flex-col items-center justify-center p-2 bg-card rounded-2xl aspect-square cursor-pointer hover:bg-card/80 transition-colors w-full max-h-19 min-h-18">
-                            <div className="flex items-center justify-center text-3xl mb-1">
-                              {category.icon}
-                            </div>
-                          </div>
-                          <span className="flex flex-col items-center justify-center pt-2 text-xs sm:text-sm text-foreground text-center leading-tight font-medium">
-                            {category.name}
-                          </span>
-                        </CategoryLink>
-                      )
-                    })}
-                  </div>
-                )
-              }
-            )}
+              return (
+                <div
+                  key={`slide-${slideIndex}`}
+                  className="grid grid-cols-4 gap-2"
+                >
+                  {slideCategories.map((category, index) => {
+                    const globalPosition = startIndex + index + 1
+                    return (
+                      <CategoryCard
+                        key={category.categorySlug}
+                        category={category}
+                        position={globalPosition}
+                      />
+                    )
+                  })}
+                </div>
+              )
+            }
+          )}
         </SwiperWrapper>
+      </div>
+
+      {/* Desktop: All cards in grid without swiper - max-w-4xl and above */}
+      <div className="hidden lg:block pb-0">
+        <div className="grid grid-cols-8 gap-2 animate-fade-in">
+          {categories.map((category, index) => (
+            <CategoryCard
+              key={category.categorySlug}
+              category={category}
+              position={index + 1}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { extractCourseId } from '@/actions/courses/utils-mock'
+import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
@@ -18,19 +18,38 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ConfirmInscriptionPage({ params, searchParams }: PageProps) {
+export default async function ConfirmInscriptionPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug: courseSlug } = await params
   const searchParamsData = await searchParams
-  const preselectedLocationId = typeof searchParamsData.locationId === 'string' 
-    ? searchParamsData.locationId 
-    : undefined
+  const preselectedLocationId =
+    typeof searchParamsData.locationId === 'string'
+      ? searchParamsData.locationId
+      : undefined
+  const preselectedClassId =
+    typeof searchParamsData.classId === 'string'
+      ? searchParamsData.classId
+      : undefined
   const courseUuid = extractCourseId(courseSlug)
 
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
     // Redirect to auth with return URL to come back here after login
-    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}`
+    // Preserve query parameters (locationId or classId) in the return URL
+    const queryParams = new URLSearchParams()
+    if (preselectedLocationId) {
+      queryParams.set('locationId', preselectedLocationId)
+    }
+    if (preselectedClassId) {
+      queryParams.set('classId', preselectedClassId)
+    }
+    const queryString = queryParams.toString()
+    const returnUrl = `/servicos/cursos/confirmar-informacoes/${courseSlug}${
+      queryString ? `?${queryString}` : ''
+    }`
     redirect(buildAuthUrl(returnUrl))
   }
 
@@ -46,11 +65,41 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
   const userInfo = userInfoResponse.data
   const courseInfo = courseInfoResponse.data
 
+  // Type assertion for self-declared fields
+  const userInfoExtended = userInfo as typeof userInfo & {
+    genero?: string
+    renda_familiar?: string
+    escolaridade?: string
+    deficiencia?: string
+  }
+
   const transformedUserInfo = {
     cpf: userInfo.cpf || userAuthInfo.cpf,
     name: userInfo.nome || userAuthInfo.name,
     email: normalizeEmailData(userInfo.email),
     phone: normalizePhoneData(userInfo.telefone),
+    address: userInfo.endereco?.principal
+      ? {
+          logradouro: userInfo.endereco.principal.logradouro,
+          numero: userInfo.endereco.principal.numero,
+          bairro: userInfo.endereco.principal.bairro,
+          municipio: userInfo.endereco.principal.municipio,
+          estado: userInfo.endereco.principal.estado,
+          tipo_logradouro: userInfo.endereco.principal.tipo_logradouro,
+          complemento: userInfo.endereco.principal.complemento,
+          cep: userInfo.endereco.principal.cep,
+        }
+      : null,
+    genero: userInfoExtended.genero,
+    escolaridade: userInfoExtended.escolaridade,
+    renda_familiar: userInfoExtended.renda_familiar,
+    deficiencia: userInfoExtended.deficiencia,
+    nascimento: userInfo.nascimento
+      ? {
+          data: userInfo.nascimento.data,
+        }
+      : undefined,
+    raca: userInfo.raca,
   }
 
   const phoneNeedsUpdate = !isUpdatedWithin({
@@ -67,13 +116,58 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
     months: 6, // Email must be updated every 6 months
   })
 
+  // Check if phone, email, and address are outdated (more than 6 months old)
+  // The confirmation screen should only show if at least one is outdated
+  const phoneOutdated = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
+        ?.updated_at || null,
+    months: 6, // Check if updated within 6 months
+  })
+
+  const emailOutdated = !isUpdatedWithin({
+    updatedAt:
+      (transformedUserInfo.email.principal as ModelsEmailPrincipal)
+        ?.updated_at || null,
+    months: 6, // Check if updated within 6 months
+  })
+
+  const addressOutdated = !isUpdatedWithin({
+    updatedAt: userInfo.endereco?.principal?.updated_at || null,
+    months: 6, // Check if updated within 6 months
+  })
+
+  // Show confirmation screen only if at least one field is outdated
+  const shouldShowConfirmationScreen =
+    phoneOutdated || emailOutdated || addressOutdated
+
   const contactUpdateStatus = {
     phoneNeedsUpdate,
     emailNeedsUpdate,
   }
 
+  const courseData = (courseInfo as any).data
+  const modality = courseData?.modalidade?.toLowerCase()
+  const isOnlineCourse = modality === 'online' || modality === 'remoto'
+
+  // Extract online classes from remote_class.schedules if available
+  const onlineClasses =
+    isOnlineCourse && courseData?.remote_class?.schedules
+      ? courseData.remote_class.schedules.map((schedule: any) => ({
+          id: schedule.id,
+          location_id: schedule.location_id,
+          vacancies: schedule.vacancies,
+          class_start_date: schedule.class_start_date,
+          class_end_date: schedule.class_end_date,
+          class_time: schedule.class_time || '',
+          class_days: schedule.class_days || '',
+          created_at: schedule.created_at,
+          updated_at: schedule.updated_at,
+        }))
+      : []
+
   const nearbyUnits =
-    (courseInfo as any).data?.locations?.map((location: any) => ({
+    courseData?.locations?.map((location: any) => ({
       id: location.id,
       curso_id: location.curso_id,
       address: location.address,
@@ -89,10 +183,13 @@ export default async function ConfirmInscriptionPage({ params, searchParams }: P
       contactUpdateStatus={contactUpdateStatus}
       userAuthInfo={userAuthInfo}
       nearbyUnits={nearbyUnits}
+      onlineClasses={onlineClasses}
       courseInfo={courseInfo}
       courseId={courseUuid}
       courseSlug={courseSlug}
       preselectedLocationId={preselectedLocationId}
+      preselectedClassId={preselectedClassId}
+      shouldShowConfirmationScreen={shouldShowConfirmationScreen}
     />
   )
 }

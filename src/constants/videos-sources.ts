@@ -56,6 +56,12 @@ export const VIDEO_SOURCES = {
     darkVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Email-atualizado.mp4',
   },
+  updateName: {
+    lightVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-Nome-atualizado.mp4',
+    darkVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Nome-atualizado.mp4',
+  },
   emptyAddress: {
     lightVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-Atualiza%C3%A7%C3%A3o-de-endere%C3%A7o.mp4',
@@ -68,7 +74,7 @@ export const VIDEO_SOURCES = {
     darkVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-sess%C3%A3o-expirada.mp4',
   },
-   course: {
+  course: {
     lightVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-cursos.mp4',
     darkVideo:

@@ -2,6 +2,7 @@
 
 import { UserIcon } from '@/assets/icons'
 import { Skeleton } from '@/components/ui/skeleton'
+import { buildAuthUrl } from '@/constants/url'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -36,22 +37,27 @@ export default function HeaderUserLink({
   if (isLoading) {
     return (
       <div className="flex items-center space-x-3">
-        <Skeleton className="rounded-full h-10 w-10" />
-        <div className="flex flex-col space-y-1">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-20" />
-        </div>
+        <Skeleton className="rounded-full h-11 w-11" />
       </div>
     )
   }
 
+  // When not logged in, redirect to auth with home as return URL
+  // When logged in, go to profile page
+  const href = isLoggedIn ? '/meu-perfil' : buildAuthUrl('/')
+
   return (
     <Link
-      href="/meu-perfil"
+      href={href}
       className="flex items-center space-x-3"
       onClick={handleClick}
     >
-      <div className="rounded-full bg-card w-10 h-10 flex items-center justify-center overflow-hidden">
+      {!isLoggedIn && (
+        <span className="text-sm font-normal text-muted-foreground">
+          Faça seu login
+        </span>
+      )}
+      <div className="rounded-full bg-card w-11 h-11 flex items-center justify-center overflow-hidden">
         {isLoggedIn && userAvatarUrl ? (
           <Image
             src={userAvatarUrl}
@@ -63,14 +69,6 @@ export default function HeaderUserLink({
         ) : (
           <UserIcon className="h-5 w-5" />
         )}
-      </div>
-      <div className="flex flex-col">
-        <span className="text-base font-medium text-foreground">
-          {isLoggedIn ? userName : 'Olá, Visitante!'}
-        </span>
-        <span className="text-sm font-normal text-muted-foreground">
-          {isLoggedIn ? '' : 'Faça seu login'}
-        </span>
       </div>
     </Link>
   )

@@ -35,7 +35,6 @@ export default async function CoursesCertifiedPage({
 
     const data = response.data as any
 
-    // Extract enrollments array from the API response
     const enrollments = data?.data?.enrollments || []
 
     // Filter enrollments that are concluded or approved and have certificate available
@@ -54,6 +53,7 @@ export default async function CoursesCertifiedPage({
         imageUrl: enrollment.curso?.cover_image,
         institutionalLogo: enrollment.curso?.institutional_logo,
         provider: enrollment.curso?.organization,
+        orgao_id: enrollment.curso?.orgao_id,
         // Só permite geração de certificado se status for 'concluded'
         // Se 'approved', mostra como pendente até admin marcar como concluded
         status:
@@ -70,8 +70,8 @@ export default async function CoursesCertifiedPage({
         // Dados necessários para geração do certificado
         studentName: userInfo.name || 'Usuário',
         courseDuration: enrollment.curso?.workload || 'Duração não informada',
-        issuingOrganization:
-          enrollment.curso?.organization || 'Organização não informada',
+        // issuingOrganization será buscado pelo orgao_id no gerador se não estiver preenchido
+        issuingOrganization: enrollment.curso?.organization || '',
       }))
       .filter((course: any) => course.id)
 

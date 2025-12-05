@@ -19,7 +19,7 @@ interface CoursesCertifiedDrawerProps {
   studentName: string
   courseDuration: string
   issuingOrganization: string
-  provider: string
+  orgao_id?: string
   certificateUrl?: string // URL direta do certificado se disponível
 }
 
@@ -35,7 +35,7 @@ export function CoursesCertifiedDrawer({
   studentName,
   courseDuration,
   issuingOrganization,
-  provider,
+  orgao_id,
   certificateUrl,
 }: CoursesCertifiedDrawerProps) {
   const [isGenerating, setIsGenerating] = useState(false)
@@ -47,11 +47,11 @@ export function CoursesCertifiedDrawer({
       courseDuration,
       issuingOrganization,
       issueDate: formatDate(new Date()),
-      organization: provider, // Passa o provider para selecionar o template correto
+      orgao_id, // Passa o orgao_id para buscar o nome do órgão e selecionar o template correto
     }
 
     // Log para debug
-    console.log('Dados do certificado:', data)
+    // console.log('Dados do certificado:', data)
 
     return data
   }
@@ -125,7 +125,9 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um blob e abre em nova aba
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const blob = new Blob([new Uint8Array(pdfBytes)], {
+        type: 'application/pdf',
+      })
       const url = URL.createObjectURL(blob)
 
       const newWindow = window.open(url, '_blank')
@@ -182,9 +184,13 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um arquivo para compartilhar
-      const file = new File([pdfBytes], `${courseTitle}-certificado.pdf`, {
-        type: 'application/pdf',
-      })
+      const file = new File(
+        [new Uint8Array(pdfBytes)],
+        `${courseTitle}-certificado.pdf`,
+        {
+          type: 'application/pdf',
+        }
+      )
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
@@ -233,7 +239,9 @@ export function CoursesCertifiedDrawer({
       const pdfBytes = await generateCertificate(certificateData)
 
       // Cria um blob e abre para impressão
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const blob = new Blob([new Uint8Array(pdfBytes)], {
+        type: 'application/pdf',
+      })
       const url = URL.createObjectURL(blob)
 
       const printWindow = window.open(url, '_blank')
@@ -317,7 +325,7 @@ export function CoursesUnavailableDrawer({
       headerClassName="text-center p-0 mb-6"
     >
       <div className="text-left md:text-center py-4">
-        <p className="text-sm text-popover-foreground leading-5">
+        <p className="text-normal text-popover-foreground leading-5">
           O certificado ainda não está disponível.
         </p>
       </div>

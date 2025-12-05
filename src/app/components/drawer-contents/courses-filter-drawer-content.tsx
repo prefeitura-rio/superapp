@@ -1,9 +1,10 @@
-import { COURSE_FILTERS } from '@/actions/courses/utils-mock'
+import { COURSE_FILTERS } from '@/actions/courses/utils'
 import {
   BottomSheet,
   BottomSheetFooter,
 } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import type { CategoryFilter } from '@/lib/course-category-helpers'
 
 interface CoursesFilterDrawerContentProps {
   open: boolean
@@ -12,6 +13,7 @@ interface CoursesFilterDrawerContentProps {
   onFilterSelect: (category: string, value: string) => void
   onClearFilters: () => void
   onApplyFilters: () => void
+  categoryFilters?: CategoryFilter[]
 }
 
 export default function CoursesFilterDrawerContent({
@@ -21,10 +23,31 @@ export default function CoursesFilterDrawerContent({
   onFilterSelect,
   onClearFilters,
   onApplyFilters,
+  categoryFilters = [],
 }: CoursesFilterDrawerContentProps) {
+  // Helper to check if a value is selected
+  const isSelected = (category: string, value: string) => {
+    return selectedFilters[category] === value
+  }
+
+  // Check if there are any filters selected
+  const hasSelectedFilters = Object.values(selectedFilters).some(
+    value => value !== undefined && value !== ''
+  )
+
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Filtros">
-      <div className="space-y-6">
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Filtros"
+      contentClassName="max-h-[80vh]! md:min-h-[88vh] 3xl:min-h-auto flex flex-col"
+      className="flex-1 min-h-0"
+    >
+      <div className="space-y-6 pb-10">
+        <h2 className="flex justify-center items-center text-xl font-medium text-center my-6">
+          Filtros
+        </h2>
+
         {/* Modalidade */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
@@ -35,10 +58,10 @@ export default function CoursesFilterDrawerContent({
               <CustomButton
                 key={option.value}
                 onClick={() => onFilterSelect('modalidade', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.modalidade === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
+                  isSelected('modalidade', option.value)
+                    ? 'bg-primary text-background hover:bg-primary'
+                    : 'bg-background text-foreground hover:bg-background'
                 }`}
               >
                 {option.label}
@@ -47,20 +70,20 @@ export default function CoursesFilterDrawerContent({
           </div>
         </div>
 
-        {/* Certificado */}
+        {/* Local do curso */}
         <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
-            Certificado
+            Local do curso
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.certificado.map(option => (
+            {COURSE_FILTERS.local_curso.map(option => (
               <CustomButton
                 key={option.value}
-                onClick={() => onFilterSelect('certificado', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.certificado === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                onClick={() => onFilterSelect('local_curso', option.value)}
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
+                  isSelected('local_curso', option.value)
+                    ? 'bg-primary text-background hover:bg-primary'
+                    : 'bg-background text-foreground hover:bg-background'
                 }`}
               >
                 {option.label}
@@ -75,34 +98,48 @@ export default function CoursesFilterDrawerContent({
             Categoria
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.categoria.map(option => (
-              <CustomButton
-                key={option.value}
-                onClick={() => onFilterSelect('categoria', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
-                  selectedFilters.categoria === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {option.label}
-              </CustomButton>
-            ))}
+            {categoryFilters.length > 0
+              ? categoryFilters.map(category => (
+                  <CustomButton
+                    key={category.value}
+                    onClick={() => onFilterSelect('categoria', category.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
+                      isSelected('categoria', category.value)
+                        ? 'bg-primary text-background hover:bg-primary'
+                        : 'bg-background text-foreground hover:bg-background'
+                    }`}
+                  >
+                    {category.label}
+                  </CustomButton>
+                ))
+              : COURSE_FILTERS.categoria.map(option => (
+                  <CustomButton
+                    key={option.value}
+                    onClick={() => onFilterSelect('categoria', option.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-normal transition-colors focus:opacity-100 active:opacity-100 border-[1px] border-muted-foreground ${
+                      isSelected('categoria', option.value)
+                        ? 'bg-primary text-background hover:bg-primary'
+                        : 'bg-background text-foreground hover:bg-background'
+                    }`}
+                  >
+                    {option.label}
+                  </CustomButton>
+                ))}
           </div>
         </div>
 
-        {/* Período do dia */}
-        <div>
+        {/* Acessibilidade */}
+        {/* <div>
           <h3 className="text-base font-normal text-popover-foreground mb-4">
-            Período do dia
+            Acessibilidade
           </h3>
           <div className="flex flex-wrap gap-2">
-            {COURSE_FILTERS.periodo.map(option => (
+            {COURSE_FILTERS.acessibilidade.map(option => (
               <CustomButton
                 key={option.value}
-                onClick={() => onFilterSelect('periodo', option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors flex items-center align-middle ${
-                  selectedFilters.periodo === option.value
+                onClick={() => onFilterSelect('acessibilidade', option.value)}
+                className={`px-4 py-2 rounded-full text-sm font-normal transition-colors ${
+                  isSelected('acessibilidade', option.value)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
@@ -111,19 +148,23 @@ export default function CoursesFilterDrawerContent({
               </CustomButton>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
-      <BottomSheetFooter>
+      <BottomSheetFooter className="flex flex-col px-0!">
+        <CustomButton
+          onClick={onApplyFilters}
+          className="rounded-full py-4 flex-1 w-full"
+        >
+          Filtrar
+        </CustomButton>
         <CustomButton
           variant="outline"
           onClick={onClearFilters}
-          className="flex-1"
+          disabled={!hasSelectedFilters}
+          className="flex-1 rounded-full py-4 w-full bg-card border-0 focus:outline-none! focus:ring-0! focus:ring-offset-0!"
         >
           Limpar filtros
-        </CustomButton>
-        <CustomButton onClick={onApplyFilters} className="flex-1">
-          Filtrar
         </CustomButton>
       </BottomSheetFooter>
     </BottomSheet>

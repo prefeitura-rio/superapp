@@ -97,3 +97,110 @@ export function formatTitleCase(
 
   return formattedWords.join(' ')
 }
+
+/**
+ * Tracks the current route in sessionStorage for back navigation.
+ * Call this function on route changes to maintain navigation history.
+ * This is particularly useful for Next.js client-side navigation where document.referrer is not updated.
+ */
+export function trackRoute(currentPath: string): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    const currentRoute =
+      window.location.pathname + window.location.search + window.location.hash
+    const storedCurrentRoute = sessionStorage.getItem('currentRoute')
+
+    // Only update if the current route is different from what's stored
+    if (storedCurrentRoute !== currentRoute) {
+      // Move current route to previous route before updating
+      if (storedCurrentRoute) {
+        sessionStorage.setItem('previousRoute', storedCurrentRoute)
+      }
+      // Update the current route
+      sessionStorage.setItem('currentRoute', currentRoute)
+    }
+  } catch (error) {
+    // sessionStorage might be unavailable (private browsing, etc.)
+    console.warn('Failed to track route:', error)
+  }
+}
+
+/**
+ * Determines the back navigation route based on tracked navigation history or referrer.
+ * Uses sessionStorage to track previous routes (works with Next.js client-side navigation),
+ * and falls back to document.referrer for external navigation or direct access.
+ * @param defaultRoute - The default route to return when no valid previous route exists (default: '/servicos/cursos/')
+ * @returns The route path to navigate back to
+ */
+export function getBackRoute(defaultRoute = '/servicos/cursos/'): string {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return defaultRoute
+  }
+
+  try {
+    // First, try to get the previous route from sessionStorage (works with client-side navigation)
+    const previousRoute = sessionStorage.getItem('previousRoute')
+    if (previousRoute) {
+      const currentUrl = new URL(window.location.href)
+      const previousPath = previousRoute.split('?')[0] // Get pathname only for comparison
+      const currentPath = currentUrl.pathname
+
+      // If previous route is different from current, check if it's a child route
+      if (previousPath !== currentPath) {
+        // Check if previous route is a child route of current route (e.g., service detail is child of category list)
+        // If previous route starts with current route + '/', it's a child route - skip it
+        const isChildRoute = previousPath.startsWith(`${currentPath}/`)
+
+        if (!isChildRoute) {
+          return previousRoute
+        }
+        // If it's a child route, fall through to use defaultRoute
+      }
+    }
+  } catch (error) {
+    // sessionStorage might be unavailable, continue to referrer check
+  }
+
+  // Fallback to document.referrer for external navigation or when sessionStorage is empty
+  const referrer = document.referrer
+
+  if (!referrer) {
+    return defaultRoute
+  }
+
+  try {
+    const referrerUrl = new URL(referrer)
+    const currentUrl = new URL(window.location.href)
+
+    // Compare hosts (including port if present)
+    const referrerHost = referrerUrl.host
+    const currentHost = currentUrl.host
+
+    // If hosts don't match, return default route
+    if (referrerHost !== currentHost) {
+      return defaultRoute
+    }
+
+    // Same domain - extract the path from referrer
+    const referrerPath =
+      referrerUrl.pathname + referrerUrl.search + referrerUrl.hash
+
+    // If referrer is the same page, return default route
+    if (
+      referrerPath ===
+      currentUrl.pathname + currentUrl.search + currentUrl.hash
+    ) {
+      return defaultRoute
+    }
+
+    // Return the referrer's path
+    return referrerPath || defaultRoute
+  } catch (error) {
+    // Invalid URL or parsing error - return default route
+    return defaultRoute
+  }
+}

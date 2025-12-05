@@ -28,11 +28,11 @@ export type GetApiV1SearchParams = {
    */
   include_inactive?: boolean
   /**
-   * Alpha para busca hybrid (0-1, default: 0.3)
+   * Alpha para busca hybrid (0-1). Alpha=0.3 significa 30% texto + 70% vetor.
    */
   alpha?: number
   /**
-   * Score mínimo para busca keyword (0-1, filtra text_match normalizado)
+   * Score mínimo para busca keyword (0-1, filtra text_match normalizado via log normalization)
    */
   threshold_keyword?: number
   /**
@@ -44,7 +44,19 @@ export type GetApiV1SearchParams = {
    */
   threshold_hybrid?: number
   /**
+   * Score mínimo para busca AI com generate_scores=true (0-1, filtra por ai_score.final_score)
+   */
+  threshold_ai?: number
+  /**
    * Se true, exclui serviços exclusivos para agentes IA (mostra apenas serviços para humanos)
    */
   exclude_agent_exclusive?: boolean
+  /**
+   * Gera scores detalhados via LLM para os resultados (apenas type=ai).
+   */
+  generate_scores?: boolean
+  /**
+   * Aplica boost por recência: docs atualizados nos últimos 30 dias mantêm score, docs mais antigos sofrem decay gradual
+   */
+  recency_boost?: boolean
 }

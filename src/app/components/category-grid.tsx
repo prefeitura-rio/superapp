@@ -1,6 +1,7 @@
 'use client'
 import { categoriesUrl } from '@/constants/aditional-services'
 import type { Category } from '@/lib/categories'
+import { getCategoryDisplayName } from '@/lib/category-display-name'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { CategoryButton } from './category-button'
@@ -37,7 +38,7 @@ export function CategoryGrid({ title, categories }: CategoryGridProps) {
               </div>
             </CategoryButton>
             <span className="mt-2 text-sm text-center text-foreground">
-              {category.name}
+              {getCategoryDisplayName(category.name)}
             </span>
           </div>
         ))}

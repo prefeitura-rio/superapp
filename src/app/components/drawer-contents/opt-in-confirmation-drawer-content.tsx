@@ -32,7 +32,7 @@ export function OptInConfirmationDrawerContent({
             Rio?
           </p>
 
-          <div className="text-sm text-muted-foreground leading-5 space-y-4">
+          <div className="text-sm text-foreground-light leading-5 space-y-4 opacity-100">
             <p>
               Ao desativar, você deixará de receber informações personalizadas
               sobre benefícios, campanhas, eventos e oportunidades relevantes
@@ -54,7 +54,7 @@ export function OptInConfirmationDrawerContent({
         <div className="flex gap-2">
           <CustomButton
             size="lg"
-            className="flex-1"
+            className="flex-1 rounded-full"
             onClick={onConfirm}
             disabled={isPending}
           >
@@ -64,7 +64,7 @@ export function OptInConfirmationDrawerContent({
           <CustomButton
             size="lg"
             variant="secondary"
-            className="flex-1"
+            className="flex-1 rounded-full"
             onClick={onCancel}
             disabled={isPending}
           >

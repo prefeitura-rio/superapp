@@ -17,7 +17,8 @@ export function hasValidEmail(
 ): boolean {
   // String
   if (typeof email === 'string') {
-    return email.trim().length > 0
+    const trimmed = email.trim()
+    return trimmed.length > 0 && trimmed.toLowerCase() !== 'null'
   }
 
   // Null/undefined
@@ -27,14 +28,22 @@ export function hasValidEmail(
 
   // Object with structure
   const valor = email.principal?.valor
-  return typeof valor === 'string' && valor.trim().length > 0
+  if (typeof valor === 'string') {
+    const trimmed = valor.trim()
+    return trimmed.length > 0 && trimmed.toLowerCase() !== 'null'
+  }
+  return false
 }
 
 export function getEmailValue(
   email: EmailData | string | null | undefined
 ): string | undefined {
-  if (typeof email === 'string' && email.trim().length > 0) {
-    return email.trim()
+  if (typeof email === 'string') {
+    const trimmed = email.trim()
+    if (trimmed.length > 0 && trimmed.toLowerCase() !== 'null') {
+      return trimmed
+    }
+    return undefined
   }
 
   if (
@@ -43,7 +52,10 @@ export function getEmailValue(
     typeof email.principal.valor === 'string'
   ) {
     const trimmed = email.principal.valor.trim()
-    return trimmed.length > 0 ? trimmed : undefined
+    if (trimmed.length > 0 && trimmed.toLowerCase() !== 'null') {
+      return trimmed
+    }
+    return undefined
   }
 
   return undefined

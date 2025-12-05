@@ -81,13 +81,13 @@ export function AddressInfoCard({
   const displayAddress = address ? mainLine : 'Endereço não disponível'
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-0 mb-0">
       <div
         onClick={() => setOpen(true)}
         className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
       >
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 pt-1">
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0">
             <MapPinIcon className="w-6 h-6 text-card-foreground" />
           </div>
 

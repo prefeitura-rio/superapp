@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
 import ConfirmUserDataSlide from './slides/confirm-user-data-slide'
 import { CustomFieldSlide } from './slides/custom-field-slide'
+import { SelectOnlineClassSlide } from './slides/select-online-class-slide'
 import { SelectScheduleSlide } from './slides/select-schedule-slide'
 import { SelectUnitSlide } from './slides/select-unit-slide'
 import { SuccessSlide } from './slides/success-slide'
@@ -20,12 +21,14 @@ import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
-import Link from 'next/link'
+import { calculateAge } from '@/lib/calculate-age'
+import { formatAddressComplete } from '@/lib/format-address-complete'
 import {
   type CourseUserInfo,
   type CustomField,
   type InscriptionFormData,
   type NearbyUnit,
+  type Schedule,
   createInscriptionSchema,
 } from '../types'
 
@@ -41,11 +44,14 @@ interface ConfirmInscriptionClientProps {
     name: string
   }
   nearbyUnits: NearbyUnit[]
+  onlineClasses?: Schedule[]
   courseInfo: any // Add courseInfo prop
   courseId: string
   courseSlug?: string
   contactUpdateStatus?: ContactUpdateStatus
   preselectedLocationId?: string
+  preselectedClassId?: string
+  shouldShowConfirmationScreen?: boolean
 }
 
 const TRANSITIONS = {
@@ -58,24 +64,37 @@ export function ConfirmInscriptionClient({
   userInfo,
   userAuthInfo,
   nearbyUnits,
+  onlineClasses = [],
   courseInfo,
   courseId,
   courseSlug,
   contactUpdateStatus,
   preselectedLocationId,
+  preselectedClassId,
+  shouldShowConfirmationScreen = true,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
-  const showUpdateButton = currentIndex === 0
   const router = useRouter()
 
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
-  const hasValidContactInfo = hasEmail && hasPhone
+  const hasAddress = !!(
+    userInfo.address?.logradouro &&
+    userInfo.address?.bairro &&
+    userInfo.address?.municipio
+  )
+  const hasGender = !!userInfo.genero
+  const hasEducation = !!userInfo.escolaridade
+  const hasFamilyIncome = !!userInfo.renda_familiar
+  const hasDisability = !!userInfo.deficiencia
+
+  // Only require phone, email, and address for course enrollment
+  const hasAllRequiredFields = hasPhone && hasEmail && hasAddress
 
   // Check if any contact info needs update
   const needsContactUpdate =
@@ -89,6 +108,10 @@ export function ConfirmInscriptionClient({
   // Determine if we need to show unit/schedule selection
   // Always show unit selection if there are units available (even if just one)
   const hasUnits = nearbyUnits && nearbyUnits.length > 0
+
+  // Check if this is an online course with multiple classes
+  const hasOnlineClasses = onlineClasses && onlineClasses.length > 0
+  const hasMultipleOnlineClasses = onlineClasses && onlineClasses.length > 1
 
   // Check if any unit has multiple schedules (needed for schema validation)
   const hasAnyUnitWithMultipleSchedules =
@@ -128,17 +151,38 @@ export function ConfirmInscriptionClient({
     return ''
   }
 
+  // Determine initial online class selection
+  const getInitialOnlineClassId = () => {
+    // If preselectedClassId is provided and exists in onlineClasses, use it
+    if (preselectedClassId) {
+      const preselectedClass = onlineClasses.find(
+        cls => cls.id === preselectedClassId
+      )
+      if (preselectedClass) {
+        return preselectedClassId
+      }
+    }
+    // Otherwise, if there's only one online class, automatically select it
+    if (hasOnlineClasses && onlineClasses.length === 1) {
+      return onlineClasses[0].id
+    }
+    // If multiple classes, start with empty (user must select)
+    return ''
+  }
+
   const form = useForm<InscriptionFormData>({
     resolver: zodResolver(
       createInscriptionSchema(
         hasUnits, // Require selection if there are units available
-        hasAnyUnitWithMultipleSchedules, // Only require scheduleId if any unit has multiple schedules
+        hasAnyUnitWithMultipleSchedules || hasMultipleOnlineClasses, // Require scheduleId if multiple schedules or online classes
         customFields
       )
     ),
     defaultValues: {
       unitId: initialUnitId,
-      scheduleId: getInitialScheduleId(),
+      scheduleId: hasOnlineClasses
+        ? getInitialOnlineClassId()
+        : getInitialScheduleId(),
       description: '',
       // Initialize custom fields with empty values
       ...Object.fromEntries(
@@ -186,43 +230,22 @@ export function ConfirmInscriptionClient({
     unitForScheduleSlide.schedules &&
     unitForScheduleSlide.schedules.length > 1
 
-  const slides = [
-    {
-      id: 'confirm-user-data',
-      component: ConfirmUserDataSlide,
-      props: { userInfo, userAuthInfo, contactUpdateStatus },
-      showPagination: true,
-      showBackButton: true,
-    },
-    // Only include subsequent slides if user has valid contact info
-    ...(hasValidContactInfo
-      ? [
-          // Always show select-unit slide if there are units available (even if just one)
-          ...(hasUnits
+  // Only show online class slide if there are multiple online classes
+  // If there's only one online class, it's automatically selected and no slide is needed
+  const shouldShowOnlineClassSlide = hasMultipleOnlineClasses
+
+  // Build slides array for subsequent steps (after confirmation)
+  const subsequentSlides = hasAllRequiredFields
+    ? [
+        // For online courses: show online class selection if multiple classes
+        ...(hasOnlineClasses && !hasUnits
+          ? shouldShowOnlineClassSlide
             ? [
                 {
-                  id: 'select-unit',
-                  component: SelectUnitSlide,
+                  id: 'select-online-class',
+                  component: SelectOnlineClassSlide,
                   props: {
-                    nearbyUnits,
-                    form,
-                    fieldName: 'unitId',
-                  },
-                  showPagination: true,
-                  showBackButton: true,
-                },
-              ]
-            : []),
-          // Only show select-schedule slide if the selected unit has multiple schedules
-          // If there's only one schedule, it's automatically selected and no slide is needed
-          ...(shouldShowScheduleSlide
-            ? [
-                {
-                  id: 'select-schedule',
-                  component: SelectScheduleSlide,
-                  props: {
-                    selectedUnit: unitForScheduleSlide,
-                    nearbyUnits,
+                    onlineClasses,
                     form,
                     fieldName: 'scheduleId',
                   },
@@ -230,31 +253,96 @@ export function ConfirmInscriptionClient({
                   showBackButton: true,
                 },
               ]
-            : []),
-          // Add custom field slides dynamically
-          ...customFields.map(field => ({
-            id: `custom-field-${field.id}`,
-            component: CustomFieldSlide,
-            props: {
-              field,
-              fieldName: `custom_${field.id}`,
-              form,
-            },
-            showPagination: true,
+            : []
+          : []),
+        // Always show select-unit slide if there are units available (even if just one)
+        ...(hasUnits
+          ? [
+              {
+                id: 'select-unit',
+                component: SelectUnitSlide,
+                props: {
+                  nearbyUnits,
+                  form,
+                  fieldName: 'unitId',
+                },
+                showPagination: true,
+                showBackButton: true,
+              },
+            ]
+          : []),
+        // Only show select-schedule slide if the selected unit has multiple schedules
+        // If there's only one schedule, it's automatically selected and no slide is needed
+        ...(shouldShowScheduleSlide
+          ? [
+              {
+                id: 'select-schedule',
+                component: SelectScheduleSlide,
+                props: {
+                  selectedUnit: unitForScheduleSlide,
+                  nearbyUnits,
+                  form,
+                  fieldName: 'scheduleId',
+                },
+                showPagination: true,
+                showBackButton: true,
+              },
+            ]
+          : []),
+        // Add custom field slides dynamically
+        ...customFields.map(field => ({
+          id: `custom-field-${field.id}`,
+          component: CustomFieldSlide,
+          props: {
+            field,
+            fieldName: `custom_${field.id}`,
+            form,
+          },
+          showPagination: true,
+          showBackButton: true,
+        })),
+      ]
+    : []
+
+  // Always show confirmation screen if fields are outdated OR if there are no other slides
+  const shouldShowConfirmation =
+    shouldShowConfirmationScreen || subsequentSlides.length === 0
+
+  const slides = [
+    ...(shouldShowConfirmation
+      ? [
+          {
+            id: 'confirm-user-data',
+            component: ConfirmUserDataSlide,
+            props: { userInfo, userAuthInfo, contactUpdateStatus, courseSlug },
+            showPagination: false,
             showBackButton: true,
-          })),
+          },
         ]
       : []),
+    ...subsequentSlides,
   ]
 
   const handleNext = async () => {
-    if (currentIndex === slides.length - 1 && hasValidContactInfo) {
+    if (currentIndex === slides.length - 1 && hasAllRequiredFields) {
       const isValid = await form.trigger()
       if (isValid) {
         await goToSuccess()
       }
     } else {
       const currentSlide = slides[currentIndex]
+      // Handle online class selection validation
+      if (currentSlide.id === 'select-online-class' && hasOnlineClasses) {
+        const isValid = await form.trigger('scheduleId')
+        if (!isValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), {
+            shouldTouch: true,
+          })
+          return
+        }
+      }
+
       if (currentSlide.id === 'select-unit' && hasUnits) {
         const isUnitValid = await form.trigger('unitId')
         if (!isUnitValid) return
@@ -334,6 +422,23 @@ export function ConfirmInscriptionClient({
 
   // Function to find the first slide with missing required fields
   const findFirstInvalidSlide = async (): Promise<number | null> => {
+    // Check online class selection if required (when there are multiple online classes)
+    if (hasMultipleOnlineClasses && !hasUnits) {
+      const onlineClassSlideIndex = slides.findIndex(
+        slide => slide.id === 'select-online-class'
+      )
+      if (onlineClassSlideIndex !== -1) {
+        const isOnlineClassValid = await form.trigger('scheduleId')
+        if (!isOnlineClassValid) {
+          // Mark field as touched so error appears
+          form.setValue('scheduleId', form.getValues('scheduleId'), {
+            shouldTouch: true,
+          })
+          return onlineClassSlideIndex
+        }
+      }
+    }
+
     // Check unit selection if required (when there are units available)
     if (hasUnits) {
       const unitSlideIndex = slides.findIndex(
@@ -417,12 +522,16 @@ export function ConfirmInscriptionClient({
         const formData = form.getValues()
 
         // Get the selected schedule ID
-        // If there's only one schedule in the selected unit, use it automatically
+        // For online courses: if there's only one online class, use it automatically
+        // For in-person courses: if there's only one schedule in the selected unit, use it automatically
         // Otherwise, use the scheduleId from the form (user selected it)
         let finalScheduleId = formData.scheduleId
-        if (!finalScheduleId && selectedUnit) {
-          if (selectedUnit.schedules.length === 1) {
-            // Auto-select if only one schedule
+        if (!finalScheduleId) {
+          if (hasOnlineClasses && onlineClasses.length === 1) {
+            // Auto-select if only one online class
+            finalScheduleId = onlineClasses[0].id
+          } else if (selectedUnit && selectedUnit.schedules.length === 1) {
+            // Auto-select if only one schedule in selected unit
             finalScheduleId = selectedUnit.schedules[0].id
           }
         }
@@ -441,47 +550,100 @@ export function ConfirmInscriptionClient({
             hasUnits && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)
               : undefined,
-          customFields: customFields.reduce(
-            (acc, field) => {
-              const fieldValue =
-                formData[`custom_${field.id}` as keyof InscriptionFormData]
-              let value: string
+          customFields: {
+            // Add custom fields from form
+            ...customFields.reduce(
+              (acc, field) => {
+                const fieldValue =
+                  formData[`custom_${field.id}` as keyof InscriptionFormData]
+                let value: string
 
-              if (field.field_type === 'text') {
-                // For text, use the value directly
-                value = (fieldValue as string) || ''
-              } else if (field.field_type === 'multiselect') {
-                // For multiselect, map IDs to values and join
-                if (Array.isArray(fieldValue)) {
-                  const selectedOptions = fieldValue
-                    .map(
-                      selectedId =>
-                        field.options?.find(option => option.id === selectedId)
-                          ?.value
-                    )
-                    .filter(Boolean)
-                  value = selectedOptions.join(', ')
+                if (field.field_type === 'text') {
+                  // For text, use the value directly
+                  value = (fieldValue as string) || ''
+                } else if (field.field_type === 'multiselect') {
+                  // For multiselect, map IDs to values and join
+                  if (Array.isArray(fieldValue)) {
+                    const selectedOptions = fieldValue
+                      .map(
+                        selectedId =>
+                          field.options?.find(
+                            option => option.id === selectedId
+                          )?.value
+                      )
+                      .filter(Boolean)
+                    value = selectedOptions.join(', ')
+                  } else {
+                    value = ''
+                  }
                 } else {
-                  value = ''
+                  // For radio and select, map ID to value
+                  const selectedOption = field.options?.find(
+                    option => option.id === fieldValue
+                  )
+                  value = selectedOption?.value || ''
                 }
-              } else {
-                // For radio and select, map ID to value
-                const selectedOption = field.options?.find(
-                  option => option.id === fieldValue
-                )
-                value = selectedOption?.value || ''
-              }
 
-              acc[field.id] = {
-                id: field.id,
-                title: field.title,
-                value,
-                required: field.required,
-              }
-              return acc
+                acc[field.id] = {
+                  id: field.id,
+                  title: field.title,
+                  value,
+                  required: field.required,
+                }
+                return acc
+              },
+              {} as Record<string, unknown>
+            ),
+            // Add complementary information
+            idade: {
+              id: 'idade',
+              title: 'Idade',
+              value: calculateAge(userInfo.nascimento?.data)?.toString() || '',
+              required: false,
             },
-            {} as Record<string, unknown>
-          ),
+            endereco: {
+              id: 'endereco',
+              title: 'Endereço',
+              value: formatAddressComplete(userInfo.address),
+              required: false,
+            },
+            bairro: {
+              id: 'bairro',
+              title: 'Bairro',
+              value: userInfo.address?.bairro || '',
+              required: false,
+            },
+            pessoa_com_deficiencia: {
+              id: 'pessoa_com_deficiencia',
+              title: 'Pessoa com deficiência',
+              value: userInfo.deficiencia || '',
+              required: false,
+            },
+            raca: {
+              id: 'raca',
+              title: 'Raça',
+              value: userInfo.raca || '',
+              required: false,
+            },
+            genero: {
+              id: 'genero',
+              title: 'Gênero',
+              value: userInfo.genero || '',
+              required: false,
+            },
+            renda_familiar: {
+              id: 'renda_familiar',
+              title: 'Renda familiar',
+              value: userInfo.renda_familiar || '',
+              required: false,
+            },
+            escolaridade: {
+              id: 'escolaridade',
+              title: 'Escolaridade',
+              value: userInfo.escolaridade || '',
+              required: false,
+            },
+          },
           reason:
             formData.description ||
             'Inscrição realizada através do portal do cidadão',
@@ -502,7 +664,7 @@ export function ConfirmInscriptionClient({
             ? error.message
             : 'Erro ao fazer inscrição. Tente novamente.'
         toast.error(errorMessage)
-        router.back()
+        router.push(`/servicos/cursos/${courseId}`)
         setFadeOut(false)
       }
     })
@@ -517,13 +679,13 @@ export function ConfirmInscriptionClient({
   const showBackButton =
     (currentIndex >= 0 || showSuccess) && currentSlide?.showBackButton !== false
   const showNextButton = !showSuccess && currentIndex < slides.length - 1
-  const isLastSlide = currentIndex === slides.length - 1 && hasValidContactInfo
+  const isLastSlide = currentIndex === slides.length - 1 && hasAllRequiredFields
   const buttonText = isLastSlide ? 'Confirmar inscrição' : 'Continuar'
 
   return (
     <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
-      <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
-        <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
+      <div className="w-full max-w-4xl mx-auto px-4 flex flex-col h-full">
+        <div className="relative h-11 pb-4 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
           <CustomButton
             className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
               showBackButton
@@ -566,50 +728,26 @@ export function ConfirmInscriptionClient({
 
         {!showSuccess && (
           <div className="flex-shrink-0 pb-12">
-            {needsContactUpdate && hasEmail && hasPhone ? (
+            {!hasAllRequiredFields && currentIndex === 0 && (
               <p className="mb-8">
                 <span className="text-muted-foreground text-sm">
-                  * Atualização Obrigatória
+                  * Campos obrigatórios devem ser preenchidos
                 </span>
               </p>
-            ) : (
-              (!hasEmail || !hasPhone) && (
-                <p className="mb-8">
-                  <span className="text-muted-foreground text-sm">
-                    * Campo Obrigatório
-                  </span>
-                </p>
-              )
             )}
             <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
-              {showUpdateButton && (
-                <div className="flex flex-col items-center w-[50%]">
-                  <Link
-                    className={`bg-card py-4 px-6 text-sm font-normal leading-5 rounded-full w-full h-[46px] hover:bg-card/90 transition-all duration-500 ease-out ring-0 outline-0 flex items-center justify-center ${
-                      showUpdateButton
-                        ? 'opacity-100 translate-x-0 scale-100 text-foreground'
-                        : 'opacity-0 -translate-x-4 scale-95 pointer-events-none flex-0'
-                    }
-                  ${(!hasValidContactInfo || needsContactUpdate) && '!text-background bg-primary hover:bg-primary'}
-                  `}
-                    href={`/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`}
-                  >
-                    Atualizar
-                  </Link>
-                </div>
-              )}
-
               <CustomButton
                 onClick={isLastSlide ? goToSuccess : handleNext}
-                disabled={isPending}
-                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out 
-        ${showUpdateButton ? 'w-[50%] flex-grow-0' : 'w-full flex-grow'}
+                disabled={
+                  isPending || (currentIndex === 0 && !hasAllRequiredFields)
+                }
+                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out w-full flex-grow
         ${
           !showSuccess
             ? 'opacity-100 translate-x-0 scale-100'
             : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
         }
-        ${showUpdateButton && (!hasValidContactInfo || needsContactUpdate) && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
+        ${currentIndex === 0 && !hasAllRequiredFields && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
         `}
               >
                 {buttonText}

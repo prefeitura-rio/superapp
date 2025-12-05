@@ -45,6 +45,8 @@ export interface ModelsPrefRioServiceRequest {
    */
   status?: number
   /** @maxLength 20000 */
+  sub_categoria?: string
+  /** @maxLength 20000 */
   tema_geral: string
   /** @maxLength 20000 */
   tempo_atendimento?: string

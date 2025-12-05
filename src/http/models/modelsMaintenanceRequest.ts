@@ -9,42 +9,21 @@
 export interface ModelsMaintenanceRequest {
   categoria?: string
   cpf?: string
-  data_alvo_diagnostico?: string
   data_alvo_finalizacao?: string
   data_fim?: string
   data_inicio?: string
-  data_real_diagnostico?: string
-  dentro_prazo?: string
   descricao?: string
-  /** Human-readable address, built on demand */
+  /** Pre-built address string */
   endereco?: string
   id?: string
-  id_bairro?: string
+  /** Maps from MongoDB "id" field */
   id_chamado?: string
-  id_logradouro?: string
-  id_origem_ocorrencia?: string
-  id_subtipo?: string
-  id_territorialidade?: string
-  id_tipo?: string
-  id_unidade_organizacional?: string
-  id_unidade_organizacional_mae?: string
   indicador?: boolean
-  justificativa_status?: unknown
-  latitude?: number
-  longitude?: number
   nome_unidade_organizacional?: string
-  numero_logradouro?: number
   origem_ocorrencia?: string
-  prazo_tipo?: string
-  prazo_unidade?: string
-  reclamacoes?: number
-  situacao?: string
   status?: string
   subtipo?: string
-  tempo_prazo?: unknown
   tipo?: string
-  tipo_situacao?: string
   total_chamados?: number
   total_fechados?: number
-  unidade_organizacional_ouvidoria?: string
 }

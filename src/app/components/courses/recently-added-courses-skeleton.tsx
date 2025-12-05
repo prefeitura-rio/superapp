@@ -13,7 +13,7 @@ export function RecentlyAddedCoursesSwipeSkeleton() {
           </div>
 
           <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-            <div className="flex gap-4 w-max">
+            <div className="flex gap-2 w-max">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
@@ -55,7 +55,7 @@ export function RecentlyAddedCoursesSwipeSkeleton() {
 
           <div className="relative">
             <div className="overflow-hidden">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-2">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}

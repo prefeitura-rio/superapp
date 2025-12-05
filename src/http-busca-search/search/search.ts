@@ -18,7 +18,7 @@ import type {
 import { customFetchBuscaSearch } from '../../../custom-fetch-busca-search'
 
 /**
- * Executa busca com 4 estratégias: keyword (textual), semantic (vetorial), hybrid (combinada) ou ai (agente inteligente)
+ * Executa busca com 4 estratégias: keyword (textual), semantic (vetorial), hybrid (combinada) ou ai (agente inteligente). Resposta inclui total_count (total do Typesense) e filtered_count (após aplicar thresholds).
  * @summary Busca unificada de serviços públicos
  */
 export type getApiV1SearchResponse200 = {

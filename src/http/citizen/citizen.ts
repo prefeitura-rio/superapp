@@ -21,15 +21,97 @@ import type {
   ModelsPetStatsResponse,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
+  ModelsSelfDeclaredDeficienciaInput,
   ModelsSelfDeclaredEmailInput,
+  ModelsSelfDeclaredEscolaridadeInput,
+  ModelsSelfDeclaredGeneroInput,
   ModelsSelfDeclaredNomeExibicaoInput,
   ModelsSelfDeclaredPhoneInput,
   ModelsSelfDeclaredRacaInput,
+  ModelsSelfDeclaredRendaFamiliarInput,
   ModelsUserConfigOptInResponse,
   ModelsUserConfigResponse,
 } from '.././models'
 
 import { customFetch } from '../../../custom-fetch'
+
+/**
+ * Retorna a lista de opções válidas de condições de deficiência para autodeclaração.
+ * @summary Listar opções de deficiência
+ */
+export type getCitizenDisabilityOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenDisabilityOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenDisabilityOptionsResponseComposite =
+  | getCitizenDisabilityOptionsResponse200
+  | getCitizenDisabilityOptionsResponse500
+
+export type getCitizenDisabilityOptionsResponse =
+  getCitizenDisabilityOptionsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenDisabilityOptionsUrl = () => {
+  return `/citizen/disability/options`
+}
+
+export const getCitizenDisabilityOptions = async (
+  options?: RequestInit
+): Promise<getCitizenDisabilityOptionsResponse> => {
+  return customFetch<getCitizenDisabilityOptionsResponse>(
+    getGetCitizenDisabilityOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Retorna a lista de opções válidas de níveis de escolaridade para autodeclaração.
+ * @summary Listar opções de escolaridade
+ */
+export type getCitizenEducationOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenEducationOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenEducationOptionsResponseComposite =
+  | getCitizenEducationOptionsResponse200
+  | getCitizenEducationOptionsResponse500
+
+export type getCitizenEducationOptionsResponse =
+  getCitizenEducationOptionsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenEducationOptionsUrl = () => {
+  return `/citizen/education/options`
+}
+
+export const getCitizenEducationOptions = async (
+  options?: RequestInit
+): Promise<getCitizenEducationOptionsResponse> => {
+  return customFetch<getCitizenEducationOptionsResponse>(
+    getGetCitizenEducationOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
 
 /**
  * Retorna a lista de opções válidas de etnia para autodeclaração. Esta lista é usada para validar as atualizações de etnia autodeclarada.
@@ -63,6 +145,84 @@ export const getCitizenEthnicityOptions = async (
 ): Promise<getCitizenEthnicityOptionsResponse> => {
   return customFetch<getCitizenEthnicityOptionsResponse>(
     getGetCitizenEthnicityOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Retorna a lista de opções válidas de faixas de renda familiar mensal para autodeclaração.
+ * @summary Listar opções de renda familiar
+ */
+export type getCitizenFamilyIncomeOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenFamilyIncomeOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenFamilyIncomeOptionsResponseComposite =
+  | getCitizenFamilyIncomeOptionsResponse200
+  | getCitizenFamilyIncomeOptionsResponse500
+
+export type getCitizenFamilyIncomeOptionsResponse =
+  getCitizenFamilyIncomeOptionsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenFamilyIncomeOptionsUrl = () => {
+  return `/citizen/family-income/options`
+}
+
+export const getCitizenFamilyIncomeOptions = async (
+  options?: RequestInit
+): Promise<getCitizenFamilyIncomeOptionsResponse> => {
+  return customFetch<getCitizenFamilyIncomeOptionsResponse>(
+    getGetCitizenFamilyIncomeOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+/**
+ * Retorna a lista de opções sugeridas de gênero para autodeclaração. Nota: Este campo aceita qualquer texto livre para a opção "Outro".
+ * @summary Listar opções de gênero
+ */
+export type getCitizenGenderOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenGenderOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenGenderOptionsResponseComposite =
+  | getCitizenGenderOptionsResponse200
+  | getCitizenGenderOptionsResponse500
+
+export type getCitizenGenderOptionsResponse =
+  getCitizenGenderOptionsResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetCitizenGenderOptionsUrl = () => {
+  return `/citizen/gender/options`
+}
+
+export const getCitizenGenderOptions = async (
+  options?: RequestInit
+): Promise<getCitizenGenderOptionsResponse> => {
+  return customFetch<getCitizenGenderOptionsResponse>(
+    getGetCitizenGenderOptionsUrl(),
     {
       ...options,
       method: 'GET',
@@ -211,6 +371,140 @@ export const putCitizenCpfAddress = async (
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(modelsSelfDeclaredAddressInput),
+    }
+  )
+}
+
+/**
+ * Atualiza ou cria a condição de deficiência autodeclarada de um cidadão por CPF. O valor deve ser uma das opções válidas retornadas pelo endpoint /citizen/disability/options.
+ * @summary Atualizar deficiência autodeclarada
+ */
+export type putCitizenCpfDisabilityResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfDisabilityResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfDisabilityResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type putCitizenCpfDisabilityResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type putCitizenCpfDisabilityResponse422 = {
+  data: HandlersErrorResponse
+  status: 422
+}
+
+export type putCitizenCpfDisabilityResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type putCitizenCpfDisabilityResponseComposite =
+  | putCitizenCpfDisabilityResponse200
+  | putCitizenCpfDisabilityResponse400
+  | putCitizenCpfDisabilityResponse401
+  | putCitizenCpfDisabilityResponse403
+  | putCitizenCpfDisabilityResponse422
+  | putCitizenCpfDisabilityResponse500
+
+export type putCitizenCpfDisabilityResponse =
+  putCitizenCpfDisabilityResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutCitizenCpfDisabilityUrl = (cpf: string) => {
+  return `/citizen/${cpf}/disability`
+}
+
+export const putCitizenCpfDisability = async (
+  cpf: string,
+  modelsSelfDeclaredDeficienciaInput: ModelsSelfDeclaredDeficienciaInput,
+  options?: RequestInit
+): Promise<putCitizenCpfDisabilityResponse> => {
+  return customFetch<putCitizenCpfDisabilityResponse>(
+    getPutCitizenCpfDisabilityUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredDeficienciaInput),
+    }
+  )
+}
+
+/**
+ * Atualiza ou cria o nível de escolaridade autodeclarado de um cidadão por CPF. O valor deve ser uma das opções válidas retornadas pelo endpoint /citizen/education/options.
+ * @summary Atualizar escolaridade autodeclarada
+ */
+export type putCitizenCpfEducationResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfEducationResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfEducationResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type putCitizenCpfEducationResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type putCitizenCpfEducationResponse422 = {
+  data: HandlersErrorResponse
+  status: 422
+}
+
+export type putCitizenCpfEducationResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type putCitizenCpfEducationResponseComposite =
+  | putCitizenCpfEducationResponse200
+  | putCitizenCpfEducationResponse400
+  | putCitizenCpfEducationResponse401
+  | putCitizenCpfEducationResponse403
+  | putCitizenCpfEducationResponse422
+  | putCitizenCpfEducationResponse500
+
+export type putCitizenCpfEducationResponse =
+  putCitizenCpfEducationResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutCitizenCpfEducationUrl = (cpf: string) => {
+  return `/citizen/${cpf}/education`
+}
+
+export const putCitizenCpfEducation = async (
+  cpf: string,
+  modelsSelfDeclaredEscolaridadeInput: ModelsSelfDeclaredEscolaridadeInput,
+  options?: RequestInit
+): Promise<putCitizenCpfEducationResponse> => {
+  return customFetch<putCitizenCpfEducationResponse>(
+    getPutCitizenCpfEducationUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredEscolaridadeInput),
     }
   )
 }
@@ -458,6 +752,73 @@ export const putCitizenCpfExhibitionName = async (
 }
 
 /**
+ * Atualiza ou cria a renda familiar mensal autodeclarada de um cidadão por CPF. O valor deve ser uma das opções válidas retornadas pelo endpoint /citizen/family-income/options.
+ * @summary Atualizar renda familiar autodeclarada
+ */
+export type putCitizenCpfFamilyIncomeResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfFamilyIncomeResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfFamilyIncomeResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type putCitizenCpfFamilyIncomeResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type putCitizenCpfFamilyIncomeResponse422 = {
+  data: HandlersErrorResponse
+  status: 422
+}
+
+export type putCitizenCpfFamilyIncomeResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type putCitizenCpfFamilyIncomeResponseComposite =
+  | putCitizenCpfFamilyIncomeResponse200
+  | putCitizenCpfFamilyIncomeResponse400
+  | putCitizenCpfFamilyIncomeResponse401
+  | putCitizenCpfFamilyIncomeResponse403
+  | putCitizenCpfFamilyIncomeResponse422
+  | putCitizenCpfFamilyIncomeResponse500
+
+export type putCitizenCpfFamilyIncomeResponse =
+  putCitizenCpfFamilyIncomeResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutCitizenCpfFamilyIncomeUrl = (cpf: string) => {
+  return `/citizen/${cpf}/family-income`
+}
+
+export const putCitizenCpfFamilyIncome = async (
+  cpf: string,
+  modelsSelfDeclaredRendaFamiliarInput: ModelsSelfDeclaredRendaFamiliarInput,
+  options?: RequestInit
+): Promise<putCitizenCpfFamilyIncomeResponse> => {
+  return customFetch<putCitizenCpfFamilyIncomeResponse>(
+    getPutCitizenCpfFamilyIncomeUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredRendaFamiliarInput),
+    }
+  )
+}
+
+/**
  * Verifica se este é o primeiro login do usuário
  * @summary Obter status do primeiro login
  */
@@ -581,6 +942,67 @@ export const putCitizenCpfFirstlogin = async (
     {
       ...options,
       method: 'PUT',
+    }
+  )
+}
+
+/**
+ * Atualiza ou cria o gênero autodeclarado de um cidadão por CPF. Aceita qualquer valor de texto livre, mas as opções sugeridas estão disponíveis no endpoint /citizen/gender/options.
+ * @summary Atualizar gênero autodeclarado
+ */
+export type putCitizenCpfGenderResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfGenderResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfGenderResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type putCitizenCpfGenderResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type putCitizenCpfGenderResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type putCitizenCpfGenderResponseComposite =
+  | putCitizenCpfGenderResponse200
+  | putCitizenCpfGenderResponse400
+  | putCitizenCpfGenderResponse401
+  | putCitizenCpfGenderResponse403
+  | putCitizenCpfGenderResponse500
+
+export type putCitizenCpfGenderResponse =
+  putCitizenCpfGenderResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutCitizenCpfGenderUrl = (cpf: string) => {
+  return `/citizen/${cpf}/gender`
+}
+
+export const putCitizenCpfGender = async (
+  cpf: string,
+  modelsSelfDeclaredGeneroInput: ModelsSelfDeclaredGeneroInput,
+  options?: RequestInit
+): Promise<putCitizenCpfGenderResponse> => {
+  return customFetch<putCitizenCpfGenderResponse>(
+    getPutCitizenCpfGenderUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredGeneroInput),
     }
   )
 }

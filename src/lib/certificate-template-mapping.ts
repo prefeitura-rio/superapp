@@ -1,57 +1,61 @@
 /**
- * Mapping between organization/provider names and their corresponding certificate templates
+ * Mapping between organization IDs (cd_ua/orgao_id) and their corresponding certificate templates
  * Each organization should have its own PDF template in src/lib/templates/
  */
 export type CertificateTemplate = 'juvrio' | 'planetario' | 'smac' | 'smpd'
 
 export interface OrganizationTemplateMapping {
-  organization: string
+  orgao_id: string // cd_ua do departamento
   template: CertificateTemplate
 }
 
 /**
- * Mapeamento das organizações para templates de certificado
+ * Mapeamento dos IDs de organizações (orgao_id/cd_ua) para templates de certificado
  *
  * Templates disponíveis:
  * - juvrio.pdf: Secretaria Especial da Juventude Carioca - JUV-RIO
- * - planetario.pdf: Fundacao Planetario da Cidade do Rio de Janeiro - PLANETARIO do Rio
- * - smac.pdf: Secretaria Municipal de Assistência Social e Direitos Humanos
+ * - planetario.pdf: Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO
+ * - smac.pdf: Secretaria Municipal de Meio Ambiente e Clima - SMAC
  * - smpd.pdf: Secretaria Municipal da Pessoa com Deficiência - SMPD
+ *
+ * NOTA: Os orgao_id devem ser os valores de cd_ua retornados pela API de departamentos.
+ * Para adicionar um novo mapeamento, consulte a API para obter o cd_ua correto.
  */
 const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
   {
-    organization: 'Secretaria Especial da Juventude Carioca - JUV-RIO',
+    orgao_id: '5300',
     template: 'juvrio',
   },
   {
-    organization:
-      'Fundacao Planetario da Cidade do Rio de Janeiro - PLANETARIO',
+    orgao_id: '2641',
     template: 'planetario',
   },
   {
-    organization: 'Secretaria Municipal do Ambiente e Clima - SMAC',
+    orgao_id: '2400',
     template: 'smac',
   },
   {
-    organization: 'Secretaria Municipal da Pessoa com Deficiência - SMPD',
+    orgao_id: '4000',
     template: 'smpd',
   },
 ]
 
 /**
- * Obtém o template de certificado baseado no nome da organização
+ * Obtém o template de certificado baseado no ID do órgão (orgao_id/cd_ua)
  *
- * @param organization Nome da organização fornecedora do curso
+ * @param orgao_id ID do órgão (cd_ua) fornecedor do curso
  * @returns Nome do arquivo de template ou null se não encontrado
  */
 export function getCertificateTemplate(
-  organization: string
+  orgao_id: string
 ): CertificateTemplate | null {
-  const normalizedOrg = organization?.trim() || ''
+  if (!orgao_id) {
+    return null
+  }
 
-  // Procura o mapeamento exato primeiro
+  // Procura o mapeamento pelo orgao_id
   const mapping = TEMPLATE_MAPPINGS.find(
-    m => m.organization.toLowerCase() === normalizedOrg.toLowerCase()
+    m => m.orgao_id.toLowerCase() === orgao_id.toLowerCase()
   )
 
   if (mapping) {
@@ -59,18 +63,18 @@ export function getCertificateTemplate(
   }
 
   // Retorna null se não encontrar mapeamento
-  console.warn(`Template não encontrado para organização: ${organization}.`)
+  console.warn(`Template não encontrado para orgao_id: ${orgao_id}.`)
   return null
 }
 
 /**
- * Constrói a URL do template baseado no nome da organização
+ * Constrói a URL do template baseado no ID do órgão (orgao_id/cd_ua)
  *
- * @param organization Nome da organização fornecedora do curso
+ * @param orgao_id ID do órgão (cd_ua) fornecedor do curso
  * @returns URL da rota API para o template ou null se não encontrado
  */
-export function getTemplateUrl(organization: string): string | null {
-  const template = getCertificateTemplate(organization)
+export function getTemplateUrl(orgao_id: string): string | null {
+  const template = getCertificateTemplate(orgao_id)
   if (!template) {
     return null
   }

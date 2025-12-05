@@ -3,6 +3,7 @@
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { AccessibilityProps } from '@/types/course'
+import Link from 'next/link'
 import { CourseCard } from './courses-card'
 
 interface MyCoursesHomeSwipeProps {
@@ -14,9 +15,11 @@ export function MyCoursesHomeSwipe({ courses }: MyCoursesHomeSwipeProps) {
 
   return (
     <div className="px-4 pb-6">
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5">
-        Meus Cursos
-      </h3>
+      <Link href="/servicos/cursos/meus-cursos">
+        <h3 className="pb-2 text-base font-medium text-foreground leading-5 cursor-pointer hover:opacity-80 transition-opacity">
+          Meus Cursos
+        </h3>
+      </Link>
       <SwiperWrapper
         showArrows
         showPagination
@@ -44,7 +47,7 @@ export function MyCoursesHomeSwipe({ courses }: MyCoursesHomeSwipeProps) {
                     provider={course.organization as string}
                     coverImage={course.cover_image as string}
                     accessibility={course.accessibility as AccessibilityProps}
-                    isExternalPartner={course.is_external_partner as boolean}
+                    courseManagementType={course.course_management_type}
                   />
                 ))}
               </div>

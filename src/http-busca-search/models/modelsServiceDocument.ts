@@ -13,7 +13,9 @@ export interface ModelsServiceDocument {
   description?: string
   id?: string
   metadata?: ModelsServiceDocumentMetadata
+  slug?: string
   status?: number
+  subcategory?: string
   title?: string
   updated_at?: number
 }
