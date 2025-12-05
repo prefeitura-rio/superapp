@@ -51,6 +51,7 @@ interface ConfirmInscriptionClientProps {
   contactUpdateStatus?: ContactUpdateStatus
   preselectedLocationId?: string
   preselectedClassId?: string
+  shouldShowConfirmationScreen?: boolean
 }
 
 const TRANSITIONS = {
@@ -70,6 +71,7 @@ export function ConfirmInscriptionClient({
   contactUpdateStatus,
   preselectedLocationId,
   preselectedClassId,
+  shouldShowConfirmationScreen = true,
 }: ConfirmInscriptionClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -233,13 +235,18 @@ export function ConfirmInscriptionClient({
   const shouldShowOnlineClassSlide = hasMultipleOnlineClasses
 
   const slides = [
-    {
-      id: 'confirm-user-data',
-      component: ConfirmUserDataSlide,
-      props: { userInfo, userAuthInfo, contactUpdateStatus, courseSlug },
-      showPagination: false,
-      showBackButton: true,
-    },
+    // Only show confirmation screen if fields are outdated
+    ...(shouldShowConfirmationScreen
+      ? [
+          {
+            id: 'confirm-user-data',
+            component: ConfirmUserDataSlide,
+            props: { userInfo, userAuthInfo, contactUpdateStatus, courseSlug },
+            showPagination: false,
+            showBackButton: true,
+          },
+        ]
+      : []),
     // Only include subsequent slides if user has all required fields
     ...(hasAllRequiredFields
       ? [
