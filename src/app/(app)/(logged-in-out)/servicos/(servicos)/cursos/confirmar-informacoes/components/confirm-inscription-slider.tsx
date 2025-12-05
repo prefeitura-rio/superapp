@@ -93,6 +93,9 @@ export const ConfirmInscriptionSlider = forwardRef<
           modules={showPagination ? [Pagination] : []}
           className="relative h-full course__confirm-user-info__slider"
           allowTouchMove={true}
+          touchEventsTarget="container"
+          nested={true}
+          touchRatio={0.5}
         >
           {slides.map((slide, idx) => {
             const SlideComponent = slide.component
