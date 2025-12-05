@@ -1,5 +1,5 @@
 import { MyCoursesCard } from '@/app/components/courses/my-course-card'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { MyCoursesBackButton } from './components/back-button'
 import { buildAuthUrl } from '@/constants/url'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -52,8 +52,8 @@ export default async function MyCoursesPage() {
 
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
-        <div className="relative overflow-hidden mt-16 px-4">
+        <MyCoursesBackButton />
+        <div className="relative overflow-hidden mt-20 px-4">
           <MyCoursesCard courses={coursesWithEnrollments} />
         </div>
       </div>
@@ -63,8 +63,8 @@ export default async function MyCoursesPage() {
     // Return empty courses array on error
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
-        <div className="relative overflow-hidden mt-16 px-4">
+        <MyCoursesBackButton />
+        <div className="relative overflow-hidden mt-20 px-4">
           <MyCoursesCard courses={[]} />
         </div>
       </div>
