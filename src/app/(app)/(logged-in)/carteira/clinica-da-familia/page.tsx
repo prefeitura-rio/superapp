@@ -6,8 +6,6 @@ import {
   PhoneIcon,
   WhatsappIcon,
 } from '@/assets/icons'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { isMCPOrigin } from '@/helpers/health'
 import {
   getDalCitizenCpfWallet,
@@ -22,84 +20,7 @@ import {
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { RegistrationRequirementsCard } from './components/registration-requirements-card'
 import { StatusIndicatorMessage } from './components/status-indicator-message'
-
-interface TeamPageProps {
-  healthData?: {
-    clinica_familia?: {
-      nome?: string
-    }
-    equipe_saude_familia?: {
-      nome?: string
-      indicador?: boolean
-      medicos?: Array<{ id_profissional_sus: string; nome: string }>
-      enfermeiros?: Array<{ id_profissional_sus: string; nome: string }>
-    }
-  }
-}
-
-function TeamPage({ healthData }: TeamPageProps) {
-  const medicos = healthData?.equipe_saude_familia?.medicos || []
-  const enfermeiros = healthData?.equipe_saude_familia?.enfermeiros || []
-  const teamName =
-    healthData?.equipe_saude_familia?.nome || 'Equipe não disponível'
-
-  // Don't show team section if indicador is false
-  if (healthData?.equipe_saude_familia?.indicador === false) {
-    return null
-  }
-
-  return (
-    <div className="p-6">
-      <div className="">
-        <h2 className="text-base pb-2 text-foreground font-medium leading-5">
-          Equipe {teamName}
-        </h2>
-
-        <Card className="rounded-xl border-0 shadow-none">
-          <CardContent className="px-0">
-            {/* Doctors Section */}
-            <div className="space-y-1 px-4">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Médicos e médicas
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                {medicos.length > 0 ? (
-                  medicos.map((medico, index) => (
-                    <p key={index} className="font-medium">
-                      {medico.nome}
-                    </p>
-                  ))
-                ) : (
-                  <p className="font-medium text-foreground">Não disponível</p>
-                )}
-              </div>
-            </div>
-
-            {/* Full width separator that touches borders */}
-            <Separator className="my-4" />
-
-            <div className="space-y-1 px-4">
-              <h3 className="text-xs font-medium text-foreground-light">
-                Enfermeiros e Enfermeiras
-              </h3>
-              <div className="text-sm space-y-1 text-foreground">
-                {enfermeiros.length > 0 ? (
-                  enfermeiros.map((enfermeiro, index) => (
-                    <p key={index} className="font-medium">
-                      {enfermeiro.nome}
-                    </p>
-                  ))
-                ) : (
-                  <p className="font-medium text-foreground">Não disponível</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
+import { TeamPage } from './components/team-page'
 
 export default async function HealthCardDetail() {
   const userAuthInfo = await getUserInfoFromToken()
@@ -210,8 +131,8 @@ export default async function HealthCardDetail() {
   const isNormalRiskStatus = riskStatus?.risco === 'Verde'
 
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" />
+    <div className="min-h-lvh max-w-xl mx-auto pt-2 pb-10">
+      <SecondaryHeader title="Carteira" className="max-w-xl" fixed={false} />
       <div className="z-50">
         <div className="px-4">
           <HealthCard

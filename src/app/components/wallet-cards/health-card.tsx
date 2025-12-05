@@ -102,15 +102,27 @@ export function HealthCard({
   const shouldRenderHealthStatusIndicator =
     primaryValue !== 'Fechado' && riskStatus
 
+  // Hide labels when origin is MCP (and shows badge)
+  const shouldShowLabels = !isMCPOrigin(origin)
+
   const frontContent = (
     <CardBase bgColor={bgColor}>
       <CardFrontContent
         title={title}
         name={name}
-        primaryLabel={primaryLabel}
-        primaryValue={primaryValue}
-        secondaryLabel={secondaryLabel}
-        secondaryValue={secondaryValue}
+        {...(shouldShowLabels
+          ? {
+              primaryLabel,
+              primaryValue,
+              secondaryLabel,
+              secondaryValue,
+            }
+          : {
+              primaryLabel: '',
+              primaryValue: '',
+              secondaryLabel: '',
+              secondaryValue: '',
+            })}
         primaryValueSlot={getPrimaryValueSlot()}
       />
     </CardBase>

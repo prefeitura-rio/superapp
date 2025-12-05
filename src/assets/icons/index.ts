@@ -3,6 +3,7 @@ import { CheckCircleIcon } from './check-circle-icon'
 import { CheckIcon } from './check-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
 import { ChevronRightIcon } from './chevron-right-icon'
+import { DoctorIcon } from './doctor-icon'
 import { DownloadIcon } from './download-icon'
 import { EditIcon } from './edit-icon'
 import { EyeIcon } from './eye-icon'
@@ -15,6 +16,7 @@ import { MailIcon } from './mail-icon'
 import { MapPinIcon } from './map-pin-icon'
 import { MoonIcon } from './moon-icon'
 import { MoreVerticalIcon } from './more-vertical-icon'
+import { NurseIcon } from './nurse-icon'
 import { PhoneIcon } from './phone-icon'
 import { PlusIcon } from './plus-icon'
 import { PrinterIcon } from './printer-icon'
@@ -36,6 +38,7 @@ export {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  DoctorIcon,
   DownloadIcon,
   EditIcon,
   EyeIcon,
@@ -48,6 +51,7 @@ export {
   MapPinIcon,
   MoonIcon,
   MoreVerticalIcon,
+  NurseIcon,
   PhoneIcon,
   PlusIcon,
   PrinterIcon,
