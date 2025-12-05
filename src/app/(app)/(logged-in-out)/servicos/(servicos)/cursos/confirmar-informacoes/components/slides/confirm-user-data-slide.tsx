@@ -37,12 +37,22 @@ export default function ConfirmUserDataSlide({
 }: ConfirmUserDataSlideProps) {
   const router = useRouter()
 
+  // Helper to check if a value is valid (not null, undefined, empty string, or "null" string)
+  const isValidAddressValue = (value: string | null | undefined): boolean => {
+    if (!value || value === null || value === undefined) return false
+    const trimmed = String(value).trim()
+    return trimmed !== '' && trimmed.toLowerCase() !== 'null'
+  }
+
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
   const hasAddress = !!(
     userInfo.address?.logradouro &&
+    isValidAddressValue(userInfo.address.logradouro) &&
     userInfo.address?.bairro &&
-    userInfo.address?.municipio
+    isValidAddressValue(userInfo.address.bairro) &&
+    userInfo.address?.municipio &&
+    isValidAddressValue(userInfo.address.municipio)
   )
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
@@ -62,8 +72,10 @@ export default function ConfirmUserDataSlide({
       userInfo.address.bairro,
       userInfo.address.municipio,
       userInfo.address.estado,
-    ].filter(Boolean)
-    return parts.join(', ') || 'Endereço não cadastrado'
+    ]
+      .filter(part => isValidAddressValue(part))
+      .map(part => String(part).trim())
+    return parts.length > 0 ? parts.join(', ') : 'Endereço não cadastrado'
   }
 
   const handlePhoneClick = () => {
