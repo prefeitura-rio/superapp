@@ -77,7 +77,7 @@ export default async function CoursesCertifiedPage({
 
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Certificados" />
+        <SecondaryHeader title="Certificados" route="/servicos/cursos" />
 
         {certificatesWithEnrollments.length === 0 ? (
           <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
@@ -100,7 +100,7 @@ export default async function CoursesCertifiedPage({
     // Return empty certificates array on error
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Certificados" />
+        <SecondaryHeader title="Certificados" route="/servicos/cursos" />
         <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
           <p className="block text-lg text-muted-foreground text-center">
             Erro ao carregar certificados. Tente novamente mais tarde.
