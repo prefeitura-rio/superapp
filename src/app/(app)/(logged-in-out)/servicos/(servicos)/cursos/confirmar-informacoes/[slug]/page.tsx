@@ -116,25 +116,25 @@ export default async function ConfirmInscriptionPage({
     months: 6, // Email must be updated every 6 months
   })
 
-  // Check if phone, email, and address are outdated (more than 1 month old)
+  // Check if phone, email, and address are outdated (more than 6 months old)
   // The confirmation screen should only show if at least one is outdated
   const phoneOutdated = !isUpdatedWithin({
     updatedAt:
       (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
         ?.updated_at || null,
-    months: 1, // Check if updated within 1 month
+    months: 6, // Check if updated within 6 months
   })
 
   const emailOutdated = !isUpdatedWithin({
     updatedAt:
       (transformedUserInfo.email.principal as ModelsEmailPrincipal)
         ?.updated_at || null,
-    months: 1, // Check if updated within 1 month
+    months: 6, // Check if updated within 6 months
   })
 
   const addressOutdated = !isUpdatedWithin({
     updatedAt: userInfo.endereco?.principal?.updated_at || null,
-    months: 1, // Check if updated within 1 month
+    months: 6, // Check if updated within 6 months
   })
 
   // Show confirmation screen only if at least one field is outdated
