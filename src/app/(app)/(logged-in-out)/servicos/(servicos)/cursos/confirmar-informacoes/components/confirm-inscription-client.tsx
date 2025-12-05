@@ -80,13 +80,23 @@ export function ConfirmInscriptionClient({
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
+  // Helper to check if a value is valid (not null, undefined, empty string, or "null" string)
+  const isValidAddressValue = (value: string | null | undefined): boolean => {
+    if (!value || value === null || value === undefined) return false
+    const trimmed = String(value).trim()
+    return trimmed !== '' && trimmed.toLowerCase() !== 'null'
+  }
+
   // Check if user has email/phone - variable for reuse
   const hasEmail = hasValidEmail(userInfo.email)
   const hasPhone = hasValidPhone(userInfo.phone)
   const hasAddress = !!(
     userInfo.address?.logradouro &&
+    isValidAddressValue(userInfo.address.logradouro) &&
     userInfo.address?.bairro &&
-    userInfo.address?.municipio
+    isValidAddressValue(userInfo.address.bairro) &&
+    userInfo.address?.municipio &&
+    isValidAddressValue(userInfo.address.municipio)
   )
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
@@ -106,8 +116,8 @@ export function ConfirmInscriptionClient({
     (courseInfo as any)?.data?.custom_fields || []
 
   // Determine if we need to show unit/schedule selection
-  // Always show unit selection if there are units available (even if just one)
   const hasUnits = nearbyUnits && nearbyUnits.length > 0
+  const hasMultipleUnits = nearbyUnits && nearbyUnits.length > 1
 
   // Check if this is an online course with multiple classes
   const hasOnlineClasses = onlineClasses && onlineClasses.length > 0
@@ -255,8 +265,9 @@ export function ConfirmInscriptionClient({
               ]
             : []
           : []),
-        // Always show select-unit slide if there are units available (even if just one)
-        ...(hasUnits
+        // Only show select-unit slide if there are multiple units
+        // If there's only one unit, it's automatically selected and no slide is needed
+        ...(hasMultipleUnits
           ? [
               {
                 id: 'select-unit',
@@ -441,14 +452,18 @@ export function ConfirmInscriptionClient({
 
     // Check unit selection if required (when there are units available)
     if (hasUnits) {
-      const unitSlideIndex = slides.findIndex(
-        slide => slide.id === 'select-unit'
-      )
-      if (unitSlideIndex !== -1) {
-        const isUnitValid = await form.trigger('unitId')
-        if (!isUnitValid) {
+      const isUnitValid = await form.trigger('unitId')
+      if (!isUnitValid) {
+        // If there's a slide for unit selection, navigate to it
+        const unitSlideIndex = slides.findIndex(
+          slide => slide.id === 'select-unit'
+        )
+        if (unitSlideIndex !== -1) {
           return unitSlideIndex
         }
+        // If no slide exists (single unit case), still return error but don't navigate
+        // This shouldn't happen if getInitialUnitId() works correctly, but it's a safety check
+        return null
       }
     }
 
