@@ -45,7 +45,7 @@ export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
       <div className="space-y-8">
         <ThemeAwareVideo
           source={VIDEO_SOURCES.course}
-          containerClassName="mb-15 mt-10 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+          containerClassName="mb-10 md:mb-15 mt-5 md:mt-10 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
         />
 
         <div className="space-y-2 text-left">
