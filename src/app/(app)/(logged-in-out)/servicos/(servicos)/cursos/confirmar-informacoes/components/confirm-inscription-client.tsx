@@ -234,9 +234,82 @@ export function ConfirmInscriptionClient({
   // If there's only one online class, it's automatically selected and no slide is needed
   const shouldShowOnlineClassSlide = hasMultipleOnlineClasses
 
+  // Build slides array for subsequent steps (after confirmation)
+  const subsequentSlides = hasAllRequiredFields
+    ? [
+        // For online courses: show online class selection if multiple classes
+        ...(hasOnlineClasses && !hasUnits
+          ? shouldShowOnlineClassSlide
+            ? [
+                {
+                  id: 'select-online-class',
+                  component: SelectOnlineClassSlide,
+                  props: {
+                    onlineClasses,
+                    form,
+                    fieldName: 'scheduleId',
+                  },
+                  showPagination: true,
+                  showBackButton: true,
+                },
+              ]
+            : []
+          : []),
+        // Always show select-unit slide if there are units available (even if just one)
+        ...(hasUnits
+          ? [
+              {
+                id: 'select-unit',
+                component: SelectUnitSlide,
+                props: {
+                  nearbyUnits,
+                  form,
+                  fieldName: 'unitId',
+                },
+                showPagination: true,
+                showBackButton: true,
+              },
+            ]
+          : []),
+        // Only show select-schedule slide if the selected unit has multiple schedules
+        // If there's only one schedule, it's automatically selected and no slide is needed
+        ...(shouldShowScheduleSlide
+          ? [
+              {
+                id: 'select-schedule',
+                component: SelectScheduleSlide,
+                props: {
+                  selectedUnit: unitForScheduleSlide,
+                  nearbyUnits,
+                  form,
+                  fieldName: 'scheduleId',
+                },
+                showPagination: true,
+                showBackButton: true,
+              },
+            ]
+          : []),
+        // Add custom field slides dynamically
+        ...customFields.map(field => ({
+          id: `custom-field-${field.id}`,
+          component: CustomFieldSlide,
+          props: {
+            field,
+            fieldName: `custom_${field.id}`,
+            form,
+          },
+          showPagination: true,
+          showBackButton: true,
+        })),
+      ]
+    : []
+
+  // Always show confirmation screen if fields are outdated OR if there are no other slides
+  const shouldShowConfirmation =
+    shouldShowConfirmationScreen || subsequentSlides.length === 0
+
   const slides = [
-    // Only show confirmation screen if fields are outdated
-    ...(shouldShowConfirmationScreen
+    ...(shouldShowConfirmation
       ? [
           {
             id: 'confirm-user-data',
@@ -247,75 +320,7 @@ export function ConfirmInscriptionClient({
           },
         ]
       : []),
-    // Only include subsequent slides if user has all required fields
-    ...(hasAllRequiredFields
-      ? [
-          // For online courses: show online class selection if multiple classes
-          ...(hasOnlineClasses && !hasUnits
-            ? shouldShowOnlineClassSlide
-              ? [
-                  {
-                    id: 'select-online-class',
-                    component: SelectOnlineClassSlide,
-                    props: {
-                      onlineClasses,
-                      form,
-                      fieldName: 'scheduleId',
-                    },
-                    showPagination: true,
-                    showBackButton: true,
-                  },
-                ]
-              : []
-            : []),
-          // Always show select-unit slide if there are units available (even if just one)
-          ...(hasUnits
-            ? [
-                {
-                  id: 'select-unit',
-                  component: SelectUnitSlide,
-                  props: {
-                    nearbyUnits,
-                    form,
-                    fieldName: 'unitId',
-                  },
-                  showPagination: true,
-                  showBackButton: true,
-                },
-              ]
-            : []),
-          // Only show select-schedule slide if the selected unit has multiple schedules
-          // If there's only one schedule, it's automatically selected and no slide is needed
-          ...(shouldShowScheduleSlide
-            ? [
-                {
-                  id: 'select-schedule',
-                  component: SelectScheduleSlide,
-                  props: {
-                    selectedUnit: unitForScheduleSlide,
-                    nearbyUnits,
-                    form,
-                    fieldName: 'scheduleId',
-                  },
-                  showPagination: true,
-                  showBackButton: true,
-                },
-              ]
-            : []),
-          // Add custom field slides dynamically
-          ...customFields.map(field => ({
-            id: `custom-field-${field.id}`,
-            component: CustomFieldSlide,
-            props: {
-              field,
-              fieldName: `custom_${field.id}`,
-              form,
-            },
-            showPagination: true,
-            showBackButton: true,
-          })),
-        ]
-      : []),
+    ...subsequentSlides,
   ]
 
   const handleNext = async () => {
