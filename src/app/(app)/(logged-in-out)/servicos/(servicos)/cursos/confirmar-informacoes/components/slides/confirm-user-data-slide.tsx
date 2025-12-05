@@ -355,13 +355,7 @@ export default function ConfirmUserDataSlide({
       >
         <GenderDrawerContent
           currentGender={userInfo.genero}
-          onClose={async () => {
-            setGenderDrawerOpen(false)
-            // Wait a bit to ensure cache revalidation is processed
-            await new Promise(resolve => setTimeout(resolve, 200))
-            // Refresh data from server without full page reload
-            router.refresh()
-          }}
+          onClose={() => setGenderDrawerOpen(false)}
         />
       </BottomSheet>
 
@@ -373,13 +367,7 @@ export default function ConfirmUserDataSlide({
       >
         <EducationDrawerContent
           currentEducation={userInfo.escolaridade}
-          onClose={async () => {
-            setEducationDrawerOpen(false)
-            // Wait a bit to ensure cache revalidation is processed
-            await new Promise(resolve => setTimeout(resolve, 200))
-            // Refresh data from server without full page reload
-            router.refresh()
-          }}
+          onClose={() => setEducationDrawerOpen(false)}
         />
       </BottomSheet>
 
@@ -391,13 +379,7 @@ export default function ConfirmUserDataSlide({
       >
         <FamilyIncomeDrawerContent
           currentFamilyIncome={userInfo.renda_familiar}
-          onClose={async () => {
-            setFamilyIncomeDrawerOpen(false)
-            // Wait a bit to ensure cache revalidation is processed
-            await new Promise(resolve => setTimeout(resolve, 200))
-            // Refresh data from server without full page reload
-            router.refresh()
-          }}
+          onClose={() => setFamilyIncomeDrawerOpen(false)}
         />
       </BottomSheet>
 
@@ -409,13 +391,7 @@ export default function ConfirmUserDataSlide({
       >
         <DisabilityDrawerContent
           currentDisability={userInfo.deficiencia}
-          onClose={async () => {
-            setDisabilityDrawerOpen(false)
-            // Wait a bit to ensure cache revalidation is processed
-            await new Promise(resolve => setTimeout(resolve, 200))
-            // Refresh data from server without full page reload
-            router.refresh()
-          }}
+          onClose={() => setDisabilityDrawerOpen(false)}
         />
       </BottomSheet>
     </div>
