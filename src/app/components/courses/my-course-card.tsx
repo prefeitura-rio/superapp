@@ -57,6 +57,18 @@ function getStatusLabel(status: string) {
   }
 }
 
+function getStatusTextColor(status: string) {
+  const statusLower = status.toLowerCase()
+  if (
+    statusLower === 'finalizado' ||
+    statusLower === 'completed' ||
+    statusLower === 'concluded'
+  ) {
+    return 'text-foreground'
+  }
+  return 'text-background dark:text-foreground'
+}
+
 export function MyCoursesCard({
   courses,
 }: { courses: CourseWithEnrollment[] }) {
@@ -130,8 +142,9 @@ export function MyCoursesCard({
               </p>
               <span
                 className={cn(
-                  'inline-block px-3 py-1 text-xs font-medium text-background dark:text-foreground rounded-full w-fit',
-                  getStatusColor(course.status)
+                  'inline-block px-3 py-1 text-xs font-medium rounded-full w-fit',
+                  getStatusColor(course.status),
+                  getStatusTextColor(course.status)
                 )}
               >
                 {getStatusLabel(course.status)}
