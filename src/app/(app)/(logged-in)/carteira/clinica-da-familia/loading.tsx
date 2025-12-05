@@ -3,12 +3,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function WalletHealthLoading() {
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" />
+    <div className="min-h-lvh max-w-xl mx-auto pt-2 pb-10">
+      <SecondaryHeader title="Carteira" className="max-w-xl" fixed={false} />
       <div className="z-50">
         <div className="px-4">
           {/* Wallet Health Card Skeleton */}
-          <div className="sticky top-34">
+          <div className="sticky top-36">
             <Skeleton className="w-full h-[190px] rounded-3xl" />
           </div>
         </div>
@@ -55,29 +55,30 @@ export default function WalletHealthLoading() {
 
       {/* Team Page Skeleton */}
       <div className="p-6">
-        <div className="">
-          <Skeleton className="h-5 w-48 mb-4" />
+        <Skeleton className="h-5 w-48 mb-2" />
 
-          <Skeleton className="w-full rounded-xl p-5">
-            {/* Doctors Section Skeleton */}
-            <div className="space-y-1 py-2">
-              <div className="text-sm space-y-1">
-                <Skeleton className="h-4 w-20 bg-card" />
-                <Skeleton className="h-4 w-40 bg-card" />
+        <div className="flex flex-col gap-2">
+          {/* Doctors Card Skeleton */}
+          <div className="w-full rounded-xl bg-card shadow-none">
+            <div className="px-4 py-4 flex gap-4 items-center">
+              <Skeleton className="w-6 h-6 rounded-none" />
+              <div className="flex flex-col flex-1 gap-1">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-5 w-48" />
               </div>
             </div>
+          </div>
 
-            {/* Separator */}
-            <Skeleton className="my-4 w-full" />
-
-            {/* Nurses Section Skeleton */}
-            <div className="space-y-1 py-2">
-              <div className="text-sm space-y-1">
-                <Skeleton className="h-4 w-20 bg-card" />
-                <Skeleton className="h-4 w-40 bg-card" />
+          {/* Nurses Card Skeleton */}
+          <div className="w-full rounded-xl bg-card shadow-none">
+            <div className="px-4 py-4 flex gap-4 items-center">
+              <Skeleton className="w-6 h-6 rounded-none" />
+              <div className="flex flex-col flex-1 gap-1">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-5 w-44" />
               </div>
             </div>
-          </Skeleton>
+          </div>
         </div>
       </div>
     </div>
