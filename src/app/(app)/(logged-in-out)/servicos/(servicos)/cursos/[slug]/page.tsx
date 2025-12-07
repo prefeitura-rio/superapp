@@ -42,7 +42,7 @@ export default async function CoursePage({
         'Error fetching user enrollment, continuing without it:',
         enrollmentError
       )
-      // Continue without enrollment data - user will see "Inscreva-se" button
+      // Continue without enrollment data - user will see 'Inscreva-se' button
     }
 
     // Fetch department/organization data if orgao_id exists
