@@ -51,6 +51,7 @@ export async function GET(request: Request) {
         result:
           response.data.results?.map(service => ({
             id: service.id,
+            slug: service.slug,
             titulo: service.title,
             descricao: service.description,
             category: service.category,

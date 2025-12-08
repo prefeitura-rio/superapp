@@ -215,7 +215,7 @@ export default function Search() {
     })
 
     // Navigate to the item
-    if (item.category && item.id) {
+    if (item.category && item.slug) {
       // Normalize category name to slug format
       const categorySlug = item.category
         .toLowerCase()
@@ -223,7 +223,7 @@ export default function Search() {
         .replace(/\p{Mn}/gu, '')
         .trim()
       router.push(
-        `/servicos/categoria/${encodeURIComponent(categorySlug)}/${item.id}`
+        `/servicos/categoria/${encodeURIComponent(categorySlug)}/${item.slug}`
       )
     } else if (item.url) {
       window.open(item.url, '_blank')

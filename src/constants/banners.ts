@@ -37,7 +37,7 @@ export const suggestedBanners: BannerProps[] = [
   //   component: IptuBanner,
   //   title: 'Fique em dia!',
   //   subtitle: 'Emita sua guia ou saiba mais',
-  //   route: '/servicos/categoria/taxas/94ff5567-17e5-47f3-8336-4ae209f1a601',
+  //   route: '/servicos/categoria/taxas/iptu-2025-94ff5567',
   // },
   {
     id: 'update',
