@@ -40,8 +40,8 @@ export default function CoursesFilterDrawerContent({
       open={open}
       onOpenChange={onOpenChange}
       title="Filtros"
-      contentClassName="max-h-[80vh]! md:min-h-[88vh] 3xl:min-h-auto flex flex-col"
-      className="flex-1 min-h-0"
+      contentClassName="max-h-[80vh]! pb-0! mb-0! lg:min-h-[670px] min-h-auto flex flex-col"
+      className="flex-1 min-h-0 max-h-none!"
     >
       <div className="space-y-6 pb-10">
         <h2 className="flex justify-center items-center text-xl font-medium text-center my-6">
@@ -151,7 +151,7 @@ export default function CoursesFilterDrawerContent({
         </div> */}
       </div>
 
-      <BottomSheetFooter className="flex flex-col px-0!">
+      <BottomSheetFooter className="flex flex-col px-0! pb-10">
         <CustomButton
           onClick={onApplyFilters}
           className="rounded-full py-4 flex-1 w-full"
