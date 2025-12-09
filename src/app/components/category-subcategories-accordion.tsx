@@ -134,12 +134,12 @@ export function CategorySubcategoriesAccordion({
                 ) : services.length > 0 ? (
                   <div className="space-y-2">
                     {services.map(service => {
-                      if (!service.id || !service.title) return null
+                      if (!service.slug || !service.title) return null
 
                       return (
                         <Link
-                          key={service.id}
-                          href={`/servicos/categoria/${categorySlug}/${service.id}`}
+                          key={service.slug}
+                          href={`/servicos/categoria/${categorySlug}/${service.slug}`}
                           className="flex bg-secondary! items-center justify-between rounded-md p-4 transition-colors group"
                         >
                           <span className="text-sm text-foreground flex-1 pr-2">

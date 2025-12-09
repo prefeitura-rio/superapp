@@ -38,14 +38,14 @@ export default async function CategoryPage({
   const services = servicesDocuments
     .filter(
       (service): service is ModelsServiceDocument =>
-        service.id !== undefined &&
+        service.slug !== undefined &&
         service.title !== undefined &&
         service.description !== undefined
     )
     .slice(0, 4)
     .map(service => ({
       id: service.id!,
-      href: `/servicos/categoria/${categorySlug}/${service.id}`,
+      href: `/servicos/categoria/${categorySlug}/${service.slug}`,
       icon: '',
       title: service.title!,
       description: service.description!,
