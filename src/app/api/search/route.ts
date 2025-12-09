@@ -1,6 +1,7 @@
 import { ModelsSearchType } from '@/http-busca-search/models/modelsSearchType'
-import { getApiV1Search } from '@/http-busca-search/search/search'
+import { getApiV2Search } from '@/http-busca-search/search-v2/search-v2'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
+import type { CourseData, JobData, ServiceData } from '@/types/search-v2'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -21,15 +22,14 @@ export async function GET(request: Request) {
     try {
       addSpanEvent('search.api.request.start')
 
-      // Use semantic search with threshold for best results
-      const response = await getApiV1Search(
+      // Use v2 endpoint with keyword search
+      const response = await getApiV2Search(
         {
           q,
-          type: ModelsSearchType.SearchTypeSemantic,
           page: 1,
           per_page: 20,
+          type: ModelsSearchType.SearchTypeKeyword,
           include_inactive: false,
-          threshold_semantic: 0.4,
         },
         {
           // Cache the response for 10 minutes
@@ -46,21 +46,62 @@ export async function GET(request: Request) {
         throw new Error(`Search API returned status ${response.status}`)
       }
 
-      // Transform the new format to the old format expected by the frontend
+      // Transform the v2 format to the format expected by the frontend
       const transformedData = {
         result:
-          response.data.results?.map(service => ({
-            id: service.id,
-            slug: service.slug,
-            titulo: service.title,
-            descricao: service.description,
-            category: service.category,
-            tipo: 'servico',
-          })) || [],
+          response.data.results?.map(result => {
+            if (result.type === 'service') {
+              const serviceData = result.data as unknown as ServiceData
+              return {
+                id: result.id,
+                slug: serviceData.slug,
+                titulo: serviceData.nome_servico,
+                descricao: serviceData.resumo_plaintext || serviceData.resumo,
+                category: serviceData.tema_geral,
+                tipo: 'servico' as const,
+                collection: result.collection,
+              }
+            }
+
+            if (result.type === 'course') {
+              const courseData = result.data as unknown as CourseData
+              return {
+                id: result.id,
+                slug: result.id, // courses use ID as slug
+                titulo: courseData.titulo,
+                descricao: courseData.descricao,
+                category: courseData.theme || 'Curso',
+                tipo: 'curso' as const,
+                collection: result.collection,
+              }
+            }
+
+            if (result.type === 'job') {
+              const jobData = result.data as unknown as JobData
+              return {
+                id: result.id,
+                slug: result.id, // jobs use ID as slug
+                titulo: jobData.titulo,
+                descricao: jobData.descricao,
+                category: 'Emprego',
+                tipo: 'job' as const,
+                collection: result.collection,
+              }
+            }
+
+            // Handle other types if needed
+            return {
+              id: result.id,
+              titulo: 'Unknown',
+              tipo: result.type as string,
+              collection: result.collection,
+            }
+          }) || [],
       }
 
       addSpanEvent('search.results.transformed', {
         'results.count': transformedData.result.length,
+        'results.collections': response.data.collections?.join(',') || '',
       })
 
       return NextResponse.json(transformedData)
