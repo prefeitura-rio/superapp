@@ -3,13 +3,15 @@
 import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
+import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { sendGAEvent } from '@next/third-parties/google'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 interface SearchResultItem {
   titulo: string
-  tipo: string
+  tipo: 'servico' | 'curso' | 'job' | string
   url?: string
   descricao?: string
   category?: string
@@ -190,20 +192,6 @@ export default function Search() {
     // No valid previous route (direct access), navigate to "/"
     router.push('/')
   }
-
-  const displayTipo = (tipo: string) => {
-    switch (tipo) {
-      case 'servico':
-        return 'Serviço'
-      case 'informacao':
-        return 'Informação'
-      case 'noticia':
-        return 'Notícia'
-      default:
-        return tipo
-    }
-  }
-
   const handleSearchItemClick = (item: SearchResultItem) => {
     // Send GA event with search details
     sendGAEvent('event', 'search_result_click', {
@@ -214,8 +202,14 @@ export default function Search() {
       event_timestamp: new Date().toISOString(),
     })
 
-    // Navigate to the item
-    if (item.category && item.slug) {
+    // Navigate to the item based on type
+    if (item.tipo === 'curso' && item.id) {
+      // Navigate to course detail page
+      router.push(`/servicos/cursos/${item.id}`)
+    } else if (item.tipo === 'job' && item.id) {
+      // Navigate to job detail page
+      router.push(`/servicos/empregos/${item.id}`)
+    } else if (item.tipo === 'servico' && item.category && item.slug) {
       // Normalize category name to slug format
       const categorySlug = item.category
         .toLowerCase()
@@ -252,38 +246,58 @@ export default function Search() {
           </div>
         ) : query.length > 2 ? (
           <div>
-            <h2 className="text-base text-foreground font-medium">
-              Resultados da Pesquisa
-            </h2>
             {results && results.length > 0 ? (
-              <ul className="space-y-2 pt-4">
-                {results
-                  .filter(item => item.tipo !== 'noticia')
-                  .map((item, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card hover:bg-card/70 rounded-lg cursor-pointer"
-                      onClick={() => handleSearchItemClick(item)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          handleSearchItemClick(item)
-                        }
-                      }}
-                    >
-                      <div className="flex-1">
-                        <div className="text-card-foreground text-sm font-normal leading-5">
-                          {item.titulo}
+              <>
+                <h2 className="text-base text-foreground font-medium">
+                  Resultados da Pesquisa
+                </h2>
+                <ul className="space-y-2 pt-4">
+                  {results
+                    .filter(item => item.tipo !== 'noticia')
+                    .map((item, index) => (
+                      <li
+                        key={index}
+                        className="text-sm text-gray-300 flex justify-between items-center p-4 bg-card hover:bg-card/70 rounded-lg cursor-pointer"
+                        onClick={() => handleSearchItemClick(item)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            handleSearchItemClick(item)
+                          }
+                        }}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="text-card-foreground line-clamp-2 text-sm font-normal leading-5">
+                              {item.titulo}
+                            </div>
+                            {item.tipo === 'curso' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                Curso
+                              </span>
+                            )}
+                            {item.tipo === 'job' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                                Emprego
+                              </span>
+                            )}
+                          </div>
+                          <div className="pt-1 line-clamp-2 text-muted-foreground text-xs font-normal leading-4">
+                            {item.descricao}
+                          </div>
                         </div>
-                        <div className="pt-1 line-clamp-2 text-muted-foreground text-xs font-normal leading-4">
-                          {item.descricao}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-              </ul>
+                      </li>
+                    ))}
+                </ul>
+              </>
             ) : (
-              <div className="text-foreground text-center mt-4">
-                Nenhum resultado encontrado
+              <div className="flex flex-col items-center text-center justify-center py-8">
+                <ThemeAwareVideo
+                  source={VIDEO_SOURCES.emptyAddress}
+                  containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+                />
+                <p className="text-lg text-muted-foreground">
+                  Ops... nenhum resultado encontrado para a sua busca
+                </p>
               </div>
             )}
           </div>
