@@ -33,9 +33,7 @@ export function ExternalLinkDrawer({
             Vamos redirecionar você para um link externo
           </h2>
           <p className="text-muted-foreground text-sm font-normal leading-5 tracking-normal">
-            Este conteúdo é gerenciado por um de nossos parceiros externos. O
-            processo de acesso e acompanhamento é feito fora do Oportunidades
-            Cariocas
+            Esta busca está redirecionando você para um link externo.
           </p>
         </div>
 
@@ -52,4 +50,3 @@ export function ExternalLinkDrawer({
     </BottomSheet>
   )
 }
-
