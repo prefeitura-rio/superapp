@@ -1,227 +1,49 @@
 'use client'
 
+import { ExternalLinkDrawer } from '@/app/components/drawer-contents/external-link-drawer'
 import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import type { SearchResultItem } from '@/helpers/search-helpers'
 import { sendGAEvent } from '@next/third-parties/google'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-
-interface SearchResultItem {
-  titulo: string
-  tipo: 'servico' | 'curso' | 'job' | string
-  url?: string
-  descricao?: string
-  category?: string
-  collection?: string
-  id?: string
-  slug?: string
-}
-
-interface ApiResponse {
-  result: SearchResultItem[]
-}
-
-const SEARCH_HISTORY_KEY = 'search-history'
-const MAX_HISTORY_ITEMS = 10
+import { useState } from 'react'
+import { useSearch } from './hooks/use-search'
+import {
+  handleBackNavigation,
+  handleSearchItemClick as handleItemClick,
+} from './utils/navigation-helpers'
 
 export default function Search() {
   const router = useRouter()
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<SearchResultItem[]>([])
-  const [loading, setLoading] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchHistory, setSearchHistory] = useState<string[]>([])
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [externalLinkDrawerOpen, setExternalLinkDrawerOpen] = useState(false)
+  const [selectedExternalUrl, setSelectedExternalUrl] = useState<string>('')
 
-  // Load search history from localStorage on mount
-  useEffect(() => {
-    const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY)
-    if (savedHistory) {
-      try {
-        const parsedHistory = JSON.parse(savedHistory)
-        setSearchHistory(parsedHistory)
-      } catch (error) {
-        console.error('Error parsing search history:', error)
-        localStorage.removeItem(SEARCH_HISTORY_KEY)
-      }
-    }
-  }, [])
-
-  // Auto-focus the search input when component mounts
-  useEffect(() => {
-    if (searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [])
-
-  // Save search history to localStorage
-  const saveSearchToHistory = (searchQuery: string) => {
-    if (!searchQuery.trim() || searchQuery.length <= 2) return
-
-    const trimmedQuery = searchQuery.trim()
-
-    setSearchHistory(prevHistory => {
-      // Remove the query if it already exists (to avoid duplicates)
-      const filteredHistory = prevHistory.filter(item => item !== trimmedQuery)
-      // Add the new query at the beginning
-      const newHistory = [trimmedQuery, ...filteredHistory].slice(
-        0,
-        MAX_HISTORY_ITEMS
-      )
-
-      // Save to localStorage
-      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
-
-      return newHistory
-    })
-  }
-
-  // Remove item from search history
-  const removeFromHistory = (itemToRemove: string) => {
-    setSearchHistory(prevHistory => {
-      const newHistory = prevHistory.filter(item => item !== itemToRemove)
-      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
-      return newHistory
-    })
-  }
-
-  const handleSearch = async (query: string) => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      const data: ApiResponse = await response.json()
-      setResults(data.result || [])
-
-      // Save to search history after successful search
-      saveSearchToHistory(query)
-    } catch (error) {
-      console.error('Error fetching search results:', error)
-      setResults([])
-    } finally {
-      setLoading(false)
-      setIsSearching(false)
-    }
-  }
-
-  const onQueryChange = (newQuery: string) => {
-    setQuery(newQuery)
-
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current)
-    }
-
-    if (newQuery.length > 2) {
-      setIsSearching(true)
-      debounceTimeout.current = setTimeout(() => {
-        handleSearch(newQuery)
-      }, 500) // 500ms delay
-    } else {
-      setResults([])
-      setIsSearching(false)
-    }
-  }
-
-  const clearSearch = () => {
-    setQuery('')
-    setResults([])
-  }
+  const {
+    query,
+    results,
+    loading,
+    isSearching,
+    searchHistory,
+    setQuery,
+    onQueryChange,
+    handleSearch,
+    clearSearch,
+    removeFromHistory,
+    searchInputRef,
+  } = useSearch()
 
   const handleBack = () => {
-    if (typeof window === 'undefined') {
-      router.push('/')
-      return
-    }
-
-    try {
-      // Check sessionStorage for previous route
-      const previousRoute = sessionStorage.getItem('previousRoute')
-      if (previousRoute) {
-        const previousPath = previousRoute.split('?')[0] // Get pathname only
-        const currentPath = window.location.pathname
-
-        // Check if previous route is different from current and is from the same app
-        if (previousPath && previousPath !== currentPath) {
-          // Check if it's not a child route
-          const isChildRoute = previousPath.startsWith(`${currentPath}/`)
-          if (!isChildRoute) {
-            // Valid previous route exists, use router.back()
-            router.back()
-            return
-          }
-        }
-      }
-
-      // Fallback to document.referrer check
-      const referrer = document.referrer
-      if (referrer) {
-        try {
-          const referrerUrl = new URL(referrer)
-          const currentUrl = new URL(window.location.href)
-
-          // Check if referrer is from the same domain
-          if (referrerUrl.origin === currentUrl.origin) {
-            const referrerPath = referrerUrl.pathname
-            const currentPath = currentUrl.pathname
-
-            // Check if referrer is different from current page
-            if (referrerPath !== currentPath) {
-              // Check if it's not a child route
-              const isChildRoute = referrerPath.startsWith(`${currentPath}/`)
-              if (!isChildRoute) {
-                // Valid referrer exists, use router.back()
-                router.back()
-                return
-              }
-            }
-          }
-        } catch {
-          // Invalid URL, continue to default
-        }
-      }
-    } catch {
-      // sessionStorage or other errors, continue to default
-    }
-
-    // No valid previous route (direct access), navigate to "/"
-    router.push('/')
+    handleBackNavigation(router)
   }
-  const handleSearchItemClick = (item: SearchResultItem) => {
-    // Send GA event with search details
-    sendGAEvent('event', 'search_result_click', {
-      search_query: query,
-      result_title: item.titulo,
-      result_description: item.descricao || '',
-      result_type: item.tipo,
-      event_timestamp: new Date().toISOString(),
-    })
 
-    // Navigate to the item based on type
-    if (item.tipo === 'curso' && item.id) {
-      // Navigate to course detail page
-      router.push(`/servicos/cursos/${item.id}`)
-    } else if (item.tipo === 'job' && item.id) {
-      // Navigate to job detail page
-      router.push(`/servicos/empregos/${item.id}`)
-    } else if (item.tipo === 'servico' && item.category && item.slug) {
-      // Normalize category name to slug format
-      const categorySlug = item.category
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{Mn}/gu, '')
-        .trim()
-      router.push(
-        `/servicos/categoria/${encodeURIComponent(categorySlug)}/${item.slug}`
-      )
-    } else if (item.url) {
-      window.open(item.url, '_blank')
-    }
+  const handleSearchItemClick = (item: SearchResultItem) => {
+    handleItemClick(item, query, router, url => {
+      setSelectedExternalUrl(url)
+      setExternalLinkDrawerOpen(true)
+    })
   }
 
   return (
@@ -278,6 +100,11 @@ export default function Search() {
                             {item.tipo === 'job' && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
                                 Emprego
+                              </span>
+                            )}
+                            {item.tipo === 'link_externo' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                Link externo
                               </span>
                             )}
                           </div>
@@ -389,6 +216,13 @@ export default function Search() {
           </ul>
         </div>
       )}
+
+      {/* External Link Drawer */}
+      <ExternalLinkDrawer
+        open={externalLinkDrawerOpen}
+        onOpenChange={setExternalLinkDrawerOpen}
+        externalUrl={selectedExternalUrl}
+      />
     </div>
   )
 }
