@@ -61,6 +61,7 @@ jobs:
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .
@@ -87,6 +88,7 @@ jobs:
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="false" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .
