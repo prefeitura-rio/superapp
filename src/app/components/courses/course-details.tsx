@@ -445,6 +445,9 @@ function OnlineClassSelection({
     const container = scrollContainerRef.current
     if (!container) return
 
+    // Only enable scroll features if there are 3 or more classes
+    if (onlineClasses.length < 3) return
+
     // Drag to scroll - works on container and all children (including buttons)
     const handleMouseDown = (e: MouseEvent) => {
       // Allow dragging even when clicking on buttons
@@ -530,7 +533,7 @@ function OnlineClassSelection({
       container.removeEventListener('wheel', handleWheel)
       container.removeEventListener('click', handleClick, true)
     }
-  }, [])
+  }, [onlineClasses.length])
 
   return (
     <div className="space-y-4">
@@ -543,7 +546,11 @@ function OnlineClassSelection({
       {/* Horizontal Scrollable Class Cards */}
       <div
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing"
+        className={`w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+          onlineClasses.length >= 3
+            ? 'cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing'
+            : ''
+        }`}
       >
         <div className="flex gap-3 pl-4 pb-2">
           {onlineClasses.map((onlineClass, index) => (
@@ -695,6 +702,9 @@ function LocationSelection({
     const container = scrollContainerRef.current
     if (!container) return
 
+    // Only enable scroll features if there are 3 or more locations
+    if (!course.locations || course.locations.length < 3) return
+
     // Drag to scroll - works on container and all children (including buttons)
     const handleMouseDown = (e: MouseEvent) => {
       // Allow dragging even when clicking on buttons
@@ -780,7 +790,7 @@ function LocationSelection({
       container.removeEventListener('wheel', handleWheel)
       container.removeEventListener('click', handleClick, true)
     }
-  }, [])
+  }, [course.locations])
 
   return (
     <div className="space-y-4">
@@ -793,7 +803,11 @@ function LocationSelection({
       {/* Horizontal Scrollable Location Cards */}
       <div
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing"
+        className={`w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+          course.locations.length >= 3
+            ? 'cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing'
+            : ''
+        }`}
       >
         <div className="flex gap-3 pl-4 pb-2">
           {course.locations.map(location => (
