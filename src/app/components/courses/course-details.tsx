@@ -29,7 +29,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { ExternalPartnerCourseDrawer } from '../drawer-contents/external-partner-course-drawer'
 import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
@@ -411,6 +411,15 @@ function OnlineClassSelection({
                   </span>
                 </div>
               )}
+              {singleClass.class_time && (
+                <div className="flex items-center gap-3">
+                  <ClockIcon />
+                  <span>Horário</span>
+                  <span className="text-foreground">
+                    {formatTimeRange(singleClass.class_time)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <PersonIcon />
                 <span>Vagas</span>
@@ -426,6 +435,103 @@ function OnlineClassSelection({
   const selectedClass =
     onlineClasses.find(cls => cls.id === selectedClassId) || onlineClasses[0]
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
+  const hasMovedRef = useRef(false)
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // Drag to scroll - works on container and all children (including buttons)
+    const handleMouseDown = (e: MouseEvent) => {
+      // Allow dragging even when clicking on buttons
+      isDraggingRef.current = true
+      hasMovedRef.current = false
+      startXRef.current = e.pageX - container.offsetLeft
+      scrollLeftRef.current = container.scrollLeft
+      container.style.cursor = 'grabbing'
+      container.style.userSelect = 'none'
+      // Prevent text selection on buttons during drag
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = 'none'
+      })
+    }
+
+    const handleMouseLeave = () => {
+      isDraggingRef.current = false
+      hasMovedRef.current = false
+      container.style.cursor = 'grab'
+      container.style.userSelect = ''
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = ''
+      })
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      container.style.cursor = 'grab'
+      container.style.userSelect = ''
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = ''
+      })
+      // Only reset hasMoved after a small delay to allow click event to check it
+      setTimeout(() => {
+        hasMovedRef.current = false
+      }, 0)
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      e.preventDefault()
+      hasMovedRef.current = true
+      const x = e.pageX - container.offsetLeft
+      const walk = (x - startXRef.current) * 2 // Scroll speed multiplier
+      container.scrollLeft = scrollLeftRef.current - walk
+    }
+
+    // Handle both vertical and horizontal scroll from touchpad
+    const handleWheel = (e: WheelEvent) => {
+      // Only apply on desktop (not touch devices)
+      if (window.innerWidth >= 768) {
+        e.preventDefault()
+        // Support both horizontal (deltaX) and vertical (deltaY) scroll
+        // deltaX is for horizontal touchpad scroll, deltaY is for vertical scroll converted to horizontal
+        container.scrollLeft += e.deltaX + e.deltaY
+      }
+    }
+
+    // Prevent click on buttons when dragging
+    const handleClick = (e: MouseEvent) => {
+      if (hasMovedRef.current && (e.target as HTMLElement).closest('button')) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+
+    // Use capture phase to ensure events work even when clicking on buttons
+    container.addEventListener('mousedown', handleMouseDown, true)
+    container.addEventListener('mouseleave', handleMouseLeave)
+    container.addEventListener('mouseup', handleMouseUp, true)
+    container.addEventListener('mousemove', handleMouseMove, true)
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('click', handleClick, true)
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown, true)
+      container.removeEventListener('mouseleave', handleMouseLeave)
+      container.removeEventListener('mouseup', handleMouseUp, true)
+      container.removeEventListener('mousemove', handleMouseMove, true)
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('click', handleClick, true)
+    }
+  }, [])
+
   return (
     <div className="space-y-4">
       {/* Class Icon Label */}
@@ -435,7 +541,10 @@ function OnlineClassSelection({
       </div>
 
       {/* Horizontal Scrollable Class Cards */}
-      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div
+        ref={scrollContainerRef}
+        className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing"
+      >
         <div className="flex gap-3 pl-4 pb-2">
           {onlineClasses.map((onlineClass, index) => (
             <button
@@ -516,6 +625,17 @@ function OnlineClassSelection({
                 </div>
               )}
 
+              {/* Horário */}
+              {selectedClass.class_time && (
+                <div className="flex items-center gap-3">
+                  <ClockIcon />
+                  <span>Horário</span>
+                  <span className="text-foreground">
+                    {formatTimeRange(selectedClass.class_time)}
+                  </span>
+                </div>
+              )}
+
               {/* Vagas */}
               <div className="flex items-center gap-3">
                 <PersonIcon />
@@ -565,6 +685,103 @@ function LocationSelection({
 
   const hasMultipleLocations = course.locations.length > 1
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
+  const hasMovedRef = useRef(false)
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // Drag to scroll - works on container and all children (including buttons)
+    const handleMouseDown = (e: MouseEvent) => {
+      // Allow dragging even when clicking on buttons
+      isDraggingRef.current = true
+      hasMovedRef.current = false
+      startXRef.current = e.pageX - container.offsetLeft
+      scrollLeftRef.current = container.scrollLeft
+      container.style.cursor = 'grabbing'
+      container.style.userSelect = 'none'
+      // Prevent text selection on buttons during drag
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = 'none'
+      })
+    }
+
+    const handleMouseLeave = () => {
+      isDraggingRef.current = false
+      hasMovedRef.current = false
+      container.style.cursor = 'grab'
+      container.style.userSelect = ''
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = ''
+      })
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      container.style.cursor = 'grab'
+      container.style.userSelect = ''
+      const buttons = container.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.style.userSelect = ''
+      })
+      // Only reset hasMoved after a small delay to allow click event to check it
+      setTimeout(() => {
+        hasMovedRef.current = false
+      }, 0)
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      e.preventDefault()
+      hasMovedRef.current = true
+      const x = e.pageX - container.offsetLeft
+      const walk = (x - startXRef.current) * 2 // Scroll speed multiplier
+      container.scrollLeft = scrollLeftRef.current - walk
+    }
+
+    // Handle both vertical and horizontal scroll from touchpad
+    const handleWheel = (e: WheelEvent) => {
+      // Only apply on desktop (not touch devices)
+      if (window.innerWidth >= 768) {
+        e.preventDefault()
+        // Support both horizontal (deltaX) and vertical (deltaY) scroll
+        // deltaX is for horizontal touchpad scroll, deltaY is for vertical scroll converted to horizontal
+        container.scrollLeft += e.deltaX + e.deltaY
+      }
+    }
+
+    // Prevent click on buttons when dragging
+    const handleClick = (e: MouseEvent) => {
+      if (hasMovedRef.current && (e.target as HTMLElement).closest('button')) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+
+    // Use capture phase to ensure events work even when clicking on buttons
+    container.addEventListener('mousedown', handleMouseDown, true)
+    container.addEventListener('mouseleave', handleMouseLeave)
+    container.addEventListener('mouseup', handleMouseUp, true)
+    container.addEventListener('mousemove', handleMouseMove, true)
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('click', handleClick, true)
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown, true)
+      container.removeEventListener('mouseleave', handleMouseLeave)
+      container.removeEventListener('mouseup', handleMouseUp, true)
+      container.removeEventListener('mousemove', handleMouseMove, true)
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('click', handleClick, true)
+    }
+  }, [])
+
   return (
     <div className="space-y-4">
       {/* Location Icon Label */}
@@ -574,7 +791,10 @@ function LocationSelection({
       </div>
 
       {/* Horizontal Scrollable Location Cards */}
-      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div
+        ref={scrollContainerRef}
+        className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing"
+      >
         <div className="flex gap-3 pl-4 pb-2">
           {course.locations.map(location => (
             <button
