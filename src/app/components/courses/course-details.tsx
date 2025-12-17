@@ -411,6 +411,15 @@ function OnlineClassSelection({
                   </span>
                 </div>
               )}
+              {singleClass.class_time && (
+                <div className="flex items-center gap-3">
+                  <ClockIcon />
+                  <span>Horário</span>
+                  <span className="text-foreground">
+                    {formatTimeRange(singleClass.class_time)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <PersonIcon />
                 <span>Vagas</span>
@@ -512,6 +521,17 @@ function OnlineClassSelection({
                   <span>Dias de aula</span>
                   <span className="text-foreground">
                     {selectedClass.class_days}
+                  </span>
+                </div>
+              )}
+
+              {/* Horário */}
+              {selectedClass.class_time && (
+                <div className="flex items-center gap-3">
+                  <ClockIcon />
+                  <span>Horário</span>
+                  <span className="text-foreground">
+                    {formatTimeRange(selectedClass.class_time)}
                   </span>
                 </div>
               )}
