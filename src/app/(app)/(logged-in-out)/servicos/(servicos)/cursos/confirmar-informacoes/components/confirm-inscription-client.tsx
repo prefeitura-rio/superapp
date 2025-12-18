@@ -628,6 +628,18 @@ export function ConfirmInscriptionClient({
               value: userInfo.address?.bairro || '',
               required: false,
             },
+            cidade: {
+              id: 'cidade',
+              title: 'Cidade',
+              value: userInfo.address?.municipio || '',
+              required: false,
+            },
+            estado: {
+              id: 'estado',
+              title: 'Estado',
+              value: userInfo.address?.estado || '',
+              required: false,
+            },
             pessoa_com_deficiencia: {
               id: 'pessoa_com_deficiencia',
               title: 'Pessoa com deficiência',
