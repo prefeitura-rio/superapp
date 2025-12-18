@@ -82,7 +82,7 @@ export function ImageGalleryModal({
               className="absolute -top-10 -right-10 z-10 p-2 text-foreground transition-opacity hover:opacity-70"
               aria-label="Fechar galeria"
             >
-              <XIcon className="h-6 w-6 text-background" />
+              <XIcon className="h-6 w-6 text-white" />
             </button>
 
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black">
