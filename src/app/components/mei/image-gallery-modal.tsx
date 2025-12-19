@@ -85,13 +85,14 @@ export function ImageGalleryModal({
               <XIcon className="h-6 w-6 text-white" />
             </button>
 
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black max-md:aspect-square">
+            <div className="relative flex items-center justify-center">
               {currentAttachment && (
                 <Image
                   src={currentAttachment.url}
                   alt={currentAttachment.name}
-                  fill
-                  className="object-contain"
+                  width={800}
+                  height={600}
+                  className="rounded-lg object-contain max-h-[70vh] w-auto h-auto"
                   priority
                   sizes="(max-width: 768px) 100vw, 768px"
                 />

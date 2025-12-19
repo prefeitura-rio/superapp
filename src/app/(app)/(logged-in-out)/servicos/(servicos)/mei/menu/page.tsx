@@ -13,13 +13,13 @@ export default function MeiMenuPage() {
   }
 
   return (
-    <main className="max-w-xl min-h-lvh mx-auto pt-15 text-foreground pb-10">
-      <header className="px-4 py-4 fixed w-full max-w-xl mx-auto z-50 bg-background text-foreground">
+    <main className="max-w-xl min-h-lvh mx-auto text-foreground pb-10">
+      <header className="px-4 py-4 w-full max-w-xl mx-auto z-50 bg-background text-foreground">
         <div className="flex justify-start">
           <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
         </div>
       </header>
-      <div className="px-4 pt-6">
+      <div className="px-4 pt-3.4">
         <MenuItem
           label="Minhas propostas"
           href="/servicos/mei/minhas-propostas"
