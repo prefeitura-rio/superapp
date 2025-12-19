@@ -5,6 +5,7 @@ import { EditIcon } from '@/assets/icons/edit-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { MeiCompanyData, MeiProposalFormData } from '../mei-proposal-client'
@@ -12,6 +13,7 @@ import type { MeiCompanyData, MeiProposalFormData } from '../mei-proposal-client
 interface ReviewStepProps {
   companyData: MeiCompanyData
   showTermsError: boolean
+  slug: string
 }
 
 interface ReviewItemProps {
@@ -69,7 +71,7 @@ function ReviewItem({
           title={infoTitle}
           showHandle
         >
-          <p className="text-lg font-medium text-foreground leading-relaxed">
+          <p className="text-foreground-light text-sm leading-relaxed">
             {infoContent}
           </p>
         </BottomSheet>
@@ -85,7 +87,8 @@ function formatCurrency(value: number): string {
   })
 }
 
-export function ReviewStep({ companyData, showTermsError }: ReviewStepProps) {
+export function ReviewStep({ companyData, showTermsError, slug }: ReviewStepProps) {
+  const router = useRouter()
   const { watch, setValue } = useFormContext<MeiProposalFormData>()
   const proposalValue = watch('value')
   const duration = watch('duration')
@@ -94,15 +97,17 @@ export function ReviewStep({ companyData, showTermsError }: ReviewStepProps) {
   const acceptedTerms = watch('acceptedTerms')
 
   const handlePhoneEdit = () => {
-    // TODO: Navigate to phone update page
-    // For now, just log - will be integrated later
-    console.log('Edit phone clicked')
+    const returnUrl = `/servicos/mei/${slug}/proposta?step=review`
+    router.push(
+      `/meu-perfil/informacoes-pessoais/atualizar-telefone?redirectFromMei=${slug}&returnUrl=${encodeURIComponent(returnUrl)}`
+    )
   }
 
   const handleEmailEdit = () => {
-    // TODO: Navigate to email update page
-    // For now, just log - will be integrated later
-    console.log('Edit email clicked')
+    const returnUrl = `/servicos/mei/${slug}/proposta?step=review`
+    router.push(
+      `/meu-perfil/informacoes-pessoais/atualizar-email?redirectFromMei=${slug}&returnUrl=${encodeURIComponent(returnUrl)}`
+    )
   }
 
   return (
