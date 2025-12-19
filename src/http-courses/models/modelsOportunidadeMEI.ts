@@ -5,7 +5,35 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
+import type { ModelsOportunidadeMEIFormaPagamento } from './modelsOportunidadeMEIFormaPagamento'
+import type { ModelsOportunidadeMEIStatus } from './modelsOportunidadeMEIStatus'
 
 export interface ModelsOportunidadeMEI {
-  [key: string]: unknown
+  bairro?: string
+  cidade?: string
+  cnae_ids?: string[]
+  complemento?: string
+  /** Imagens */
+  cover_image?: string
+  created_at?: string
+  data_expiracao?: string
+  data_limite_execucao?: string
+  deleted_at?: string
+  descricao_servico?: string
+  estado?: string
+  /** Pagamento e prazos */
+  forma_pagamento?: ModelsOportunidadeMEIFormaPagamento
+  gallery_images?: string[]
+  id?: number
+  /** Local de execução */
+  logradouro?: string
+  numero?: string
+  /** Relacionamentos */
+  orgao_id?: string
+  outras_informacoes?: string
+  prazo_pagamento?: string
+  /** Status e controle */
+  status?: ModelsOportunidadeMEIStatus
+  titulo?: string
+  updated_at?: string
 }

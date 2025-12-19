@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetApiV1PropostasMeiPorEmpresaParams = {
+export type GetPropostasMeiPorEmpresaParams = {
   /**
    * CNPJ da MEI empresa
    */
