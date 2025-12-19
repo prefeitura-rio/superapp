@@ -456,8 +456,8 @@ export const getGetPropostasMeiPorEmpresaUrl = (
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `/propostas-mei/por-empresa?${stringifiedParams}`
-    : `/propostas-mei/por-empresa`
+    ? `/api/v1/propostas-mei/por-empresa?${stringifiedParams}`
+    : `/api/v1/propostas-mei/por-empresa`
 }
 
 export const getPropostasMeiPorEmpresa = async (
