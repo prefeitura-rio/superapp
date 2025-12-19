@@ -1,21 +1,22 @@
-import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
-import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
-import { mapApiToMeiProposal } from '@/lib/mei-utils'
 import type { ModelsPropostaMEI } from '@/http-courses/models'
+import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
+import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
+import { mapApiToMeiProposal } from '@/lib/mei-utils'
 import type { MeiProposal } from './types'
 
 interface PropostasResponse {
-  propostas?: ModelsPropostaMEI[]
-  total?: number
+  data?: ModelsPropostaMEI[]
+  meta?: {
+    page: number
+    page_size: number
+    total: number
+  }
 }
 
 export async function getMyProposals(cnpj: string): Promise<MeiProposal[]> {
   try {
-    // 1. Buscar propostas do MEI
     const response = await getPropostasMeiPorEmpresa({
       meiEmpresaId: cnpj.replace(/\D/g, ''),
-      page: 1,
-      pageSize: 50,
     })
 
     if (response.status !== 200 || !response.data) {
@@ -23,8 +24,8 @@ export async function getMyProposals(cnpj: string): Promise<MeiProposal[]> {
       return []
     }
 
-    const data = response.data as PropostasResponse
-    const propostas = data.propostas || []
+    const apiData = response.data as PropostasResponse
+    const propostas = apiData.data || []
 
     if (propostas.length === 0) {
       return []

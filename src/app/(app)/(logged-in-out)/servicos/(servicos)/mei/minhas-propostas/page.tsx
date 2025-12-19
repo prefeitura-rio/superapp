@@ -1,11 +1,21 @@
+import { getUserLegalEntity } from '@/lib/mei-utils.server'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { getMyProposals } from './get-my-proposals'
 import { MinhasPropostasClient } from './minhas-propostas-client'
 
 export default async function MinhasPropostasPage() {
-  // TODO: Buscar CNPJ do usuário de outra API (não implementada ainda)
-  const cnpj = '12345678000195' // Mock temporário
+  const userInfo = await getUserInfoFromToken()
 
-  const proposals = await getMyProposals(cnpj)
+  if (!userInfo.cpf) {
+    return <MinhasPropostasClient proposals={[]} hasMei={false} />
+  }
 
-  return <MinhasPropostasClient proposals={proposals} />
+  const result = await getUserLegalEntity(userInfo.cpf)
+  if (!result) {
+    return <MinhasPropostasClient proposals={[]} hasMei={false} />
+  }
+
+  const proposals = await getMyProposals(result.cnpj)
+
+  return <MinhasPropostasClient proposals={proposals} hasMei={true} />
 }
