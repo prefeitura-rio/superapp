@@ -13,7 +13,7 @@ function StatusBadge({ status }: { status: MeiCompanyStatus }) {
   return (
     <Badge
       className={
-        isActive ? 'bg-primary text-background' : 'bg-destructive text-white'
+        isActive ? 'bg-success text-white' : 'bg-destructive text-white'
       }
     >
       {status}
@@ -34,9 +34,13 @@ export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
     console.log('Edit email clicked')
   }
 
-  // Format CNAE with code and description
-  const formatCnae = (cnae: { codigo: string; descricao: string }) =>
-    `${cnae.codigo} - ${cnae.descricao}`
+  // Format CNAE with code and description (only add separator if description exists)
+  const formatCnae = (cnae: { codigo: string; descricao: string }) => {
+    if (cnae.descricao) {
+      return `${cnae.codigo} – ${cnae.descricao}`
+    }
+    return cnae.codigo
+  }
 
   // Get all secondary CNAEs as array of formatted strings
   const secondaryCnaes = data.cnaesSecundarios.map(formatCnae)
@@ -60,7 +64,9 @@ export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
       <div className="flex flex-col">
         <MeiDataItem label="CNPJ" value={data.cnpj} />
 
-        <MeiDataItem label="Nome fantasia" value={data.nomeFantasia} />
+        {data.nomeFantasia && (
+          <MeiDataItem label="Nome fantasia" value={data.nomeFantasia} />
+        )}
 
         <MeiDataItem
           label="Celular"

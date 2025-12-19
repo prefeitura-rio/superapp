@@ -53,10 +53,7 @@ export function MeiDataItem({
           )}
         </div>
         {values.map((v, index) => (
-          <span
-            key={index}
-            className="text-base text-foreground block"
-          >
+          <span key={index} className="text-base text-foreground block">
             {v}
           </span>
         ))}
@@ -69,7 +66,7 @@ export function MeiDataItem({
           title={infoTitle}
           showHandle
         >
-          <p className="text-lg font-medium text-foreground leading-relaxed">
+          <p className="text-sm text-popover-foreground leading-5 pt-6">
             {infoContent}
           </p>
         </BottomSheet>
