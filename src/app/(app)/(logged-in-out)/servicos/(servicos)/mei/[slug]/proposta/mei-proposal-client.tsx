@@ -170,6 +170,7 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
               <ReviewStep
                 companyData={companyData}
                 showTermsError={showTermsError}
+                slug={slug}
               />
             )}
           </div>
