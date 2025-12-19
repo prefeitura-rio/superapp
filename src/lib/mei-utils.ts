@@ -3,6 +3,7 @@ import type {
   ModelsPropostaMEI,
   ModelsPropostaMEIStatusCidadao,
 } from '@/http-courses/models'
+import type { ModelsLegalEntity } from '@/http/models'
 import type {
   MeiOpportunity,
   MeiOpportunityDetailData,
@@ -12,6 +13,10 @@ import type {
   MeiProposal,
   ProposalStatus,
 } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/mei/minhas-propostas/types'
+import type {
+  MeiCompanyFullData,
+  MeiCompanyStatus,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/mei/meu-mei/types'
 
 /**
  * Mapeia forma de pagamento da API para texto legível
@@ -144,6 +149,7 @@ export function mapApiToMeiOpportunityDetail(
     },
     executionDeadline: formatMeiDate(api.data_limite_execucao),
     attachments: mapGalleryToAttachments(api.gallery_images),
+    cnaeIds: api.cnae_ids,
   }
 }
 
@@ -170,12 +176,131 @@ export function mapApiToMeiProposal(
   oportunidade: { titulo?: string; cover_image?: string }
 ): MeiProposal {
   return {
-    id: Number(proposta.id) || 0,
+    id: proposta.id || '',
     opportunityId: proposta.oportunidade_mei_id || 0,
     opportunitySlug: String(proposta.oportunidade_mei_id || 0),
     title: oportunidade.titulo || 'Oportunidade',
     coverImage: oportunidade.cover_image,
     status: mapApiStatusToProposalStatus(proposta.status_cidadao),
+  }
+}
+
+/**
+ * Formata CNPJ com pontuação
+ */
+export function formatCnpj(cnpj: string): string {
+  const digits = cnpj.replace(/\D/g, '')
+  if (digits.length !== 14) return cnpj
+  return digits.replace(
+    /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+    '$1.$2.$3/$4-$5'
+  )
+}
+
+/**
+ * Mapeia situação cadastral da API para tipo do frontend
+ */
+export function mapSituacaoCadastral(descricao?: string): MeiCompanyStatus {
+  const map: Record<string, MeiCompanyStatus> = {
+    Ativa: 'Ativa',
+    Suspensa: 'Suspensa',
+    Inapta: 'Inapta',
+    Baixada: 'Baixada',
+    Nula: 'Nula',
+  }
+  return map[descricao || ''] || 'Ativa'
+}
+
+/**
+ * Mapper: API ModelsLegalEntity -> Frontend MeiCompanyFullData (página Meu MEI)
+ */
+export function mapLegalEntityToMeiCompanyFullData(
+  entity: ModelsLegalEntity
+): MeiCompanyFullData {
+  const phone = entity.contato?.telefone?.[0]
+
+  return {
+    cnpj: formatCnpj(entity.cnpj || ''),
+    razaoSocial: entity.razao_social || '',
+    nomeFantasia: entity.nome_fantasia || '',
+    situacaoCadastral: mapSituacaoCadastral(entity.situacao_cadastral?.descricao),
+    telefone: {
+      ddi: '55',
+      ddd: phone?.ddd || '',
+      valor: phone?.telefone || '',
+    },
+    email: entity.contato?.email || '',
+    naturezaJuridica: entity.natureza_juridica?.descricao || '',
+    cnaePrincipal: {
+      codigo: entity.cnae_fiscal || '',
+      descricao: '',
+    },
+    cnaesSecundarios: (entity.cnae_secundarias || []).map(codigo => ({
+      codigo,
+      descricao: '',
+    })),
+  }
+}
+
+/**
+ * Normaliza CNAE removendo caracteres não numéricos para comparação
+ * Ex: "4520-0/02" -> "4520002"
+ */
+export function normalizeCnaeForComparison(cnae: string): string {
+  return cnae.replace(/\D/g, '')
+}
+
+/**
+ * Verifica se algum CNAE do usuário está na lista de CNAEs da oportunidade
+ * Normaliza ambos os lados para comparação (remove formatação)
+ */
+export function hasCompatibleCnae(
+  userCnaes: string[],
+  opportunityCnaes: string[]
+): boolean {
+  if (!userCnaes.length || !opportunityCnaes.length) {
+    return false
+  }
+
+  const normalizedOpportunity = opportunityCnaes.map(normalizeCnaeForComparison)
+  return userCnaes.some((userCnae) =>
+    normalizedOpportunity.includes(normalizeCnaeForComparison(userCnae))
+  )
+}
+
+/**
+ * Interface simplificada para dados de empresa (usado no fluxo de proposta)
+ */
+export interface MeiCompanyData {
+  cnpj: string
+  razaoSocial: string
+  nomeFantasia: string
+  telefone: {
+    ddi: string
+    ddd: string
+    valor: string
+  }
+  email: string
+}
+
+/**
+ * Mapper: API ModelsLegalEntity -> Frontend MeiCompanyData (fluxo de proposta)
+ */
+export function mapLegalEntityToMeiCompanyData(
+  entity: ModelsLegalEntity
+): MeiCompanyData {
+  const phone = entity.contato?.telefone?.[0]
+
+  return {
+    cnpj: formatCnpj(entity.cnpj || ''),
+    razaoSocial: entity.razao_social || '',
+    nomeFantasia: entity.nome_fantasia || '',
+    telefone: {
+      ddi: '55',
+      ddd: phone?.ddd || '',
+      valor: phone?.telefone || '',
+    },
+    email: entity.contato?.email || '',
   }
 }
 
