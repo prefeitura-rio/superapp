@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeftIcon } from '@/assets/icons'
+import { ChevronLeftIcon, TrashIcon } from '@/assets/icons'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { getBackRoute } from '@/lib/utils'
 import Image from 'next/image'
@@ -9,11 +9,15 @@ import { useRouter } from 'next/navigation'
 interface MeiOpportunityHeaderProps {
   title: string
   coverImage?: string
+  showDeleteButton?: boolean
+  onDeleteClick?: () => void
 }
 
 export function MeiOpportunityHeader({
   title,
   coverImage,
+  showDeleteButton,
+  onDeleteClick,
 }: MeiOpportunityHeaderProps) {
   const router = useRouter()
 
@@ -24,12 +28,11 @@ export function MeiOpportunityHeader({
 
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
-      <div className="flex justify-start">
-        <IconButton
-          icon={ChevronLeftIcon}
-          className="top-4 left-4 absolute z-10"
-          onClick={handleBack}
-        />
+      <div className="flex justify-between absolute top-4 left-4 right-4 z-10">
+        <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+        {showDeleteButton && (
+          <IconButton icon={TrashIcon} onClick={onDeleteClick} />
+        )}
       </div>
 
       {coverImage ? (
