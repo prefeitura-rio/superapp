@@ -1,48 +1,50 @@
-import { MeiPageClient } from '@/app/components/mei'
 import { FloatNavigation } from '@/app/components/float-navigation'
-import { getUserInfoFromToken } from '@/lib/user-info'
 import type { MeiOpportunity } from '@/app/components/mei'
+import { MeiPageClient } from '@/app/components/mei'
+import type { ModelsOportunidadeMEI } from '@/http-courses/models'
+import { getApiV1OportunidadesMei } from '@/http-courses/oportunidades-mei/oportunidades-mei'
+import { mapApiToMeiOpportunity } from '@/lib/mei-utils'
+import { getUserInfoFromToken } from '@/lib/user-info'
 
-// Mock data - será substituído por dados reais do servidor
+interface OportunidadesMeiApiResponse {
+  data: {
+    oportunidades?: ModelsOportunidadeMEI[]
+  }
+  success?: boolean
+}
+
 async function getMeiOpportunities(): Promise<MeiOpportunity[]> {
-  // Simula delay de servidor
-  // await new Promise((resolve) => setTimeout(resolve, 500))
+  try {
+    const response = await getApiV1OportunidadesMei({
+      page: 1,
+      pageSize: 50,
+      status: 'active',
+    })
 
-  const now = new Date()
+    if (response.status === 200) {
+      const data = response.data as unknown as OportunidadesMeiApiResponse
 
-  return [
-    {
-      id: 1,
-      title: 'Reparador de máquinas e aparelhos de refrigeração e ventilação',
-      expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 dias
-      coverImage: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop',
-    },
-    {
-      id: 2,
-      title: 'Reparador de extintor de incêndio',
-      expiresAt: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 dias
-      coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop',
-    },
-    {
-      id: 3,
-      title: 'Reparador(a) de equipamentos médico-hospitalares não eletrônicos',
-      expiresAt: new Date(now.getTime() + 4 * 60 * 60 * 1000).toISOString(), // 4 horas
-      coverImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=200&h=200&fit=crop',
-    },
-    {
-      id: 4,
-      title: 'Técnico em manutenção de equipamentos industriais',
-      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
-      coverImage: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200&h=200&fit=crop',
-    },
-  ]
+      const opportunities =
+        data?.data?.oportunidades ||
+        (data?.data as unknown as ModelsOportunidadeMEI[]) ||
+        (Array.isArray(data) ? data : [])
+
+      if (Array.isArray(opportunities) && opportunities.length > 0) {
+        return opportunities.map(mapApiToMeiOpportunity)
+      }
+    }
+
+    return []
+  } catch (error) {
+    console.error('[MEI] Error fetching opportunities:', error)
+    return []
+  }
 }
 
 export default async function MeiPage() {
   const userInfo = await getUserInfoFromToken()
   const isLoggedIn = !!(userInfo.cpf && userInfo.name)
 
-  // Busca dados do servidor (mock por enquanto)
   const opportunities = await getMeiOpportunities()
 
   return (
