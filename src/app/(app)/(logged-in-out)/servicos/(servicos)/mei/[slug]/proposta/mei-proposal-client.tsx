@@ -1,5 +1,6 @@
 'use client'
 
+import { submitMeiProposal } from '@/actions/mei/submit-proposal'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -103,7 +104,6 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
     const formData = getValues()
 
     if (!formData.acceptedTerms) {
-      // Show error animation
       if (termsErrorTimeoutRef.current) {
         clearTimeout(termsErrorTimeoutRef.current)
       }
@@ -117,29 +117,28 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
     setIsSubmitting(true)
 
     try {
-      // TODO: Replace with actual API call
-      console.log('Submitting proposal:', {
-        slug,
-        value: formData.value,
-        duration: formData.duration,
-        phone: formData.phone,
+      const result = await submitMeiProposal({
+        oportunidadeId: Number(slug),
+        meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
+        valorProposta: formData.value,
+        prazoExecucaoDias: formData.duration,
+        telefone: formData.phone,
         email: formData.email,
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (!result.success) {
+        console.error('[MEI Proposal] Error:', result.error)
+        return
+      }
 
-      // Mark that proposal was submitted successfully
       sessionStorage.setItem('mei_proposal_submitted', 'true')
-
-      // Navigate to success page
       router.push(`/servicos/mei/${slug}/proposta/sucesso`)
     } catch (error) {
-      console.error('Error submitting proposal:', error)
+      console.error('[MEI Proposal] Error submitting:', error)
     } finally {
       setIsSubmitting(false)
     }
-  }, [getValues, slug, router])
+  }, [getValues, slug, router, companyData])
 
   const isButtonDisabled =
     (currentStep === 'value' && value <= 0) ||
@@ -171,6 +170,7 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
               <ReviewStep
                 companyData={companyData}
                 showTermsError={showTermsError}
+                slug={slug}
               />
             )}
           </div>

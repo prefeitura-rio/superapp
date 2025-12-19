@@ -75,23 +75,24 @@ export function ImageGalleryModal({
           <DialogPrimitive.Title className="sr-only">
             Galeria de imagens
           </DialogPrimitive.Title>
-          <div className="relative w-full max-w-3xl">
+          <div className="relative w-full max-w-3xl max-md:max-w-[calc(100vw-2rem)]">
             <button
               type="button"
               onClick={onClose}
-              className="absolute -top-10 -right-10 z-10 p-2 text-foreground transition-opacity hover:opacity-70"
+              className="absolute -top-10 right-0 md:-right-10 z-10 p-2 text-foreground transition-opacity hover:opacity-70"
               aria-label="Fechar galeria"
             >
               <XIcon className="h-6 w-6 text-white" />
             </button>
 
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black">
+            <div className="relative flex items-center justify-center">
               {currentAttachment && (
                 <Image
                   src={currentAttachment.url}
                   alt={currentAttachment.name}
-                  fill
-                  className="object-contain"
+                  width={800}
+                  height={600}
+                  className="rounded-lg object-contain max-h-[70vh] w-auto h-auto"
                   priority
                   sizes="(max-width: 768px) 100vw, 768px"
                 />
@@ -111,7 +112,7 @@ export function ImageGalleryModal({
                     )}
                     aria-label="Imagem anterior"
                   >
-                    <ChevronLeftIcon className="h-6 w-6 text-foreground" />
+                    <ChevronLeftIcon className="h-6 w-6 text-black" />
                   </button>
 
                   <button
@@ -126,7 +127,7 @@ export function ImageGalleryModal({
                     )}
                     aria-label="Próxima imagem"
                   >
-                    <ChevronRightIcon className="h-6 w-6 text-foreground" />
+                    <ChevronRightIcon className="h-6 w-6 text-black" />
                   </button>
                 </>
               )}

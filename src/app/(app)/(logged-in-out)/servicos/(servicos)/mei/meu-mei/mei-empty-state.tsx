@@ -1,25 +1,33 @@
 'use client'
 
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { MEI_LINKS } from '@/constants/mei-links'
 
-const MEI_REGISTRATION_URL =
-  'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei'
+type MeiEmptyStateVariant = 'meu-mei' | 'propostas'
 
-export function MeiEmptyState() {
+interface MeiEmptyStateProps {
+  variant?: MeiEmptyStateVariant
+}
+
+const variantTexts: Record<MeiEmptyStateVariant, string> = {
+  'meu-mei':
+    'Abra uma empresa para poder realizar orçamentos, executar serviços e gerenciar seus dados. Veja abaixo mais informações sobre como se tornar um Microempreendedor Individual.',
+  propostas: 'Abra uma empresa para poder enviar propostas de serviço.',
+}
+
+export function MeiEmptyState({ variant = 'meu-mei' }: MeiEmptyStateProps) {
   const handleOpenMeiRegistration = () => {
-    window.open(MEI_REGISTRATION_URL, '_blank', 'noopener,noreferrer')
+    window.open(MEI_LINKS.REGISTRATION, '_blank', 'noopener,noreferrer')
   }
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-180px)]">
-      <div className="flex-1">
+      <div className="flex-1 pt-8">
         <h1 className="text-3xl font-medium text-foreground leading-tight mb-4">
           Você ainda não possui uma empresa MEI
         </h1>
         <p className="text-foreground-light text-base leading-relaxed">
-          Abra uma empresa para poder realizar orçamentos, executar serviços e
-          gerenciar seus dados. Veja abaixo mais informações sobre como se
-          tornar um Microempreendedor Individual.
+          {variantTexts[variant]}
         </p>
       </div>
 

@@ -1,53 +1,140 @@
-import { MeiPageClient } from '@/app/components/mei'
 import { FloatNavigation } from '@/app/components/float-navigation'
+import type { MeiOpportunity, MeiProposal } from '@/app/components/mei'
+import { MeiPageClient } from '@/app/components/mei'
+import type { ModelsOportunidadeMEI, ModelsPropostaMEI } from '@/http-courses/models'
+import { getApiV1OportunidadesMei } from '@/http-courses/oportunidades-mei/oportunidades-mei'
+import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
+import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
+import { mapApiToMeiOpportunity, mapApiToMeiProposal } from '@/lib/mei-utils'
+import { getUserLegalEntity } from '@/lib/mei-utils.server'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import type { MeiOpportunity } from '@/app/components/mei'
 
-// Mock data - será substituído por dados reais do servidor
+interface OportunidadesMeiApiResponse {
+  data: {
+    oportunidades?: ModelsOportunidadeMEI[]
+  }
+  success?: boolean
+}
+
+interface PropostasApiResponse {
+  data?: ModelsPropostaMEI[]
+  meta?: {
+    page: number
+    page_size: number
+    total: number
+  }
+}
+
 async function getMeiOpportunities(): Promise<MeiOpportunity[]> {
-  // Simula delay de servidor
-  // await new Promise((resolve) => setTimeout(resolve, 500))
+  try {
+    const response = await getApiV1OportunidadesMei({
+      page: 1,
+      pageSize: 50,
+      status: 'active',
+    })
 
-  const now = new Date()
+    if (response.status === 200) {
+      const data = response.data as unknown as OportunidadesMeiApiResponse
 
-  return [
-    {
-      id: 1,
-      title: 'Reparador de máquinas e aparelhos de refrigeração e ventilação',
-      expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 dias
-      coverImage: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop',
-    },
-    {
-      id: 2,
-      title: 'Reparador de extintor de incêndio',
-      expiresAt: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 dias
-      coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop',
-    },
-    {
-      id: 3,
-      title: 'Reparador(a) de equipamentos médico-hospitalares não eletrônicos',
-      expiresAt: new Date(now.getTime() + 4 * 60 * 60 * 1000).toISOString(), // 4 horas
-      coverImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=200&h=200&fit=crop',
-    },
-    {
-      id: 4,
-      title: 'Técnico em manutenção de equipamentos industriais',
-      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
-      coverImage: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200&h=200&fit=crop',
-    },
-  ]
+      const opportunities =
+        data?.data?.oportunidades ||
+        (data?.data as unknown as ModelsOportunidadeMEI[]) ||
+        (Array.isArray(data) ? data : [])
+
+      if (Array.isArray(opportunities) && opportunities.length > 0) {
+        return opportunities.map(mapApiToMeiOpportunity)
+      }
+    }
+
+    return []
+  } catch (error) {
+    console.error('[MEI] Error fetching opportunities:', error)
+    return []
+  }
+}
+
+async function getUserProposals(cpf: string): Promise<MeiProposal[]> {
+  try {
+    // Buscar CNPJ do usuário
+    const result = await getUserLegalEntity(cpf)
+    if (!result?.cnpj) {
+      return []
+    }
+
+    // Buscar propostas
+    const proposalsRes = await getPropostasMeiPorEmpresa({
+      meiEmpresaId: result.cnpj.replace(/\D/g, ''),
+      page: 1,
+      pageSize: 50,
+    })
+
+    if (proposalsRes.status !== 200 || !proposalsRes.data) {
+      return []
+    }
+
+    const apiData = proposalsRes.data as PropostasApiResponse
+    const propostas = apiData.data || []
+
+    if (propostas.length === 0) {
+      return []
+    }
+
+    // Para cada proposta, buscar dados da oportunidade
+    const proposals = await Promise.all(
+      propostas.map(async (proposta) => {
+        let oportunidade: { titulo?: string; cover_image?: string } = {}
+
+        if (proposta.oportunidade_mei_id) {
+          try {
+            const opRes = await getApiV1OportunidadesMeiId(proposta.oportunidade_mei_id)
+            if (opRes.status === 200 && opRes.data) {
+              oportunidade = {
+                titulo: opRes.data.titulo,
+                cover_image: opRes.data.cover_image,
+              }
+            }
+          } catch (e) {
+            console.error('[MEI] Error fetching opportunity:', e)
+          }
+        }
+
+        return mapApiToMeiProposal(proposta, oportunidade)
+      })
+    )
+
+    return proposals
+  } catch (error) {
+    console.error('[MEI] Error fetching user proposals:', error)
+    return []
+  }
 }
 
 export default async function MeiPage() {
   const userInfo = await getUserInfoFromToken()
   const isLoggedIn = !!(userInfo.cpf && userInfo.name)
 
-  // Busca dados do servidor (mock por enquanto)
   const opportunities = await getMeiOpportunities()
+
+  let userProposals: MeiProposal[] = []
+  if (isLoggedIn && userInfo.cpf) {
+    userProposals = await getUserProposals(userInfo.cpf)
+  }
+
+  // Filtrar oportunidades que já têm proposta do usuário
+  const userProposalOpportunityIds = new Set(
+    userProposals.map((p) => p.opportunityId)
+  )
+  const filteredOpportunities = opportunities.filter(
+    (op) => !userProposalOpportunityIds.has(op.id)
+  )
 
   return (
     <>
-      <MeiPageClient opportunities={opportunities} isLoggedIn={isLoggedIn} />
+      <MeiPageClient
+        opportunities={filteredOpportunities}
+        isLoggedIn={isLoggedIn}
+        userProposals={userProposals}
+      />
       <FloatNavigation />
     </>
   )

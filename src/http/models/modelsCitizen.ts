@@ -20,11 +20,17 @@ export interface ModelsCitizen {
   _id?: string
   assistencia_social?: ModelsAssistenciaSocial
   cpf?: string
+  /** Self-declared, not stored in base collection */
+  deficiencia?: string
   /** Wallet and internal fields */
   documentos?: ModelsDocumentos
   educacao?: ModelsEducacao
   email?: ModelsEmail
   endereco?: ModelsEndereco
+  /** Self-declared, not stored in base collection */
+  escolaridade?: string
+  /** Self-declared, not stored in base collection */
+  genero?: string
   mae?: ModelsMae
   menor_idade?: boolean
   nascimento?: ModelsNascimento
@@ -34,6 +40,8 @@ export interface ModelsCitizen {
   nome_social?: string
   obito?: ModelsObito
   raca?: string
+  /** Self-declared, not stored in base collection */
+  renda_familiar?: string
   saude?: ModelsSaude
   sexo?: string
   telefone?: ModelsTelefone

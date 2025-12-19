@@ -8,13 +8,23 @@ import { WalletIcon } from '@/assets/icons/wallet-icon'
 import { buildAuthUrl } from '@/constants/url'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { MeiAttachment } from './attachment-gallery'
 import { AttachmentGallery } from './attachment-gallery'
 import { ImageGalleryModal } from './image-gallery-modal'
 import { MeiOpportunityHeader } from './mei-opportunity-header'
 import { QuickInfoItem } from './quick-info-item'
+import { MEI_LINKS } from '@/constants/mei-links'
+import { deleteProposal } from './actions/delete-proposal'
+import { hasCompatibleCnae } from '@/lib/mei-utils'
+import toast from 'react-hot-toast'
+import { CancelProposalDrawer } from './cancel-proposal-drawer'
+import { ProposalStatusBadge } from './proposal-status-badge'
+import {
+  ServiceTypeDrawer,
+  type UserMeiContext,
+} from './service-type-drawer'
 
 export interface MeiOpportunityDetailData {
   id: number
@@ -38,11 +48,13 @@ export interface MeiOpportunityDetailData {
   }
   executionDeadline: string
   attachments: MeiAttachment[]
+  cnaeIds?: string[]
 }
 
 interface MeiOpportunityDetailClientProps {
   opportunity: MeiOpportunityDetailData
-  isLoggedIn: boolean
+  userMeiContext: UserMeiContext
+  userProposal?: { id: string; status: string } | null
 }
 
 function formatExpirationTime(expiresAt: string): string {
@@ -66,14 +78,42 @@ function formatExpirationTime(expiresAt: string): string {
 
 export function MeiOpportunityDetailClient({
   opportunity,
-  isLoggedIn,
+  userMeiContext,
+  userProposal,
 }: MeiOpportunityDetailClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const loginUrl = buildAuthUrl(`/servicos/mei/${opportunity.slug}`)
 
+  const [isServiceTypeDrawerOpen, setIsServiceTypeDrawerOpen] = useState(false)
+  const [isCancelDrawerOpen, setIsCancelDrawerOpen] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+
+  const handleCancelProposal = async () => {
+    if (!userProposal) return
+
+    setIsCancelling(true)
+    try {
+      const result = await deleteProposal(opportunity.id, userProposal.id)
+      if (result.success) {
+        toast.success('Proposta cancelada')
+        setIsCancelDrawerOpen(false)
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao cancelar proposta')
+      }
+    } catch (error) {
+      toast.error('Erro ao cancelar proposta')
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
   const isGalleryOpen = searchParams.get('gallery') === 'true'
-  const currentImageIndex = Number.parseInt(searchParams.get('image') || '0', 10)
+  const currentImageIndex = Number.parseInt(
+    searchParams.get('image') || '0',
+    10
+  )
 
   const openGallery = useCallback(
     (index: number) => {
@@ -104,21 +144,86 @@ export function MeiOpportunityDetailClient({
     [router, searchParams]
   )
 
+  // Mapeia status da API para o tipo do badge
+  const getProposalBadgeStatus = (
+    apiStatus: string
+  ): 'submitted' | 'approved' | 'rejected' => {
+    if (apiStatus === 'approved') return 'approved'
+    if (apiStatus === 'rejected') return 'rejected'
+    return 'submitted'
+  }
+
   const ActionButton = () => {
     const buttonClasses =
       'block w-full py-3 text-center rounded-full bg-primary text-background hover:brightness-90 transition text-sm'
 
-    if (isLoggedIn) {
+    // Se já tem proposta, não mostrar botão
+    if (userProposal) {
+      return null
+    }
+
+    const { isLoggedIn, hasMei, situacaoCadastral, userCnaes } = userMeiContext
+
+    // 1. Não logado → Login
+    if (!isLoggedIn) {
       return (
-        <Link href={`/servicos/mei/${opportunity.slug}/proposta`} className={buttonClasses}>
-          Enviar proposta
+        <Link href={loginUrl} className={buttonClasses}>
+          Fazer login para enviar proposta
         </Link>
       )
     }
 
+    // 2. Sem MEI → Redireciona direto para site de abertura
+    if (!hasMei) {
+      return (
+        <a
+          href={MEI_LINKS.REGISTRATION}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonClasses}
+        >
+          Abrir MEI para enviar proposta
+        </a>
+      )
+    }
+
+    // 3. Situação irregular → Redireciona para regularização
+    if (situacaoCadastral && situacaoCadastral !== 'Ativa') {
+      return (
+        <a
+          href={MEI_LINKS.REGULARIZATION}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonClasses}
+        >
+          Regularizar situação para enviar proposta
+        </a>
+      )
+    }
+
+    // 4. CNAE incompatível → Abre drawer explicando
+    if (opportunity.cnaeIds?.length && userCnaes?.length) {
+      const isCompatible = hasCompatibleCnae(userCnaes, opportunity.cnaeIds)
+      if (!isCompatible) {
+        return (
+          <button
+            type="button"
+            onClick={() => setIsServiceTypeDrawerOpen(true)}
+            className={buttonClasses}
+          >
+            Enviar proposta
+          </button>
+        )
+      }
+    }
+
+    // 5. Tudo OK → Enviar proposta normalmente
     return (
-      <Link href={loginUrl} className={buttonClasses}>
-        Fazer login para enviar proposta
+      <Link
+        href={`/servicos/mei/${opportunity.slug}/proposta`}
+        className={buttonClasses}
+      >
+        Enviar proposta
       </Link>
     )
   }
@@ -129,16 +234,22 @@ export function MeiOpportunityDetailClient({
         <MeiOpportunityHeader
           title={opportunity.title}
           coverImage={opportunity.coverImage}
+          showDeleteButton={!!userProposal && userProposal.status === 'submitted'}
+          onDeleteClick={() => setIsCancelDrawerOpen(true)}
         />
 
         <div className="px-4 py-4 flex justify-between items-start">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsServiceTypeDrawerOpen(true)}
+              className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+            >
               <span className="text-sm text-foreground-light">
                 Tipo de serviço
               </span>
               <InfoIcon className="w-4 h-4 text-foreground-light" />
-            </div>
+            </button>
             <span className="text-sm text-foreground">
               {opportunity.serviceType}
             </span>
@@ -152,15 +263,39 @@ export function MeiOpportunityDetailClient({
           </div>
         </div>
 
+        <ServiceTypeDrawer
+          open={isServiceTypeDrawerOpen}
+          onOpenChange={setIsServiceTypeDrawerOpen}
+          opportunityCnaeIds={opportunity.cnaeIds}
+          userContext={userMeiContext}
+        />
+
+        {/* Status da proposta - aparece antes das informações */}
+        {userProposal && (
+          <div className="px-4 pb-4">
+            <ProposalStatusBadge
+              status={getProposalBadgeStatus(userProposal.status)}
+              deadlineDate={
+                userProposal.status === 'approved'
+                  ? opportunity.executionDeadline
+                  : undefined
+              }
+            />
+          </div>
+        )}
+
         <div className="px-4 pb-6">
           <p className="text-sm text-foreground-light whitespace-pre-line leading-relaxed">
             {opportunity.description}
           </p>
         </div>
 
-        <div className="px-4 pb-6">
-          <ActionButton />
-        </div>
+        {/* Botão de ação - não aparece se já tem proposta */}
+        {!userProposal && (
+          <div className="px-4 pb-6">
+            <ActionButton />
+          </div>
+        )}
 
         <div className="px-4 space-y-4 pb-6">
           <QuickInfoItem
@@ -208,6 +343,13 @@ export function MeiOpportunityDetailClient({
           isOpen={isGalleryOpen}
           onClose={closeGallery}
           onNavigate={navigateGallery}
+        />
+
+        <CancelProposalDrawer
+          open={isCancelDrawerOpen}
+          onOpenChange={setIsCancelDrawerOpen}
+          onConfirm={handleCancelProposal}
+          isPending={isCancelling}
         />
       </div>
     </div>
