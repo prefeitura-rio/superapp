@@ -3,21 +3,36 @@
 import { ChevronLeftIcon } from '@/assets/icons'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { useRouter } from 'next/navigation'
+import { MeiEmptyState } from '../meu-mei/mei-empty-state'
 import { ProposalsEmptyState } from './proposals-empty-state'
 import { ProposalsList } from './proposals-list'
 import type { MeiProposal } from './types'
 
 interface MinhasPropostasClientProps {
   proposals: MeiProposal[]
+  hasMei: boolean
 }
 
 export function MinhasPropostasClient({
   proposals,
+  hasMei,
 }: MinhasPropostasClientProps) {
   const router = useRouter()
 
   const handleBack = () => {
     router.push('/servicos/mei/menu')
+  }
+
+  const renderContent = () => {
+    if (!hasMei) {
+      return <MeiEmptyState variant="propostas" />
+    }
+
+    if (proposals.length === 0) {
+      return <ProposalsEmptyState />
+    }
+
+    return <ProposalsList proposals={proposals} />
   }
 
   return (
@@ -27,13 +42,7 @@ export function MinhasPropostasClient({
           <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
         </div>
       </header>
-      <div className="px-4 pb-12">
-        {proposals.length > 0 ? (
-          <ProposalsList proposals={proposals} />
-        ) : (
-          <ProposalsEmptyState />
-        )}
-      </div>
+      <div className="px-4 pb-12">{renderContent()}</div>
     </main>
   )
 }
