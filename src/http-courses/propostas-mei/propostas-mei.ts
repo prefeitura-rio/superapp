@@ -9,8 +9,8 @@ import type {
   DeleteApiV1OportunidadesMeiIdPropostasPropostaId200,
   GetApiV1OportunidadesMeiIdPropostas200,
   GetApiV1OportunidadesMeiIdPropostasParams,
-  GetPropostasMeiPorEmpresa200,
-  GetPropostasMeiPorEmpresaParams,
+  GetApiV1PropostasMeiPorEmpresa200,
+  GetApiV1PropostasMeiPorEmpresaParams,
   ModelsErrorResponse,
   ModelsPropostaMEI,
   ModelsPropostaStatusUpdateRequest,
@@ -417,33 +417,33 @@ export const putApiV1OportunidadesMeiIdPropostasPropostaIdStatus = async (
  * Retorna uma lista paginada de propostas MEI de uma empresa
  * @summary Listar propostas MEI por MEI empresa
  */
-export type getPropostasMeiPorEmpresaResponse200 = {
-  data: GetPropostasMeiPorEmpresa200
+export type getApiV1PropostasMeiPorEmpresaResponse200 = {
+  data: GetApiV1PropostasMeiPorEmpresa200
   status: 200
 }
 
-export type getPropostasMeiPorEmpresaResponse400 = {
+export type getApiV1PropostasMeiPorEmpresaResponse400 = {
   data: ModelsErrorResponse
   status: 400
 }
 
-export type getPropostasMeiPorEmpresaResponse500 = {
+export type getApiV1PropostasMeiPorEmpresaResponse500 = {
   data: ModelsErrorResponse
   status: 500
 }
 
-export type getPropostasMeiPorEmpresaResponseComposite =
-  | getPropostasMeiPorEmpresaResponse200
-  | getPropostasMeiPorEmpresaResponse400
-  | getPropostasMeiPorEmpresaResponse500
+export type getApiV1PropostasMeiPorEmpresaResponseComposite =
+  | getApiV1PropostasMeiPorEmpresaResponse200
+  | getApiV1PropostasMeiPorEmpresaResponse400
+  | getApiV1PropostasMeiPorEmpresaResponse500
 
-export type getPropostasMeiPorEmpresaResponse =
-  getPropostasMeiPorEmpresaResponseComposite & {
+export type getApiV1PropostasMeiPorEmpresaResponse =
+  getApiV1PropostasMeiPorEmpresaResponseComposite & {
     headers: Headers
   }
 
-export const getGetPropostasMeiPorEmpresaUrl = (
-  params: GetPropostasMeiPorEmpresaParams
+export const getGetApiV1PropostasMeiPorEmpresaUrl = (
+  params: GetApiV1PropostasMeiPorEmpresaParams
 ) => {
   const normalizedParams = new URLSearchParams()
 
@@ -460,12 +460,12 @@ export const getGetPropostasMeiPorEmpresaUrl = (
     : `/api/v1/propostas-mei/por-empresa`
 }
 
-export const getPropostasMeiPorEmpresa = async (
-  params: GetPropostasMeiPorEmpresaParams,
+export const getApiV1PropostasMeiPorEmpresa = async (
+  params: GetApiV1PropostasMeiPorEmpresaParams,
   options?: RequestInit
-): Promise<getPropostasMeiPorEmpresaResponse> => {
-  return customFetch<getPropostasMeiPorEmpresaResponse>(
-    getGetPropostasMeiPorEmpresaUrl(params),
+): Promise<getApiV1PropostasMeiPorEmpresaResponse> => {
+  return customFetch<getApiV1PropostasMeiPorEmpresaResponse>(
+    getGetApiV1PropostasMeiPorEmpresaUrl(params),
     {
       ...options,
       method: 'GET',

@@ -1,10 +1,13 @@
 import { FloatNavigation } from '@/app/components/float-navigation'
 import type { MeiOpportunity, MeiProposal } from '@/app/components/mei'
 import { MeiPageClient } from '@/app/components/mei'
-import type { ModelsOportunidadeMEI, ModelsPropostaMEI } from '@/http-courses/models'
+import type {
+  ModelsOportunidadeMEI,
+  ModelsPropostaMEI,
+} from '@/http-courses/models'
 import { getApiV1OportunidadesMei } from '@/http-courses/oportunidades-mei/oportunidades-mei'
 import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
-import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
+import { getApiV1PropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
 import { mapApiToMeiOpportunity, mapApiToMeiProposal } from '@/lib/mei-utils'
 import { getUserLegalEntity } from '@/lib/mei-utils.server'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -62,7 +65,7 @@ async function getUserProposals(cpf: string): Promise<MeiProposal[]> {
     }
 
     // Buscar propostas
-    const proposalsRes = await getPropostasMeiPorEmpresa({
+    const proposalsRes = await getApiV1PropostasMeiPorEmpresa({
       meiEmpresaId: result.cnpj.replace(/\D/g, ''),
       page: 1,
       pageSize: 50,
@@ -81,12 +84,14 @@ async function getUserProposals(cpf: string): Promise<MeiProposal[]> {
 
     // Para cada proposta, buscar dados da oportunidade
     const proposals = await Promise.all(
-      propostas.map(async (proposta) => {
+      propostas.map(async proposta => {
         let oportunidade: { titulo?: string; cover_image?: string } = {}
 
         if (proposta.oportunidade_mei_id) {
           try {
-            const opRes = await getApiV1OportunidadesMeiId(proposta.oportunidade_mei_id)
+            const opRes = await getApiV1OportunidadesMeiId(
+              proposta.oportunidade_mei_id
+            )
             if (opRes.status === 200 && opRes.data) {
               oportunidade = {
                 titulo: opRes.data.titulo,
@@ -122,10 +127,10 @@ export default async function MeiPage() {
 
   // Filtrar oportunidades que já têm proposta do usuário
   const userProposalOpportunityIds = new Set(
-    userProposals.map((p) => p.opportunityId)
+    userProposals.map(p => p.opportunityId)
   )
   const filteredOpportunities = opportunities.filter(
-    (op) => !userProposalOpportunityIds.has(op.id)
+    op => !userProposalOpportunityIds.has(op.id)
   )
 
   return (

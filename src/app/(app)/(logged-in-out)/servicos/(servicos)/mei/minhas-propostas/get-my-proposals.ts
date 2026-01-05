@@ -1,6 +1,6 @@
 import type { ModelsPropostaMEI } from '@/http-courses/models'
 import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
-import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
+import { getApiV1PropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
 import { mapApiToMeiProposal } from '@/lib/mei-utils'
 import type { MeiProposal } from './types'
 
@@ -15,7 +15,7 @@ interface PropostasResponse {
 
 export async function getMyProposals(cnpj: string): Promise<MeiProposal[]> {
   try {
-    const response = await getPropostasMeiPorEmpresa({
+    const response = await getApiV1PropostasMeiPorEmpresa({
       meiEmpresaId: cnpj.replace(/\D/g, ''),
     })
 
@@ -33,7 +33,7 @@ export async function getMyProposals(cnpj: string): Promise<MeiProposal[]> {
 
     // 2. Para cada proposta, buscar dados da oportunidade
     const proposals = await Promise.all(
-      propostas.map(async (proposta) => {
+      propostas.map(async proposta => {
         let oportunidade: { titulo?: string; cover_image?: string } = {}
 
         if (proposta.oportunidade_mei_id) {

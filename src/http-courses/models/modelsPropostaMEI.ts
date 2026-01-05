@@ -9,11 +9,13 @@ import type { ModelsPropostaMEIStatusAdmin } from './modelsPropostaMEIStatusAdmi
 import type { ModelsPropostaMEIStatusCidadao } from './modelsPropostaMEIStatusCidadao'
 
 export interface ModelsPropostaMEI {
+  aceita_custos_integrais?: boolean
   created_at?: string
   deleted_at?: string
   id?: string
   mei_empresa_id?: string
   oportunidade_mei_id?: number
+  prazo_execucao?: string
   status_admin?: ModelsPropostaMEIStatusAdmin
   status_cidadao?: ModelsPropostaMEIStatusCidadao
   updated_at?: string

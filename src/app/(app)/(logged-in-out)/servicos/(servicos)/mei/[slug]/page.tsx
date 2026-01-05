@@ -4,9 +4,12 @@ import {
 } from '@/app/components/mei'
 import type { UserMeiContext } from '@/app/components/mei/service-type-drawer'
 import { getApiV1OportunidadesMeiId } from '@/http-courses/oportunidades-mei/oportunidades-mei'
-import { getPropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
+import { getApiV1PropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
-import { mapApiToMeiOpportunityDetail, mapSituacaoCadastral } from '@/lib/mei-utils'
+import {
+  mapApiToMeiOpportunityDetail,
+  mapSituacaoCadastral,
+} from '@/lib/mei-utils'
 import { getUserLegalEntity } from '@/lib/mei-utils.server'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'
@@ -93,23 +96,25 @@ export default async function MeiOpportunityPage({
   // Buscar proposta existente do usuário para esta oportunidade
   if (userMeiContext.hasMei && userCnpj) {
     try {
-      const proposalsRes = await getPropostasMeiPorEmpresa({
+      const proposalsRes = await getApiV1PropostasMeiPorEmpresa({
         meiEmpresaId: userCnpj.replace(/\D/g, ''),
         page: 1,
         pageSize: 50,
       })
 
       if (proposalsRes.status === 200 && proposalsRes.data) {
-        const apiData = proposalsRes.data as { data?: Array<{
-          id?: string
-          oportunidade_mei_id?: number
-          status_cidadao?: string
-        }> }
+        const apiData = proposalsRes.data as {
+          data?: Array<{
+            id?: string
+            oportunidade_mei_id?: number
+            status_cidadao?: string
+          }>
+        }
         const propostas = apiData.data || []
         const opportunityId = Number.parseInt(slug, 10)
 
         const existingProposal = propostas.find(
-          (p) => p.oportunidade_mei_id === opportunityId
+          p => p.oportunidade_mei_id === opportunityId
         )
 
         if (existingProposal?.id) {
