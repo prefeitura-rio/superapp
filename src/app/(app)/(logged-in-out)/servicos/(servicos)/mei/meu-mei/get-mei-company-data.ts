@@ -1,5 +1,8 @@
 import { mapLegalEntityToMeiCompanyFullData } from '@/lib/mei-utils'
-import { getUserLegalEntity } from '@/lib/mei-utils.server'
+import {
+  getCitizenContactInfo,
+  getUserLegalEntity,
+} from '@/lib/mei-utils.server'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import type { MeiCompanyFullData } from './types'
 
@@ -15,5 +18,14 @@ export async function getMeiCompanyData(): Promise<MeiCompanyFullData | null> {
     return null
   }
 
-  return mapLegalEntityToMeiCompanyFullData(result.entity)
+  const companyData = mapLegalEntityToMeiCompanyFullData(result.entity)
+
+  // Override contact info with citizen's personal data (see getCitizenContactInfo for details)
+  const citizenContact = await getCitizenContactInfo(userInfo.cpf)
+  if (citizenContact) {
+    companyData.telefone = citizenContact.telefone
+    companyData.email = citizenContact.email
+  }
+
+  return companyData
 }

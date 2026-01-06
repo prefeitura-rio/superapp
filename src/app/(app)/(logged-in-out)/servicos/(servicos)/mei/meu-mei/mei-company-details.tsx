@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
+import { useRouter } from 'next/navigation'
 import { MeiDataItem } from './mei-data-item'
 import type { MeiCompanyFullData, MeiCompanyStatus } from './types'
 
@@ -22,16 +23,24 @@ function StatusBadge({ status }: { status: MeiCompanyStatus }) {
 }
 
 export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
-  const formattedPhone = `(${data.telefone.ddd}) ${data.telefone.valor}`
+  const router = useRouter()
+  const formattedPhone =
+    data.telefone.ddd && data.telefone.valor
+      ? `(${data.telefone.ddd}) ${data.telefone.valor}`
+      : 'Não informado'
 
   const handlePhoneEdit = () => {
-    // TODO: Navigate to phone update page
-    console.log('Edit phone clicked')
+    const returnUrl = '/servicos/mei/meu-mei'
+    router.push(
+      `/meu-perfil/informacoes-pessoais/atualizar-telefone?returnUrl=${encodeURIComponent(returnUrl)}`
+    )
   }
 
   const handleEmailEdit = () => {
-    // TODO: Navigate to email update page
-    console.log('Edit email clicked')
+    const returnUrl = '/servicos/mei/meu-mei'
+    router.push(
+      `/meu-perfil/informacoes-pessoais/atualizar-email?returnUrl=${encodeURIComponent(returnUrl)}`
+    )
   }
 
   // Format CNAE with code and description (only add separator if description exists)
@@ -80,7 +89,7 @@ export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
 
         <MeiDataItem
           label="E-mail"
-          value={data.email}
+          value={data.email || 'Não informado'}
           showInfo
           showEdit
           infoTitle="E-mail"
