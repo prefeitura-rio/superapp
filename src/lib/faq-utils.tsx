@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import { cn } from './utils'
 
 export type ContentPart = {
   type: 'text' | 'video-title' | 'link'
@@ -70,11 +71,17 @@ export function parseContent(text: string): ContentPart[] {
   return parts.length > 0 ? parts : [{ type: 'text', content: text }]
 }
 
-export const FormattedContent = memo(({ content }: { content: string }) => {
-  const parts = parseContent(content)
+export const FormattedContent = memo(
+  ({ content, className }: { content: string; className?: string }) => {
+    const parts = parseContent(content)
 
-  return (
-    <p className="text-foreground-light text-sm leading-relaxed whitespace-pre-line opacity-50">
+    return (
+      <p
+        className={cn(
+          'text-foreground-light text-sm leading-relaxed whitespace-pre-line opacity-50',
+          className
+        )}
+      >
       {parts.map((part, i) => {
         if (part.type === 'video-title') {
           return (
@@ -98,8 +105,9 @@ export const FormattedContent = memo(({ content }: { content: string }) => {
         }
         return <span key={i}>{part.content}</span>
       })}
-    </p>
-  )
-})
+      </p>
+    )
+  }
+)
 
 FormattedContent.displayName = 'FormattedContent'
