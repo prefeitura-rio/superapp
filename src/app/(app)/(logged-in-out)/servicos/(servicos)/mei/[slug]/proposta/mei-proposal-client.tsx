@@ -4,7 +4,7 @@ import { submitMeiProposal } from '@/actions/mei/submit-proposal'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { DurationStep } from './steps/duration-step'
 import { ReviewStep } from './steps/review-step'
@@ -62,10 +62,28 @@ export function MeiProposalClient({
     },
   })
 
-  const { watch, getValues } = form
+  const { watch, getValues, reset } = form
   const value = watch('value')
   const duration = watch('duration')
   const acceptedTerms = watch('acceptedTerms')
+  const currentPhone = watch('phone')
+  const currentEmail = watch('email')
+
+  // Sync form values when companyData changes (e.g., after email/phone update)
+  useEffect(() => {
+    const expectedPhone = `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`
+    const expectedEmail = companyData.email
+    
+    // Only update if values have changed to avoid unnecessary resets
+    if (currentPhone !== expectedPhone || currentEmail !== expectedEmail) {
+      const formValues = getValues()
+      reset({
+        ...formValues,
+        phone: expectedPhone,
+        email: expectedEmail,
+      })
+    }
+  }, [companyData.telefone.ddd, companyData.telefone.valor, companyData.email, currentPhone, currentEmail, reset, getValues])
 
   const navigateToStep = useCallback(
     (step: Step) => {

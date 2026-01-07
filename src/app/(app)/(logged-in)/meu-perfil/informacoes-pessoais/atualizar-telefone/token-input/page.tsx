@@ -78,15 +78,18 @@ export default function TokenInputForm() {
     setDrawerOpen(false)
     if (returnUrl) {
       router.push(returnUrl)
+      router.refresh()
       return
     }
     if (courseSlug) {
       router.push(
         `/servicos/cursos/atualizar-dados?redirectFromCourses=${courseSlug}`
       )
+      router.refresh()
       return
     }
     router.push('/meu-perfil/informacoes-pessoais')
+    router.refresh()
   }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary dependency>
