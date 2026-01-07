@@ -12,6 +12,8 @@ import { mapApiToMeiOpportunity, mapApiToMeiProposal } from '@/lib/mei-utils'
 import { getUserLegalEntity } from '@/lib/mei-utils.server'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
+export const dynamic = 'force-dynamic'
+
 interface OportunidadesMeiApiResponse {
   data: {
     oportunidades?: ModelsOportunidadeMEI[]
