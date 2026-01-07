@@ -122,6 +122,7 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
         meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
         valorProposta: formData.value,
         prazoExecucaoDias: formData.duration,
+        aceitaCustosIntegrais: formData.acceptedTerms,
         telefone: formData.phone,
         email: formData.email,
       })

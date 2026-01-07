@@ -6,8 +6,8 @@ interface SubmitProposalData {
   oportunidadeId: number
   meiEmpresaId: string
   valorProposta: number
-  // Campos extras para quando a API aceitar
   prazoExecucaoDias: number
+  aceitaCustosIntegrais: boolean
   telefone: string
   email: string
 }
@@ -18,18 +18,13 @@ export async function submitMeiProposal(data: SubmitProposalData): Promise<{
   error?: string
 }> {
   try {
-    // TODO: required fields?
-    console.log('[MEI Proposal] Extra fields (not sent to API yet):', {
-      prazo_execucao_dias: data.prazoExecucaoDias,
-      telefone: data.telefone,
-      email: data.email,
-    })
-
     const response = await postApiV1OportunidadesMeiIdPropostas(
       data.oportunidadeId,
       {
         mei_empresa_id: data.meiEmpresaId,
         valor_proposta: data.valorProposta,
+        prazo_execucao: data.prazoExecucaoDias.toString(),
+        aceita_custos_integrais: data.aceitaCustosIntegrais,
       }
     )
 
