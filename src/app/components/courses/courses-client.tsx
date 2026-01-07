@@ -8,7 +8,7 @@ import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
 import { useMemo } from 'react'
-import { ServiceTypeToggle } from '../mei'
+import { ServiceTypeToggle, ServiceTypeToggleSkeleton } from '../mei'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
 import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
@@ -58,7 +58,11 @@ export default function CoursePageClient({
       <CoursesHeader userInfo={userInfo} />
       <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
         <div className="my-6 mb-12">
-          <ServiceTypeToggle activeType="cursos" />
+          {isLoadingCategories ? (
+            <ServiceTypeToggleSkeleton />
+          ) : (
+            <ServiceTypeToggle activeType="cursos" />
+          )}
         </div>
         {isLoadingCategories ? (
           <ResponsiveWrapper
