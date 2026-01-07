@@ -3,6 +3,7 @@ import { CategoryFiltersSwipeSkeleton } from '@/app/components/courses/category-
 import { RecentlyAddedCoursesSwipeSkeleton } from '@/app/components/courses/recently-added-courses-skeleton'
 import { RecommendedCoursesSwipeSkeleton } from '@/app/components/courses/recommended-courses-swipe-skeleton'
 import { FloatNavigation } from '@/app/components/float-navigation'
+import { ServiceTypeToggleSkeleton } from '@/app/components/mei'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CoursesLoading() {
@@ -23,6 +24,11 @@ export default function CoursesLoading() {
         </header>
 
         <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
+          {/* Service Type Toggle Skeleton */}
+          <div className="my-6 mb-12">
+            <ServiceTypeToggleSkeleton />
+          </div>
+
           {/* Category Filters Skeleton */}
           <div className="block sm:hidden">
             <CategoryFiltersMobileSkeleton />
