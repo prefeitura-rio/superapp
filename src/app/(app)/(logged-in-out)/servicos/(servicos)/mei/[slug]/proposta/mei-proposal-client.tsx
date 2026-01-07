@@ -88,7 +88,7 @@ export function MeiProposalClient({
 
   // Save form data to sessionStorage whenever it changes
   useEffect(() => {
-    const subscription = watch((formData) => {
+    const subscription = watch(formData => {
       try {
         sessionStorage.setItem(storageKey, JSON.stringify(formData))
       } catch (error) {
@@ -112,7 +112,15 @@ export function MeiProposalClient({
         email: expectedEmail,
       })
     }
-  }, [companyData.telefone.ddd, companyData.telefone.valor, companyData.email, currentPhone, currentEmail, reset, getValues])
+  }, [
+    companyData.telefone.ddd,
+    companyData.telefone.valor,
+    companyData.email,
+    currentPhone,
+    currentEmail,
+    reset,
+    getValues,
+  ])
 
   const navigateToStep = useCallback(
     (step: Step) => {
