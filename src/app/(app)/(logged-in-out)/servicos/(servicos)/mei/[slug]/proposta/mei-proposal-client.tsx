@@ -52,6 +52,22 @@ export function MeiProposalClient({
   const currentStep = (searchParams.get('step') as Step) || 'value'
   const currentStepIndex = STEPS.indexOf(currentStep)
 
+  // Storage key for persisting form data
+  const storageKey = `mei_proposal_draft_${slug}`
+
+  // Load saved form data from sessionStorage
+  const getSavedFormData = (): Partial<MeiProposalFormData> => {
+    try {
+      const saved = sessionStorage.getItem(storageKey)
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    } catch (error) {
+      console.error('[MEI Proposal] Error loading saved data:', error)
+    }
+    return {}
+  }
+
   const form = useForm<MeiProposalFormData>({
     defaultValues: {
       value: 0,
@@ -59,6 +75,7 @@ export function MeiProposalClient({
       phone: `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`,
       email: companyData.email,
       acceptedTerms: false,
+      ...getSavedFormData(),
     },
   })
 
@@ -69,11 +86,23 @@ export function MeiProposalClient({
   const currentPhone = watch('phone')
   const currentEmail = watch('email')
 
+  // Save form data to sessionStorage whenever it changes
+  useEffect(() => {
+    const subscription = watch((formData) => {
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(formData))
+      } catch (error) {
+        console.error('[MEI Proposal] Error saving form data:', error)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, storageKey])
+
   // Sync form values when companyData changes (e.g., after email/phone update)
   useEffect(() => {
     const expectedPhone = `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`
     const expectedEmail = companyData.email
-    
+
     // Only update if values have changed to avoid unnecessary resets
     if (currentPhone !== expectedPhone || currentEmail !== expectedEmail) {
       const formValues = getValues()
@@ -153,6 +182,8 @@ export function MeiProposalClient({
         return
       }
 
+      // Clear the saved draft after successful submission
+      sessionStorage.removeItem(storageKey)
       sessionStorage.setItem('mei_proposal_submitted', 'true')
       router.push(`/servicos/mei/${slug}/proposta/sucesso`)
     } catch (error) {
@@ -160,7 +191,7 @@ export function MeiProposalClient({
     } finally {
       setIsSubmitting(false)
     }
-  }, [getValues, slug, router, companyData])
+  }, [getValues, slug, router, companyData, storageKey])
 
   const isButtonDisabled =
     (currentStep === 'value' && value <= 0) ||
