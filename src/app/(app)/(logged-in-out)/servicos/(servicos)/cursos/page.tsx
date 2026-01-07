@@ -9,6 +9,8 @@ import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
 import { getDalCategorias } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
+export const dynamic = 'force-dynamic'
+
 // Type for the expected API response structure
 interface CoursesApiResponse {
   data: {
