@@ -39,7 +39,10 @@ type Step = 'value' | 'duration' | 'review'
 
 const STEPS: Step[] = ['value', 'duration', 'review']
 
-export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps) {
+export function MeiProposalClient({
+  slug,
+  companyData,
+}: MeiProposalClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -165,8 +168,8 @@ export function MeiProposalClient({ slug, companyData }: MeiProposalClientProps)
 
           {/* Content */}
           <div className="flex-1 flex flex-col overflow-hidden py-8">
-            {currentStep === 'value' && <ValueStep />}
-            {currentStep === 'duration' && <DurationStep />}
+            {currentStep === 'value' && <ValueStep onNext={handleNext} />}
+            {currentStep === 'duration' && <DurationStep onNext={handleNext} />}
             {currentStep === 'review' && (
               <ReviewStep
                 companyData={companyData}
