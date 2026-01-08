@@ -57,7 +57,7 @@ export default function CoursePageClient({
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
       <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
-        <div className="my-6 mb-12">
+        <div className="my-4 mb-12 mx-4">
           {isLoadingCategories ? (
             <ServiceTypeToggleSkeleton />
           ) : (
