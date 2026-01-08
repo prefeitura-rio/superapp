@@ -11,14 +11,14 @@ interface ServiceTypeToggleProps {
 
 export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
   return (
-    <div className="flex items-center bg-muted rounded-full p-1 w-full">
+    <div className="flex items-center bg-card rounded-full p-1 w-full">
       <Link
         href="/servicos/mei"
         className={cn(
-          'flex-1 py-2 rounded-full text-sm font-medium transition-colors text-center',
+          'flex-1 py-3 leading-5 rounded-full text-sm font-normal transition-colors text-center',
           activeType === 'mei'
             ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground'
+            : 'text-foreground hover:text-foreground'
         )}
       >
         MEI
@@ -26,7 +26,7 @@ export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
       <Link
         href="/servicos/cursos"
         className={cn(
-          'flex-1 py-2 rounded-full text-sm font-medium transition-colors text-center',
+          'flex-1 py-3 rounded-full leading-5 text-sm font-normal transition-colors text-center',
           activeType === 'cursos'
             ? 'bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:text-foreground'
