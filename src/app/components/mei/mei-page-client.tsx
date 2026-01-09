@@ -42,18 +42,16 @@ export function MeiPageClient({
     <div className="min-h-lvh">
       <MeiHeader isLoggedIn={isLoggedIn} />
       <main className="max-w-4xl mx-auto pt-24 pb-34 px-4">
-        <div className="mb-12 mt-2">
+        <div className="my-4 mb-12">
           <ServiceTypeToggle activeType="mei" />
         </div>
 
-        {/* Minhas oportunidades - só aparece se tiver propostas */}
         {hasProposals && (
           <section className="mb-8">
             <h2 className="text-lg font-semibold text-foreground mb-4">
               Minhas oportunidades
             </h2>
 
-            {/* Mobile: column layout with dividers */}
             <div className="flex flex-col sm:hidden">
               {userProposals.map((proposal, index) => (
                 <Fragment key={proposal.id}>
