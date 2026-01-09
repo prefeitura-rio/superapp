@@ -25,7 +25,7 @@ export default function CoursesLoading() {
 
         <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
           {/* Service Type Toggle Skeleton */}
-          <div className="my-6 mb-12">
+          <div className="my-4 mb-10 px-4">
             <ServiceTypeToggleSkeleton />
           </div>
 

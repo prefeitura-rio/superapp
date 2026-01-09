@@ -12,12 +12,12 @@ export function ServiceTypeToggleSkeleton({
   activeType = 'cursos',
 }: ServiceTypeToggleSkeletonProps) {
   return (
-    <div className="flex items-center bg-card rounded-full p-1 w-full">
+    <div className="flex items-center bg-card/70 rounded-full p-1 w-full px-10">
       <Skeleton
-        className={`flex-1 h-9 rounded-full ${activeType === 'mei' ? '' : 'opacity-40'}`}
+        className={`flex-1 h-10 rounded-full ${activeType === 'mei' ? '' : 'bg-card/80'}`}
       />
       <Skeleton
-        className={`flex-1 h-9 rounded-full ${activeType === 'cursos' ? '' : 'opacity-40'}`}
+        className={`flex-1 h-10 rounded-full ${activeType === 'cursos' ? '' : 'bg-card/80'}`}
       />
     </div>
   )
