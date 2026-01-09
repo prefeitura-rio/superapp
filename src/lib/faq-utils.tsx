@@ -78,33 +78,33 @@ export const FormattedContent = memo(
     return (
       <p
         className={cn(
-          'text-foreground-light text-sm leading-relaxed whitespace-pre-line opacity-50',
+          'text-foreground text-sm leading-relaxed whitespace-pre-line opacity-50',
           className
         )}
       >
-      {parts.map((part, i) => {
-        if (part.type === 'video-title') {
-          return (
-            <span key={i} className="italic opacity-100">
-              "{part.content}"
-            </span>
-          )
-        }
-        if (part.type === 'link') {
-          return (
-            <a
-              key={i}
-              href={part.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="italic underline opacity-100 hover:opacity-80 transition-opacity"
-            >
-              {part.content}
-            </a>
-          )
-        }
-        return <span key={i}>{part.content}</span>
-      })}
+        {parts.map((part, i) => {
+          if (part.type === 'video-title') {
+            return (
+              <span key={i} className="italic opacity-100">
+                "{part.content}"
+              </span>
+            )
+          }
+          if (part.type === 'link') {
+            return (
+              <a
+                key={i}
+                href={part.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="italic underline opacity-100 hover:opacity-80 transition-opacity"
+              >
+                {part.content}
+              </a>
+            )
+          }
+          return <span key={i}>{part.content}</span>
+        })}
       </p>
     )
   }
