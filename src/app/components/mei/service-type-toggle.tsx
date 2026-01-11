@@ -10,15 +10,21 @@ interface ServiceTypeToggleProps {
 }
 
 export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
+  const hideToggle = process.env.NEXT_PUBLIC_FEATURE_FLAG === 'true'
+
+  if (hideToggle) {
+    return null
+  }
+
   return (
-    <div className="flex items-center bg-card rounded-full p-1 w-full">
+    <div className="flex mt-12 items-center bg-card rounded-full p-1 w-full">
       <Link
         href="/servicos/mei"
         className={cn(
           'flex-1 py-3 leading-5 rounded-full text-sm font-normal transition-colors text-center',
           activeType === 'mei'
             ? 'bg-primary text-primary-foreground'
-            : 'text-foreground hover:text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
         )}
       >
         MEI

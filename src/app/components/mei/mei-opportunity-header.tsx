@@ -1,6 +1,7 @@
 'use client'
 
-import { ChevronLeftIcon, TrashIcon } from '@/assets/icons'
+import { ChevronLeftIcon, EditIcon, TrashIcon } from '@/assets/icons'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { getBackRoute } from '@/lib/utils'
 import Image from 'next/image'
@@ -31,17 +32,22 @@ export function MeiOpportunityHeader({
       <div className="flex justify-between absolute top-4 left-4 right-4 z-10">
         <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
         {showDeleteButton && (
-          <IconButton icon={TrashIcon} onClick={onDeleteClick} />
+          <div className="flex items-center gap-2">
+            <CustomButton
+              variant="secondary"
+              icon={EditIcon}
+              iconPosition="left"
+              className="rounded-full hover:bg-card"
+            >
+              Editar
+            </CustomButton>
+            <IconButton icon={TrashIcon} onClick={onDeleteClick} />
+          </div>
         )}
       </div>
 
       {coverImage ? (
-        <Image
-          src={coverImage}
-          alt={title}
-          fill
-          className="object-cover"
-        />
+        <Image src={coverImage} alt={title} fill className="object-cover" />
       ) : (
         <div className="w-full h-full bg-primary/20 flex items-center justify-center">
           <span className="text-4xl font-bold text-primary/40">
