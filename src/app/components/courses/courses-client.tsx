@@ -2,13 +2,11 @@
 
 import CoursesHeader from '@/app/components/courses/courses-header'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
-import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
 import type { UserInfo } from '@/lib/user-info'
 import { useMemo } from 'react'
-import { ServiceTypeToggle, ServiceTypeToggleSkeleton } from '../mei'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
 import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
@@ -56,29 +54,26 @@ export default function CoursePageClient({
   return (
     <div className="min-h-lvh">
       <CoursesHeader userInfo={userInfo} />
-      <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
-        <div className="my-4 mb-12 mx-4">
-          {isLoadingCategories ? (
-            <ServiceTypeToggleSkeleton />
-          ) : (
-            <ServiceTypeToggle activeType="cursos" />
-          )}
-        </div>
+      <main className="max-w-4xl mx-auto pb-34 text-white">
         {isLoadingCategories ? (
-          <ResponsiveWrapper
-            mobileComponent={<CategoryFiltersMobileSkeleton />}
-            desktopComponent={<CategoryFiltersSwipeSkeleton />}
-          />
+          <>
+            <div className="block sm:hidden">
+              <CategoryFiltersMobileSkeleton />
+            </div>
+            <div className="hidden sm:block">
+              <CategoryFiltersSwipeSkeleton />
+            </div>
+          </>
         ) : (
           categoryFilters.length > 0 && (
-            <ResponsiveWrapper
-              mobileComponent={
+            <>
+              <div className="block sm:hidden">
                 <CategoryFiltersMobile categoryFilters={categoryFilters} />
-              }
-              desktopComponent={
+              </div>
+              <div className="hidden sm:block">
                 <CategoryFiltersSwipe categoryFilters={categoryFilters} />
-              }
-            />
+              </div>
+            </>
           )
         )}
 
