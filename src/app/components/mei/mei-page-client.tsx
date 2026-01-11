@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 import { MeiHeader } from './mei-header'
 import { type MeiOpportunity, MeiOpportunityCard } from './mei-opportunity-card'
 import { type MeiProposal, MeiProposalCard } from './mei-proposal-card'
+import { ServiceTypeToggle } from './service-type-toggle'
 
 interface MeiPageClientProps {
   opportunities: MeiOpportunity[]
@@ -24,6 +25,9 @@ export function MeiPageClient({
       <div className="min-h-lvh">
         <MeiHeader isLoggedIn={isLoggedIn} />
         <main className="max-w-4xl mx-auto pt-24 pb-34 px-4">
+          <div className="mb-6">
+            <ServiceTypeToggle activeType="mei" />
+          </div>
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
               Nenhuma oportunidade encontrada
@@ -37,7 +41,11 @@ export function MeiPageClient({
   return (
     <div className="min-h-lvh">
       <MeiHeader isLoggedIn={isLoggedIn} />
-      <main className="max-w-4xl mx-auto pb-34 px-4">
+      <main className="max-w-4xl mx-auto pt-24 pb-34 px-4">
+        <div className="mb-12 mt-2">
+          <ServiceTypeToggle activeType="mei" />
+        </div>
+
         {/* Minhas oportunidades - só aparece se tiver propostas */}
         {hasProposals && (
           <section className="mb-8">

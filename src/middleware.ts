@@ -86,23 +86,6 @@ export async function middleware(request: NextRequest) {
         .replace(/\s{2,}/g, ' ')
         .trim()
 
-      // TEMPORARY: Block access to "mei" routes when feature flag is enabled
-      // TODO: Remove this block once the feature is ready
-      if (
-        path.includes('mei') &&
-        process.env.NEXT_PUBLIC_FEATURE_FLAG === 'true'
-      ) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/not-found'
-
-        const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
-        return response
-      }
-
       const publicRoute = publicRoutes.find(route =>
         matchRoute(path, route.path)
       )
