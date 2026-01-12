@@ -1,6 +1,7 @@
 'use client'
 
 import { submitMeiProposal } from '@/actions/mei/submit-proposal'
+import { updateMeiProposal } from '@/actions/mei/update-proposal'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -9,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { DurationStep } from './steps/duration-step'
 import { ReviewStep } from './steps/review-step'
 import { ValueStep } from './steps/value-step'
+import toast from 'react-hot-toast'
 
 export interface MeiCompanyData {
   cnpj: string
@@ -33,6 +35,12 @@ export interface MeiProposalFormData {
 interface MeiProposalClientProps {
   slug: string
   companyData: MeiCompanyData
+  existingProposal?: {
+    id: string
+    value: number
+    duration: number
+    acceptedTerms: boolean
+  } | null
 }
 
 type Step = 'value' | 'duration' | 'review'
@@ -42,6 +50,7 @@ const STEPS: Step[] = ['value', 'duration', 'review']
 export function MeiProposalClient({
   slug,
   companyData,
+  existingProposal,
 }: MeiProposalClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -68,14 +77,17 @@ export function MeiProposalClient({
     return {}
   }
 
+  // Try to load from sessionStorage first, then fallback to existingProposal or defaults
+  const savedFormData = getSavedFormData()
   const form = useForm<MeiProposalFormData>({
     defaultValues: {
-      value: 0,
-      duration: 0,
+      // Se há dados salvos no sessionStorage, usar esses (preserva valores editados pelo usuário)
+      // Caso contrário, usar valores da proposta existente ou valores padrão
+      value: savedFormData.value ?? existingProposal?.value ?? 0,
+      duration: savedFormData.duration ?? existingProposal?.duration ?? 0,
       phone: `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`,
       email: companyData.email,
-      acceptedTerms: false,
-      ...getSavedFormData(),
+      acceptedTerms: savedFormData.acceptedTerms ?? existingProposal?.acceptedTerms ?? false,
     },
   })
 
@@ -175,38 +187,66 @@ export function MeiProposalClient({
     setIsSubmitting(true)
 
     try {
-      const result = await submitMeiProposal({
-        oportunidadeId: Number(slug),
-        meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
-        valorProposta: formData.value,
-        prazoExecucaoDias: formData.duration,
-        aceitaCustosIntegrais: formData.acceptedTerms,
-        telefone: formData.phone,
-        email: formData.email,
-      })
+      let result
+
+      // Se há proposta existente, está em modo de edição (independente do parâmetro mode na URL)
+      if (existingProposal?.id) {
+        // Atualizar proposta existente
+        result = await updateMeiProposal({
+          oportunidadeId: Number(slug),
+          propostaId: existingProposal.id,
+          meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
+          valorProposta: formData.value,
+          prazoExecucaoDias: formData.duration,
+          aceitaCustosIntegrais: formData.acceptedTerms,
+          telefone: formData.phone,
+          email: formData.email,
+        })
+      } else {
+        // Criar nova proposta
+        result = await submitMeiProposal({
+          oportunidadeId: Number(slug),
+          meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
+          valorProposta: formData.value,
+          prazoExecucaoDias: formData.duration,
+          aceitaCustosIntegrais: formData.acceptedTerms,
+          telefone: formData.phone,
+          email: formData.email,
+        })
+      }
 
       if (!result.success) {
         console.error('[MEI Proposal] Error:', result.error)
+        toast.error(result.error || 'Erro ao enviar proposta')
         return
       }
 
       // Clear the saved draft after successful submission
       sessionStorage.removeItem(storageKey)
-      sessionStorage.setItem('mei_proposal_submitted', 'true')
-      router.push(`/servicos/mei/${slug}/proposta/sucesso`)
+
+      if (existingProposal?.id) {
+        toast.success('Proposta atualizada com sucesso')
+        router.push(`/servicos/mei/${slug}`)
+      } else {
+        sessionStorage.setItem('mei_proposal_submitted', 'true')
+        router.push(`/servicos/mei/${slug}/proposta/sucesso`)
+      }
     } catch (error) {
       console.error('[MEI Proposal] Error submitting:', error)
+      toast.error('Erro ao processar proposta')
     } finally {
       setIsSubmitting(false)
     }
-  }, [getValues, slug, router, companyData, storageKey])
+  }, [getValues, slug, router, companyData, storageKey, existingProposal])
 
   const isButtonDisabled =
     (currentStep === 'value' && value <= 0) ||
     (currentStep === 'duration' && duration <= 0) ||
     isSubmitting
 
-  const buttonText = currentStep === 'review' ? 'Enviar proposta' : 'Continuar'
+  const buttonText = currentStep === 'review' 
+    ? (existingProposal ? 'Atualizar proposta' : 'Enviar proposta')
+    : 'Continuar'
 
   return (
     <FormProvider {...form}>
@@ -232,6 +272,7 @@ export function MeiProposalClient({
                 companyData={companyData}
                 showTermsError={showTermsError}
                 slug={slug}
+                hasExistingProposal={!!existingProposal}
               />
             )}
           </div>

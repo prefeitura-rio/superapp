@@ -11,14 +11,18 @@ interface MeiOpportunityHeaderProps {
   title: string
   coverImage?: string
   showDeleteButton?: boolean
+  showEditButton?: boolean
   onDeleteClick?: () => void
+  onEditClick?: () => void
 }
 
 export function MeiOpportunityHeader({
   title,
   coverImage,
   showDeleteButton,
+  showEditButton,
   onDeleteClick,
+  onEditClick,
 }: MeiOpportunityHeaderProps) {
   const router = useRouter()
 
@@ -31,17 +35,22 @@ export function MeiOpportunityHeader({
     <div className="h-[320px] md:h-[380px] w-full relative">
       <div className="flex justify-between absolute top-4 left-4 right-4 z-10">
         <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
-        {showDeleteButton && (
+        {(showEditButton || showDeleteButton) && (
           <div className="flex items-center gap-2">
-            <CustomButton
-              variant="secondary"
-              icon={EditIcon}
-              iconPosition="left"
-              className="rounded-full hover:bg-card"
-            >
-              Editar
-            </CustomButton>
-            <IconButton icon={TrashIcon} onClick={onDeleteClick} />
+            {showEditButton && (
+              <CustomButton
+                variant="secondary"
+                icon={EditIcon}
+                iconPosition="left"
+                className="rounded-full hover:bg-card"
+                onClick={onEditClick}
+              >
+                Editar
+              </CustomButton>
+            )}
+            {showDeleteButton && (
+              <IconButton icon={TrashIcon} onClick={onDeleteClick} />
+            )}
           </div>
         )}
       </div>

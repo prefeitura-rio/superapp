@@ -89,6 +89,14 @@ export function MeiOpportunityDetailClient({
   const [isCancelDrawerOpen, setIsCancelDrawerOpen] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
 
+  const handleEditProposal = () => {
+    if (!userProposal) return
+    // Apenas propostas com status 'submitted' podem ser editadas
+    if (userProposal.status === 'submitted') {
+      router.push(`/servicos/mei/${opportunity.slug}/proposta?mode=edit`)
+    }
+  }
+
   const handleCancelProposal = async () => {
     if (!userProposal) return
 
@@ -234,7 +242,9 @@ export function MeiOpportunityDetailClient({
         <MeiOpportunityHeader
           title={opportunity.title}
           coverImage={opportunity.coverImage}
+          showEditButton={!!userProposal && userProposal.status === 'submitted'}
           showDeleteButton={!!userProposal && userProposal.status === 'submitted'}
+          onEditClick={handleEditProposal}
           onDeleteClick={() => setIsCancelDrawerOpen(true)}
         />
 

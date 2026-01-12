@@ -14,6 +14,7 @@ interface ReviewStepProps {
   companyData: MeiCompanyData
   showTermsError: boolean
   slug: string
+  hasExistingProposal?: boolean
 }
 
 interface ReviewItemProps {
@@ -87,7 +88,7 @@ function formatCurrency(value: number): string {
   })
 }
 
-export function ReviewStep({ companyData, showTermsError, slug }: ReviewStepProps) {
+export function ReviewStep({ companyData, showTermsError, slug, hasExistingProposal }: ReviewStepProps) {
   const router = useRouter()
   const { watch, setValue } = useFormContext<MeiProposalFormData>()
   const proposalValue = watch('value')
@@ -97,14 +98,14 @@ export function ReviewStep({ companyData, showTermsError, slug }: ReviewStepProp
   const acceptedTerms = watch('acceptedTerms')
 
   const handlePhoneEdit = () => {
-    const returnUrl = `/servicos/mei/${slug}/proposta?step=review`
+    const returnUrl = `/servicos/mei/${slug}/proposta?step=review${hasExistingProposal ? '&mode=edit' : ''}`
     router.push(
       `/meu-perfil/informacoes-pessoais/atualizar-telefone?redirectFromMei=${slug}&returnUrl=${encodeURIComponent(returnUrl)}`
     )
   }
 
   const handleEmailEdit = () => {
-    const returnUrl = `/servicos/mei/${slug}/proposta?step=review`
+    const returnUrl = `/servicos/mei/${slug}/proposta?step=review${hasExistingProposal ? '&mode=edit' : ''}`
     router.push(
       `/meu-perfil/informacoes-pessoais/atualizar-email?redirectFromMei=${slug}&returnUrl=${encodeURIComponent(returnUrl)}`
     )
