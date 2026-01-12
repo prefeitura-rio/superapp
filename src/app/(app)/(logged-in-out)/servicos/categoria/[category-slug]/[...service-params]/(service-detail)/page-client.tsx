@@ -95,7 +95,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                   >
                     <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
                       {button.descricao && (
-                        <CardDescription className="text-sm break-all text-foreground-light">
+                        <CardDescription className="text-sm text-foreground-light line-clamp-2">
                           {button.descricao}
                         </CardDescription>
                       )}
