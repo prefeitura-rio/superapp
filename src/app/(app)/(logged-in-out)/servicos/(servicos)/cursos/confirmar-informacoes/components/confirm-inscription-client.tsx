@@ -721,6 +721,7 @@ export function ConfirmInscriptionClient({
             }`}
             onClick={handleBack}
             disabled={isPending}
+            data-testid="back-button"
           >
             <ChevronLeftIcon className="text-foreground" />
           </CustomButton>
