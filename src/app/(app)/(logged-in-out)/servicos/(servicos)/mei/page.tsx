@@ -139,7 +139,6 @@ export default async function MeiPage() {
     <>
       <MeiPageClient
         opportunities={filteredOpportunities}
-        isLoggedIn={isLoggedIn}
         userProposals={userProposals}
       />
       <FloatNavigation />

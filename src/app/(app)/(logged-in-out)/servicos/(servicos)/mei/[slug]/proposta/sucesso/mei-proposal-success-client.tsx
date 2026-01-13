@@ -94,7 +94,7 @@ export function MeiProposalSuccessClient({
             onClick={handleGoHome}
             className="w-full rounded-full h-[46px] bg-primary text-background"
           >
-            Voltar para Home
+            Voltar para a tela inicial
           </CustomButton>
         </div>
       </div>

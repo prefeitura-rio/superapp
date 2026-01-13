@@ -35,7 +35,7 @@ export default function NotFound() {
               variant="primary"
               fullWidth
             >
-              Voltar para a Home
+              Voltar para a tela inicial
             </CustomButton>
           </Link>
         </div>

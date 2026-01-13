@@ -1,6 +1,7 @@
 'use client'
 
 import { ServiceTypeToggle } from '@/app/components/mei/service-type-toggle'
+import { AuthHeaderProvider } from '@/providers/auth-header-provider'
 import { usePathname } from 'next/navigation'
 
 export default function ServicosLayout({
@@ -18,15 +19,17 @@ export default function ServicosLayout({
     pathname === '/servicos/cursos' || pathname === '/servicos/mei'
 
   return (
-    <div>
-      {shouldShowToggle && (
-        <div className="max-w-4xl mx-auto pt-12 pb-0 px-4">
-          <div className="mb-12 mt-2">
-            <ServiceTypeToggle activeType={activeType} />
+    <AuthHeaderProvider>
+      <div>
+        {shouldShowToggle && (
+          <div className="max-w-4xl mx-auto pt-12 pb-0 px-4">
+            <div className="mb-12 mt-2">
+              <ServiceTypeToggle activeType={activeType} />
+            </div>
           </div>
-        </div>
-      )}
-      <main>{children}</main>
-    </div>
+        )}
+        <main>{children}</main>
+      </div>
+    </AuthHeaderProvider>
   )
 }
