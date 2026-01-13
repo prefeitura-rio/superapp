@@ -1,19 +1,17 @@
 'use client'
 
 import { Fragment } from 'react'
-import { MeiHeader } from './mei-header'
+import { MeiHeaderClient } from './mei-header-client'
 import { type MeiOpportunity, MeiOpportunityCard } from './mei-opportunity-card'
 import { type MeiProposal, MeiProposalCard } from './mei-proposal-card'
 
 interface MeiPageClientProps {
   opportunities: MeiOpportunity[]
-  isLoggedIn: boolean
   userProposals?: MeiProposal[]
 }
 
 export function MeiPageClient({
   opportunities,
-  isLoggedIn,
   userProposals = [],
 }: MeiPageClientProps) {
   const hasProposals = userProposals.length > 0
@@ -22,7 +20,7 @@ export function MeiPageClient({
   if (!hasOpportunities && !hasProposals) {
     return (
       <div className="min-h-lvh">
-        <MeiHeader isLoggedIn={isLoggedIn} />
+        <MeiHeaderClient />
         <main className="max-w-4xl mx-auto pt-24 pb-34 px-4">
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
@@ -36,7 +34,7 @@ export function MeiPageClient({
 
   return (
     <div className="min-h-lvh">
-      <MeiHeader isLoggedIn={isLoggedIn} />
+      <MeiHeaderClient />
       <main className="max-w-4xl mx-auto pb-34 px-4">
         {/* Minhas oportunidades - só aparece se tiver propostas */}
         {hasProposals && (
