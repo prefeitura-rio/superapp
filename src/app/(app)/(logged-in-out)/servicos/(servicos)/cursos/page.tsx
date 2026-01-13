@@ -109,7 +109,6 @@ export default async function CoursesPage() {
         <CoursePageClient
           courses={sortedCourses}
           myCourses={myCourses}
-          userInfo={userInfo}
           categoryFilters={categoriesFilters}
         />
         <FloatNavigation />
@@ -121,7 +120,6 @@ export default async function CoursesPage() {
       <CoursePageClient
         courses={[]}
         myCourses={[]}
-        userInfo={userInfo}
         categoryFilters={[]}
       />
     )
