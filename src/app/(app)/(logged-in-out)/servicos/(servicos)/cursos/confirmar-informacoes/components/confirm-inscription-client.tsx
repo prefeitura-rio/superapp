@@ -154,18 +154,31 @@ export function ConfirmInscriptionClient({
 
   // Determine initial unit selection
   const getInitialUnitId = () => {
-    // If preselectedLocationId is provided and exists in nearbyUnits, use it
+    // Helper to check if a unit has available schedules
+    const hasAvailableSchedules = (unit: NearbyUnit) => {
+      if (!unit.schedules || unit.schedules.length === 0) return false
+      return unit.schedules.some(
+        schedule =>
+          schedule.remaining_vacancies !== undefined &&
+          schedule.remaining_vacancies !== null &&
+          schedule.remaining_vacancies > 0
+      )
+    }
+
+    // If preselectedLocationId is provided and exists in nearbyUnits, use it if it has available schedules
     if (preselectedLocationId) {
       const preselectedUnit = nearbyUnits.find(
         unit => unit.id === preselectedLocationId
       )
-      if (preselectedUnit) {
+      if (preselectedUnit && hasAvailableSchedules(preselectedUnit)) {
         return preselectedLocationId
       }
     }
-    // Otherwise, if there's only one unit, automatically select it
+    // Otherwise, if there's only one unit with available schedules, automatically select it
     if (nearbyUnits && nearbyUnits.length === 1) {
-      return nearbyUnits[0].id
+      if (hasAvailableSchedules(nearbyUnits[0])) {
+        return nearbyUnits[0].id
+      }
     }
     // If multiple units, start with empty (user must select)
     if (nearbyUnits && nearbyUnits.length > 1) {
@@ -198,12 +211,13 @@ export function ConfirmInscriptionClient({
       const preselectedClass = availableOnlineClasses.find(
         cls => cls.id === preselectedClassId
       )
-      if (preselectedClass) {
+      // Check if the preselected class has available vacancies
+      if (preselectedClass && isClassAvailable(preselectedClass)) {
         return preselectedClassId
       }
     }
     // Otherwise, if there's only one available online class, automatically select it
-    if (availableOnlineClasses.length === 1) {
+    if (availableOnlineClasses.length === 1 && isClassAvailable(availableOnlineClasses[0])) {
       return availableOnlineClasses[0].id
     }
     // If multiple classes, start with empty (user must select)
