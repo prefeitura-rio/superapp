@@ -26,8 +26,25 @@ export const SelectUnitSlide = ({
 
   const selectedValue = watch(fieldName as any)
 
+  // Check if a unit has any available schedules (with remaining_vacancies > 0)
+  const hasAvailableSchedules = (unit: NearbyUnit) => {
+    if (!unit.schedules || unit.schedules.length === 0) return false
+    return unit.schedules.some(
+      schedule =>
+        schedule.remaining_vacancies !== undefined &&
+        schedule.remaining_vacancies !== null &&
+        schedule.remaining_vacancies > 0
+    )
+  }
+
   // Handle unit selection with validation
   const handleUnitChange = async (value: string) => {
+    // Check if the selected unit has available schedules
+    const selectedUnit = nearbyUnits.find(unit => unit.id === value)
+    if (selectedUnit && !hasAvailableSchedules(selectedUnit)) {
+      // Don't allow selection of units without available schedules
+      return
+    }
     setValue(fieldName as any, value)
     // Clear errors and revalidate immediately
     clearErrors(fieldName as any)
@@ -74,27 +91,37 @@ export const SelectUnitSlide = ({
             onValueChange={handleUnitChange}
             className="w-full"
           >
-            {nearbyUnits.map((unit, index) => (
-              <label
-                key={unit.id}
-                htmlFor={unit.id}
-                className={`
-                  flex items-center justify-between py-4 px-1 cursor-pointer transition-colors
-                  hover:bg-muted/30
-                  ${index !== nearbyUnits.length - 1 ? 'border-b border-border' : ''}
-                `}
-              >
-                <div className="flex flex-col">
-                  <h3 className="font-medium text-foreground">{unit.address}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {unit.neighborhood}, Rio de Janeiro
-                  </p>
-                </div>
-                <div className="flex items-center">
-                  <RadioGroupItem value={unit.id} id={unit.id} />
-                </div>
-              </label>
-            ))}
+            {nearbyUnits.map((unit, index) => {
+              const isAvailable = hasAvailableSchedules(unit)
+              return (
+                <label
+                  key={unit.id}
+                  htmlFor={unit.id}
+                  className={`
+                    flex items-center justify-between py-4 px-1 transition-colors
+                    ${isAvailable ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
+                    ${index !== nearbyUnits.length - 1 ? 'border-b border-border' : ''}
+                  `}
+                >
+                  <div className="flex flex-col">
+                    <h3 className="font-medium text-foreground">
+                      {unit.address}
+                      {!isAvailable && (
+                        <span className="text-muted-foreground text-xs ml-2">
+                          (Sem vagas disponíveis)
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {unit.neighborhood}, Rio de Janeiro
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <RadioGroupItem value={unit.id} id={unit.id} disabled={!isAvailable} />
+                  </div>
+                </label>
+              )
+            })}
           </RadioGroup>
         </div>
 

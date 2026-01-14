@@ -423,7 +423,14 @@ function OnlineClassSelection({
               <div className="flex items-center gap-3">
                 <PersonIcon />
                 <span>Vagas</span>
-                <span className="text-foreground">{singleClass.vacancies}</span>
+                <span className="text-foreground">
+                  {singleClass.vacancies}
+                  {singleClass.remaining_vacancies !== undefined && (
+                    <span className="text-muted-foreground">
+                      {' '}({singleClass.remaining_vacancies} disponíveis)
+                    </span>
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -535,6 +542,15 @@ function OnlineClassSelection({
     }
   }, [onlineClasses.length])
 
+  // Check if a class is available (has remaining_vacancies > 0)
+  const isClassAvailable = (onlineClass: any) => {
+    return (
+      onlineClass.remaining_vacancies !== undefined &&
+      onlineClass.remaining_vacancies !== null &&
+      onlineClass.remaining_vacancies > 0
+    )
+  }
+
   return (
     <div className="space-y-4">
       {/* Class Icon Label */}
@@ -553,27 +569,40 @@ function OnlineClassSelection({
         }`}
       >
         <div className="flex gap-3 pl-4 pb-2">
-          {onlineClasses.map((onlineClass, index) => (
-            <button
-              type="button"
-              key={onlineClass.id}
-              onClick={() => onClassSelect(onlineClass.id)}
-              className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
-                selectedClassId === onlineClass.id
-                  ? 'border-muted-foreground bg-secondary'
-                  : 'border-none bg-card cufrsor-pointer'
-              }`}
-            >
-              <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
-                Turma {index + 1}
-              </h4>
-              <p className="text-xs md:text-sm text-foreground-light mt-1">
-                {!onlineClass.class_start_date && !onlineClass.class_end_date
-                  ? 'Datas a serem definidas'
-                  : `${formatDateOrFallback(onlineClass.class_start_date)} - ${formatDateOrFallback(onlineClass.class_end_date)}`}
-              </p>
-            </button>
-          ))}
+          {onlineClasses.map((onlineClass, index) => {
+            const isAvailable = isClassAvailable(onlineClass)
+            return (
+              <button
+                type="button"
+                key={onlineClass.id}
+                onClick={() => isAvailable && onClassSelect(onlineClass.id)}
+                disabled={!isAvailable}
+                className={`shrink-0 w-[280px] p-4 rounded-lg border text-left transition-all ${
+                  isAvailable
+                    ? 'hover:border-muted-foreground hover:bg-secondary cursor-pointer'
+                    : 'opacity-50 cursor-not-allowed'
+                } ${
+                  selectedClassId === onlineClass.id
+                    ? 'border-muted-foreground bg-secondary'
+                    : 'border-none bg-card'
+                }`}
+              >
+                <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
+                  Turma {index + 1}
+                  {!isAvailable && (
+                    <span className="text-muted-foreground text-xs ml-2">
+                      (Sem vagas)
+                    </span>
+                  )}
+                </h4>
+                <p className="text-xs md:text-sm text-foreground-light mt-1">
+                  {!onlineClass.class_start_date && !onlineClass.class_end_date
+                    ? 'Datas a serem definidas'
+                    : `${formatDateOrFallback(onlineClass.class_start_date)} - ${formatDateOrFallback(onlineClass.class_end_date)}`}
+                </p>
+              </button>
+            )
+          })}
           {/* Spacer for right padding in horizontal scroll */}
           <div className="flex-shrink-0 w-4" aria-hidden="true" />
         </div>
@@ -649,6 +678,11 @@ function OnlineClassSelection({
                 <span>Vagas</span>
                 <span className="text-foreground">
                   {selectedClass.vacancies}
+                  {selectedClass.remaining_vacancies !== undefined && (
+                    <span className="text-muted-foreground">
+                      {' '}({selectedClass.remaining_vacancies} disponíveis)
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -815,10 +849,10 @@ function LocationSelection({
               type="button"
               key={location.id}
               onClick={() => onLocationSelect(location.id)}
-              className={`flex-shrink-0 w-[280px] p-4 rounded-lg border-1 text-left transition-all hover:border-muted-foreground hover:bg-secondary ${
+              className={`shrink-0 w-[280px] p-4 rounded-lg border text-left transition-all hover:border-muted-foreground hover:bg-secondary cursor-pointer ${
                 selectedLocationId === location.id
                   ? 'border-muted-foreground bg-secondary'
-                  : 'border-none bg-card cursor-pointer'
+                  : 'border-none bg-card'
               }`}
             >
               <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
