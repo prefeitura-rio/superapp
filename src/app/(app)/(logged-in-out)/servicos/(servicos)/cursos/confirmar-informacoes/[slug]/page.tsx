@@ -157,6 +157,7 @@ export default async function ConfirmInscriptionPage({
           id: schedule.id,
           location_id: schedule.location_id,
           vacancies: schedule.vacancies,
+          remaining_vacancies: schedule.remaining_vacancies,
           class_start_date: schedule.class_start_date,
           class_end_date: schedule.class_end_date,
           class_time: schedule.class_time || '',
@@ -172,7 +173,10 @@ export default async function ConfirmInscriptionPage({
       curso_id: location.curso_id,
       address: location.address,
       neighborhood: location.neighborhood,
-      schedules: location.schedules || [],
+      schedules: (location.schedules || []).map((schedule: any) => ({
+        ...schedule,
+        remaining_vacancies: schedule.remaining_vacancies,
+      })),
       created_at: location.created_at,
       updated_at: location.updated_at,
     })) || []
