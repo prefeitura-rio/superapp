@@ -29,6 +29,12 @@ export const SelectOnlineClassSlide = ({
 
   // Handle class selection with validation
   const handleClassChange = async (value: string) => {
+    // Check if the selected class is available
+    const selectedClass = onlineClasses.find(cls => cls.id === value)
+    if (selectedClass && !isClassAvailable(selectedClass)) {
+      // Don't allow selection of unavailable classes
+      return
+    }
     setValue(fieldName as any, value)
     // Clear errors and revalidate immediately
     clearErrors(fieldName as any)
@@ -38,6 +44,15 @@ export const SelectOnlineClassSlide = ({
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
+
+  // Check if a class is available (has remaining_vacancies > 0)
+  const isClassAvailable = (onlineClass: Schedule) => {
+    return (
+      onlineClass.remaining_vacancies !== undefined &&
+      onlineClass.remaining_vacancies !== null &&
+      onlineClass.remaining_vacancies > 0
+    )
+  }
 
   const checkScroll = () => {
     if (!listRef.current) return
@@ -90,43 +105,60 @@ export const SelectOnlineClassSlide = ({
             onValueChange={handleClassChange}
             className="w-full"
           >
-            {onlineClasses.map((onlineClass, index) => (
-              <label
-                key={onlineClass.id}
-                htmlFor={onlineClass.id}
-                className={`
-                  flex items-start justify-between py-4 px-1 cursor-pointer transition-colors
-                  hover:bg-muted/30
-                  ${index !== onlineClasses.length - 1 ? 'border-b border-border' : ''}
-                `}
-              >
-                <div className="flex flex-col gap-1 flex-1">
-                  <h3 className="font-medium text-foreground">
-                    Turma {index + 1}
-                  </h3>
-                  <div className="text-sm text-muted-foreground space-y-0.5">
-                    {(onlineClass.class_start_date ||
-                      onlineClass.class_end_date) && (
-                      <div className="flex items-center gap-1">
-                        <p className="font-medium">
-                          {formatDate(onlineClass.class_start_date)}
-                        </p>
-                        <span className="font-medium">-</span>
-                        <p>{formatDate(onlineClass.class_end_date)}</p>
-                      </div>
-                    )}
-                    {onlineClass.class_days && <p>{onlineClass.class_days}</p>}
-                    <p>
-                      <span className="font-medium">Vagas:</span>{' '}
-                      {onlineClass.vacancies}
-                    </p>
+            {onlineClasses.map((onlineClass, index) => {
+              const isAvailable = isClassAvailable(onlineClass)
+              return (
+                <label
+                  key={onlineClass.id}
+                  htmlFor={onlineClass.id}
+                  className={`
+                    flex items-start justify-between py-4 px-1 transition-colors
+                    ${isAvailable ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
+                    ${index !== onlineClasses.length - 1 ? 'border-b border-border' : ''}
+                  `}
+                >
+                  <div className="flex flex-col gap-1 flex-1">
+                    <h3 className="font-medium text-foreground">
+                      Turma {index + 1}
+                      {!isAvailable && (
+                        <span className="text-muted-foreground text-xs ml-2">
+                          (Sem vagas disponíveis)
+                        </span>
+                      )}
+                    </h3>
+                    <div className="text-sm text-muted-foreground space-y-0.5">
+                      {(onlineClass.class_start_date ||
+                        onlineClass.class_end_date) && (
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">
+                            {formatDate(onlineClass.class_start_date)}
+                          </p>
+                          <span className="font-medium">-</span>
+                          <p>{formatDate(onlineClass.class_end_date)}</p>
+                        </div>
+                      )}
+                      {onlineClass.class_days && <p>{onlineClass.class_days}</p>}
+                      <p>
+                        <span className="font-medium">Vagas:</span>{' '}
+                        {onlineClass.vacancies}
+                        {onlineClass.remaining_vacancies !== undefined && (
+                          <span className="text-muted-foreground">
+                            {' '}({onlineClass.remaining_vacancies} disponíveis)
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center ml-2">
-                  <RadioGroupItem value={onlineClass.id} id={onlineClass.id} />
-                </div>
-              </label>
-            ))}
+                  <div className="flex items-center ml-2">
+                    <RadioGroupItem
+                      value={onlineClass.id}
+                      id={onlineClass.id}
+                      disabled={!isAvailable}
+                    />
+                  </div>
+                </label>
+              )
+            })}
           </RadioGroup>
         </div>
 

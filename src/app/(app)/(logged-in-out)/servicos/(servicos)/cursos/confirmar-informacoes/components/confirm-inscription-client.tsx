@@ -119,14 +119,38 @@ export function ConfirmInscriptionClient({
   const hasUnits = nearbyUnits && nearbyUnits.length > 0
   const hasMultipleUnits = nearbyUnits && nearbyUnits.length > 1
 
-  // Check if this is an online course with multiple classes
-  const hasOnlineClasses = onlineClasses && onlineClasses.length > 0
-  const hasMultipleOnlineClasses = onlineClasses && onlineClasses.length > 1
+  // Helper to check if a class is available (has remaining_vacancies > 0)
+  const isClassAvailable = (cls: Schedule) => {
+    return (
+      cls.remaining_vacancies !== undefined &&
+      cls.remaining_vacancies !== null &&
+      cls.remaining_vacancies > 0
+    )
+  }
 
-  // Check if any unit has multiple schedules (needed for schema validation)
+  // Helper to check if a schedule is available (has remaining_vacancies > 0)
+  const isScheduleAvailable = (schedule: Schedule) => {
+    return (
+      schedule.remaining_vacancies !== undefined &&
+      schedule.remaining_vacancies !== null &&
+      schedule.remaining_vacancies > 0
+    )
+  }
+
+  // Filter available online classes for initial selection and validation
+  const availableOnlineClasses = onlineClasses.filter(isClassAvailable)
+
+  // Check if this is an online course with multiple classes (only count available ones for selection logic)
+  const hasOnlineClasses = availableOnlineClasses.length > 0
+  const hasMultipleOnlineClasses = availableOnlineClasses.length > 1
+
+  // Check if any unit has multiple available schedules (needed for schema validation)
   const hasAnyUnitWithMultipleSchedules =
-    nearbyUnits?.some(unit => unit.schedules && unit.schedules.length > 1) ||
-    false
+    nearbyUnits?.some(unit => {
+      const availableSchedules =
+        unit.schedules?.filter(isScheduleAvailable) || []
+      return availableSchedules.length > 1
+    }) || false
 
   // Determine initial unit selection
   const getInitialUnitId = () => {
@@ -155,26 +179,32 @@ export function ConfirmInscriptionClient({
 
   // Determine initial schedule selection
   const getInitialScheduleId = () => {
-    if (initialUnit && initialUnit.schedules.length === 1) {
-      return initialUnit.schedules[0].id
+    if (initialUnit && initialUnit.schedules) {
+      // Filter available schedules (with remaining_vacancies > 0)
+      const availableSchedules = initialUnit.schedules.filter(
+        isScheduleAvailable
+      )
+      if (availableSchedules.length === 1) {
+        return availableSchedules[0].id
+      }
     }
     return ''
   }
 
   // Determine initial online class selection
   const getInitialOnlineClassId = () => {
-    // If preselectedClassId is provided and exists in onlineClasses, use it
+    // If preselectedClassId is provided and exists in availableOnlineClasses, use it
     if (preselectedClassId) {
-      const preselectedClass = onlineClasses.find(
+      const preselectedClass = availableOnlineClasses.find(
         cls => cls.id === preselectedClassId
       )
       if (preselectedClass) {
         return preselectedClassId
       }
     }
-    // Otherwise, if there's only one online class, automatically select it
-    if (hasOnlineClasses && onlineClasses.length === 1) {
-      return onlineClasses[0].id
+    // Otherwise, if there's only one available online class, automatically select it
+    if (availableOnlineClasses.length === 1) {
+      return availableOnlineClasses[0].id
     }
     // If multiple classes, start with empty (user must select)
     return ''
@@ -542,12 +572,18 @@ export function ConfirmInscriptionClient({
         // Otherwise, use the scheduleId from the form (user selected it)
         let finalScheduleId = formData.scheduleId
         if (!finalScheduleId) {
-          if (hasOnlineClasses && onlineClasses.length === 1) {
+          if (hasOnlineClasses && availableOnlineClasses.length === 1) {
             // Auto-select if only one online class
-            finalScheduleId = onlineClasses[0].id
-          } else if (selectedUnit && selectedUnit.schedules.length === 1) {
-            // Auto-select if only one schedule in selected unit
-            finalScheduleId = selectedUnit.schedules[0].id
+            finalScheduleId = availableOnlineClasses[0].id
+          } else if (selectedUnit && selectedUnit.schedules) {
+            // Filter available schedules (with remaining_vacancies > 0)
+            const availableSchedules = selectedUnit.schedules.filter(
+              isScheduleAvailable
+            )
+            if (availableSchedules.length === 1) {
+              // Auto-select if only one available schedule in selected unit
+              finalScheduleId = availableSchedules[0].id
+            }
           }
         }
 
