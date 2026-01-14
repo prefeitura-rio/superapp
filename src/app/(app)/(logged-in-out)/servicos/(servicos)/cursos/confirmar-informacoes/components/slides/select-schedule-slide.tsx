@@ -4,7 +4,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-import type { InscriptionFormData, NearbyUnit } from '../../types'
+import type { InscriptionFormData, NearbyUnit, Schedule } from '../../types'
 
 interface SelectScheduleSlideProps {
   selectedUnit: NearbyUnit | null
@@ -34,8 +34,25 @@ export const SelectScheduleSlide = ({
   const selectedUnit =
     nearbyUnits?.find(unit => unit.id === selectedUnitId) || initialSelectedUnit
 
+  // Check if a schedule is available (has remaining_vacancies > 0)
+  const isScheduleAvailable = (schedule: Schedule) => {
+    return (
+      schedule.remaining_vacancies !== undefined &&
+      schedule.remaining_vacancies !== null &&
+      schedule.remaining_vacancies > 0
+    )
+  }
+
   // Handle schedule selection with validation
   const handleScheduleChange = async (value: string) => {
+    // Check if the selected schedule is available
+    const selectedSchedule = selectedUnit?.schedules?.find(
+      sch => sch.id === value
+    )
+    if (selectedSchedule && !isScheduleAvailable(selectedSchedule)) {
+      // Don't allow selection of unavailable schedules
+      return
+    }
     setValue(fieldName as any, value, { shouldTouch: true })
     // Clear errors and revalidate immediately
     clearErrors(fieldName as any)
@@ -106,47 +123,64 @@ export const SelectScheduleSlide = ({
             onValueChange={handleScheduleChange}
             className="w-full"
           >
-            {selectedUnit.schedules.map((schedule, index) => (
-              <label
-                key={schedule.id}
-                htmlFor={schedule.id}
-                className={`
-                  flex items-start justify-between py-4 px-1 cursor-pointer transition-colors
-                  hover:bg-muted/30
-                  ${index !== selectedUnit.schedules.length - 1 ? 'border-b border-border' : ''}
-                `}
-              >
-                <div className="flex flex-col gap-1 flex-1">
-                  <h3 className="font-medium text-foreground">
-                    Turma {index + 1}
-                  </h3>
-                  <div className="text-sm text-muted-foreground space-y-0.5">
-                   <div className="flex items-center gap-1">
-                    <p className="font-medium">
-                      {formatDate(schedule.class_start_date)}
-                    </p>
-                    <span className="font-medium">-</span>
-                    <p>
-                      {formatDate(schedule.class_end_date)}
-                    </p>
+            {selectedUnit.schedules.map((schedule, index) => {
+              const isAvailable = isScheduleAvailable(schedule)
+              return (
+                <label
+                  key={schedule.id}
+                  htmlFor={schedule.id}
+                  className={`
+                    flex items-start justify-between py-4 px-1 transition-colors
+                    ${isAvailable ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
+                    ${index !== selectedUnit.schedules.length - 1 ? 'border-b border-border' : ''}
+                  `}
+                >
+                  <div className="flex flex-col gap-1 flex-1">
+                    <h3 className="font-medium text-foreground">
+                      Turma {index + 1}
+                      {!isAvailable && (
+                        <span className="text-muted-foreground text-xs ml-2">
+                          (Sem vagas disponíveis)
+                        </span>
+                      )}
+                    </h3>
+                    <div className="text-sm text-muted-foreground space-y-0.5">
+                     <div className="flex items-center gap-1">
+                      <p className="font-medium">
+                        {formatDate(schedule.class_start_date)}
+                      </p>
+                      <span className="font-medium">-</span>
+                      <p>
+                        {formatDate(schedule.class_end_date)}
+                      </p>
+                      </div>
+                      <p>
+                        {formatTimeRange(schedule.class_time)}
+                      </p>
+                      <p>
+                        {schedule.class_days}
+                      </p>
+                      <p>
+                        <span className="font-medium">Vagas:</span>{' '}
+                        {schedule.vacancies}
+                        {schedule.remaining_vacancies !== undefined && (
+                          <span className="text-muted-foreground">
+                            {' '}({schedule.remaining_vacancies} disponíveis)
+                          </span>
+                        )}
+                      </p>
                     </div>
-                    <p>
-                      {formatTimeRange(schedule.class_time)}
-                    </p>
-                    <p>
-                      {schedule.class_days}
-                    </p>
-                    <p>
-                      <span className="font-medium">Vagas:</span>{' '}
-                      {schedule.vacancies}
-                    </p>
                   </div>
-                </div>
-                <div className="flex items-center ml-2">
-                  <RadioGroupItem value={schedule.id} id={schedule.id} />
-                </div>
-              </label>
-            ))}
+                  <div className="flex items-center ml-2">
+                    <RadioGroupItem
+                      value={schedule.id}
+                      id={schedule.id}
+                      disabled={!isAvailable}
+                    />
+                  </div>
+                </label>
+              )
+            })}
           </RadioGroup>
         </div>
 
