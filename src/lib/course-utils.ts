@@ -156,6 +156,53 @@ export function shouldShowCourse({
 }
 
 /**
+ * Check if all online classes have no available vacancies
+ * Returns true if there are no available classes (all have remaining_vacancies = 0 or undefined)
+ */
+function hasNoAvailableOnlineClasses(course: ModelsCurso): boolean {
+  const courseAny = course as any
+  const modality = course.modalidade?.toLowerCase()
+
+  // Only check for online/remote courses
+  if (modality !== 'online' && modality !== 'remoto') {
+    return false
+  }
+
+  // Check remote_class schedules (new structure with multiple classes)
+  if (
+    courseAny?.remote_class?.schedules &&
+    Array.isArray(courseAny.remote_class.schedules)
+  ) {
+    const schedules = courseAny.remote_class.schedules
+    if (schedules.length === 0) {
+      return true // No schedules means no available classes
+    }
+
+    // Check if all schedules have no available vacancies
+    const hasAnyAvailable = schedules.some(
+      (schedule: any) =>
+        schedule.remaining_vacancies !== undefined &&
+        schedule.remaining_vacancies !== null &&
+        schedule.remaining_vacancies > 0
+    )
+
+    return !hasAnyAvailable // If no schedule has available vacancies, return true
+  }
+
+  // Legacy structure: single remote_class
+  if (courseAny?.remote_class) {
+    const remainingVacancies = courseAny.remote_class.remaining_vacancies
+    return (
+      remainingVacancies === undefined ||
+      remainingVacancies === null ||
+      remainingVacancies === 0
+    )
+  }
+
+  return false
+}
+
+/**
  * Get enrollment status and button configuration for a course
  */
 export function getCourseEnrollmentInfo(
@@ -224,6 +271,16 @@ export function getCourseEnrollmentInfo(
         isDisabled: true,
         canEnroll: false,
       }
+    }
+  }
+
+  // Check if all online classes have no available vacancies
+  if (hasNoAvailableOnlineClasses(course)) {
+    return {
+      status: 'enrollment_closed',
+      buttonText: 'Vagas encerradas',
+      isDisabled: true,
+      canEnroll: false,
     }
   }
 

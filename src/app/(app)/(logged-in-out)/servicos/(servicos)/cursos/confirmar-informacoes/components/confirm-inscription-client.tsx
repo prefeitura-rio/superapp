@@ -587,6 +587,34 @@ export function ConfirmInscriptionClient({
           }
         }
 
+        // Validate that the selected schedule/class has available vacancies
+        if (finalScheduleId) {
+          if (hasOnlineClasses) {
+            const selectedClass = onlineClasses.find(
+              cls => cls.id === finalScheduleId
+            )
+            if (!selectedClass || !isClassAvailable(selectedClass)) {
+              toast.error('Esta turma não possui vagas disponíveis')
+              setFadeOut(false)
+              return
+            }
+          } else if (selectedUnit) {
+            const selectedSchedule = selectedUnit.schedules?.find(
+              sch => sch.id === finalScheduleId
+            )
+            if (!selectedSchedule || !isScheduleAvailable(selectedSchedule)) {
+              toast.error('Esta turma não possui vagas disponíveis')
+              setFadeOut(false)
+              return
+            }
+          }
+        } else if (hasOnlineClasses && availableOnlineClasses.length === 0) {
+          // No available online classes
+          toast.error('Não há vagas disponíveis para este curso')
+          setFadeOut(false)
+          return
+        }
+
         const result = await submitCourseInscription({
           courseId,
           userInfo: {
