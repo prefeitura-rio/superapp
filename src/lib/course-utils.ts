@@ -203,6 +203,52 @@ function hasNoAvailableOnlineClasses(course: ModelsCurso): boolean {
 }
 
 /**
+ * Check if all in-person/semi-in-person locations have no available vacancies
+ * Returns true if there are no available locations (all have remaining_vacancies = 0 or undefined in all schedules)
+ */
+function hasNoAvailableInPersonClasses(course: ModelsCurso): boolean {
+  const courseAny = course as any
+  const modality = course.modalidade?.toLowerCase()
+
+  // Only check for presencial/semipresencial courses
+  if (modality !== 'presencial' && modality !== 'semipresencial') {
+    return false
+  }
+
+  // Check locations and their schedules
+  if (
+    !courseAny?.locations ||
+    !Array.isArray(courseAny.locations) ||
+    courseAny.locations.length === 0
+  ) {
+    return true // No locations means no available classes
+  }
+
+  // Check if any location has any schedule with available vacancies
+  const hasAnyAvailable = courseAny.locations.some((location: any) => {
+    // New structure: check schedules array
+    if (location?.schedules && Array.isArray(location.schedules)) {
+      return location.schedules.some(
+        (schedule: any) =>
+          schedule.remaining_vacancies !== undefined &&
+          schedule.remaining_vacancies !== null &&
+          schedule.remaining_vacancies > 0
+      )
+    }
+    // Legacy structure: check location directly
+    if (location?.remaining_vacancies !== undefined) {
+      return (
+        location.remaining_vacancies !== null &&
+        location.remaining_vacancies > 0
+      )
+    }
+    return false
+  })
+
+  return !hasAnyAvailable // If no location has available vacancies, return true
+}
+
+/**
  * Get enrollment status and button configuration for a course
  */
 export function getCourseEnrollmentInfo(
@@ -276,6 +322,16 @@ export function getCourseEnrollmentInfo(
 
   // Check if all online classes have no available vacancies
   if (hasNoAvailableOnlineClasses(course)) {
+    return {
+      status: 'enrollment_closed',
+      buttonText: 'Vagas encerradas',
+      isDisabled: true,
+      canEnroll: false,
+    }
+  }
+
+  // Check if all in-person/semi-in-person locations have no available vacancies
+  if (hasNoAvailableInPersonClasses(course)) {
     return {
       status: 'enrollment_closed',
       buttonText: 'Vagas encerradas',
