@@ -94,15 +94,18 @@ export default function EmailForm() {
 
     if (returnUrl) {
       router.push(returnUrl)
+      router.refresh()
       return
     }
 
     if (courseSlug) {
       router.push(`/servicos/cursos/confirmar-informacoes/${courseSlug}`)
+      router.refresh()
       return
     }
 
     router.back()
+    router.refresh()
   }
 
   const clearEmail = () => {

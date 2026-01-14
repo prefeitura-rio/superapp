@@ -3,7 +3,7 @@ import { putCitizenCpfPhone } from '@/http/citizen/citizen'
 import type { HandlersErrorResponse } from '@/http/models/handlersErrorResponse'
 import type { ModelsSelfDeclaredPhoneInput } from '@/http/models/modelsSelfDeclaredPhoneInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
   const user = await getUserInfoFromToken()
@@ -27,6 +27,8 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
     }
     
     revalidateTag(`user-info-${user.cpf}`)
+    // Revalidate MEI proposal pages that use citizen contact info
+    revalidatePath('/servicos/mei', 'layout')
     return { success: true, data: response.data }
   } catch (error: any) {
     // If it's an API error response, return it with error

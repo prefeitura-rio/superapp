@@ -15,4 +15,12 @@ export type GetApiV1OportunidadesMeiDraftsParams = {
    * Tamanho da página (default: 10, max: 1000)
    */
   pageSize?: number
+  /**
+   * Filtrar por órgão
+   */
+  orgaoId?: string
+  /**
+   * Buscar por título (case-insensitive)
+   */
+  titulo?: string
 }

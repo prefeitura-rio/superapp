@@ -5,7 +5,19 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
+import type { ModelsPropostaMEIStatusAdmin } from './modelsPropostaMEIStatusAdmin'
+import type { ModelsPropostaMEIStatusCidadao } from './modelsPropostaMEIStatusCidadao'
 
 export interface ModelsPropostaMEI {
-  [key: string]: unknown
+  aceita_custos_integrais?: boolean
+  created_at?: string
+  deleted_at?: string
+  id?: string
+  mei_empresa_id?: string
+  oportunidade_mei_id?: number
+  prazo_execucao?: string
+  status_admin?: ModelsPropostaMEIStatusAdmin
+  status_cidadao?: ModelsPropostaMEIStatusCidadao
+  updated_at?: string
+  valor_proposta?: number
 }

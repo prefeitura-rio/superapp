@@ -1,12 +1,10 @@
 'use client'
 
-import CoursesHeader from '@/app/components/courses/courses-header'
+import { CoursesHeaderClient } from '@/app/components/courses/courses-header-client'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
-import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
-import type { UserInfo } from '@/lib/user-info'
 import { useMemo } from 'react'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
@@ -17,13 +15,11 @@ import { MyCoursesHome } from './my-courses-home'
 
 export default function CoursePageClient({
   courses,
-  userInfo,
   myCourses,
   categoryFilters,
   isLoadingCategories = false,
 }: {
   courses: ModelsCurso[]
-  userInfo: UserInfo
   myCourses: ModelsCurso[]
   categoryFilters: CategoryFilter[]
   isLoadingCategories?: boolean
@@ -41,7 +37,7 @@ export default function CoursePageClient({
   if (courses.length === 0) {
     return (
       <div className="min-h-lvh">
-        <CoursesHeader userInfo={userInfo} />
+        <CoursesHeaderClient />
         <main className="max-w-4xl mx-auto pt-30 pb-20 text-white">
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
@@ -54,23 +50,27 @@ export default function CoursePageClient({
   }
   return (
     <div className="min-h-lvh">
-      <CoursesHeader userInfo={userInfo} />
-      <main className="max-w-4xl mx-auto pt-24 pb-34 text-white">
+      <CoursesHeaderClient />
+      <main className="max-w-4xl mx-auto pb-34 text-white">
         {isLoadingCategories ? (
-          <ResponsiveWrapper
-            mobileComponent={<CategoryFiltersMobileSkeleton />}
-            desktopComponent={<CategoryFiltersSwipeSkeleton />}
-          />
+          <>
+            <div className="block sm:hidden">
+              <CategoryFiltersMobileSkeleton />
+            </div>
+            <div className="hidden sm:block">
+              <CategoryFiltersSwipeSkeleton />
+            </div>
+          </>
         ) : (
           categoryFilters.length > 0 && (
-            <ResponsiveWrapper
-              mobileComponent={
+            <>
+              <div className="block sm:hidden">
                 <CategoryFiltersMobile categoryFilters={categoryFilters} />
-              }
-              desktopComponent={
+              </div>
+              <div className="hidden sm:block">
                 <CategoryFiltersSwipe categoryFilters={categoryFilters} />
-              }
-            />
+              </div>
+            </>
           )
         )}
 

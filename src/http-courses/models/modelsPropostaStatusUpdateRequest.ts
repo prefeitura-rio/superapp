@@ -5,9 +5,9 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
-import type { ModelsStatusPropostaCidadao } from './modelsStatusPropostaCidadao'
+import type { ModelsPropostaStatusUpdateRequestStatus } from './modelsPropostaStatusUpdateRequestStatus'
 
 export interface ModelsPropostaStatusUpdateRequest {
   proposta_ids: string[]
-  status: ModelsStatusPropostaCidadao
+  status: ModelsPropostaStatusUpdateRequestStatus
 }

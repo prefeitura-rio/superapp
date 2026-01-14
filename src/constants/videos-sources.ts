@@ -80,6 +80,12 @@ export const VIDEO_SOURCES = {
     darkVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-cursos.mp4',
   },
+  meiProposalSuccess: {
+    lightVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-Proposta-enviada.mp4',
+    darkVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Proposta-enviada.mp4',
+  },
 }
 
 export type VideoSourceProps = {

@@ -1,0 +1,330 @@
+'use client'
+
+import { submitMeiProposal } from '@/actions/mei/submit-proposal'
+import { updateMeiProposal } from '@/actions/mei/update-proposal'
+import { ChevronLeftIcon } from '@/assets/icons'
+import { CustomButton } from '@/components/ui/custom/custom-button'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { DurationStep } from './steps/duration-step'
+import { ReviewStep } from './steps/review-step'
+import { ValueStep } from './steps/value-step'
+import toast from 'react-hot-toast'
+
+export interface MeiCompanyData {
+  cnpj: string
+  razaoSocial: string
+  nomeFantasia: string
+  telefone: {
+    ddi: string
+    ddd: string
+    valor: string
+  }
+  email: string
+}
+
+export interface MeiProposalFormData {
+  value: number
+  duration: number
+  phone: string
+  email: string
+  acceptedTerms: boolean
+}
+
+interface MeiProposalClientProps {
+  slug: string
+  companyData: MeiCompanyData
+  existingProposal?: {
+    id: string
+    value: number
+    duration: number
+    acceptedTerms: boolean
+  } | null
+}
+
+type Step = 'value' | 'duration' | 'review'
+
+const STEPS: Step[] = ['value', 'duration', 'review']
+
+export function MeiProposalClient({
+  slug,
+  companyData,
+  existingProposal,
+}: MeiProposalClientProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showTermsError, setShowTermsError] = useState(false)
+  const termsErrorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const currentStep = (searchParams.get('step') as Step) || 'value'
+  const currentStepIndex = STEPS.indexOf(currentStep)
+
+  // Storage key for persisting form data
+  const storageKey = `mei_proposal_draft_${slug}`
+
+  // Load saved form data from sessionStorage
+  const getSavedFormData = (): Partial<MeiProposalFormData> => {
+    try {
+      const saved = sessionStorage.getItem(storageKey)
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    } catch (error) {
+      console.error('[MEI Proposal] Error loading saved data:', error)
+    }
+    return {}
+  }
+
+  // Try to load from sessionStorage first, then fallback to existingProposal or defaults
+  const savedFormData = getSavedFormData()
+  const form = useForm<MeiProposalFormData>({
+    defaultValues: {
+      // Se há dados salvos no sessionStorage, usar esses (preserva valores editados pelo usuário)
+      // Caso contrário, usar valores da proposta existente ou valores padrão
+      value: savedFormData.value ?? existingProposal?.value ?? 0,
+      duration: savedFormData.duration ?? existingProposal?.duration ?? 0,
+      phone: `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`,
+      email: companyData.email,
+      acceptedTerms: savedFormData.acceptedTerms ?? existingProposal?.acceptedTerms ?? false,
+    },
+  })
+
+  const { watch, getValues, reset } = form
+  const value = watch('value')
+  const duration = watch('duration')
+  const acceptedTerms = watch('acceptedTerms')
+  const currentPhone = watch('phone')
+  const currentEmail = watch('email')
+
+  // Save form data to sessionStorage whenever it changes
+  useEffect(() => {
+    const subscription = watch(formData => {
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(formData))
+      } catch (error) {
+        console.error('[MEI Proposal] Error saving form data:', error)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, storageKey])
+
+  // Sync form values when companyData changes (e.g., after email/phone update)
+  useEffect(() => {
+    const expectedPhone = `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`
+    const expectedEmail = companyData.email
+
+    // Only update if values have changed to avoid unnecessary resets
+    if (currentPhone !== expectedPhone || currentEmail !== expectedEmail) {
+      const formValues = getValues()
+      reset({
+        ...formValues,
+        phone: expectedPhone,
+        email: expectedEmail,
+      })
+    }
+  }, [
+    companyData.telefone.ddd,
+    companyData.telefone.valor,
+    companyData.email,
+    currentPhone,
+    currentEmail,
+    reset,
+    getValues,
+  ])
+
+  const navigateToStep = useCallback(
+    (step: Step) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (step === 'value') {
+        params.delete('step')
+      } else {
+        params.set('step', step)
+      }
+      const queryString = params.toString()
+      router.push(queryString ? `?${queryString}` : window.location.pathname, {
+        scroll: false,
+      })
+    },
+    [router, searchParams]
+  )
+
+  const handleBack = useCallback(() => {
+    if (currentStepIndex === 0) {
+      router.push(`/servicos/mei/${slug}`)
+    } else {
+      navigateToStep(STEPS[currentStepIndex - 1])
+    }
+  }, [currentStepIndex, router, slug, navigateToStep])
+
+  const handleNext = useCallback(async () => {
+    if (currentStep === 'value') {
+      if (value > 0) {
+        navigateToStep('duration')
+      }
+    } else if (currentStep === 'duration') {
+      if (duration > 0) {
+        navigateToStep('review')
+      }
+    }
+  }, [currentStep, value, duration, navigateToStep])
+
+  const handleSubmit = useCallback(async () => {
+    const formData = getValues()
+
+    if (!formData.acceptedTerms) {
+      if (termsErrorTimeoutRef.current) {
+        clearTimeout(termsErrorTimeoutRef.current)
+      }
+      setShowTermsError(true)
+      termsErrorTimeoutRef.current = setTimeout(() => {
+        setShowTermsError(false)
+      }, 1000)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      let result
+
+      // Se há proposta existente, está em modo de edição (independente do parâmetro mode na URL)
+      if (existingProposal?.id) {
+        // Atualizar proposta existente
+        result = await updateMeiProposal({
+          oportunidadeId: Number(slug),
+          propostaId: existingProposal.id,
+          meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
+          valorProposta: formData.value,
+          prazoExecucaoDias: formData.duration,
+          aceitaCustosIntegrais: formData.acceptedTerms,
+          telefone: formData.phone,
+          email: formData.email,
+        })
+      } else {
+        // Criar nova proposta
+        result = await submitMeiProposal({
+          oportunidadeId: Number(slug),
+          meiEmpresaId: companyData.cnpj.replace(/\D/g, ''),
+          valorProposta: formData.value,
+          prazoExecucaoDias: formData.duration,
+          aceitaCustosIntegrais: formData.acceptedTerms,
+          telefone: formData.phone,
+          email: formData.email,
+        })
+      }
+
+      if (!result.success) {
+        console.error('[MEI Proposal] Error:', result.error)
+        toast.error(result.error || 'Erro ao enviar proposta')
+        return
+      }
+
+      // Clear the saved draft after successful submission
+      sessionStorage.removeItem(storageKey)
+
+      if (existingProposal?.id) {
+        toast.success('Proposta atualizada com sucesso')
+        router.push(`/servicos/mei/${slug}`)
+      } else {
+        sessionStorage.setItem('mei_proposal_submitted', 'true')
+        router.push(`/servicos/mei/${slug}/proposta/sucesso`)
+      }
+    } catch (error) {
+      console.error('[MEI Proposal] Error submitting:', error)
+      toast.error('Erro ao processar proposta')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [getValues, slug, router, companyData, storageKey, existingProposal])
+
+  const isButtonDisabled =
+    (currentStep === 'value' && value <= 0) ||
+    (currentStep === 'duration' && duration <= 0) ||
+    isSubmitting
+
+  const buttonText = currentStep === 'review' 
+    ? (existingProposal ? 'Atualizar proposta' : 'Enviar proposta')
+    : 'Continuar'
+
+  return (
+    <FormProvider {...form}>
+      <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
+        <div className="w-full max-w-xl mx-auto px-4 flex flex-col h-full">
+          {/* Header with back button */}
+          <div className="flex-shrink-0 pt-8 pb-4">
+            <CustomButton
+              className="bg-card text-muted-foreground rounded-full w-11! h-11! min-h-0! p-0! hover:bg-card/80 outline-none focus:ring-0"
+              onClick={handleBack}
+              disabled={isSubmitting}
+            >
+              <ChevronLeftIcon className="text-foreground" />
+            </CustomButton>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 flex flex-col overflow-hidden py-8">
+            {currentStep === 'value' && <ValueStep onNext={handleNext} />}
+            {currentStep === 'duration' && <DurationStep onNext={handleNext} />}
+            {currentStep === 'review' && (
+              <ReviewStep
+                companyData={companyData}
+                showTermsError={showTermsError}
+                slug={slug}
+                hasExistingProposal={!!existingProposal}
+              />
+            )}
+          </div>
+
+          {/* Footer with buttons */}
+          <div className="flex-shrink-0 pb-12">
+            {currentStep === 'review' ? (
+              <div className="flex gap-3">
+                <CustomButton
+                  variant="secondary"
+                  onClick={() => navigateToStep('value')}
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-full h-[46px]"
+                >
+                  Editar
+                </CustomButton>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className={`flex-1 rounded-full h-[46px] text-sm font-normal transition-all duration-200 ${
+                    !acceptedTerms || isSubmitting
+                      ? 'bg-card text-muted-foreground cursor-not-allowed'
+                      : 'bg-primary text-background hover:bg-primary/90'
+                  } ${isSubmitting ? 'opacity-50' : ''}`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+                      <span>{buttonText}</span>
+                    </div>
+                  ) : (
+                    buttonText
+                  )}
+                </button>
+              </div>
+            ) : (
+              <CustomButton
+                onClick={handleNext}
+                disabled={isButtonDisabled}
+                className={`w-full rounded-full h-[46px] ${
+                  isButtonDisabled
+                    ? 'bg-card text-muted-foreground'
+                    : 'bg-primary text-background'
+                }`}
+              >
+                {buttonText}
+              </CustomButton>
+            )}
+          </div>
+        </div>
+      </div>
+    </FormProvider>
+  )
+}

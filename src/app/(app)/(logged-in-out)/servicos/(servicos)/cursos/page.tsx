@@ -9,6 +9,8 @@ import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
 import { getDalCategorias } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
+export const dynamic = 'force-dynamic'
+
 // Type for the expected API response structure
 interface CoursesApiResponse {
   data: {
@@ -107,7 +109,6 @@ export default async function CoursesPage() {
         <CoursePageClient
           courses={sortedCourses}
           myCourses={myCourses}
-          userInfo={userInfo}
           categoryFilters={categoriesFilters}
         />
         <FloatNavigation />
@@ -119,7 +120,6 @@ export default async function CoursesPage() {
       <CoursePageClient
         courses={[]}
         myCourses={[]}
-        userInfo={userInfo}
         categoryFilters={[]}
       />
     )
