@@ -44,16 +44,21 @@ export default function ConfirmUserDataSlide({
     return trimmed !== '' && trimmed.toLowerCase() !== 'null'
   }
 
-  const hasEmail = hasValidEmail(userInfo.email)
-  const hasPhone = hasValidPhone(userInfo.phone)
-  const hasAddress = !!(
-    userInfo.address?.logradouro &&
-    isValidAddressValue(userInfo.address.logradouro) &&
-    userInfo.address?.bairro &&
-    isValidAddressValue(userInfo.address.bairro) &&
-    userInfo.address?.municipio &&
-    isValidAddressValue(userInfo.address.municipio)
-  )
+  // Consider contactUpdateStatus: if phone/email/address needs update, treat as invalid
+  const hasEmail =
+    !contactUpdateStatus?.emailNeedsUpdate && hasValidEmail(userInfo.email)
+  const hasPhone =
+    !contactUpdateStatus?.phoneNeedsUpdate && hasValidPhone(userInfo.phone)
+  const hasAddress =
+    !contactUpdateStatus?.addressNeedsUpdate &&
+    !!(
+      userInfo.address?.logradouro &&
+      isValidAddressValue(userInfo.address.logradouro) &&
+      userInfo.address?.bairro &&
+      isValidAddressValue(userInfo.address.bairro) &&
+      userInfo.address?.municipio &&
+      isValidAddressValue(userInfo.address.municipio)
+    )
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
