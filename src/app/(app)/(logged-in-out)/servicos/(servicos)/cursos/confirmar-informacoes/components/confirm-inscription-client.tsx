@@ -35,6 +35,7 @@ import {
 export type ContactUpdateStatus = {
   phoneNeedsUpdate: boolean
   emailNeedsUpdate: boolean
+  addressNeedsUpdate?: boolean
 }
 
 interface ConfirmInscriptionClientProps {
@@ -87,17 +88,22 @@ export function ConfirmInscriptionClient({
     return trimmed !== '' && trimmed.toLowerCase() !== 'null'
   }
 
-  // Check if user has email/phone - variable for reuse
-  const hasEmail = hasValidEmail(userInfo.email)
-  const hasPhone = hasValidPhone(userInfo.phone)
-  const hasAddress = !!(
-    userInfo.address?.logradouro &&
-    isValidAddressValue(userInfo.address.logradouro) &&
-    userInfo.address?.bairro &&
-    isValidAddressValue(userInfo.address.bairro) &&
-    userInfo.address?.municipio &&
-    isValidAddressValue(userInfo.address.municipio)
-  )
+  // Check if user has email/phone/address - variable for reuse
+  // Consider contactUpdateStatus: if phone/email/address needs update, treat as invalid
+  const hasEmail =
+    !contactUpdateStatus?.emailNeedsUpdate && hasValidEmail(userInfo.email)
+  const hasPhone =
+    !contactUpdateStatus?.phoneNeedsUpdate && hasValidPhone(userInfo.phone)
+  const hasAddress =
+    !contactUpdateStatus?.addressNeedsUpdate &&
+    !!(
+      userInfo.address?.logradouro &&
+      isValidAddressValue(userInfo.address.logradouro) &&
+      userInfo.address?.bairro &&
+      isValidAddressValue(userInfo.address.bairro) &&
+      userInfo.address?.municipio &&
+      isValidAddressValue(userInfo.address.municipio)
+    )
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar

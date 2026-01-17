@@ -1,7 +1,13 @@
 import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
-import { normalizeEmailData } from '@/helpers/email-data-helpers'
-import { normalizePhoneData } from '@/helpers/phone-data-helpers'
+import {
+  hasValidEmail,
+  normalizeEmailData,
+} from '@/helpers/email-data-helpers'
+import {
+  hasValidPhone,
+  normalizePhoneData,
+} from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
 import type {
   ModelsEmailPrincipal,
@@ -102,6 +108,18 @@ export default async function ConfirmInscriptionPage({
     raca: userInfo.raca,
   }
 
+  // Helper to check if a value is valid (not null, undefined, empty string, or "null" string)
+  const isValidValue = (value: string | null | undefined): boolean => {
+    if (!value || value === null || value === undefined) return false
+    const trimmed = String(value).trim()
+    return trimmed !== '' && trimmed.toLowerCase() !== 'null'
+  }
+
+  // Helper to check if address is valid
+  const isValidAddressValue = (value: string | null | undefined): boolean => {
+    return isValidValue(value)
+  }
+
   const phoneNeedsUpdate = !isUpdatedWithin({
     updatedAt:
       (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
@@ -116,34 +134,47 @@ export default async function ConfirmInscriptionPage({
     months: 6, // Email must be updated every 6 months
   })
 
-  // Check if phone, email, and address are outdated (more than 6 months old)
-  // The confirmation screen should only show if at least one is outdated
-  const phoneOutdated = !isUpdatedWithin({
-    updatedAt:
-      (transformedUserInfo.phone.principal as ModelsTelefonePrincipal)
-        ?.updated_at || null,
-    months: 6, // Check if updated within 6 months
-  })
-
-  const emailOutdated = !isUpdatedWithin({
-    updatedAt:
-      (transformedUserInfo.email.principal as ModelsEmailPrincipal)
-        ?.updated_at || null,
-    months: 6, // Check if updated within 6 months
-  })
-
-  const addressOutdated = !isUpdatedWithin({
+  const addressNeedsUpdate = !isUpdatedWithin({
     updatedAt: userInfo.endereco?.principal?.updated_at || null,
-    months: 6, // Check if updated within 6 months
+    months: 6, // Address must be updated every 6 months
   })
 
-  // Show confirmation screen only if at least one field is outdated
+  // Check if required fields are filled and up-to-date
+  const hasValidPhoneField =
+    !phoneNeedsUpdate && hasValidPhone(transformedUserInfo.phone)
+
+  const hasValidEmailField =
+    !emailNeedsUpdate && hasValidEmail(transformedUserInfo.email)
+
+  const hasValidAddress =
+    !addressNeedsUpdate &&
+    transformedUserInfo.address?.logradouro &&
+    isValidAddressValue(transformedUserInfo.address.logradouro) &&
+    transformedUserInfo.address?.bairro &&
+    isValidAddressValue(transformedUserInfo.address.bairro) &&
+    transformedUserInfo.address?.municipio &&
+    isValidAddressValue(transformedUserInfo.address.municipio)
+
+  // Check if optional fields are filled
+  const hasGender = isValidValue(transformedUserInfo.genero)
+  const hasEducation = isValidValue(transformedUserInfo.escolaridade)
+  const hasFamilyIncome = isValidValue(transformedUserInfo.renda_familiar)
+  const hasDisability = isValidValue(transformedUserInfo.deficiencia)
+
+  // Show confirmation screen if ANY field (required or optional) is missing
   const shouldShowConfirmationScreen =
-    phoneOutdated || emailOutdated || addressOutdated
+    !hasValidPhoneField ||
+    !hasValidEmailField ||
+    !hasValidAddress ||
+    !hasGender ||
+    !hasEducation ||
+    !hasFamilyIncome ||
+    !hasDisability
 
   const contactUpdateStatus = {
     phoneNeedsUpdate,
     emailNeedsUpdate,
+    addressNeedsUpdate,
   }
 
   const courseData = (courseInfo as any).data
