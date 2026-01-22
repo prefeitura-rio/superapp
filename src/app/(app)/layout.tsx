@@ -18,6 +18,7 @@ export default async function AppLayout({
   if (userInfo.cpf) {
     try {
       const response = await getDalCitizenCpfFirstlogin(userInfo.cpf)
+
       if (response.status === 200) {
         firstLogin = response.data?.firstlogin ?? false
       } else {
