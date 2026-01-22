@@ -88,19 +88,23 @@ export async function middleware(request: NextRequest) {
 
       // TEMPORARY: Block access to "mei" routes when feature flag is enabled
       // TODO: Remove this block once the feature is ready
-      if (
-        path.includes('mei') &&
-        process.env.NEXT_PUBLIC_FEATURE_FLAG === 'true'
-      ) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/not-found'
+      // Only block routes where "mei" is a complete path segment (e.g., /mei, /servicos/mei, /mei/qualquercoisa)
+      // This prevents blocking routes like "meio ambiente" which contains "mei" as a substring
+      if (process.env.NEXT_PUBLIC_FEATURE_FLAG === 'true') {
+        const pathSegments = path.split('/').filter(Boolean) // Split path and remove empty strings
+        const hasMeiSegment = pathSegments.some(segment => segment === 'mei')
 
-        const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
-        return response
+        if (hasMeiSegment) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/not-found'
+
+          const response = NextResponse.rewrite(url)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          return response
+        }
       }
 
       const publicRoute = publicRoutes.find(route =>
