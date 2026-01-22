@@ -14,7 +14,6 @@ export default async function AppLayout({
   const userInfo = await getUserInfoFromToken()
 
   let firstLogin = false
-
   if (userInfo.cpf) {
     try {
       const response = await getDalCitizenCpfFirstlogin(userInfo.cpf)
