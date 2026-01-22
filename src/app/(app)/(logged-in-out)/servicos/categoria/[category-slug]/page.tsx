@@ -21,14 +21,41 @@ export default async function CategoryPage({
   params: Promise<{ 'category-slug': string }>
 }) {
   const { 'category-slug': categorySlug } = await params
-  const categoryName = await getCategoryNameBySlug(categorySlug)
 
-  // Fetch services data from API
-  const servicesData = await fetchServicesByCategory(categorySlug)
+  // Decode the category slug to handle URL encoding (e.g., "meio%20ambiente" -> "meio ambiente")
+  const decodedSlug = decodeURIComponent(categorySlug)
 
-  // Fetch subcategories data from API
-  const subcategoriesResponse = await fetchSubcategoriesByCategory(categoryName)
-  const subcategories = subcategoriesResponse?.subcategories || []
+  // Safely fetch category name with error handling
+  let categoryName = decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
+  try {
+    const fetchedCategoryName = await getCategoryNameBySlug(decodedSlug)
+    if (fetchedCategoryName) {
+      categoryName = fetchedCategoryName
+    }
+  } catch (error) {
+    console.error('Error fetching category name:', error)
+    // Continue with fallback category name
+  }
+
+  // Safely fetch services data from API with error handling
+  let servicesData = null
+  try {
+    servicesData = await fetchServicesByCategory(decodedSlug)
+  } catch (error) {
+    console.error('Error fetching services by category:', error)
+    // Continue with null - will show empty state
+  }
+
+  // Safely fetch subcategories data from API with error handling
+  let subcategories: any[] = []
+  try {
+    const subcategoriesResponse =
+      await fetchSubcategoriesByCategory(categoryName)
+    subcategories = subcategoriesResponse?.subcategories || []
+  } catch (error) {
+    console.error('Error fetching subcategories:', error)
+    // Continue with empty array
+  }
 
   // Extract services from the response
   const servicesDocuments = servicesData?.filtered_category?.services || []
@@ -45,7 +72,7 @@ export default async function CategoryPage({
     .slice(0, 4)
     .map(service => ({
       id: service.id!,
-      href: `/servicos/categoria/${categorySlug}/${service.slug}`,
+      href: `/servicos/categoria/${encodeURIComponent(decodedSlug)}/${service.slug}`,
       icon: '',
       title: service.title!,
       description: service.description!,
@@ -96,7 +123,7 @@ export default async function CategoryPage({
                         }}
                       >
                         <div className="w-full">
-                          <h3 className="text-sm line-clamp-5 font-normal leading-4.5 break-words text-white">
+                          <h3 className="text-sm line-clamp-5 font-normal leading-4.5 wrap-break-word text-white">
                             {service.title}
                           </h3>
                         </div>
@@ -105,7 +132,7 @@ export default async function CategoryPage({
                   )
                 })}
                 {/* Spacer to ensure padding at the end */}
-                <div className="flex-shrink-0 sm:hidden w-2" />
+                <div className="shrink-0 sm:hidden w-2" />
               </div>
             </div>
           </>
@@ -124,7 +151,7 @@ export default async function CategoryPage({
         {/* Subcategories Accordion */}
         {subcategories.length > 0 && (
           <CategorySubcategoriesAccordion
-            categorySlug={categorySlug}
+            categorySlug={decodedSlug}
             categoryName={categoryName}
             subcategories={subcategories}
           />

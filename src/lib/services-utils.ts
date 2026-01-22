@@ -12,14 +12,28 @@ import { fetchCategories } from './categories'
 export async function getCategoryNameBySlug(
   categorySlug: string
 ): Promise<string> {
-  // Decode the URL-encoded category slug
-  const decodedSlug = decodeURIComponent(categorySlug)
+  try {
+    // Decode the URL-encoded category slug
+    const decodedSlug = decodeURIComponent(categorySlug)
 
-  const categories = await fetchCategories()
-  const category = categories.find(cat => cat.categorySlug === decodedSlug)
-  return (
-    category?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
-  )
+    const categories = await fetchCategories()
+    const category = categories.find(cat => cat.categorySlug === decodedSlug)
+    return (
+      category?.name ||
+      decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
+    )
+  } catch (error) {
+    // If there's any error (e.g., decodeURIComponent fails, fetchCategories fails),
+    // return a fallback based on the original slug
+    console.error('Error in getCategoryNameBySlug:', error)
+    try {
+      const decodedSlug = decodeURIComponent(categorySlug)
+      return decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
+    } catch {
+      // If decodeURIComponent also fails, use the original slug as-is
+      return categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
+    }
+  }
 }
 
 export interface ServicesByCategoryResponse {
@@ -30,8 +44,14 @@ export async function fetchServicesByCategory(
   categorySlug: string
 ): Promise<ServicesByCategoryResponse | null> {
   try {
-    // Decode the URL-encoded category slug
-    const decodedSlug = decodeURIComponent(categorySlug)
+    // Decode the URL-encoded category slug with error handling
+    let decodedSlug: string
+    try {
+      decodedSlug = decodeURIComponent(categorySlug)
+    } catch {
+      // If decodeURIComponent fails, use the original slug
+      decodedSlug = categorySlug
+    }
 
     // First, get the category name from the slug
     const categoryName = await getCategoryNameBySlug(decodedSlug)
