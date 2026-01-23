@@ -194,7 +194,7 @@ export const putApiV1OportunidadesMeiIdPropostasStatus = async (
 }
 
 /**
- * Retorna uma proposta MEI pelo seu ID
+ * Retorna uma proposta MEI pelo seu ID. Requer que o usuário seja dono do CNPJ ou tenha permissões de leitura.
  * @summary Obter proposta MEI por ID
  */
 export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse200 = {
@@ -205,6 +205,11 @@ export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse200 = {
 export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse400 = {
   data: ModelsErrorResponse
   status: 400
+}
+
+export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse403 = {
+  data: ModelsErrorResponse
+  status: 403
 }
 
 export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse404 = {
@@ -220,6 +225,7 @@ export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponse500 = {
 export type getApiV1OportunidadesMeiIdPropostasPropostaIdResponseComposite =
   | getApiV1OportunidadesMeiIdPropostasPropostaIdResponse200
   | getApiV1OportunidadesMeiIdPropostasPropostaIdResponse400
+  | getApiV1OportunidadesMeiIdPropostasPropostaIdResponse403
   | getApiV1OportunidadesMeiIdPropostasPropostaIdResponse404
   | getApiV1OportunidadesMeiIdPropostasPropostaIdResponse500
 
@@ -250,7 +256,7 @@ export const getApiV1OportunidadesMeiIdPropostasPropostaId = async (
 }
 
 /**
- * Atualiza os dados de uma proposta MEI existente
+ * Atualiza os dados de uma proposta MEI existente. Requer que o usuário seja o dono da proposta ou tenha uma das permissões configuradas.
  * @summary Atualizar proposta MEI
  */
 export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse200 = {
@@ -261,6 +267,11 @@ export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse200 = {
 export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse400 = {
   data: ModelsErrorResponse
   status: 400
+}
+
+export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse403 = {
+  data: ModelsErrorResponse
+  status: 403
 }
 
 export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse404 = {
@@ -276,6 +287,7 @@ export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponse500 = {
 export type putApiV1OportunidadesMeiIdPropostasPropostaIdResponseComposite =
   | putApiV1OportunidadesMeiIdPropostasPropostaIdResponse200
   | putApiV1OportunidadesMeiIdPropostasPropostaIdResponse400
+  | putApiV1OportunidadesMeiIdPropostasPropostaIdResponse403
   | putApiV1OportunidadesMeiIdPropostasPropostaIdResponse404
   | putApiV1OportunidadesMeiIdPropostasPropostaIdResponse500
 
@@ -309,7 +321,7 @@ export const putApiV1OportunidadesMeiIdPropostasPropostaId = async (
 }
 
 /**
- * Remove uma proposta MEI pelo ID (soft delete)
+ * Remove uma proposta MEI pelo ID (soft delete). Requer que o usuário seja o dono da proposta ou tenha uma das permissões configuradas.
  * @summary Excluir proposta MEI
  */
 export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse200 = {
@@ -322,6 +334,16 @@ export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse400 = {
   status: 400
 }
 
+export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse403 = {
+  data: ModelsErrorResponse
+  status: 403
+}
+
+export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse404 = {
+  data: ModelsErrorResponse
+  status: 404
+}
+
 export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse500 = {
   data: ModelsErrorResponse
   status: 500
@@ -330,6 +352,8 @@ export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse500 = {
 export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponseComposite =
   | deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse200
   | deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse400
+  | deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse403
+  | deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse404
   | deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse500
 
 export type deleteApiV1OportunidadesMeiIdPropostasPropostaIdResponse =
