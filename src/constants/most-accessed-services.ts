@@ -12,7 +12,7 @@ export const MOST_ACCESSED_SERVICES = [
     id: 'iptu',
     href: '/servicos/categoria/taxas/iptu-2025-94ff5567',
     icon: iptuIcon,
-    title: 'IPTU 2025',
+    title: 'IPTU 2026',
     description: 'Pague no PIX',
   },
   {

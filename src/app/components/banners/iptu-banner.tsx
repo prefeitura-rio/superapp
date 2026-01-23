@@ -23,7 +23,7 @@ export const IptuBanner = ({
       subtitle={subtitle}
       color="#407137"
       route={route}
-      badge="IPTU 2025"
+      badge="IPTU 2026"
       onBannerClick={onBannerClick}
       image={
         <Image
