@@ -10,8 +10,11 @@ import type { ModelsPropostaMEIStatusCidadao } from './modelsPropostaMEIStatusCi
 
 export interface ModelsPropostaMEI {
   aceita_custos_integrais?: boolean
+  celular_pessoa_fisica?: string
   created_at?: string
   deleted_at?: string
+  /** Computed fields from RMI API (not persisted to database) */
+  email_pessoa_fisica?: string
   id?: string
   mei_empresa_id?: string
   oportunidade_mei_id?: number
