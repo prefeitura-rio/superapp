@@ -19,8 +19,10 @@ import { SuccessSlide } from './slides/success-slide'
 
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
-import { hasValidEmail } from '@/helpers/email-data-helpers'
-import { hasValidPhone } from '@/helpers/phone-data-helpers'
+import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
+import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
+import { calculateAge } from '@/lib/calculate-age'
+import { formatAddressComplete } from '@/lib/format-address-complete'
 import {
   type CourseUserInfo,
   type CustomField,
@@ -198,8 +200,9 @@ export function ConfirmInscriptionClient({
   const getInitialScheduleId = () => {
     if (initialUnit && initialUnit.schedules) {
       // Filter available schedules (with remaining_vacancies > 0)
-      const availableSchedules =
-        initialUnit.schedules.filter(isScheduleAvailable)
+      const availableSchedules = initialUnit.schedules.filter(
+        isScheduleAvailable
+      )
       if (availableSchedules.length === 1) {
         return availableSchedules[0].id
       }
@@ -220,10 +223,7 @@ export function ConfirmInscriptionClient({
       }
     }
     // Otherwise, if there's only one available online class, automatically select it
-    if (
-      availableOnlineClasses.length === 1 &&
-      isClassAvailable(availableOnlineClasses[0])
-    ) {
+    if (availableOnlineClasses.length === 1 && isClassAvailable(availableOnlineClasses[0])) {
       return availableOnlineClasses[0].id
     }
     // If multiple classes, start with empty (user must select)
@@ -597,8 +597,9 @@ export function ConfirmInscriptionClient({
             finalScheduleId = availableOnlineClasses[0].id
           } else if (selectedUnit && selectedUnit.schedules) {
             // Filter available schedules (with remaining_vacancies > 0)
-            const availableSchedules =
-              selectedUnit.schedules.filter(isScheduleAvailable)
+            const availableSchedules = selectedUnit.schedules.filter(
+              isScheduleAvailable
+            )
             if (availableSchedules.length === 1) {
               // Auto-select if only one available schedule in selected unit
               finalScheduleId = availableSchedules[0].id
@@ -639,10 +640,8 @@ export function ConfirmInscriptionClient({
           userInfo: {
             cpf: userAuthInfo.cpf,
             name: userAuthInfo.name,
-            // Email and phone are automatically populated by the backend via personal_info
-            // so we don't need to send them
-            // Send birth date for age calculation (fallback when RMI doesn't have data_nascimento)
-            birthDate: userInfo.nascimento?.data,
+            email: getEmailValue(userInfo.email),
+            phone: getPhoneValue(userInfo.phone),
           },
           unitId: hasUnits && formData.unitId ? formData.unitId : undefined,
           scheduleId: finalScheduleId,
@@ -650,59 +649,112 @@ export function ConfirmInscriptionClient({
             hasUnits && formData.unitId
               ? nearbyUnits.find(unit => unit.id === formData.unitId)
               : undefined,
-          customFields:
-            customFields.length > 0
-              ? {
-                  // Only include course-specific custom fields (not personal info)
-                  // Personal info (idade, endereco, bairro, cidade, estado, pessoa_com_deficiencia,
-                  // raca, genero, renda_familiar, escolaridade) is now automatically populated
-                  // by the backend via the personal_info field
-                  ...customFields.reduce(
-                    (acc, field) => {
-                      const fieldValue =
-                        formData[
-                          `custom_${field.id}` as keyof InscriptionFormData
-                        ]
-                      let value: string
+          customFields: {
+            // Add custom fields from form
+            ...customFields.reduce(
+              (acc, field) => {
+                const fieldValue =
+                  formData[`custom_${field.id}` as keyof InscriptionFormData]
+                let value: string
 
-                      if (field.field_type === 'text') {
-                        // For text, use the value directly
-                        value = (fieldValue as string) || ''
-                      } else if (field.field_type === 'multiselect') {
-                        // For multiselect, map IDs to values and join
-                        if (Array.isArray(fieldValue)) {
-                          const selectedOptions = fieldValue
-                            .map(
-                              selectedId =>
-                                field.options?.find(
-                                  option => option.id === selectedId
-                                )?.value
-                            )
-                            .filter(Boolean)
-                          value = selectedOptions.join(', ')
-                        } else {
-                          value = ''
-                        }
-                      } else {
-                        // For radio and select, map ID to value
-                        const selectedOption = field.options?.find(
-                          option => option.id === fieldValue
-                        )
-                        value = selectedOption?.value || ''
-                      }
-
-                      acc[field.id] = {
-                        id: field.id,
-                        title: field.title,
-                        value,
-                        required: field.required,
-                      }
-                      return acc
-                    },
-                    {} as Record<string, unknown>
-                  ),
+                if (field.field_type === 'text') {
+                  // For text, use the value directly
+                  value = (fieldValue as string) || ''
+                } else if (field.field_type === 'multiselect') {
+                  // For multiselect, map IDs to values and join
+                  if (Array.isArray(fieldValue)) {
+                    const selectedOptions = fieldValue
+                      .map(
+                        selectedId =>
+                          field.options?.find(
+                            option => option.id === selectedId
+                          )?.value
+                      )
+                      .filter(Boolean)
+                    value = selectedOptions.join(', ')
+                  } else {
+                    value = ''
+                  }
+                } else {
+                  // For radio and select, map ID to value
+                  const selectedOption = field.options?.find(
+                    option => option.id === fieldValue
+                  )
+                  value = selectedOption?.value || ''
                 }
-              : undefined,
+
+                acc[field.id] = {
+                  id: field.id,
+                  title: field.title,
+                  value,
+                  required: field.required,
+                }
+                return acc
+              },
+              {} as Record<string, unknown>
+            ),
+            // Add complementary information
+            idade: {
+              id: 'idade',
+              title: 'Idade',
+              value: calculateAge(userInfo.nascimento?.data)?.toString() || '',
+              required: false,
+            },
+            endereco: {
+              id: 'endereco',
+              title: 'Endereço',
+              value: formatAddressComplete(userInfo.address),
+              required: false,
+            },
+            bairro: {
+              id: 'bairro',
+              title: 'Bairro',
+              value: userInfo.address?.bairro || '',
+              required: false,
+            },
+            cidade: {
+              id: 'cidade',
+              title: 'Cidade',
+              value: userInfo.address?.municipio || '',
+              required: false,
+            },
+            estado: {
+              id: 'estado',
+              title: 'Estado',
+              value: userInfo.address?.estado || '',
+              required: false,
+            },
+            pessoa_com_deficiencia: {
+              id: 'pessoa_com_deficiencia',
+              title: 'Pessoa com deficiência',
+              value: userInfo.deficiencia || '',
+              required: false,
+            },
+            raca: {
+              id: 'raca',
+              title: 'Raça',
+              value: userInfo.raca || '',
+              required: false,
+            },
+            genero: {
+              id: 'genero',
+              title: 'Gênero',
+              value: userInfo.genero || '',
+              required: false,
+            },
+            renda_familiar: {
+              id: 'renda_familiar',
+              title: 'Renda familiar',
+              value: userInfo.renda_familiar || '',
+              required: false,
+            },
+            escolaridade: {
+              id: 'escolaridade',
+              title: 'Escolaridade',
+              value: userInfo.escolaridade || '',
+              required: false,
+            },
+          },
           reason:
             formData.description ||
             'Inscrição realizada através do portal do cidadão',
