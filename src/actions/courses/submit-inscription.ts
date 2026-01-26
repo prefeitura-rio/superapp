@@ -3,7 +3,6 @@
 import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao'
 import type { ModelsInscricaoCustomFields } from '@/http-courses/models/modelsInscricaoCustomFields'
-import { calculateAge } from '@/lib/calculate-age'
 import { revalidateDalCourseEnrollment } from '@/lib/dal'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -17,12 +16,8 @@ interface SubmitInscriptionData {
   userInfo: {
     cpf: string
     name: string
-    // Email and phone are no longer sent to the API as they are automatically
-    // populated by the backend via the personal_info field from CitizenSnapshot
     email?: string
     phone?: string
-    // Birth date for age calculation (optional - comes from nascimento.data)
-    birthDate?: string
   }
   unitId?: string
   scheduleId?: string
@@ -57,28 +52,26 @@ export async function submitCourseInscription(
   error?: string
 }> {
   try {
-    // Calculate age from birth date if available
-    // This serves as a fallback when RMI doesn't have data_nascimento
-    const age = calculateAge(data.userInfo.birthDate)
+    // Format the phone number if it exists
+    let formattedPhone: string | undefined
+    if (data.userInfo.phone) {
+      // Assuming phone is already formatted from the UI
+      formattedPhone = data.userInfo.phone
+    }
 
     // Create the inscription payload according to ModelsInscricao
     // For online courses without units, we should not send empty schedule_id or enrolled_unit
-    // Email and phone are automatically populated by the backend via the personal_info field
-    // from CitizenSnapshot, so we don't need to send them
     const inscriptionPayload: ModelsInscricao = {
       id: uuidv4(),
       course_id: Number.parseInt(data.courseId),
       cpf: data.userInfo.cpf,
       name: data.userInfo.name,
+      email: data.userInfo.email,
+      phone: formattedPhone,
       reason: data.reason || '',
       enrolled_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      // Include age if calculated successfully (fallback for when RMI doesn't have data_nascimento)
-      ...(age !== null && { age }),
-      // Only include custom_fields if they exist (course-specific fields only)
-      // Personal info (email, phone, idade, endereco, bairro, etc.) is automatically populated
-      // by the backend via the personal_info field from CitizenSnapshot
-      ...(data.customFields && { custom_fields: data.customFields }),
+      custom_fields: data.customFields,
       // Only include enrolled_unit if it exists (for presencial/semipresencial courses)
       ...(data.enrolledUnit && { enrolled_unit: data.enrolledUnit }),
       // Only include schedule_id if it has a valid value (not empty string)
@@ -86,10 +79,7 @@ export async function submitCourseInscription(
         data.scheduleId.trim() !== '' && { schedule_id: data.scheduleId }),
     }
 
-    console.log('[Course Enrollment] 📦 Payload being sent to backend:', {
-      ...inscriptionPayload,
-      cpf: `${inscriptionPayload.cpf?.slice(0, 3)}***${inscriptionPayload.cpf?.slice(-2)}`, // Mask CPF for security
-    })
+    console.log('Submitting inscription with payload:', inscriptionPayload)
 
     // Submit to the API
     const response = await postApiV1CoursesCourseIdEnrollments(
