@@ -641,6 +641,8 @@ export function ConfirmInscriptionClient({
             name: userAuthInfo.name,
             // Email and phone are automatically populated by the backend via personal_info
             // so we don't need to send them
+            // Send birth date for age calculation (fallback when RMI doesn't have data_nascimento)
+            birthDate: userInfo.nascimento?.data,
           },
           unitId: hasUnits && formData.unitId ? formData.unitId : undefined,
           scheduleId: finalScheduleId,
