@@ -3,6 +3,7 @@
 import { postApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { ModelsInscricao } from '@/http-courses/models/modelsInscricao'
 import type { ModelsInscricaoCustomFields } from '@/http-courses/models/modelsInscricaoCustomFields'
+import { calculateAge } from '@/lib/calculate-age'
 import { revalidateDalCourseEnrollment } from '@/lib/dal'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -18,6 +19,7 @@ interface SubmitInscriptionData {
     name: string
     email?: string
     phone?: string
+    birthDate?: string
   }
   unitId?: string
   scheduleId?: string
@@ -59,6 +61,9 @@ export async function submitCourseInscription(
       formattedPhone = data.userInfo.phone
     }
 
+    // Calculate age from birth date if available
+    const age = calculateAge(data.userInfo.birthDate)
+
     // Create the inscription payload according to ModelsInscricao
     // For online courses without units, we should not send empty schedule_id or enrolled_unit
     const inscriptionPayload: ModelsInscricao = {
@@ -72,6 +77,8 @@ export async function submitCourseInscription(
       enrolled_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       custom_fields: data.customFields,
+      // Only include age if it was successfully calculated
+      ...(age !== null && { age }),
       // Only include enrolled_unit if it exists (for presencial/semipresencial courses)
       ...(data.enrolledUnit && { enrolled_unit: data.enrolledUnit }),
       // Only include schedule_id if it has a valid value (not empty string)

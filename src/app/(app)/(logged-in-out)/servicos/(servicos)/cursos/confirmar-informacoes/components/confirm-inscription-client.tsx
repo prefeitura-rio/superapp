@@ -642,6 +642,7 @@ export function ConfirmInscriptionClient({
             name: userAuthInfo.name,
             email: getEmailValue(userInfo.email),
             phone: getPhoneValue(userInfo.phone),
+            birthDate: userInfo.nascimento?.data,
           },
           unitId: hasUnits && formData.unitId ? formData.unitId : undefined,
           scheduleId: finalScheduleId,
