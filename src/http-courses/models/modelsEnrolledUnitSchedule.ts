@@ -14,7 +14,6 @@ export interface ModelsEnrolledUnitSchedule {
   created_at?: string
   id?: string
   location_id?: string
-  remaining_vacancies?: number
   updated_at?: string
   vacancies?: number
 }
