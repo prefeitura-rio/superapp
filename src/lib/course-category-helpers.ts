@@ -17,6 +17,7 @@ import gestaoImage from '@/assets/course-categories/gestao.png'
 import iaImage from '@/assets/course-categories/ia.png'
 import marketingImage from '@/assets/course-categories/marketing.png'
 import nutricaoImage from '@/assets/course-categories/nutricao.png'
+import rioDoFuturoImage from '@/assets/course-categories/rio-do-futuro.png'
 import saudeImage from '@/assets/course-categories/saude.png'
 import sustentabilidadeImage from '@/assets/course-categories/sustentabilidade.png'
 import tecnologiaImage from '@/assets/course-categories/tecnologia.png'
@@ -61,6 +62,14 @@ const CATEGORY_IMAGE_MAP: Record<number, StaticImageData | string> = {
 }
 
 /**
+ * Maps category names to imported image modules
+ * Used for categories that might not have a fixed ID
+ */
+const CATEGORY_NAME_IMAGE_MAP: Record<string, StaticImageData | string> = {
+  'rio do futuro': rioDoFuturoImage,
+}
+
+/**
  * Transforms API categories into filter format for the UI
  * @param categories - Array of categories from the API
  * @returns Array of category filters with label, value (slug), and image path
@@ -68,16 +77,19 @@ const CATEGORY_IMAGE_MAP: Record<number, StaticImageData | string> = {
 export function transformCategoriesToFilters(
   categories: ModelsCategoria[]
 ): CategoryFilter[] {
-  return categories
+  const filters = categories
     .filter(category => category.nome && category.id)
     .map(category => {
       const nome = category.nome || ''
       const slug = slugify(nome)
       const categoryId = category.id!
 
-      // Use mapped image if available, otherwise undefined
-      // Categories without images won't display an image
-      const imagePath = CATEGORY_IMAGE_MAP[categoryId]
+      // Use mapped image by ID first, then by name (case-insensitive)
+      let imagePath = CATEGORY_IMAGE_MAP[categoryId]
+      if (!imagePath) {
+        const normalizedName = nome.toLowerCase().trim()
+        imagePath = CATEGORY_NAME_IMAGE_MAP[normalizedName]
+      }
 
       return {
         label: nome,
@@ -86,7 +98,17 @@ export function transformCategoriesToFilters(
         id: categoryId,
       }
     })
-    .sort((a, b) => a.label.localeCompare(b.label)) // Sort alphabetically by label
+
+  // Separate "Rio do Futuro" category from others (check by name, case-insensitive)
+  const rioDoFuturo = filters.find(cat =>
+    cat.label.toLowerCase().trim() === 'rio do futuro'
+  )
+  const otherCategories = filters
+    .filter(cat => cat.label.toLowerCase().trim() !== 'rio do futuro')
+    .sort((a, b) => a.label.localeCompare(b.label)) // Sort alphabetically
+
+  // Return with "Rio do Futuro" first, followed by alphabetically sorted categories
+  return rioDoFuturo ? [rioDoFuturo, ...otherCategories] : otherCategories
 }
 
 /**
