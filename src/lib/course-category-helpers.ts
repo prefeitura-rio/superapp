@@ -17,7 +17,6 @@ import gestaoImage from '@/assets/course-categories/gestao.png'
 import iaImage from '@/assets/course-categories/ia.png'
 import marketingImage from '@/assets/course-categories/marketing.png'
 import nutricaoImage from '@/assets/course-categories/nutricao.png'
-import rioDoFuturoImage from '@/assets/course-categories/rio-do-futuro.png'
 import saudeImage from '@/assets/course-categories/saude.png'
 import sustentabilidadeImage from '@/assets/course-categories/sustentabilidade.png'
 import tecnologiaImage from '@/assets/course-categories/tecnologia.png'
@@ -65,9 +64,7 @@ const CATEGORY_IMAGE_MAP: Record<number, StaticImageData | string> = {
  * Maps category names to imported image modules
  * Used for categories that might not have a fixed ID
  */
-const CATEGORY_NAME_IMAGE_MAP: Record<string, StaticImageData | string> = {
-  'rio do futuro': rioDoFuturoImage,
-}
+const CATEGORY_NAME_IMAGE_MAP: Record<string, StaticImageData | string> = {}
 
 /**
  * Transforms API categories into filter format for the UI
@@ -99,16 +96,7 @@ export function transformCategoriesToFilters(
       }
     })
 
-  // Separate "Rio do Futuro" category from others (check by name, case-insensitive)
-  const rioDoFuturo = filters.find(cat =>
-    cat.label.toLowerCase().trim() === 'rio do futuro'
-  )
-  const otherCategories = filters
-    .filter(cat => cat.label.toLowerCase().trim() !== 'rio do futuro')
-    .sort((a, b) => a.label.localeCompare(b.label)) // Sort alphabetically
-
-  // Return with "Rio do Futuro" first, followed by alphabetically sorted categories
-  return rioDoFuturo ? [rioDoFuturo, ...otherCategories] : otherCategories
+  return filters.sort((a, b) => a.label.localeCompare(b.label))
 }
 
 /**
