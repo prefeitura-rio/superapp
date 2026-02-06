@@ -39,6 +39,10 @@ const getHeaders = async (headers?: HeadersInit): Promise<HeadersInit> => {
   const cookieStore = await cookies()
   const access_token = cookieStore.get('access_token')?.value
 
+  if (!access_token) {
+    console.warn('[CUSTOM_FETCH_COURSES] No access token found in cookies')
+  }
+
   // Check if Content-Type is already set in headers
   const hasContentType =
     headers && typeof headers === 'object' && 'Content-Type' in headers
