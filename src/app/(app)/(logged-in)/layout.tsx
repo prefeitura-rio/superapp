@@ -1,11 +1,15 @@
+import { TokenRefreshProvider } from '@/components/token-refresh-provider'
+
 export default async function PrivateLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <div>
-      <main>{children}</main>
-    </div>
+    <TokenRefreshProvider>
+      <div>
+        <main>{children}</main>
+      </div>
+    </TokenRefreshProvider>
   )
 }
