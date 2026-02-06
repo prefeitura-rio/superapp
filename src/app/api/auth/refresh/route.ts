@@ -13,6 +13,11 @@ import {
  * POST /api/auth/refresh
  * Response: { success: true } | { error: string }
  */
+
+// Disable Next.js caching - auth endpoints must always return fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies()
@@ -47,6 +52,14 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Token refreshed successfully',
     })
+
+    // Anti-cache headers - prevent browser/CDN from caching auth responses
+    response.headers.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, proxy-revalidate'
+    )
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
 
     response.cookies.set(
       'access_token',

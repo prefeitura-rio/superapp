@@ -17,7 +17,10 @@ export function useTokenRefresh(intervalMinutes: number = 5) {
     const checkAndRefresh = async () => {
       try {
         // Verifica se usuário ainda está logado
-        const statusResponse = await fetch('/api/user/auth-status')
+        // IMPORTANTE: cache: 'no-store' previne Next.js de cachear resposta
+        const statusResponse = await fetch('/api/user/auth-status', {
+          cache: 'no-store',
+        })
         const statusData = await statusResponse.json()
 
         if (!statusData.isLoggedIn) {
@@ -30,9 +33,16 @@ export function useTokenRefresh(intervalMinutes: number = 5) {
 
         // Força refresh preventivo
         // O backend decide se é necessário refresh baseado no tempo restante
-        await fetch('/api/auth/refresh', { method: 'POST' })
+        // IMPORTANTE: cache: 'no-store' previne Next.js de cachear resposta
+        await fetch('/api/auth/refresh', {
+          method: 'POST',
+          cache: 'no-store',
+        })
       } catch (error) {
-        console.error('[useTokenRefresh] Error during token refresh check', error)
+        console.error(
+          '[useTokenRefresh] Error during token refresh check',
+          error
+        )
       }
     }
 
