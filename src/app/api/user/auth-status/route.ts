@@ -1,6 +1,10 @@
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
 
+// Disable Next.js caching - auth endpoints must always return fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const userAuthInfo = await getUserInfoFromToken()
