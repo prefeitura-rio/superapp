@@ -34,11 +34,11 @@ export function CustomFieldSlide({
     const maxCharacters = 50
 
     return (
-      <div className="space-y-2 overflow-y-auto">
+      <div className="space-y-2">
         <Textarea
           {...register(fieldName)}
           placeholder="Escreva aqui ..."
-          className="w-full border-0 min-h-[48px] mt-10 border-b border-border rounded-none shadow-none
+          className="w-full border-0 min-h-[48px] border-b border-border rounded-none shadow-none
            bg-transparent resize-none px-0 py-2 leading-[1.5]
            placeholder:text-muted-foreground
            focus-visible:ring-0 focus-visible:border-primary"
@@ -48,15 +48,12 @@ export function CustomFieldSlide({
         <p className="text-muted-foreground text-sm">
           Limite de {maxCharacters} caracteres
         </p>
-        {error && (
-          <p className="text-destructive text-sm">{String(error.message)}</p>
-        )}
       </div>
     )
   }
 
   const renderRadioField = () => (
-    <div className="space-y-4 mt-10">
+    <div className="space-y-4">
       <Controller
         name={fieldName}
         control={control}
@@ -75,14 +72,11 @@ export function CustomFieldSlide({
           />
         )}
       />
-      {error && (
-        <p className="text-destructive text-sm">{String(error.message)}</p>
-      )}
     </div>
   )
 
   const renderSelectField = () => (
-    <div className="space-y-4 mt-10">
+    <div className="space-y-4">
       <Controller
         name={fieldName}
         control={control}
@@ -101,9 +95,6 @@ export function CustomFieldSlide({
           />
         )}
       />
-      {error && (
-        <p className="text-destructive text-sm">{String(error.message)}</p>
-      )}
     </div>
   )
 
@@ -119,7 +110,7 @@ export function CustomFieldSlide({
     }
 
     return (
-      <div className="space-y-4 mt-10">
+      <div className="space-y-4">
         <div className="space-y-1">
           {field.options?.map(option => (
             <div
@@ -136,23 +127,26 @@ export function CustomFieldSlide({
             </div>
           ))}
         </div>
-        {error && (
-          <p className="text-destructive text-sm">{String(error.message)}</p>
-        )}
       </div>
     )
   }
 
+  const isLongTitle = field.title.length > 150
+
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="text-left pb-5 flex-shrink-0">
-        <h2 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">
-          {field.title}
-        </h2>
+      {/* Título com scroll próprio e altura máxima */}
+      <div className="flex-shrink-0 pb-5" data-slide-title-container>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-hidden pr-1">
+          <h2 className={`font-medium text-foreground mb-2 tracking-tight break-words ${isLongTitle ? 'text-2xl leading-7' : 'text-3xl leading-9'}`}>
+            {field.title}
+          </h2>
+        </div>
       </div>
 
-      <div className="relative flex-1 min-h-0 overflow-hidden">
-        <div className="overflow-y-auto overflow-x-hidden pr-1 space-y-4 h-full">
+      {/* Opções sempre visíveis - SEM scroll */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-1">
+        <div className="space-y-4">
           {field.field_type === 'text' && renderTextField()}
           {field.field_type === 'radio' && renderRadioField()}
           {field.field_type === 'select' && renderSelectField()}
@@ -168,6 +162,12 @@ export function CustomFieldSlide({
             </div>
           )}
         </div>
+
+        {error && (
+          <p className="text-destructive text-sm mt-2">
+            {String(error.message)}
+          </p>
+        )}
       </div>
     </div>
   )
