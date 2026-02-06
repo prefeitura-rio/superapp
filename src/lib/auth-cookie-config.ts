@@ -10,11 +10,18 @@
  */
 
 /**
- * Durações padrão dos tokens (em segundos)
- * Podem ser ajustadas conforme configuração do Keycloak
+ * Durações dos tokens (em segundos)
+ * IMPORTANTE: Devem corresponder às configurações REAIS do Keycloak
+ *
+ * Keycloak Staging/Produção atual:
+ * - Access Token Lifespan: ~10 horas (35854s)
+ * - Refresh Token Lifespan: 30 minutos (1800s)
+ *
+ * CRÍTICO: Se o cookie expirar antes do token JWT, o navegador
+ * deleta o cookie e o usuário é deslogado mesmo com token válido!
  */
-export const ACCESS_TOKEN_MAX_AGE = 30 * 60 // 30 minutos
-export const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 // 7 dias
+export const ACCESS_TOKEN_MAX_AGE = 10 * 60 * 60 // 10 horas (igual Keycloak)
+export const REFRESH_TOKEN_MAX_AGE = 30 * 60 // 30 minutos (igual Keycloak)
 
 /**
  * Configuração base compartilhada entre access e refresh tokens
