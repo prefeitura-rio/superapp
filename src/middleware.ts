@@ -117,6 +117,15 @@ export async function middleware(request: NextRequest) {
       span.setAttribute('auth.has_token', !!authToken)
       span.setAttribute('auth.has_refresh_token', !!refreshToken)
 
+      // Log cookie status for debugging auth issues
+      if (!authToken && !publicRoute) {
+        console.warn('[AUTH_MIDDLEWARE] No access token for protected route', {
+          path,
+          hasRefreshToken: !!refreshToken,
+          allCookies: request.cookies.getAll().map(c => c.name),
+        })
+      }
+
       // Set up request headers with nonce and CSP
       const requestHeaders = new Headers(request.headers)
       requestHeaders.set('x-nonce', nonce)

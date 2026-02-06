@@ -43,6 +43,10 @@ const getHeaders = async (headers?: HeadersInit): Promise<HeadersInit> => {
   const cookieStore = await cookies()
   const access_token = cookieStore.get('access_token')?.value
 
+  if (!access_token) {
+    console.warn('[CUSTOM_FETCH_RMI] No access token found in cookies')
+  }
+
   return {
     ...headers,
     ...(access_token && { Authorization: `Bearer ${access_token}` }),

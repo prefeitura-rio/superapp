@@ -7,6 +7,7 @@ export function isJwtExpired(token: string): boolean {
     const now = Math.floor(Date.now() / 1000)
     return decoded.exp < now
   } catch {
-    return false
+    // If token is invalid/corrupted, treat it as expired to force refresh/logout
+    return true
   }
 }
