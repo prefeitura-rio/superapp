@@ -17,7 +17,7 @@ export function RecentlyAddedCoursesSwipe({
   return (
     <div className="px-4 pb-6">
       <h3 className="pb-2 text-base font-medium text-foreground leading-5">
-        Mais Recentes
+        Mais recentes
       </h3>
       <SwiperWrapper
         showArrows
@@ -37,7 +37,11 @@ export function RecentlyAddedCoursesSwipe({
               >
                 {slideCourses.map((course, courseIndex) => (
                   <CourseCard
-                    key={course.id != null ? String(course.id) : `course-${slideIndex}-${courseIndex}`}
+                    key={
+                      course.id != null
+                        ? String(course.id)
+                        : `course-${slideIndex}-${courseIndex}`
+                    }
                     courseId={course.id}
                     title={course.title as string}
                     modality={course.modalidade as string}

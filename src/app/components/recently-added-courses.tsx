@@ -19,13 +19,16 @@ export default function RecentlyAddedCourses({
   return (
     <>
       <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
-        Mais Recentes
+        Mais recentes
       </h3>
       {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
-            <div key={course.id != null ? String(course.id) : `course-${index}`} className="shrink-0">
+            <div
+              key={course.id != null ? String(course.id) : `course-${index}`}
+              className="shrink-0"
+            >
               <CourseCard
                 courseId={course.id}
                 title={course.title as string}

@@ -19,7 +19,7 @@ export default function ServicosLayout({
       ? 'empregabilidade'
       : 'mei'
 
-  // Só mostra o toggle nas rotas específicas
+  // Só mostra o toggle e o float nav nas homes dos serviços
   const shouldShowToggle =
     pathname === '/servicos/cursos' ||
     pathname === '/servicos/mei' ||
@@ -37,7 +37,7 @@ export default function ServicosLayout({
           </div>
         )}
         <main>{children}</main>
-        <FloatNavigationWrapper />
+        {shouldShowToggle && <FloatNavigationWrapper />}
       </div>
     </AuthHeaderProvider>
   )

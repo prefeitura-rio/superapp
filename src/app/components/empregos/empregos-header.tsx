@@ -27,7 +27,7 @@ export function EmpregosHeader({ isLoggedIn }: EmpregosHeaderProps) {
 
         <div className="flex items-center space-x-2">
           <Link
-            href="/servicos/empregos/busca"
+            href="/busca?tipo=empregos"
             className="rounded-full bg-transparent p-4"
           >
             <SearchIcon className="h-5 w-5 text-foreground" />

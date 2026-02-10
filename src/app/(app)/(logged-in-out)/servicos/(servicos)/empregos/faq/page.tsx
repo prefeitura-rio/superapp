@@ -20,6 +20,24 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
     content:
       'Sim, todos os cursos oferecidos para a população serão gratuitos.',
   },
+  {
+    id: 'quem-se-inscrever',
+    title: 'Quem pode se inscrever?',
+    content:
+      'Residentes no Município do Rio de Janeiro com idade a partir de 16 anos e Ensino Fundamental completo.\n* Funcionários Senac não podem participar do projeto.',
+  },
+  {
+    id: 'idade-inscricao',
+    title: 'Há idade para se inscrever?',
+    content:
+      'Sim. Pessoas a partir de 16 anos podem se inscrever.',
+  },
+  {
+    id: 'pre-inscricao-paga',
+    title: 'A pré-inscrição é paga?',
+    content:
+      'Não. A Pré-inscrição é gratuita.',
+  },
 ]
 
 export const dynamic = 'force-static'
