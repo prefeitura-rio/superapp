@@ -22,7 +22,11 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
         <div className="flex gap-2 px-4 min-w-max">
           {limitedVagas.map((vaga) => (
             <div key={vaga.id} className="shrink-0 h-[11.75rem] w-[11.75rem]">
-              <VagaCard vaga={vaga} variant="recent" className="h-full w-full min-h-0" />
+              <VagaCard
+                vaga={vaga}
+                variant="recent"
+                className="h-full w-full min-h-0"
+              />
             </div>
           ))}
         </div>

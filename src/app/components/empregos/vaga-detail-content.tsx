@@ -1,0 +1,211 @@
+'use client'
+
+import type { VagaBadge } from '@/app/components/empregos/vaga-card'
+import { MapPinIcon } from '@/assets/icons'
+import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
+import { CustomButton } from '@/components/ui/custom/custom-button'
+import type { VagaDetail } from '@/lib/emprego-utils'
+import { Briefcase, DollarSign, FileText } from 'lucide-react'
+import { Accessibility } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+interface VagaDetailContentProps {
+  vaga: VagaDetail
+  isLoggedIn: boolean
+}
+
+function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
+  if (!type) return <FileText className="h-3.5 w-3.5 shrink-0" />
+  switch (type) {
+    case 'modality':
+      return <Briefcase className="h-3.5 w-3.5 shrink-0" />
+    case 'bairro':
+      return <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+    case 'salary':
+      return <DollarSign className="h-3.5 w-3.5 shrink-0" />
+    case 'acessivel_pcd':
+    case 'preferencial_pcd':
+      return <Accessibility className="h-3.5 w-3.5 shrink-0" />
+    default:
+      return <FileText className="h-3.5 w-3.5 shrink-0" />
+  }
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-start gap-4 py-2 text-sm font-normal leading-5 first:pt-0 last:pb-0">
+      <span className="shrink-0 text-foreground-light">{label}</span>
+      <span className="text-right text-foreground">{value}</span>
+    </div>
+  )
+}
+
+function SectionBlock({
+  title,
+  content,
+}: {
+  title: string
+  content: string
+}) {
+  if (!content?.trim()) return null
+  return (
+    <section className="pt-6">
+      <h3 className="text-sm font-normal leading-5 text-foreground">{title}</h3>
+      <div className="text-foreground-light text-sm leading-5 font-normal whitespace-pre-line">
+        {content}
+      </div>
+    </section>
+  )
+}
+
+export function VagaDetailContent({
+  vaga,
+  isLoggedIn,
+}: VagaDetailContentProps) {
+  const router = useRouter()
+
+  const handleShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: vaga.titulo,
+          text: `${vaga.titulo} - ${vaga.empresaNome}`,
+          url: window.location.href,
+        })
+      } catch {
+        // ignore
+      }
+    } else {
+      await navigator.clipboard?.writeText(window.location.href)
+    }
+  }
+
+  const candidacyButtonClassName =
+    'bg-[#3E5782] hover:bg-[#3E5782]/90 text-white border-0 rounded-full'
+
+  return (
+    <div className="max-w-4xl mx-auto text-foreground">
+      {/* Capa: colada no topo, sem padding externo, borda apenas embaixo */}
+      <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center justify-center rounded-full w-11 h-11 bg-black/5 text-white hover:bg-black/20 hover:cursor-pointer transition-colors"
+            aria-label="Voltar"
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex items-center justify-center rounded-full w-11 h-11  text-white hover:cursor-pointer"
+            aria-label="Compartilhar"
+          >
+            <ShareIcon className="h-5 w-5 text-white" />
+          </button>
+        </div>
+        <h1 className="text-3xl leading-9 font-medium text-white mt-12">
+          {vaga.titulo}
+        </h1>
+        <p className="text-sm text-white leading-5 pb-6 font-normal">
+          Inscrições até {vaga.dataEncerramentoInscricoes}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-3">
+          {vaga.badges.map((badge, index) => (
+            <span
+              key={`${badge.text}-${index}`}
+              className="inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full bg-white/10 text-white"
+            >
+              <DetailBadgeIcon type={badge.type} />
+              <span className="text-xs">{badge.text}</span>
+            </span>
+          ))}
+        </div>
+      </header>
+
+      {/* Conteúdo abaixo da capa com padding */}
+      <div className="p-4">
+        {/* Informação da empresa */}
+        <div className="flex items-center gap-3">
+          <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+            {vaga.empresaLogo ? (
+              <Image
+                src={vaga.empresaLogo}
+                alt={vaga.empresaNome}
+                width={40}
+                height={40}
+                className="object-contain"
+              />
+            ) : (
+              <span className="text-xs font-semibold uppercase text-muted-foreground">
+                {vaga.empresaNome?.charAt(0) || '?'}
+              </span>
+            )}
+          </div>
+          <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
+            {vaga.empresaNome}
+          </span>
+          <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
+        </div>
+
+        {/* Descrição */}
+        {vaga.descricao ? (
+          <p className="text-sm font-normal leading-5 text-foreground-light mt-4">
+            {vaga.descricao}
+          </p>
+        ) : null}
+
+        {/* Botão */}
+        <div className="mt-6">
+          {isLoggedIn ? (
+            <CustomButton
+              fullWidth
+              size="lg"
+              className={candidacyButtonClassName}
+            >
+              Candidatar-se à vaga
+            </CustomButton>
+          ) : (
+            <Link
+              href={`/?redirect=/servicos/empregos/${vaga.id}`}
+              className="inline-flex rounded-full items-center justify-center gap-2 w-full rounded-2xl font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
+            >
+              Fazer login para se candidatar
+            </Link>
+          )}
+        </div>
+
+        {/* Informações gerais */}
+        <h2 className="text-sm font-normal leading-5 text-foreground mt-8">
+          Informações gerais
+        </h2>
+        <div className="bg-card rounded-xl p-6 mt-2">
+          <InfoRow label="Valor da Vaga" value={vaga.valorVaga} />
+          <InfoRow
+            label="Regime de contratação"
+            value={vaga.regimeContratacao}
+          />
+          <InfoRow label="Modelo de trabalho" value={vaga.modeloTrabalho} />
+          <InfoRow label="Local de trabalho" value={vaga.localTrabalho} />
+          <InfoRow
+            label="Data limite de inscrição"
+            value={vaga.dataLimiteInscricao}
+          />
+          <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
+        </div>
+
+        {/* Requisitos, Diferenciais, Responsabilidades, Benefícios */}
+        <SectionBlock title="Requisitos" content={vaga.requisitos} />
+        <SectionBlock title="Diferenciais" content={vaga.diferenciais ?? ''} />
+        <SectionBlock
+          title="Responsabilidades"
+          content={vaga.responsabilidades ?? ''}
+        />
+        <SectionBlock title="Benefícios" content={vaga.beneficios} />
+      </div>
+    </div>
+  )
+}
