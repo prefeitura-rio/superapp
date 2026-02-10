@@ -12,11 +12,17 @@ export default function ServicosLayout({
   const pathname = usePathname()
 
   // Determina qual tipo está ativo baseado na rota
-  const activeType = pathname?.includes('/servicos/cursos') ? 'cursos' : 'mei'
+  const activeType = pathname?.includes('/servicos/cursos')
+    ? 'cursos'
+    : pathname?.includes('/servicos/empregos')
+      ? 'empregabilidade'
+      : 'mei'
 
   // Só mostra o toggle nas rotas específicas
   const shouldShowToggle =
-    pathname === '/servicos/cursos' || pathname === '/servicos/mei'
+    pathname === '/servicos/cursos' ||
+    pathname === '/servicos/mei' ||
+    pathname?.includes('/servicos/empregos')
 
   return (
     <AuthHeaderProvider>
