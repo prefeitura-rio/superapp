@@ -1,5 +1,6 @@
 'use client'
 
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { ServiceTypeToggle } from '@/app/components/mei/service-type-toggle'
 import { AuthHeaderProvider } from '@/providers/auth-header-provider'
 import { usePathname } from 'next/navigation'
@@ -22,7 +23,8 @@ export default function ServicosLayout({
   const shouldShowToggle =
     pathname === '/servicos/cursos' ||
     pathname === '/servicos/mei' ||
-    pathname?.includes('/servicos/empregos')
+    pathname === '/servicos/empregos' ||
+    pathname === '/servicos/empregos/'
 
   return (
     <AuthHeaderProvider>
@@ -35,6 +37,7 @@ export default function ServicosLayout({
           </div>
         )}
         <main>{children}</main>
+        <FloatNavigationWrapper />
       </div>
     </AuthHeaderProvider>
   )
