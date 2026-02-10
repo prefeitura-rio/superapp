@@ -48,7 +48,7 @@ export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
           'flex-1 py-3 rounded-full leading-5 text-sm font-normal transition-colors text-center',
           activeType === 'cursos'
             ? 'bg-primary text-primary-foreground'
-            : 'text-foreground hover:text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
         )}
       >
         Cursos
