@@ -13,6 +13,7 @@ export type ModelsTipoContratacao =
 export const ModelsTipoContratacao = {
   TipoContratacaoCLT: 'CLT',
   TipoContratacaoEstagio: 'ESTAGIO',
+  TipoContratacaoJovemAprendiz: 'JOVEM_APRENDIZ',
   TipoContratacaoMEI: 'MEI',
   TipoContratacaoPJ: 'PJ',
 } as const
