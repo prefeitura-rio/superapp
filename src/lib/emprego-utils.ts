@@ -1,6 +1,12 @@
 import type { ModelsEmprego } from '@/http-courses/models'
 import type { VagaBadge, VagaCardData } from '@/app/components/empregos/vaga-card'
 
+export interface EtapaProcessoSeletivo {
+  ordem: number
+  titulo: string
+  descricao?: string
+}
+
 export interface VagaDetail {
   id: number
   titulo: string
@@ -8,6 +14,7 @@ export interface VagaDetail {
   badges: VagaBadge[]
   empresaNome: string
   empresaLogo?: string
+  empresaCnpj?: string
   descricao: string
   valorVaga: string
   regimeContratacao: string
@@ -19,6 +26,12 @@ export interface VagaDetail {
   diferenciais?: string
   responsabilidades?: string
   beneficios: string
+  /** Etapas do processo seletivo; quando presente, exibido na página da vaga */
+  etapasProcessoSeletivo?: EtapaProcessoSeletivo[]
+  /** Índice da etapa atual do candidato (0-based), quando já inscrito */
+  etapaAtualCandidatura?: number
+  /** Órgão parceiro da vaga; quando presente, exibe o card "Vaga oferecida em parceria com" */
+  orgaoParceiro?: string
 }
 
 function formatSalary(value: number): string {

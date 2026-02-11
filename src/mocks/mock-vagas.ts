@@ -10,6 +10,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     id: 1,
     titulo: 'Mestre de Obras - Alta experiência',
     empresaNome: 'Odebrecht Engenharia e Construção',
+    empresaCnpj: '60746948000112',
     badges: [
       { text: 'Presencial', type: 'modality' },
       { text: 'Preferencial PcD', type: 'preferencial_pcd' },
@@ -21,6 +22,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     id: 2,
     titulo: 'Guia de Turismo Bilíngue',
     empresaNome: 'Prefeitura Municipal do Rio de Janeiro',
+    empresaCnpj: '41442565000180',
     badges: [
       { text: 'Presencial', type: 'modality' },
       { text: 'Flamengo', type: 'bairro' },
@@ -32,10 +34,46 @@ export const MOCK_VAGAS: VagaCardData[] = [
     id: 3,
     titulo: 'Engenheiro de Processos Sênior',
     empresaNome: 'Petrobrás S.A.',
+    empresaCnpj: '33000167000101',
     badges: [
       { text: 'Presencial', type: 'modality' },
       { text: 'Porto Maravilha', type: 'bairro' },
       { text: 'R$8.500,00', type: 'salary' },
+      { text: 'Preferencial PcD', type: 'preferencial_pcd' },
+    ],
+  },
+  {
+    id: 11,
+    titulo: 'Encarregado de Obras',
+    empresaNome: 'Odebrecht Engenharia e Construção',
+    empresaCnpj: '60746948000112',
+    badges: [
+      { text: 'Presencial', type: 'modality' },
+      { text: 'Barra da Tijuca', type: 'bairro' },
+      { text: 'R$2.800,00', type: 'salary' },
+      { text: 'Acessível PcD', type: 'acessivel_pcd' },
+    ],
+  },
+  {
+    id: 12,
+    titulo: 'Agente de Atendimento ao Cidadão',
+    empresaNome: 'Prefeitura Municipal do Rio de Janeiro',
+    empresaCnpj: '41442565000180',
+    badges: [
+      { text: 'Presencial', type: 'modality' },
+      { text: 'Centro', type: 'bairro' },
+      { text: 'R$2.100,00', type: 'salary' },
+    ],
+  },
+  {
+    id: 13,
+    titulo: 'Técnico de Manutenção Industrial',
+    empresaNome: 'Petrobrás S.A.',
+    empresaCnpj: '33000167000101',
+    badges: [
+      { text: 'Presencial', type: 'modality' },
+      { text: 'Duque de Caxias', type: 'bairro' },
+      { text: 'R$5.200,00', type: 'salary' },
       { text: 'Preferencial PcD', type: 'preferencial_pcd' },
     ],
   },
@@ -113,21 +151,37 @@ export const MOCK_VAGAS: VagaCardData[] = [
   },
 ]
 
+const ETAPAS_PROCESSO_PADRAO: VagaDetail['etapasProcessoSeletivo'] = [
+  {
+    ordem: 1,
+    titulo: 'Envio da candidatura',
+    descricao:
+      'Inscrição realizada com sucesso. Os dados informados serão analisados pela equipe responsável.',
+  },
+  { ordem: 2, titulo: 'Análise de currículo', descricao: '' },
+  { ordem: 3, titulo: 'Entrevista', descricao: '' },
+]
+
 const MOCK_DETAIL_BY_ID: Record<
   number,
-  Pick<
-    VagaDetail,
-    | 'descricao'
-    | 'requisitos'
-    | 'diferenciais'
-    | 'responsabilidades'
-    | 'beneficios'
-    | 'dataEncerramentoInscricoes'
-    | 'dataLimiteInscricao'
-    | 'regimeContratacao'
-    | 'localTrabalho'
-    | 'valorVaga'
-    | 'acessibilidade'
+  Partial<
+    Pick<
+      VagaDetail,
+      | 'descricao'
+      | 'requisitos'
+      | 'diferenciais'
+      | 'responsabilidades'
+      | 'beneficios'
+      | 'dataEncerramentoInscricoes'
+      | 'dataLimiteInscricao'
+      | 'regimeContratacao'
+      | 'localTrabalho'
+      | 'valorVaga'
+      | 'acessibilidade'
+      | 'etapasProcessoSeletivo'
+      | 'etapaAtualCandidatura'
+      | 'orgaoParceiro'
+    >
   >
 > = {
   1: {
@@ -136,7 +190,6 @@ const MOCK_DETAIL_BY_ID: Record<
     valorVaga: 'R$ 3.200,00',
     regimeContratacao: 'CLT',
     localTrabalho: 'Campo Grande',
-    acessibilidade: 'Preferencial para PcD',
     descricao:
       'Atuar na coordenação e supervisão de equipes de obra, garantindo o cumprimento de prazos, normas de segurança e qualidade. Experiência comprovada em obras de médio e grande porte.',
     requisitos:
@@ -146,6 +199,9 @@ const MOCK_DETAIL_BY_ID: Record<
     responsabilidades:
       'Supervisionar equipe de pedreiros e serventes.\nAcompanhar cronograma e relatórios de avanço.',
     beneficios: 'Vale-transporte, vale-refeição e assistência médica.',
+    etapasProcessoSeletivo: ETAPAS_PROCESSO_PADRAO,
+    etapaAtualCandidatura: 0,
+    orgaoParceiro: 'Secretaria Municipal de Trabalho e Renda',
   },
 }
 
@@ -171,17 +227,30 @@ function getDefaultMockDetail(
   const pcd = vaga.badges.find(
     b => b.type === 'preferencial_pcd' || b.type === 'acessivel_pcd'
   )
+  const override = MOCK_DETAIL_BY_ID[vaga.id] ?? {}
+
   return {
-    dataEncerramentoInscricoes: '26 de agosto',
-    dataLimiteInscricao: '26/08/2026',
-    valorVaga: salaryBadge?.text ?? 'A combinar',
-    regimeContratacao: 'CLT',
-    localTrabalho: bairroBadge?.text ?? '—',
-    acessibilidade: pcd ? (pcd.type === 'preferencial_pcd' ? 'Preferencial para PcD' : 'Acessível para PcD') : 'Não informado',
-    descricao: `Descrição da vaga: ${vaga.titulo}. Confira os requisitos e benefícios abaixo.`,
-    requisitos: 'Requisitos conforme descrito na vaga.',
-    beneficios: 'A combinar com a empresa.',
-    ...MOCK_DETAIL_BY_ID[vaga.id],
+    dataEncerramentoInscricoes:
+      override.dataEncerramentoInscricoes ?? '26 de agosto',
+    dataLimiteInscricao: override.dataLimiteInscricao ?? '26/08/2026',
+    valorVaga: override.valorVaga ?? salaryBadge?.text ?? 'A combinar',
+    regimeContratacao: override.regimeContratacao ?? 'CLT',
+    localTrabalho: override.localTrabalho ?? bairroBadge?.text ?? '—',
+    acessibilidade:
+      override.acessibilidade ??
+      (pcd
+        ? pcd.type === 'preferencial_pcd'
+          ? 'Preferencial para PcD'
+          : 'Acessível para PcD'
+        : 'Não informado'),
+    descricao:
+      override.descricao ??
+      `Descrição da vaga: ${vaga.titulo}. Confira os requisitos e benefícios abaixo.`,
+    requisitos:
+      override.requisitos ?? 'Requisitos conforme descrito na vaga.',
+    beneficios: override.beneficios ?? 'A combinar com a empresa.',
+    diferenciais: override.diferenciais,
+    responsabilidades: override.responsabilidades,
   }
 }
 
@@ -194,6 +263,7 @@ export function getMockVagaDetailById(id: number): VagaDetail | null {
   const badges = hasClt
     ? vaga.badges
     : [{ text: 'CLT' }, ...vaga.badges]
+  const detailOverride = MOCK_DETAIL_BY_ID[vaga.id] ?? {}
   return {
     id: vaga.id,
     titulo: vaga.titulo,
@@ -201,6 +271,7 @@ export function getMockVagaDetailById(id: number): VagaDetail | null {
     badges,
     empresaNome: vaga.empresaNome,
     empresaLogo: vaga.empresaLogo,
+    empresaCnpj: vaga.empresaCnpj,
     descricao: extra.descricao,
     valorVaga: extra.valorVaga,
     regimeContratacao: extra.regimeContratacao,
@@ -212,5 +283,8 @@ export function getMockVagaDetailById(id: number): VagaDetail | null {
     diferenciais: extra.diferenciais,
     responsabilidades: extra.responsabilidades,
     beneficios: extra.beneficios,
+    etapasProcessoSeletivo: detailOverride.etapasProcessoSeletivo,
+    etapaAtualCandidatura: detailOverride.etapaAtualCandidatura,
+    orgaoParceiro: detailOverride.orgaoParceiro,
   }
 }

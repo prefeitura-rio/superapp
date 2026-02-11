@@ -1,5 +1,7 @@
 'use client'
 
+import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
+import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { MapPinIcon } from '@/assets/icons'
 import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
@@ -128,28 +130,55 @@ export function VagaDetailContent({
 
       {/* Conteúdo abaixo da capa com padding */}
       <div className="p-4">
-        {/* Informação da empresa */}
-        <div className="flex items-center gap-3">
-          <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
-            {vaga.empresaLogo ? (
-              <Image
-                src={vaga.empresaLogo}
-                alt={vaga.empresaNome}
-                width={40}
-                height={40}
-                className="object-contain"
-              />
-            ) : (
-              <span className="text-xs font-semibold uppercase text-muted-foreground">
-                {vaga.empresaNome?.charAt(0) || '?'}
-              </span>
-            )}
+        {/* Informação da empresa - link para detalhe da empresa quando houver CNPJ */}
+        {vaga.empresaCnpj ? (
+          <Link
+            href={`/servicos/empresas/${encodeURIComponent(vaga.empresaCnpj)}`}
+            className="flex items-center gap-3 rounded-xl transition-opacity hover:opacity-90"
+          >
+            <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+              {vaga.empresaLogo ? (
+                <Image
+                  src={vaga.empresaLogo}
+                  alt={vaga.empresaNome}
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              ) : (
+                <span className="text-xs font-semibold uppercase text-muted-foreground">
+                  {vaga.empresaNome?.charAt(0) || '?'}
+                </span>
+              )}
+            </div>
+            <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
+              {vaga.empresaNome}
+            </span>
+            <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+              {vaga.empresaLogo ? (
+                <Image
+                  src={vaga.empresaLogo}
+                  alt={vaga.empresaNome}
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              ) : (
+                <span className="text-xs font-semibold uppercase text-muted-foreground">
+                  {vaga.empresaNome?.charAt(0) || '?'}
+                </span>
+              )}
+            </div>
+            <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
+              {vaga.empresaNome}
+            </span>
+            <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
           </div>
-          <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
-            {vaga.empresaNome}
-          </span>
-          <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
-        </div>
+        )}
 
         {/* Descrição */}
         {vaga.descricao ? (
@@ -205,6 +234,15 @@ export function VagaDetailContent({
           content={vaga.responsabilidades ?? ''}
         />
         <SectionBlock title="Benefícios" content={vaga.beneficios} />
+
+        <EtapasProcessoSeletivoCard
+          etapas={vaga.etapasProcessoSeletivo ?? []}
+          etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+        />
+
+        {vaga.orgaoParceiro ? (
+          <VagaParceriaCard orgaoParceiro={vaga.orgaoParceiro} />
+        ) : null}
       </div>
     </div>
   )

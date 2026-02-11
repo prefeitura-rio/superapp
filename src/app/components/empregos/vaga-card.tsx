@@ -16,6 +16,7 @@ export interface VagaCardData {
   titulo: string
   empresaNome: string
   empresaLogo?: string
+  empresaCnpj?: string
   badges: VagaBadge[]
 }
 
