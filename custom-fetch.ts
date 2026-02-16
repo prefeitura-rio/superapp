@@ -8,8 +8,7 @@ const getBody = <T>(c: Response | Request): Promise<T> => {
     return c.json()
   }
 
-  if (contentType?.includes('application/pdf')) {
-    return c.blob() as Promise<T>
+  if (contentType?.includes('application/pdf')) { return c.blob() as Promise<T>
   }
 
   return c.text() as Promise<T>
