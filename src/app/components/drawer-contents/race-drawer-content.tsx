@@ -19,7 +19,7 @@ export function RaceDrawerContent({
   onClose,
 }: RaceDrawerContentProps) {
   const router = useRouter()
-  
+
   // Map API value to display value for initial selection
   const initialDisplayRace =
     currentRace && RACE_API_TO_DISPLAY[currentRace.toLowerCase()]

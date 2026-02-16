@@ -246,8 +246,7 @@ function getDefaultMockDetail(
     descricao:
       override.descricao ??
       `Descrição da vaga: ${vaga.titulo}. Confira os requisitos e benefícios abaixo.`,
-    requisitos:
-      override.requisitos ?? 'Requisitos conforme descrito na vaga.',
+    requisitos: override.requisitos ?? 'Requisitos conforme descrito na vaga.',
     beneficios: override.beneficios ?? 'A combinar com a empresa.',
     diferenciais: override.diferenciais,
     responsabilidades: override.responsabilidades,
@@ -260,9 +259,7 @@ export function getMockVagaDetailById(id: number): VagaDetail | null {
   const extra = getDefaultMockDetail(vaga)
   const modalityBadge = vaga.badges.find(b => b.type === 'modality')
   const hasClt = vaga.badges.some(b => b.text === 'CLT')
-  const badges = hasClt
-    ? vaga.badges
-    : [{ text: 'CLT' }, ...vaga.badges]
+  const badges = hasClt ? vaga.badges : [{ text: 'CLT' }, ...vaga.badges]
   const detailOverride = MOCK_DETAIL_BY_ID[vaga.id] ?? {}
   return {
     id: vaga.id,

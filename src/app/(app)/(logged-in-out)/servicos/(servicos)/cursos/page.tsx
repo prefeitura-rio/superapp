@@ -112,12 +112,6 @@ export default async function CoursesPage() {
     )
   } catch (error) {
     console.error('Error fetching courses:', error)
-    return (
-      <CoursePageClient
-        courses={[]}
-        myCourses={[]}
-        categoryFilters={[]}
-      />
-    )
+    return <CoursePageClient courses={[]} myCourses={[]} categoryFilters={[]} />
   }
 }

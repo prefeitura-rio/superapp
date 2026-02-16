@@ -1,10 +1,10 @@
-import { describe, expect, test } from 'vitest'
-import type { ViaCepResponse } from '@/types/address'
 import {
   findBestCepMatch,
   hasOnlyNonNumericComplements,
   isNumberInRange,
 } from '@/lib/cep-utils'
+import type { ViaCepResponse } from '@/types/address'
+import { describe, expect, test } from 'vitest'
 
 function createViaCepResponse(
   complemento: string,

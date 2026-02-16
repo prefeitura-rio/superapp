@@ -14,7 +14,11 @@ export function NoMeiSheet({ open, onOpenChange }: NoMeiSheetProps) {
   }
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Sem Empresa MEI">
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Sem Empresa MEI"
+    >
       <div className="text-foreground">
         <h2 className="text-xl font-medium mb-3">
           Você não possui uma empresa MEI

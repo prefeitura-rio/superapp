@@ -98,27 +98,27 @@ export const ActionDiv = forwardRef<HTMLDivElement, ActionDivProps>(
         aria-invalid={!!error}
         role={drawerContent ? 'button' : undefined}
         className={cn(
-        'relative group cursor-pointer border-2 rounded-xl text-card-foreground font-normal truncate transition-colors',
-        error ? 'border-destructive' : 'border-border',
-        disabled
-          ? 'bg-transparent hover:bg-accent/40'
-          : 'bg-card text-muted-foreground',
-        sizeStyles[size],
-        leftIcon && 'pl-15',
-        rightIcon && 'pr-10',
-        optionalLabel && !rightIcon && 'pr-[80px]',
-        optionalLabel && rightIcon && 'pr-[140px]',
-        className
-      )}
-      onClick={
-        redirectLink
-          ? undefined // Deixa o Link do Next.js lidar com o clique
-          : drawerContent
-            ? handleDrawerOpen('content')
-            : undefined
-      }
-    >
-      {leftIcon && (
+          'relative group cursor-pointer border-2 rounded-xl text-card-foreground font-normal truncate transition-colors',
+          error ? 'border-destructive' : 'border-border',
+          disabled
+            ? 'bg-transparent hover:bg-accent/40'
+            : 'bg-card text-muted-foreground',
+          sizeStyles[size],
+          leftIcon && 'pl-15',
+          rightIcon && 'pr-10',
+          optionalLabel && !rightIcon && 'pr-[80px]',
+          optionalLabel && rightIcon && 'pr-[140px]',
+          className
+        )}
+        onClick={
+          redirectLink
+            ? undefined // Deixa o Link do Next.js lidar com o clique
+            : drawerContent
+              ? handleDrawerOpen('content')
+              : undefined
+        }
+      >
+        {leftIcon && (
           <div
             className={cn(
               'absolute left-5 top-1/2 transform -translate-y-1/2',
@@ -127,90 +127,90 @@ export const ActionDiv = forwardRef<HTMLDivElement, ActionDivProps>(
           >
             {leftIcon}
           </div>
-      )}
+        )}
 
-      <div className="flex items-center h-full w-full">
-        <span className="truncate block flex-1 min-w-0">{content}</span>
-      </div>
-
-      {optionalLabel && (
-        <Badge
-          variant={optionalLabelVariant}
-          className={cn(
-            'absolute top-1/2 transform -translate-y-1/2 text-xs',
-            rightIcon ? 'right-[60px]' : 'right-4'
-          )}
-        >
-          {optionalLabel}
-        </Badge>
-      )}
-
-      {rightIcon && (
-        <div
-          className={cn(
-            'absolute right-5 top-1/2 transform -translate-y-1/2',
-            iconVariantStyles[effectiveVariant]
-          )}
-        >
-          {rightIcon}
+        <div className="flex items-center h-full w-full">
+          <span className="truncate block flex-1 min-w-0">{content}</span>
         </div>
-      )}
-    </div>
-  )
 
-  return (
-    <>
-      <div className={cn('space-y-2', containerClassName)}>
-        {label && (
-          <div className="flex items-center gap-2">
-            <div
-              className={cn(
-                'text-sm font-normal',
-                labelVariantStyles[effectiveVariant],
-                labelClassName
-              )}
-            >
-              {label}
-              {isRequired && <span className="text-destructive ml-1">*</span>}
-            </div>
-
-            {tooltip && (
-              <div className="relative">
-                <InfoIcon
-                  className={cn(
-                    'h-5 w-5 cursor-help',
-                    tooltipIconVariantStyles[effectiveVariant]
-                  )}
-                  onClick={handleDrawerOpen('tooltip')}
-                />
-              </div>
+        {optionalLabel && (
+          <Badge
+            variant={optionalLabelVariant}
+            className={cn(
+              'absolute top-1/2 transform -translate-y-1/2 text-xs',
+              rightIcon ? 'right-[60px]' : 'right-4'
             )}
+          >
+            {optionalLabel}
+          </Badge>
+        )}
+
+        {rightIcon && (
+          <div
+            className={cn(
+              'absolute right-5 top-1/2 transform -translate-y-1/2',
+              iconVariantStyles[effectiveVariant]
+            )}
+          >
+            {rightIcon}
           </div>
         )}
-        {redirectLink ? <Link href={redirectLink}>{Content}</Link> : Content}
-        {error && <p className="text-sm text-destructive mt-1">{error}</p>}
-        {hint && !error && (
-          <p className="text-xs text-muted-foreground mt-1">{hint}</p>
-        )}
       </div>
-      {drawerType !== null && (
-        <BottomSheet
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
-          title={drawerTitle}
-          showHandle
-        >
-          {drawerType === 'content' &&
-          drawerContent &&
-          React.isValidElement(drawerContent)
-            ? React.cloneElement(drawerContent as React.ReactElement<any>, {
-                onClose: () => setDrawerOpen(false),
-              })
-            : drawerContent}
-        </BottomSheet>
-      )}
-    </>
-  )
+    )
+
+    return (
+      <>
+        <div className={cn('space-y-2', containerClassName)}>
+          {label && (
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  'text-sm font-normal',
+                  labelVariantStyles[effectiveVariant],
+                  labelClassName
+                )}
+              >
+                {label}
+                {isRequired && <span className="text-destructive ml-1">*</span>}
+              </div>
+
+              {tooltip && (
+                <div className="relative">
+                  <InfoIcon
+                    className={cn(
+                      'h-5 w-5 cursor-help',
+                      tooltipIconVariantStyles[effectiveVariant]
+                    )}
+                    onClick={handleDrawerOpen('tooltip')}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {redirectLink ? <Link href={redirectLink}>{Content}</Link> : Content}
+          {error && <p className="text-sm text-destructive mt-1">{error}</p>}
+          {hint && !error && (
+            <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+          )}
+        </div>
+        {drawerType !== null && (
+          <BottomSheet
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            title={drawerTitle}
+            showHandle
+          >
+            {drawerType === 'content' &&
+            drawerContent &&
+            React.isValidElement(drawerContent)
+              ? React.cloneElement(drawerContent as React.ReactElement<any>, {
+                  onClose: () => setDrawerOpen(false),
+                })
+              : drawerContent}
+          </BottomSheet>
+        )}
+      </>
+    )
   }
 )
 

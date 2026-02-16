@@ -8,14 +8,14 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
   const userAuthInfo = await getUserInfoFromToken()
-  
+
   if (!userAuthInfo.cpf) {
     throw new Error('Usuário não autenticado')
   }
-  
+
   try {
     const response = await putCitizenCpfEmail(userAuthInfo.cpf, emailData)
-    
+
     // Check if the response indicates an error
     if (response.status !== 200) {
       const errorData = response.data as HandlersErrorResponse
@@ -23,10 +23,10 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
       return {
         success: false,
         error: errorData?.error || 'Erro ao atualizar email',
-        status: response.status
+        status: response.status,
       }
     }
-    
+
     revalidateTag(`user-info-${userAuthInfo.cpf}`)
     // Revalidate MEI proposal pages that use citizen contact info
     revalidatePath('/servicos/mei', 'layout')
@@ -40,7 +40,7 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
         error: err?.error || 'Erro ao atualizar email',
       }
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

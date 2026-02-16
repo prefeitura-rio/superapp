@@ -73,10 +73,7 @@ export default function MeiOpportunityDetailLoading() {
           </div>
           <div className="flex gap-2 overflow-x-auto px-4 pb-2">
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                className="h-24 w-24 shrink-0 rounded-lg"
-              />
+              <Skeleton key={index} className="h-24 w-24 shrink-0 rounded-lg" />
             ))}
           </div>
         </div>

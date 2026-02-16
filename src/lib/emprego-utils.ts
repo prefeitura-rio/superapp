@@ -1,5 +1,8 @@
+import type {
+  VagaBadge,
+  VagaCardData,
+} from '@/app/components/empregos/vaga-card'
 import type { ModelsEmprego } from '@/http-courses/models'
-import type { VagaBadge, VagaCardData } from '@/app/components/empregos/vaga-card'
 
 export interface EtapaProcessoSeletivo {
   ordem: number
@@ -67,7 +70,8 @@ function formatDateLong(isoDate: string | undefined): string {
 
 export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
   const badges: VagaBadge[] = []
-  const modalidade = (emprego as { modalidade?: string }).modalidade ?? 'Presencial'
+  const modalidade =
+    (emprego as { modalidade?: string }).modalidade ?? 'Presencial'
   badges.push({ text: modalidade, type: 'modality' })
   const bairro = (emprego as { bairro?: string }).bairro
   if (bairro) badges.push({ text: bairro, type: 'bairro' })
@@ -79,7 +83,8 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
   if (salario != null) {
     badges.push({ text: formatSalary(salario), type: 'salary' })
   }
-  const preferencialPcd = (emprego as { preferencial_pcd?: boolean }).preferencial_pcd
+  const preferencialPcd = (emprego as { preferencial_pcd?: boolean })
+    .preferencial_pcd
   const acessivelPcd = (emprego as { acessivel_pcd?: boolean }).acessivel_pcd
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
@@ -93,8 +98,7 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
       ? 'Acessível para PcD'
       : 'Não informado'
 
-  const valorVaga =
-    salario != null ? formatSalary(salario) : 'A combinar'
+  const valorVaga = salario != null ? formatSalary(salario) : 'A combinar'
 
   return {
     id: emprego.id ?? 0,
@@ -105,23 +109,29 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
     empresaLogo: (emprego.empresa as { logo?: string })?.logo,
     descricao: emprego.descricao ?? '',
     valorVaga,
-    regimeContratacao: emprego.tipo_contratacao ? String(emprego.tipo_contratacao) : '—',
+    regimeContratacao: emprego.tipo_contratacao
+      ? String(emprego.tipo_contratacao)
+      : '—',
     modeloTrabalho: modalidade,
     localTrabalho: bairro ?? '—',
     dataLimiteInscricao: formatDateBr(emprego.data_limite_candidatura),
     acessibilidade: acessibilidadeLabel,
     requisitos: emprego.pre_requisitos ?? '',
     diferenciais: (emprego as { diferenciais?: string }).diferenciais,
-    responsabilidades: (emprego as { responsabilidades?: string }).responsabilidades,
+    responsabilidades: (emprego as { responsabilidades?: string })
+      .responsabilidades,
     beneficios: emprego.beneficios ?? '',
   }
 }
 
-export function mapModelsEmpregoToVagaCardData(emprego: ModelsEmprego): VagaCardData {
+export function mapModelsEmpregoToVagaCardData(
+  emprego: ModelsEmprego
+): VagaCardData {
   const badges: VagaBadge[] = []
 
   // Modalidade: Presencial, Remoto, Híbrido
-  const modalidade = (emprego as { modalidade?: string }).modalidade ?? 'Presencial'
+  const modalidade =
+    (emprego as { modalidade?: string }).modalidade ?? 'Presencial'
   badges.push({ text: modalidade, type: 'modality' })
 
   // Bairro
@@ -138,7 +148,8 @@ export function mapModelsEmpregoToVagaCardData(emprego: ModelsEmprego): VagaCard
 
   // Acessível PcD | Preferencial PcD
   const acessivelPcd = (emprego as { acessivel_pcd?: boolean }).acessivel_pcd
-  const preferencialPcd = (emprego as { preferencial_pcd?: boolean }).preferencial_pcd
+  const preferencialPcd = (emprego as { preferencial_pcd?: boolean })
+    .preferencial_pcd
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
   } else if (acessivelPcd) {

@@ -8,11 +8,11 @@ import { revalidateTag } from 'next/cache'
 
 export async function deleteUserAddress() {
   const userAuthInfo = await getUserInfoFromToken()
-  
+
   if (!userAuthInfo.cpf) {
     throw new Error('Usuário não autenticado')
   }
-  
+
   // Send empty values to "delete" the address
   const emptyAddress = {
     bairro: 'null',
@@ -24,16 +24,16 @@ export async function deleteUserAddress() {
     numero: 'null',
     tipo_logradouro: 'null',
   }
-  
+
   try {
     const response = await putCitizenCpfAddress(userAuthInfo.cpf, emptyAddress)
-    
+
     // Check if the response indicates an error
     if (response.status !== 200) {
       const errorData = response.data as HandlersErrorResponse
       throw new Error(errorData?.error || 'Erro ao excluir endereço')
     }
-    
+
     revalidateTag(`user-info-${userAuthInfo.cpf}`)
     console.log('Address deleted successfully:', response.data)
     return { success: true, data: response.data }
@@ -43,7 +43,7 @@ export async function deleteUserAddress() {
       const err = error as HandlersErrorResponse
       throw new Error(err?.error || 'Erro ao excluir endereço')
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

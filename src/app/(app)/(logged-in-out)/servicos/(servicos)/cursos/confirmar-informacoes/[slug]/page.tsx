@@ -1,13 +1,7 @@
 import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
-import {
-  hasValidEmail,
-  normalizeEmailData,
-} from '@/helpers/email-data-helpers'
-import {
-  hasValidPhone,
-  normalizePhoneData,
-} from '@/helpers/phone-data-helpers'
+import { hasValidEmail, normalizeEmailData } from '@/helpers/email-data-helpers'
+import { hasValidPhone, normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
 import type {
   ModelsEmailPrincipal,

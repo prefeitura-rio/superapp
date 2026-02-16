@@ -1,7 +1,4 @@
-import type {
-  SearchContext,
-  SearchResultItem,
-} from '@/helpers/search-helpers'
+import type { SearchContext, SearchResultItem } from '@/helpers/search-helpers'
 import {
   loadSearchHistory,
   performSearch,
@@ -213,13 +210,16 @@ export function useSearch(
     updateSearchUrl('', pathname, router, isUpdatingUrl)
   }, [router, pathname])
 
-  const removeFromHistory = useCallback((itemToRemove: string) => {
-    const updatedHistory = removeFromHistoryHelper(
-      itemToRemove,
-      historyContext
-    )
-    setSearchHistory(updatedHistory)
-  }, [historyContext])
+  const removeFromHistory = useCallback(
+    (itemToRemove: string) => {
+      const updatedHistory = removeFromHistoryHelper(
+        itemToRemove,
+        historyContext
+      )
+      setSearchHistory(updatedHistory)
+    },
+    [historyContext]
+  )
 
   return {
     query,

@@ -88,7 +88,12 @@ export function ValueStep({ onNext }: ValueStepProps) {
       </h1>
 
       <div className="flex items-baseline gap-1">
-        <span className="font-medium text-primary" style={{ fontSize: '3rem', lineHeight: '1' }}>R$</span>
+        <span
+          className="font-medium text-primary"
+          style={{ fontSize: '3rem', lineHeight: '1' }}
+        >
+          R$
+        </span>
         <input
           ref={inputRef}
           type="text"

@@ -41,7 +41,12 @@ export function TextBlock({ title, content, renderMarkdown }: TextBlockProps) {
           (() => {
             const item = content[0].trim()
             // If it contains newlines or starts with list markers, it's likely markdown - keep as is
-            if (item.includes('\n') || item.match(/^[-*]\s/) || item.match(/^\d+\.\s/) || item.match(/^- \[[ x]\]/)) {
+            if (
+              item.includes('\n') ||
+              item.match(/^[-*]\s/) ||
+              item.match(/^\d+\.\s/) ||
+              item.match(/^- \[[ x]\]/)
+            ) {
               return item
             }
             // Otherwise, it's a simple single item - remove leading "- " if present

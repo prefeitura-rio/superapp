@@ -182,9 +182,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
           )}
         </div>
 
-        {error && (
-          <p className="text-sm text-destructive mt-1">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive mt-1">{error}</p>}
         {hint && !error && (
           <p className="text-xs text-muted-foreground mt-1">{hint}</p>
         )}

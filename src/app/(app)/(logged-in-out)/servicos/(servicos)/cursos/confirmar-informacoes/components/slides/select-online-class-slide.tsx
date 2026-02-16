@@ -137,13 +137,16 @@ export const SelectOnlineClassSlide = ({
                           <p>{formatDate(onlineClass.class_end_date)}</p>
                         </div>
                       )}
-                      {onlineClass.class_days && <p>{onlineClass.class_days}</p>}
+                      {onlineClass.class_days && (
+                        <p>{onlineClass.class_days}</p>
+                      )}
                       <p>
                         <span className="font-medium">Vagas:</span>{' '}
                         {onlineClass.vacancies}
                         {onlineClass.remaining_vacancies !== undefined && (
                           <span className="text-muted-foreground">
-                            {' '}({onlineClass.remaining_vacancies} disponíveis)
+                            {' '}
+                            ({onlineClass.remaining_vacancies} disponíveis)
                           </span>
                         )}
                       </p>

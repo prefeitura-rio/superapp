@@ -9,19 +9,13 @@ import {
 
 const formacaoAcademicaItemSchema = z
   .object({
-    nomeInstituicao: z
-      .string()
-      .max(50, 'Máximo de 50 caracteres')
-      .optional(),
-    nomeCurso: z
-      .string()
-      .max(50, 'Máximo de 50 caracteres')
-      .optional(),
+    nomeInstituicao: z.string().max(50, 'Máximo de 50 caracteres').optional(),
+    nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     status: z
       .string()
       .optional()
       .refine(
-        (val) =>
+        val =>
           !val ||
           STATUS_FORMACAO_OPCOES.includes(
             val as (typeof STATUS_FORMACAO_OPCOES)[number]
@@ -31,10 +25,9 @@ const formacaoAcademicaItemSchema = z
     anoConclusao: z
       .string()
       .optional()
-      .refine(
-        (val) => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val),
-        { message: 'Selecione um ano válido' }
-      ),
+      .refine(val => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val), {
+        message: 'Selecione um ano válido',
+      }),
   })
   .superRefine((data, ctx) => {
     const hasAny =
@@ -95,10 +88,7 @@ const formacaoAcademicaItemSchema = z
 
 const formacaoComplementarItemSchema = z
   .object({
-    nomeCurso: z
-      .string()
-      .max(50, 'Máximo de 50 caracteres')
-      .optional(),
+    nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     organizacaoResponsavel: z
       .string()
       .max(50, 'Máximo de 50 caracteres')
@@ -106,10 +96,9 @@ const formacaoComplementarItemSchema = z
     anoConclusao: z
       .string()
       .optional()
-      .refine(
-        (val) => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val),
-        { message: 'Selecione um ano válido' }
-      ),
+      .refine(val => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val), {
+        message: 'Selecione um ano válido',
+      }),
   })
   .superRefine((data, ctx) => {
     const hasAny =
@@ -163,7 +152,7 @@ const idiomaItemSchema = z.object({
     .string()
     .optional()
     .refine(
-      (val) =>
+      val =>
         !val || IDIOMAS_OPCOES.includes(val as (typeof IDIOMAS_OPCOES)[number]),
       { message: 'Selecione um idioma válido' }
     ),
@@ -171,7 +160,7 @@ const idiomaItemSchema = z.object({
     .string()
     .optional()
     .refine(
-      (val) =>
+      val =>
         !val ||
         NIVEL_IDIOMA_OPCOES.includes(
           val as (typeof NIVEL_IDIOMA_OPCOES)[number]
@@ -185,7 +174,7 @@ export const curriculoFormacaoSchema = z.object({
     .string()
     .min(1, 'Escolaridade é obrigatória')
     .refine(
-      (val) =>
+      val =>
         ESCOLARIDADE_OPCOES.includes(
           val as (typeof ESCOLARIDADE_OPCOES)[number]
         ),

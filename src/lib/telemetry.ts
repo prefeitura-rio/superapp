@@ -1,4 +1,4 @@
-import { trace, type Span, SpanStatusCode, context } from '@opentelemetry/api'
+import { type Span, SpanStatusCode, context, trace } from '@opentelemetry/api'
 
 /**
  * Get the tracer instance for the application
@@ -22,7 +22,7 @@ export async function withSpan<T>(
 ): Promise<T> {
   const tracer = getTracer()
 
-  return tracer.startActiveSpan(name, async (span) => {
+  return tracer.startActiveSpan(name, async span => {
     try {
       // Add custom attributes if provided
       if (attributes) {
@@ -135,22 +135,19 @@ export async function traceServerComponent<T>(
   fn: () => Promise<T>,
   attributes?: Record<string, string | number | boolean>
 ): Promise<T> {
-  return withSpan(
-    `component.${componentName}`,
-    async (span) => {
-      span.setAttribute('component.type', 'server')
+  return withSpan(`component.${componentName}`, async span => {
+    span.setAttribute('component.type', 'server')
 
-      if (attributes) {
-        for (const [key, value] of Object.entries(attributes)) {
-          span.setAttribute(`component.${key}`, value)
-        }
+    if (attributes) {
+      for (const [key, value] of Object.entries(attributes)) {
+        span.setAttribute(`component.${key}`, value)
       }
-
-      addSpanEvent('component.render.start')
-      const result = await fn()
-      addSpanEvent('component.render.complete')
-
-      return result
     }
-  )
+
+    addSpanEvent('component.render.start')
+    const result = await fn()
+    addSpanEvent('component.render.complete')
+
+    return result
+  })
 }

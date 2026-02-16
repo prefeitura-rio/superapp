@@ -30,7 +30,10 @@ function RecentlyAddedVagasSkeleton() {
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-2">
                   {Array.from({ length: 3 }).map((_, badgeIndex) => (
-                    <Skeleton key={badgeIndex} className="h-5 w-20 rounded-full" />
+                    <Skeleton
+                      key={badgeIndex}
+                      className="h-5 w-20 rounded-full"
+                    />
                   ))}
                 </div>
               </div>
@@ -63,7 +66,10 @@ function RecentlyAddedVagasSkeleton() {
                 {/* Badges */}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {Array.from({ length: 3 }).map((_, badgeIndex) => (
-                    <Skeleton key={badgeIndex} className="h-5 w-24 rounded-full" />
+                    <Skeleton
+                      key={badgeIndex}
+                      className="h-5 w-24 rounded-full"
+                    />
                   ))}
                 </div>
               </div>

@@ -1,4 +1,9 @@
-export type MeiCompanyStatus = 'Ativa' | 'Suspensa' | 'Inapta' | 'Baixada' | 'Nula'
+export type MeiCompanyStatus =
+  | 'Ativa'
+  | 'Suspensa'
+  | 'Inapta'
+  | 'Baixada'
+  | 'Nula'
 
 export interface MeiCnae {
   codigo: string

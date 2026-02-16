@@ -1,10 +1,10 @@
-import { http, HttpResponse } from 'msw'
-import { describe, expect, test, vi } from 'vitest'
-import { server } from '@/test/mocks/server'
-import { TEST_ENV } from '@/test/mocks/env'
-import { updateAddress } from '../update-user-address'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { TEST_ENV } from '@/test/mocks/env'
+import { server } from '@/test/mocks/server'
+import { http, HttpResponse } from 'msw'
 import { revalidateTag } from 'next/cache'
+import { describe, expect, test, vi } from 'vitest'
+import { updateAddress } from '../update-user-address'
 
 const RMI_BASE_URL = TEST_ENV.NEXT_PUBLIC_BASE_API_URL_RMI
 
@@ -35,10 +35,7 @@ describe('updateAddress', () => {
     test('throws error for API failure (status 400)', async () => {
       server.use(
         http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/address`, () => {
-          return HttpResponse.json(
-            { error: 'CEP inválido' },
-            { status: 400 }
-          )
+          return HttpResponse.json({ error: 'CEP inválido' }, { status: 400 })
         })
       )
 

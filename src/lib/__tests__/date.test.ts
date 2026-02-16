@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   formatDate,
   formatTimeRange,
   formatTimestamp,
   isUpdatedWithin,
 } from '@/lib/date'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 describe('isUpdatedWithin', () => {
   beforeEach(() => {

@@ -36,9 +36,3 @@ export default function MyCoursesLoading() {
     </div>
   )
 }
-
-
-
-
-
-

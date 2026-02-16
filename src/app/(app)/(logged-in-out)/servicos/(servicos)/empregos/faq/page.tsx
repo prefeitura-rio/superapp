@@ -1,5 +1,5 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { FormattedContent, type FaqSection } from '@/lib/faq-utils'
+import { type FaqSection, FormattedContent } from '@/lib/faq-utils'
 
 const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   {
@@ -29,14 +29,12 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   {
     id: 'idade-inscricao',
     title: 'Há idade para se inscrever?',
-    content:
-      'Sim. Pessoas a partir de 16 anos podem se inscrever.',
+    content: 'Sim. Pessoas a partir de 16 anos podem se inscrever.',
   },
   {
     id: 'pre-inscricao-paga',
     title: 'A pré-inscrição é paga?',
-    content:
-      'Não. A Pré-inscrição é gratuita.',
+    content: 'Não. A Pré-inscrição é gratuita.',
   },
 ]
 

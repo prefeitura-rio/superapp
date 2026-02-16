@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { ensureUrlProtocol } from '@/lib/url-utils'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import { ensureUrlProtocol } from '@/lib/url-utils'
 import Link from 'next/link'
 import { MarkdownRenderer } from './markdown-renderer'
 

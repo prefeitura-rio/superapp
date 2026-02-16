@@ -1,10 +1,10 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { refreshAccessToken } from '@/lib/token-refresh'
 import {
   getAccessTokenCookieConfig,
   getRefreshTokenCookieConfig,
 } from '@/lib/auth-cookie-config'
+import { refreshAccessToken } from '@/lib/token-refresh'
+import { cookies } from 'next/headers'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Endpoint para refresh manual de access token

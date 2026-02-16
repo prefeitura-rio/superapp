@@ -1,18 +1,18 @@
-import { NodeSDK } from '@opentelemetry/sdk-node'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc'
+import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch'
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { Resource } from '@opentelemetry/resources'
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import {
+  AlwaysOnSampler,
+  ParentBasedSampler,
+  TraceIdRatioBasedSampler,
+} from '@opentelemetry/sdk-trace-base'
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions'
 import { SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } from '@opentelemetry/semantic-conventions'
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch'
-import {
-  TraceIdRatioBasedSampler,
-  AlwaysOnSampler,
-  ParentBasedSampler,
-} from '@opentelemetry/sdk-trace-base'
 
 export async function register() {
   // Check if OpenTelemetry is enabled
@@ -35,7 +35,9 @@ export async function register() {
   // OTEL_TRACES_SAMPLER can be: always_on, always_off, traceidratio
   // OTEL_TRACES_SAMPLER_ARG is the ratio for traceidratio (0.0 to 1.0)
   const samplerType = process.env.OTEL_TRACES_SAMPLER || 'always_on'
-  const samplerArg = Number.parseFloat(process.env.OTEL_TRACES_SAMPLER_ARG || '1.0')
+  const samplerArg = Number.parseFloat(
+    process.env.OTEL_TRACES_SAMPLER_ARG || '1.0'
+  )
 
   let sampler
   if (samplerType === 'traceidratio') {
@@ -79,7 +81,7 @@ export async function register() {
     instrumentations: [
       // Auto-instrument HTTP requests (both incoming and outgoing)
       new HttpInstrumentation({
-        ignoreIncomingRequestHook: (req) => {
+        ignoreIncomingRequestHook: req => {
           // Ignore health check and static assets
           const url = req.url || ''
           return (
@@ -105,7 +107,9 @@ export async function register() {
     sdk
       .shutdown()
       .then(() => console.log('[OpenTelemetry] Tracing terminated'))
-      .catch((error) => console.error('[OpenTelemetry] Error terminating tracing', error))
+      .catch(error =>
+        console.error('[OpenTelemetry] Error terminating tracing', error)
+      )
       .finally(() => process.exit(0))
   })
 }

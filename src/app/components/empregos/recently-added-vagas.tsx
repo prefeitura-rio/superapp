@@ -20,7 +20,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
       {/* Mobile: cards h-47 w-47 (11.75rem) em linha com scroll horizontal */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
-          {limitedVagas.map((vaga) => (
+          {limitedVagas.map(vaga => (
             <div key={vaga.id} className="shrink-0 h-[11.75rem] w-[11.75rem]">
               <VagaCard
                 vaga={vaga}
@@ -34,7 +34,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
       {/* Desktop: grid 4 colunas responsivo */}
       <div className="hidden min-[577px]:block px-4 pb-6">
         <div className="grid grid-cols-4 gap-2">
-          {limitedVagas.map((vaga) => (
+          {limitedVagas.map(vaga => (
             <VagaCard
               key={vaga.id}
               vaga={vaga}

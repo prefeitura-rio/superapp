@@ -55,7 +55,9 @@ function createDynamicSchema(informacoes: InformacaoComplementar[]) {
     switch (info.tipo_campo) {
       case 'resposta_curta': {
         if (info.obrigatorio) {
-          schemaFields[fieldName] = z.string().min(1, 'Este campo é obrigatório')
+          schemaFields[fieldName] = z
+            .string()
+            .min(1, 'Este campo é obrigatório')
         } else {
           schemaFields[fieldName] = z.string().optional()
         }
@@ -101,7 +103,9 @@ function createDynamicSchema(informacoes: InformacaoComplementar[]) {
 
       case 'selecao_multipla': {
         if (info.obrigatorio) {
-          schemaFields[fieldName] = z.array(z.string()).min(1, 'Selecione pelo menos uma opção')
+          schemaFields[fieldName] = z
+            .array(z.string())
+            .min(1, 'Selecione pelo menos uma opção')
         } else {
           schemaFields[fieldName] = z.array(z.string()).optional()
         }

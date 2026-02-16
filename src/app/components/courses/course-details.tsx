@@ -427,7 +427,8 @@ function OnlineClassSelection({
                   {singleClass.vacancies}
                   {singleClass.remaining_vacancies !== undefined && (
                     <span className="text-muted-foreground">
-                      {' '}({singleClass.remaining_vacancies} disponíveis)
+                      {' '}
+                      ({singleClass.remaining_vacancies} disponíveis)
                     </span>
                   )}
                 </span>
@@ -680,7 +681,8 @@ function OnlineClassSelection({
                   {selectedClass.vacancies}
                   {selectedClass.remaining_vacancies !== undefined && (
                     <span className="text-muted-foreground">
-                      {' '}({selectedClass.remaining_vacancies} disponíveis)
+                      {' '}
+                      ({selectedClass.remaining_vacancies} disponíveis)
                     </span>
                   )}
                 </span>
@@ -1121,10 +1123,7 @@ export function CourseDetails({
 
   const renderActionButton = () => {
     // Don't render button if user concluded course without certificate
-    if (
-      userEnrollment?.status === 'concluded' &&
-      !course.has_certificate
-    ) {
+    if (userEnrollment?.status === 'concluded' && !course.has_certificate) {
       return null
     }
 

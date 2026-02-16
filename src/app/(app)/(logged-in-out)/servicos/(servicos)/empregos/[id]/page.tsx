@@ -1,7 +1,7 @@
+import { VagaDetailContent } from '@/app/components/empregos/vaga-detail-content'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getMockVagaDetailById } from '@/mocks/mock-vagas'
 import { notFound } from 'next/navigation'
-import { VagaDetailContent } from '@/app/components/empregos/vaga-detail-content'
 
 export const dynamic = 'force-dynamic'
 

@@ -15,8 +15,7 @@ export function StatusFormacaoDrawerContent({
   onClose,
 }: StatusFormacaoDrawerContentProps) {
   const { setValue, watch } = useFormContext<CurriculoFormacaoFormValues>()
-  const value =
-    watch(`formacaoAcademica.${fieldIndex}.status`) ?? ''
+  const value = watch(`formacaoAcademica.${fieldIndex}.status`) ?? ''
 
   const handleSelect = (selected: string) => {
     setValue(`formacaoAcademica.${fieldIndex}.status`, selected, {

@@ -110,7 +110,8 @@ export function FavoritesCard() {
                 {course.title}
               </h3>
               <div className="text-xs text-muted-foreground">
-                {normalizeModalityDisplay(course.modalidade)} • {course.carga_horaria || 'N/A'}h
+                {normalizeModalityDisplay(course.modalidade)} •{' '}
+                {course.carga_horaria || 'N/A'}h
               </div>
             </div>
           </Link>

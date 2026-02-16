@@ -36,7 +36,8 @@ const MOCK_EMPRESAS: EmpresaDetail[] = [
     site: 'https://prefeitura.rio',
     setor: 'Administração Pública',
     tamanho: '+ de 10.000 funcionários',
-    especializacoes: 'Gestão pública, Turismo, Cultura, Educação, Saúde, Mobilidade urbana',
+    especializacoes:
+      'Gestão pública, Turismo, Cultura, Educação, Saúde, Mobilidade urbana',
   },
   {
     cnpj: '33000167000101',
@@ -46,7 +47,8 @@ const MOCK_EMPRESAS: EmpresaDetail[] = [
     site: 'https://petrobras.com.br',
     setor: 'Petróleo e Gás',
     tamanho: '+ de 10.000 funcionários',
-    especializacoes: 'Exploração e produção, Refino, Petroquímica, Energia, Biocombustíveis',
+    especializacoes:
+      'Exploração e produção, Refino, Petroquímica, Energia, Biocombustíveis',
   },
 ]
 

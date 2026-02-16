@@ -1,3 +1,4 @@
+import { getApiV1PropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
 import { mapLegalEntityToMeiCompanyData } from '@/lib/mei-utils'
 import {
   getCitizenContactInfo,
@@ -6,7 +7,6 @@ import {
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
 import { MeiProposalClient } from './mei-proposal-client'
-import { getApiV1PropostasMeiPorEmpresa } from '@/http-courses/propostas-mei/propostas-mei'
 
 export default async function MeiProposalPage({
   params,
