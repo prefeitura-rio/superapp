@@ -18,8 +18,10 @@ interface CustomInputProps
   labelClassName?: string
   optionalLabel?: string
   hint?: string
+  error?: string
   optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
   isEditable?: boolean
+  isRequired?: boolean
 }
 
 const labelVariantStyles = {
@@ -64,6 +66,8 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
       optionalLabel,
       optionalLabelVariant,
       hint,
+      error,
+      isRequired = false,
       ...props
     },
     ref
@@ -72,6 +76,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
     const [showTooltip, setShowTooltip] = useState(false)
     const readOnlyClasses =
       'text-muted-foreground bg-card cursor-not-allowed focus:!outline-none focus:!bg-card focus:!border-border'
+    const effectiveVariant = error ? 'error' : variant
 
     return (
       <div className={cn('space-y-2', containerClassName)}>
@@ -81,11 +86,12 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
               htmlFor={inputId}
               className={cn(
                 'text-sm font-normal',
-                labelVariantStyles[variant],
+                labelVariantStyles[effectiveVariant],
                 labelClassName
               )}
             >
               {label}
+              {isRequired && <span className="text-destructive ml-1">*</span>}
             </label>
 
             {tooltip && (
@@ -93,7 +99,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
                 <Info
                   className={cn(
                     'h-4 w-4 cursor-help',
-                    tooltipIconVariantStyles[variant]
+                    tooltipIconVariantStyles[effectiveVariant]
                   )}
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
@@ -120,7 +126,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             <div
               className={cn(
                 'absolute left-5 top-1/2 transform -translate-y-1/2',
-                iconVariantStyles[variant]
+                iconVariantStyles[effectiveVariant]
               )}
             >
               {leftIcon}
@@ -132,8 +138,10 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             id={inputId}
             disabled={disabled}
             readOnly={!isEditable}
+            aria-invalid={!!error}
             className={cn(
-              'flex w-full rounded-xl border-2 border-border bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
+              'flex w-full rounded-xl border-2 bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
+              error ? 'border-destructive' : 'border-border',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               'placeholder:text-muted-foreground',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -166,7 +174,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             <div
               className={cn(
                 'absolute right-5 top-1/2 transform -translate-y-1/2',
-                iconVariantStyles[variant]
+                iconVariantStyles[effectiveVariant]
               )}
             >
               {rightIcon}
@@ -174,7 +182,12 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
           )}
         </div>
 
-        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+        {error && (
+          <p className="text-sm text-destructive mt-1">{error}</p>
+        )}
+        {hint && !error && (
+          <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+        )}
       </div>
     )
   }

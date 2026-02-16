@@ -35,7 +35,7 @@ export async function register() {
   // OTEL_TRACES_SAMPLER can be: always_on, always_off, traceidratio
   // OTEL_TRACES_SAMPLER_ARG is the ratio for traceidratio (0.0 to 1.0)
   const samplerType = process.env.OTEL_TRACES_SAMPLER || 'always_on'
-  const samplerArg = parseFloat(process.env.OTEL_TRACES_SAMPLER_ARG || '1.0')
+  const samplerArg = Number.parseFloat(process.env.OTEL_TRACES_SAMPLER_ARG || '1.0')
 
   let sampler
   if (samplerType === 'traceidratio') {

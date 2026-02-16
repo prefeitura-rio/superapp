@@ -1,4 +1,4 @@
-import { trace, Span, SpanStatusCode, context } from '@opentelemetry/api'
+import { trace, type Span, SpanStatusCode, context } from '@opentelemetry/api'
 
 /**
  * Get the tracer instance for the application

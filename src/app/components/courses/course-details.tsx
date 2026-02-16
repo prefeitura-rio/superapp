@@ -1120,6 +1120,14 @@ export function CourseDetails({
     )
 
   const renderActionButton = () => {
+    // Don't render button if user concluded course without certificate
+    if (
+      userEnrollment?.status === 'concluded' &&
+      !course.has_certificate
+    ) {
+      return null
+    }
+
     const isAvailable = enrollmentInfo.status === 'available'
     const baseButtonClasses =
       'block text-sm md:text-base w-full py-3 text-center rounded-full hover:brightness-90 transition outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
@@ -1243,6 +1251,7 @@ export function CourseDetails({
           <CourseStatusCard
             status={userEnrollment.status as any}
             className="mx-4"
+            hasCertificate={course.has_certificate}
           />
         )}
         <div className="px-4 py-6 pb-0">
@@ -1257,11 +1266,9 @@ export function CourseDetails({
             </div>
           )}
         </div>
-        {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
-          <div className="px-4 pb-2 py-8 w-full max-w-4xl">
-            {renderActionButton()}
-          </div>
-        )}
+        <div className="px-4 pb-2 py-8 w-full max-w-4xl">
+          {renderActionButton()}
+        </div>
         <LocationSelection
           course={course}
           selectedLocationId={selectedLocationId}

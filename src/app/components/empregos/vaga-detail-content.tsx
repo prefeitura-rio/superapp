@@ -1,11 +1,11 @@
 'use client'
 
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
-import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
+import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
 import { MapPinIcon } from '@/assets/icons'
 import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
-import { CustomButton } from '@/components/ui/custom/custom-button'
+import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
 import { Briefcase, DollarSign, FileText } from 'lucide-react'
 import { Accessibility } from 'lucide-react'
@@ -190,17 +190,18 @@ export function VagaDetailContent({
         {/* Botão */}
         <div className="mt-6">
           {isLoggedIn ? (
-            <CustomButton
-              fullWidth
-              size="lg"
-              className={candidacyButtonClassName}
+            <Link
+              href={`/servicos/empregos/${vaga.id}/inscricao/bem-vindo`}
+              className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 ${candidacyButtonClassName}`}
             >
               Candidatar-se à vaga
-            </CustomButton>
+            </Link>
           ) : (
             <Link
-              href={`/?redirect=/servicos/empregos/${vaga.id}`}
-              className="inline-flex rounded-full items-center justify-center gap-2 w-full rounded-2xl font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
+              href={buildAuthUrl(
+                `/servicos/empregos/${vaga.id}/inscricao/bem-vindo`
+              )}
+              className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
             >
               Fazer login para se candidatar
             </Link>

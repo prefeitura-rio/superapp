@@ -51,7 +51,8 @@
       "next.config.js",
       "next-env.d.ts",
       "node_modules/**",
-      "package-lock.json"
+      "package-lock.json",
+      "**/*.js"
     ]
   }
 }

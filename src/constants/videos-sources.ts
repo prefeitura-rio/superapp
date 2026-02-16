@@ -86,6 +86,12 @@ export const VIDEO_SOURCES = {
     darkVideo:
       'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Proposta-enviada.mp4',
   },
+  jobApplicationSuccess: {
+    lightVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/light/light-Candidatura-enviada.mp4',
+    darkVideo:
+      'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/mp4/dark/dark-Candidatura-enviada.mp4',
+  },
 }
 
 export type VideoSourceProps = {

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 
 interface ActionDivProps {
   label?: string
@@ -17,9 +17,11 @@ interface ActionDivProps {
   containerClassName?: string
   labelClassName?: string
   optionalLabel?: string
-  hint?: string
-  redirectLink?: string
   optionalLabelVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
+  hint?: string
+  error?: string
+  redirectLink?: string
+  isRequired?: boolean
   className?: string
   content?: React.ReactNode
   disabled?: boolean
@@ -51,41 +53,53 @@ const sizeStyles = {
   lg: 'h-18 px-4 text-lg',
 } as const
 
-export const ActionDiv = ({
-  label,
-  tooltip,
-  leftIcon,
-  rightIcon,
-  variant = 'default',
-  size = 'md',
-  disabled = false,
-  className,
-  containerClassName,
-  labelClassName,
-  optionalLabel,
-  optionalLabelVariant = 'default',
-  hint,
-  redirectLink,
-  content,
-  drawerContent,
-  drawerTitle,
-}: ActionDivProps) => {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerType, setDrawerType] = useState<'tooltip' | 'content' | null>(
-    null
-  )
+export const ActionDiv = forwardRef<HTMLDivElement, ActionDivProps>(
+  (
+    {
+      label,
+      tooltip,
+      leftIcon,
+      rightIcon,
+      variant = 'default',
+      size = 'md',
+      disabled = false,
+      className,
+      containerClassName,
+      labelClassName,
+      optionalLabel,
+      optionalLabelVariant = 'default',
+      hint,
+      error,
+      redirectLink,
+      isRequired = false,
+      content,
+      drawerContent,
+      drawerTitle,
+    },
+    ref
+  ) => {
+    const effectiveVariant = error ? 'error' : variant
+    const [drawerOpen, setDrawerOpen] = useState(false)
+    const [drawerType, setDrawerType] = useState<'tooltip' | 'content' | null>(
+      null
+    )
 
-  const handleDrawerOpen =
-    (type: 'tooltip' | 'content') => (e: React.MouseEvent) => {
-      e.preventDefault()
-      setDrawerType(type)
-      setDrawerOpen(true)
-    }
+    const handleDrawerOpen =
+      (type: 'tooltip' | 'content') => (e: React.MouseEvent) => {
+        e.preventDefault()
+        setDrawerType(type)
+        setDrawerOpen(true)
+      }
 
-  const Content = (
-    <div
-      className={cn(
-        'relative group cursor-pointer border-2 border-border rounded-xl text-card-foreground font-normal truncate transition-colors',
+    const Content = (
+      <div
+        ref={ref}
+        tabIndex={-1}
+        aria-invalid={!!error}
+        role={drawerContent ? 'button' : undefined}
+        className={cn(
+        'relative group cursor-pointer border-2 rounded-xl text-card-foreground font-normal truncate transition-colors',
+        error ? 'border-destructive' : 'border-border',
         disabled
           ? 'bg-transparent hover:bg-accent/40'
           : 'bg-card text-muted-foreground',
@@ -97,22 +111,22 @@ export const ActionDiv = ({
         className
       )}
       onClick={
-        redirectLink 
+        redirectLink
           ? undefined // Deixa o Link do Next.js lidar com o clique
-          : drawerContent 
-          ? handleDrawerOpen('content') 
-          : undefined
+          : drawerContent
+            ? handleDrawerOpen('content')
+            : undefined
       }
     >
       {leftIcon && (
-        <div
-          className={cn(
-            'absolute left-5 top-1/2 transform -translate-y-1/2',
-            iconVariantStyles[variant]
-          )}
-        >
-          {leftIcon}
-        </div>
+          <div
+            className={cn(
+              'absolute left-5 top-1/2 transform -translate-y-1/2',
+              iconVariantStyles[effectiveVariant]
+            )}
+          >
+            {leftIcon}
+          </div>
       )}
 
       <div className="flex items-center h-full w-full">
@@ -135,7 +149,7 @@ export const ActionDiv = ({
         <div
           className={cn(
             'absolute right-5 top-1/2 transform -translate-y-1/2',
-            iconVariantStyles[variant]
+            iconVariantStyles[effectiveVariant]
           )}
         >
           {rightIcon}
@@ -152,11 +166,12 @@ export const ActionDiv = ({
             <div
               className={cn(
                 'text-sm font-normal',
-                labelVariantStyles[variant],
+                labelVariantStyles[effectiveVariant],
                 labelClassName
               )}
             >
               {label}
+              {isRequired && <span className="text-destructive ml-1">*</span>}
             </div>
 
             {tooltip && (
@@ -164,7 +179,7 @@ export const ActionDiv = ({
                 <InfoIcon
                   className={cn(
                     'h-5 w-5 cursor-help',
-                    tooltipIconVariantStyles[variant]
+                    tooltipIconVariantStyles[effectiveVariant]
                   )}
                   onClick={handleDrawerOpen('tooltip')}
                 />
@@ -172,12 +187,11 @@ export const ActionDiv = ({
             )}
           </div>
         )}
-        {redirectLink ? (
-          <Link href={redirectLink}>{Content}</Link>
-        ) : (
-          Content
+        {redirectLink ? <Link href={redirectLink}>{Content}</Link> : Content}
+        {error && <p className="text-sm text-destructive mt-1">{error}</p>}
+        {hint && !error && (
+          <p className="text-xs text-muted-foreground mt-1">{hint}</p>
         )}
-        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </div>
       {drawerType !== null && (
         <BottomSheet
@@ -197,6 +211,7 @@ export const ActionDiv = ({
       )}
     </>
   )
-}
+  }
+)
 
 ActionDiv.displayName = 'ActionDiv'

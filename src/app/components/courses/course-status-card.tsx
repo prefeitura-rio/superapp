@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 interface CourseStatusCardProps {
   status: 'pending' | 'approved' | 'concluded' | 'rejected' | 'cancelled'
   className?: string
+  hasCertificate?: boolean
 }
 
 const statusConfig = {
@@ -37,22 +38,35 @@ const statusConfig = {
       'Sua inscrição foi reprovada. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
     badgeClassName: 'bg-destructive text-background dark:text-foreground',
   },
-}
+} as const
 
-export function CourseStatusCard({ status, className }: CourseStatusCardProps) {
+const concludedMessageWithoutCertificate =
+  'Parabéns! Você concluiu o curso com sucesso.'
+
+export function CourseStatusCard({
+  status,
+  className,
+  hasCertificate = true,
+}: CourseStatusCardProps) {
   const config = statusConfig[status]
+
+  // For concluded status, use different message based on certificate availability
+  const message =
+    status === 'concluded' && !hasCertificate
+      ? concludedMessageWithoutCertificate
+      : config.message
 
   return (
     <div
       className={cn(
-        'p-4 bg-card mt-6 rounded-2xl border-muted-foreground border-dashed border-1',
+        'p-4 bg-card mt-6 rounded-2xl border-muted-foreground border-dashed border',
         className
       )}
     >
       <div className="flex flex-col items-start justify-between gap-2">
         <Badge className={config.badgeClassName}>{config.badgeText}</Badge>
         <p className="text-xs md:text-sm text-foreground-light leading-4 md:leading-5 whitespace-pre-line">
-          {config.message}
+          {message}
         </p>
       </div>
     </div>

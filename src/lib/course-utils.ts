@@ -259,8 +259,6 @@ export function getCourseEnrollmentInfo(
 
   // Check if user has concluded the course
   if (userEnrollment?.status === 'concluded') {
-    const latestClassEndDate = getLatestClassEndDate(course)
-
     // If user has concluded and course has certificate, show certificate available
     if (course.has_certificate) {
       return {
@@ -270,6 +268,13 @@ export function getCourseEnrollmentInfo(
         canEnroll: false,
         certificateUrl: userEnrollment.certificate_url, // Pode ser undefined
       }
+    }
+    // If user has concluded but course has no certificate, show concluded status without button
+    return {
+      status: 'course_ended',
+      buttonText: '',
+      isDisabled: true,
+      canEnroll: false,
     }
   }
 

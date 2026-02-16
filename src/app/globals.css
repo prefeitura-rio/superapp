@@ -170,6 +170,7 @@ select:-webkit-autofill:focus {
   --color-popover-line: var(--popover-line);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-focused: var(--primary-focused);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-terciary: var(--terciary);
@@ -253,6 +254,7 @@ select:-webkit-autofill:focus {
   --popover-line: #d4d4d8;
   --primary: #13335a;
   --primary-foreground: #f8fafc;
+  --primary-focused: #2A476A;
   --secondary: #e4e4e7;
   --secondary-foreground: #0f172b;
   --terciary: #d4d4d8;
@@ -332,6 +334,7 @@ select:-webkit-autofill:focus {
   --popover-line: #3f3f46;
   --primary: #8ec5ff;
   --primary-foreground: #f8fafc;
+  --primary-focused: #81B2E7;
   --secondary: #27272a;
   --secondary-foreground: #0f172b;
   --terciary: #3f3f46;
