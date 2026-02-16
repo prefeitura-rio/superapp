@@ -20,7 +20,8 @@ const getUrl = (contextUrl: string): string => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_RMI
 
   if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_BASE_API_URL_RMI environment variable is not set.'
+    throw new Error(
+      'NEXT_PUBLIC_BASE_API_URL_RMI environment variable is not set.'
     )
   }
 
