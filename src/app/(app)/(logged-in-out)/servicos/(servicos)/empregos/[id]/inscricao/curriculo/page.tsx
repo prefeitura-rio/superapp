@@ -1,6 +1,6 @@
-import { CurriculoContent } from '../../../curriculo/curriculo-content'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import { notFound } from 'next/navigation'
+import { CurriculoContent } from '../../../curriculo/curriculo-content'
 
 interface PageProps {
   params: Promise<{ id: string }>

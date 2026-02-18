@@ -1,7 +1,7 @@
-import { BemVindoContent } from './bem-vindo-content'
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
+import { BemVindoContent } from './bem-vindo-content'
 
 export const dynamic = 'force-dynamic'
 

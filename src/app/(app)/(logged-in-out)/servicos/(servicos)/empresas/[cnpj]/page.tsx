@@ -1,5 +1,5 @@
-import { EmpresaDetailContent } from '@/app/components/empresas/empresa-detail-content'
 import { processVagas } from '@/app/components/empregos/vagas-utils'
+import { EmpresaDetailContent } from '@/app/components/empresas/empresa-detail-content'
 import { getApiV1EmpregabilidadeEmpresasCnpj } from '@/http-courses/empregabilidade-empresas/empregabilidade-empresas'
 import { getApiV1EmpregabilidadeVagas } from '@/http-courses/empregabilidade-vagas/empregabilidade-vagas'
 import type { EmpregabilidadeVaga } from '@/http-courses/models'
@@ -18,9 +18,8 @@ export default async function EmpresaDetailPage({ params }: PageProps) {
 
   try {
     // Busca empresa da API
-    const empresaResponse = await getApiV1EmpregabilidadeEmpresasCnpj(
-      decodedCnpj
-    )
+    const empresaResponse =
+      await getApiV1EmpregabilidadeEmpresasCnpj(decodedCnpj)
 
     if (empresaResponse.status !== 200 || !empresaResponse.data) {
       notFound()

@@ -23,7 +23,12 @@ export function CandidaturaEnviadaDrawer({
   dismissible = true,
 }: CandidaturaEnviadaDrawerProps) {
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} modal dismissible={dismissible}>
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      modal
+      dismissible={dismissible}
+    >
       <DrawerHeader className="sr-only">
         <DrawerTitle className="sr-only">
           Candidatura enviada e currículo atualizado

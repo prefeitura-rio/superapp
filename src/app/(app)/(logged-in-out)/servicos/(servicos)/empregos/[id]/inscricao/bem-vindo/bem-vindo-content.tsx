@@ -25,7 +25,9 @@ export function BemVindoContent({ vagaId }: BemVindoContentProps) {
 
       if (result.success) {
         // Sucesso: vai para próxima página
-        router.push(`/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`)
+        router.push(
+          `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+        )
       } else {
         // Falha: mostra toast e redireciona para lista de empregos
         toast.error(result.error || 'Algo deu errado. Tente novamente.')
