@@ -12,7 +12,7 @@ export interface VagaBadge {
 }
 
 export interface VagaCardData {
-  id: number
+  id: string
   titulo: string
   empresaNome: string
   empresaLogo?: string

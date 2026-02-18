@@ -3,18 +3,18 @@
 import { AllVagas } from './all-vagas'
 import { RecentlyAddedVagas } from './recently-added-vagas'
 import type { VagaCardData } from './vaga-card'
+import { separateVagas } from './vagas-utils'
 
 interface EmpregosPageClientProps {
   vagas: VagaCardData[]
 }
 
 export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
-  const recentlyAddedVagas = vagas.slice(0, 4)
-  const allVagas = vagas
+  const { recentVagas, allVagas } = separateVagas(vagas)
 
   return (
     <>
-      <RecentlyAddedVagas vagas={recentlyAddedVagas} />
+      <RecentlyAddedVagas vagas={recentVagas} />
       <AllVagas vagas={allVagas} />
     </>
   )

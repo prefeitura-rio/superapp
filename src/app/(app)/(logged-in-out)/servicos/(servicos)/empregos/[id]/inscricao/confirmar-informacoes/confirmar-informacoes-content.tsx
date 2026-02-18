@@ -72,9 +72,7 @@ export function ConfirmarInformacoesContent({
   const handleDisabilityClick = () => setDisabilityDrawerOpen(true)
 
   const handleContinuar = () => {
-    router.push(
-      `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
-    )
+    router.push(`/servicos/empregos/${vagaId}/inscricao/curriculo`)
   }
 
   return (

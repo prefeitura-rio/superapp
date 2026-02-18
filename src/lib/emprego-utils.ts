@@ -2,7 +2,7 @@ import type {
   VagaBadge,
   VagaCardData,
 } from '@/app/components/empregos/vaga-card'
-import type { ModelsEmprego } from '@/http-courses/models'
+import type { EmpregabilidadeVaga, ModelsEmprego } from '@/http-courses/models'
 
 export interface EtapaProcessoSeletivo {
   ordem: number
@@ -11,7 +11,7 @@ export interface EtapaProcessoSeletivo {
 }
 
 export interface VagaDetail {
-  id: number
+  id: string
   titulo: string
   dataEncerramentoInscricoes: string
   badges: VagaBadge[]
@@ -101,7 +101,7 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
   const valorVaga = salario != null ? formatSalary(salario) : 'A combinar'
 
   return {
-    id: emprego.id ?? 0,
+    id: String(emprego.id ?? 0),
     titulo: emprego.titulo ?? 'Vaga',
     dataEncerramentoInscricoes: formatDateLong(emprego.data_limite_candidatura),
     badges,
@@ -157,10 +157,110 @@ export function mapModelsEmpregoToVagaCardData(
   }
 
   return {
-    id: emprego.id ?? 0,
+    id: String(emprego.id ?? 0),
     titulo: emprego.titulo ?? 'Vaga',
     empresaNome: emprego.empresa?.nome ?? 'Empresa',
     empresaLogo: (emprego.empresa as { logo?: string })?.logo,
     badges,
+  }
+}
+
+/**
+ * Transforma EmpregabilidadeVaga da API em VagaDetail
+ */
+export function mapEmpregabilidadeVagaToDetail(
+  vaga: EmpregabilidadeVaga
+): VagaDetail {
+  const badges: VagaBadge[] = []
+
+  // Badge do modelo de trabalho
+  if (vaga.modelo_trabalho?.descricao) {
+    badges.push({
+      text: vaga.modelo_trabalho.descricao,
+      type: 'modality',
+    })
+  }
+
+  // Badge do bairro
+  if (vaga.bairro) {
+    badges.push({
+      text: vaga.bairro,
+      type: 'bairro',
+    })
+  }
+
+  // Badge do regime de contratação
+  if (vaga.regime_contratacao?.descricao) {
+    badges.push({
+      text: vaga.regime_contratacao.descricao,
+      type: undefined,
+    })
+  }
+
+  // Badge do salário
+  if (vaga.valor_vaga && vaga.valor_vaga > 0) {
+    badges.push({
+      text: formatSalary(vaga.valor_vaga),
+      type: 'salary',
+    })
+  }
+
+  // Badges de acessibilidade PCD
+  const preferencialPcd = vaga.acessibilidade_pcd === 'preferencial_pcd'
+  const acessivelPcd =
+    vaga.acessibilidade_pcd === 'para_pcd' ||
+    vaga.acessibilidade_pcd === 'exclusivo_pcd'
+
+  if (preferencialPcd) {
+    badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
+  } else if (acessivelPcd) {
+    badges.push({ text: 'Acessível PcD', type: 'acessivel_pcd' })
+  }
+
+  // Label de acessibilidade
+  const acessibilidadeLabel = preferencialPcd
+    ? 'Preferencial para PcD'
+    : acessivelPcd
+      ? 'Acessível para PcD'
+      : 'Não informado'
+
+  // Valor da vaga formatado
+  const valorVaga =
+    vaga.valor_vaga && vaga.valor_vaga > 0
+      ? formatSalary(vaga.valor_vaga)
+      : 'A combinar'
+
+  // Etapas do processo seletivo
+  const etapasProcessoSeletivo: EtapaProcessoSeletivo[] | undefined =
+    vaga.etapas?.map((etapa, index) => ({
+      ordem: index + 1,
+      titulo: etapa.titulo || `Etapa ${index + 1}`,
+      descricao: etapa.descricao,
+    }))
+
+  return {
+    id: vaga.id || '',
+    titulo: vaga.titulo || 'Vaga',
+    dataEncerramentoInscricoes: formatDateLong(vaga.data_limite),
+    badges,
+    empresaNome:
+      vaga.contratante?.nome_fantasia ||
+      vaga.contratante?.razao_social ||
+      'Empresa',
+    empresaLogo: vaga.contratante?.url_logo,
+    empresaCnpj: vaga.contratante?.cnpj,
+    descricao: vaga.descricao || '',
+    valorVaga,
+    regimeContratacao: vaga.regime_contratacao?.descricao || '—',
+    modeloTrabalho: vaga.modelo_trabalho?.descricao || '—',
+    localTrabalho: vaga.bairro || '—',
+    dataLimiteInscricao: formatDateBr(vaga.data_limite),
+    acessibilidade: acessibilidadeLabel,
+    requisitos: vaga.requisitos || '',
+    diferenciais: vaga.diferenciais,
+    responsabilidades: vaga.responsabilidades,
+    beneficios: vaga.beneficios || '',
+    etapasProcessoSeletivo,
+    orgaoParceiro: vaga.orgao_parceiro?.name,
   }
 }

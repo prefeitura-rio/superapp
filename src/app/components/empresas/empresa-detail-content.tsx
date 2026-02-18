@@ -3,7 +3,7 @@
 import type { VagaCardData } from '@/app/components/empregos/vaga-card'
 import { VagaCard } from '@/app/components/empregos/vaga-card'
 import { ChevronLeftIcon } from '@/assets/icons'
-import type { EmpresaDetail } from '@/mocks/mock-empresas'
+import type { EmpresaDetail } from '@/lib/empresa-utils'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 

@@ -5,6 +5,9 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { completeOnboarding } from './actions'
 
 interface BemVindoContentProps {
   vagaId: string
@@ -12,9 +15,36 @@ interface BemVindoContentProps {
 
 export function BemVindoContent({ vagaId }: BemVindoContentProps) {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleContinuar = () => {
-    router.push(`/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`)
+  const handleContinuar = async () => {
+    setIsLoading(true)
+
+    try {
+      const result = await completeOnboarding()
+
+      if (result.success) {
+        // Sucesso: vai para próxima página
+        router.push(`/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`)
+      } else {
+        // Falha: mostra toast e redireciona para lista de empregos
+        toast.error(result.error || 'Algo deu errado. Tente novamente.')
+
+        // Aguarda um momento para o usuário ver o toast
+        setTimeout(() => {
+          router.push('/servicos/empregos')
+        }, 2000)
+      }
+    } catch (error) {
+      console.error('Erro ao continuar:', error)
+      toast.error('Algo deu errado. Tente novamente.')
+
+      setTimeout(() => {
+        router.push('/servicos/empregos')
+      }, 2000)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -48,8 +78,9 @@ export function BemVindoContent({ vagaId }: BemVindoContentProps) {
           variant="primary"
           onClick={handleContinuar}
           className="rounded-full"
+          disabled={isLoading}
         >
-          Continuar
+          {isLoading ? 'Carregando...' : 'Continuar'}
         </CustomButton>
       </div>
     </>

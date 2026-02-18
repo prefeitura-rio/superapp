@@ -1,6 +1,7 @@
 'use client'
 
 import { ActionDiv } from '@/app/components/action-div'
+import { CandidaturaEnviadaDrawer } from '@/app/components/empregos/candidatura-enviada-drawer'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
   Accordion,
@@ -14,7 +15,9 @@ import { Separator } from '@/components/ui/separator'
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import {
   Controller,
@@ -1088,8 +1091,23 @@ const defaultSituacaoValues: CurriculoSituacaoFormValues = {
   tipoVinculo: [],
 }
 
-export function CurriculoContent() {
+export interface CurriculoContentProps {
+  /** Quando definido, exibe o botão Continuar e redireciona para o fluxo de inscrição. */
+  inscricaoVagaId?: string
+  /** Rota do header "voltar". Usado no fluxo de inscrição (ex: página da vaga). */
+  backRoute?: string
+  /** Se a vaga tem perguntas adicionais; quando true, Continuar leva para perguntas-adicionais, senão abre bottom sheet com confetti. */
+  hasPerguntasAdicionais?: boolean
+}
+
+export function CurriculoContent({
+  inscricaoVagaId,
+  backRoute = '/servicos/empregos',
+  hasPerguntasAdicionais = false,
+}: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
+  const [successSheetOpen, setSuccessSheetOpen] = useState(false)
+  const router = useRouter()
   const formacaoSnapshotRef = useRef<Pick<
     CurriculoFormacaoFormValues,
     'escolaridade' | 'formacaoAcademica' | 'formacaoComplementar' | 'idiomas'
@@ -1236,9 +1254,21 @@ export function CurriculoContent() {
 
   const handleContinuar = () => {
     form.handleSubmit(
-      data => {
-        // TODO: navegação ou submit quando os formulários estiverem prontos
-        console.log('Formação:', data)
+      () => {
+        if (inscricaoVagaId) {
+          if (hasPerguntasAdicionais) {
+            router.push(
+              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+            )
+          } else {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.7 },
+            })
+            setSuccessSheetOpen(true)
+          }
+        }
       },
       errors => {
         console.log('Erros:', errors)
@@ -1247,13 +1277,18 @@ export function CurriculoContent() {
     )()
   }
 
+  const handleSuccessSheetOpenChange = (open: boolean) => {
+    setSuccessSheetOpen(open)
+    if (!open) router.push('/servicos/empregos')
+  }
+
   return (
     <>
       <div className="max-w-4xl mx-auto">
         <SecondaryHeader
           fixed={false}
           className="max-w-4xl mx-auto"
-          route="/servicos/empregos"
+          route={backRoute}
         />
       </div>
 
@@ -1383,19 +1418,27 @@ export function CurriculoContent() {
             </AccordionItem>
           </Accordion>
 
-          <div className="mt-auto pt-8 pb-8 shrink-0">
-            <CustomButton
-              size="lg"
-              fullWidth
-              variant="primary"
-              onClick={handleContinuar}
-              className="rounded-full"
-            >
-              Continuar
-            </CustomButton>
-          </div>
+          {inscricaoVagaId ? (
+            <div className="mt-auto pt-8 pb-8 shrink-0">
+              <CustomButton
+                size="lg"
+                fullWidth
+                variant="primary"
+                onClick={handleContinuar}
+                className="rounded-full"
+              >
+                Continuar
+              </CustomButton>
+            </div>
+          ) : null}
         </div>
       </FormProvider>
+
+      <CandidaturaEnviadaDrawer
+        open={successSheetOpen}
+        onOpenChange={handleSuccessSheetOpenChange}
+        dismissible
+      />
     </>
   )
 }
