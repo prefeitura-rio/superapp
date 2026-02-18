@@ -7,7 +7,7 @@ import type { VagaDetail } from '@/lib/emprego-utils'
  */
 export const MOCK_VAGAS: VagaCardData[] = [
   {
-    id: 1,
+    id: '1',
     titulo: 'Mestre de Obras - Alta experiência',
     empresaNome: 'Odebrecht Engenharia e Construção',
     empresaCnpj: '60746948000112',
@@ -19,7 +19,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 2,
+    id: '2',
     titulo: 'Guia de Turismo Bilíngue',
     empresaNome: 'Prefeitura Municipal do Rio de Janeiro',
     empresaCnpj: '41442565000180',
@@ -31,7 +31,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 3,
+    id: '3',
     titulo: 'Engenheiro de Processos Sênior',
     empresaNome: 'Petrobrás S.A.',
     empresaCnpj: '33000167000101',
@@ -43,7 +43,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 11,
+    id: '11',
     titulo: 'Encarregado de Obras',
     empresaNome: 'Odebrecht Engenharia e Construção',
     empresaCnpj: '60746948000112',
@@ -55,7 +55,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 12,
+    id: '12',
     titulo: 'Agente de Atendimento ao Cidadão',
     empresaNome: 'Prefeitura Municipal do Rio de Janeiro',
     empresaCnpj: '41442565000180',
@@ -66,7 +66,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 13,
+    id: '13',
     titulo: 'Técnico de Manutenção Industrial',
     empresaNome: 'Petrobrás S.A.',
     empresaCnpj: '33000167000101',
@@ -78,7 +78,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 4,
+    id: '4',
     titulo: 'Desenvolvedor de Software',
     empresaNome: 'Google',
     badges: [
@@ -87,7 +87,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 5,
+    id: '5',
     titulo: 'Ajudante de Pedreiro',
     empresaNome: 'Prefeitura',
     badges: [
@@ -98,7 +98,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 6,
+    id: '6',
     titulo: 'Vendedor de Loja',
     empresaNome: 'SENAI',
     badges: [
@@ -108,7 +108,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 7,
+    id: '7',
     titulo: 'Analista Financeiro',
     empresaNome: 'Banco do Brasil',
     badges: [
@@ -119,7 +119,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 8,
+    id: '8',
     titulo: 'Atendente de Telemarketing',
     empresaNome: 'Claro S.A.',
     badges: [
@@ -129,7 +129,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 9,
+    id: '9',
     titulo: 'Assistente Administrativo',
     empresaNome: 'Prefeitura Municipal',
     badges: [
@@ -139,7 +139,7 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
-    id: 10,
+    id: '10',
     titulo: 'Cozinheiro',
     empresaNome: 'Restaurante Carioca',
     badges: [
@@ -163,7 +163,7 @@ const ETAPAS_PROCESSO_PADRAO: VagaDetail['etapasProcessoSeletivo'] = [
 ]
 
 const MOCK_DETAIL_BY_ID: Record<
-  number,
+  string,
   Partial<
     Pick<
       VagaDetail,
@@ -254,7 +254,7 @@ function getDefaultMockDetail(
 }
 
 export function getMockVagaDetailById(id: number): VagaDetail | null {
-  const vaga = MOCK_VAGAS.find(v => v.id === id)
+  const vaga = MOCK_VAGAS.find(v => v.id === String(id))
   if (!vaga) return null
   const extra = getDefaultMockDetail(vaga)
   const modalityBadge = vaga.badges.find(b => b.type === 'modality')
