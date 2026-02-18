@@ -11,4 +11,5 @@ export interface HandlersHealthResponse {
   services?: HandlersHealthResponseServices
   status?: boolean
   timestamp?: string
+  version?: string
 }

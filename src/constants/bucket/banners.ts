@@ -14,3 +14,5 @@ export const cicloCariocaIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas.png'
 export const acessarCarteiraIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/acessar-carteira.png'
+export const empregabilidadeBannerIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/avatar-empregabilidade.png'

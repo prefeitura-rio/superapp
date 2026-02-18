@@ -15,7 +15,7 @@ export async function handleExpiredToken(
   // Try to refresh the token if we have a refresh token
   if (refreshToken) {
     const refreshResult = await refreshAccessToken(refreshToken)
-    
+
     if (refreshResult.success && refreshResult.accessToken) {
       console.log('[AUTH_MIDDLEWARE] Token refreshed successfully', {
         path: request.nextUrl.pathname,

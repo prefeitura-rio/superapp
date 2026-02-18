@@ -13,11 +13,11 @@ export async function updateAddress(
   addressData: ModelsSelfDeclaredAddressInput
 ) {
   const userAuthInfo = await getUserInfoFromToken()
-  
+
   if (!userAuthInfo.cpf) {
     throw new Error('Usuário não autenticado')
   }
-  
+
   try {
     const response = await putCitizenCpfAddress(userAuthInfo.cpf, addressData)
 
@@ -26,7 +26,7 @@ export async function updateAddress(
       const errorData = response.data as HandlersErrorResponse
       throw new Error(errorData?.error || 'Erro ao atualizar endereço')
     }
-    
+
     revalidateTag(`user-info-${userAuthInfo.cpf}`)
     return { success: true, data: response.data }
   } catch (error: any) {
@@ -35,7 +35,7 @@ export async function updateAddress(
       const err = error as HandlersErrorResponse
       throw new Error(err?.error || 'Erro ao atualizar endereço')
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

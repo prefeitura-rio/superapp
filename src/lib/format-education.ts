@@ -4,4 +4,3 @@ export function formatEducation(education: string | undefined | null): string {
   }
   return education
 }
-

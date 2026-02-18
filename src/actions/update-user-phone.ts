@@ -7,14 +7,14 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
   const user = await getUserInfoFromToken()
-  
+
   if (!user.cpf) {
     throw new Error('Usuário não autenticado')
   }
-  
+
   try {
     const response = await putCitizenCpfPhone(user.cpf, data)
-    
+
     // Check if the response indicates an error
     if (response.status !== 200) {
       const errorData = response.data as HandlersErrorResponse
@@ -22,10 +22,10 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
       return {
         success: false,
         error: errorData?.error || 'Erro ao atualizar número',
-        status: response.status
+        status: response.status,
       }
     }
-    
+
     revalidateTag(`user-info-${user.cpf}`)
     // Revalidate MEI proposal pages that use citizen contact info
     revalidatePath('/servicos/mei', 'layout')
@@ -39,7 +39,7 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
         error: err?.error || 'Erro ao atualizar número',
       }
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

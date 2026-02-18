@@ -10,7 +10,7 @@ import { useEffect, useRef } from 'react'
  *
  * @param intervalMinutes - Intervalo em minutos para verificação (padrão: 5)
  */
-export function useTokenRefresh(intervalMinutes: number = 5) {
+export function useTokenRefresh(intervalMinutes = 5) {
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {

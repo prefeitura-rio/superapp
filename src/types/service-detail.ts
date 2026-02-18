@@ -42,4 +42,3 @@ export interface ServiceDetailResponse {
   description?: string
   updated_at?: number
 }
-

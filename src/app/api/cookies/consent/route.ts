@@ -1,9 +1,9 @@
+import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 export async function POST(request: NextRequest) {
-  return withSpan('api.cookies.consent', async (span) => {
+  return withSpan('api.cookies.consent', async span => {
     try {
       const { consent } = await request.json()
 

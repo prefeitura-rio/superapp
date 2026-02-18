@@ -5,7 +5,9 @@ export interface TokenRefreshResult {
   error?: string
 }
 
-export async function refreshAccessToken(refreshToken: string): Promise<TokenRefreshResult> {
+export async function refreshAccessToken(
+  refreshToken: string
+): Promise<TokenRefreshResult> {
   try {
     const tokenUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/token`
     const params = new URLSearchParams({

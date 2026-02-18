@@ -1,4 +1,3 @@
-import { FloatNavigation } from '@/app/components/float-navigation'
 import type { MeiOpportunity, MeiProposal } from '@/app/components/mei'
 import { MeiPageClient } from '@/app/components/mei'
 import type {
@@ -136,12 +135,9 @@ export default async function MeiPage() {
   )
 
   return (
-    <>
-      <MeiPageClient
-        opportunities={filteredOpportunities}
-        userProposals={userProposals}
-      />
-      <FloatNavigation />
-    </>
+    <MeiPageClient
+      opportunities={filteredOpportunities}
+      userProposals={userProposals}
+    />
   )
 }

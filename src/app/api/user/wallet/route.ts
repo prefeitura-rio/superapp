@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server'
 import {
-  getDalCitizenCpfWallet,
   getDalCitizenCpfMaintenanceRequest,
+  getDalCitizenCpfWallet,
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
-import { getUserInfoFromToken } from '@/lib/user-info'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
   formatHealthOperatingHours,
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -149,4 +149,3 @@ export async function GET() {
     )
   }
 }
-

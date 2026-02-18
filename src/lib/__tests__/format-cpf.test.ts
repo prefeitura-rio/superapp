@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest'
 import { formatCpf } from '@/lib/format-cpf'
+import { describe, expect, test } from 'vitest'
 
 describe('formatCpf', () => {
   describe('invalid inputs', () => {

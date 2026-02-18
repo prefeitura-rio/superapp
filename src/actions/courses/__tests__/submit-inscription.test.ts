@@ -1,7 +1,7 @@
+import { TEST_ENV } from '@/test/mocks/env'
+import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, test } from 'vitest'
-import { server } from '@/test/mocks/server'
-import { TEST_ENV } from '@/test/mocks/env'
 import { submitCourseInscription } from '../submit-inscription'
 
 const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
@@ -118,15 +118,12 @@ describe('submitCourseInscription', () => {
   describe('error scenarios', () => {
     test('returns error for duplicate enrollment (status 409)', async () => {
       server.use(
-        http.post(
-          `${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`,
-          () => {
-            return HttpResponse.json(
-              { message: 'Usuário já inscrito neste curso' },
-              { status: 409 }
-            )
-          }
-        )
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.json(
+            { message: 'Usuário já inscrito neste curso' },
+            { status: 409 }
+          )
+        })
       )
 
       const data = {
@@ -145,15 +142,12 @@ describe('submitCourseInscription', () => {
 
     test('returns error for API failure (status 400)', async () => {
       server.use(
-        http.post(
-          `${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`,
-          () => {
-            return HttpResponse.json(
-              { message: 'Dados inválidos' },
-              { status: 400 }
-            )
-          }
-        )
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.json(
+            { message: 'Dados inválidos' },
+            { status: 400 }
+          )
+        })
       )
 
       const data = {
@@ -172,12 +166,9 @@ describe('submitCourseInscription', () => {
 
     test('returns generic error for network failure', async () => {
       server.use(
-        http.post(
-          `${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`,
-          () => {
-            return HttpResponse.error()
-          }
-        )
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.error()
+        })
       )
 
       const data = {

@@ -1,14 +1,14 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { ModelsCurso } from '@/http-courses/models'
 import {
+  type UserEnrollmentExtended,
   filterCoursesExcludingMyCourses,
   filterVisibleCourses,
   getCourseEnrollmentInfo,
   normalizeModalityDisplay,
   shouldShowCourse,
   sortCourses,
-  type UserEnrollmentExtended,
 } from '@/lib/course-utils'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 function createCourse(overrides: Partial<ModelsCurso> = {}): ModelsCurso {
   return {

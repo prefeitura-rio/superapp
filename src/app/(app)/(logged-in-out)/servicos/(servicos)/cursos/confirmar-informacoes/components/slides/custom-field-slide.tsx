@@ -138,7 +138,9 @@ export function CustomFieldSlide({
       {/* Título com scroll próprio e altura máxima */}
       <div className="flex-shrink-0 pb-5" data-slide-title-container>
         <div className="max-h-[30vh] overflow-y-auto overflow-x-hidden pr-1">
-          <h2 className={`font-medium text-foreground mb-2 tracking-tight break-words ${isLongTitle ? 'text-2xl leading-7' : 'text-3xl leading-9'}`}>
+          <h2
+            className={`font-medium text-foreground mb-2 tracking-tight break-words ${isLongTitle ? 'text-2xl leading-7' : 'text-3xl leading-9'}`}
+          >
             {field.title}
           </h2>
         </div>
