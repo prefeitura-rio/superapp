@@ -856,10 +856,7 @@ function getFormacaoSnapshot(
 /** Payload do accordion Formação (sem escolaridade — vem de Informações Pessoais). */
 function getFormacaoPayload(
   values: CurriculoFormacaoFormValues
-): Omit<
-  CurriculoFormacaoFormValues,
-  'escolaridade'
-> {
+): Omit<CurriculoFormacaoFormValues, 'escolaridade'> {
   return structuredClone({
     formacaoAcademica: values.formacaoAcademica,
     formacaoComplementar: values.formacaoComplementar,

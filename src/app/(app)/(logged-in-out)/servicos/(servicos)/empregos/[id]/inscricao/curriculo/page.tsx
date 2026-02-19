@@ -1,5 +1,5 @@
-import type { ModelsCitizen } from '@/http/models'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
+import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'

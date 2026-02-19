@@ -5,8 +5,8 @@ import { EDUCATIONS } from '@/app/components/drawer-contents/education-drawer-co
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import { useFormContext } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 
 interface EscolaridadeDrawerContentProps {
