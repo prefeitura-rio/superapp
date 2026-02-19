@@ -4,10 +4,22 @@ import {
   IDIOMAS_OPCOES,
   NIVEL_IDIOMA_OPCOES,
   STATUS_FORMACAO_OPCOES,
+  TIPO_FORMACAO_OPCOES,
 } from './constants'
 
 const formacaoAcademicaItemSchema = z
   .object({
+    tipoFormacao: z
+      .string()
+      .optional()
+      .refine(
+        val =>
+          !val ||
+          TIPO_FORMACAO_OPCOES.includes(
+            val as (typeof TIPO_FORMACAO_OPCOES)[number]
+          ),
+        { message: 'Selecione uma opção válida' }
+      ),
     nomeInstituicao: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     status: z
@@ -29,21 +41,9 @@ const formacaoAcademicaItemSchema = z
       }),
   })
   .superRefine((data, ctx) => {
-    const hasAny =
-      (data.nomeInstituicao?.trim()?.length ?? 0) > 0 ||
-      (data.nomeCurso?.trim()?.length ?? 0) > 0 ||
-      (data.status?.length ?? 0) > 0 ||
-      (data.anoConclusao?.length ?? 0) > 0
-
-    // Validação de nomeInstituicao
+    // Apenas validação de formato quando o usuário preenche (mín. 3 caracteres)
     const nomeInstituicaoLength = data.nomeInstituicao?.trim()?.length ?? 0
-    if (hasAny && nomeInstituicaoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeInstituicao'],
-        message: 'Preencha o nome da instituição',
-      })
-    } else if (nomeInstituicaoLength > 0 && nomeInstituicaoLength < 3) {
+    if (nomeInstituicaoLength > 0 && nomeInstituicaoLength < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['nomeInstituicao'],
@@ -51,37 +51,13 @@ const formacaoAcademicaItemSchema = z
       })
     }
 
-    // Validação de nomeCurso
     const nomeCursoLength = data.nomeCurso?.trim()?.length ?? 0
-    if (hasAny && nomeCursoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Preencha o nome do curso',
-      })
-    } else if (nomeCursoLength > 0 && nomeCursoLength < 3) {
+    if (nomeCursoLength > 0 && nomeCursoLength < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['nomeCurso'],
         message: 'Mínimo de 3 caracteres',
       })
-    }
-
-    if (hasAny) {
-      if (!data.status) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['status'],
-          message: 'Selecione o status da formação',
-        })
-      }
-      if (!data.anoConclusao) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['anoConclusao'],
-          message: 'Informe o ano de conclusão',
-        })
-      }
     }
   })
 

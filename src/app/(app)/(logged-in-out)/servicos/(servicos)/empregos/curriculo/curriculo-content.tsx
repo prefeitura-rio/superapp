@@ -253,6 +253,23 @@ function FormacaoAccordionContent({
           >
             <div className="space-y-2">
               <CustomInput
+                {...register(`formacaoAcademica.${index}.nomeCurso`)}
+                id={`formacao-academica-${index}-nome-curso`}
+                label="Nome do Curso"
+                placeholder="Preencha com o nome do curso"
+                maxLength={50}
+                error={errors.formacaoAcademica?.[index]?.nomeCurso?.message}
+                className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
+              />
+              {!errors.formacaoAcademica?.[index]?.nomeCurso && (
+                <p className={HINT_CLASS}>
+                  Informe o nome do curso principal que você está cursando ou
+                  concluiu
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <CustomInput
                 {...register(`formacaoAcademica.${index}.nomeInstituicao`)}
                 id={`formacao-academica-${index}-nome-instituicao`}
                 label="Nome da Instituição"
@@ -270,25 +287,6 @@ function FormacaoAccordionContent({
                 </p>
               )}
             </div>
-
-            <div className="space-y-2">
-              <CustomInput
-                {...register(`formacaoAcademica.${index}.nomeCurso`)}
-                id={`formacao-academica-${index}-nome-curso`}
-                label="Nome do Curso"
-                placeholder="Preencha com o nome do curso"
-                maxLength={50}
-                error={errors.formacaoAcademica?.[index]?.nomeCurso?.message}
-                className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-              />
-              {!errors.formacaoAcademica?.[index]?.nomeCurso && (
-                <p className={HINT_CLASS}>
-                  Informe o nome do curso principal que você está cursando ou
-                  concluiu
-                </p>
-              )}
-            </div>
-
             <div className="space-y-2">
               <span
                 className={cn(

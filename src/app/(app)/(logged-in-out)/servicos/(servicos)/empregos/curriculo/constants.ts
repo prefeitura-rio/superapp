@@ -18,6 +18,16 @@ export const STATUS_FORMACAO_OPCOES = [
   'Incompleto',
 ] as const
 
+export const TIPO_FORMACAO_OPCOES = [
+  'Curso profissionalizante',
+  'Curso técnico',
+  'Certificado profissional',
+  'Graduação',
+  'Pós graduação / MBA',
+  'Mestrado',
+  'Doutorado',
+] as const
+
 const START_YEAR = 2015
 const END_YEAR = 2026
 export const ANO_CONCLUSAO_OPCOES = Array.from(

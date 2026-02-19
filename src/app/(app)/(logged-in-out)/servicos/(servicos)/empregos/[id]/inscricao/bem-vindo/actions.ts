@@ -31,7 +31,7 @@ export async function completeOnboarding(): Promise<CompleteOnboardingResult> {
 
     return {
       success: false,
-      error: 'Erro ao completar onboarding',
+      error: 'Oops! Algo deu errado.',
     }
   } catch (error) {
     console.error('Erro ao completar onboarding:', error)
