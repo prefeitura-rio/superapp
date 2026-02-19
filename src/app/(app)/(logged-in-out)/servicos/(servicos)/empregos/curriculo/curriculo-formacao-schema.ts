@@ -1,14 +1,25 @@
 import { z } from 'zod'
 import {
   ANO_CONCLUSAO_FORMACAO_OPCOES,
-  ESCOLARIDADE_OPCOES,
   IDIOMAS_OPCOES,
   NIVEL_IDIOMA_OPCOES,
   STATUS_FORMACAO_OPCOES,
+  TIPO_FORMACAO_OPCOES,
 } from './constants'
 
 const formacaoAcademicaItemSchema = z
   .object({
+    tipoFormacao: z
+      .string()
+      .optional()
+      .refine(
+        val =>
+          !val ||
+          TIPO_FORMACAO_OPCOES.includes(
+            val as (typeof TIPO_FORMACAO_OPCOES)[number]
+          ),
+        { message: 'Selecione uma opção válida' }
+      ),
     nomeInstituicao: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     status: z
@@ -30,21 +41,9 @@ const formacaoAcademicaItemSchema = z
       }),
   })
   .superRefine((data, ctx) => {
-    const hasAny =
-      (data.nomeInstituicao?.trim()?.length ?? 0) > 0 ||
-      (data.nomeCurso?.trim()?.length ?? 0) > 0 ||
-      (data.status?.length ?? 0) > 0 ||
-      (data.anoConclusao?.length ?? 0) > 0
-
-    // Validação de nomeInstituicao
+    // Apenas validação de formato quando o usuário preenche (mín. 3 caracteres)
     const nomeInstituicaoLength = data.nomeInstituicao?.trim()?.length ?? 0
-    if (hasAny && nomeInstituicaoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeInstituicao'],
-        message: 'Preencha o nome da instituição',
-      })
-    } else if (nomeInstituicaoLength > 0 && nomeInstituicaoLength < 3) {
+    if (nomeInstituicaoLength > 0 && nomeInstituicaoLength < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['nomeInstituicao'],
@@ -52,97 +51,12 @@ const formacaoAcademicaItemSchema = z
       })
     }
 
-    // Validação de nomeCurso
     const nomeCursoLength = data.nomeCurso?.trim()?.length ?? 0
-    if (hasAny && nomeCursoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Preencha o nome do curso',
-      })
-    } else if (nomeCursoLength > 0 && nomeCursoLength < 3) {
+    if (nomeCursoLength > 0 && nomeCursoLength < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['nomeCurso'],
         message: 'Mínimo de 3 caracteres',
-      })
-    }
-
-    if (hasAny) {
-      if (!data.status) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['status'],
-          message: 'Selecione o status da formação',
-        })
-      }
-      if (!data.anoConclusao) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['anoConclusao'],
-          message: 'Informe o ano de conclusão',
-        })
-      }
-    }
-  })
-
-const formacaoComplementarItemSchema = z
-  .object({
-    nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
-    organizacaoResponsavel: z
-      .string()
-      .max(50, 'Máximo de 50 caracteres')
-      .optional(),
-    anoConclusao: z
-      .string()
-      .optional()
-      .refine(val => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val), {
-        message: 'Selecione um ano válido',
-      }),
-  })
-  .superRefine((data, ctx) => {
-    const hasAny =
-      (data.nomeCurso?.trim()?.length ?? 0) > 0 ||
-      (data.organizacaoResponsavel?.trim()?.length ?? 0) > 0 ||
-      (data.anoConclusao?.length ?? 0) > 0
-
-    // Validação de nomeCurso
-    const nomeCursoLength = data.nomeCurso?.trim()?.length ?? 0
-    if (hasAny && nomeCursoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Preencha o nome do curso',
-      })
-    } else if (nomeCursoLength > 0 && nomeCursoLength < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Mínimo de 3 caracteres',
-      })
-    }
-
-    // Validação de organizacaoResponsavel
-    const organizacaoLength = data.organizacaoResponsavel?.trim()?.length ?? 0
-    if (hasAny && organizacaoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['organizacaoResponsavel'],
-        message: 'Preencha a organização responsável',
-      })
-    } else if (organizacaoLength > 0 && organizacaoLength < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['organizacaoResponsavel'],
-        message: 'Mínimo de 3 caracteres',
-      })
-    }
-
-    if (hasAny && !data.anoConclusao) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['anoConclusao'],
-        message: 'Informe o ano de conclusão',
       })
     }
   })
@@ -170,18 +84,9 @@ const idiomaItemSchema = z.object({
 })
 
 export const curriculoFormacaoSchema = z.object({
-  escolaridade: z
-    .string()
-    .min(1, 'Escolaridade é obrigatória')
-    .refine(
-      val =>
-        ESCOLARIDADE_OPCOES.includes(
-          val as (typeof ESCOLARIDADE_OPCOES)[number]
-        ),
-      { message: 'Selecione uma opção válida' }
-    ),
+  /** Escolaridade vem de Informações Pessoais (fonte única); obrigatória para prosseguir. */
+  escolaridade: z.string().min(1, 'Escolaridade é obrigatória'),
   formacaoAcademica: z.array(formacaoAcademicaItemSchema),
-  formacaoComplementar: z.array(formacaoComplementarItemSchema),
   idiomas: z.array(idiomaItemSchema).superRefine((arr, ctx) => {
     arr.forEach((item, index) => {
       const hasIdioma = (item.idioma?.trim()?.length ?? 0) > 0
@@ -212,7 +117,4 @@ export type CurriculoFormacaoFormValues = z.infer<
   typeof curriculoFormacaoSchema
 >
 export type FormacaoAcademicaItem = z.infer<typeof formacaoAcademicaItemSchema>
-export type FormacaoComplementarItem = z.infer<
-  typeof formacaoComplementarItemSchema
->
 export type IdiomaItem = z.infer<typeof idiomaItemSchema>

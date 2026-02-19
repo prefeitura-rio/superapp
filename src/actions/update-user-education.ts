@@ -32,6 +32,7 @@ export async function updateUserEducation(education: string) {
 
     revalidateTag(`user-info-${userInfo.cpf}`)
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
+    revalidatePath('/servicos/empregos/curriculo', 'page')
     return { success: true, message: 'Escolaridade atualizada com sucesso.' }
   } catch (error: any) {
     // If it's an API error response, throw it to be handled by the component

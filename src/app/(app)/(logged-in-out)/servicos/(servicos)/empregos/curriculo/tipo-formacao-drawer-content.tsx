@@ -2,27 +2,23 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { ANO_CONCLUSAO_FORMACAO_OPCOES } from './constants'
+import { TIPO_FORMACAO_OPCOES } from './constants'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 
-type FormacaoFieldPath = 'formacaoAcademica'
-
-interface AnoConclusaoDrawerContentProps {
+interface TipoFormacaoDrawerContentProps {
   fieldIndex: number
-  fieldPath?: FormacaoFieldPath
   onClose?: () => void
 }
 
-export function AnoConclusaoDrawerContent({
+export function TipoFormacaoDrawerContent({
   fieldIndex,
-  fieldPath = 'formacaoAcademica',
   onClose,
-}: AnoConclusaoDrawerContentProps) {
+}: TipoFormacaoDrawerContentProps) {
   const { setValue, watch } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`${fieldPath}.${fieldIndex}.anoConclusao`) ?? ''
+  const value = watch(`formacaoAcademica.${fieldIndex}.tipoFormacao`) ?? ''
 
   const handleSelect = (selected: string) => {
-    setValue(`${fieldPath}.${fieldIndex}.anoConclusao`, selected, {
+    setValue(`formacaoAcademica.${fieldIndex}.tipoFormacao`, selected, {
       shouldValidate: true,
     })
     onClose?.()
@@ -31,10 +27,10 @@ export function AnoConclusaoDrawerContent({
   return (
     <div>
       <RadioList
-        options={ANO_CONCLUSAO_FORMACAO_OPCOES}
+        options={[...TIPO_FORMACAO_OPCOES]}
         value={value}
         onValueChange={handleSelect}
-        name={`ano-conclusao-${fieldPath}-${fieldIndex}`}
+        name={`tipo-formacao-${fieldIndex}`}
       />
     </div>
   )

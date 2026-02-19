@@ -31,11 +31,7 @@ export function BemVindoContent({ vagaId }: BemVindoContentProps) {
       } else {
         // Falha: mostra toast e redireciona para lista de empregos
         toast.error(result.error || 'Algo deu errado. Tente novamente.')
-
-        // Aguarda um momento para o usuário ver o toast
-        setTimeout(() => {
-          router.push('/servicos/empregos')
-        }, 2000)
+        router.push('/servicos/empregos')
       }
     } catch (error) {
       console.error('Erro ao continuar:', error)
