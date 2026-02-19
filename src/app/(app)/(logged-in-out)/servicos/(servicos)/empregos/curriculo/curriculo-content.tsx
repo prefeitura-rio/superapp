@@ -60,7 +60,6 @@ const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 const FORMACAO_ERROR_PATHS = [
   'escolaridade',
   'formacaoAcademica',
-  'formacaoComplementar',
   'idiomas',
 ] as const
 
@@ -172,7 +171,6 @@ const defaultExperienciaValues: CurriculoExperienciaFormValues = {
 const FORMACAO_FIELD_NAMES = [
   'escolaridade',
   'formacaoAcademica',
-  'formacaoComplementar',
   'idiomas',
 ] as const
 
@@ -373,17 +371,6 @@ function FormacaoAccordionContent({
 
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">
-          Formação complementar
-        </p>
-        <FormacaoComplementarFields />
-      </div>
-
-      <div className="py-1">
-        <Separator className="h-0.5 bg-border" />
-      </div>
-
-      <div className="space-y-4">
-        <p className="text-sm font-normal text-primary">
           Idiomas <span className="text-destructive">*</span>
         </p>
         <IdiomasFields />
@@ -575,174 +562,6 @@ function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
   )
 }
 
-function FormacaoComplementarFields() {
-  const { register, control, formState } =
-    useFormContext<CurriculoFormacaoFormValues>()
-  const { errors } = formState
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'formacaoComplementar',
-  })
-
-  return (
-    <>
-      {fields.map((field, index) => (
-        <div
-          key={field.id}
-          className="rounded-xl bg-card p-4 space-y-4 shadow-none"
-        >
-          <div className="space-y-2">
-            <CustomInput
-              {...register(`formacaoComplementar.${index}.nomeCurso`)}
-              id={`formacao-complementar-${index}-nome-curso`}
-              label="Nome do curso"
-              placeholder="Preencha com o nome do curso"
-              maxLength={50}
-              error={errors.formacaoComplementar?.[index]?.nomeCurso?.message}
-              className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-            />
-            {!errors.formacaoComplementar?.[index]?.nomeCurso && (
-              <p className={HINT_CLASS}>
-                Exemplo: Atendimento ao Cliente, Excel Básico, Cuidador de
-                Idosos, Informática Básica, Operador de Caixa, Auxiliar de
-                Cozinha, entre outros
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <CustomInput
-              {...register(
-                `formacaoComplementar.${index}.organizacaoResponsavel`
-              )}
-              id={`formacao-complementar-${index}-organizacao`}
-              label="Organização responsável"
-              placeholder="Preencha com o nome da instituição"
-              maxLength={50}
-              error={
-                errors.formacaoComplementar?.[index]?.organizacaoResponsavel
-                  ?.message
-              }
-              className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-            />
-            {!errors.formacaoComplementar?.[index]?.organizacaoResponsavel && (
-              <p className={HINT_CLASS}>
-                Escreva o nome da escola, faculdade ou instituição responsável
-                por essa formação
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <span
-              className={cn(
-                'text-sm font-normal block',
-                errors.formacaoComplementar?.[index]?.anoConclusao
-                  ? 'text-destructive'
-                  : 'text-primary'
-              )}
-            >
-              Ano de conclusão
-            </span>
-            <AnoConclusaoFormacaoComplementarField
-              index={index}
-              error={
-                errors.formacaoComplementar?.[index]?.anoConclusao?.message
-              }
-            />
-            {!errors.formacaoComplementar?.[index]?.anoConclusao && (
-              <p className={HINT_CLASS}>
-                Informe qual o ano de conclusão do curso principal que você
-                concluiu, caso já tenha finalizado
-              </p>
-            )}
-          </div>
-
-          {fields.length > 1 && (
-            <button
-              type="button"
-              onClick={() => remove(index)}
-              className="flex hover:cursor-pointer items-center gap-2 text-primary text-sm mt-2"
-            >
-              <Trash2 className="size-4" />
-              Remover formação
-            </button>
-          )}
-        </div>
-      ))}
-
-      <CustomButton
-        type="button"
-        variant="secondary"
-        size="lg"
-        className="w-full rounded-full bg-card text-primary"
-        onClick={() =>
-          append({
-            nomeCurso: '',
-            organizacaoResponsavel: '',
-            anoConclusao: '',
-          })
-        }
-      >
-        Adicionar outra formação
-      </CustomButton>
-    </>
-  )
-}
-
-function AnoConclusaoFormacaoComplementarField({
-  index,
-  error,
-}: {
-  index: number
-  error?: string
-}) {
-  const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`formacaoComplementar.${index}.anoConclusao`) ?? ''
-  const hasSelection = Boolean(value)
-
-  return (
-    <Controller
-      control={control}
-      name={`formacaoComplementar.${index}.anoConclusao`}
-      render={({ field }) => (
-        <ActionDiv
-          ref={field.ref}
-          className="bg-background shadow-none"
-          error={error}
-          content={
-            hasSelection ? (
-              value
-            ) : (
-              <span className="text-foreground-light dark:text-muted-foreground">
-                Informe o ano de conclusão
-              </span>
-            )
-          }
-          variant="default"
-          disabled
-          rightIcon={
-            <ChevronDownIcon
-              className={
-                hasSelection
-                  ? 'text-primary stroke-[1.5] size-5'
-                  : 'text-foreground-light stroke-[1.5] size-5'
-              }
-            />
-          }
-          drawerContent={
-            <AnoConclusaoDrawerContent
-              fieldIndex={index}
-              fieldPath="formacaoComplementar"
-            />
-          }
-          drawerTitle="Ano de conclusão"
-        />
-      )}
-    />
-  )
-}
-
 function StatusFormacaoField({
   index,
   error,
@@ -843,12 +662,11 @@ function getFormacaoSnapshot(
   values: CurriculoFormacaoFormValues
 ): Pick<
   CurriculoFormacaoFormValues,
-  'escolaridade' | 'formacaoAcademica' | 'formacaoComplementar' | 'idiomas'
+  'escolaridade' | 'formacaoAcademica' | 'idiomas'
 > {
   return structuredClone({
     escolaridade: values.escolaridade,
     formacaoAcademica: values.formacaoAcademica,
-    formacaoComplementar: values.formacaoComplementar,
     idiomas: values.idiomas,
   })
 }
@@ -859,7 +677,6 @@ function getFormacaoPayload(
 ): Omit<CurriculoFormacaoFormValues, 'escolaridade'> {
   return structuredClone({
     formacaoAcademica: values.formacaoAcademica,
-    formacaoComplementar: values.formacaoComplementar,
     idiomas: values.idiomas,
   })
 }
@@ -1126,7 +943,7 @@ export function CurriculoContent({
   const router = useRouter()
   const formacaoSnapshotRef = useRef<Pick<
     CurriculoFormacaoFormValues,
-    'escolaridade' | 'formacaoAcademica' | 'formacaoComplementar' | 'idiomas'
+    'escolaridade' | 'formacaoAcademica' | 'idiomas'
   > | null>(null)
   const experienciaSnapshotRef = useRef<CurriculoExperienciaFormValues | null>(
     null
@@ -1146,7 +963,6 @@ export function CurriculoContent({
           anoConclusao: '',
         },
       ],
-      formacaoComplementar: [],
       idiomas: [{ idioma: '', nivel: '' }],
       ...defaultExperienciaValues,
       ...defaultSituacaoValues,
@@ -1197,7 +1013,6 @@ export function CurriculoContent({
           anoConclusao: '',
         },
       ],
-      formacaoComplementar: [],
       idiomas: [{ idioma: '', nivel: '' }],
     }
     const currentFormValues = form.getValues()
@@ -1206,7 +1021,6 @@ export function CurriculoContent({
         ...currentFormValues,
         escolaridade: valuesToRestore.escolaridade,
         formacaoAcademica: valuesToRestore.formacaoAcademica,
-        formacaoComplementar: valuesToRestore.formacaoComplementar,
         idiomas: valuesToRestore.idiomas,
       },
       { keepDefaultValues: false }

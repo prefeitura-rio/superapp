@@ -85,67 +85,6 @@ const formacaoAcademicaItemSchema = z
     }
   })
 
-const formacaoComplementarItemSchema = z
-  .object({
-    nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
-    organizacaoResponsavel: z
-      .string()
-      .max(50, 'Máximo de 50 caracteres')
-      .optional(),
-    anoConclusao: z
-      .string()
-      .optional()
-      .refine(val => !val || ANO_CONCLUSAO_FORMACAO_OPCOES.includes(val), {
-        message: 'Selecione um ano válido',
-      }),
-  })
-  .superRefine((data, ctx) => {
-    const hasAny =
-      (data.nomeCurso?.trim()?.length ?? 0) > 0 ||
-      (data.organizacaoResponsavel?.trim()?.length ?? 0) > 0 ||
-      (data.anoConclusao?.length ?? 0) > 0
-
-    // Validação de nomeCurso
-    const nomeCursoLength = data.nomeCurso?.trim()?.length ?? 0
-    if (hasAny && nomeCursoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Preencha o nome do curso',
-      })
-    } else if (nomeCursoLength > 0 && nomeCursoLength < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['nomeCurso'],
-        message: 'Mínimo de 3 caracteres',
-      })
-    }
-
-    // Validação de organizacaoResponsavel
-    const organizacaoLength = data.organizacaoResponsavel?.trim()?.length ?? 0
-    if (hasAny && organizacaoLength === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['organizacaoResponsavel'],
-        message: 'Preencha a organização responsável',
-      })
-    } else if (organizacaoLength > 0 && organizacaoLength < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['organizacaoResponsavel'],
-        message: 'Mínimo de 3 caracteres',
-      })
-    }
-
-    if (hasAny && !data.anoConclusao) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['anoConclusao'],
-        message: 'Informe o ano de conclusão',
-      })
-    }
-  })
-
 const idiomaItemSchema = z.object({
   idioma: z
     .string()
@@ -172,7 +111,6 @@ export const curriculoFormacaoSchema = z.object({
   /** Escolaridade vem de Informações Pessoais (fonte única); obrigatória para prosseguir. */
   escolaridade: z.string().min(1, 'Escolaridade é obrigatória'),
   formacaoAcademica: z.array(formacaoAcademicaItemSchema),
-  formacaoComplementar: z.array(formacaoComplementarItemSchema),
   idiomas: z.array(idiomaItemSchema).superRefine((arr, ctx) => {
     arr.forEach((item, index) => {
       const hasIdioma = (item.idioma?.trim()?.length ?? 0) > 0
@@ -203,7 +141,4 @@ export type CurriculoFormacaoFormValues = z.infer<
   typeof curriculoFormacaoSchema
 >
 export type FormacaoAcademicaItem = z.infer<typeof formacaoAcademicaItemSchema>
-export type FormacaoComplementarItem = z.infer<
-  typeof formacaoComplementarItemSchema
->
 export type IdiomaItem = z.infer<typeof idiomaItemSchema>

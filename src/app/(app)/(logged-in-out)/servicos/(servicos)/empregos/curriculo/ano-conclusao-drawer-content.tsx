@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form'
 import { ANO_CONCLUSAO_FORMACAO_OPCOES } from './constants'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 
-type FormacaoFieldPath = 'formacaoAcademica' | 'formacaoComplementar'
+type FormacaoFieldPath = 'formacaoAcademica'
 
 interface AnoConclusaoDrawerContentProps {
   fieldIndex: number
