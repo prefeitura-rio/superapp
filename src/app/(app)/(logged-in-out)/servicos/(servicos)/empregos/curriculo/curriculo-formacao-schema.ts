@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
   ANO_CONCLUSAO_FORMACAO_OPCOES,
-  ESCOLARIDADE_OPCOES,
   IDIOMAS_OPCOES,
   NIVEL_IDIOMA_OPCOES,
   STATUS_FORMACAO_OPCOES,
@@ -170,16 +169,8 @@ const idiomaItemSchema = z.object({
 })
 
 export const curriculoFormacaoSchema = z.object({
-  escolaridade: z
-    .string()
-    .min(1, 'Escolaridade é obrigatória')
-    .refine(
-      val =>
-        ESCOLARIDADE_OPCOES.includes(
-          val as (typeof ESCOLARIDADE_OPCOES)[number]
-        ),
-      { message: 'Selecione uma opção válida' }
-    ),
+  /** Escolaridade vem de Informações Pessoais (fonte única); obrigatória para prosseguir. */
+  escolaridade: z.string().min(1, 'Escolaridade é obrigatória'),
   formacaoAcademica: z.array(formacaoAcademicaItemSchema),
   formacaoComplementar: z.array(formacaoComplementarItemSchema),
   idiomas: z.array(idiomaItemSchema).superRefine((arr, ctx) => {

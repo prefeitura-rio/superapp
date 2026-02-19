@@ -193,10 +193,12 @@ function FormacaoAccordionContent({
   const handleFormacaoSave = async () => {
     const isValid = await trigger([...FORMACAO_FIELD_NAMES])
     if (isValid) {
-      const data = getFormacaoSnapshot(getValues())
-      console.log('Formação salva:', data)
+      const values = getValues()
+      const snapshot = getFormacaoSnapshot(values)
+      const payload = getFormacaoPayload(values)
+      console.log('Formação salva (payload sem escolaridade):', payload)
       toast.success('Formação salva com sucesso')
-      onSaveSuccess(data)
+      onSaveSuccess(snapshot)
     } else {
       toast.error('Por favor, revise todos os campos.')
       // Focar no primeiro campo com erro
@@ -245,7 +247,7 @@ function FormacaoAccordionContent({
       />
 
       <div className="space-y-4">
-        <p className="text-sm font-normal text-primary">Formação acadêmica</p>
+        <p className="text-sm font-normal text-primary">Formação</p>
         {fields.map((field, index) => (
           <div
             key={field.id}
@@ -851,6 +853,20 @@ function getFormacaoSnapshot(
   })
 }
 
+/** Payload do accordion Formação (sem escolaridade — vem de Informações Pessoais). */
+function getFormacaoPayload(
+  values: CurriculoFormacaoFormValues
+): Omit<
+  CurriculoFormacaoFormValues,
+  'escolaridade'
+> {
+  return structuredClone({
+    formacaoAcademica: values.formacaoAcademica,
+    formacaoComplementar: values.formacaoComplementar,
+    idiomas: values.idiomas,
+  })
+}
+
 function getSituacaoSnapshot(
   values: CurriculoSituacaoFormValues
 ): CurriculoSituacaoFormValues {
@@ -1098,12 +1114,15 @@ export interface CurriculoContentProps {
   backRoute?: string
   /** Se a vaga tem perguntas adicionais; quando true, Continuar leva para perguntas-adicionais, senão abre bottom sheet com confetti. */
   hasPerguntasAdicionais?: boolean
+  /** Escolaridade vinda de Informações Pessoais (fonte única de verdade). */
+  initialEscolaridade?: string
 }
 
 export function CurriculoContent({
   inscricaoVagaId,
   backRoute = '/servicos/empregos',
   hasPerguntasAdicionais = false,
+  initialEscolaridade = '',
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
@@ -1121,7 +1140,7 @@ export function CurriculoContent({
     resolver: zodResolver(curriculoSchema),
     mode: 'all',
     defaultValues: {
-      escolaridade: '',
+      escolaridade: initialEscolaridade ?? '',
       formacaoAcademica: [
         {
           nomeInstituicao: '',
@@ -1172,7 +1191,7 @@ export function CurriculoContent({
   const handleFormacaoCancel = () => {
     const snapshot = formacaoSnapshotRef.current
     const valuesToRestore: CurriculoFormacaoFormValues = snapshot ?? {
-      escolaridade: '',
+      escolaridade: initialEscolaridade ?? '',
       formacaoAcademica: [
         {
           nomeInstituicao: '',
