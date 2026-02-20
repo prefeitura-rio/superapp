@@ -1,8 +1,6 @@
 'use server'
 
-import {
-  putApiV1EmpregabilidadeCurriculoSituacaoInteresses,
-} from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
+import { putApiV1EmpregabilidadeCurriculoSituacaoInteresses } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
 import type { EmpregabilidadeCurriculoSituacaoInteresses } from '@/http-courses/models'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 
@@ -20,8 +18,8 @@ export async function saveSituacaoAction(
       id_disponibilidade: values.idDisponibilidade?.trim() || undefined,
       ids_tipos_vinculo_preferencia:
         values.idsTiposVinculo?.length &&
-        values.idsTiposVinculo.every((id) => id?.trim())
-          ? values.idsTiposVinculo.map((id) => id.trim())
+        values.idsTiposVinculo.every(id => id?.trim())
+          ? values.idsTiposVinculo.map(id => id.trim())
           : undefined,
     }
 

@@ -8,13 +8,17 @@ import type {
 
 function parseListResponse(data: unknown): SituacaoOptionItem[] {
   const body = data as { data?: Array<{ id?: string; descricao?: string }> }
-  const arr = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []
+  const arr = Array.isArray(body?.data)
+    ? body.data
+    : Array.isArray(body)
+      ? body
+      : []
   return arr
-    .map((item) => ({
+    .map(item => ({
       id: item.id ?? '',
       descricao: item.descricao ?? '',
     }))
-    .filter((item) => item.id)
+    .filter(item => item.id)
 }
 
 /**

@@ -9,7 +9,7 @@ export const curriculoSituacaoSchema = z.object({
     .string()
     .min(1, 'Campo obrigatório')
     .refine(
-      (val) =>
+      val =>
         (TEMPO_PROCURANDO_EMPREGO_CODES as readonly string[]).includes(val),
       { message: 'Selecione uma opção válida' }
     ),

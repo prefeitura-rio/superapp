@@ -1,7 +1,10 @@
 'use client'
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
-import type { SituacaoOptionItem, SituacaoOptions } from './situacao-options-types'
+import { type ReactNode, createContext, useContext, useMemo } from 'react'
+import type {
+  SituacaoOptionItem,
+  SituacaoOptions,
+} from './situacao-options-types'
 
 interface SituacaoApiContextValue {
   situacoesAtual: SituacaoOptionItem[]
@@ -16,7 +19,10 @@ interface SituacaoApiProviderProps {
   children: ReactNode
 }
 
-export function SituacaoApiProvider({ initialData, children }: SituacaoApiProviderProps) {
+export function SituacaoApiProvider({
+  initialData,
+  children,
+}: SituacaoApiProviderProps) {
   const value = useMemo<SituacaoApiContextValue>(
     () => ({
       situacoesAtual: initialData.situacoesAtual,
@@ -30,12 +36,15 @@ export function SituacaoApiProvider({ initialData, children }: SituacaoApiProvid
     ]
   )
   return (
-    <SituacaoApiContext.Provider value={value}>{children}</SituacaoApiContext.Provider>
+    <SituacaoApiContext.Provider value={value}>
+      {children}
+    </SituacaoApiContext.Provider>
   )
 }
 
 export function useSituacaoApi() {
   const ctx = useContext(SituacaoApiContext)
-  if (!ctx) throw new Error('useSituacaoApi must be used within SituacaoApiProvider')
+  if (!ctx)
+    throw new Error('useSituacaoApi must be used within SituacaoApiProvider')
   return ctx
 }

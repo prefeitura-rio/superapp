@@ -29,12 +29,12 @@ import {
 } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { AnoConclusaoDrawerContent } from './ano-conclusao-drawer-content'
+import { TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL } from './constants'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 import { curriculoSchema } from './curriculo-schema'
 import type { CurriculoFormValues } from './curriculo-schema'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
-import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { DisponibilidadeDrawerContent } from './disponibilidade-drawer-content'
 import { EscolaridadeDrawerContent } from './escolaridade-drawer-content'
 import {
@@ -48,18 +48,18 @@ import type {
   InitialFormacaoItem,
   InitialIdiomaItem,
 } from './get-curriculo-formacao-data'
+import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
 import { saveFormacaoAccordion } from './save-formacao-action'
 import { saveSituacaoAction } from './save-situacao-action'
-import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
 import { SituacaoApiProvider, useSituacaoApi } from './situacao-api-context'
+import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
 import type { SituacaoOptions } from './situacao-options-types'
 import { StatusFormacaoDrawerContent } from './status-formacao-drawer-content'
 import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-drawer-content'
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
-import { TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL } from './constants'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 
 const ACCORDION_ITEMS = [
@@ -870,7 +870,7 @@ function SituacaoAtualAccordionContent({
   const idsTiposVinculo = watch('idsTiposVinculo')
 
   const situacaoLabel =
-    situacoesAtual.find((s) => s.id === idSituacao)?.descricao ?? ''
+    situacoesAtual.find(s => s.id === idSituacao)?.descricao ?? ''
   const tempoLabel =
     (tempoProcurandoEmprego &&
       TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL[
@@ -878,16 +878,17 @@ function SituacaoAtualAccordionContent({
       ]) ??
     ''
   const disponibilidadeLabel =
-    disponibilidades.find((d) => d.id === idDisponibilidade)?.descricao ?? ''
+    disponibilidades.find(d => d.id === idDisponibilidade)?.descricao ?? ''
   const tiposVinculoLabels = (idsTiposVinculo ?? [])
-    .map((id) => regimesContratacao.find((r) => r.id === id)?.descricao)
+    .map(id => regimesContratacao.find(r => r.id === id)?.descricao)
     .filter(Boolean) as string[]
 
   const hasSituacaoAtualSelection = Boolean(idSituacao)
   const hasTempoSelection = Boolean(tempoProcurandoEmprego)
   const hasDisponibilidadeSelection = Boolean(idDisponibilidade)
-  const hasTipoVinculoSelection =
-    Boolean(idsTiposVinculo && idsTiposVinculo.length > 0)
+  const hasTipoVinculoSelection = Boolean(
+    idsTiposVinculo && idsTiposVinculo.length > 0
+  )
 
   const handleSituacaoSave = async () => {
     const isValid = await trigger([...SITUACAO_FIELD_NAMES])
@@ -1367,147 +1368,147 @@ export function CurriculoContent({
       <FormacaoApiProvider initialData={formacaoOptions}>
         <SituacaoApiProvider initialData={situacaoOptions}>
           <FormProvider {...form}>
-          <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-            <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
-              Meu Currículo
-            </h1>
+            <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+              <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
+                Meu Currículo
+              </h1>
 
-            <Accordion
-              type="single"
-              collapsible
-              className="w-full"
-              value={accordionValue}
-              onValueChange={handleAccordionValueChange}
-            >
-              <AccordionItem
-                value="formacao"
-                className="border-b border-border py-5 last:border-b-0"
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={accordionValue}
+                onValueChange={handleAccordionValueChange}
               >
-                <AccordionTrigger
-                  chevronClassName="text-primary stroke-[1.5]"
-                  className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                <AccordionItem
+                  value="formacao"
+                  className="border-b border-border py-5 last:border-b-0"
                 >
-                  <span className="flex items-center gap-2.5">
-                    Formação
-                    {hasFormacaoErrors ? (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                        <X className="size-3.5 text-white stroke-3" />
-                      </span>
-                    ) : (
-                      requiredFieldsFilled && (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                          <Check className="size-3.5 text-white stroke-3" />
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Formação
+                      {hasFormacaoErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
                         </span>
-                      )
-                    )}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-5 pb-4">
-                  <FormacaoAccordionContent
-                    cpf={cpf}
-                    onCancel={handleFormacaoCancel}
-                    onSaveSuccess={handleFormacaoSaveSuccess}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem
-                value="experiencia"
-                className="border-b border-border py-5 last:border-b-0"
-              >
-                <AccordionTrigger
-                  chevronClassName="text-primary stroke-[1.5]"
-                  className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      ) : (
+                        requiredFieldsFilled && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <FormacaoAccordionContent
+                      cpf={cpf}
+                      onCancel={handleFormacaoCancel}
+                      onSaveSuccess={handleFormacaoSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="experiencia"
+                  className="border-b border-border py-5 last:border-b-0"
                 >
-                  <span className="flex items-center gap-2.5">
-                    Experiência Profissional
-                    {hasExperienciaErrors ? (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                        <X className="size-3.5 text-white stroke-3" />
-                      </span>
-                    ) : null}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-5 pb-4">
-                  <ExperienciaProfissionalAccordionContent
-                    onCancel={handleExperienciaCancel}
-                    onSaveSuccess={handleExperienciaSaveSuccess}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem
-                value="situacao"
-                className="border-b border-border py-5 last:border-b-0"
-              >
-                <AccordionTrigger
-                  chevronClassName="text-primary stroke-[1.5]"
-                  className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
-                >
-                  <span className="flex items-center gap-2.5">
-                    Situação atual
-                    {hasSituacaoErrors ? (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                        <X className="size-3.5 text-white stroke-3" />
-                      </span>
-                    ) : (
-                      situacaoRequiredFieldsFilled && (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                          <Check className="size-3.5 text-white stroke-3" />
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Experiência Profissional
+                      {hasExperienciaErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
                         </span>
-                      )
-                    )}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-5 pb-4">
-                <SituacaoAtualAccordionContent
-                  cpf={cpf}
-                  onCancel={handleSituacaoCancel}
-                  onSaveSuccess={handleSituacaoSaveSuccess}
-                />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem
-                value="termos"
-                className="border-b border-border py-5 last:border-b-0"
-              >
-                <AccordionTrigger
-                  chevronClassName="text-primary stroke-[1.5]"
-                  className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      ) : null}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <ExperienciaProfissionalAccordionContent
+                      onCancel={handleExperienciaCancel}
+                      onSaveSuccess={handleExperienciaSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="situacao"
+                  className="border-b border-border py-5 last:border-b-0"
                 >
-                  <span className="flex items-center gap-2.5">
-                    Termos de Uso
-                    {hasTermosErrors ? (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                        <X className="size-3.5 text-white stroke-3" />
-                      </span>
-                    ) : (
-                      termosAceitos && (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                          <Check className="size-3.5 text-white stroke-3" />
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Situação atual
+                      {hasSituacaoErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
                         </span>
-                      )
-                    )}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-5 pb-4">
-                  <TermosUsoAccordionContent />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                      ) : (
+                        situacaoRequiredFieldsFilled && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <SituacaoAtualAccordionContent
+                      cpf={cpf}
+                      onCancel={handleSituacaoCancel}
+                      onSaveSuccess={handleSituacaoSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="termos"
+                  className="border-b border-border py-5 last:border-b-0"
+                >
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Termos de Uso
+                      {hasTermosErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
+                        </span>
+                      ) : (
+                        termosAceitos && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <TermosUsoAccordionContent />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
-            {inscricaoVagaId ? (
-              <div className="mt-auto pt-8 pb-8 shrink-0">
-                <CustomButton
-                  size="lg"
-                  fullWidth
-                  variant="primary"
-                  onClick={handleContinuar}
-                  className="rounded-full"
-                >
-                  Continuar
-                </CustomButton>
-              </div>
-          ) : null}
-        </div>
+              {inscricaoVagaId ? (
+                <div className="mt-auto pt-8 pb-8 shrink-0">
+                  <CustomButton
+                    size="lg"
+                    fullWidth
+                    variant="primary"
+                    onClick={handleContinuar}
+                    className="rounded-full"
+                  >
+                    Continuar
+                  </CustomButton>
+                </div>
+              ) : null}
+            </div>
           </FormProvider>
         </SituacaoApiProvider>
       </FormacaoApiProvider>

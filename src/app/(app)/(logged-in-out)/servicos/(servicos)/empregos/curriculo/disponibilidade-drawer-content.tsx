@@ -2,8 +2,8 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { useSituacaoApi } from './situacao-api-context'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
+import { useSituacaoApi } from './situacao-api-context'
 
 interface DisponibilidadeDrawerContentProps {
   onClose?: () => void
@@ -16,7 +16,7 @@ export function DisponibilidadeDrawerContent({
   const { disponibilidades } = useSituacaoApi()
   const value = watch('idDisponibilidade') ?? ''
 
-  const options = disponibilidades.map((item) => ({
+  const options = disponibilidades.map(item => ({
     label: item.descricao,
     value: item.id,
   }))

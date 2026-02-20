@@ -1,6 +1,4 @@
-import {
-  getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses,
-} from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
+import { getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 
 export interface InitialSituacaoData {
@@ -28,9 +26,8 @@ export async function getCurriculoSituacaoData(
     return { ...DEFAULT_SITUACAO, idsTiposVinculo: [] }
   }
 
-  const res = await getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses(
-    normalizedCpf
-  )
+  const res =
+    await getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses(normalizedCpf)
 
   if (res.status !== 200 || !res.data) {
     return { ...DEFAULT_SITUACAO, idsTiposVinculo: [] }
@@ -39,7 +36,7 @@ export async function getCurriculoSituacaoData(
   const body = res.data as Record<string, unknown>
   const idsVinculo = body.ids_tipos_vinculo_preferencia
   const idsTiposVinculo = Array.isArray(idsVinculo)
-    ? (idsVinculo as unknown[]).map((id) => String(id ?? '')).filter(Boolean)
+    ? (idsVinculo as unknown[]).map(id => String(id ?? '')).filter(Boolean)
     : []
 
   return {

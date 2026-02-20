@@ -21,8 +21,9 @@ export default async function CurriculoPage() {
   let initialIdiomas: Awaited<
     ReturnType<typeof getCurriculoFormacaoData>
   >['idiomas'] = []
-  let initialSituacao: Awaited<ReturnType<typeof getCurriculoSituacaoData>> | null =
-    null
+  let initialSituacao: Awaited<
+    ReturnType<typeof getCurriculoSituacaoData>
+  > | null = null
 
   if (userAuthInfo.cpf) {
     try {

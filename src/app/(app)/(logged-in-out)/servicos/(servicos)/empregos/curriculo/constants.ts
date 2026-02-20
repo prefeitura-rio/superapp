@@ -118,12 +118,11 @@ export const TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL: Record<
 }
 
 /** Para uso no drawer: { label, value: code }. */
-export const TEMPO_PROCURANDO_EMPREGO_OPCOES_DISPLAY = TEMPO_PROCURANDO_EMPREGO_OPCOES.map(
-  (label) => ({
+export const TEMPO_PROCURANDO_EMPREGO_OPCOES_DISPLAY =
+  TEMPO_PROCURANDO_EMPREGO_OPCOES.map(label => ({
     label,
     value: TEMPO_PROCURANDO_EMPREGO_LABEL_TO_CODE[label],
-  })
-)
+  }))
 
 export const DISPONIBILIDADE_OPCOES = [
   'Imediato',

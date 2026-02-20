@@ -2,8 +2,8 @@
 
 import { CheckboxList } from '@/components/ui/custom/checkbox-list'
 import { useFormContext } from 'react-hook-form'
-import { useSituacaoApi } from './situacao-api-context'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
+import { useSituacaoApi } from './situacao-api-context'
 
 interface TipoVinculoDrawerContentProps {
   onClose?: () => void
@@ -16,7 +16,7 @@ export function TipoVinculoDrawerContent({
   const { regimesContratacao } = useSituacaoApi()
   const value = watch('idsTiposVinculo') ?? []
 
-  const options = regimesContratacao.map((item) => ({
+  const options = regimesContratacao.map(item => ({
     label: item.descricao,
     value: item.id,
   }))
