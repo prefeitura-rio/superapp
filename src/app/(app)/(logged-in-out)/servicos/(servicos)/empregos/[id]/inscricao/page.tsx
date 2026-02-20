@@ -4,6 +4,8 @@ import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
+import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
+import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
@@ -72,12 +74,19 @@ export default async function InscricaoPage({
     redirect(buildAuthUrl(`/servicos/empregos/${vagaId}/inscricao`))
   }
 
-  const [vagaResponse, onboardingResponse, userInfoResponse] =
-    await Promise.all([
-      getApiPublicEmpregabilidadeVagasId(vagaId),
-      getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
-      getDalCitizenCpf(userAuthInfo.cpf),
-    ])
+  const [
+    vagaResponse,
+    onboardingResponse,
+    userInfoResponse,
+    formacaoOptions,
+    curriculoFormacaoData,
+  ] = await Promise.all([
+    getApiPublicEmpregabilidadeVagasId(vagaId),
+    getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
+    getDalCitizenCpf(userAuthInfo.cpf),
+    getFormacaoOptions(),
+    getCurriculoFormacaoData(userAuthInfo.cpf),
+  ])
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
     notFound()
@@ -161,6 +170,9 @@ export default async function InscricaoPage({
         userInfo={transformedUserInfo}
         userAuthInfo={userAuthInfo}
         contactUpdateStatus={contactUpdateStatus}
+        formacaoOptions={formacaoOptions}
+        initialFormacoes={curriculoFormacaoData.formacoes}
+        initialIdiomas={curriculoFormacaoData.idiomas}
         initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
       />

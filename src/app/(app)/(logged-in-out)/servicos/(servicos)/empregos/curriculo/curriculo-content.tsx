@@ -12,7 +12,9 @@ import {
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
+import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/models'
 import { formatEducation } from '@/lib/format-education'
+import { saveFormacaoAccordion } from './save-formacao-action'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
@@ -42,10 +44,20 @@ import {
 } from './experiencia-profissional-accordion-content'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
+import {
+  FormacaoApiProvider,
+  useFormacaoApi,
+} from './formacao-api-context'
 import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
 import { StatusFormacaoDrawerContent } from './status-formacao-drawer-content'
+import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-drawer-content'
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
+import type {
+  InitialFormacaoItem,
+  InitialIdiomaItem,
+} from './get-curriculo-formacao-data'
+import type { FormacaoOptions } from './formacao-options-types'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 
 const ACCORDION_ITEMS = [
@@ -134,8 +146,8 @@ function hasFormacaoRequiredFields(
   const hasEscolaridade = (values.escolaridade?.trim()?.length ?? 0) > 0
   const hasIdiomas = (values.idiomas ?? []).some(
     item =>
-      (item.idioma?.trim()?.length ?? 0) > 0 &&
-      (item.nivel?.trim()?.length ?? 0) > 0
+      (item.idIdioma?.trim()?.length ?? 0) > 0 &&
+      (item.idNivel?.trim()?.length ?? 0) > 0
   )
   return hasEscolaridade && hasIdiomas
 }
@@ -150,6 +162,7 @@ function hasSituacaoRequiredFields(
 }
 
 interface FormacaoAccordionContentProps {
+  cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoFormacaoFormValues) => void
 }
@@ -175,6 +188,7 @@ const FORMACAO_FIELD_NAMES = [
 ] as const
 
 function FormacaoAccordionContent({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: FormacaoAccordionContentProps) {
@@ -190,20 +204,34 @@ function FormacaoAccordionContent({
 
   const handleFormacaoSave = async () => {
     const isValid = await trigger([...FORMACAO_FIELD_NAMES])
-    if (isValid) {
-      const values = getValues()
-      const snapshot = getFormacaoSnapshot(values)
-      const payload = getFormacaoPayload(values)
-      console.log('Formação salva (payload sem escolaridade):', payload)
-      toast.success('Formação salva com sucesso')
-      onSaveSuccess(snapshot)
-    } else {
+    if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
-      // Focar no primeiro campo com erro
       const firstErrorField = getFirstErrorField(errors)
       if (firstErrorField) {
         setFocus(firstErrorField as any)
       }
+      return
+    }
+
+    if (!cpf?.trim()) {
+      toast.error('CPF não disponível. Faça login novamente.')
+      return
+    }
+
+    const values = getValues()
+    const snapshot = getFormacaoSnapshot(values)
+    const apiPayload = getFormacaoApiPayload(values)
+
+    try {
+      const result = await saveFormacaoAccordion(cpf, apiPayload)
+      if (result.success) {
+        toast.success('Formação salva com sucesso')
+        onSaveSuccess(snapshot)
+      } else {
+        toast.error('Não foi possível salvar. Tente novamente.')
+      }
+    } catch {
+      toast.error('Erro ao salvar formação. Tente novamente.')
     }
   }
 
@@ -251,6 +279,29 @@ function FormacaoAccordionContent({
             key={field.id}
             className="rounded-xl bg-card p-4 space-y-4 shadow-none"
           >
+            <div className="space-y-2">
+              <span
+                className={cn(
+                  'text-sm font-normal block',
+                errors.formacaoAcademica?.[index]?.tipoFormacaoId
+                  ? 'text-destructive'
+                  : 'text-primary'
+              )}
+            >
+              Tipo de formação
+            </span>
+            <TipoFormacaoField
+              index={index}
+              error={
+                errors.formacaoAcademica?.[index]?.tipoFormacaoId?.message
+              }
+            />
+            {!errors.formacaoAcademica?.[index]?.tipoFormacaoId && (
+                <p className={HINT_CLASS}>
+                  Escolha a opção que melhor descreve o tipo dessa formação
+                </p>
+              )}
+            </div>
             <div className="space-y-2">
               <CustomInput
                 {...register(`formacaoAcademica.${index}.nomeCurso`)}
@@ -352,6 +403,7 @@ function FormacaoAccordionContent({
           className="w-full rounded-full bg-card text-primary"
           onClick={() =>
             append({
+              tipoFormacaoId: '',
               nomeInstituicao: '',
               nomeCurso: '',
               status: '',
@@ -421,7 +473,7 @@ function IdiomasFields() {
             <span
               className={cn(
                 'text-sm font-normal block',
-                errors.idiomas?.[index]?.idioma
+                errors.idiomas?.[index]?.idIdioma
                   ? 'text-destructive'
                   : 'text-primary'
               )}
@@ -430,14 +482,14 @@ function IdiomasFields() {
             </span>
             <IdiomaField
               index={index}
-              error={errors.idiomas?.[index]?.idioma?.message}
+              error={errors.idiomas?.[index]?.idIdioma?.message}
             />
           </div>
           <div className="space-y-2">
             <span
               className={cn(
                 'text-sm font-normal block',
-                errors.idiomas?.[index]?.nivel
+                errors.idiomas?.[index]?.idNivel
                   ? 'text-destructive'
                   : 'text-primary'
               )}
@@ -446,7 +498,7 @@ function IdiomasFields() {
             </span>
             <NivelIdiomaField
               index={index}
-              error={errors.idiomas?.[index]?.nivel?.message}
+              error={errors.idiomas?.[index]?.idNivel?.message}
             />
           </div>
 
@@ -468,7 +520,7 @@ function IdiomasFields() {
         variant="secondary"
         size="lg"
         className="w-full rounded-full bg-card text-primary"
-        onClick={() => append({ idioma: '', nivel: '' })}
+        onClick={() => append({ idIdioma: '', idNivel: '' })}
       >
         Adicionar outro idioma
       </CustomButton>
@@ -478,13 +530,16 @@ function IdiomasFields() {
 
 function IdiomaField({ index, error }: { index: number; error?: string }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`idiomas.${index}.idioma`) ?? ''
-  const hasSelection = Boolean(value)
+  const { idiomas: idiomasList } = useFormacaoApi()
+  const idIdioma = watch(`idiomas.${index}.idIdioma`) ?? ''
+  const displayLabel =
+    idiomasList.find((i) => i.id === idIdioma)?.descricao ?? ''
+  const hasSelection = Boolean(idIdioma)
 
   return (
     <Controller
       control={control}
-      name={`idiomas.${index}.idioma`}
+      name={`idiomas.${index}.idIdioma`}
       render={({ field }) => (
         <ActionDiv
           ref={field.ref}
@@ -492,7 +547,7 @@ function IdiomaField({ index, error }: { index: number; error?: string }) {
           error={error}
           content={
             hasSelection ? (
-              value
+              displayLabel
             ) : (
               <span className="text-foreground-light dark:text-muted-foreground">
                 Selecione o idioma
@@ -520,13 +575,16 @@ function IdiomaField({ index, error }: { index: number; error?: string }) {
 
 function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`idiomas.${index}.nivel`) ?? ''
-  const hasSelection = Boolean(value)
+  const { niveisIdioma } = useFormacaoApi()
+  const idNivel = watch(`idiomas.${index}.idNivel`) ?? ''
+  const displayLabel =
+    niveisIdioma.find((n) => n.id === idNivel)?.descricao ?? ''
+  const hasSelection = Boolean(idNivel)
 
   return (
     <Controller
       control={control}
-      name={`idiomas.${index}.nivel`}
+      name={`idiomas.${index}.idNivel`}
       render={({ field }) => (
         <ActionDiv
           ref={field.ref}
@@ -534,7 +592,7 @@ function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
           error={error}
           content={
             hasSelection ? (
-              value
+              displayLabel
             ) : (
               <span className="text-foreground-light dark:text-muted-foreground">
                 Selecione o nível
@@ -554,6 +612,57 @@ function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
           }
           drawerContent={<NivelIdiomaDrawerContent fieldIndex={index} />}
           drawerTitle="Nível"
+        />
+      )}
+    />
+  )
+}
+
+function TipoFormacaoField({
+  index,
+  error,
+}: {
+  index: number
+  error?: string
+}) {
+  const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
+  const { escolaridades } = useFormacaoApi()
+  const tipoFormacaoId = watch(`formacaoAcademica.${index}.tipoFormacaoId`) ?? ''
+  const displayLabel =
+    escolaridades.find((e) => e.id === tipoFormacaoId)?.descricao ?? ''
+  const hasSelection = Boolean(tipoFormacaoId)
+
+  return (
+    <Controller
+      control={control}
+      name={`formacaoAcademica.${index}.tipoFormacaoId`}
+      render={({ field }) => (
+        <ActionDiv
+          ref={field.ref}
+          className="bg-background shadow-none"
+          error={error}
+          content={
+            hasSelection ? (
+              displayLabel
+            ) : (
+              <span className="text-foreground-light dark:text-muted-foreground">
+                Selecione o tipo da formação
+              </span>
+            )
+          }
+          variant="default"
+          disabled
+          rightIcon={
+            <ChevronDownIcon
+              className={
+                hasSelection
+                  ? 'text-primary stroke-[1.5] size-5'
+                  : 'text-foreground-light stroke-[1.5] size-5'
+              }
+            />
+          }
+          drawerContent={<TipoFormacaoDrawerContent fieldIndex={index} />}
+          drawerTitle="Tipo de formação"
         />
       )}
     />
@@ -677,6 +786,43 @@ function getFormacaoPayload(
     formacaoAcademica: values.formacaoAcademica,
     idiomas: values.idiomas,
   })
+}
+
+/** Payload para a API PUT formacoes/idiomas (id_escolaridade, id_idioma, id_nivel). */
+function getFormacaoApiPayload(
+  values: CurriculoFormacaoFormValues
+): EmpregabilidadeFormacaoAccordionRequest {
+  const formacoes = (values.formacaoAcademica ?? [])
+    .filter(
+      (f) =>
+        (f.tipoFormacaoId?.trim()?.length ?? 0) > 0 &&
+        (f.nomeCurso?.trim()?.length ?? 0) > 0 &&
+        (f.status?.trim()?.length ?? 0) > 0 &&
+        (f.anoConclusao?.trim()?.length ?? 0) > 0
+    )
+    .map((f) => ({
+      id_escolaridade: f.tipoFormacaoId!.trim(),
+      nome_curso: f.nomeCurso!.trim(),
+      nome_instituicao: f.nomeInstituicao?.trim() || undefined,
+      status: f.status!.trim() as
+        | 'Completo'
+        | 'Em andamento'
+        | 'Incompleto',
+      ano_conclusao: f.anoConclusao!.trim(),
+    }))
+
+  const idiomas = (values.idiomas ?? [])
+    .filter(
+      (i) =>
+        (i.idIdioma?.trim()?.length ?? 0) > 0 &&
+        (i.idNivel?.trim()?.length ?? 0) > 0
+    )
+    .map((i) => ({
+      id_idioma: i.idIdioma!.trim(),
+      id_nivel: i.idNivel!.trim(),
+    }))
+
+  return { formacoes, idiomas }
 }
 
 function getSituacaoSnapshot(
@@ -919,6 +1065,12 @@ const defaultSituacaoValues: CurriculoSituacaoFormValues = {
   tipoVinculo: [],
 }
 
+const DEFAULT_FORMACAO_OPTIONS: FormacaoOptions = {
+  escolaridades: [],
+  idiomas: [],
+  niveisIdioma: [],
+}
+
 export interface CurriculoContentProps {
   /** Quando definido, exibe o botão Continuar e redireciona para o fluxo de inscrição. */
   inscricaoVagaId?: string
@@ -928,6 +1080,14 @@ export interface CurriculoContentProps {
   hasPerguntasAdicionais?: boolean
   /** Escolaridade vinda de Informações Pessoais (fonte única de verdade). */
   initialEscolaridade?: string
+  /** CPF do usuário logado; necessário para salvar formação/idiomas na API. */
+  cpf?: string
+  /** Opções de formação/idiomas/níveis carregadas no server (evita usar next/headers no client). */
+  formacaoOptions?: FormacaoOptions
+  /** Formações já salvas do currículo (preenche o formulário). */
+  initialFormacoes?: InitialFormacaoItem[]
+  /** Idiomas já salvos do currículo (preenche o formulário). */
+  initialIdiomas?: InitialIdiomaItem[]
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
   onContinuarToNext?: () => void
   /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
@@ -939,6 +1099,10 @@ export function CurriculoContent({
   backRoute = '/servicos/empregos',
   hasPerguntasAdicionais = false,
   initialEscolaridade = '',
+  cpf,
+  formacaoOptions = DEFAULT_FORMACAO_OPTIONS,
+  initialFormacoes,
+  initialIdiomas,
   onContinuarToNext,
   onSuccessClose,
 }: CurriculoContentProps = {}) {
@@ -954,20 +1118,40 @@ export function CurriculoContent({
   )
   const situacaoSnapshotRef = useRef<CurriculoSituacaoFormValues | null>(null)
 
+  const defaultFormacaoAcademica =
+    (initialFormacoes?.length ?? 0) > 0
+      ? (initialFormacoes ?? []).map((f) => ({
+          tipoFormacaoId: f.tipoFormacaoId ?? '',
+          nomeInstituicao: f.nomeInstituicao ?? '',
+          nomeCurso: f.nomeCurso ?? '',
+          status: f.status ?? '',
+          anoConclusao: f.anoConclusao ?? '',
+        }))
+      : [
+          {
+            tipoFormacaoId: '',
+            nomeInstituicao: '',
+            nomeCurso: '',
+            status: '',
+            anoConclusao: '',
+          },
+        ]
+
+  const defaultIdiomas =
+    (initialIdiomas?.length ?? 0) > 0
+      ? (initialIdiomas ?? []).map((i) => ({
+          idIdioma: i.idIdioma ?? '',
+          idNivel: i.idNivel ?? '',
+        }))
+      : [{ idIdioma: '', idNivel: '' }]
+
   const form = useForm<CurriculoFormValues>({
     resolver: zodResolver(curriculoSchema),
     mode: 'all',
     defaultValues: {
       escolaridade: initialEscolaridade ?? '',
-      formacaoAcademica: [
-        {
-          nomeInstituicao: '',
-          nomeCurso: '',
-          status: '',
-          anoConclusao: '',
-        },
-      ],
-      idiomas: [{ idioma: '', nivel: '' }],
+      formacaoAcademica: defaultFormacaoAcademica,
+      idiomas: defaultIdiomas,
       ...defaultExperienciaValues,
       ...defaultSituacaoValues,
       termosAceitos: false,
@@ -1009,15 +1193,8 @@ export function CurriculoContent({
     const snapshot = formacaoSnapshotRef.current
     const valuesToRestore: CurriculoFormacaoFormValues = snapshot ?? {
       escolaridade: initialEscolaridade ?? '',
-      formacaoAcademica: [
-        {
-          nomeInstituicao: '',
-          nomeCurso: '',
-          status: '',
-          anoConclusao: '',
-        },
-      ],
-      idiomas: [{ idioma: '', nivel: '' }],
+      formacaoAcademica: defaultFormacaoAcademica,
+      idiomas: defaultIdiomas,
     }
     const currentFormValues = form.getValues()
     form.reset(
@@ -1136,8 +1313,9 @@ export function CurriculoContent({
         />
       </div>
 
-      <FormProvider {...form}>
-        <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+      <FormacaoApiProvider initialData={formacaoOptions}>
+        <FormProvider {...form}>
+          <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
           <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
             Meu Currículo
           </h1>
@@ -1174,6 +1352,7 @@ export function CurriculoContent({
               </AccordionTrigger>
               <AccordionContent className="pt-5 pb-4">
                 <FormacaoAccordionContent
+                  cpf={cpf}
                   onCancel={handleFormacaoCancel}
                   onSaveSuccess={handleFormacaoSaveSuccess}
                 />
@@ -1276,7 +1455,8 @@ export function CurriculoContent({
             </div>
           ) : null}
         </div>
-      </FormProvider>
+        </FormProvider>
+      </FormacaoApiProvider>
 
       <CandidaturaEnviadaDrawer
         open={successSheetOpen}

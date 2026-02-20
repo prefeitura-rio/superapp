@@ -2,7 +2,7 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { NIVEL_IDIOMA_OPCOES } from './constants'
+import { useFormacaoApi } from './formacao-api-context'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 
 interface NivelIdiomaDrawerContentProps {
@@ -15,19 +15,33 @@ export function NivelIdiomaDrawerContent({
   onClose,
 }: NivelIdiomaDrawerContentProps) {
   const { setValue, watch } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`idiomas.${fieldIndex}.nivel`) ?? ''
+  const { niveisIdioma, isLoading } = useFormacaoApi()
+  const value = watch(`idiomas.${fieldIndex}.idNivel`) ?? ''
+
+  const options = niveisIdioma.map((item) => ({
+    label: item.descricao,
+    value: item.id,
+  }))
 
   const handleSelect = (selected: string) => {
-    setValue(`idiomas.${fieldIndex}.nivel`, selected, {
+    setValue(`idiomas.${fieldIndex}.idNivel`, selected, {
       shouldValidate: true,
     })
     onClose?.()
   }
 
+  if (isLoading) {
+    return (
+      <div className="py-4 text-center text-muted-foreground text-sm">
+        Carregando opções...
+      </div>
+    )
+  }
+
   return (
     <div>
       <RadioList
-        options={[...NIVEL_IDIOMA_OPCOES]}
+        options={options}
         value={value}
         onValueChange={handleSelect}
         name={`nivel-idioma-${fieldIndex}`}

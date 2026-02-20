@@ -117,7 +117,7 @@ function ExperienciaProfissionalAccordionContentInner({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <p className="text-sm font-normal text-primary">Empregos</p>
       <div className="space-y-4">
         {empregosFields.map((field, index) => (
@@ -284,7 +284,7 @@ function ExperienciaProfissionalAccordionContentInner({
         </CustomButton>
       </div>
 
-      <div className="py-1">
+      <div className="py-1 pt-3">
         <Separator className="h-0.5 bg-border" />
       </div>
 

@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import type {
+  InitialFormacaoItem,
+  InitialIdiomaItem,
+} from '../../curriculo/get-curriculo-formacao-data'
+import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
@@ -47,6 +52,9 @@ interface InscricaoFlowCarouselProps {
   userInfo: EmpregosUserInfo
   userAuthInfo: { cpf: string; name: string }
   contactUpdateStatus: ContactUpdateStatus
+  formacaoOptions: FormacaoOptions
+  initialFormacoes?: InitialFormacaoItem[]
+  initialIdiomas?: InitialIdiomaItem[]
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
 }
@@ -60,6 +68,9 @@ export function InscricaoFlowCarousel({
   userInfo,
   userAuthInfo,
   contactUpdateStatus,
+  formacaoOptions,
+  initialFormacoes,
+  initialIdiomas,
   initialEscolaridade = '',
   informacoesComplementares,
 }: InscricaoFlowCarouselProps) {
@@ -146,6 +157,10 @@ export function InscricaoFlowCarousel({
         )}
         <SwiperSlide key="curriculo" className="h-auto!">
           <CurriculoContent
+            cpf={userAuthInfo.cpf}
+            formacaoOptions={formacaoOptions}
+            initialFormacoes={initialFormacoes}
+            initialIdiomas={initialIdiomas}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}
             hasPerguntasAdicionais={hasPerguntasAdicionais}
