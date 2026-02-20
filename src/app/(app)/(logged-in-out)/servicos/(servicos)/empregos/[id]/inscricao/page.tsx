@@ -15,6 +15,7 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
 import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
 import { getCurriculoSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
+import { getCurriculoTermosAceitos } from '../../curriculo/get-curriculo-termos-data'
 import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import { getSituacaoOptions } from '../../curriculo/get-situacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
@@ -84,6 +85,7 @@ export default async function InscricaoPage({
     situacaoOptions,
     curriculoFormacaoData,
     curriculoSituacaoData,
+    curriculoTermosAceitos,
   ] = await Promise.all([
     getApiPublicEmpregabilidadeVagasId(vagaId),
     getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
@@ -92,6 +94,7 @@ export default async function InscricaoPage({
     getSituacaoOptions(),
     getCurriculoFormacaoData(userAuthInfo.cpf),
     getCurriculoSituacaoData(userAuthInfo.cpf),
+    getCurriculoTermosAceitos(userAuthInfo.cpf),
   ])
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
@@ -181,6 +184,7 @@ export default async function InscricaoPage({
         initialIdiomas={curriculoFormacaoData.idiomas}
         situacaoOptions={situacaoOptions}
         initialSituacao={curriculoSituacaoData}
+        initialTermosAceitos={curriculoTermosAceitos}
         initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
       />

@@ -1126,6 +1126,8 @@ export interface CurriculoContentProps {
   situacaoOptions?: SituacaoOptions
   /** Situação e interesses já salvos (preenche o accordion Situação atual). */
   initialSituacao?: InitialSituacaoData
+  /** Se o usuário já aceitou os termos de uso (preenche o checkbox). */
+  initialTermosAceitos?: boolean
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
   onContinuarToNext?: () => void
   /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
@@ -1143,6 +1145,7 @@ export function CurriculoContent({
   initialIdiomas,
   situacaoOptions = DEFAULT_SITUACAO_OPTIONS,
   initialSituacao,
+  initialTermosAceitos,
   onContinuarToNext,
   onSuccessClose,
 }: CurriculoContentProps = {}) {
@@ -1206,7 +1209,7 @@ export function CurriculoContent({
       idiomas: defaultIdiomas,
       ...defaultExperienciaValues,
       ...defaultSituacaoFormValues,
-      termosAceitos: false,
+      termosAceitos: initialTermosAceitos ?? false,
     },
   })
 
@@ -1490,7 +1493,7 @@ export function CurriculoContent({
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="pt-5 pb-4">
-                    <TermosUsoAccordionContent />
+                    <TermosUsoAccordionContent cpf={cpf} />
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

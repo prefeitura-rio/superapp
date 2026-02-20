@@ -59,6 +59,7 @@ interface InscricaoFlowCarouselProps {
   initialIdiomas?: InitialIdiomaItem[]
   situacaoOptions: SituacaoOptions
   initialSituacao?: InitialSituacaoData
+  initialTermosAceitos?: boolean
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
 }
@@ -77,6 +78,7 @@ export function InscricaoFlowCarousel({
   initialIdiomas,
   situacaoOptions,
   initialSituacao,
+  initialTermosAceitos,
   initialEscolaridade = '',
   informacoesComplementares,
 }: InscricaoFlowCarouselProps) {
@@ -169,6 +171,7 @@ export function InscricaoFlowCarousel({
             initialIdiomas={initialIdiomas}
             situacaoOptions={situacaoOptions}
             initialSituacao={initialSituacao}
+            initialTermosAceitos={initialTermosAceitos}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}
             hasPerguntasAdicionais={hasPerguntasAdicionais}
