@@ -28,6 +28,10 @@ interface ConfirmarInformacoesContentProps {
     name: string
   }
   contactUpdateStatus?: ContactUpdateStatus
+  /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push */
+  onContinuar?: () => void
+  /** URL de retorno para links de atualizar telefone/email (ex: /servicos/empregos/[id]/inscricao?step=1) */
+  returnUrlForProfile?: string
 }
 
 export function ConfirmarInformacoesContent({
@@ -35,6 +39,8 @@ export function ConfirmarInformacoesContent({
   userInfo,
   userAuthInfo,
   contactUpdateStatus,
+  onContinuar,
+  returnUrlForProfile,
 }: ConfirmarInformacoesContentProps) {
   const router = useRouter()
 
@@ -52,7 +58,9 @@ export function ConfirmarInformacoesContent({
   const [familyIncomeDrawerOpen, setFamilyIncomeDrawerOpen] = useState(false)
   const [disabilityDrawerOpen, setDisabilityDrawerOpen] = useState(false)
 
-  const returnUrl = `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+  const returnUrl =
+    returnUrlForProfile ??
+    `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
 
   const handlePhoneClick = () => {
     router.push(
@@ -72,7 +80,11 @@ export function ConfirmarInformacoesContent({
   const handleDisabilityClick = () => setDisabilityDrawerOpen(true)
 
   const handleContinuar = () => {
-    router.push(`/servicos/empregos/${vagaId}/inscricao/curriculo`)
+    if (onContinuar) {
+      onContinuar()
+    } else {
+      router.push(`/servicos/empregos/${vagaId}/inscricao/curriculo`)
+    }
   }
 
   return (

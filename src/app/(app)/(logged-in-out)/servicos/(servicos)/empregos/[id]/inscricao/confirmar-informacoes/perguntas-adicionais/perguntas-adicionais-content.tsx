@@ -37,6 +37,10 @@ interface InformacaoComplementar {
 interface PerguntasAdicionaisContentProps {
   vagaId: string
   informacoesComplementares: InformacaoComplementar[]
+  /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
+  onSuccessClose?: () => void
+  /** Rota do header "voltar". No carousel use o detalhe da vaga para sair do fluxo. */
+  backRoute?: string
 }
 
 function createDynamicSchema(informacoes: InformacaoComplementar[]) {
@@ -138,6 +142,8 @@ function createDefaultValues(informacoes: InformacaoComplementar[]) {
 export function PerguntasAdicionaisContent({
   vagaId,
   informacoesComplementares,
+  onSuccessClose,
+  backRoute,
 }: PerguntasAdicionaisContentProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -197,7 +203,10 @@ export function PerguntasAdicionaisContent({
         <SecondaryHeader
           fixed={false}
           className="max-w-4xl mx-auto"
-          route={`/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`}
+          route={
+            backRoute ??
+            `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+          }
         />
       </div>
 
@@ -382,7 +391,13 @@ export function PerguntasAdicionaisContent({
         open={successDrawerOpen}
         onOpenChange={open => {
           setSuccessDrawerOpen(open)
-          if (!open) router.push('/servicos/empregos')
+          if (!open) {
+            if (onSuccessClose) {
+              onSuccessClose()
+            } else {
+              router.push('/servicos/empregos')
+            }
+          }
         }}
         dismissible={false}
       />

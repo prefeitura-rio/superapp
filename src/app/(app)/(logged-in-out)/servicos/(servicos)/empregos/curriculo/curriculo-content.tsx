@@ -928,6 +928,10 @@ export interface CurriculoContentProps {
   hasPerguntasAdicionais?: boolean
   /** Escolaridade vinda de Informações Pessoais (fonte única de verdade). */
   initialEscolaridade?: string
+  /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
+  onContinuarToNext?: () => void
+  /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
+  onSuccessClose?: () => void
 }
 
 export function CurriculoContent({
@@ -935,6 +939,8 @@ export function CurriculoContent({
   backRoute = '/servicos/empregos',
   hasPerguntasAdicionais = false,
   initialEscolaridade = '',
+  onContinuarToNext,
+  onSuccessClose,
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
@@ -1085,9 +1091,13 @@ export function CurriculoContent({
       () => {
         if (inscricaoVagaId) {
           if (hasPerguntasAdicionais) {
-            router.push(
-              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
-            )
+            if (onContinuarToNext) {
+              onContinuarToNext()
+            } else {
+              router.push(
+                `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+              )
+            }
           } else {
             confetti({
               particleCount: 100,
@@ -1107,7 +1117,13 @@ export function CurriculoContent({
 
   const handleSuccessSheetOpenChange = (open: boolean) => {
     setSuccessSheetOpen(open)
-    if (!open) router.push('/servicos/empregos')
+    if (!open) {
+      if (onSuccessClose) {
+        onSuccessClose()
+      } else {
+        router.push('/servicos/empregos')
+      }
+    }
   }
 
   return (
