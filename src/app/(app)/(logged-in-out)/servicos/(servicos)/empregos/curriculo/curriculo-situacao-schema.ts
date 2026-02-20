@@ -1,56 +1,22 @@
 import { z } from 'zod'
-import {
-  DISPONIBILIDADE_OPCOES,
-  SITUACAO_ATUAL_OPCOES,
-  TEMPO_PROCURANDO_EMPREGO_OPCOES,
-  TIPO_VINCULO_OPCOES,
-} from './constants'
+import { TEMPO_PROCURANDO_EMPREGO_CODES } from './constants'
 
 export const curriculoSituacaoSchema = z.object({
-  situacaoAtual: z
-    .string()
-    .min(1, 'Campo obrigatório')
-    .refine(
-      val =>
-        SITUACAO_ATUAL_OPCOES.includes(
-          val as (typeof SITUACAO_ATUAL_OPCOES)[number]
-        ),
-      { message: 'Selecione uma opção válida' }
-    ),
+  /** UUID da situação atual (Encontra-se). */
+  idSituacao: z.string().min(1, 'Campo obrigatório'),
+  /** Código estável enviado à API: UP_TO_6, FROM_7_TO_12, FROM_13_TO_24, OVER_24. */
   tempoProcurandoEmprego: z
     .string()
     .min(1, 'Campo obrigatório')
     .refine(
       val =>
-        TEMPO_PROCURANDO_EMPREGO_OPCOES.includes(
-          val as (typeof TEMPO_PROCURANDO_EMPREGO_OPCOES)[number]
-        ),
+        (TEMPO_PROCURANDO_EMPREGO_CODES as readonly string[]).includes(val),
       { message: 'Selecione uma opção válida' }
     ),
-  disponibilidade: z
-    .string()
-    .optional()
-    .refine(
-      val =>
-        !val ||
-        DISPONIBILIDADE_OPCOES.includes(
-          val as (typeof DISPONIBILIDADE_OPCOES)[number]
-        ),
-      { message: 'Selecione uma opção válida' }
-    ),
-  tipoVinculo: z
-    .array(z.string())
-    .optional()
-    .refine(
-      val =>
-        !val ||
-        val.every(v =>
-          TIPO_VINCULO_OPCOES.includes(
-            v as (typeof TIPO_VINCULO_OPCOES)[number]
-          )
-        ),
-      { message: 'Selecione opções válidas' }
-    ),
+  /** UUID da disponibilidade (opcional). */
+  idDisponibilidade: z.string().optional(),
+  /** UUIDs dos tipos de vínculo desejados (opcional, múltipla escolha). */
+  idsTiposVinculo: z.array(z.string()).optional(),
 })
 
 export type CurriculoSituacaoFormValues = z.infer<

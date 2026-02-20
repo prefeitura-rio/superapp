@@ -33,6 +33,7 @@ import type {
   EmpregabilidadeCurriculoIdioma,
   EmpregabilidadeCurriculoIdiomaBody,
   EmpregabilidadeCurriculoSituacaoInteresses,
+  EmpregabilidadeFormacaoAccordionRequest,
   GetApiV1EmpregabilidadeCurriculoConquistasId400,
   GetApiV1EmpregabilidadeCurriculoConquistasId404,
   GetApiV1EmpregabilidadeCurriculoConquistasId500,
@@ -73,6 +74,21 @@ import type {
   PostApiV1EmpregabilidadeCurriculoIdiomas500,
   PutApiV1EmpregabilidadeCurriculoConquistasId400,
   PutApiV1EmpregabilidadeCurriculoConquistasId500,
+  PutApiV1EmpregabilidadeCurriculoCpfConquistas200,
+  PutApiV1EmpregabilidadeCurriculoCpfConquistas400,
+  PutApiV1EmpregabilidadeCurriculoCpfConquistas500,
+  PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares200,
+  PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares400,
+  PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares500,
+  PutApiV1EmpregabilidadeCurriculoCpfExperiencias200,
+  PutApiV1EmpregabilidadeCurriculoCpfExperiencias400,
+  PutApiV1EmpregabilidadeCurriculoCpfExperiencias500,
+  PutApiV1EmpregabilidadeCurriculoCpfFormacoes200,
+  PutApiV1EmpregabilidadeCurriculoCpfFormacoes400,
+  PutApiV1EmpregabilidadeCurriculoCpfFormacoes500,
+  PutApiV1EmpregabilidadeCurriculoCpfIdiomas200,
+  PutApiV1EmpregabilidadeCurriculoCpfIdiomas400,
+  PutApiV1EmpregabilidadeCurriculoCpfIdiomas500,
   PutApiV1EmpregabilidadeCurriculoCursosComplementaresId400,
   PutApiV1EmpregabilidadeCurriculoCursosComplementaresId500,
   PutApiV1EmpregabilidadeCurriculoExperienciasId400,
@@ -1230,6 +1246,57 @@ export const getApiV1EmpregabilidadeCurriculoCpfConquistas = async (
 }
 
 /**
+ * Remove todas as conquistas do CPF e insere as novas em uma transação
+ * @summary Substituir conquistas por CPF
+ */
+export type putApiV1EmpregabilidadeCurriculoCpfConquistasResponse200 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfConquistas200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfConquistasResponse400 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfConquistas400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfConquistasResponse500 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfConquistas500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfConquistasResponseComposite =
+  | putApiV1EmpregabilidadeCurriculoCpfConquistasResponse200
+  | putApiV1EmpregabilidadeCurriculoCpfConquistasResponse400
+  | putApiV1EmpregabilidadeCurriculoCpfConquistasResponse500
+
+export type putApiV1EmpregabilidadeCurriculoCpfConquistasResponse =
+  putApiV1EmpregabilidadeCurriculoCpfConquistasResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCurriculoCpfConquistasUrl = (
+  cpf: string
+) => {
+  return `/api/v1/empregabilidade/curriculo/${cpf}/conquistas`
+}
+
+export const putApiV1EmpregabilidadeCurriculoCpfConquistas = async (
+  cpf: string,
+  empregabilidadeCurriculoConquista: EmpregabilidadeCurriculoConquista[],
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCurriculoCpfConquistasResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCurriculoCpfConquistasResponse>(
+    getPutApiV1EmpregabilidadeCurriculoCpfConquistasUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeCurriculoConquista),
+    }
+  )
+}
+
+/**
  * Retorna todos os cursos complementares de um usuário
  * @summary Listar cursos complementares por CPF
  */
@@ -1269,6 +1336,60 @@ export const getApiV1EmpregabilidadeCurriculoCpfCursosComplementares = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+/**
+ * Remove todos os cursos complementares do CPF e insere os novos em uma transação
+ * @summary Substituir cursos complementares por CPF
+ */
+export type putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse200 =
+  {
+    data: PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares200
+    status: 200
+  }
+
+export type putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse400 =
+  {
+    data: PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares400
+    status: 400
+  }
+
+export type putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse500 =
+  {
+    data: PutApiV1EmpregabilidadeCurriculoCpfCursosComplementares500
+    status: 500
+  }
+
+export type putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponseComposite =
+  | putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse200
+  | putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse400
+  | putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse500
+
+export type putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse =
+  putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCurriculoCpfCursosComplementaresUrl = (
+  cpf: string
+) => {
+  return `/api/v1/empregabilidade/curriculo/${cpf}/cursos-complementares`
+}
+
+export const putApiV1EmpregabilidadeCurriculoCpfCursosComplementares = async (
+  cpf: string,
+  empregabilidadeCurriculoCursoComplementar: EmpregabilidadeCurriculoCursoComplementar[],
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCurriculoCpfCursosComplementaresResponse>(
+    getPutApiV1EmpregabilidadeCurriculoCpfCursosComplementaresUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeCurriculoCursoComplementar),
     }
   )
 }
@@ -1316,6 +1437,57 @@ export const getApiV1EmpregabilidadeCurriculoCpfExperiencias = async (
 }
 
 /**
+ * Remove todas as experiências do CPF e insere as novas em uma transação
+ * @summary Substituir experiências por CPF
+ */
+export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse200 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfExperiencias200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse400 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfExperiencias400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse500 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfExperiencias500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponseComposite =
+  | putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse200
+  | putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse400
+  | putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse500
+
+export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse =
+  putApiV1EmpregabilidadeCurriculoCpfExperienciasResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCurriculoCpfExperienciasUrl = (
+  cpf: string
+) => {
+  return `/api/v1/empregabilidade/curriculo/${cpf}/experiencias`
+}
+
+export const putApiV1EmpregabilidadeCurriculoCpfExperiencias = async (
+  cpf: string,
+  empregabilidadeCurriculoExperiencia: EmpregabilidadeCurriculoExperiencia[],
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse>(
+    getPutApiV1EmpregabilidadeCurriculoCpfExperienciasUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeCurriculoExperiencia),
+    }
+  )
+}
+
+/**
  * Retorna todas as formações de um usuário
  * @summary Listar formações por CPF
  */
@@ -1358,6 +1530,57 @@ export const getApiV1EmpregabilidadeCurriculoCpfFormacoes = async (
 }
 
 /**
+ * Remove todas as formações e idiomas do CPF e insere os novos em uma única transação
+ * @summary Substituir formações e idiomas por CPF
+ */
+export type putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse200 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfFormacoes200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse400 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfFormacoes400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse500 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfFormacoes500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfFormacoesResponseComposite =
+  | putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse200
+  | putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse400
+  | putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse500
+
+export type putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse =
+  putApiV1EmpregabilidadeCurriculoCpfFormacoesResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCurriculoCpfFormacoesUrl = (
+  cpf: string
+) => {
+  return `/api/v1/empregabilidade/curriculo/${cpf}/formacoes`
+}
+
+export const putApiV1EmpregabilidadeCurriculoCpfFormacoes = async (
+  cpf: string,
+  empregabilidadeFormacaoAccordionRequest: EmpregabilidadeFormacaoAccordionRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCurriculoCpfFormacoesResponse>(
+    getPutApiV1EmpregabilidadeCurriculoCpfFormacoesUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeFormacaoAccordionRequest),
+    }
+  )
+}
+
+/**
  * Retorna todos os idiomas de um usuário
  * @summary Listar idiomas por CPF
  */
@@ -1395,6 +1618,57 @@ export const getApiV1EmpregabilidadeCurriculoCpfIdiomas = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+/**
+ * Remove todos os idiomas do CPF e insere os novos em uma transação
+ * @summary Substituir idiomas por CPF
+ */
+export type putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse200 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfIdiomas200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse400 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfIdiomas400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse500 = {
+  data: PutApiV1EmpregabilidadeCurriculoCpfIdiomas500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCurriculoCpfIdiomasResponseComposite =
+  | putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse200
+  | putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse400
+  | putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse500
+
+export type putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse =
+  putApiV1EmpregabilidadeCurriculoCpfIdiomasResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCurriculoCpfIdiomasUrl = (
+  cpf: string
+) => {
+  return `/api/v1/empregabilidade/curriculo/${cpf}/idiomas`
+}
+
+export const putApiV1EmpregabilidadeCurriculoCpfIdiomas = async (
+  cpf: string,
+  empregabilidadeCurriculoIdioma: EmpregabilidadeCurriculoIdioma[],
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCurriculoCpfIdiomasResponse>(
+    getPutApiV1EmpregabilidadeCurriculoCpfIdiomasUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeCurriculoIdioma),
     }
   )
 }

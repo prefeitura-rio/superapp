@@ -76,12 +76,53 @@ export const SITUACAO_ATUAL_OPCOES = [
   'Profissional liberal',
 ] as const
 
+/** Opções exibidas no drawer; valor enviado ao backend é o code. */
 export const TEMPO_PROCURANDO_EMPREGO_OPCOES = [
   'Há até 6 meses',
   'De 7 a 12 meses',
   'De 13 a 24 meses',
   'Mais de 24 meses',
 ] as const
+
+/** Códigos estáveis enviados à API (tempo procurando emprego). */
+export const TEMPO_PROCURANDO_EMPREGO_CODES = [
+  'UP_TO_6',
+  'FROM_7_TO_12',
+  'FROM_13_TO_24',
+  'OVER_24',
+] as const
+
+export type TempoProcurandoEmpregoCode =
+  (typeof TEMPO_PROCURANDO_EMPREGO_CODES)[number]
+
+/** Mapeamento label (UI) -> code (API). */
+export const TEMPO_PROCURANDO_EMPREGO_LABEL_TO_CODE: Record<
+  (typeof TEMPO_PROCURANDO_EMPREGO_OPCOES)[number],
+  TempoProcurandoEmpregoCode
+> = {
+  'Há até 6 meses': 'UP_TO_6',
+  'De 7 a 12 meses': 'FROM_7_TO_12',
+  'De 13 a 24 meses': 'FROM_13_TO_24',
+  'Mais de 24 meses': 'OVER_24',
+}
+
+/** Mapeamento code (API) -> label (UI). */
+export const TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL: Record<
+  TempoProcurandoEmpregoCode,
+  (typeof TEMPO_PROCURANDO_EMPREGO_OPCOES)[number]
+> = {
+  UP_TO_6: 'Há até 6 meses',
+  FROM_7_TO_12: 'De 7 a 12 meses',
+  FROM_13_TO_24: 'De 13 a 24 meses',
+  OVER_24: 'Mais de 24 meses',
+}
+
+/** Para uso no drawer: { label, value: code }. */
+export const TEMPO_PROCURANDO_EMPREGO_OPCOES_DISPLAY =
+  TEMPO_PROCURANDO_EMPREGO_OPCOES.map(label => ({
+    label,
+    value: TEMPO_PROCURANDO_EMPREGO_LABEL_TO_CODE[label],
+  }))
 
 export const DISPONIBILIDADE_OPCOES = [
   'Imediato',

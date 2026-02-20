@@ -1,25 +1,12 @@
 import { z } from 'zod'
 import {
   ANO_CONCLUSAO_FORMACAO_OPCOES,
-  IDIOMAS_OPCOES,
-  NIVEL_IDIOMA_OPCOES,
   STATUS_FORMACAO_OPCOES,
-  TIPO_FORMACAO_OPCOES,
 } from './constants'
 
 const formacaoAcademicaItemSchema = z
   .object({
-    tipoFormacao: z
-      .string()
-      .optional()
-      .refine(
-        val =>
-          !val ||
-          TIPO_FORMACAO_OPCOES.includes(
-            val as (typeof TIPO_FORMACAO_OPCOES)[number]
-          ),
-        { message: 'Selecione uma opção válida' }
-      ),
+    tipoFormacaoId: z.string().optional(),
     nomeInstituicao: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     nomeCurso: z.string().max(50, 'Máximo de 50 caracteres').optional(),
     status: z
@@ -41,7 +28,6 @@ const formacaoAcademicaItemSchema = z
       }),
   })
   .superRefine((data, ctx) => {
-    // Apenas validação de formato quando o usuário preenche (mín. 3 caracteres)
     const nomeInstituicaoLength = data.nomeInstituicao?.trim()?.length ?? 0
     if (nomeInstituicaoLength > 0 && nomeInstituicaoLength < 3) {
       ctx.addIssue({
@@ -62,25 +48,8 @@ const formacaoAcademicaItemSchema = z
   })
 
 const idiomaItemSchema = z.object({
-  idioma: z
-    .string()
-    .optional()
-    .refine(
-      val =>
-        !val || IDIOMAS_OPCOES.includes(val as (typeof IDIOMAS_OPCOES)[number]),
-      { message: 'Selecione um idioma válido' }
-    ),
-  nivel: z
-    .string()
-    .optional()
-    .refine(
-      val =>
-        !val ||
-        NIVEL_IDIOMA_OPCOES.includes(
-          val as (typeof NIVEL_IDIOMA_OPCOES)[number]
-        ),
-      { message: 'Selecione um nível válido' }
-    ),
+  idIdioma: z.string().optional(),
+  idNivel: z.string().optional(),
 })
 
 export const curriculoFormacaoSchema = z.object({
@@ -89,22 +58,22 @@ export const curriculoFormacaoSchema = z.object({
   formacaoAcademica: z.array(formacaoAcademicaItemSchema),
   idiomas: z.array(idiomaItemSchema).superRefine((arr, ctx) => {
     arr.forEach((item, index) => {
-      const hasIdioma = (item.idioma?.trim()?.length ?? 0) > 0
-      const hasNivel = (item.nivel?.trim()?.length ?? 0) > 0
+      const hasIdioma = (item.idIdioma?.trim()?.length ?? 0) > 0
+      const hasNivel = (item.idNivel?.trim()?.length ?? 0) > 0
       const isComplete = hasIdioma && hasNivel
 
       if (!isComplete) {
         if (!hasIdioma) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: [index, 'idioma'],
+            path: [index, 'idIdioma'],
             message: 'Selecione o idioma',
           })
         }
         if (!hasNivel) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: [index, 'nivel'],
+            path: [index, 'idNivel'],
             message: 'Selecione o nível',
           })
         }

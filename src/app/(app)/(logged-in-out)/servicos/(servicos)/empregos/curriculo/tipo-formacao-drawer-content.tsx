@@ -2,8 +2,8 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { TIPO_FORMACAO_OPCOES } from './constants'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
+import { useFormacaoApi } from './formacao-api-context'
 
 interface TipoFormacaoDrawerContentProps {
   fieldIndex: number
@@ -15,19 +15,33 @@ export function TipoFormacaoDrawerContent({
   onClose,
 }: TipoFormacaoDrawerContentProps) {
   const { setValue, watch } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`formacaoAcademica.${fieldIndex}.tipoFormacao`) ?? ''
+  const { escolaridades, isLoading } = useFormacaoApi()
+  const value = watch(`formacaoAcademica.${fieldIndex}.tipoFormacaoId`) ?? ''
+
+  const options = escolaridades.map(item => ({
+    label: item.descricao,
+    value: item.id,
+  }))
 
   const handleSelect = (selected: string) => {
-    setValue(`formacaoAcademica.${fieldIndex}.tipoFormacao`, selected, {
+    setValue(`formacaoAcademica.${fieldIndex}.tipoFormacaoId`, selected, {
       shouldValidate: true,
     })
     onClose?.()
   }
 
+  if (isLoading) {
+    return (
+      <div className="py-4 text-center text-muted-foreground text-sm">
+        Carregando opções...
+      </div>
+    )
+  }
+
   return (
     <div>
       <RadioList
-        options={[...TIPO_FORMACAO_OPCOES]}
+        options={options}
         value={value}
         onValueChange={handleSelect}
         name={`tipo-formacao-${fieldIndex}`}

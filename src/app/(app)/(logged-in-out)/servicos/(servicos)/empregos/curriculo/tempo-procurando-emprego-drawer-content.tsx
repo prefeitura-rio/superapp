@@ -2,7 +2,7 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { TEMPO_PROCURANDO_EMPREGO_OPCOES } from './constants'
+import { TEMPO_PROCURANDO_EMPREGO_OPCOES_DISPLAY } from './constants'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 
 interface TempoProcurandoEmpregoDrawerContentProps {
@@ -23,7 +23,7 @@ export function TempoProcurandoEmpregoDrawerContent({
   return (
     <div>
       <RadioList
-        options={[...TEMPO_PROCURANDO_EMPREGO_OPCOES]}
+        options={TEMPO_PROCURANDO_EMPREGO_OPCOES_DISPLAY}
         value={value}
         onValueChange={handleSelect}
         name="tempo-procurando-emprego"

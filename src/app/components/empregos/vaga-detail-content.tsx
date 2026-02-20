@@ -191,16 +191,14 @@ export function VagaDetailContent({
         <div className="mt-6">
           {isLoggedIn ? (
             <Link
-              href={`/servicos/empregos/${vaga.id}/inscricao/bem-vindo`}
+              href={`/servicos/empregos/${vaga.id}/inscricao`}
               className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 ${candidacyButtonClassName}`}
             >
               Candidatar-se à vaga
             </Link>
           ) : (
             <Link
-              href={buildAuthUrl(
-                `/servicos/empregos/${vaga.id}/inscricao/bem-vindo`
-              )}
+              href={buildAuthUrl(`/servicos/empregos/${vaga.id}/inscricao`)}
               className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
             >
               Fazer login para se candidatar

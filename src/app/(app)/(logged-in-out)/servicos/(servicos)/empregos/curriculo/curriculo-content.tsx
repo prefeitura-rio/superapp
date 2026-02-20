@@ -12,6 +12,7 @@ import {
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
+import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/models'
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,6 +29,7 @@ import {
 } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { AnoConclusaoDrawerContent } from './ano-conclusao-drawer-content'
+import { TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL } from './constants'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 import { curriculoSchema } from './curriculo-schema'
@@ -40,12 +42,24 @@ import {
   getExperienciaSnapshot,
   hasExperienciaValidationErrors,
 } from './experiencia-profissional-accordion-content'
+import { FormacaoApiProvider, useFormacaoApi } from './formacao-api-context'
+import type { FormacaoOptions } from './formacao-options-types'
+import type {
+  InitialFormacaoItem,
+  InitialIdiomaItem,
+} from './get-curriculo-formacao-data'
+import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
+import { saveFormacaoAccordion } from './save-formacao-action'
+import { saveSituacaoAction } from './save-situacao-action'
+import { SituacaoApiProvider, useSituacaoApi } from './situacao-api-context'
 import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
+import type { SituacaoOptions } from './situacao-options-types'
 import { StatusFormacaoDrawerContent } from './status-formacao-drawer-content'
 import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-drawer-content'
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
+import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 
 const ACCORDION_ITEMS = [
@@ -64,10 +78,10 @@ const FORMACAO_ERROR_PATHS = [
 ] as const
 
 const SITUACAO_ERROR_PATHS = [
-  'situacaoAtual',
+  'idSituacao',
   'tempoProcurandoEmprego',
-  'disponibilidade',
-  'tipoVinculo',
+  'idDisponibilidade',
+  'idsTiposVinculo',
 ] as const
 
 const TERMOS_ERROR_PATHS = ['termosAceitos'] as const
@@ -134,8 +148,8 @@ function hasFormacaoRequiredFields(
   const hasEscolaridade = (values.escolaridade?.trim()?.length ?? 0) > 0
   const hasIdiomas = (values.idiomas ?? []).some(
     item =>
-      (item.idioma?.trim()?.length ?? 0) > 0 &&
-      (item.nivel?.trim()?.length ?? 0) > 0
+      (item.idIdioma?.trim()?.length ?? 0) > 0 &&
+      (item.idNivel?.trim()?.length ?? 0) > 0
   )
   return hasEscolaridade && hasIdiomas
 }
@@ -143,13 +157,14 @@ function hasFormacaoRequiredFields(
 function hasSituacaoRequiredFields(
   values: CurriculoSituacaoFormValues
 ): boolean {
-  const hasSituacaoAtual = (values.situacaoAtual?.trim()?.length ?? 0) > 0
+  const hasSituacaoAtual = (values.idSituacao?.trim()?.length ?? 0) > 0
   const hasTempoProcurando =
     (values.tempoProcurandoEmprego?.trim()?.length ?? 0) > 0
   return hasSituacaoAtual && hasTempoProcurando
 }
 
 interface FormacaoAccordionContentProps {
+  cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoFormacaoFormValues) => void
 }
@@ -175,6 +190,7 @@ const FORMACAO_FIELD_NAMES = [
 ] as const
 
 function FormacaoAccordionContent({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: FormacaoAccordionContentProps) {
@@ -190,20 +206,34 @@ function FormacaoAccordionContent({
 
   const handleFormacaoSave = async () => {
     const isValid = await trigger([...FORMACAO_FIELD_NAMES])
-    if (isValid) {
-      const values = getValues()
-      const snapshot = getFormacaoSnapshot(values)
-      const payload = getFormacaoPayload(values)
-      console.log('Formação salva (payload sem escolaridade):', payload)
-      toast.success('Formação salva com sucesso')
-      onSaveSuccess(snapshot)
-    } else {
+    if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
-      // Focar no primeiro campo com erro
       const firstErrorField = getFirstErrorField(errors)
       if (firstErrorField) {
         setFocus(firstErrorField as any)
       }
+      return
+    }
+
+    if (!cpf?.trim()) {
+      toast.error('CPF não disponível. Faça login novamente.')
+      return
+    }
+
+    const values = getValues()
+    const snapshot = getFormacaoSnapshot(values)
+    const apiPayload = getFormacaoApiPayload(values)
+
+    try {
+      const result = await saveFormacaoAccordion(cpf, apiPayload)
+      if (result.success) {
+        toast.success('Formação salva com sucesso')
+        onSaveSuccess(snapshot)
+      } else {
+        toast.error('Não foi possível salvar. Tente novamente.')
+      }
+    } catch {
+      toast.error('Erro ao salvar formação. Tente novamente.')
     }
   }
 
@@ -251,6 +281,29 @@ function FormacaoAccordionContent({
             key={field.id}
             className="rounded-xl bg-card p-4 space-y-4 shadow-none"
           >
+            <div className="space-y-2">
+              <span
+                className={cn(
+                  'text-sm font-normal block',
+                  errors.formacaoAcademica?.[index]?.tipoFormacaoId
+                    ? 'text-destructive'
+                    : 'text-primary'
+                )}
+              >
+                Tipo de formação
+              </span>
+              <TipoFormacaoField
+                index={index}
+                error={
+                  errors.formacaoAcademica?.[index]?.tipoFormacaoId?.message
+                }
+              />
+              {!errors.formacaoAcademica?.[index]?.tipoFormacaoId && (
+                <p className={HINT_CLASS}>
+                  Escolha a opção que melhor descreve o tipo dessa formação
+                </p>
+              )}
+            </div>
             <div className="space-y-2">
               <CustomInput
                 {...register(`formacaoAcademica.${index}.nomeCurso`)}
@@ -352,6 +405,7 @@ function FormacaoAccordionContent({
           className="w-full rounded-full bg-card text-primary"
           onClick={() =>
             append({
+              tipoFormacaoId: '',
               nomeInstituicao: '',
               nomeCurso: '',
               status: '',
@@ -421,7 +475,7 @@ function IdiomasFields() {
             <span
               className={cn(
                 'text-sm font-normal block',
-                errors.idiomas?.[index]?.idioma
+                errors.idiomas?.[index]?.idIdioma
                   ? 'text-destructive'
                   : 'text-primary'
               )}
@@ -430,14 +484,14 @@ function IdiomasFields() {
             </span>
             <IdiomaField
               index={index}
-              error={errors.idiomas?.[index]?.idioma?.message}
+              error={errors.idiomas?.[index]?.idIdioma?.message}
             />
           </div>
           <div className="space-y-2">
             <span
               className={cn(
                 'text-sm font-normal block',
-                errors.idiomas?.[index]?.nivel
+                errors.idiomas?.[index]?.idNivel
                   ? 'text-destructive'
                   : 'text-primary'
               )}
@@ -446,7 +500,7 @@ function IdiomasFields() {
             </span>
             <NivelIdiomaField
               index={index}
-              error={errors.idiomas?.[index]?.nivel?.message}
+              error={errors.idiomas?.[index]?.idNivel?.message}
             />
           </div>
 
@@ -468,7 +522,7 @@ function IdiomasFields() {
         variant="secondary"
         size="lg"
         className="w-full rounded-full bg-card text-primary"
-        onClick={() => append({ idioma: '', nivel: '' })}
+        onClick={() => append({ idIdioma: '', idNivel: '' })}
       >
         Adicionar outro idioma
       </CustomButton>
@@ -478,13 +532,15 @@ function IdiomasFields() {
 
 function IdiomaField({ index, error }: { index: number; error?: string }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`idiomas.${index}.idioma`) ?? ''
-  const hasSelection = Boolean(value)
+  const { idiomas: idiomasList } = useFormacaoApi()
+  const idIdioma = watch(`idiomas.${index}.idIdioma`) ?? ''
+  const displayLabel = idiomasList.find(i => i.id === idIdioma)?.descricao ?? ''
+  const hasSelection = Boolean(idIdioma)
 
   return (
     <Controller
       control={control}
-      name={`idiomas.${index}.idioma`}
+      name={`idiomas.${index}.idIdioma`}
       render={({ field }) => (
         <ActionDiv
           ref={field.ref}
@@ -492,7 +548,7 @@ function IdiomaField({ index, error }: { index: number; error?: string }) {
           error={error}
           content={
             hasSelection ? (
-              value
+              displayLabel
             ) : (
               <span className="text-foreground-light dark:text-muted-foreground">
                 Selecione o idioma
@@ -520,13 +576,15 @@ function IdiomaField({ index, error }: { index: number; error?: string }) {
 
 function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
-  const value = watch(`idiomas.${index}.nivel`) ?? ''
-  const hasSelection = Boolean(value)
+  const { niveisIdioma } = useFormacaoApi()
+  const idNivel = watch(`idiomas.${index}.idNivel`) ?? ''
+  const displayLabel = niveisIdioma.find(n => n.id === idNivel)?.descricao ?? ''
+  const hasSelection = Boolean(idNivel)
 
   return (
     <Controller
       control={control}
-      name={`idiomas.${index}.nivel`}
+      name={`idiomas.${index}.idNivel`}
       render={({ field }) => (
         <ActionDiv
           ref={field.ref}
@@ -534,7 +592,7 @@ function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
           error={error}
           content={
             hasSelection ? (
-              value
+              displayLabel
             ) : (
               <span className="text-foreground-light dark:text-muted-foreground">
                 Selecione o nível
@@ -554,6 +612,58 @@ function NivelIdiomaField({ index, error }: { index: number; error?: string }) {
           }
           drawerContent={<NivelIdiomaDrawerContent fieldIndex={index} />}
           drawerTitle="Nível"
+        />
+      )}
+    />
+  )
+}
+
+function TipoFormacaoField({
+  index,
+  error,
+}: {
+  index: number
+  error?: string
+}) {
+  const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
+  const { escolaridades } = useFormacaoApi()
+  const tipoFormacaoId =
+    watch(`formacaoAcademica.${index}.tipoFormacaoId`) ?? ''
+  const displayLabel =
+    escolaridades.find(e => e.id === tipoFormacaoId)?.descricao ?? ''
+  const hasSelection = Boolean(tipoFormacaoId)
+
+  return (
+    <Controller
+      control={control}
+      name={`formacaoAcademica.${index}.tipoFormacaoId`}
+      render={({ field }) => (
+        <ActionDiv
+          ref={field.ref}
+          className="bg-background shadow-none"
+          error={error}
+          content={
+            hasSelection ? (
+              displayLabel
+            ) : (
+              <span className="text-foreground-light dark:text-muted-foreground">
+                Selecione o tipo da formação
+              </span>
+            )
+          }
+          variant="default"
+          disabled
+          rightIcon={
+            <ChevronDownIcon
+              className={
+                hasSelection
+                  ? 'text-primary stroke-[1.5] size-5'
+                  : 'text-foreground-light stroke-[1.5] size-5'
+              }
+            />
+          }
+          drawerContent={<TipoFormacaoDrawerContent fieldIndex={index} />}
+          drawerTitle="Tipo de formação"
         />
       )}
     />
@@ -679,60 +789,130 @@ function getFormacaoPayload(
   })
 }
 
+/** Payload para a API PUT formacoes/idiomas (id_escolaridade, id_idioma, id_nivel). */
+function getFormacaoApiPayload(
+  values: CurriculoFormacaoFormValues
+): EmpregabilidadeFormacaoAccordionRequest {
+  const formacoes = (values.formacaoAcademica ?? [])
+    .filter(
+      f =>
+        (f.tipoFormacaoId?.trim()?.length ?? 0) > 0 &&
+        (f.nomeCurso?.trim()?.length ?? 0) > 0 &&
+        (f.status?.trim()?.length ?? 0) > 0 &&
+        (f.anoConclusao?.trim()?.length ?? 0) > 0
+    )
+    .map(f => ({
+      id_escolaridade: f.tipoFormacaoId!.trim(),
+      nome_curso: f.nomeCurso!.trim(),
+      nome_instituicao: f.nomeInstituicao?.trim() || undefined,
+      status: f.status!.trim() as 'Completo' | 'Em andamento' | 'Incompleto',
+      ano_conclusao: f.anoConclusao!.trim(),
+    }))
+
+  const idiomas = (values.idiomas ?? [])
+    .filter(
+      i =>
+        (i.idIdioma?.trim()?.length ?? 0) > 0 &&
+        (i.idNivel?.trim()?.length ?? 0) > 0
+    )
+    .map(i => ({
+      id_idioma: i.idIdioma!.trim(),
+      id_nivel: i.idNivel!.trim(),
+    }))
+
+  return { formacoes, idiomas }
+}
+
 function getSituacaoSnapshot(
   values: CurriculoSituacaoFormValues
 ): CurriculoSituacaoFormValues {
   return structuredClone({
-    situacaoAtual: values.situacaoAtual,
+    idSituacao: values.idSituacao,
     tempoProcurandoEmprego: values.tempoProcurandoEmprego,
-    disponibilidade: values.disponibilidade,
-    tipoVinculo: values.tipoVinculo,
+    idDisponibilidade: values.idDisponibilidade,
+    idsTiposVinculo: values.idsTiposVinculo,
   })
 }
 
 const SITUACAO_FIELD_NAMES = [
-  'situacaoAtual',
+  'idSituacao',
   'tempoProcurandoEmprego',
-  'disponibilidade',
-  'tipoVinculo',
+  'idDisponibilidade',
+  'idsTiposVinculo',
 ] as const
 
+const DEFAULT_SITUACAO_OPTIONS: SituacaoOptions = {
+  situacoesAtual: [],
+  disponibilidades: [],
+  regimesContratacao: [],
+}
+
 interface SituacaoAtualAccordionContentProps {
+  cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoSituacaoFormValues) => void
 }
 
 function SituacaoAtualAccordionContent({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: SituacaoAtualAccordionContentProps) {
   const { watch, control, formState, trigger, getValues, setFocus } =
     useFormContext<CurriculoSituacaoFormValues>()
   const { errors } = formState
+  const { situacoesAtual, disponibilidades, regimesContratacao } =
+    useSituacaoApi()
 
-  const situacaoAtual = watch('situacaoAtual')
+  const idSituacao = watch('idSituacao')
   const tempoProcurandoEmprego = watch('tempoProcurandoEmprego')
-  const disponibilidade = watch('disponibilidade')
-  const tipoVinculo = watch('tipoVinculo')
+  const idDisponibilidade = watch('idDisponibilidade')
+  const idsTiposVinculo = watch('idsTiposVinculo')
 
-  const hasSituacaoAtualSelection = Boolean(situacaoAtual)
+  const situacaoLabel =
+    situacoesAtual.find(s => s.id === idSituacao)?.descricao ?? ''
+  const tempoLabel =
+    (tempoProcurandoEmprego &&
+      TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL[
+        tempoProcurandoEmprego as keyof typeof TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL
+      ]) ??
+    ''
+  const disponibilidadeLabel =
+    disponibilidades.find(d => d.id === idDisponibilidade)?.descricao ?? ''
+  const tiposVinculoLabels = (idsTiposVinculo ?? [])
+    .map(id => regimesContratacao.find(r => r.id === id)?.descricao)
+    .filter(Boolean) as string[]
+
+  const hasSituacaoAtualSelection = Boolean(idSituacao)
   const hasTempoSelection = Boolean(tempoProcurandoEmprego)
-  const hasDisponibilidadeSelection = Boolean(disponibilidade)
-  const hasTipoVinculoSelection = Boolean(tipoVinculo && tipoVinculo.length > 0)
+  const hasDisponibilidadeSelection = Boolean(idDisponibilidade)
+  const hasTipoVinculoSelection = Boolean(
+    idsTiposVinculo && idsTiposVinculo.length > 0
+  )
 
   const handleSituacaoSave = async () => {
     const isValid = await trigger([...SITUACAO_FIELD_NAMES])
-    if (isValid) {
-      const data = getSituacaoSnapshot(getValues())
-      console.log('Situação atual salva:', data)
-      toast.success('Situação atual salva com sucesso')
-      onSaveSuccess(data)
-    } else {
+    if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
       const firstErrorField = getFirstErrorField(errors)
-      if (firstErrorField) {
-        setFocus(firstErrorField as any)
+      if (firstErrorField) setFocus(firstErrorField as any)
+      return
+    }
+    if (!cpf?.trim()) {
+      toast.error('CPF não disponível. Faça login novamente.')
+      return
+    }
+    const data = getSituacaoSnapshot(getValues())
+    try {
+      const result = await saveSituacaoAction(cpf, data)
+      if (result.success) {
+        toast.success('Situação atual salva com sucesso')
+        onSaveSuccess(data)
+      } else {
+        toast.error('Não foi possível salvar. Tente novamente.')
       }
+    } catch {
+      toast.error('Erro ao salvar situação. Tente novamente.')
     }
   }
 
@@ -741,7 +921,7 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="situacaoAtual"
+          name="idSituacao"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
@@ -749,14 +929,14 @@ function SituacaoAtualAccordionContent({
               isRequired
               content={
                 hasSituacaoAtualSelection ? (
-                  situacaoAtual
+                  situacaoLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
               }
               disabled
               variant="default"
-              error={errors.situacaoAtual?.message}
+              error={errors.idSituacao?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -771,7 +951,7 @@ function SituacaoAtualAccordionContent({
             />
           )}
         />
-        {!errors.situacaoAtual && (
+        {!errors.idSituacao && (
           <p className={HINT_CLASS}>
             Informe sua situação atual no mercado de trabalho
           </p>
@@ -789,7 +969,7 @@ function SituacaoAtualAccordionContent({
               isRequired
               content={
                 hasTempoSelection ? (
-                  tempoProcurandoEmprego
+                  tempoLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
@@ -816,21 +996,21 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="disponibilidade"
+          name="idDisponibilidade"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
               label="Disponibilidade"
               content={
                 hasDisponibilidadeSelection ? (
-                  disponibilidade
+                  disponibilidadeLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
               }
               disabled
               variant="default"
-              error={errors.disponibilidade?.message}
+              error={errors.idDisponibilidade?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -845,7 +1025,7 @@ function SituacaoAtualAccordionContent({
             />
           )}
         />
-        {!errors.disponibilidade && (
+        {!errors.idDisponibilidade && (
           <p className={HINT_CLASS}>
             Selecione a partir de quando você pode começar a trabalhar
           </p>
@@ -855,7 +1035,7 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="tipoVinculo"
+          name="idsTiposVinculo"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
@@ -863,7 +1043,7 @@ function SituacaoAtualAccordionContent({
               content={
                 hasTipoVinculoSelection ? (
                   <span className="line-clamp-2">
-                    {tipoVinculo?.join(', ')}
+                    {tiposVinculoLabels.join(', ')}
                   </span>
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
@@ -871,7 +1051,7 @@ function SituacaoAtualAccordionContent({
               }
               disabled
               variant="default"
-              error={errors.tipoVinculo?.message}
+              error={errors.idsTiposVinculo?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -913,10 +1093,16 @@ function SituacaoAtualAccordionContent({
 }
 
 const defaultSituacaoValues: CurriculoSituacaoFormValues = {
-  situacaoAtual: '',
+  idSituacao: '',
   tempoProcurandoEmprego: '',
-  disponibilidade: '',
-  tipoVinculo: [],
+  idDisponibilidade: '',
+  idsTiposVinculo: [],
+}
+
+const DEFAULT_FORMACAO_OPTIONS: FormacaoOptions = {
+  escolaridades: [],
+  idiomas: [],
+  niveisIdioma: [],
 }
 
 export interface CurriculoContentProps {
@@ -928,6 +1114,24 @@ export interface CurriculoContentProps {
   hasPerguntasAdicionais?: boolean
   /** Escolaridade vinda de Informações Pessoais (fonte única de verdade). */
   initialEscolaridade?: string
+  /** CPF do usuário logado; necessário para salvar formação/idiomas na API. */
+  cpf?: string
+  /** Opções de formação/idiomas/níveis carregadas no server (evita usar next/headers no client). */
+  formacaoOptions?: FormacaoOptions
+  /** Formações já salvas do currículo (preenche o formulário). */
+  initialFormacoes?: InitialFormacaoItem[]
+  /** Idiomas já salvos do currículo (preenche o formulário). */
+  initialIdiomas?: InitialIdiomaItem[]
+  /** Opções de situação atual (Encontra-se, Disponibilidade, Tipo vínculo) carregadas no server. */
+  situacaoOptions?: SituacaoOptions
+  /** Situação e interesses já salvos (preenche o accordion Situação atual). */
+  initialSituacao?: InitialSituacaoData
+  /** Se o usuário já aceitou os termos de uso (preenche o checkbox). */
+  initialTermosAceitos?: boolean
+  /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
+  onContinuarToNext?: () => void
+  /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
+  onSuccessClose?: () => void
 }
 
 export function CurriculoContent({
@@ -935,6 +1139,15 @@ export function CurriculoContent({
   backRoute = '/servicos/empregos',
   hasPerguntasAdicionais = false,
   initialEscolaridade = '',
+  cpf,
+  formacaoOptions = DEFAULT_FORMACAO_OPTIONS,
+  initialFormacoes,
+  initialIdiomas,
+  situacaoOptions = DEFAULT_SITUACAO_OPTIONS,
+  initialSituacao,
+  initialTermosAceitos,
+  onContinuarToNext,
+  onSuccessClose,
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
@@ -948,23 +1161,55 @@ export function CurriculoContent({
   )
   const situacaoSnapshotRef = useRef<CurriculoSituacaoFormValues | null>(null)
 
+  const defaultFormacaoAcademica =
+    (initialFormacoes?.length ?? 0) > 0
+      ? (initialFormacoes ?? []).map(f => ({
+          tipoFormacaoId: f.tipoFormacaoId ?? '',
+          nomeInstituicao: f.nomeInstituicao ?? '',
+          nomeCurso: f.nomeCurso ?? '',
+          status: f.status ?? '',
+          anoConclusao: f.anoConclusao ?? '',
+        }))
+      : [
+          {
+            tipoFormacaoId: '',
+            nomeInstituicao: '',
+            nomeCurso: '',
+            status: '',
+            anoConclusao: '',
+          },
+        ]
+
+  const defaultIdiomas =
+    (initialIdiomas?.length ?? 0) > 0
+      ? (initialIdiomas ?? []).map(i => ({
+          idIdioma: i.idIdioma ?? '',
+          idNivel: i.idNivel ?? '',
+        }))
+      : [{ idIdioma: '', idNivel: '' }]
+
+  const defaultSituacaoFormValues: CurriculoSituacaoFormValues =
+    initialSituacao &&
+    (initialSituacao.idSituacao?.trim() ||
+      initialSituacao.tempoProcurandoEmprego?.trim())
+      ? {
+          idSituacao: initialSituacao.idSituacao ?? '',
+          tempoProcurandoEmprego: initialSituacao.tempoProcurandoEmprego ?? '',
+          idDisponibilidade: initialSituacao.idDisponibilidade ?? '',
+          idsTiposVinculo: initialSituacao.idsTiposVinculo ?? [],
+        }
+      : defaultSituacaoValues
+
   const form = useForm<CurriculoFormValues>({
     resolver: zodResolver(curriculoSchema),
     mode: 'all',
     defaultValues: {
       escolaridade: initialEscolaridade ?? '',
-      formacaoAcademica: [
-        {
-          nomeInstituicao: '',
-          nomeCurso: '',
-          status: '',
-          anoConclusao: '',
-        },
-      ],
-      idiomas: [{ idioma: '', nivel: '' }],
+      formacaoAcademica: defaultFormacaoAcademica,
+      idiomas: defaultIdiomas,
       ...defaultExperienciaValues,
-      ...defaultSituacaoValues,
-      termosAceitos: false,
+      ...defaultSituacaoFormValues,
+      termosAceitos: initialTermosAceitos ?? false,
     },
   })
 
@@ -1003,15 +1248,8 @@ export function CurriculoContent({
     const snapshot = formacaoSnapshotRef.current
     const valuesToRestore: CurriculoFormacaoFormValues = snapshot ?? {
       escolaridade: initialEscolaridade ?? '',
-      formacaoAcademica: [
-        {
-          nomeInstituicao: '',
-          nomeCurso: '',
-          status: '',
-          anoConclusao: '',
-        },
-      ],
-      idiomas: [{ idioma: '', nivel: '' }],
+      formacaoAcademica: defaultFormacaoAcademica,
+      idiomas: defaultIdiomas,
     }
     const currentFormValues = form.getValues()
     form.reset(
@@ -1059,15 +1297,15 @@ export function CurriculoContent({
   const handleSituacaoCancel = () => {
     const snapshot = situacaoSnapshotRef.current
     const valuesToRestore: CurriculoSituacaoFormValues =
-      snapshot ?? defaultSituacaoValues
+      snapshot ?? defaultSituacaoFormValues
     const currentFormValues = form.getValues()
     form.reset(
       {
         ...currentFormValues,
-        situacaoAtual: valuesToRestore.situacaoAtual,
+        idSituacao: valuesToRestore.idSituacao,
         tempoProcurandoEmprego: valuesToRestore.tempoProcurandoEmprego,
-        disponibilidade: valuesToRestore.disponibilidade,
-        tipoVinculo: valuesToRestore.tipoVinculo,
+        idDisponibilidade: valuesToRestore.idDisponibilidade,
+        idsTiposVinculo: valuesToRestore.idsTiposVinculo,
       },
       { keepDefaultValues: false }
     )
@@ -1085,9 +1323,13 @@ export function CurriculoContent({
       () => {
         if (inscricaoVagaId) {
           if (hasPerguntasAdicionais) {
-            router.push(
-              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
-            )
+            if (onContinuarToNext) {
+              onContinuarToNext()
+            } else {
+              router.push(
+                `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+              )
+            }
           } else {
             confetti({
               particleCount: 100,
@@ -1107,7 +1349,13 @@ export function CurriculoContent({
 
   const handleSuccessSheetOpenChange = (open: boolean) => {
     setSuccessSheetOpen(open)
-    if (!open) router.push('/servicos/empregos')
+    if (!open) {
+      if (onSuccessClose) {
+        onSuccessClose()
+      } else {
+        router.push('/servicos/empregos')
+      }
+    }
   }
 
   return (
@@ -1120,147 +1368,153 @@ export function CurriculoContent({
         />
       </div>
 
-      <FormProvider {...form}>
-        <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-          <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
-            Meu Currículo
-          </h1>
+      <FormacaoApiProvider initialData={formacaoOptions}>
+        <SituacaoApiProvider initialData={situacaoOptions}>
+          <FormProvider {...form}>
+            <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+              <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
+                Meu Currículo
+              </h1>
 
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full"
-            value={accordionValue}
-            onValueChange={handleAccordionValueChange}
-          >
-            <AccordionItem
-              value="formacao"
-              className="border-b border-border py-5 last:border-b-0"
-            >
-              <AccordionTrigger
-                chevronClassName="text-primary stroke-[1.5]"
-                className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={accordionValue}
+                onValueChange={handleAccordionValueChange}
               >
-                <span className="flex items-center gap-2.5">
-                  Formação
-                  {hasFormacaoErrors ? (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                      <X className="size-3.5 text-white stroke-3" />
+                <AccordionItem
+                  value="formacao"
+                  className="border-b border-border py-5 last:border-b-0"
+                >
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Formação
+                      {hasFormacaoErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
+                        </span>
+                      ) : (
+                        requiredFieldsFilled && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
                     </span>
-                  ) : (
-                    requiredFieldsFilled && (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                        <Check className="size-3.5 text-white stroke-3" />
-                      </span>
-                    )
-                  )}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pt-5 pb-4">
-                <FormacaoAccordionContent
-                  onCancel={handleFormacaoCancel}
-                  onSaveSuccess={handleFormacaoSaveSuccess}
-                />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem
-              value="experiencia"
-              className="border-b border-border py-5 last:border-b-0"
-            >
-              <AccordionTrigger
-                chevronClassName="text-primary stroke-[1.5]"
-                className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
-              >
-                <span className="flex items-center gap-2.5">
-                  Experiência Profissional
-                  {hasExperienciaErrors ? (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                      <X className="size-3.5 text-white stroke-3" />
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <FormacaoAccordionContent
+                      cpf={cpf}
+                      onCancel={handleFormacaoCancel}
+                      onSaveSuccess={handleFormacaoSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="experiencia"
+                  className="border-b border-border py-5 last:border-b-0"
+                >
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Experiência Profissional
+                      {hasExperienciaErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pt-5 pb-4">
-                <ExperienciaProfissionalAccordionContent
-                  onCancel={handleExperienciaCancel}
-                  onSaveSuccess={handleExperienciaSaveSuccess}
-                />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem
-              value="situacao"
-              className="border-b border-border py-5 last:border-b-0"
-            >
-              <AccordionTrigger
-                chevronClassName="text-primary stroke-[1.5]"
-                className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
-              >
-                <span className="flex items-center gap-2.5">
-                  Situação atual
-                  {hasSituacaoErrors ? (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                      <X className="size-3.5 text-white stroke-3" />
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <ExperienciaProfissionalAccordionContent
+                      onCancel={handleExperienciaCancel}
+                      onSaveSuccess={handleExperienciaSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="situacao"
+                  className="border-b border-border py-5 last:border-b-0"
+                >
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Situação atual
+                      {hasSituacaoErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
+                        </span>
+                      ) : (
+                        situacaoRequiredFieldsFilled && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
                     </span>
-                  ) : (
-                    situacaoRequiredFieldsFilled && (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                        <Check className="size-3.5 text-white stroke-3" />
-                      </span>
-                    )
-                  )}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pt-5 pb-4">
-                <SituacaoAtualAccordionContent
-                  onCancel={handleSituacaoCancel}
-                  onSaveSuccess={handleSituacaoSaveSuccess}
-                />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem
-              value="termos"
-              className="border-b border-border py-5 last:border-b-0"
-            >
-              <AccordionTrigger
-                chevronClassName="text-primary stroke-[1.5]"
-                className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
-              >
-                <span className="flex items-center gap-2.5">
-                  Termos de Uso
-                  {hasTermosErrors ? (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                      <X className="size-3.5 text-white stroke-3" />
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <SituacaoAtualAccordionContent
+                      cpf={cpf}
+                      onCancel={handleSituacaoCancel}
+                      onSaveSuccess={handleSituacaoSaveSuccess}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="termos"
+                  className="border-b border-border py-5 last:border-b-0"
+                >
+                  <AccordionTrigger
+                    chevronClassName="text-primary stroke-[1.5]"
+                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      Termos de Uso
+                      {hasTermosErrors ? (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                          <X className="size-3.5 text-white stroke-3" />
+                        </span>
+                      ) : (
+                        termosAceitos && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        )
+                      )}
                     </span>
-                  ) : (
-                    termosAceitos && (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                        <Check className="size-3.5 text-white stroke-3" />
-                      </span>
-                    )
-                  )}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pt-5 pb-4">
-                <TermosUsoAccordionContent />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-5 pb-4">
+                    <TermosUsoAccordionContent cpf={cpf} />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
-          {inscricaoVagaId ? (
-            <div className="mt-auto pt-8 pb-8 shrink-0">
-              <CustomButton
-                size="lg"
-                fullWidth
-                variant="primary"
-                onClick={handleContinuar}
-                className="rounded-full"
-              >
-                Continuar
-              </CustomButton>
+              {inscricaoVagaId ? (
+                <div className="mt-auto pt-8 pb-8 shrink-0">
+                  <CustomButton
+                    size="lg"
+                    fullWidth
+                    variant="primary"
+                    onClick={handleContinuar}
+                    className="rounded-full"
+                  >
+                    Continuar
+                  </CustomButton>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
-      </FormProvider>
+          </FormProvider>
+        </SituacaoApiProvider>
+      </FormacaoApiProvider>
 
       <CandidaturaEnviadaDrawer
         open={successSheetOpen}

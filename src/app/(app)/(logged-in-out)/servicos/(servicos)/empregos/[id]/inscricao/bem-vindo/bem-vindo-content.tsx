@@ -11,9 +11,14 @@ import { completeOnboarding } from './actions'
 
 interface BemVindoContentProps {
   vagaId: string
+  /** Quando em fluxo único (carousel), chamado após sucesso em vez de router.push */
+  onContinuarSuccess?: () => void
 }
 
-export function BemVindoContent({ vagaId }: BemVindoContentProps) {
+export function BemVindoContent({
+  vagaId,
+  onContinuarSuccess,
+}: BemVindoContentProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,10 +29,13 @@ export function BemVindoContent({ vagaId }: BemVindoContentProps) {
       const result = await completeOnboarding()
 
       if (result.success) {
-        // Sucesso: vai para próxima página
-        router.push(
-          `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
-        )
+        if (onContinuarSuccess) {
+          onContinuarSuccess()
+        } else {
+          router.push(
+            `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+          )
+        }
       } else {
         // Falha: mostra toast e redireciona para lista de empregos
         toast.error(result.error || 'Algo deu errado. Tente novamente.')

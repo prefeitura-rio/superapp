@@ -3,9 +3,28 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Controller, useFormContext } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { saveTermosAcceptAction } from './save-termos-accept-action'
 
-export function TermosUsoAccordionContent() {
+interface TermosUsoAccordionContentProps {
+  cpf?: string
+}
+
+export function TermosUsoAccordionContent({
+  cpf,
+}: TermosUsoAccordionContentProps) {
   const { control } = useFormContext()
+
+  const handleCheckedChange = async (checked: boolean) => {
+    if (checked && cpf?.trim()) {
+      const result = await saveTermosAcceptAction(cpf)
+      if (result.success) {
+        toast.success('Termos de uso aceitos e registrados')
+      } else {
+        toast.error('Não foi possível registrar o aceite. Tente novamente.')
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -39,11 +58,17 @@ export function TermosUsoAccordionContent() {
         render={({ field }) => (
           <div
             className="flex items-center justify-between cursor-pointer"
-            onClick={() => field.onChange(!field.value)}
+            onClick={() => {
+              const newValue = !field.value
+              field.onChange(newValue)
+              if (newValue) void handleCheckedChange(newValue)
+            }}
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                field.onChange(!field.value)
+                const newValue = !field.value
+                field.onChange(newValue)
+                if (newValue) void handleCheckedChange(newValue)
               }
             }}
             role="button"
@@ -54,7 +79,10 @@ export function TermosUsoAccordionContent() {
             </span>
             <Checkbox
               checked={field.value}
-              onCheckedChange={field.onChange}
+              onCheckedChange={checked => {
+                field.onChange(checked)
+                if (checked === true) void handleCheckedChange(true)
+              }}
               ref={field.ref}
               onClick={e => e.stopPropagation()}
             />
