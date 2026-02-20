@@ -16,10 +16,12 @@ export interface EmpregabilidadeCandidatura {
   created_at?: string
   curriculo_snapshot?: EmpregabilidadeCurriculoCompleto
   deleted_at?: string
+  email?: string
   etapa_atual?: EmpregabilidadeEtapa
   id?: string
   id_etapa_atual?: string
   id_vaga?: string
+  nome?: string
   respostas_info_complementares?: EmpregabilidadeRespostaInfoComplementar[]
   status?: EmpregabilidadeStatusCandidatura
   updated_at?: string

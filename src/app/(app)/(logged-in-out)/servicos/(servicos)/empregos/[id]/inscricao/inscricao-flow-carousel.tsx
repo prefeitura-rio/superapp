@@ -1,14 +1,17 @@
 'use client'
 
-import { Swiper, SwiperSlide } from 'swiper/react'
-import type { Swiper as SwiperType } from 'swiper'
-import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useRef, useState } from 'react'
+import type { Swiper as SwiperType } from 'swiper'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { CurriculoContent } from '../../curriculo/curriculo-content'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
-import { CurriculoContent } from '../../curriculo/curriculo-content'
-import type { ContactUpdateStatus, EmpregosUserInfo } from './confirmar-informacoes/types'
+import type {
+  ContactUpdateStatus,
+  EmpregosUserInfo,
+} from './confirmar-informacoes/types'
 
 import 'swiper/css'
 
@@ -17,7 +20,11 @@ interface InformacaoComplementarForPerguntas {
   id_vaga: string
   titulo: string
   obrigatorio: boolean
-  tipo_campo: 'resposta_curta' | 'resposta_numerica' | 'selecao_unica' | 'selecao_multipla'
+  tipo_campo:
+    | 'resposta_curta'
+    | 'resposta_numerica'
+    | 'selecao_unica'
+    | 'selecao_multipla'
   valor_minimo: number | null
   valor_maximo: number | null
   opcoes: string[] | null
@@ -25,7 +32,11 @@ interface InformacaoComplementarForPerguntas {
   updated_at: string
 }
 
-export type InscricaoStep = 'bem-vindo' | 'confirmar-informacoes' | 'curriculo' | 'perguntas-adicionais'
+export type InscricaoStep =
+  | 'bem-vindo'
+  | 'confirmar-informacoes'
+  | 'curriculo'
+  | 'perguntas-adicionais'
 
 interface InscricaoFlowCarouselProps {
   vagaId: string

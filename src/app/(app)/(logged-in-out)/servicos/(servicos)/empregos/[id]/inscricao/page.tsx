@@ -1,20 +1,20 @@
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
+import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
+import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
+import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
 } from '@/http/models'
-import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
-import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
-import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
-import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
+import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +28,11 @@ interface InformacaoComplementarForPerguntas {
   id_vaga: string
   titulo: string
   obrigatorio: boolean
-  tipo_campo: 'resposta_curta' | 'resposta_numerica' | 'selecao_unica' | 'selecao_multipla'
+  tipo_campo:
+    | 'resposta_curta'
+    | 'resposta_numerica'
+    | 'selecao_unica'
+    | 'selecao_multipla'
   valor_minimo: number | null
   valor_maximo: number | null
   opcoes: string[] | null
@@ -44,7 +48,8 @@ function mapInformacaoComplementar(
     id_vaga: info.id_vaga ?? '',
     titulo: info.titulo ?? '',
     obrigatorio: info.obrigatorio ?? false,
-    tipo_campo: (info.tipo_campo ?? 'resposta_curta') as InformacaoComplementarForPerguntas['tipo_campo'],
+    tipo_campo: (info.tipo_campo ??
+      'resposta_curta') as InformacaoComplementarForPerguntas['tipo_campo'],
     valor_minimo: info.valor_minimo ?? null,
     valor_maximo: info.valor_maximo ?? null,
     opcoes: info.opcoes ?? null,
@@ -67,11 +72,12 @@ export default async function InscricaoPage({
     redirect(buildAuthUrl(`/servicos/empregos/${vagaId}/inscricao`))
   }
 
-  const [vagaResponse, onboardingResponse, userInfoResponse] = await Promise.all([
-    getApiPublicEmpregabilidadeVagasId(vagaId),
-    getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
-    getDalCitizenCpf(userAuthInfo.cpf),
-  ])
+  const [vagaResponse, onboardingResponse, userInfoResponse] =
+    await Promise.all([
+      getApiPublicEmpregabilidadeVagasId(vagaId),
+      getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
+      getDalCitizenCpf(userAuthInfo.cpf),
+    ])
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
     notFound()
@@ -119,9 +125,10 @@ export default async function InscricaoPage({
     emailNeedsUpdate,
   }
 
-  const onboardingData = onboardingResponse.status === 200 && onboardingResponse.data
-    ? (onboardingResponse.data as { is_first_login?: boolean })
-    : null
+  const onboardingData =
+    onboardingResponse.status === 200 && onboardingResponse.data
+      ? (onboardingResponse.data as { is_first_login?: boolean })
+      : null
   const showBemVindo = onboardingData?.is_first_login === true
 
   const needsConfirmar =
@@ -136,8 +143,9 @@ export default async function InscricaoPage({
     (vagaResponse.data.informacoes_complementares?.length ?? 0) > 0
 
   const informacoesComplementares =
-    vagaResponse.data.informacoes_complementares?.map(mapInformacaoComplementar) ??
-    []
+    vagaResponse.data.informacoes_complementares?.map(
+      mapInformacaoComplementar
+    ) ?? []
 
   const citizen = userInfo as ModelsCitizen
   const initialEscolaridade = citizen.escolaridade?.trim() || undefined
