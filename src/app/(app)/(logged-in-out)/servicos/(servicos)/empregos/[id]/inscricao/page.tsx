@@ -4,8 +4,6 @@ import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
-import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
-import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
@@ -15,6 +13,8 @@ import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
+import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
+import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
 import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
 

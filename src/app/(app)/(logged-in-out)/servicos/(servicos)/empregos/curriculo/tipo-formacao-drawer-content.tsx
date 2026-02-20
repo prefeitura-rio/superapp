@@ -2,8 +2,8 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { useFormacaoApi } from './formacao-api-context'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
+import { useFormacaoApi } from './formacao-api-context'
 
 interface TipoFormacaoDrawerContentProps {
   fieldIndex: number
@@ -18,7 +18,7 @@ export function TipoFormacaoDrawerContent({
   const { escolaridades, isLoading } = useFormacaoApi()
   const value = watch(`formacaoAcademica.${fieldIndex}.tipoFormacaoId`) ?? ''
 
-  const options = escolaridades.map((item) => ({
+  const options = escolaridades.map(item => ({
     label: item.descricao,
     value: item.id,
   }))

@@ -13,11 +13,11 @@ function parseListResponse(data: unknown): FormacaoApiItem[] {
       ? body
       : []
   return arr
-    .map((item) => ({
+    .map(item => ({
       id: item.id ?? '',
       descricao: item.descricao ?? '',
     }))
-    .filter((item) => item.id)
+    .filter(item => item.id)
 }
 
 /**

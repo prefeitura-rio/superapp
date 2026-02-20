@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { CurriculoContent } from '../../curriculo/curriculo-content'
+import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
 import type {
   InitialFormacaoItem,
   InitialIdiomaItem,
 } from '../../curriculo/get-curriculo-formacao-data'
-import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
-import { CurriculoContent } from '../../curriculo/curriculo-content'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'

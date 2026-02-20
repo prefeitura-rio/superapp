@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react'
+import { type ReactNode, createContext, useContext, useMemo } from 'react'
 import type { FormacaoApiItem, FormacaoOptions } from './formacao-options-types'
 
 interface FormacaoApiContextValue {
@@ -25,7 +20,10 @@ interface FormacaoApiProviderProps {
   children: ReactNode
 }
 
-export function FormacaoApiProvider({ initialData, children }: FormacaoApiProviderProps) {
+export function FormacaoApiProvider({
+  initialData,
+  children,
+}: FormacaoApiProviderProps) {
   const value = useMemo<FormacaoApiContextValue>(
     () => ({
       escolaridades: initialData.escolaridades,
@@ -35,11 +33,7 @@ export function FormacaoApiProvider({ initialData, children }: FormacaoApiProvid
       error: null,
       refetch: async () => {},
     }),
-    [
-      initialData.escolaridades,
-      initialData.idiomas,
-      initialData.niveisIdioma,
-    ]
+    [initialData.escolaridades, initialData.idiomas, initialData.niveisIdioma]
   )
 
   return (

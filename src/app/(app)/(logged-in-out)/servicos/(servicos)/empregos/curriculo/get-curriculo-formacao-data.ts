@@ -61,13 +61,13 @@ export async function getCurriculoFormacaoData(
 
   const formacoesBody =
     formacoesRes.status === 200 && formacoesRes.data
-      ? (formacoesRes.data as { data?: unknown }).data ?? formacoesRes.data
+      ? ((formacoesRes.data as { data?: unknown }).data ?? formacoesRes.data)
       : null
   const formacoes = parseFormacoesArray(formacoesBody)
 
   const idiomasBody =
     idiomasRes.status === 200 && idiomasRes.data
-      ? (idiomasRes.data as { data?: unknown }).data ?? idiomasRes.data
+      ? ((idiomasRes.data as { data?: unknown }).data ?? idiomasRes.data)
       : null
   const idiomas = parseIdiomasArray(idiomasBody)
 

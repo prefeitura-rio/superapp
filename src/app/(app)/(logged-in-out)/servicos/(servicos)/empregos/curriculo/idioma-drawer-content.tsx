@@ -2,8 +2,8 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { useFormacaoApi } from './formacao-api-context'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
+import { useFormacaoApi } from './formacao-api-context'
 
 interface IdiomaDrawerContentProps {
   fieldIndex: number
@@ -18,7 +18,7 @@ export function IdiomaDrawerContent({
   const { idiomas, isLoading } = useFormacaoApi()
   const value = watch(`idiomas.${fieldIndex}.idIdioma`) ?? ''
 
-  const options = idiomas.map((item) => ({
+  const options = idiomas.map(item => ({
     label: item.descricao,
     value: item.id,
   }))
