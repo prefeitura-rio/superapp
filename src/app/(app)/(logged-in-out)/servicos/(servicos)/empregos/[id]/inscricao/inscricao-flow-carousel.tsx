@@ -5,6 +5,8 @@ import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
+import type { CurriculoExperienciaFormValues } from '../../curriculo/curriculo-experiencia-schema'
+import type { ExperienciaOptions } from '../../curriculo/experiencia-options-types'
 import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
 import type {
   InitialFormacaoItem,
@@ -59,6 +61,8 @@ interface InscricaoFlowCarouselProps {
   initialIdiomas?: InitialIdiomaItem[]
   situacaoOptions: SituacaoOptions
   initialSituacao?: InitialSituacaoData
+  experienciaOptions: ExperienciaOptions
+  initialExperiencia?: CurriculoExperienciaFormValues
   initialTermosAceitos?: boolean
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
@@ -78,6 +82,8 @@ export function InscricaoFlowCarousel({
   initialIdiomas,
   situacaoOptions,
   initialSituacao,
+  experienciaOptions,
+  initialExperiencia,
   initialTermosAceitos,
   initialEscolaridade = '',
   informacoesComplementares,
@@ -171,6 +177,8 @@ export function InscricaoFlowCarousel({
             initialIdiomas={initialIdiomas}
             situacaoOptions={situacaoOptions}
             initialSituacao={initialSituacao}
+            experienciaOptions={experienciaOptions}
+            initialExperiencia={initialExperiencia}
             initialTermosAceitos={initialTermosAceitos}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}

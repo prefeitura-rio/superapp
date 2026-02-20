@@ -12,8 +12,10 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { curriculoExperienciaSchema } from './curriculo-experiencia-schema'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
+import { useExperienciaApi } from './experiencia-api-context'
 import { ExperienciaComprovadaDrawerContent } from './experiencia-comprovada-drawer-content'
 import { TipoConquistaDrawerContent } from './tipo-conquista-drawer-content'
+import { saveExperienciaAction } from './save-experiencia-action'
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
@@ -71,11 +73,13 @@ function getFirstErrorField(errors: Record<string, unknown>): string | null {
 }
 
 interface ExperienciaProfissionalAccordionContentProps {
+  cpf: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoExperienciaFormValues) => void
 }
 
 function ExperienciaProfissionalAccordionContentInner({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: ExperienciaProfissionalAccordionContentProps) {
@@ -101,18 +105,21 @@ function ExperienciaProfissionalAccordionContentInner({
 
   const handleExperienciaSave = async () => {
     const isValid = await trigger([...EXPERIENCIA_FIELD_NAMES])
-    if (isValid) {
-      const data = getExperienciaSnapshot(getValues())
-      console.log('Experiência profissional salva:', data)
+    if (!isValid) {
+      toast.error('Por favor, revise todos os campos.')
+      const firstErrorField = getFirstErrorField(errors)
+      if (firstErrorField) {
+        setFocus(firstErrorField as Parameters<typeof setFocus>[0])
+      }
+      return
+    }
+    const data = getExperienciaSnapshot(getValues())
+    const result = await saveExperienciaAction(cpf, data)
+    if (result.success) {
       toast.success('Experiência profissional salva com sucesso')
       onSaveSuccess(data)
     } else {
-      toast.error('Por favor, revise todos os campos.')
-      // Focar no primeiro campo com erro
-      const firstErrorField = getFirstErrorField(errors)
-      if (firstErrorField) {
-        setFocus(firstErrorField as any)
-      }
+      toast.error(result.error ?? 'Erro ao salvar. Tente novamente.')
     }
   }
 
@@ -301,7 +308,7 @@ function ExperienciaProfissionalAccordionContentInner({
               <span
                 className={cn(
                   'text-sm font-normal block',
-                  errors.conquistas?.[index]?.tipo
+                  errors.conquistas?.[index]?.idTipoConquista
                     ? 'text-destructive'
                     : 'text-primary'
                 )}
@@ -310,9 +317,9 @@ function ExperienciaProfissionalAccordionContentInner({
               </span>
               <TipoConquistaField
                 index={index}
-                error={errors.conquistas?.[index]?.tipo?.message}
+                error={errors.conquistas?.[index]?.idTipoConquista?.message}
               />
-              {!errors.conquistas?.[index]?.tipo && (
+              {!errors.conquistas?.[index]?.idTipoConquista && (
                 <p className={HINT_CLASS}>
                   Você pode informar sobre cursos, trabalho voluntários e outros
                   reconhecimentos
@@ -379,7 +386,7 @@ function ExperienciaProfissionalAccordionContentInner({
           className="w-full rounded-full bg-card text-primary"
           onClick={() =>
             appendConquista({
-              tipo: '',
+              idTipoConquista: '',
               titulo: '',
               descricao: '',
             })
@@ -475,13 +482,15 @@ function TipoConquistaField({
   error?: string
 }) {
   const { watch, control } = useFormContext<CurriculoExperienciaFormValues>()
-  const value = watch(`conquistas.${index}.tipo`) ?? ''
+  const { tiposConquista } = useExperienciaApi()
+  const value = watch(`conquistas.${index}.idTipoConquista`) ?? ''
+  const label = tiposConquista.find((t) => t.id === value)?.descricao ?? ''
   const hasSelection = Boolean(value)
 
   return (
     <Controller
       control={control}
-      name={`conquistas.${index}.tipo`}
+      name={`conquistas.${index}.idTipoConquista`}
       render={({ field }) => (
         <ActionDiv
           ref={field.ref}
@@ -489,7 +498,7 @@ function TipoConquistaField({
           error={error}
           content={
             hasSelection ? (
-              value
+              label
             ) : (
               <span className="text-foreground-light dark:text-muted-foreground">
                 Selecione uma opção
@@ -516,11 +525,13 @@ function TipoConquistaField({
 }
 
 export function ExperienciaProfissionalAccordionContent({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: ExperienciaProfissionalAccordionContentProps) {
   return (
     <ExperienciaProfissionalAccordionContentInner
+      cpf={cpf}
       onCancel={onCancel}
       onSaveSuccess={onSaveSuccess}
     />

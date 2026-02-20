@@ -2,7 +2,7 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { TIPO_CONQUISTA_OPCOES } from './constants'
+import { useExperienciaApi } from './experiencia-api-context'
 
 interface TipoConquistaDrawerContentProps {
   fieldIndex: number
@@ -14,10 +14,16 @@ export function TipoConquistaDrawerContent({
   onClose,
 }: TipoConquistaDrawerContentProps) {
   const { setValue, watch } = useFormContext()
-  const value = watch(`conquistas.${fieldIndex}.tipo`) ?? ''
+  const { tiposConquista } = useExperienciaApi()
+  const value = watch(`conquistas.${fieldIndex}.idTipoConquista`) ?? ''
+
+  const options = tiposConquista.map((t) => ({
+    label: t.descricao,
+    value: t.id,
+  }))
 
   const handleSelect = (selected: string) => {
-    setValue(`conquistas.${fieldIndex}.tipo`, selected, {
+    setValue(`conquistas.${fieldIndex}.idTipoConquista`, selected, {
       shouldValidate: true,
     })
     onClose?.()
@@ -26,7 +32,7 @@ export function TipoConquistaDrawerContent({
   return (
     <div>
       <RadioList
-        options={[...TIPO_CONQUISTA_OPCOES]}
+        options={options}
         value={value}
         onValueChange={handleSelect}
         name={`tipo-conquista-${fieldIndex}`}

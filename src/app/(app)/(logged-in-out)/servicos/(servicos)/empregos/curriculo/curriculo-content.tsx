@@ -48,6 +48,8 @@ import type {
   InitialFormacaoItem,
   InitialIdiomaItem,
 } from './get-curriculo-formacao-data'
+import type { ExperienciaOptions } from './experiencia-options-types'
+import { ExperienciaApiProvider } from './experiencia-api-context'
 import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
@@ -180,7 +182,7 @@ const defaultExperienciaValues: CurriculoExperienciaFormValues = {
       experienciaComprovadaCarteira: '',
     },
   ],
-  conquistas: [{ tipo: '', titulo: '', descricao: '' }],
+  conquistas: [{ idTipoConquista: '', titulo: '', descricao: '' }],
 }
 
 const FORMACAO_FIELD_NAMES = [
@@ -1126,6 +1128,10 @@ export interface CurriculoContentProps {
   situacaoOptions?: SituacaoOptions
   /** Situação e interesses já salvos (preenche o accordion Situação atual). */
   initialSituacao?: InitialSituacaoData
+  /** Opções de tipos de conquista carregadas no server (Conquistas ou certificados). */
+  experienciaOptions?: ExperienciaOptions
+  /** Experiências e conquistas já salvos (preenche o accordion Experiência Profissional). */
+  initialExperiencia?: CurriculoExperienciaFormValues
   /** Se o usuário já aceitou os termos de uso (preenche o checkbox). */
   initialTermosAceitos?: boolean
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
@@ -1145,6 +1151,8 @@ export function CurriculoContent({
   initialIdiomas,
   situacaoOptions = DEFAULT_SITUACAO_OPTIONS,
   initialSituacao,
+  experienciaOptions = { tiposConquista: [] },
+  initialExperiencia,
   initialTermosAceitos,
   onContinuarToNext,
   onSuccessClose,
@@ -1207,7 +1215,14 @@ export function CurriculoContent({
       escolaridade: initialEscolaridade ?? '',
       formacaoAcademica: defaultFormacaoAcademica,
       idiomas: defaultIdiomas,
-      ...defaultExperienciaValues,
+      empregos:
+        (initialExperiencia?.empregos?.length ?? 0) > 0
+          ? initialExperiencia!.empregos
+          : defaultExperienciaValues.empregos,
+      conquistas:
+        (initialExperiencia?.conquistas?.length ?? 0) > 0
+          ? initialExperiencia!.conquistas
+          : defaultExperienciaValues.conquistas,
       ...defaultSituacaoFormValues,
       termosAceitos: initialTermosAceitos ?? false,
     },
@@ -1370,7 +1385,8 @@ export function CurriculoContent({
 
       <FormacaoApiProvider initialData={formacaoOptions}>
         <SituacaoApiProvider initialData={situacaoOptions}>
-          <FormProvider {...form}>
+          <ExperienciaApiProvider initialData={experienciaOptions}>
+            <FormProvider {...form}>
             <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
               <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
                 Meu Currículo
@@ -1433,6 +1449,7 @@ export function CurriculoContent({
                   </AccordionTrigger>
                   <AccordionContent className="pt-5 pb-4">
                     <ExperienciaProfissionalAccordionContent
+                      cpf={cpf ?? ''}
                       onCancel={handleExperienciaCancel}
                       onSaveSuccess={handleExperienciaSaveSuccess}
                     />
@@ -1513,6 +1530,7 @@ export function CurriculoContent({
               ) : null}
             </div>
           </FormProvider>
+          </ExperienciaApiProvider>
         </SituacaoApiProvider>
       </FormacaoApiProvider>
 
