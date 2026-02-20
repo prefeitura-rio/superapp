@@ -6,10 +6,12 @@ import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
 import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
+import type { InitialSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
 import type {
   InitialFormacaoItem,
   InitialIdiomaItem,
 } from '../../curriculo/get-curriculo-formacao-data'
+import type { SituacaoOptions } from '../../curriculo/situacao-options-types'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
@@ -55,6 +57,8 @@ interface InscricaoFlowCarouselProps {
   formacaoOptions: FormacaoOptions
   initialFormacoes?: InitialFormacaoItem[]
   initialIdiomas?: InitialIdiomaItem[]
+  situacaoOptions: SituacaoOptions
+  initialSituacao?: InitialSituacaoData
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
 }
@@ -71,6 +75,8 @@ export function InscricaoFlowCarousel({
   formacaoOptions,
   initialFormacoes,
   initialIdiomas,
+  situacaoOptions,
+  initialSituacao,
   initialEscolaridade = '',
   informacoesComplementares,
 }: InscricaoFlowCarouselProps) {
@@ -161,6 +167,8 @@ export function InscricaoFlowCarousel({
             formacaoOptions={formacaoOptions}
             initialFormacoes={initialFormacoes}
             initialIdiomas={initialIdiomas}
+            situacaoOptions={situacaoOptions}
+            initialSituacao={initialSituacao}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}
             hasPerguntasAdicionais={hasPerguntasAdicionais}

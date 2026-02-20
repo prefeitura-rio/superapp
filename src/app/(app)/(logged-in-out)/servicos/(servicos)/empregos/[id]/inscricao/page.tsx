@@ -14,7 +14,9 @@ import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
 import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
+import { getCurriculoSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
 import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
+import { getSituacaoOptions } from '../../curriculo/get-situacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
 import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
 
@@ -79,13 +81,17 @@ export default async function InscricaoPage({
     onboardingResponse,
     userInfoResponse,
     formacaoOptions,
+    situacaoOptions,
     curriculoFormacaoData,
+    curriculoSituacaoData,
   ] = await Promise.all([
     getApiPublicEmpregabilidadeVagasId(vagaId),
     getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
     getDalCitizenCpf(userAuthInfo.cpf),
     getFormacaoOptions(),
+    getSituacaoOptions(),
     getCurriculoFormacaoData(userAuthInfo.cpf),
+    getCurriculoSituacaoData(userAuthInfo.cpf),
   ])
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
@@ -173,6 +179,8 @@ export default async function InscricaoPage({
         formacaoOptions={formacaoOptions}
         initialFormacoes={curriculoFormacaoData.formacoes}
         initialIdiomas={curriculoFormacaoData.idiomas}
+        situacaoOptions={situacaoOptions}
+        initialSituacao={curriculoSituacaoData}
         initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
       />

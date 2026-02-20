@@ -2,7 +2,7 @@
 
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
-import { SITUACAO_ATUAL_OPCOES } from './constants'
+import { useSituacaoApi } from './situacao-api-context'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 
 interface SituacaoAtualDrawerContentProps {
@@ -13,17 +13,23 @@ export function SituacaoAtualDrawerContent({
   onClose,
 }: SituacaoAtualDrawerContentProps) {
   const { setValue, watch } = useFormContext<CurriculoSituacaoFormValues>()
-  const value = watch('situacaoAtual') ?? ''
+  const { situacoesAtual } = useSituacaoApi()
+  const value = watch('idSituacao') ?? ''
+
+  const options = situacoesAtual.map((item) => ({
+    label: item.descricao,
+    value: item.id,
+  }))
 
   const handleSelect = (selected: string) => {
-    setValue('situacaoAtual', selected, { shouldValidate: true })
+    setValue('idSituacao', selected, { shouldValidate: true })
     onClose?.()
   }
 
   return (
     <div>
       <RadioList
-        options={[...SITUACAO_ATUAL_OPCOES]}
+        options={options}
         value={value}
         onValueChange={handleSelect}
         name="situacao-atual"

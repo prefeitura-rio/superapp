@@ -34,6 +34,7 @@ import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 import { curriculoSchema } from './curriculo-schema'
 import type { CurriculoFormValues } from './curriculo-schema'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
+import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { DisponibilidadeDrawerContent } from './disponibilidade-drawer-content'
 import { EscolaridadeDrawerContent } from './escolaridade-drawer-content'
 import {
@@ -50,11 +51,15 @@ import type {
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
 import { saveFormacaoAccordion } from './save-formacao-action'
+import { saveSituacaoAction } from './save-situacao-action'
 import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
+import { SituacaoApiProvider, useSituacaoApi } from './situacao-api-context'
+import type { SituacaoOptions } from './situacao-options-types'
 import { StatusFormacaoDrawerContent } from './status-formacao-drawer-content'
 import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-drawer-content'
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
+import { TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL } from './constants'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 
 const ACCORDION_ITEMS = [
@@ -73,10 +78,10 @@ const FORMACAO_ERROR_PATHS = [
 ] as const
 
 const SITUACAO_ERROR_PATHS = [
-  'situacaoAtual',
+  'idSituacao',
   'tempoProcurandoEmprego',
-  'disponibilidade',
-  'tipoVinculo',
+  'idDisponibilidade',
+  'idsTiposVinculo',
 ] as const
 
 const TERMOS_ERROR_PATHS = ['termosAceitos'] as const
@@ -152,7 +157,7 @@ function hasFormacaoRequiredFields(
 function hasSituacaoRequiredFields(
   values: CurriculoSituacaoFormValues
 ): boolean {
-  const hasSituacaoAtual = (values.situacaoAtual?.trim()?.length ?? 0) > 0
+  const hasSituacaoAtual = (values.idSituacao?.trim()?.length ?? 0) > 0
   const hasTempoProcurando =
     (values.tempoProcurandoEmprego?.trim()?.length ?? 0) > 0
   return hasSituacaoAtual && hasTempoProcurando
@@ -822,56 +827,91 @@ function getSituacaoSnapshot(
   values: CurriculoSituacaoFormValues
 ): CurriculoSituacaoFormValues {
   return structuredClone({
-    situacaoAtual: values.situacaoAtual,
+    idSituacao: values.idSituacao,
     tempoProcurandoEmprego: values.tempoProcurandoEmprego,
-    disponibilidade: values.disponibilidade,
-    tipoVinculo: values.tipoVinculo,
+    idDisponibilidade: values.idDisponibilidade,
+    idsTiposVinculo: values.idsTiposVinculo,
   })
 }
 
 const SITUACAO_FIELD_NAMES = [
-  'situacaoAtual',
+  'idSituacao',
   'tempoProcurandoEmprego',
-  'disponibilidade',
-  'tipoVinculo',
+  'idDisponibilidade',
+  'idsTiposVinculo',
 ] as const
 
+const DEFAULT_SITUACAO_OPTIONS: SituacaoOptions = {
+  situacoesAtual: [],
+  disponibilidades: [],
+  regimesContratacao: [],
+}
+
 interface SituacaoAtualAccordionContentProps {
+  cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoSituacaoFormValues) => void
 }
 
 function SituacaoAtualAccordionContent({
+  cpf,
   onCancel,
   onSaveSuccess,
 }: SituacaoAtualAccordionContentProps) {
   const { watch, control, formState, trigger, getValues, setFocus } =
     useFormContext<CurriculoSituacaoFormValues>()
   const { errors } = formState
+  const { situacoesAtual, disponibilidades, regimesContratacao } =
+    useSituacaoApi()
 
-  const situacaoAtual = watch('situacaoAtual')
+  const idSituacao = watch('idSituacao')
   const tempoProcurandoEmprego = watch('tempoProcurandoEmprego')
-  const disponibilidade = watch('disponibilidade')
-  const tipoVinculo = watch('tipoVinculo')
+  const idDisponibilidade = watch('idDisponibilidade')
+  const idsTiposVinculo = watch('idsTiposVinculo')
 
-  const hasSituacaoAtualSelection = Boolean(situacaoAtual)
+  const situacaoLabel =
+    situacoesAtual.find((s) => s.id === idSituacao)?.descricao ?? ''
+  const tempoLabel =
+    (tempoProcurandoEmprego &&
+      TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL[
+        tempoProcurandoEmprego as keyof typeof TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL
+      ]) ??
+    ''
+  const disponibilidadeLabel =
+    disponibilidades.find((d) => d.id === idDisponibilidade)?.descricao ?? ''
+  const tiposVinculoLabels = (idsTiposVinculo ?? [])
+    .map((id) => regimesContratacao.find((r) => r.id === id)?.descricao)
+    .filter(Boolean) as string[]
+
+  const hasSituacaoAtualSelection = Boolean(idSituacao)
   const hasTempoSelection = Boolean(tempoProcurandoEmprego)
-  const hasDisponibilidadeSelection = Boolean(disponibilidade)
-  const hasTipoVinculoSelection = Boolean(tipoVinculo && tipoVinculo.length > 0)
+  const hasDisponibilidadeSelection = Boolean(idDisponibilidade)
+  const hasTipoVinculoSelection =
+    Boolean(idsTiposVinculo && idsTiposVinculo.length > 0)
 
   const handleSituacaoSave = async () => {
     const isValid = await trigger([...SITUACAO_FIELD_NAMES])
-    if (isValid) {
-      const data = getSituacaoSnapshot(getValues())
-      console.log('Situação atual salva:', data)
-      toast.success('Situação atual salva com sucesso')
-      onSaveSuccess(data)
-    } else {
+    if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
       const firstErrorField = getFirstErrorField(errors)
-      if (firstErrorField) {
-        setFocus(firstErrorField as any)
+      if (firstErrorField) setFocus(firstErrorField as any)
+      return
+    }
+    if (!cpf?.trim()) {
+      toast.error('CPF não disponível. Faça login novamente.')
+      return
+    }
+    const data = getSituacaoSnapshot(getValues())
+    try {
+      const result = await saveSituacaoAction(cpf, data)
+      if (result.success) {
+        toast.success('Situação atual salva com sucesso')
+        onSaveSuccess(data)
+      } else {
+        toast.error('Não foi possível salvar. Tente novamente.')
       }
+    } catch {
+      toast.error('Erro ao salvar situação. Tente novamente.')
     }
   }
 
@@ -880,7 +920,7 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="situacaoAtual"
+          name="idSituacao"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
@@ -888,14 +928,14 @@ function SituacaoAtualAccordionContent({
               isRequired
               content={
                 hasSituacaoAtualSelection ? (
-                  situacaoAtual
+                  situacaoLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
               }
               disabled
               variant="default"
-              error={errors.situacaoAtual?.message}
+              error={errors.idSituacao?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -910,7 +950,7 @@ function SituacaoAtualAccordionContent({
             />
           )}
         />
-        {!errors.situacaoAtual && (
+        {!errors.idSituacao && (
           <p className={HINT_CLASS}>
             Informe sua situação atual no mercado de trabalho
           </p>
@@ -928,7 +968,7 @@ function SituacaoAtualAccordionContent({
               isRequired
               content={
                 hasTempoSelection ? (
-                  tempoProcurandoEmprego
+                  tempoLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
@@ -955,21 +995,21 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="disponibilidade"
+          name="idDisponibilidade"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
               label="Disponibilidade"
               content={
                 hasDisponibilidadeSelection ? (
-                  disponibilidade
+                  disponibilidadeLabel
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
                 )
               }
               disabled
               variant="default"
-              error={errors.disponibilidade?.message}
+              error={errors.idDisponibilidade?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -984,7 +1024,7 @@ function SituacaoAtualAccordionContent({
             />
           )}
         />
-        {!errors.disponibilidade && (
+        {!errors.idDisponibilidade && (
           <p className={HINT_CLASS}>
             Selecione a partir de quando você pode começar a trabalhar
           </p>
@@ -994,7 +1034,7 @@ function SituacaoAtualAccordionContent({
       <div className="space-y-2">
         <Controller
           control={control}
-          name="tipoVinculo"
+          name="idsTiposVinculo"
           render={({ field }) => (
             <ActionDiv
               ref={field.ref}
@@ -1002,7 +1042,7 @@ function SituacaoAtualAccordionContent({
               content={
                 hasTipoVinculoSelection ? (
                   <span className="line-clamp-2">
-                    {tipoVinculo?.join(', ')}
+                    {tiposVinculoLabels.join(', ')}
                   </span>
                 ) : (
                   <span className="text-foreground-light">Selecionar</span>
@@ -1010,7 +1050,7 @@ function SituacaoAtualAccordionContent({
               }
               disabled
               variant="default"
-              error={errors.tipoVinculo?.message}
+              error={errors.idsTiposVinculo?.message}
               rightIcon={
                 <ChevronDownIcon
                   className={
@@ -1052,10 +1092,10 @@ function SituacaoAtualAccordionContent({
 }
 
 const defaultSituacaoValues: CurriculoSituacaoFormValues = {
-  situacaoAtual: '',
+  idSituacao: '',
   tempoProcurandoEmprego: '',
-  disponibilidade: '',
-  tipoVinculo: [],
+  idDisponibilidade: '',
+  idsTiposVinculo: [],
 }
 
 const DEFAULT_FORMACAO_OPTIONS: FormacaoOptions = {
@@ -1081,6 +1121,10 @@ export interface CurriculoContentProps {
   initialFormacoes?: InitialFormacaoItem[]
   /** Idiomas já salvos do currículo (preenche o formulário). */
   initialIdiomas?: InitialIdiomaItem[]
+  /** Opções de situação atual (Encontra-se, Disponibilidade, Tipo vínculo) carregadas no server. */
+  situacaoOptions?: SituacaoOptions
+  /** Situação e interesses já salvos (preenche o accordion Situação atual). */
+  initialSituacao?: InitialSituacaoData
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
   onContinuarToNext?: () => void
   /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
@@ -1096,6 +1140,8 @@ export function CurriculoContent({
   formacaoOptions = DEFAULT_FORMACAO_OPTIONS,
   initialFormacoes,
   initialIdiomas,
+  situacaoOptions = DEFAULT_SITUACAO_OPTIONS,
+  initialSituacao,
   onContinuarToNext,
   onSuccessClose,
 }: CurriculoContentProps = {}) {
@@ -1138,6 +1184,18 @@ export function CurriculoContent({
         }))
       : [{ idIdioma: '', idNivel: '' }]
 
+  const defaultSituacaoFormValues: CurriculoSituacaoFormValues =
+    initialSituacao &&
+    (initialSituacao.idSituacao?.trim() ||
+      initialSituacao.tempoProcurandoEmprego?.trim())
+      ? {
+          idSituacao: initialSituacao.idSituacao ?? '',
+          tempoProcurandoEmprego: initialSituacao.tempoProcurandoEmprego ?? '',
+          idDisponibilidade: initialSituacao.idDisponibilidade ?? '',
+          idsTiposVinculo: initialSituacao.idsTiposVinculo ?? [],
+        }
+      : defaultSituacaoValues
+
   const form = useForm<CurriculoFormValues>({
     resolver: zodResolver(curriculoSchema),
     mode: 'all',
@@ -1146,7 +1204,7 @@ export function CurriculoContent({
       formacaoAcademica: defaultFormacaoAcademica,
       idiomas: defaultIdiomas,
       ...defaultExperienciaValues,
-      ...defaultSituacaoValues,
+      ...defaultSituacaoFormValues,
       termosAceitos: false,
     },
   })
@@ -1235,15 +1293,15 @@ export function CurriculoContent({
   const handleSituacaoCancel = () => {
     const snapshot = situacaoSnapshotRef.current
     const valuesToRestore: CurriculoSituacaoFormValues =
-      snapshot ?? defaultSituacaoValues
+      snapshot ?? defaultSituacaoFormValues
     const currentFormValues = form.getValues()
     form.reset(
       {
         ...currentFormValues,
-        situacaoAtual: valuesToRestore.situacaoAtual,
+        idSituacao: valuesToRestore.idSituacao,
         tempoProcurandoEmprego: valuesToRestore.tempoProcurandoEmprego,
-        disponibilidade: valuesToRestore.disponibilidade,
-        tipoVinculo: valuesToRestore.tipoVinculo,
+        idDisponibilidade: valuesToRestore.idDisponibilidade,
+        idsTiposVinculo: valuesToRestore.idsTiposVinculo,
       },
       { keepDefaultValues: false }
     )
@@ -1307,7 +1365,8 @@ export function CurriculoContent({
       </div>
 
       <FormacaoApiProvider initialData={formacaoOptions}>
-        <FormProvider {...form}>
+        <SituacaoApiProvider initialData={situacaoOptions}>
+          <FormProvider {...form}>
           <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
             <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
               Meu Currículo
@@ -1399,10 +1458,11 @@ export function CurriculoContent({
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="pt-5 pb-4">
-                  <SituacaoAtualAccordionContent
-                    onCancel={handleSituacaoCancel}
-                    onSaveSuccess={handleSituacaoSaveSuccess}
-                  />
+                <SituacaoAtualAccordionContent
+                  cpf={cpf}
+                  onCancel={handleSituacaoCancel}
+                  onSaveSuccess={handleSituacaoSaveSuccess}
+                />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem
@@ -1446,9 +1506,10 @@ export function CurriculoContent({
                   Continuar
                 </CustomButton>
               </div>
-            ) : null}
-          </div>
-        </FormProvider>
+          ) : null}
+        </div>
+          </FormProvider>
+        </SituacaoApiProvider>
       </FormacaoApiProvider>
 
       <CandidaturaEnviadaDrawer
