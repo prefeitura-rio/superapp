@@ -36,6 +36,8 @@ export function ExperienciaApiProvider({
 export function useExperienciaApi() {
   const ctx = useContext(ExperienciaApiContext)
   if (!ctx)
-    throw new Error('useExperienciaApi must be used within ExperienciaApiProvider')
+    throw new Error(
+      'useExperienciaApi must be used within ExperienciaApiProvider'
+    )
   return ctx
 }

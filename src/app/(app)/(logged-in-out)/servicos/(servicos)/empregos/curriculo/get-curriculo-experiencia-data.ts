@@ -68,7 +68,8 @@ export async function getCurriculoExperienciaData(
 
   const experienciasBody =
     experienciasRes.status === 200 && experienciasRes.data
-      ? ((experienciasRes.data as { data?: unknown }).data ?? experienciasRes.data)
+      ? ((experienciasRes.data as { data?: unknown }).data ??
+        experienciasRes.data)
       : null
   const conquistasBody =
     conquistasRes.status === 200 && conquistasRes.data

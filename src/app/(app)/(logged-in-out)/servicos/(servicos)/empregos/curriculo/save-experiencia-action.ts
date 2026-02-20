@@ -13,7 +13,7 @@ function buildExperiencias(
 ): EmpregabilidadeCurriculoExperiencia[] {
   return empregos
     .filter(
-      (e) =>
+      e =>
         (e.cargo?.trim()?.length ?? 0) > 0 &&
         (e.empresa?.trim()?.length ?? 0) > 0 &&
         (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
@@ -22,7 +22,7 @@ function buildExperiencias(
         (e.experienciaComprovadaCarteira === 'Sim' ||
           e.experienciaComprovadaCarteira === 'Não')
     )
-    .map((e) => ({
+    .map(e => ({
       cargo: e.cargo?.trim() || undefined,
       empresa: e.empresa?.trim() || undefined,
       descricao_atividades: e.descricaoAtividades?.trim() || undefined,
@@ -37,12 +37,12 @@ function buildConquistas(
 ): EmpregabilidadeCurriculoConquista[] {
   return conquistas
     .filter(
-      (c) =>
+      c =>
         (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
         (c.titulo?.trim()?.length ?? 0) > 0 &&
         (c.descricao?.trim()?.length ?? 0) > 0
     )
-    .map((c) => ({
+    .map(c => ({
       id_tipo_conquista: c.idTipoConquista?.trim() || undefined,
       titulo: c.titulo?.trim() || undefined,
       descricao: c.descricao?.trim() || undefined,

@@ -17,7 +17,7 @@ export function TipoConquistaDrawerContent({
   const { tiposConquista } = useExperienciaApi()
   const value = watch(`conquistas.${fieldIndex}.idTipoConquista`) ?? ''
 
-  const options = tiposConquista.map((t) => ({
+  const options = tiposConquista.map(t => ({
     label: t.descricao,
     value: t.id,
   }))

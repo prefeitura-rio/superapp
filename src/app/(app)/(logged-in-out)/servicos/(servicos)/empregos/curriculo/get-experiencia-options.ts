@@ -8,11 +8,11 @@ function parseTiposConquista(data: unknown): TipoConquistaItem[] {
   const body = data as { data?: Array<{ id?: string; descricao?: string }> }
   const arr = Array.isArray(body?.data) ? body.data : []
   return arr
-    .map((item) => ({
+    .map(item => ({
       id: item.id ?? '',
       descricao: item.descricao ?? '',
     }))
-    .filter((item) => item.id)
+    .filter(item => item.id)
 }
 
 /**

@@ -14,8 +14,8 @@ import { curriculoExperienciaSchema } from './curriculo-experiencia-schema'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import { useExperienciaApi } from './experiencia-api-context'
 import { ExperienciaComprovadaDrawerContent } from './experiencia-comprovada-drawer-content'
-import { TipoConquistaDrawerContent } from './tipo-conquista-drawer-content'
 import { saveExperienciaAction } from './save-experiencia-action'
+import { TipoConquistaDrawerContent } from './tipo-conquista-drawer-content'
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
@@ -484,7 +484,7 @@ function TipoConquistaField({
   const { watch, control } = useFormContext<CurriculoExperienciaFormValues>()
   const { tiposConquista } = useExperienciaApi()
   const value = watch(`conquistas.${index}.idTipoConquista`) ?? ''
-  const label = tiposConquista.find((t) => t.id === value)?.descricao ?? ''
+  const label = tiposConquista.find(t => t.id === value)?.descricao ?? ''
   const hasSelection = Boolean(value)
 
   return (
