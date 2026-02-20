@@ -13,7 +13,7 @@ export async function getCurriculoTermosAceitos(cpf: string): Promise<boolean> {
     if (res.status !== 200 || !res.data) return false
     const data = res.data as Record<string, unknown>
     if (typeof data !== 'object' || data === null) return false
-    return Object.values(data).some((v) => v === true)
+    return Object.values(data).some(v => v === true)
   } catch {
     return false
   }

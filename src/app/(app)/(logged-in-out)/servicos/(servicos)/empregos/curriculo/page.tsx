@@ -29,17 +29,13 @@ export default async function CurriculoPage() {
 
   if (userAuthInfo.cpf) {
     try {
-      const [
-        citizenResponse,
-        formacaoData,
-        situacaoData,
-        termosAceitos,
-      ] = await Promise.all([
-        getDalCitizenCpf(userAuthInfo.cpf),
-        getCurriculoFormacaoData(userAuthInfo.cpf),
-        getCurriculoSituacaoData(userAuthInfo.cpf),
-        getCurriculoTermosAceitos(userAuthInfo.cpf),
-      ])
+      const [citizenResponse, formacaoData, situacaoData, termosAceitos] =
+        await Promise.all([
+          getDalCitizenCpf(userAuthInfo.cpf),
+          getCurriculoFormacaoData(userAuthInfo.cpf),
+          getCurriculoSituacaoData(userAuthInfo.cpf),
+          getCurriculoTermosAceitos(userAuthInfo.cpf),
+        ])
       if (citizenResponse.status === 200 && citizenResponse.data) {
         const userInfo = citizenResponse.data as ModelsCitizen
         initialEscolaridade = userInfo.escolaridade?.trim() || undefined
