@@ -178,8 +178,9 @@ export function PerguntasAdicionaisContent({
       const respostas: RespostaInfoComplementarPayload[] =
         informacoesComplementares.map(info => {
           const raw = data[`field_${info.id}`]
-          const resposta =
-            Array.isArray(raw) ? (raw as string[]).join(', ') : String(raw ?? '')
+          const resposta = Array.isArray(raw)
+            ? (raw as string[]).join(', ')
+            : String(raw ?? '')
           return {
             id_info: info.id,
             resposta,
@@ -189,7 +190,9 @@ export function PerguntasAdicionaisContent({
       if (onEnviarCandidatura) {
         const result = await onEnviarCandidatura(vagaId, respostas)
         if (!result.success) {
-          toast.error(result.error ?? 'Erro ao finalizar inscrição. Tente novamente.')
+          toast.error(
+            result.error ?? 'Erro ao finalizar inscrição. Tente novamente.'
+          )
           return
         }
       }

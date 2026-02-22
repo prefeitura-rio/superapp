@@ -1,9 +1,9 @@
 'use client'
 
+import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
-import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { MapPinIcon } from '@/assets/icons'
 import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
 import { buildAuthUrl } from '@/constants/url'
@@ -61,7 +61,9 @@ function SectionBlock({
       <h3 className="text-sm font-normal leading-5 text-foreground">{title}</h3>
       <MarkdownRenderer
         content={content}
-        className={className ?? 'text-foreground-light text-sm leading-5 font-normal'}
+        className={
+          className ?? 'text-foreground-light text-sm leading-5 font-normal'
+        }
       />
     </section>
   )

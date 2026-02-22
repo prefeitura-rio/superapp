@@ -170,7 +170,7 @@ function hasExperienciaRequiredFieldsFilled(
   values: CurriculoExperienciaFormValues
 ): boolean {
   const hasValidEmprego = values.empregos.some(
-    (e) =>
+    e =>
       (e.cargo?.trim()?.length ?? 0) > 0 &&
       (e.empresa?.trim()?.length ?? 0) > 0 &&
       (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
@@ -180,7 +180,7 @@ function hasExperienciaRequiredFieldsFilled(
         e.experienciaComprovadaCarteira === 'Não')
   )
   const hasValidConquista = values.conquistas.some(
-    (c) =>
+    c =>
       (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
       (c.titulo?.trim()?.length ?? 0) > 0 &&
       (c.descricao?.trim()?.length ?? 0) > 0
@@ -1398,7 +1398,9 @@ export function CurriculoContent({
             })
             setSuccessSheetOpen(true)
           } else {
-            toast.error(result.error ?? 'Não foi possível enviar a candidatura.')
+            toast.error(
+              result.error ?? 'Não foi possível enviar a candidatura.'
+            )
           }
         } catch {
           toast.error('Erro ao enviar candidatura. Tente novamente.')

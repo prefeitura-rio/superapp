@@ -6,8 +6,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import type { EtapaProcessoSeletivo } from '@/lib/emprego-utils'
 import { EmpregabilidadeStatusCandidatura } from '@/http-courses/models'
+import type { EtapaProcessoSeletivo } from '@/lib/emprego-utils'
 import { Check, X } from 'lucide-react'
 
 const ETAPA_ENVIO_CANDIDATURA = {

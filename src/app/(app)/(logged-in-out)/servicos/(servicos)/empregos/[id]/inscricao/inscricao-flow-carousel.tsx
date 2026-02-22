@@ -17,11 +17,11 @@ import type { SituacaoOptions } from '../../curriculo/situacao-options-types'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
+import type { RespostaInfoComplementarPayload } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
 import type {
   ContactUpdateStatus,
   EmpregosUserInfo,
 } from './confirmar-informacoes/types'
-import type { RespostaInfoComplementarPayload } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
 
 import 'swiper/css'
 
@@ -195,7 +195,7 @@ export function InscricaoFlowCarousel({
             onSuccessClose={handleCurriculoSuccessClose}
             onEnviarCandidatura={
               onEnviarCandidatura
-                ? (vagaIdToSend) => onEnviarCandidatura(vagaIdToSend)
+                ? vagaIdToSend => onEnviarCandidatura(vagaIdToSend)
                 : undefined
             }
           />
