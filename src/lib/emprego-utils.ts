@@ -2,7 +2,11 @@ import type {
   VagaBadge,
   VagaCardData,
 } from '@/app/components/empregos/vaga-card'
-import type { EmpregabilidadeVaga, ModelsEmprego } from '@/http-courses/models'
+import type {
+  EmpregabilidadeStatusCandidatura,
+  EmpregabilidadeVaga,
+  ModelsEmprego,
+} from '@/http-courses/models'
 
 export interface EtapaProcessoSeletivo {
   ordem: number
@@ -33,6 +37,8 @@ export interface VagaDetail {
   etapasProcessoSeletivo?: EtapaProcessoSeletivo[]
   /** Índice da etapa atual do candidato (0-based), quando já inscrito */
   etapaAtualCandidatura?: number
+  /** Status da candidatura (reprovada, vaga_congelada, vaga_descontinuada exibem X e mensagem na etapa atual) */
+  statusCandidatura?: EmpregabilidadeStatusCandidatura
   /** Órgão parceiro da vaga; quando presente, exibe o card "Vaga oferecida em parceria com" */
   orgaoParceiro?: string
 }

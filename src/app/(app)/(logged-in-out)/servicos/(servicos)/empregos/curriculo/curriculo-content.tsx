@@ -165,6 +165,29 @@ function hasSituacaoRequiredFields(
   return hasSituacaoAtual && hasTempoProcurando
 }
 
+/** True se existe pelo menos um emprego completo ou uma conquista completa. */
+function hasExperienciaRequiredFieldsFilled(
+  values: CurriculoExperienciaFormValues
+): boolean {
+  const hasValidEmprego = values.empregos.some(
+    (e) =>
+      (e.cargo?.trim()?.length ?? 0) > 0 &&
+      (e.empresa?.trim()?.length ?? 0) > 0 &&
+      (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
+      e.tempoExperienciaMeses != null &&
+      e.tempoExperienciaMeses >= 1 &&
+      (e.experienciaComprovadaCarteira === 'Sim' ||
+        e.experienciaComprovadaCarteira === 'Não')
+  )
+  const hasValidConquista = values.conquistas.some(
+    (c) =>
+      (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
+      (c.titulo?.trim()?.length ?? 0) > 0 &&
+      (c.descricao?.trim()?.length ?? 0) > 0
+  )
+  return hasValidEmprego || hasValidConquista
+}
+
 interface FormacaoAccordionContentProps {
   cpf?: string
   onCancel: () => void
@@ -1138,6 +1161,10 @@ export interface CurriculoContentProps {
   onContinuarToNext?: () => void
   /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
   onSuccessClose?: () => void
+  /** Server action para enviar candidatura (cenário sem perguntas adicionais). */
+  onEnviarCandidatura?: (
+    vagaId: string
+  ) => Promise<{ success: boolean; error?: string }>
 }
 
 export function CurriculoContent({
@@ -1156,9 +1183,11 @@ export function CurriculoContent({
   initialTermosAceitos,
   onContinuarToNext,
   onSuccessClose,
+  onEnviarCandidatura,
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
+  const [isEnviandoCandidatura, setIsEnviandoCandidatura] = useState(false)
   const router = useRouter()
   const formacaoSnapshotRef = useRef<Pick<
     CurriculoFormacaoFormValues,
@@ -1244,6 +1273,8 @@ export function CurriculoContent({
   )
   const requiredFieldsFilled = hasFormacaoRequiredFields(formValues)
   const situacaoRequiredFieldsFilled = hasSituacaoRequiredFields(formValues)
+  const experienciaRequiredFieldsFilled =
+    hasExperienciaRequiredFieldsFilled(formValues)
   const termosAceitos = form.watch('termosAceitos')
 
   const handleAccordionValueChange = (value: string) => {
@@ -1335,24 +1366,44 @@ export function CurriculoContent({
 
   const handleContinuar = () => {
     form.handleSubmit(
-      () => {
-        if (inscricaoVagaId) {
-          if (hasPerguntasAdicionais) {
-            if (onContinuarToNext) {
-              onContinuarToNext()
-            } else {
-              router.push(
-                `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
-              )
-            }
+      async () => {
+        if (!inscricaoVagaId) return
+        if (hasPerguntasAdicionais) {
+          if (onContinuarToNext) {
+            onContinuarToNext()
           } else {
+            router.push(
+              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+            )
+          }
+          return
+        }
+        if (!onEnviarCandidatura) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.7 },
+          })
+          setSuccessSheetOpen(true)
+          return
+        }
+        setIsEnviandoCandidatura(true)
+        try {
+          const result = await onEnviarCandidatura(inscricaoVagaId)
+          if (result.success) {
             confetti({
               particleCount: 100,
               spread: 70,
               origin: { y: 0.7 },
             })
             setSuccessSheetOpen(true)
+          } else {
+            toast.error(result.error ?? 'Não foi possível enviar a candidatura.')
           }
+        } catch {
+          toast.error('Erro ao enviar candidatura. Tente novamente.')
+        } finally {
+          setIsEnviandoCandidatura(false)
         }
       },
       errors => {
@@ -1444,7 +1495,13 @@ export function CurriculoContent({
                           <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
                             <X className="size-3.5 text-white stroke-3" />
                           </span>
-                        ) : null}
+                        ) : (
+                          experienciaRequiredFieldsFilled && (
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                              <Check className="size-3.5 text-white stroke-3" />
+                            </span>
+                          )
+                        )}
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="pt-5 pb-4">
@@ -1523,8 +1580,9 @@ export function CurriculoContent({
                       variant="primary"
                       onClick={handleContinuar}
                       className="rounded-full"
+                      disabled={isEnviandoCandidatura}
                     >
-                      Continuar
+                      {isEnviandoCandidatura ? 'Enviando...' : 'Continuar'}
                     </CustomButton>
                   </div>
                 ) : null}

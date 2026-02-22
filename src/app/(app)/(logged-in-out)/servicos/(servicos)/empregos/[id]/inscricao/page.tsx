@@ -21,6 +21,7 @@ import { getExperienciaOptions } from '../../curriculo/get-experiencia-options'
 import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import { getSituacaoOptions } from '../../curriculo/get-situacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
+import { enviarCandidatura } from './enviar-candidatura-action'
 import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
 
 export const dynamic = 'force-dynamic'
@@ -195,6 +196,7 @@ export default async function InscricaoPage({
         initialTermosAceitos={curriculoTermosAceitos}
         initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
+        onEnviarCandidatura={enviarCandidatura}
       />
     </div>
   )

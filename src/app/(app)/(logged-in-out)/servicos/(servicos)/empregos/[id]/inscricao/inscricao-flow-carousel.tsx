@@ -21,6 +21,7 @@ import type {
   ContactUpdateStatus,
   EmpregosUserInfo,
 } from './confirmar-informacoes/types'
+import type { RespostaInfoComplementarPayload } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
 
 import 'swiper/css'
 
@@ -66,6 +67,11 @@ interface InscricaoFlowCarouselProps {
   initialTermosAceitos?: boolean
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
+  /** Server action para enviar candidatura (curriculo sem perguntas ou perguntas-adicionais). */
+  onEnviarCandidatura?: (
+    vagaId: string,
+    respostas?: RespostaInfoComplementarPayload[]
+  ) => Promise<{ success: boolean; error?: string }>
 }
 
 export function InscricaoFlowCarousel({
@@ -87,6 +93,7 @@ export function InscricaoFlowCarousel({
   initialTermosAceitos,
   initialEscolaridade = '',
   informacoesComplementares,
+  onEnviarCandidatura,
 }: InscricaoFlowCarouselProps) {
   const router = useRouter()
   const swiperRef = useRef<SwiperType | null>(null)
@@ -186,6 +193,11 @@ export function InscricaoFlowCarousel({
             initialEscolaridade={initialEscolaridade}
             onContinuarToNext={handleCurriculoToNext}
             onSuccessClose={handleCurriculoSuccessClose}
+            onEnviarCandidatura={
+              onEnviarCandidatura
+                ? (vagaIdToSend) => onEnviarCandidatura(vagaIdToSend)
+                : undefined
+            }
           />
         </SwiperSlide>
         {hasPerguntasAdicionais && (
@@ -195,6 +207,7 @@ export function InscricaoFlowCarousel({
               informacoesComplementares={informacoesComplementares}
               onSuccessClose={handlePerguntasSuccessClose}
               backRoute={`/servicos/empregos/${vagaId}`}
+              onEnviarCandidatura={onEnviarCandidatura}
             />
           </SwiperSlide>
         )}

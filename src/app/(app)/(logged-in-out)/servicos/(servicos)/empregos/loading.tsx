@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 function RecentlyAddedVagasSkeleton() {
   return (
     <>
-      <Skeleton className="h-5 w-40 mb-2 px-4" />
+      <Skeleton className="h-5 w-40 mb-2 px-6 mx-4" />
       {/* Mobile: cards 11.75rem em linha com scroll horizontal */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
