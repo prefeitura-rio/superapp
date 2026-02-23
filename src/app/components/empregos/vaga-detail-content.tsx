@@ -1,5 +1,6 @@
 'use client'
 
+import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
@@ -7,8 +8,7 @@ import { MapPinIcon } from '@/assets/icons'
 import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
 import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
-import { Briefcase, DollarSign, FileText } from 'lucide-react'
-import { Accessibility } from 'lucide-react'
+import { Accessibility, Briefcase, DollarSign, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -16,6 +16,8 @@ import { useRouter } from 'next/navigation'
 interface VagaDetailContentProps {
   vaga: VagaDetail
   isLoggedIn: boolean
+  /** Indica se o usuário já se candidatou a esta vaga */
+  hasCandidatura?: boolean
 }
 
 function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
@@ -47,17 +49,22 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function SectionBlock({
   title,
   content,
+  className,
 }: {
   title: string
   content: string
+  className?: string
 }) {
   if (!content?.trim()) return null
   return (
     <section className="pt-6">
       <h3 className="text-sm font-normal leading-5 text-foreground">{title}</h3>
-      <div className="text-foreground-light text-sm leading-5 font-normal whitespace-pre-line">
-        {content}
-      </div>
+      <MarkdownRenderer
+        content={content}
+        className={
+          className ?? 'text-foreground-light text-sm leading-5 font-normal'
+        }
+      />
     </section>
   )
 }
@@ -65,8 +72,10 @@ function SectionBlock({
 export function VagaDetailContent({
   vaga,
   isLoggedIn,
+  hasCandidatura = false,
 }: VagaDetailContentProps) {
   const router = useRouter()
+  const hasEtapas = (vaga.etapasProcessoSeletivo?.length ?? 0) > 0
 
   const handleShare = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -182,47 +191,65 @@ export function VagaDetailContent({
 
         {/* Descrição */}
         {vaga.descricao ? (
-          <p className="text-sm font-normal leading-5 text-foreground-light mt-4">
-            {vaga.descricao}
-          </p>
+          <MarkdownRenderer
+            content={vaga.descricao}
+            className="text-sm font-normal leading-5 text-foreground-light mt-4"
+          />
         ) : null}
 
-        {/* Botão */}
-        <div className="mt-6">
-          {isLoggedIn ? (
-            <Link
-              href={`/servicos/empregos/${vaga.id}/inscricao`}
-              className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 ${candidacyButtonClassName}`}
-            >
-              Candidatar-se à vaga
-            </Link>
-          ) : (
-            <Link
-              href={buildAuthUrl(`/servicos/empregos/${vaga.id}/inscricao`)}
-              className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
-            >
-              Fazer login para se candidatar
-            </Link>
-          )}
-        </div>
+        {/* Botão quando o usuário ainda não se candidatou; etapas quando já se candidatou e a vaga tem etapas */}
+        {(!hasCandidatura || hasEtapas) && (
+          <div className="mt-6">
+            {hasCandidatura ? (
+              <EtapasProcessoSeletivoCard
+                etapas={vaga.etapasProcessoSeletivo ?? []}
+                etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+                statusCandidatura={vaga.statusCandidatura}
+                hasCandidatura
+              />
+            ) : isLoggedIn ? (
+              <Link
+                href={`/servicos/empregos/${vaga.id}/inscricao`}
+                className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 ${candidacyButtonClassName}`}
+              >
+                Candidatar-se à vaga
+              </Link>
+            ) : (
+              <Link
+                href={buildAuthUrl(`/servicos/empregos/${vaga.id}/inscricao`)}
+                className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
+              >
+                Fazer login para se candidatar
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Informações gerais */}
         <h2 className="text-sm font-normal leading-5 text-foreground mt-8">
           Informações gerais
         </h2>
         <div className="bg-card rounded-xl p-6 mt-2">
-          <InfoRow label="Valor da Vaga" value={vaga.valorVaga} />
+          <InfoRow label="Valor da Vaga" value={vaga.valorVaga || '—'} />
           <InfoRow
             label="Regime de contratação"
-            value={vaga.regimeContratacao}
+            value={vaga.regimeContratacao || '—'}
           />
-          <InfoRow label="Modelo de trabalho" value={vaga.modeloTrabalho} />
-          <InfoRow label="Local de trabalho" value={vaga.localTrabalho} />
+          <InfoRow
+            label="Modelo de trabalho"
+            value={vaga.modeloTrabalho || '—'}
+          />
+          <InfoRow
+            label="Local de trabalho"
+            value={vaga.localTrabalho || '—'}
+          />
           <InfoRow
             label="Data limite de inscrição"
-            value={vaga.dataLimiteInscricao}
+            value={vaga.dataLimiteInscricao || '—'}
           />
-          <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
+          {vaga.acessibilidade && vaga.acessibilidade !== 'Não informado' && (
+            <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
+          )}
         </div>
 
         {/* Requisitos, Diferenciais, Responsabilidades, Benefícios */}
@@ -234,10 +261,17 @@ export function VagaDetailContent({
         />
         <SectionBlock title="Benefícios" content={vaga.beneficios} />
 
-        <EtapasProcessoSeletivoCard
-          etapas={vaga.etapasProcessoSeletivo ?? []}
-          etapaAtualCandidatura={vaga.etapaAtualCandidatura}
-        />
+        {/* Etapas do processo seletivo: só na posição inferior quando a vaga tem etapas e o usuário NÃO está candidato (quando está candidato, já foi exibido no lugar do botão) */}
+        {hasEtapas && !hasCandidatura && (
+          <div className="mt-6">
+            <EtapasProcessoSeletivoCard
+              etapas={vaga.etapasProcessoSeletivo ?? []}
+              etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+              statusCandidatura={vaga.statusCandidatura}
+              hasCandidatura={false}
+            />
+          </div>
+        )}
 
         {vaga.orgaoParceiro ? (
           <VagaParceriaCard orgaoParceiro={vaga.orgaoParceiro} />

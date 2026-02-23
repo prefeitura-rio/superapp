@@ -5,6 +5,8 @@ import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
+import type { CurriculoExperienciaFormValues } from '../../curriculo/curriculo-experiencia-schema'
+import type { ExperienciaOptions } from '../../curriculo/experiencia-options-types'
 import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
 import type {
   InitialFormacaoItem,
@@ -15,6 +17,7 @@ import type { SituacaoOptions } from '../../curriculo/situacao-options-types'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
+import type { RespostaInfoComplementarPayload } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
 import type {
   ContactUpdateStatus,
   EmpregosUserInfo,
@@ -59,9 +62,16 @@ interface InscricaoFlowCarouselProps {
   initialIdiomas?: InitialIdiomaItem[]
   situacaoOptions: SituacaoOptions
   initialSituacao?: InitialSituacaoData
+  experienciaOptions: ExperienciaOptions
+  initialExperiencia?: CurriculoExperienciaFormValues
   initialTermosAceitos?: boolean
   initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
+  /** Server action para enviar candidatura (curriculo sem perguntas ou perguntas-adicionais). */
+  onEnviarCandidatura?: (
+    vagaId: string,
+    respostas?: RespostaInfoComplementarPayload[]
+  ) => Promise<{ success: boolean; error?: string }>
 }
 
 export function InscricaoFlowCarousel({
@@ -78,9 +88,12 @@ export function InscricaoFlowCarousel({
   initialIdiomas,
   situacaoOptions,
   initialSituacao,
+  experienciaOptions,
+  initialExperiencia,
   initialTermosAceitos,
   initialEscolaridade = '',
   informacoesComplementares,
+  onEnviarCandidatura,
 }: InscricaoFlowCarouselProps) {
   const router = useRouter()
   const swiperRef = useRef<SwiperType | null>(null)
@@ -171,6 +184,8 @@ export function InscricaoFlowCarousel({
             initialIdiomas={initialIdiomas}
             situacaoOptions={situacaoOptions}
             initialSituacao={initialSituacao}
+            experienciaOptions={experienciaOptions}
+            initialExperiencia={initialExperiencia}
             initialTermosAceitos={initialTermosAceitos}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}
@@ -178,6 +193,11 @@ export function InscricaoFlowCarousel({
             initialEscolaridade={initialEscolaridade}
             onContinuarToNext={handleCurriculoToNext}
             onSuccessClose={handleCurriculoSuccessClose}
+            onEnviarCandidatura={
+              onEnviarCandidatura
+                ? vagaIdToSend => onEnviarCandidatura(vagaIdToSend)
+                : undefined
+            }
           />
         </SwiperSlide>
         {hasPerguntasAdicionais && (
@@ -187,6 +207,7 @@ export function InscricaoFlowCarousel({
               informacoesComplementares={informacoesComplementares}
               onSuccessClose={handlePerguntasSuccessClose}
               backRoute={`/servicos/empregos/${vagaId}`}
+              onEnviarCandidatura={onEnviarCandidatura}
             />
           </SwiperSlide>
         )}

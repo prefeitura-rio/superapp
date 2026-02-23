@@ -11,6 +11,7 @@ import type {
   DeleteApiV1EmpregabilidadeCandidaturasId500,
   EmpregabilidadeCandidatura,
   EmpregabilidadeCandidaturaBody,
+  EmpregabilidadeUpdateEtapaRequest,
   EmpregabilidadeUpdateStatusRequest,
   GetApiV1EmpregabilidadeCandidaturas200,
   GetApiV1EmpregabilidadeCandidaturas500,
@@ -25,6 +26,9 @@ import type {
   PutApiV1EmpregabilidadeCandidaturasIdApprove200,
   PutApiV1EmpregabilidadeCandidaturasIdApprove400,
   PutApiV1EmpregabilidadeCandidaturasIdApprove500,
+  PutApiV1EmpregabilidadeCandidaturasIdEtapa200,
+  PutApiV1EmpregabilidadeCandidaturasIdEtapa400,
+  PutApiV1EmpregabilidadeCandidaturasIdEtapa500,
   PutApiV1EmpregabilidadeCandidaturasIdReject200,
   PutApiV1EmpregabilidadeCandidaturasIdReject400,
   PutApiV1EmpregabilidadeCandidaturasIdReject500,
@@ -328,6 +332,57 @@ export const putApiV1EmpregabilidadeCandidaturasIdApprove = async (
     {
       ...options,
       method: 'PUT',
+    }
+  )
+}
+
+/**
+ * Atualiza a etapa atual de uma candidatura
+ * @summary Avançar etapa da candidatura
+ */
+export type putApiV1EmpregabilidadeCandidaturasIdEtapaResponse200 = {
+  data: PutApiV1EmpregabilidadeCandidaturasIdEtapa200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCandidaturasIdEtapaResponse400 = {
+  data: PutApiV1EmpregabilidadeCandidaturasIdEtapa400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCandidaturasIdEtapaResponse500 = {
+  data: PutApiV1EmpregabilidadeCandidaturasIdEtapa500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCandidaturasIdEtapaResponseComposite =
+  | putApiV1EmpregabilidadeCandidaturasIdEtapaResponse200
+  | putApiV1EmpregabilidadeCandidaturasIdEtapaResponse400
+  | putApiV1EmpregabilidadeCandidaturasIdEtapaResponse500
+
+export type putApiV1EmpregabilidadeCandidaturasIdEtapaResponse =
+  putApiV1EmpregabilidadeCandidaturasIdEtapaResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCandidaturasIdEtapaUrl = (
+  id: string
+) => {
+  return `/api/v1/empregabilidade/candidaturas/${id}/etapa`
+}
+
+export const putApiV1EmpregabilidadeCandidaturasIdEtapa = async (
+  id: string,
+  empregabilidadeUpdateEtapaRequest: EmpregabilidadeUpdateEtapaRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCandidaturasIdEtapaResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCandidaturasIdEtapaResponse>(
+    getPutApiV1EmpregabilidadeCandidaturasIdEtapaUrl(id),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeUpdateEtapaRequest),
     }
   )
 }

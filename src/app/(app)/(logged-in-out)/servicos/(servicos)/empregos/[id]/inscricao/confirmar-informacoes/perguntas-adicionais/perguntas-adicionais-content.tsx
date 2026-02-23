@@ -34,6 +34,11 @@ interface InformacaoComplementar {
   updated_at: string
 }
 
+export interface RespostaInfoComplementarPayload {
+  id_info: string
+  resposta: string
+}
+
 interface PerguntasAdicionaisContentProps {
   vagaId: string
   informacoesComplementares: InformacaoComplementar[]
@@ -41,6 +46,11 @@ interface PerguntasAdicionaisContentProps {
   onSuccessClose?: () => void
   /** Rota do header "voltar". No carousel use o detalhe da vaga para sair do fluxo. */
   backRoute?: string
+  /** Server action para enviar candidatura com as respostas das perguntas adicionais. */
+  onEnviarCandidatura?: (
+    vagaId: string,
+    respostas: RespostaInfoComplementarPayload[]
+  ) => Promise<{ success: boolean; error?: string }>
 }
 
 function createDynamicSchema(informacoes: InformacaoComplementar[]) {
@@ -144,6 +154,7 @@ export function PerguntasAdicionaisContent({
   informacoesComplementares,
   onSuccessClose,
   backRoute,
+  onEnviarCandidatura,
 }: PerguntasAdicionaisContentProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -164,25 +175,33 @@ export function PerguntasAdicionaisContent({
   const onSubmit = async (data: Record<string, unknown>) => {
     setIsSubmitting(true)
     try {
-      // TODO: Enviar dados para a API
-      console.log('Dados a enviar:', data)
+      const respostas: RespostaInfoComplementarPayload[] =
+        informacoesComplementares.map(info => {
+          const raw = data[`field_${info.id}`]
+          const resposta = Array.isArray(raw)
+            ? (raw as string[]).join(', ')
+            : String(raw ?? '')
+          return {
+            id_info: info.id,
+            resposta,
+          }
+        })
 
-      // Formatar dados para o formato esperado pela API
-      const respostas = informacoesComplementares.map(info => ({
-        id_informacao_complementar: info.id,
-        resposta: data[`field_${info.id}`],
-      }))
+      if (onEnviarCandidatura) {
+        const result = await onEnviarCandidatura(vagaId, respostas)
+        if (!result.success) {
+          toast.error(
+            result.error ?? 'Erro ao finalizar inscrição. Tente novamente.'
+          )
+          return
+        }
+      }
 
-      console.log('Respostas formatadas:', respostas)
-
-      // Disparar confetti
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.7 },
       })
-
-      // Abrir drawer de sucesso
       setSuccessDrawerOpen(true)
     } catch (error) {
       console.error('Erro ao finalizar inscrição:', error)

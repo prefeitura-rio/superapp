@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SIM_NAO_OPCOES, TIPO_CONQUISTA_OPCOES } from './constants'
+import { SIM_NAO_OPCOES } from './constants'
 
 const empregoItemSchema = z
   .object({
@@ -96,17 +96,7 @@ const empregoItemSchema = z
 
 const conquistaItemSchema = z
   .object({
-    tipo: z
-      .string()
-      .optional()
-      .refine(
-        val =>
-          !val ||
-          TIPO_CONQUISTA_OPCOES.includes(
-            val as (typeof TIPO_CONQUISTA_OPCOES)[number]
-          ),
-        { message: 'Selecione uma opção válida' }
-      ),
+    idTipoConquista: z.string().optional(),
     titulo: z
       .string()
       .optional()
@@ -120,16 +110,16 @@ const conquistaItemSchema = z
   })
   .superRefine((data, ctx) => {
     const hasAny =
-      (data.tipo?.trim()?.length ?? 0) > 0 ||
+      (data.idTipoConquista?.trim()?.length ?? 0) > 0 ||
       (data.titulo?.trim()?.length ?? 0) > 0 ||
       (data.descricao?.trim()?.length ?? 0) > 0
 
     if (!hasAny) return
 
-    if (!data.tipo) {
+    if (!data.idTipoConquista?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['tipo'],
+        path: ['idTipoConquista'],
         message: 'Selecione o tipo de conquista ou certificado',
       })
     }

@@ -37,6 +37,8 @@ import type { CurriculoFormValues } from './curriculo-schema'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 import { DisponibilidadeDrawerContent } from './disponibilidade-drawer-content'
 import { EscolaridadeDrawerContent } from './escolaridade-drawer-content'
+import { ExperienciaApiProvider } from './experiencia-api-context'
+import type { ExperienciaOptions } from './experiencia-options-types'
 import {
   ExperienciaProfissionalAccordionContent,
   getExperienciaSnapshot,
@@ -163,6 +165,29 @@ function hasSituacaoRequiredFields(
   return hasSituacaoAtual && hasTempoProcurando
 }
 
+/** True se existe pelo menos um emprego completo ou uma conquista completa. */
+function hasExperienciaRequiredFieldsFilled(
+  values: CurriculoExperienciaFormValues
+): boolean {
+  const hasValidEmprego = values.empregos.some(
+    e =>
+      (e.cargo?.trim()?.length ?? 0) > 0 &&
+      (e.empresa?.trim()?.length ?? 0) > 0 &&
+      (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
+      e.tempoExperienciaMeses != null &&
+      e.tempoExperienciaMeses >= 1 &&
+      (e.experienciaComprovadaCarteira === 'Sim' ||
+        e.experienciaComprovadaCarteira === 'Não')
+  )
+  const hasValidConquista = values.conquistas.some(
+    c =>
+      (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
+      (c.titulo?.trim()?.length ?? 0) > 0 &&
+      (c.descricao?.trim()?.length ?? 0) > 0
+  )
+  return hasValidEmprego || hasValidConquista
+}
+
 interface FormacaoAccordionContentProps {
   cpf?: string
   onCancel: () => void
@@ -180,7 +205,7 @@ const defaultExperienciaValues: CurriculoExperienciaFormValues = {
       experienciaComprovadaCarteira: '',
     },
   ],
-  conquistas: [{ tipo: '', titulo: '', descricao: '' }],
+  conquistas: [{ idTipoConquista: '', titulo: '', descricao: '' }],
 }
 
 const FORMACAO_FIELD_NAMES = [
@@ -1126,12 +1151,20 @@ export interface CurriculoContentProps {
   situacaoOptions?: SituacaoOptions
   /** Situação e interesses já salvos (preenche o accordion Situação atual). */
   initialSituacao?: InitialSituacaoData
+  /** Opções de tipos de conquista carregadas no server (Conquistas ou certificados). */
+  experienciaOptions?: ExperienciaOptions
+  /** Experiências e conquistas já salvos (preenche o accordion Experiência Profissional). */
+  initialExperiencia?: CurriculoExperienciaFormValues
   /** Se o usuário já aceitou os termos de uso (preenche o checkbox). */
   initialTermosAceitos?: boolean
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push para perguntas. */
   onContinuarToNext?: () => void
   /** Quando em fluxo único (carousel), chamado ao fechar o drawer de sucesso em vez de router.push. */
   onSuccessClose?: () => void
+  /** Server action para enviar candidatura (cenário sem perguntas adicionais). */
+  onEnviarCandidatura?: (
+    vagaId: string
+  ) => Promise<{ success: boolean; error?: string }>
 }
 
 export function CurriculoContent({
@@ -1145,12 +1178,16 @@ export function CurriculoContent({
   initialIdiomas,
   situacaoOptions = DEFAULT_SITUACAO_OPTIONS,
   initialSituacao,
+  experienciaOptions = { tiposConquista: [] },
+  initialExperiencia,
   initialTermosAceitos,
   onContinuarToNext,
   onSuccessClose,
+  onEnviarCandidatura,
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
+  const [isEnviandoCandidatura, setIsEnviandoCandidatura] = useState(false)
   const router = useRouter()
   const formacaoSnapshotRef = useRef<Pick<
     CurriculoFormacaoFormValues,
@@ -1207,7 +1244,14 @@ export function CurriculoContent({
       escolaridade: initialEscolaridade ?? '',
       formacaoAcademica: defaultFormacaoAcademica,
       idiomas: defaultIdiomas,
-      ...defaultExperienciaValues,
+      empregos:
+        (initialExperiencia?.empregos?.length ?? 0) > 0
+          ? initialExperiencia!.empregos
+          : defaultExperienciaValues.empregos,
+      conquistas:
+        (initialExperiencia?.conquistas?.length ?? 0) > 0
+          ? initialExperiencia!.conquistas
+          : defaultExperienciaValues.conquistas,
       ...defaultSituacaoFormValues,
       termosAceitos: initialTermosAceitos ?? false,
     },
@@ -1229,6 +1273,8 @@ export function CurriculoContent({
   )
   const requiredFieldsFilled = hasFormacaoRequiredFields(formValues)
   const situacaoRequiredFieldsFilled = hasSituacaoRequiredFields(formValues)
+  const experienciaRequiredFieldsFilled =
+    hasExperienciaRequiredFieldsFilled(formValues)
   const termosAceitos = form.watch('termosAceitos')
 
   const handleAccordionValueChange = (value: string) => {
@@ -1320,24 +1366,46 @@ export function CurriculoContent({
 
   const handleContinuar = () => {
     form.handleSubmit(
-      () => {
-        if (inscricaoVagaId) {
-          if (hasPerguntasAdicionais) {
-            if (onContinuarToNext) {
-              onContinuarToNext()
-            } else {
-              router.push(
-                `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
-              )
-            }
+      async () => {
+        if (!inscricaoVagaId) return
+        if (hasPerguntasAdicionais) {
+          if (onContinuarToNext) {
+            onContinuarToNext()
           } else {
+            router.push(
+              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+            )
+          }
+          return
+        }
+        if (!onEnviarCandidatura) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.7 },
+          })
+          setSuccessSheetOpen(true)
+          return
+        }
+        setIsEnviandoCandidatura(true)
+        try {
+          const result = await onEnviarCandidatura(inscricaoVagaId)
+          if (result.success) {
             confetti({
               particleCount: 100,
               spread: 70,
               origin: { y: 0.7 },
             })
             setSuccessSheetOpen(true)
+          } else {
+            toast.error(
+              result.error ?? 'Não foi possível enviar a candidatura.'
+            )
           }
+        } catch {
+          toast.error('Erro ao enviar candidatura. Tente novamente.')
+        } finally {
+          setIsEnviandoCandidatura(false)
         }
       },
       errors => {
@@ -1370,149 +1438,159 @@ export function CurriculoContent({
 
       <FormacaoApiProvider initialData={formacaoOptions}>
         <SituacaoApiProvider initialData={situacaoOptions}>
-          <FormProvider {...form}>
-            <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-              <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
-                Meu Currículo
-              </h1>
+          <ExperienciaApiProvider initialData={experienciaOptions}>
+            <FormProvider {...form}>
+              <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
+                  Meu Currículo
+                </h1>
 
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
-                value={accordionValue}
-                onValueChange={handleAccordionValueChange}
-              >
-                <AccordionItem
-                  value="formacao"
-                  className="border-b border-border py-5 last:border-b-0"
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full"
+                  value={accordionValue}
+                  onValueChange={handleAccordionValueChange}
                 >
-                  <AccordionTrigger
-                    chevronClassName="text-primary stroke-[1.5]"
-                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                  <AccordionItem
+                    value="formacao"
+                    className="border-b border-border py-5 last:border-b-0"
                   >
-                    <span className="flex items-center gap-2.5">
-                      Formação
-                      {hasFormacaoErrors ? (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                          <X className="size-3.5 text-white stroke-3" />
-                        </span>
-                      ) : (
-                        requiredFieldsFilled && (
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                            <Check className="size-3.5 text-white stroke-3" />
+                    <AccordionTrigger
+                      chevronClassName="text-primary stroke-[1.5]"
+                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        Formação
+                        {hasFormacaoErrors ? (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                            <X className="size-3.5 text-white stroke-3" />
                           </span>
-                        )
-                      )}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-5 pb-4">
-                    <FormacaoAccordionContent
-                      cpf={cpf}
-                      onCancel={handleFormacaoCancel}
-                      onSaveSuccess={handleFormacaoSaveSuccess}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem
-                  value="experiencia"
-                  className="border-b border-border py-5 last:border-b-0"
-                >
-                  <AccordionTrigger
-                    chevronClassName="text-primary stroke-[1.5]"
-                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                        ) : (
+                          requiredFieldsFilled && (
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                              <Check className="size-3.5 text-white stroke-3" />
+                            </span>
+                          )
+                        )}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-5 pb-4">
+                      <FormacaoAccordionContent
+                        cpf={cpf}
+                        onCancel={handleFormacaoCancel}
+                        onSaveSuccess={handleFormacaoSaveSuccess}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="experiencia"
+                    className="border-b border-border py-5 last:border-b-0"
                   >
-                    <span className="flex items-center gap-2.5">
-                      Experiência Profissional
-                      {hasExperienciaErrors ? (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                          <X className="size-3.5 text-white stroke-3" />
-                        </span>
-                      ) : null}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-5 pb-4">
-                    <ExperienciaProfissionalAccordionContent
-                      onCancel={handleExperienciaCancel}
-                      onSaveSuccess={handleExperienciaSaveSuccess}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem
-                  value="situacao"
-                  className="border-b border-border py-5 last:border-b-0"
-                >
-                  <AccordionTrigger
-                    chevronClassName="text-primary stroke-[1.5]"
-                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      Situação atual
-                      {hasSituacaoErrors ? (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                          <X className="size-3.5 text-white stroke-3" />
-                        </span>
-                      ) : (
-                        situacaoRequiredFieldsFilled && (
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                            <Check className="size-3.5 text-white stroke-3" />
+                    <AccordionTrigger
+                      chevronClassName="text-primary stroke-[1.5]"
+                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        Experiência Profissional
+                        {hasExperienciaErrors ? (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                            <X className="size-3.5 text-white stroke-3" />
                           </span>
-                        )
-                      )}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-5 pb-4">
-                    <SituacaoAtualAccordionContent
-                      cpf={cpf}
-                      onCancel={handleSituacaoCancel}
-                      onSaveSuccess={handleSituacaoSaveSuccess}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem
-                  value="termos"
-                  className="border-b border-border py-5 last:border-b-0"
-                >
-                  <AccordionTrigger
-                    chevronClassName="text-primary stroke-[1.5]"
-                    className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                        ) : (
+                          experienciaRequiredFieldsFilled && (
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                              <Check className="size-3.5 text-white stroke-3" />
+                            </span>
+                          )
+                        )}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-5 pb-4">
+                      <ExperienciaProfissionalAccordionContent
+                        cpf={cpf ?? ''}
+                        onCancel={handleExperienciaCancel}
+                        onSaveSuccess={handleExperienciaSaveSuccess}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="situacao"
+                    className="border-b border-border py-5 last:border-b-0"
                   >
-                    <span className="flex items-center gap-2.5">
-                      Termos de Uso
-                      {hasTermosErrors ? (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
-                          <X className="size-3.5 text-white stroke-3" />
-                        </span>
-                      ) : (
-                        termosAceitos && (
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                            <Check className="size-3.5 text-white stroke-3" />
+                    <AccordionTrigger
+                      chevronClassName="text-primary stroke-[1.5]"
+                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        Situação atual
+                        {hasSituacaoErrors ? (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                            <X className="size-3.5 text-white stroke-3" />
                           </span>
-                        )
-                      )}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-5 pb-4">
-                    <TermosUsoAccordionContent cpf={cpf} />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                        ) : (
+                          situacaoRequiredFieldsFilled && (
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                              <Check className="size-3.5 text-white stroke-3" />
+                            </span>
+                          )
+                        )}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-5 pb-4">
+                      <SituacaoAtualAccordionContent
+                        cpf={cpf}
+                        onCancel={handleSituacaoCancel}
+                        onSaveSuccess={handleSituacaoSaveSuccess}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="termos"
+                    className="border-b border-border py-5 last:border-b-0"
+                  >
+                    <AccordionTrigger
+                      chevronClassName="text-primary stroke-[1.5]"
+                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        Termos de Uso
+                        {hasTermosErrors ? (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive">
+                            <X className="size-3.5 text-white stroke-3" />
+                          </span>
+                        ) : (
+                          termosAceitos && (
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                              <Check className="size-3.5 text-white stroke-3" />
+                            </span>
+                          )
+                        )}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-5 pb-4">
+                      <TermosUsoAccordionContent cpf={cpf} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
-              {inscricaoVagaId ? (
-                <div className="mt-auto pt-8 pb-8 shrink-0">
-                  <CustomButton
-                    size="lg"
-                    fullWidth
-                    variant="primary"
-                    onClick={handleContinuar}
-                    className="rounded-full"
-                  >
-                    Continuar
-                  </CustomButton>
-                </div>
-              ) : null}
-            </div>
-          </FormProvider>
+                {inscricaoVagaId ? (
+                  <div className="mt-auto pt-8 pb-8 shrink-0">
+                    <CustomButton
+                      size="lg"
+                      fullWidth
+                      variant="primary"
+                      onClick={handleContinuar}
+                      className="rounded-full"
+                      disabled={isEnviandoCandidatura}
+                    >
+                      {isEnviandoCandidatura ? 'Enviando...' : 'Continuar'}
+                    </CustomButton>
+                  </div>
+                ) : null}
+              </div>
+            </FormProvider>
+          </ExperienciaApiProvider>
         </SituacaoApiProvider>
       </FormacaoApiProvider>
 

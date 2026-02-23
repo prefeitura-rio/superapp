@@ -33,6 +33,7 @@ import type {
   EmpregabilidadeCurriculoIdioma,
   EmpregabilidadeCurriculoIdiomaBody,
   EmpregabilidadeCurriculoSituacaoInteresses,
+  EmpregabilidadeExperienciaProfissionalAccordionRequest,
   EmpregabilidadeFormacaoAccordionRequest,
   GetApiV1EmpregabilidadeCurriculoConquistasId400,
   GetApiV1EmpregabilidadeCurriculoConquistasId404,
@@ -1437,8 +1438,8 @@ export const getApiV1EmpregabilidadeCurriculoCpfExperiencias = async (
 }
 
 /**
- * Remove todas as experiências do CPF e insere as novas em uma transação
- * @summary Substituir experiências por CPF
+ * Remove todas as experiências e conquistas do CPF e insere as novas em uma transação
+ * @summary Substituir experiências e conquistas por CPF
  */
 export type putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse200 = {
   data: PutApiV1EmpregabilidadeCurriculoCpfExperiencias200
@@ -1473,7 +1474,7 @@ export const getPutApiV1EmpregabilidadeCurriculoCpfExperienciasUrl = (
 
 export const putApiV1EmpregabilidadeCurriculoCpfExperiencias = async (
   cpf: string,
-  empregabilidadeCurriculoExperiencia: EmpregabilidadeCurriculoExperiencia[],
+  empregabilidadeExperienciaProfissionalAccordionRequest: EmpregabilidadeExperienciaProfissionalAccordionRequest,
   options?: RequestInit
 ): Promise<putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse> => {
   return customFetch<putApiV1EmpregabilidadeCurriculoCpfExperienciasResponse>(
@@ -1482,7 +1483,9 @@ export const putApiV1EmpregabilidadeCurriculoCpfExperiencias = async (
       ...options,
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(empregabilidadeCurriculoExperiencia),
+      body: JSON.stringify(
+        empregabilidadeExperienciaProfissionalAccordionRequest
+      ),
     }
   )
 }

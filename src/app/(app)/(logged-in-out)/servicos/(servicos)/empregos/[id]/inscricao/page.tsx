@@ -13,12 +13,15 @@ import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
+import { getCurriculoExperienciaData } from '../../curriculo/get-curriculo-experiencia-data'
 import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
 import { getCurriculoSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
 import { getCurriculoTermosAceitos } from '../../curriculo/get-curriculo-termos-data'
+import { getExperienciaOptions } from '../../curriculo/get-experiencia-options'
 import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
 import { getSituacaoOptions } from '../../curriculo/get-situacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
+import { enviarCandidatura } from './enviar-candidatura-action'
 import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
 
 export const dynamic = 'force-dynamic'
@@ -83,8 +86,10 @@ export default async function InscricaoPage({
     userInfoResponse,
     formacaoOptions,
     situacaoOptions,
+    experienciaOptions,
     curriculoFormacaoData,
     curriculoSituacaoData,
+    curriculoExperienciaData,
     curriculoTermosAceitos,
   ] = await Promise.all([
     getApiPublicEmpregabilidadeVagasId(vagaId),
@@ -92,8 +97,10 @@ export default async function InscricaoPage({
     getDalCitizenCpf(userAuthInfo.cpf),
     getFormacaoOptions(),
     getSituacaoOptions(),
+    getExperienciaOptions(),
     getCurriculoFormacaoData(userAuthInfo.cpf),
     getCurriculoSituacaoData(userAuthInfo.cpf),
+    getCurriculoExperienciaData(userAuthInfo.cpf),
     getCurriculoTermosAceitos(userAuthInfo.cpf),
   ])
 
@@ -184,9 +191,12 @@ export default async function InscricaoPage({
         initialIdiomas={curriculoFormacaoData.idiomas}
         situacaoOptions={situacaoOptions}
         initialSituacao={curriculoSituacaoData}
+        experienciaOptions={experienciaOptions}
+        initialExperiencia={curriculoExperienciaData}
         initialTermosAceitos={curriculoTermosAceitos}
         initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
+        onEnviarCandidatura={enviarCandidatura}
       />
     </div>
   )
