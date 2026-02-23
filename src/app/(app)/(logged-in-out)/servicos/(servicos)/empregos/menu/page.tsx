@@ -1,30 +1,14 @@
-'use client'
+import { buildAuthUrl } from '@/constants/url'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { redirect } from 'next/navigation'
+import { EmpregosMenuContent } from './menu-content'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import { ChevronLeftIcon } from '@/assets/icons'
-import { IconButton } from '@/components/ui/custom/icon-button'
-import { MenuItem } from '@/components/ui/custom/menu-item'
-import { useRouter } from 'next/navigation'
+export default async function EmpregosMenuPage() {
+  const userInfo = await getUserInfoFromToken()
 
-export default function EmpregosMenuPage() {
-  const router = useRouter()
-
-  const handleBack = () => {
-    router.push('/servicos/empregos')
+  if (!userInfo.cpf) {
+    return redirect(buildAuthUrl('/servicos/empregos/menu'))
   }
 
-  return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader fixed={false} title="Menu" route="/servicos/empregos" />
-      <div className="px-4 pt-3.4">
-        <MenuItem
-          label="Minhas candidaturas"
-          href="/servicos/empregos/minhas-candidaturas"
-          isFirst
-        />
-        <MenuItem label="Meu currículo" href="/servicos/empregos/curriculo" />
-        <MenuItem label="FAQ" href="/servicos/empregos/faq" isLast />
-      </div>
-    </main>
-  )
+  return <EmpregosMenuContent />
 }

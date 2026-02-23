@@ -86,6 +86,11 @@ export function EtapasProcessoSeletivoCard({
               isStatusRejeitado &&
               etapaAtualCandidatura != null &&
               index === etapaAtualCandidatura + 1
+            /** Quando id_etapa_atual é null e não passou para a próxima etapa, a etapa logo após "Envio da candidatura" exibe X e mensagem. */
+            const isProximaEtapaNaoPassou =
+              hasCandidatura && etapaAtualCandidatura == null && index === 1
+            const isEtapaComXDestructive =
+              isEtapaAtualRejeitada || isProximaEtapaNaoPassou
             const isCompleted =
               (isEnvioCandidatura && hasCandidatura) ||
               (!isEnvioCandidatura &&
@@ -104,7 +109,7 @@ export function EtapasProcessoSeletivoCard({
                       {etapa.ordem}. {etapa.titulo}
                     </span>
                     <span className="shrink-0 flex items-center justify-center size-5">
-                      {isEtapaAtualRejeitada ? (
+                      {isEtapaComXDestructive ? (
                         <span className="flex size-4 items-center justify-center rounded-full bg-destructive text-white">
                           <X className="size-3 stroke-[2.5]" />
                         </span>
@@ -120,7 +125,7 @@ export function EtapasProcessoSeletivoCard({
                 </AccordionTrigger>
                 <AccordionContent className="text-foreground-light text-sm leading-5 font-normal pb-3 pt-0">
                   {hasContent ? etapa.descricao : 'Etapa sem descrição.'}
-                  {isEtapaAtualRejeitada && (
+                  {isEtapaComXDestructive && (
                     <p className="mt-3 text-foreground font-normal">
                       {MENSAGEM_NAO_SEGUIU_CANDIDATURA}
                     </p>

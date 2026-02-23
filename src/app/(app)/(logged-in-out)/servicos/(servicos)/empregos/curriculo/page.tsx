@@ -1,6 +1,8 @@
+import { buildAuthUrl } from '@/constants/url'
 import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { redirect } from 'next/navigation'
 import { CurriculoContent } from './curriculo-content'
 import { getCurriculoExperienciaData } from './get-curriculo-experiencia-data'
 import { getCurriculoFormacaoData } from './get-curriculo-formacao-data'
@@ -61,6 +63,8 @@ export default async function CurriculoPage() {
     } catch {
       // mantém vazio em caso de erro
     }
+  } else {
+    return redirect(buildAuthUrl('/servicos/empregos/curriculo'))
   }
 
   return (
