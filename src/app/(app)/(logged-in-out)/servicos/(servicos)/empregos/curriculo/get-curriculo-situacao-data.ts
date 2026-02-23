@@ -23,14 +23,14 @@ export async function getCurriculoSituacaoData(
 ): Promise<InitialSituacaoData> {
   const normalizedCpf = cpf.replace(/\D/g, '')
   if (!normalizedCpf) {
-    return { ...DEFAULT_SITUACAO, idsTiposVinculo: [] }
+    return { ...DEFAULT_SITUACAO, idsTiposVinculo: [], idDisponibilidade: '' }
   }
 
   const res =
     await getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses(normalizedCpf)
 
   if (res.status !== 200 || !res.data) {
-    return { ...DEFAULT_SITUACAO, idsTiposVinculo: [] }
+    return { ...DEFAULT_SITUACAO, idsTiposVinculo: [], idDisponibilidade: '' }
   }
 
   const body = res.data as Record<string, unknown>
