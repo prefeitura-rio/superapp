@@ -20,8 +20,6 @@ import type {
   GetApiV1EmpregabilidadeVagasParams,
   PostApiV1EmpregabilidadeVagas400,
   PostApiV1EmpregabilidadeVagas500,
-  PostApiV1EmpregabilidadeVagasDraft400,
-  PostApiV1EmpregabilidadeVagasDraft500,
   PutApiV1EmpregabilidadeVagasId400,
   PutApiV1EmpregabilidadeVagasId500,
   PutApiV1EmpregabilidadeVagasIdPublish200,
@@ -29,6 +27,11 @@ import type {
   PutApiV1EmpregabilidadeVagasIdPublish404,
   PutApiV1EmpregabilidadeVagasIdPublish409,
   PutApiV1EmpregabilidadeVagasIdPublish500,
+  PutApiV1EmpregabilidadeVagasIdSendToApproval200,
+  PutApiV1EmpregabilidadeVagasIdSendToApproval400,
+  PutApiV1EmpregabilidadeVagasIdSendToApproval404,
+  PutApiV1EmpregabilidadeVagasIdSendToApproval409,
+  PutApiV1EmpregabilidadeVagasIdSendToApproval500,
   PutApiV1EmpregabilidadeVagasIdTiposPcd200,
   PutApiV1EmpregabilidadeVagasIdTiposPcd400,
   PutApiV1EmpregabilidadeVagasIdTiposPcd500,
@@ -37,7 +40,7 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 /**
- * Retorna lista paginada de vagas
+ * Retorna lista paginada de vagas com filtros opcionais
  * @summary Listar vagas
  */
 export type getApiV1EmpregabilidadeVagasResponse200 = {
@@ -129,54 +132,6 @@ export const postApiV1EmpregabilidadeVagas = async (
 ): Promise<postApiV1EmpregabilidadeVagasResponse> => {
   return customFetch<postApiV1EmpregabilidadeVagasResponse>(
     getPostApiV1EmpregabilidadeVagasUrl(),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(empregabilidadeVagaBody),
-    }
-  )
-}
-
-/**
- * Cria um rascunho de vaga
- * @summary Criar rascunho de vaga
- */
-export type postApiV1EmpregabilidadeVagasDraftResponse201 = {
-  data: EmpregabilidadeVaga
-  status: 201
-}
-
-export type postApiV1EmpregabilidadeVagasDraftResponse400 = {
-  data: PostApiV1EmpregabilidadeVagasDraft400
-  status: 400
-}
-
-export type postApiV1EmpregabilidadeVagasDraftResponse500 = {
-  data: PostApiV1EmpregabilidadeVagasDraft500
-  status: 500
-}
-
-export type postApiV1EmpregabilidadeVagasDraftResponseComposite =
-  | postApiV1EmpregabilidadeVagasDraftResponse201
-  | postApiV1EmpregabilidadeVagasDraftResponse400
-  | postApiV1EmpregabilidadeVagasDraftResponse500
-
-export type postApiV1EmpregabilidadeVagasDraftResponse =
-  postApiV1EmpregabilidadeVagasDraftResponseComposite & {
-    headers: Headers
-  }
-
-export const getPostApiV1EmpregabilidadeVagasDraftUrl = () => {
-  return `/api/v1/empregabilidade/vagas/draft`
-}
-
-export const postApiV1EmpregabilidadeVagasDraft = async (
-  empregabilidadeVagaBody: EmpregabilidadeVagaBody,
-  options?: RequestInit
-): Promise<postApiV1EmpregabilidadeVagasDraftResponse> => {
-  return customFetch<postApiV1EmpregabilidadeVagasDraftResponse>(
-    getPostApiV1EmpregabilidadeVagasDraftUrl(),
     {
       ...options,
       method: 'POST',
@@ -384,6 +339,66 @@ export const putApiV1EmpregabilidadeVagasIdPublish = async (
 ): Promise<putApiV1EmpregabilidadeVagasIdPublishResponse> => {
   return customFetch<putApiV1EmpregabilidadeVagasIdPublishResponse>(
     getPutApiV1EmpregabilidadeVagasIdPublishUrl(id),
+    {
+      ...options,
+      method: 'PUT',
+    }
+  )
+}
+
+/**
+ * Envia uma vaga em edição para o fluxo de aprovação
+ * @summary Enviar vaga para aprovação
+ */
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse200 = {
+  data: PutApiV1EmpregabilidadeVagasIdSendToApproval200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse400 = {
+  data: PutApiV1EmpregabilidadeVagasIdSendToApproval400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse404 = {
+  data: PutApiV1EmpregabilidadeVagasIdSendToApproval404
+  status: 404
+}
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse409 = {
+  data: PutApiV1EmpregabilidadeVagasIdSendToApproval409
+  status: 409
+}
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse500 = {
+  data: PutApiV1EmpregabilidadeVagasIdSendToApproval500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponseComposite =
+  | putApiV1EmpregabilidadeVagasIdSendToApprovalResponse200
+  | putApiV1EmpregabilidadeVagasIdSendToApprovalResponse400
+  | putApiV1EmpregabilidadeVagasIdSendToApprovalResponse404
+  | putApiV1EmpregabilidadeVagasIdSendToApprovalResponse409
+  | putApiV1EmpregabilidadeVagasIdSendToApprovalResponse500
+
+export type putApiV1EmpregabilidadeVagasIdSendToApprovalResponse =
+  putApiV1EmpregabilidadeVagasIdSendToApprovalResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeVagasIdSendToApprovalUrl = (
+  id: string
+) => {
+  return `/api/v1/empregabilidade/vagas/${id}/send-to-approval`
+}
+
+export const putApiV1EmpregabilidadeVagasIdSendToApproval = async (
+  id: string,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeVagasIdSendToApprovalResponse> => {
+  return customFetch<putApiV1EmpregabilidadeVagasIdSendToApprovalResponse>(
+    getPutApiV1EmpregabilidadeVagasIdSendToApprovalUrl(id),
     {
       ...options,
       method: 'PUT',

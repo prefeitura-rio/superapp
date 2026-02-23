@@ -8,10 +8,13 @@
 import type {
   EmpregabilidadeTermosUso,
   GetApiV1EmpregabilidadeTermosUsoCpf200,
+  GetApiV1EmpregabilidadeTermosUsoCpf403,
   GetApiV1EmpregabilidadeTermosUsoCpf500,
+  GetApiV1EmpregabilidadeTermosUsoCpfDetails403,
   GetApiV1EmpregabilidadeTermosUsoCpfDetails404,
   GetApiV1EmpregabilidadeTermosUsoCpfDetails500,
   PutApiV1EmpregabilidadeTermosUsoCpfAccept200,
+  PutApiV1EmpregabilidadeTermosUsoCpfAccept403,
   PutApiV1EmpregabilidadeTermosUsoCpfAccept500,
 } from '.././models'
 
@@ -26,6 +29,11 @@ export type getApiV1EmpregabilidadeTermosUsoCpfResponse200 = {
   status: 200
 }
 
+export type getApiV1EmpregabilidadeTermosUsoCpfResponse403 = {
+  data: GetApiV1EmpregabilidadeTermosUsoCpf403
+  status: 403
+}
+
 export type getApiV1EmpregabilidadeTermosUsoCpfResponse500 = {
   data: GetApiV1EmpregabilidadeTermosUsoCpf500
   status: 500
@@ -33,6 +41,7 @@ export type getApiV1EmpregabilidadeTermosUsoCpfResponse500 = {
 
 export type getApiV1EmpregabilidadeTermosUsoCpfResponseComposite =
   | getApiV1EmpregabilidadeTermosUsoCpfResponse200
+  | getApiV1EmpregabilidadeTermosUsoCpfResponse403
   | getApiV1EmpregabilidadeTermosUsoCpfResponse500
 
 export type getApiV1EmpregabilidadeTermosUsoCpfResponse =
@@ -58,12 +67,17 @@ export const getApiV1EmpregabilidadeTermosUsoCpf = async (
 }
 
 /**
- * Registra o aceite dos termos de uso pelo usuário
+ * Registra o aceite dos termos de uso pelo usuário autenticado
  * @summary Aceitar termos de uso
  */
 export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse200 = {
   data: PutApiV1EmpregabilidadeTermosUsoCpfAccept200
   status: 200
+}
+
+export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse403 = {
+  data: PutApiV1EmpregabilidadeTermosUsoCpfAccept403
+  status: 403
 }
 
 export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse500 = {
@@ -73,6 +87,7 @@ export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse500 = {
 
 export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponseComposite =
   | putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse200
+  | putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse403
   | putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse500
 
 export type putApiV1EmpregabilidadeTermosUsoCpfAcceptResponse =
@@ -108,6 +123,11 @@ export type getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse200 = {
   status: 200
 }
 
+export type getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse403 = {
+  data: GetApiV1EmpregabilidadeTermosUsoCpfDetails403
+  status: 403
+}
+
 export type getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse404 = {
   data: GetApiV1EmpregabilidadeTermosUsoCpfDetails404
   status: 404
@@ -120,6 +140,7 @@ export type getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse500 = {
 
 export type getApiV1EmpregabilidadeTermosUsoCpfDetailsResponseComposite =
   | getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse200
+  | getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse403
   | getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse404
   | getApiV1EmpregabilidadeTermosUsoCpfDetailsResponse500
 

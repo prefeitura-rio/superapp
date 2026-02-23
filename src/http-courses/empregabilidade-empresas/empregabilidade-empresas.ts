@@ -28,7 +28,7 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 /**
- * Retorna lista paginada de empresas
+ * Retorna lista paginada de empresas com filtros opcionais
  * @summary Listar empresas
  */
 export type getApiV1EmpregabilidadeEmpresasResponse200 = {

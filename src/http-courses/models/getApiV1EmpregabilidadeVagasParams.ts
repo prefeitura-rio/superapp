@@ -16,11 +16,19 @@ export type GetApiV1EmpregabilidadeVagasParams = {
    */
   pageSize?: number
   /**
-   * Filtrar por status
+   * Filtrar por status (em_edicao, em_aprovacao, publicado_ativo, publicado_expirado)
    */
   status?: string
   /**
    * Filtrar por CNPJ do contratante
    */
   contratante?: string
+  /**
+   * Filtrar por ID do órgão parceiro
+   */
+  orgao_parceiro_id?: string
+  /**
+   * Busca parcial no título da vaga
+   */
+  search?: string
 }
