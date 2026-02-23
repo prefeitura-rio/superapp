@@ -1,5 +1,5 @@
-import type { ModelsCitizen } from '@/http/models'
 import { buildAuthUrl } from '@/constants/url'
+import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'

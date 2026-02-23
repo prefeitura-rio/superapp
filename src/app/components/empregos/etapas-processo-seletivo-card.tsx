@@ -88,9 +88,7 @@ export function EtapasProcessoSeletivoCard({
               index === etapaAtualCandidatura + 1
             /** Quando id_etapa_atual é null e não passou para a próxima etapa, a etapa logo após "Envio da candidatura" exibe X e mensagem. */
             const isProximaEtapaNaoPassou =
-              hasCandidatura &&
-              etapaAtualCandidatura == null &&
-              index === 1
+              hasCandidatura && etapaAtualCandidatura == null && index === 1
             const isEtapaComXDestructive =
               isEtapaAtualRejeitada || isProximaEtapaNaoPassou
             const isCompleted =
