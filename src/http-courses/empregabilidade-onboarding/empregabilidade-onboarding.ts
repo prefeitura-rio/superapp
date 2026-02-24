@@ -7,8 +7,10 @@
  */
 import type {
   GetApiV1EmpregabilidadeOnboardingCpf200,
+  GetApiV1EmpregabilidadeOnboardingCpf403,
   GetApiV1EmpregabilidadeOnboardingCpf500,
   PutApiV1EmpregabilidadeOnboardingCpfComplete200,
+  PutApiV1EmpregabilidadeOnboardingCpfComplete403,
   PutApiV1EmpregabilidadeOnboardingCpfComplete500,
 } from '.././models'
 
@@ -23,6 +25,11 @@ export type getApiV1EmpregabilidadeOnboardingCpfResponse200 = {
   status: 200
 }
 
+export type getApiV1EmpregabilidadeOnboardingCpfResponse403 = {
+  data: GetApiV1EmpregabilidadeOnboardingCpf403
+  status: 403
+}
+
 export type getApiV1EmpregabilidadeOnboardingCpfResponse500 = {
   data: GetApiV1EmpregabilidadeOnboardingCpf500
   status: 500
@@ -30,6 +37,7 @@ export type getApiV1EmpregabilidadeOnboardingCpfResponse500 = {
 
 export type getApiV1EmpregabilidadeOnboardingCpfResponseComposite =
   | getApiV1EmpregabilidadeOnboardingCpfResponse200
+  | getApiV1EmpregabilidadeOnboardingCpfResponse403
   | getApiV1EmpregabilidadeOnboardingCpfResponse500
 
 export type getApiV1EmpregabilidadeOnboardingCpfResponse =
@@ -63,6 +71,11 @@ export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponse200 = {
   status: 200
 }
 
+export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponse403 = {
+  data: PutApiV1EmpregabilidadeOnboardingCpfComplete403
+  status: 403
+}
+
 export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponse500 = {
   data: PutApiV1EmpregabilidadeOnboardingCpfComplete500
   status: 500
@@ -70,6 +83,7 @@ export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponse500 = {
 
 export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponseComposite =
   | putApiV1EmpregabilidadeOnboardingCpfCompleteResponse200
+  | putApiV1EmpregabilidadeOnboardingCpfCompleteResponse403
   | putApiV1EmpregabilidadeOnboardingCpfCompleteResponse500
 
 export type putApiV1EmpregabilidadeOnboardingCpfCompleteResponse =

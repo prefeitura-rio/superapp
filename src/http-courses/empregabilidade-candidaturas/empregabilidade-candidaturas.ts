@@ -9,6 +9,7 @@ import type {
   DeleteApiV1EmpregabilidadeCandidaturasId200,
   DeleteApiV1EmpregabilidadeCandidaturasId400,
   DeleteApiV1EmpregabilidadeCandidaturasId500,
+  EmpregabilidadeBulkUpdateStatusRequest,
   EmpregabilidadeCandidatura,
   EmpregabilidadeCandidaturaBody,
   EmpregabilidadeUpdateEtapaRequest,
@@ -21,6 +22,9 @@ import type {
   GetApiV1EmpregabilidadeCandidaturasParams,
   PostApiV1EmpregabilidadeCandidaturas400,
   PostApiV1EmpregabilidadeCandidaturas500,
+  PutApiV1EmpregabilidadeCandidaturasBulkStatus200,
+  PutApiV1EmpregabilidadeCandidaturasBulkStatus400,
+  PutApiV1EmpregabilidadeCandidaturasBulkStatus500,
   PutApiV1EmpregabilidadeCandidaturasId400,
   PutApiV1EmpregabilidadeCandidaturasId500,
   PutApiV1EmpregabilidadeCandidaturasIdApprove200,
@@ -40,7 +44,7 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 /**
- * Retorna lista paginada de candidaturas
+ * Retorna lista paginada de candidaturas com filtros e busca universal
  * @summary Listar candidaturas
  */
 export type getApiV1EmpregabilidadeCandidaturasResponse200 = {
@@ -137,6 +141,54 @@ export const postApiV1EmpregabilidadeCandidaturas = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(empregabilidadeCandidaturaBody),
+    }
+  )
+}
+
+/**
+ * Atualiza o status de múltiplas candidaturas de uma vaga identificadas por lista de CPFs
+ * @summary Atualizar status de candidaturas em lote
+ */
+export type putApiV1EmpregabilidadeCandidaturasBulkStatusResponse200 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkStatus200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkStatusResponse400 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkStatus400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkStatusResponse500 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkStatus500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkStatusResponseComposite =
+  | putApiV1EmpregabilidadeCandidaturasBulkStatusResponse200
+  | putApiV1EmpregabilidadeCandidaturasBulkStatusResponse400
+  | putApiV1EmpregabilidadeCandidaturasBulkStatusResponse500
+
+export type putApiV1EmpregabilidadeCandidaturasBulkStatusResponse =
+  putApiV1EmpregabilidadeCandidaturasBulkStatusResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCandidaturasBulkStatusUrl = () => {
+  return `/api/v1/empregabilidade/candidaturas/bulk-status`
+}
+
+export const putApiV1EmpregabilidadeCandidaturasBulkStatus = async (
+  empregabilidadeBulkUpdateStatusRequest: EmpregabilidadeBulkUpdateStatusRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCandidaturasBulkStatusResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCandidaturasBulkStatusResponse>(
+    getPutApiV1EmpregabilidadeCandidaturasBulkStatusUrl(),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeBulkUpdateStatusRequest),
     }
   )
 }
