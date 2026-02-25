@@ -1,4 +1,5 @@
 import { CursosBanner } from '@/app/components/banners/cursos-banner'
+import { EmpregabilidadeBanner } from '@/app/components/banners/empregabilidade-banner'
 import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
@@ -18,6 +19,13 @@ type BannerProps = {
 }
 
 export const suggestedBanners: BannerProps[] = [
+  {
+    id: 'empregabilidade',
+    component: EmpregabilidadeBanner,
+    title: 'Encontre seu emprego',
+    subtitle: 'no Oportunidades Cariocas',
+    route: '/servicos/empregos/',
+  },
   {
     id: 'cursos',
     component: CursosBanner,

@@ -38,7 +38,11 @@ export function MyCoursesHomeSwipe({ courses }: MyCoursesHomeSwipeProps) {
               >
                 {slideCourses.map((course, courseIndex) => (
                   <CourseCard
-                    key={course.id != null ? String(course.id) : `course-${slideIndex}-${courseIndex}`}
+                    key={
+                      course.id != null
+                        ? String(course.id)
+                        : `course-${slideIndex}-${courseIndex}`
+                    }
                     courseId={course.id}
                     title={course.title as string}
                     modality={course.modalidade as string}

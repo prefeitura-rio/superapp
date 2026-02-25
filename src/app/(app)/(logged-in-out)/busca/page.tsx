@@ -8,7 +8,7 @@ import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { SearchResultItem } from '@/helpers/search-helpers'
 import { sendGAEvent } from '@next/third-parties/google'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useSearch } from './hooks/use-search'
 import {
@@ -18,8 +18,12 @@ import {
 
 export default function Search() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [externalLinkDrawerOpen, setExternalLinkDrawerOpen] = useState(false)
   const [selectedExternalUrl, setSelectedExternalUrl] = useState<string>('')
+
+  const searchContextParam = searchParams.get('tipo')
+  const isEmpregosContext = searchContextParam === 'empregos'
 
   const {
     query,
@@ -33,7 +37,7 @@ export default function Search() {
     clearSearch,
     removeFromHistory,
     searchInputRef,
-  } = useSearch()
+  } = useSearch(isEmpregosContext ? 'empregos' : 'servicos')
 
   const handleBack = () => {
     handleBackNavigation(router)
@@ -134,12 +138,20 @@ export default function Search() {
               Mais pesquisados
             </h2>
             <ul>
-              {[
-                'Quero pagar meu IPTU',
-                'Matricular meu filho na escola',
-                'Procurar emprego',
-                'Cadastrar evento',
-              ].map((text, index) => (
+              {(isEmpregosContext
+                ? [
+                    'Procurar vagas de emprego',
+                    'Ver vagas perto de mim',
+                    'Cadastrar meu currículo',
+                    'Vagas para primeiro emprego',
+                  ]
+                : [
+                    'Quero pagar meu IPTU',
+                    'Matricular meu filho na escola',
+                    'Procurar emprego',
+                    'Cadastrar evento',
+                  ]
+              ).map((text, index) => (
                 <li
                   key={index}
                   className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"

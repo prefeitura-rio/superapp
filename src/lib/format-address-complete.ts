@@ -63,4 +63,3 @@ export function formatAddressComplete(
 
   return parts.join(', ')
 }
-

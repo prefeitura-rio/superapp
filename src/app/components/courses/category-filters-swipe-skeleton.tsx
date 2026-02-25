@@ -20,10 +20,7 @@ export function CategoryFiltersSwipeSkeleton() {
       >
         {Array.from({ length: totalSlides }, (_, slideIndex) => {
           const startIndex = slideIndex * itemsPerSlide
-          const itemsInSlide = Math.min(
-            itemsPerSlide,
-            totalItems - startIndex
-          )
+          const itemsInSlide = Math.min(itemsPerSlide, totalItems - startIndex)
 
           return (
             <div
@@ -58,4 +55,3 @@ export function CategoryFiltersSwipeSkeleton() {
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { FormattedContent, type FaqSection } from '@/lib/faq-utils'
+import { type FaqSection, FormattedContent } from '@/lib/faq-utils'
 
 const FAQ_SECTIONS: FaqSection[] = [
   {

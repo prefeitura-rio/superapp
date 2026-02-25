@@ -4,4 +4,3 @@ export function formatGender(gender: string | undefined | null): string {
   }
   return gender
 }
-

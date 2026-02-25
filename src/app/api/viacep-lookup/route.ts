@@ -1,10 +1,10 @@
 import { findBestCepMatch } from '@/lib/cep-utils'
+import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type { ViaCepResponse } from '@/types/address'
 import { type NextRequest, NextResponse } from 'next/server'
-import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 export async function GET(req: NextRequest) {
-  return withSpan('api.viacep_lookup', async (span) => {
+  return withSpan('api.viacep_lookup', async span => {
     const uf = req.nextUrl.searchParams.get('uf')
     const cidade = req.nextUrl.searchParams.get('cidade')
     const logradouro = req.nextUrl.searchParams.get('logradouro')
@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
 
     // ViaCEP requires minimum 3 characters for cidade and logradouro
     if (cidade.length < 3 || logradouro.length < 3) {
-      addSpanEvent('viacep.validation.failed', { reason: 'insufficient_length' })
+      addSpanEvent('viacep.validation.failed', {
+        reason: 'insufficient_length',
+      })
       return NextResponse.json(
         { error: 'Cidade and logradouro must have at least 3 characters' },
         { status: 400 }

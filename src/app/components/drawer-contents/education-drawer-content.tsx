@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-const EDUCATIONS = [
+/** Opções de escolaridade (fonte única com Informações Pessoais e Meu Currículo). */
+export const EDUCATIONS = [
   'Fundamental incompleto',
   'Fundamental completo',
   'Médio incompleto',

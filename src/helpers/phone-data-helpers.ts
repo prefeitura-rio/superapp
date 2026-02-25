@@ -52,7 +52,11 @@ export function getPhoneValue(
   const valor = principal.valor!.trim()
 
   // Double check for "null" strings
-  if (ddi.toLowerCase() === 'null' || ddd.toLowerCase() === 'null' || valor.toLowerCase() === 'null') {
+  if (
+    ddi.toLowerCase() === 'null' ||
+    ddd.toLowerCase() === 'null' ||
+    valor.toLowerCase() === 'null'
+  ) {
     return undefined
   }
 

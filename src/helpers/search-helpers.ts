@@ -18,7 +18,15 @@ export interface ApiResponse {
 }
 
 export const SEARCH_HISTORY_KEY = 'search-history'
+export type SearchContext = 'servicos' | 'empregos'
 export const MAX_HISTORY_ITEMS = 10
+
+function getSearchHistoryKey(context?: SearchContext): string {
+  if (context === 'empregos') {
+    return `${SEARCH_HISTORY_KEY}-empregos`
+  }
+  return SEARCH_HISTORY_KEY
+}
 
 /**
  * Normalizes a string by removing accents and special characters
@@ -219,12 +227,13 @@ export function mergeSearchResults(
 /**
  * Loads search history from localStorage
  */
-export function loadSearchHistory(): string[] {
+export function loadSearchHistory(context?: SearchContext): string[] {
   if (typeof window === 'undefined') {
     return []
   }
 
-  const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY)
+  const storageKey = getSearchHistoryKey(context)
+  const savedHistory = localStorage.getItem(storageKey)
   if (!savedHistory) {
     return []
   }
@@ -233,7 +242,7 @@ export function loadSearchHistory(): string[] {
     return JSON.parse(savedHistory)
   } catch (error) {
     console.error('Error parsing search history:', error)
-    localStorage.removeItem(SEARCH_HISTORY_KEY)
+    localStorage.removeItem(storageKey)
     return []
   }
 }
@@ -241,17 +250,20 @@ export function loadSearchHistory(): string[] {
 /**
  * Saves a search query to history in localStorage
  */
-export function saveSearchToHistory(searchQuery: string): string[] {
+export function saveSearchToHistory(
+  searchQuery: string,
+  context?: SearchContext
+): string[] {
   if (typeof window === 'undefined') {
     return []
   }
 
   if (!searchQuery.trim() || searchQuery.length <= 2) {
-    return loadSearchHistory()
+    return loadSearchHistory(context)
   }
 
   const trimmedQuery = searchQuery.trim()
-  const currentHistory = loadSearchHistory()
+  const currentHistory = loadSearchHistory(context)
 
   // Remove the query if it already exists (to avoid duplicates)
   const filteredHistory = currentHistory.filter(item => item !== trimmedQuery)
@@ -262,7 +274,8 @@ export function saveSearchToHistory(searchQuery: string): string[] {
   )
 
   // Save to localStorage
-  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+  const storageKey = getSearchHistoryKey(context)
+  localStorage.setItem(storageKey, JSON.stringify(newHistory))
 
   return newHistory
 }
@@ -270,14 +283,18 @@ export function saveSearchToHistory(searchQuery: string): string[] {
 /**
  * Removes an item from search history
  */
-export function removeFromHistory(itemToRemove: string): string[] {
+export function removeFromHistory(
+  itemToRemove: string,
+  context?: SearchContext
+): string[] {
   if (typeof window === 'undefined') {
     return []
   }
 
-  const currentHistory = loadSearchHistory()
+  const currentHistory = loadSearchHistory(context)
   const newHistory = currentHistory.filter(item => item !== itemToRemove)
-  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+  const storageKey = getSearchHistoryKey(context)
+  localStorage.setItem(storageKey, JSON.stringify(newHistory))
   return newHistory
 }
 

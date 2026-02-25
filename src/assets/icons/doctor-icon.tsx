@@ -54,13 +54,7 @@ export function DoctorIcon(props: IconProps) {
         strokeWidth="1.4"
         strokeLinecap="round"
       />
-      <circle
-        cx="15"
-        cy="20"
-        r="1.3"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
+      <circle cx="15" cy="20" r="1.3" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   )
 }

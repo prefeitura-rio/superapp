@@ -1,7 +1,7 @@
+import { server } from '@/test/mocks/server'
 import { render, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, test } from 'vitest'
-import { server } from '@/test/mocks/server'
 import { AuthHeaderProvider, useAuthHeader } from '../auth-header-provider'
 
 // Test component that consumes the context
@@ -14,7 +14,9 @@ function TestConsumer() {
 
   return (
     <div>
-      <span data-testid="is-logged-in">{data.isLoggedIn ? 'true' : 'false'}</span>
+      <span data-testid="is-logged-in">
+        {data.isLoggedIn ? 'true' : 'false'}
+      </span>
       <span data-testid="user-name">{data.userName}</span>
     </div>
   )

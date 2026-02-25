@@ -60,7 +60,9 @@ export const SelectScheduleSlide = ({
   }
 
   // Only show error if the field has been touched or if an error exists after trigger
-  const shouldShowError = touchedFields[fieldName as keyof typeof touchedFields] && errors[fieldName as keyof typeof errors]
+  const shouldShowError =
+    touchedFields[fieldName as keyof typeof touchedFields] &&
+    errors[fieldName as keyof typeof errors]
 
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
@@ -145,27 +147,22 @@ export const SelectScheduleSlide = ({
                       )}
                     </h3>
                     <div className="text-sm text-muted-foreground space-y-0.5">
-                     <div className="flex items-center gap-1">
-                      <p className="font-medium">
-                        {formatDate(schedule.class_start_date)}
-                      </p>
-                      <span className="font-medium">-</span>
-                      <p>
-                        {formatDate(schedule.class_end_date)}
-                      </p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium">
+                          {formatDate(schedule.class_start_date)}
+                        </p>
+                        <span className="font-medium">-</span>
+                        <p>{formatDate(schedule.class_end_date)}</p>
                       </div>
-                      <p>
-                        {formatTimeRange(schedule.class_time)}
-                      </p>
-                      <p>
-                        {schedule.class_days}
-                      </p>
+                      <p>{formatTimeRange(schedule.class_time)}</p>
+                      <p>{schedule.class_days}</p>
                       <p>
                         <span className="font-medium">Vagas:</span>{' '}
                         {schedule.vacancies}
                         {schedule.remaining_vacancies !== undefined && (
                           <span className="text-muted-foreground">
-                            {' '}({schedule.remaining_vacancies} disponíveis)
+                            {' '}
+                            ({schedule.remaining_vacancies} disponíveis)
                           </span>
                         )}
                       </p>

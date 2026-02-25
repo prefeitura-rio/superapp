@@ -10,21 +10,18 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
-import type { MeiAttachment } from './attachment-gallery'
-import { AttachmentGallery } from './attachment-gallery'
-import { ImageGalleryModal } from './image-gallery-modal'
-import { MeiOpportunityHeader } from './mei-opportunity-header'
-import { QuickInfoItem } from './quick-info-item'
 import { MEI_LINKS } from '@/constants/mei-links'
-import { deleteProposal } from './actions/delete-proposal'
 import { hasCompatibleCnae } from '@/lib/mei-utils'
 import toast from 'react-hot-toast'
+import { deleteProposal } from './actions/delete-proposal'
+import type { MeiAttachment } from './attachment-gallery'
+import { AttachmentGallery } from './attachment-gallery'
 import { CancelProposalDrawer } from './cancel-proposal-drawer'
+import { ImageGalleryModal } from './image-gallery-modal'
+import { MeiOpportunityHeader } from './mei-opportunity-header'
 import { ProposalStatusBadge } from './proposal-status-badge'
-import {
-  ServiceTypeDrawer,
-  type UserMeiContext,
-} from './service-type-drawer'
+import { QuickInfoItem } from './quick-info-item'
+import { ServiceTypeDrawer, type UserMeiContext } from './service-type-drawer'
 
 export interface MeiOpportunityDetailData {
   id: number
@@ -243,7 +240,9 @@ export function MeiOpportunityDetailClient({
           title={opportunity.title}
           coverImage={opportunity.coverImage}
           showEditButton={!!userProposal && userProposal.status === 'submitted'}
-          showDeleteButton={!!userProposal && userProposal.status === 'submitted'}
+          showDeleteButton={
+            !!userProposal && userProposal.status === 'submitted'
+          }
           onEditClick={handleEditProposal}
           onDeleteClick={() => setIsCancelDrawerOpen(true)}
         />
