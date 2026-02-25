@@ -1293,9 +1293,11 @@ export function CourseDetails({
             </div>
           )}
         </div>
-        <div className="px-4 pb-2 py-8 w-full max-w-4xl">
-          {renderActionButton()}
-        </div>
+        {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
+          <div className="px-4 pb-2 py-8 w-full max-w-4xl">
+            {renderActionButton()}
+          </div>
+        )}
         <LocationSelection
           course={course}
           selectedLocationId={selectedLocationId}
