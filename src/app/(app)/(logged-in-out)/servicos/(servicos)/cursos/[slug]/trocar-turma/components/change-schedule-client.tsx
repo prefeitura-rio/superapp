@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import type { SwiperRef } from 'swiper/react'
@@ -48,7 +48,7 @@ export function ChangeScheduleClient({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const swiperRef = useRef<SwiperRef>(null)
   const router = useRouter()
 
@@ -192,106 +192,108 @@ export function ChangeScheduleClient({
   }
 
   const goToSuccess = async () => {
-    setIsSubmitting(true)
+    setFadeOut(true)
+    await delay(TRANSITIONS.FADE)
 
-    const formData = form.getValues()
+    startTransition(async () => {
+      const formData = form.getValues()
 
-    // Build request data structure
-    const selectedScheduleId = formData.newScheduleId
-    let finalUnit: NearbyUnit | null = null
-    let finalSchedule: Schedule | null = null
+      // Build request data structure
+      const selectedScheduleId = formData.newScheduleId
+      let finalUnit: NearbyUnit | null = null
+      let finalSchedule: Schedule | null = null
 
-    if (isOnlineCourse) {
-      // For online courses, find the selected schedule from online classes
-      finalSchedule =
-        onlineClasses.find(cls => cls.id === selectedScheduleId) || null
-    } else {
-      // For presential courses
-      finalUnit = selectedUnit || (hasUnits ? nearbyUnits[0] : null)
-      if (finalUnit) {
+      if (isOnlineCourse) {
+        // For online courses, find the selected schedule from online classes
         finalSchedule =
-          finalUnit.schedules?.find(sch => sch.id === selectedScheduleId) ||
-          null
-      }
-    }
-
-    // Build enrolled unit for API
-    const enrolledUnit = finalUnit
-      ? {
-          id: finalUnit.id,
-          curso_id: finalUnit.curso_id,
-          address: finalUnit.address,
-          neighborhood: finalUnit.neighborhood,
-          neighborhood_zone: (finalUnit as any).neighborhood_zone as
-            | string
-            | undefined,
-          schedules: finalSchedule
-            ? [
-                {
-                  id: finalSchedule.id,
-                  location_id: finalSchedule.location_id,
-                  vacancies: finalSchedule.vacancies,
-                  class_start_date: finalSchedule.class_start_date,
-                  class_end_date: finalSchedule.class_end_date,
-                  class_time: finalSchedule.class_time,
-                  class_days: finalSchedule.class_days,
-                  remaining_vacancies: finalSchedule.remaining_vacancies,
-                },
-              ]
-            : [],
-        }
-      : {
-          id: 'online',
-          curso_id: course.id as number,
-          address: 'Online',
-          neighborhood: 'Online',
-          schedules: finalSchedule
-            ? [
-                {
-                  id: finalSchedule.id,
-                  location_id: finalSchedule.location_id,
-                  vacancies: finalSchedule.vacancies,
-                  class_start_date: finalSchedule.class_start_date,
-                  class_end_date: finalSchedule.class_end_date,
-                  class_time: finalSchedule.class_time,
-                  class_days: finalSchedule.class_days,
-                  remaining_vacancies: finalSchedule.remaining_vacancies,
-                },
-              ]
-            : [],
-        }
-
-    try {
-      const result = await changeSchedule({
-        enrollmentId: userEnrollment.id,
-        courseId: course.id as number,
-        scheduleId: selectedScheduleId,
-        enrolledUnit,
-      })
-
-      if (result.success) {
-        setFadeOut(true)
-        await delay(TRANSITIONS.FADE)
-        setShowSuccess(true)
-        setFadeOut(false)
+          onlineClasses.find(cls => cls.id === selectedScheduleId) || null
       } else {
-        toast.error(result.error || 'Erro ao trocar de turma')
+        // For presential courses
+        finalUnit = selectedUnit || (hasUnits ? nearbyUnits[0] : null)
+        if (finalUnit) {
+          finalSchedule =
+            finalUnit.schedules?.find(sch => sch.id === selectedScheduleId) ||
+            null
+        }
       }
-    } catch (error) {
-      toast.error('Erro ao trocar de turma. Tente novamente.')
-    } finally {
-      setIsSubmitting(false)
-    }
+
+      // Build enrolled unit for API
+      const enrolledUnit = finalUnit
+        ? {
+            id: finalUnit.id,
+            curso_id: finalUnit.curso_id,
+            address: finalUnit.address,
+            neighborhood: finalUnit.neighborhood,
+            neighborhood_zone: (finalUnit as any).neighborhood_zone as
+              | string
+              | undefined,
+            schedules: finalSchedule
+              ? [
+                  {
+                    id: finalSchedule.id,
+                    location_id: finalSchedule.location_id,
+                    vacancies: finalSchedule.vacancies,
+                    class_start_date: finalSchedule.class_start_date,
+                    class_end_date: finalSchedule.class_end_date,
+                    class_time: finalSchedule.class_time,
+                    class_days: finalSchedule.class_days,
+                    remaining_vacancies: finalSchedule.remaining_vacancies,
+                  },
+                ]
+              : [],
+          }
+        : {
+            id: 'online',
+            curso_id: course.id as number,
+            address: 'Online',
+            neighborhood: 'Online',
+            schedules: finalSchedule
+              ? [
+                  {
+                    id: finalSchedule.id,
+                    location_id: finalSchedule.location_id,
+                    vacancies: finalSchedule.vacancies,
+                    class_start_date: finalSchedule.class_start_date,
+                    class_end_date: finalSchedule.class_end_date,
+                    class_time: finalSchedule.class_time,
+                    class_days: finalSchedule.class_days,
+                    remaining_vacancies: finalSchedule.remaining_vacancies,
+                  },
+                ]
+              : [],
+          }
+
+      try {
+        const result = await changeSchedule({
+          enrollmentId: userEnrollment.id,
+          courseId: course.id as number,
+          scheduleId: selectedScheduleId,
+          enrolledUnit,
+        })
+
+        if (result.success) {
+          setShowSuccess(true)
+          setFadeOut(false)
+        } else {
+          toast.error(result.error || 'Erro ao trocar de turma')
+          setFadeOut(false)
+        }
+      } catch (error) {
+        toast.error('Erro ao trocar de turma. Tente novamente.')
+        setFadeOut(false)
+      }
+    })
   }
 
   const handleFinish = () => {
-    router.push(`/servicos/cursos/${courseSlug}`)
+    // Hard navigation to ensure fresh data is loaded (cache invalidated)
+    window.location.href = `/servicos/cursos/${courseSlug}`
   }
 
   const currentSlide = slides[currentIndex]
   const showBackButton = currentIndex >= 0 || showSuccess
   const isLastSlide = currentIndex === slides.length - 1
-  const buttonText = isSubmitting
+  const buttonText = isPending
     ? 'Trocando...'
     : isLastSlide
       ? 'Confirmar troca'
@@ -334,7 +336,7 @@ export function ChangeScheduleClient({
 
           {showSuccess && (
             <div
-              className={`flex justify-center transition-opacity duration-600 ${
+              className={`h-full flex flex-col transition-opacity duration-600 ${
                 fadeOut ? 'opacity-0' : 'opacity-100'
               }`}
             >
@@ -349,7 +351,7 @@ export function ChangeScheduleClient({
             <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
               <CustomButton
                 onClick={handleNext}
-                disabled={isSubmitting}
+                disabled={isPending}
                 className="bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out w-full flex-grow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {buttonText}

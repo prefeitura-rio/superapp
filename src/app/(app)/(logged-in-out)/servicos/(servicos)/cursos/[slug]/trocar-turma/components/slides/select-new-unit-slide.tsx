@@ -106,7 +106,7 @@ export const SelectNewUnitSlide = ({
                   htmlFor={unit.id}
                   className={`
                     flex items-center justify-between py-4 px-1 transition-colors
-                    ${isAvailable && !isCurrentUnit ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
+                    ${isAvailable ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
                     ${index !== nearbyUnits.length - 1 ? 'border-b border-border' : ''}
                   `}
                 >
@@ -118,7 +118,7 @@ export const SelectNewUnitSlide = ({
                           (Unidade atual)
                         </span>
                       )}
-                      {!isAvailable && !isCurrentUnit && (
+                      {!isAvailable && (
                         <span className="text-muted-foreground text-xs ml-2">
                           (Sem vagas disponíveis)
                         </span>
@@ -132,7 +132,7 @@ export const SelectNewUnitSlide = ({
                     <RadioGroupItem
                       value={unit.id}
                       id={unit.id}
-                      disabled={!isAvailable || isCurrentUnit}
+                      disabled={!isAvailable}
                     />
                   </div>
                 </label>

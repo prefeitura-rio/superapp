@@ -52,10 +52,6 @@ export const ChangeSuccessSlide = ({ onFinish }: ChangeSuccessSlideProps) => {
             <span className="text-primary">troca de turma e horário</span> foi
             aceita!
           </h2>
-          <p className="text-foreground-light text-sm max-w-sm font-normal leading-5 tracking-normal">
-            A troca foi realizada com sucesso. Você receberá uma confirmação por
-            email.
-          </p>
         </div>
       </div>
 
