@@ -177,8 +177,12 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
       }
     }
 
-    // If previous route contains "confirmar-informacoes", go to courses list
-    if (previousRoute && previousRoute.includes('confirmar-informacoes')) {
+    // If previous route contains "confirmar-informacoes" or "trocar-turma", go to courses list
+    if (
+      previousRoute &&
+      (previousRoute.includes('confirmar-informacoes') ||
+        previousRoute.includes('trocar-turma'))
+    ) {
       router.push('/servicos/cursos/')
       return
     }
