@@ -5,7 +5,6 @@ import type {
   ModelsEnrolledUnit,
   ModelsScheduleChangeRequest,
 } from '@/http-courses/models'
-import { revalidateDalCourseEnrollment } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 interface EnrolledUnitSchedule {
@@ -78,7 +77,8 @@ export async function changeSchedule({
     )
 
     if (response.status === 200) {
-      await revalidateDalCourseEnrollment(courseId, currentUser.cpf)
+      // Cache revalidation happens via hard navigation when user clicks "Finalizar"
+      // This prevents the Server Component from re-rendering and losing client state
       return { success: true }
     }
 

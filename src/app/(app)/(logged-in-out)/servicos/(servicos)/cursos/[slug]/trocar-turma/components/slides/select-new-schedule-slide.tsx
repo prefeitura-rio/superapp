@@ -41,8 +41,12 @@ export const SelectNewScheduleSlide = ({
   const selectedUnit =
     nearbyUnits?.find(unit => unit.id === selectedUnitId) || initialSelectedUnit
 
-  // Get current enrolled schedule ID from enrollment
+  // Get current enrolled schedule ID and unit ID from enrollment
   const currentScheduleId = (currentEnrollment as any)?.schedule_id
+  const currentEnrolledUnitId = (currentEnrollment as any)?.enrolled_unit?.id
+
+  // Check if user is viewing their current enrolled unit
+  const isInCurrentUnit = !isOnlineCourse && selectedUnit?.id === currentEnrolledUnitId
 
   // Determine which schedules to show
   const schedulesToShow = isOnlineCourse
@@ -140,13 +144,17 @@ export const SelectNewScheduleSlide = ({
             {schedulesToShow.map((schedule, index) => {
               const isAvailable = isScheduleAvailable(schedule)
               const isCurrentSchedule = schedule.id === currentScheduleId
+              // Only disable current schedule if user is in their current unit (or online course)
+              const shouldDisableCurrentSchedule =
+                isCurrentSchedule && (isInCurrentUnit || isOnlineCourse)
+              const isDisabled = !isAvailable || shouldDisableCurrentSchedule
               return (
                 <label
                   key={schedule.id}
                   htmlFor={schedule.id}
                   className={`
                     flex items-start justify-between py-4 px-1 transition-colors
-                    ${isAvailable && !isCurrentSchedule ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
+                    ${!isDisabled ? 'cursor-pointer hover:bg-muted/30' : 'cursor-not-allowed opacity-50'}
                     ${index !== schedulesToShow.length - 1 ? 'border-b border-border' : ''}
                   `}
                 >
@@ -154,12 +162,12 @@ export const SelectNewScheduleSlide = ({
                     <h3 className="font-medium text-foreground">
                       {formatDate(schedule.class_start_date)} •{' '}
                       {formatTimeRange(schedule.class_time)}
-                      {isCurrentSchedule && (
+                      {shouldDisableCurrentSchedule && (
                         <span className="text-primary text-xs ml-2">
-                          (Turma atual)
+                          (Seu horário atual)
                         </span>
                       )}
-                      {!isAvailable && !isCurrentSchedule && (
+                      {!isAvailable && !shouldDisableCurrentSchedule && (
                         <span className="text-muted-foreground text-xs ml-2">
                           (Sem vagas disponíveis)
                         </span>
@@ -179,7 +187,7 @@ export const SelectNewScheduleSlide = ({
                     <RadioGroupItem
                       value={schedule.id}
                       id={schedule.id}
-                      disabled={!isAvailable || isCurrentSchedule}
+                      disabled={isDisabled}
                     />
                   </div>
                 </label>
