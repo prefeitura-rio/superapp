@@ -1,6 +1,7 @@
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
+import { getApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
@@ -78,6 +79,27 @@ export default async function InscricaoPage({
 
   if (!userAuthInfo.cpf) {
     redirect(buildAuthUrl(`/servicos/empregos/${vagaId}/inscricao`))
+  }
+
+  // Verifica se o usuário já está inscrito nesta vaga
+  const cpfLimpo = userAuthInfo.cpf.replace(/\D/g, '')
+  const candidaturasResponse = await getApiV1EmpregabilidadeCandidaturas({
+    page: 1,
+    pageSize: 1,
+    cpf: cpfLimpo,
+    vagaId,
+  })
+
+  if (candidaturasResponse.status === 200) {
+    const body = candidaturasResponse.data as unknown as {
+      data: unknown[]
+      meta: { page: number; page_size: number; total: number }
+    }
+    const candidaturas = Array.isArray(body.data) ? body.data : []
+    // Se já existe uma candidatura para esta vaga, redireciona
+    if (candidaturas.length > 0) {
+      redirect('/servicos/empregos/minhas-candidaturas')
+    }
   }
 
   const [
