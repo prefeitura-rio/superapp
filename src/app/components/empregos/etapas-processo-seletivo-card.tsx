@@ -85,10 +85,7 @@ export function EtapasProcessoSeletivoCard({
             /** Quando reprovado com etapa definida: marca a etapa *seguinte* (que não alcançou) com X. Se estava na última etapa, marca a última. */
             const indexEtapaComXQuandoRejeitado =
               isStatusRejeitado && etapaAtualCandidatura != null
-                ? Math.min(
-                    etapaAtualCandidatura + 2,
-                    etapasExibicao.length - 1
-                  )
+                ? Math.min(etapaAtualCandidatura + 2, etapasExibicao.length - 1)
                 : -1
             const isProximaEtapaNaoAlcancada =
               isStatusRejeitado && index === indexEtapaComXQuandoRejeitado
