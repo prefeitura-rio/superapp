@@ -9,6 +9,7 @@ import type {
   DeleteApiV1EmpregabilidadeCandidaturasId200,
   DeleteApiV1EmpregabilidadeCandidaturasId400,
   DeleteApiV1EmpregabilidadeCandidaturasId500,
+  EmpregabilidadeBulkUpdateEtapaRequest,
   EmpregabilidadeBulkUpdateStatusRequest,
   EmpregabilidadeCandidatura,
   EmpregabilidadeCandidaturaBody,
@@ -22,6 +23,10 @@ import type {
   GetApiV1EmpregabilidadeCandidaturasParams,
   PostApiV1EmpregabilidadeCandidaturas400,
   PostApiV1EmpregabilidadeCandidaturas500,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa200,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa400,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa409,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa500,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus200,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus400,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus500,
@@ -141,6 +146,60 @@ export const postApiV1EmpregabilidadeCandidaturas = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(empregabilidadeCandidaturaBody),
+    }
+  )
+}
+
+/**
+ * Atualiza a etapa atual de múltiplas candidaturas de uma vaga. Todos os candidatos devem estar na mesma etapa atual.
+ * @summary Atualizar etapa de candidaturas em lote
+ */
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse200 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse400 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse409 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa409
+  status: 409
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse500 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponseComposite =
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse200
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse400
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse409
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse500
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse =
+  putApiV1EmpregabilidadeCandidaturasBulkEtapaResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCandidaturasBulkEtapaUrl = () => {
+  return `/api/v1/empregabilidade/candidaturas/bulk-etapa`
+}
+
+export const putApiV1EmpregabilidadeCandidaturasBulkEtapa = async (
+  empregabilidadeBulkUpdateEtapaRequest: EmpregabilidadeBulkUpdateEtapaRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse>(
+    getPutApiV1EmpregabilidadeCandidaturasBulkEtapaUrl(),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeBulkUpdateEtapaRequest),
     }
   )
 }
