@@ -14,6 +14,8 @@ import type { ModelsTurno } from './modelsTurno'
 export interface ModelsCurso {
   /** Accessibility field - free text field for frontend */
   accessibility?: string
+  /** Auto-approve enrollments - when true, new enrollments are automatically approved instead of pending */
+  auto_approve_enrollments?: boolean
   carga_horaria?: number
   certificacao_oferecida?: boolean
   contato_duvidas?: string
