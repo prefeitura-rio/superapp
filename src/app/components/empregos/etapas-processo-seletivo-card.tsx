@@ -29,7 +29,7 @@ interface EtapasProcessoSeletivoCardProps {
   etapas: EtapaProcessoSeletivo[]
   /** Índice da etapa atual do candidato (0-based no array de etapas da API); quando definido, indica etapa em que está. */
   etapaAtualCandidatura?: number
-  /** Status da candidatura; quando reprovada/congelada/descontinuada, a etapa atual exibe X e mensagem. */
+  /** Status da candidatura; quando reprovada/congelada/descontinuada, a etapa seguinte (que não foi alcançada) exibe X e mensagem. */
   statusCandidatura?: string
   /** Quando true, a etapa "Envio da candidatura" é exibida como concluída; quando false (usuário não se candidatou), exibe como não concluída. */
   hasCandidatura?: boolean
@@ -82,18 +82,22 @@ export function EtapasProcessoSeletivoCard({
           {etapasExibicao.map((etapa, index) => {
             const value = `etapa-${index}`
             const isEnvioCandidatura = index === 0
-            const isEtapaAtualRejeitada =
-              isStatusRejeitado &&
-              etapaAtualCandidatura != null &&
-              index === etapaAtualCandidatura + 1
-            /** Quando id_etapa_atual é null e o status é de reprovação, a etapa logo após "Envio da candidatura" exibe X e mensagem. Não exibe X para candidatura_enviada (aguardando avaliação). */
+            /** Quando reprovado com etapa definida: marca a etapa *seguinte* (que não alcançou) com X. Se estava na última etapa, marca a última. */
+            const indexEtapaComXQuandoRejeitado =
+              isStatusRejeitado && etapaAtualCandidatura != null
+                ? Math.min(etapaAtualCandidatura + 2, etapasExibicao.length - 1)
+                : -1
+            const isProximaEtapaNaoAlcancada =
+              isStatusRejeitado && index === indexEtapaComXQuandoRejeitado
+            /** Quando id_etapa_atual é null e o status é de reprovação, a etapa logo após "Envio da candidatura" (que não alcançou) exibe X e mensagem. */
             const isProximaEtapaNaoPassou =
               hasCandidatura &&
               etapaAtualCandidatura == null &&
               index === 1 &&
               isStatusRejeitado
             const isEtapaComXDestructive =
-              isEtapaAtualRejeitada || isProximaEtapaNaoPassou
+              isProximaEtapaNaoAlcancada || isProximaEtapaNaoPassou
+            /** Concluídas: Envio (se hasCandidatura) e todas até a etapa atual (inclusive); quando reprovado, a etapa atual também conta como "atingida" antes da reprovação. */
             const isCompleted =
               (isEnvioCandidatura && hasCandidatura) ||
               (!isEnvioCandidatura &&
