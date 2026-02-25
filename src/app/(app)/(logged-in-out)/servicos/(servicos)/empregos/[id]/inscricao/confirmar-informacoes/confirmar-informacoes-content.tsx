@@ -316,6 +316,7 @@ export function ConfirmarInformacoesContent({
             variant="primary"
             onClick={handleContinuar}
             className="rounded-full"
+            disabled={!hasPhone || !hasEmail}
           >
             Continuar
           </CustomButton>

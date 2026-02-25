@@ -86,9 +86,12 @@ export function EtapasProcessoSeletivoCard({
               isStatusRejeitado &&
               etapaAtualCandidatura != null &&
               index === etapaAtualCandidatura + 1
-            /** Quando id_etapa_atual é null e não passou para a próxima etapa, a etapa logo após "Envio da candidatura" exibe X e mensagem. */
+            /** Quando id_etapa_atual é null e o status é de reprovação, a etapa logo após "Envio da candidatura" exibe X e mensagem. Não exibe X para candidatura_enviada (aguardando avaliação). */
             const isProximaEtapaNaoPassou =
-              hasCandidatura && etapaAtualCandidatura == null && index === 1
+              hasCandidatura &&
+              etapaAtualCandidatura == null &&
+              index === 1 &&
+              isStatusRejeitado
             const isEtapaComXDestructive =
               isEtapaAtualRejeitada || isProximaEtapaNaoPassou
             const isCompleted =
