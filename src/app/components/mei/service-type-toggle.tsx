@@ -19,7 +19,7 @@ export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
 
   // Em staging, mostra toggle com Empregabilidade, MEI e Cursos
   return (
-    <div className="flex mt-12 items-center bg-card rounded-full p-1 w-full">
+    <div className="flex mt-8 items-center bg-card rounded-full p-1 w-full">
       <Link
         href="/servicos/empregos/"
         className={cn(

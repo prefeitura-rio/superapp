@@ -22,6 +22,7 @@ import { MeiOpportunityHeader } from './mei-opportunity-header'
 import { ProposalStatusBadge } from './proposal-status-badge'
 import { QuickInfoItem } from './quick-info-item'
 import { ServiceTypeDrawer, type UserMeiContext } from './service-type-drawer'
+import { CnaeInfoSheet } from './service-type-drawer/cnae-info-sheet'
 
 export interface MeiOpportunityDetailData {
   id: number
@@ -83,6 +84,7 @@ export function MeiOpportunityDetailClient({
   const loginUrl = buildAuthUrl(`/servicos/mei/${opportunity.slug}`)
 
   const [isServiceTypeDrawerOpen, setIsServiceTypeDrawerOpen] = useState(false)
+  const [isInfoSheetOpen, setIsInfoSheetOpen] = useState(false)
   const [isCancelDrawerOpen, setIsCancelDrawerOpen] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
 
@@ -160,7 +162,7 @@ export function MeiOpportunityDetailClient({
 
   const ActionButton = () => {
     const buttonClasses =
-      'block w-full py-3 text-center rounded-full bg-primary text-background hover:brightness-90 transition text-sm'
+      'block w-full py-4 text-center rounded-full bg-primary text-background hover:brightness-90 transition text-sm'
 
     // Se já tem proposta, não mostrar botão
     if (userProposal) {
@@ -251,8 +253,8 @@ export function MeiOpportunityDetailClient({
           <div className="flex flex-col gap-1">
             <button
               type="button"
-              onClick={() => setIsServiceTypeDrawerOpen(true)}
-              className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+              onClick={() => setIsInfoSheetOpen(true)}
+              className="flex items-center gap-1 hover:opacity-70 transition-opacity"
             >
               <span className="text-sm text-foreground-light">
                 Tipo de serviço
@@ -264,13 +266,20 @@ export function MeiOpportunityDetailClient({
             </span>
           </div>
 
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-start">
             <span className="text-sm text-foreground-light">Expira em</span>
             <span className="text-sm font-medium text-foreground">
               {formatExpirationTime(opportunity.expiresAt)}
             </span>
           </div>
         </div>
+
+        <CnaeInfoSheet
+          open={isInfoSheetOpen}
+          onOpenChange={setIsInfoSheetOpen}
+          cnaeIds={opportunity.cnaeIds}
+          userCnaes={userMeiContext.userCnaes}
+        />
 
         <ServiceTypeDrawer
           open={isServiceTypeDrawerOpen}
