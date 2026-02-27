@@ -3,7 +3,10 @@
 import { SearchIcon } from '@/assets/icons'
 import { HelpCircleIcon } from '@/assets/icons/help-circle-icon'
 import { MenuIcon } from '@/assets/icons/menu-icon'
-import OportunidadesCariocas from '@/assets/oportunidades-cariocas-icon.png'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { useAuthHeader } from '@/providers/auth-header-provider'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -24,11 +27,20 @@ export function CoursesHeaderClient() {
       <div className="mx-auto md:px-4 flex max-w-4xl items-center justify-between">
         <div className="flex justify-center">
           <Image
-            src={OportunidadesCariocas}
+            src={oportunidadesCariocasLogo}
             alt="Oportunidades Cariocas Logo"
             width={170}
             height={38}
-            className="rounded-full"
+            className="dark:hidden"
+            priority
+          />
+          <Image
+            src={oportunidadesCariocasLogoDark}
+            alt="Oportunidades Cariocas Logo"
+            width={170}
+            height={38}
+            className="hidden dark:block"
+            priority
           />
         </div>
 
