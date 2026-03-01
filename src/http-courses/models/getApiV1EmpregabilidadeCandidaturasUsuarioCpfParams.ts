@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetApiV1EmpregabilidadeCandidaturasParams = {
+export type GetApiV1EmpregabilidadeCandidaturasUsuarioCpfParams = {
   /**
    * Número da página (default: 1)
    */
@@ -16,10 +16,6 @@ export type GetApiV1EmpregabilidadeCandidaturasParams = {
    */
   pageSize?: number
   /**
-   * Filtrar por CPF
-   */
-  cpf?: string
-  /**
    * Filtrar por ID da vaga
    */
   vagaId?: string
@@ -27,10 +23,6 @@ export type GetApiV1EmpregabilidadeCandidaturasParams = {
    * Filtrar por status
    */
   status?: string
-  /**
-   * Busca parcial por CPF, nome ou email
-   */
-  search?: string
   /**
    * Filtrar por ID da etapa atual
    */

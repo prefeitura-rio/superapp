@@ -1,6 +1,7 @@
 'use client'
 
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
+import { CandidaturaFeedbackCard } from '@/app/components/empregos/candidatura-feedback-card'
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
@@ -196,6 +197,15 @@ export function VagaDetailContent({
             className="text-sm font-normal leading-5 text-foreground-light mt-4"
           />
         ) : null}
+        {/* Card de feedback da candidatura */}
+        {hasCandidatura && vaga.statusCandidatura && (
+          <div className="mt-6">
+            <CandidaturaFeedbackCard
+              statusCandidatura={vaga.statusCandidatura}
+              etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+            />
+          </div>
+        )}
 
         {/* Botão quando o usuário ainda não se candidatou; etapas quando já se candidatou e a vaga tem etapas */}
         {(!hasCandidatura || hasEtapas) && (

@@ -10,6 +10,7 @@ import type { EmpregabilidadeEtapa } from './empregabilidadeEtapa'
 import type { EmpregabilidadeRespostaInfoComplementar } from './empregabilidadeRespostaInfoComplementar'
 import type { EmpregabilidadeStatusCandidatura } from './empregabilidadeStatusCandidatura'
 import type { EmpregabilidadeVaga } from './empregabilidadeVaga'
+import type { ModelsCitizenPersonalInfo } from './modelsCitizenPersonalInfo'
 
 export interface EmpregabilidadeCandidatura {
   cpf?: string
@@ -22,8 +23,11 @@ export interface EmpregabilidadeCandidatura {
   id_etapa_atual?: string
   id_vaga?: string
   nome?: string
+  /** Computed field (not stored in DB) - populated from CitizenSnapshot */
+  personal_info?: ModelsCitizenPersonalInfo
   respostas_info_complementares?: EmpregabilidadeRespostaInfoComplementar[]
   status?: EmpregabilidadeStatusCandidatura
+  status_anterior?: EmpregabilidadeStatusCandidatura
   updated_at?: string
   /** Relationships */
   vaga?: EmpregabilidadeVaga

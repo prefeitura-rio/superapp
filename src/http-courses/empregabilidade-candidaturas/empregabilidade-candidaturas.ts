@@ -9,19 +9,30 @@ import type {
   DeleteApiV1EmpregabilidadeCandidaturasId200,
   DeleteApiV1EmpregabilidadeCandidaturasId400,
   DeleteApiV1EmpregabilidadeCandidaturasId500,
+  EmpregabilidadeBulkUpdateEtapaRequest,
   EmpregabilidadeBulkUpdateStatusRequest,
   EmpregabilidadeCandidatura,
   EmpregabilidadeCandidaturaBody,
   EmpregabilidadeUpdateEtapaRequest,
   EmpregabilidadeUpdateStatusRequest,
   GetApiV1EmpregabilidadeCandidaturas200,
+  GetApiV1EmpregabilidadeCandidaturas403,
   GetApiV1EmpregabilidadeCandidaturas500,
   GetApiV1EmpregabilidadeCandidaturasId400,
   GetApiV1EmpregabilidadeCandidaturasId404,
   GetApiV1EmpregabilidadeCandidaturasId500,
   GetApiV1EmpregabilidadeCandidaturasParams,
+  GetApiV1EmpregabilidadeCandidaturasUsuarioCpf200,
+  GetApiV1EmpregabilidadeCandidaturasUsuarioCpf401,
+  GetApiV1EmpregabilidadeCandidaturasUsuarioCpf403,
+  GetApiV1EmpregabilidadeCandidaturasUsuarioCpf500,
+  GetApiV1EmpregabilidadeCandidaturasUsuarioCpfParams,
   PostApiV1EmpregabilidadeCandidaturas400,
   PostApiV1EmpregabilidadeCandidaturas500,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa200,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa400,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa409,
+  PutApiV1EmpregabilidadeCandidaturasBulkEtapa500,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus200,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus400,
   PutApiV1EmpregabilidadeCandidaturasBulkStatus500,
@@ -44,12 +55,17 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 /**
- * Retorna lista paginada de candidaturas com filtros e busca universal
- * @summary Listar candidaturas
+ * Retorna lista paginada de candidaturas com filtros e busca universal. Restrito a administradores.
+ * @summary Listar candidaturas (admin)
  */
 export type getApiV1EmpregabilidadeCandidaturasResponse200 = {
   data: GetApiV1EmpregabilidadeCandidaturas200
   status: 200
+}
+
+export type getApiV1EmpregabilidadeCandidaturasResponse403 = {
+  data: GetApiV1EmpregabilidadeCandidaturas403
+  status: 403
 }
 
 export type getApiV1EmpregabilidadeCandidaturasResponse500 = {
@@ -59,6 +75,7 @@ export type getApiV1EmpregabilidadeCandidaturasResponse500 = {
 
 export type getApiV1EmpregabilidadeCandidaturasResponseComposite =
   | getApiV1EmpregabilidadeCandidaturasResponse200
+  | getApiV1EmpregabilidadeCandidaturasResponse403
   | getApiV1EmpregabilidadeCandidaturasResponse500
 
 export type getApiV1EmpregabilidadeCandidaturasResponse =
@@ -146,6 +163,60 @@ export const postApiV1EmpregabilidadeCandidaturas = async (
 }
 
 /**
+ * Atualiza a etapa atual de múltiplas candidaturas de uma vaga. Todos os candidatos devem estar na mesma etapa atual.
+ * @summary Atualizar etapa de candidaturas em lote
+ */
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse200 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse400 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse409 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa409
+  status: 409
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse500 = {
+  data: PutApiV1EmpregabilidadeCandidaturasBulkEtapa500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponseComposite =
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse200
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse400
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse409
+  | putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse500
+
+export type putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse =
+  putApiV1EmpregabilidadeCandidaturasBulkEtapaResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EmpregabilidadeCandidaturasBulkEtapaUrl = () => {
+  return `/api/v1/empregabilidade/candidaturas/bulk-etapa`
+}
+
+export const putApiV1EmpregabilidadeCandidaturasBulkEtapa = async (
+  empregabilidadeBulkUpdateEtapaRequest: EmpregabilidadeBulkUpdateEtapaRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse> => {
+  return customFetch<putApiV1EmpregabilidadeCandidaturasBulkEtapaResponse>(
+    getPutApiV1EmpregabilidadeCandidaturasBulkEtapaUrl(),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeBulkUpdateEtapaRequest),
+    }
+  )
+}
+
+/**
  * Atualiza o status de múltiplas candidaturas de uma vaga identificadas por lista de CPFs
  * @summary Atualizar status de candidaturas em lote
  */
@@ -189,6 +260,74 @@ export const putApiV1EmpregabilidadeCandidaturasBulkStatus = async (
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(empregabilidadeBulkUpdateStatusRequest),
+    }
+  )
+}
+
+/**
+ * Retorna lista paginada de candidaturas de um usuário pelo CPF. Usuários só podem acessar o próprio CPF; admins podem acessar qualquer CPF.
+ * @summary Listar candidaturas por CPF
+ */
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse200 = {
+  data: GetApiV1EmpregabilidadeCandidaturasUsuarioCpf200
+  status: 200
+}
+
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse401 = {
+  data: GetApiV1EmpregabilidadeCandidaturasUsuarioCpf401
+  status: 401
+}
+
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse403 = {
+  data: GetApiV1EmpregabilidadeCandidaturasUsuarioCpf403
+  status: 403
+}
+
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse500 = {
+  data: GetApiV1EmpregabilidadeCandidaturasUsuarioCpf500
+  status: 500
+}
+
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponseComposite =
+  | getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse200
+  | getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse401
+  | getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse403
+  | getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse500
+
+export type getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse =
+  getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponseComposite & {
+    headers: Headers
+  }
+
+export const getGetApiV1EmpregabilidadeCandidaturasUsuarioCpfUrl = (
+  cpf: string,
+  params?: GetApiV1EmpregabilidadeCandidaturasUsuarioCpfParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/empregabilidade/candidaturas/usuario/${cpf}?${stringifiedParams}`
+    : `/api/v1/empregabilidade/candidaturas/usuario/${cpf}`
+}
+
+export const getApiV1EmpregabilidadeCandidaturasUsuarioCpf = async (
+  cpf: string,
+  params?: GetApiV1EmpregabilidadeCandidaturasUsuarioCpfParams,
+  options?: RequestInit
+): Promise<getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse> => {
+  return customFetch<getApiV1EmpregabilidadeCandidaturasUsuarioCpfResponse>(
+    getGetApiV1EmpregabilidadeCandidaturasUsuarioCpfUrl(cpf, params),
+    {
+      ...options,
+      method: 'GET',
     }
   )
 }
