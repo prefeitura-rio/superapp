@@ -61,6 +61,9 @@ export function EtapasProcessoSeletivoCard({
     (STATUS_COM_MENSAGEM_REPROVACAO as readonly string[]).includes(
       statusCandidatura
     )
+  const isAprovado =
+    statusCandidatura ===
+    EmpregabilidadeStatusCandidatura.StatusCandidaturaAprovada
 
   const defaultOpen =
     etapaAtualCandidatura != null && etapaAtualCandidatura >= 0
@@ -97,8 +100,9 @@ export function EtapasProcessoSeletivoCard({
               isStatusRejeitado
             const isEtapaComXDestructive =
               isProximaEtapaNaoAlcancada || isProximaEtapaNaoPassou
-            /** Concluídas: Envio (se hasCandidatura) e todas até a etapa atual (inclusive); quando reprovado, a etapa atual também conta como "atingida" antes da reprovação. */
+            /** Concluídas: todas as etapas quando aprovado; Envio (se hasCandidatura) e todas até a etapa atual (inclusive); quando reprovado, a etapa atual também conta como "atingida" antes da reprovação. */
             const isCompleted =
+              (hasCandidatura && isAprovado) ||
               (isEnvioCandidatura && hasCandidatura) ||
               (!isEnvioCandidatura &&
                 etapaAtualCandidatura != null &&
