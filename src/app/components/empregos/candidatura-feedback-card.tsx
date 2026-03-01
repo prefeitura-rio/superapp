@@ -106,7 +106,8 @@ export function CandidaturaFeedbackCard({
   statusCandidatura,
   etapaAtualCandidatura,
 }: CandidaturaFeedbackCardProps) {
-  const avancouEtapa = etapaAtualCandidatura != null && etapaAtualCandidatura >= 0
+  const avancouEtapa =
+    etapaAtualCandidatura != null && etapaAtualCandidatura >= 0
   const text = getFeedbackText(statusCandidatura, avancouEtapa)
 
   return (
