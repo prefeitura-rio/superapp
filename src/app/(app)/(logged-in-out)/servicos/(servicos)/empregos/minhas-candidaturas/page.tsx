@@ -1,5 +1,5 @@
 import { buildAuthUrl } from '@/constants/url'
-import { getApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
+import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
@@ -27,10 +27,9 @@ export default async function MinhasCandidaturasPage() {
   const cpf = userAuthInfo.cpf.replace(/\D/g, '')
 
   try {
-    const res = await getApiV1EmpregabilidadeCandidaturas({
+    const res = await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(cpf, {
       page: 1,
       pageSize: 50,
-      cpf,
     })
     if (res.status === 200) {
       const body = res.data as unknown as CandidaturasListResponse

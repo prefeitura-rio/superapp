@@ -1,6 +1,6 @@
 import { VagaDetailContent } from '@/app/components/empregos/vaga-detail-content'
 import { isVagaValida } from '@/app/components/empregos/vagas-utils'
-import { getApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
+import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
 import { mapEmpregabilidadeVagaToDetail } from '@/lib/emprego-utils'
@@ -41,8 +41,7 @@ export default async function VagaDetailPage({ params }: PageProps) {
     if (userInfo.cpf?.trim()) {
       const cpf = userInfo.cpf.replace(/\D/g, '')
       try {
-        const res = await getApiV1EmpregabilidadeCandidaturas({
-          cpf,
+        const res = await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(cpf, {
           vagaId: id,
           page: 1,
           pageSize: 1,

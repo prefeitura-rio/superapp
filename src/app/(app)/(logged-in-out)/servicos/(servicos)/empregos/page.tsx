@@ -1,9 +1,10 @@
 import { EmpregosHeaderClient } from '@/app/components/empregos/empregos-header-client'
 import { EmpregosPageClient } from '@/app/components/empregos/empregos-page-client'
 import { processVagas } from '@/app/components/empregos/vagas-utils'
-import { getApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
+import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiPublicEmpregabilidadeVagas } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeVaga } from '@/http-courses/models'
+import { getUserInfoFromToken } from '@/lib/user-info'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,19 +35,26 @@ export default async function EmpregosPage() {
   // Verifica se o usuário tem ao menos uma candidatura (para exibir o CTA)
   let hasCandidaturas = false
   try {
-    const candidaturasResponse = await getApiV1EmpregabilidadeCandidaturas({
-      page: 1,
-      pageSize: 1,
-    })
-    if (
-      candidaturasResponse.status === 200 &&
-      candidaturasResponse.data &&
-      typeof candidaturasResponse.data === 'object'
-    ) {
-      const count = getCandidaturasCount(
-        candidaturasResponse.data as Record<string, unknown>
-      )
-      hasCandidaturas = count >= 1
+    const userInfo = await getUserInfoFromToken()
+
+    if (userInfo.cpf?.trim()) {
+      const cpf = userInfo.cpf.replace(/\D/g, '')
+      const candidaturasResponse =
+        await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(cpf, {
+          page: 1,
+          pageSize: 1,
+        })
+
+      if (
+        candidaturasResponse.status === 200 &&
+        candidaturasResponse.data &&
+        typeof candidaturasResponse.data === 'object'
+      ) {
+        const count = getCandidaturasCount(
+          candidaturasResponse.data as Record<string, unknown>
+        )
+        hasCandidaturas = count >= 1
+      }
     }
   } catch (error) {
     console.error('Erro ao buscar candidaturas:', error)
