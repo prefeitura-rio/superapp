@@ -1,7 +1,7 @@
 import { buildAuthUrl } from '@/constants/url'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
-import { getApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
+import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
@@ -83,12 +83,12 @@ export default async function InscricaoPage({
 
   // Verifica se o usuário já está inscrito nesta vaga
   const cpfLimpo = userAuthInfo.cpf.replace(/\D/g, '')
-  const candidaturasResponse = await getApiV1EmpregabilidadeCandidaturas({
-    page: 1,
-    pageSize: 1,
-    cpf: cpfLimpo,
-    vagaId,
-  })
+  const candidaturasResponse =
+    await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(cpfLimpo, {
+      page: 1,
+      pageSize: 1,
+      vagaId,
+    })
 
   if (candidaturasResponse.status === 200) {
     const body = candidaturasResponse.data as unknown as {
