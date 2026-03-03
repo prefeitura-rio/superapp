@@ -83,14 +83,12 @@ export default async function InscricaoPage({
 
   // Verifica se o usuário já está inscrito nesta vaga
   const cpfLimpo = userAuthInfo.cpf.replace(/\D/g, '')
-  const candidaturasResponse = await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(
-    cpfLimpo,
-    {
+  const candidaturasResponse =
+    await getApiV1EmpregabilidadeCandidaturasUsuarioCpf(cpfLimpo, {
       page: 1,
       pageSize: 1,
       vagaId,
-    }
-  )
+    })
 
   if (candidaturasResponse.status === 200) {
     const body = candidaturasResponse.data as unknown as {
