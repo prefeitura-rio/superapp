@@ -129,7 +129,20 @@ export function EtapasProcessoSeletivoCard({
                           <Check className="size-3 stroke-[2.5]" />
                         </span>
                       ) : (
-                        <span className="size-4 rounded-full border-2 border-dashed border-muted-foreground" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="17"
+                          height="17"
+                          viewBox="0 0 17 17"
+                          fill="none"
+                        >
+                          <path
+                            d="M8.5 16.5C12.9183 16.5 16.5 12.9183 16.5 8.5C16.5 4.08172 12.9183 0.5 8.5 0.5C4.08172 0.5 0.5 4.08172 0.5 8.5C0.5 12.9183 4.08172 16.5 8.5 16.5Z"
+                            stroke="#A1A1A1"
+                            strokeLinecap="round"
+                            strokeDasharray="4 4"
+                          />
+                        </svg>
                       )}
                     </span>
                   </div>

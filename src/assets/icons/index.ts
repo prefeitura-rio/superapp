@@ -17,6 +17,7 @@ import { MapPinIcon } from './map-pin-icon'
 import { MoonIcon } from './moon-icon'
 import { MoreVerticalIcon } from './more-vertical-icon'
 import { NurseIcon } from './nurse-icon'
+import { ParceriaLogo } from './parceria-logo'
 import { PhoneIcon } from './phone-icon'
 import { PlusIcon } from './plus-icon'
 import { PrinterIcon } from './printer-icon'
@@ -52,6 +53,7 @@ export {
   MoonIcon,
   MoreVerticalIcon,
   NurseIcon,
+  ParceriaLogo,
   PhoneIcon,
   PlusIcon,
   PrinterIcon,
