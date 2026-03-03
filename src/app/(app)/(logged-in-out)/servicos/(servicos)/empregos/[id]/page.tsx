@@ -3,6 +3,7 @@ import { isVagaValida } from '@/app/components/empregos/vagas-utils'
 import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
+import { getDepartmentsCdUa } from '@/http/departments/departments'
 import { mapEmpregabilidadeVagaToDetail } from '@/lib/emprego-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound } from 'next/navigation'
@@ -33,6 +34,21 @@ export default async function VagaDetailPage({ params }: PageProps) {
     }
 
     const vaga = mapEmpregabilidadeVagaToDetail(response.data)
+
+    // Fallback: se o backend não retornou orgao_parceiro mas temos o ID,
+    // busca o nome do órgão diretamente na API de departamentos (RMI)
+    if (!vaga.orgaoParceiro && response.data.id_orgao_parceiro) {
+      try {
+        const departmentResponse = await getDepartmentsCdUa(
+          response.data.id_orgao_parceiro
+        )
+        if (departmentResponse.status === 200 && departmentResponse.data) {
+          vaga.orgaoParceiro = departmentResponse.data.nome_ua
+        }
+      } catch (error) {
+        console.error('[Emprego] Erro ao buscar órgão parceiro.', error)
+      }
+    }
 
     const userInfo = await getUserInfoFromToken()
     const isLoggedIn = !!(userInfo.cpf && userInfo.name)
