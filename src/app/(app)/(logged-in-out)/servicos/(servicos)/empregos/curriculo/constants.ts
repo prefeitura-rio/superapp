@@ -76,6 +76,18 @@ export const SITUACAO_ATUAL_OPCOES = [
   'Profissional liberal',
 ] as const
 
+/**
+ * Employment statuses that require the "job search duration" field.
+ * These match the descriptions from the backend emp_situacoes_atual table.
+ */
+export const UNEMPLOYED_STATUS_DESCRIPTIONS = [
+  'Desempregado(a)',
+  'Buscando primeiro emprego',
+] as const
+
+export type UnemployedStatusDescription =
+  (typeof UNEMPLOYED_STATUS_DESCRIPTIONS)[number]
+
 /** Opções exibidas no drawer; valor enviado ao backend é o code. */
 export const TEMPO_PROCURANDO_EMPREGO_OPCOES = [
   'Há até 6 meses',
