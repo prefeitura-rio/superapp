@@ -58,12 +58,12 @@ import { saveSituacaoAction } from './save-situacao-action'
 import { SituacaoApiProvider, useSituacaoApi } from './situacao-api-context'
 import { SituacaoAtualDrawerContent } from './situacao-atual-drawer-content'
 import type { SituacaoOptions } from './situacao-options-types'
+import { shouldShowJobSearchDuration } from './situation-utils'
 import { StatusFormacaoDrawerContent } from './status-formacao-drawer-content'
 import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-drawer-content'
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
-import { shouldShowJobSearchDuration } from './situation-utils'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
@@ -166,7 +166,9 @@ function hasSituacaoRequiredFields(
 
   const requiresJobSearchDuration = shouldShowJobSearchDuration(
     values.idSituacao,
-    situacaoDescricao ? [{ id: values.idSituacao ?? '', descricao: situacaoDescricao }] : []
+    situacaoDescricao
+      ? [{ id: values.idSituacao ?? '', descricao: situacaoDescricao }]
+      : []
   )
 
   if (requiresJobSearchDuration) {
