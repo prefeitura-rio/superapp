@@ -1,18 +1,19 @@
 import { getApiV1EmpregabilidadeCurriculoCpfSituacaoInteresses } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
-import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
 
 export interface InitialSituacaoData {
   idSituacao: string
   tempoProcurandoEmprego: string
   idDisponibilidade: string
   idsTiposVinculo: string[]
+  situacaoDescricao: string
 }
 
-const DEFAULT_SITUACAO: CurriculoSituacaoFormValues = {
+const DEFAULT_SITUACAO: InitialSituacaoData = {
   idSituacao: '',
   tempoProcurandoEmprego: '',
   idDisponibilidade: '',
   idsTiposVinculo: [],
+  situacaoDescricao: '',
 }
 
 /**
@@ -39,10 +40,15 @@ export async function getCurriculoSituacaoData(
     ? (idsVinculo as unknown[]).map(id => String(id ?? '')).filter(Boolean)
     : []
 
+  // Extract situacao description from the nested relationship
+  const situacao = body.situacao as Record<string, unknown> | undefined
+  const situacaoDescricao = String(situacao?.descricao ?? '')
+
   return {
     idSituacao: String(body.id_situacao ?? ''),
     tempoProcurandoEmprego: String(body.tempo_procurando_emprego ?? ''),
     idDisponibilidade: String(body.id_disponibilidade ?? ''),
     idsTiposVinculo,
+    situacaoDescricao,
   }
 }

@@ -19,7 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Controller,
   FormProvider,
@@ -63,6 +63,7 @@ import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
+import { shouldShowJobSearchDuration } from './situation-utils'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
@@ -157,12 +158,22 @@ function hasFormacaoRequiredFields(
 }
 
 function hasSituacaoRequiredFields(
-  values: CurriculoSituacaoFormValues
+  values: CurriculoSituacaoFormValues,
+  situacaoDescricao: string | undefined
 ): boolean {
   const hasSituacaoAtual = (values.idSituacao?.trim()?.length ?? 0) > 0
-  const hasTempoProcurando =
-    (values.tempoProcurandoEmprego?.trim()?.length ?? 0) > 0
-  return hasSituacaoAtual && hasTempoProcurando
+  if (!hasSituacaoAtual) return false
+
+  const requiresJobSearchDuration = shouldShowJobSearchDuration(
+    values.idSituacao,
+    situacaoDescricao ? [{ id: values.idSituacao ?? '', descricao: situacaoDescricao }] : []
+  )
+
+  if (requiresJobSearchDuration) {
+    return (values.tempoProcurandoEmprego?.trim()?.length ?? 0) > 0
+  }
+
+  return true
 }
 
 /** True se existe pelo menos um emprego completo ou uma conquista completa. */
@@ -856,6 +867,7 @@ function getSituacaoSnapshot(
     tempoProcurandoEmprego: values.tempoProcurandoEmprego,
     idDisponibilidade: values.idDisponibilidade,
     idsTiposVinculo: values.idsTiposVinculo,
+    situacaoDescricao: values.situacaoDescricao,
   })
 }
 
@@ -864,6 +876,7 @@ const SITUACAO_FIELD_NAMES = [
   'tempoProcurandoEmprego',
   'idDisponibilidade',
   'idsTiposVinculo',
+  'situacaoDescricao',
 ] as const
 
 const DEFAULT_SITUACAO_OPTIONS: SituacaoOptions = {
@@ -883,7 +896,7 @@ function SituacaoAtualAccordionContent({
   onCancel,
   onSaveSuccess,
 }: SituacaoAtualAccordionContentProps) {
-  const { watch, control, formState, trigger, getValues, setFocus } =
+  const { watch, control, formState, trigger, getValues, setFocus, setValue } =
     useFormContext<CurriculoSituacaoFormValues>()
   const { errors } = formState
   const { situacoesAtual, disponibilidades, regimesContratacao } =
@@ -896,6 +909,25 @@ function SituacaoAtualAccordionContent({
 
   const situacaoLabel =
     situacoesAtual.find(s => s.id === idSituacao)?.descricao ?? ''
+
+  // Determine if job search duration field should be shown
+  const showJobSearchDuration = shouldShowJobSearchDuration(
+    idSituacao,
+    situacoesAtual
+  )
+
+  // Sync situacaoDescricao for conditional validation in schema
+  useEffect(() => {
+    setValue('situacaoDescricao', situacaoLabel, { shouldValidate: false })
+  }, [situacaoLabel, setValue])
+
+  // Reset job search duration when switching to a non-unemployed status
+  useEffect(() => {
+    if (!showJobSearchDuration && tempoProcurandoEmprego) {
+      setValue('tempoProcurandoEmprego', '', { shouldValidate: false })
+    }
+  }, [showJobSearchDuration, tempoProcurandoEmprego, setValue])
+
   const tempoLabel =
     (tempoProcurandoEmprego &&
       TEMPO_PROCURANDO_EMPREGO_CODE_TO_LABEL[
@@ -983,40 +1015,42 @@ function SituacaoAtualAccordionContent({
         )}
       </div>
 
-      <div className="space-y-2">
-        <Controller
-          control={control}
-          name="tempoProcurandoEmprego"
-          render={({ field }) => (
-            <ActionDiv
-              ref={field.ref}
-              label="Há quanto tempo procurando emprego?"
-              isRequired
-              content={
-                hasTempoSelection ? (
-                  tempoLabel
-                ) : (
-                  <span className="text-foreground-light">Selecionar</span>
-                )
-              }
-              disabled
-              variant="default"
-              error={errors.tempoProcurandoEmprego?.message}
-              rightIcon={
-                <ChevronDownIcon
-                  className={
-                    hasTempoSelection
-                      ? 'text-primary stroke-[1.5] size-5'
-                      : 'text-foreground-light stroke-[1.5] size-5'
-                  }
-                />
-              }
-              drawerContent={<TempoProcurandoEmpregoDrawerContent />}
-              drawerTitle="Há quanto tempo procurando emprego?"
-            />
-          )}
-        />
-      </div>
+      {showJobSearchDuration && (
+        <div className="space-y-2">
+          <Controller
+            control={control}
+            name="tempoProcurandoEmprego"
+            render={({ field }) => (
+              <ActionDiv
+                ref={field.ref}
+                label="Há quanto tempo procurando emprego?"
+                isRequired
+                content={
+                  hasTempoSelection ? (
+                    tempoLabel
+                  ) : (
+                    <span className="text-foreground-light">Selecionar</span>
+                  )
+                }
+                disabled
+                variant="default"
+                error={errors.tempoProcurandoEmprego?.message}
+                rightIcon={
+                  <ChevronDownIcon
+                    className={
+                      hasTempoSelection
+                        ? 'text-primary stroke-[1.5] size-5'
+                        : 'text-foreground-light stroke-[1.5] size-5'
+                    }
+                  />
+                }
+                drawerContent={<TempoProcurandoEmpregoDrawerContent />}
+                drawerTitle="Há quanto tempo procurando emprego?"
+              />
+            )}
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Controller
@@ -1122,6 +1156,7 @@ const defaultSituacaoValues: CurriculoSituacaoFormValues = {
   tempoProcurandoEmprego: '',
   idDisponibilidade: '',
   idsTiposVinculo: [],
+  situacaoDescricao: '',
 }
 
 const DEFAULT_FORMACAO_OPTIONS: FormacaoOptions = {
@@ -1234,6 +1269,7 @@ export function CurriculoContent({
           tempoProcurandoEmprego: initialSituacao.tempoProcurandoEmprego ?? '',
           idDisponibilidade: initialSituacao.idDisponibilidade ?? '',
           idsTiposVinculo: initialSituacao.idsTiposVinculo ?? [],
+          situacaoDescricao: initialSituacao.situacaoDescricao ?? '',
         }
       : defaultSituacaoValues
 
@@ -1272,7 +1308,10 @@ export function CurriculoContent({
     errors as Record<string, unknown>
   )
   const requiredFieldsFilled = hasFormacaoRequiredFields(formValues)
-  const situacaoRequiredFieldsFilled = hasSituacaoRequiredFields(formValues)
+  const situacaoRequiredFieldsFilled = hasSituacaoRequiredFields(
+    formValues as CurriculoSituacaoFormValues,
+    (formValues as CurriculoSituacaoFormValues).situacaoDescricao
+  )
   const experienciaRequiredFieldsFilled =
     hasExperienciaRequiredFieldsFilled(formValues)
   const termosAceitos = form.watch('termosAceitos')
@@ -1352,6 +1391,7 @@ export function CurriculoContent({
         tempoProcurandoEmprego: valuesToRestore.tempoProcurandoEmprego,
         idDisponibilidade: valuesToRestore.idDisponibilidade,
         idsTiposVinculo: valuesToRestore.idsTiposVinculo,
+        situacaoDescricao: valuesToRestore.situacaoDescricao,
       },
       { keepDefaultValues: false }
     )
