@@ -1,5 +1,5 @@
-import type { SituacaoOptionItem } from './situacao-options-types'
 import { UNEMPLOYED_STATUS_DESCRIPTIONS } from './constants'
+import type { SituacaoOptionItem } from './situacao-options-types'
 
 /**
  * Checks if the selected employment status indicates unemployment
