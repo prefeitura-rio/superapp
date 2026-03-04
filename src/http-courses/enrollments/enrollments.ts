@@ -9,6 +9,8 @@ import type {
   GetApiV1EnrollmentsUserCpf200,
   GetApiV1EnrollmentsUserCpfParams,
   ModelsErrorResponse,
+  ModelsInscricao,
+  ModelsScheduleChangeRequest,
 } from '.././models'
 
 import { customFetch } from '../../../custom-fetch-course'
@@ -77,6 +79,69 @@ export const getApiV1EnrollmentsUserCpf = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+/**
+ * Permite ao cidadão trocar de turma em uma inscrição existente. Deve ser feito com pelo menos 72h de antecedência do início da aula. Se a inscrição estava aprovada, volta para status pendente.
+ * @summary Trocar turma/horário de inscrição
+ */
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse200 = {
+  data: ModelsInscricao
+  status: 200
+}
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse400 = {
+  data: ModelsErrorResponse
+  status: 400
+}
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse403 = {
+  data: ModelsErrorResponse
+  status: 403
+}
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse404 = {
+  data: ModelsErrorResponse
+  status: 404
+}
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse500 = {
+  data: ModelsErrorResponse
+  status: 500
+}
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponseComposite =
+  | putApiV1EnrollmentsEnrollmentIdScheduleResponse200
+  | putApiV1EnrollmentsEnrollmentIdScheduleResponse400
+  | putApiV1EnrollmentsEnrollmentIdScheduleResponse403
+  | putApiV1EnrollmentsEnrollmentIdScheduleResponse404
+  | putApiV1EnrollmentsEnrollmentIdScheduleResponse500
+
+export type putApiV1EnrollmentsEnrollmentIdScheduleResponse =
+  putApiV1EnrollmentsEnrollmentIdScheduleResponseComposite & {
+    headers: Headers
+  }
+
+export const getPutApiV1EnrollmentsEnrollmentIdScheduleUrl = (
+  enrollmentId: string
+) => {
+  return `/api/v1/enrollments/${enrollmentId}/schedule`
+}
+
+export const putApiV1EnrollmentsEnrollmentIdSchedule = async (
+  enrollmentId: string,
+  modelsScheduleChangeRequest: ModelsScheduleChangeRequest,
+  options?: RequestInit
+): Promise<putApiV1EnrollmentsEnrollmentIdScheduleResponse> => {
+  return customFetch<putApiV1EnrollmentsEnrollmentIdScheduleResponse>(
+    getPutApiV1EnrollmentsEnrollmentIdScheduleUrl(enrollmentId),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsScheduleChangeRequest),
     }
   )
 }

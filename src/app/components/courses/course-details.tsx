@@ -177,8 +177,12 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
       }
     }
 
-    // If previous route contains "confirmar-informacoes", go to courses list
-    if (previousRoute && previousRoute.includes('confirmar-informacoes')) {
+    // If previous route contains "confirmar-informacoes" or "trocar-turma", go to courses list
+    if (
+      previousRoute &&
+      (previousRoute.includes('confirmar-informacoes') ||
+        previousRoute.includes('trocar-turma'))
+    ) {
       router.push('/servicos/cursos/')
       return
     }
@@ -1149,6 +1153,28 @@ export function CourseDetails({
       )
     }
 
+    // Handle approved status - show both "Trocar turma" and "Cancelar inscrição" buttons
+    if (userEnrollment?.status === 'approved') {
+      return (
+        <div className="flex flex-col gap-3">
+          <Link
+            href={`/servicos/cursos/${course.id}/trocar-turma`}
+            className={`${baseButtonClasses} bg-primary text-background hover:bg-primary`}
+          >
+            Trocar turma / horário
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShowConfirmation(true)}
+            disabled={isDeleting}
+            className={`${baseButtonClasses} bg-card text-foreground hover:bg-card`}
+          >
+            Cancelar inscrição
+          </button>
+        </div>
+      )
+    }
+
     if (isEnrolled) {
       return (
         <button
@@ -1245,6 +1271,12 @@ export function CourseDetails({
             className="mx-4"
           />
         )}
+        {/* Action buttons for approved users - below status card, above description */}
+        {userEnrollment?.status === 'approved' && (
+          <div className="px-4 py-6 pb-0 w-full max-w-4xl">
+            {renderActionButton()}
+          </div>
+        )}
         <div className="px-4 py-6 pb-0">
           {course.description ? (
             <MarkdownRenderer
@@ -1274,7 +1306,10 @@ export function CourseDetails({
         />
         <div className="my-12" />
         <CourseContent course={course} />
-        <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
+        {/* Bottom action button - hide for approved users since buttons are shown above description */}
+        {userEnrollment?.status !== 'approved' && (
+          <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
+        )}
       </div>
     </div>
   )

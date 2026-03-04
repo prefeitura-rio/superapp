@@ -1,7 +1,7 @@
 'use client'
 
 import { useTokenRefresh } from '@/hooks/useTokenRefresh'
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 /**
  * Provider para refresh proativo de tokens
