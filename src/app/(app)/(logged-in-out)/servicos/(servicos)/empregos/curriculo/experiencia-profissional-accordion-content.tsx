@@ -16,6 +16,13 @@ import { useExperienciaApi } from './experiencia-api-context'
 import { ExperienciaComprovadaDrawerContent } from './experiencia-comprovada-drawer-content'
 import { saveExperienciaAction } from './save-experiencia-action'
 import { TipoConquistaDrawerContent } from './tipo-conquista-drawer-content'
+import { useFormDirtyState } from './hooks/use-form-dirty-state'
+import {
+  isConquistaComplete,
+  isConquistaEmpty,
+  isEmpregoComplete,
+  isEmpregoEmpty,
+} from './utils/item-validators'
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
@@ -72,20 +79,65 @@ function getFirstErrorField(errors: Record<string, unknown>): string | null {
   return null
 }
 
+/** True if at least one complete emprego OR one complete conquista exists. */
+function hasExperienciaRequiredFieldsFilled(
+  values: CurriculoExperienciaFormValues
+): boolean {
+  const hasValidEmprego = values.empregos.some(
+    e =>
+      (e.cargo?.trim()?.length ?? 0) > 0 &&
+      (e.empresa?.trim()?.length ?? 0) > 0 &&
+      (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
+      e.tempoExperienciaMeses != null &&
+      e.tempoExperienciaMeses >= 1 &&
+      (e.experienciaComprovadaCarteira === 'Sim' ||
+        e.experienciaComprovadaCarteira === 'Não')
+  )
+  const hasValidConquista = values.conquistas.some(
+    c =>
+      (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
+      (c.titulo?.trim()?.length ?? 0) > 0 &&
+      (c.descricao?.trim()?.length ?? 0) > 0
+  )
+  return hasValidEmprego || hasValidConquista
+}
+
 interface ExperienciaProfissionalAccordionContentProps {
   cpf: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoExperienciaFormValues) => void
+  snapshot: CurriculoExperienciaFormValues | null
 }
 
 function ExperienciaProfissionalAccordionContentInner({
   cpf,
   onCancel,
   onSaveSuccess,
+  snapshot,
 }: ExperienciaProfissionalAccordionContentProps) {
   const { watch, register, control, formState, trigger, getValues, setFocus } =
     useFormContext<CurriculoExperienciaFormValues>()
   const { errors } = formState
+  const formValues = watch()
+
+  const { canSave } = useFormDirtyState({
+    currentValues: formValues,
+    snapshot,
+    getSnapshot: getExperienciaSnapshot,
+    hasRequiredFields: hasExperienciaRequiredFieldsFilled,
+    arrayFields: [
+      {
+        fieldPath: 'empregos',
+        isItemComplete: isEmpregoComplete,
+        isItemEmpty: isEmpregoEmpty,
+      },
+      {
+        fieldPath: 'conquistas',
+        isItemComplete: isConquistaComplete,
+        isItemEmpty: isConquistaEmpty,
+      },
+    ],
+  })
   const {
     fields: empregosFields,
     append: appendEmprego,
@@ -104,7 +156,21 @@ function ExperienciaProfissionalAccordionContentInner({
   })
 
   const handleExperienciaSave = async () => {
+    // Always trigger validation to show errors
     const isValid = await trigger([...EXPERIENCIA_FIELD_NAMES])
+
+    // If canSave is false, just show validation errors but don't proceed
+    if (!canSave) {
+      if (!isValid) {
+        toast.error('Por favor, revise todos os campos.')
+        const firstErrorField = getFirstErrorField(errors)
+        if (firstErrorField) {
+          setFocus(firstErrorField as Parameters<typeof setFocus>[0])
+        }
+      }
+      return
+    }
+
     if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
       const firstErrorField = getFirstErrorField(errors)
@@ -414,7 +480,10 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1 rounded-full"
+          className={cn(
+            'flex-1 rounded-full',
+            !canSave && 'opacity-50'
+          )}
           onClick={() => handleExperienciaSave()}
         >
           Salvar
@@ -528,12 +597,14 @@ export function ExperienciaProfissionalAccordionContent({
   cpf,
   onCancel,
   onSaveSuccess,
+  snapshot,
 }: ExperienciaProfissionalAccordionContentProps) {
   return (
     <ExperienciaProfissionalAccordionContentInner
       cpf={cpf}
       onCancel={onCancel}
       onSaveSuccess={onSaveSuccess}
+      snapshot={snapshot}
     />
   )
 }

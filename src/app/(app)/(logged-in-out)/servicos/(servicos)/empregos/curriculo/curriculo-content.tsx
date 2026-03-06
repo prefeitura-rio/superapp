@@ -64,6 +64,13 @@ import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
+import { useFormDirtyState } from './hooks/use-form-dirty-state'
+import {
+  isFormacaoAcademicaComplete,
+  isFormacaoAcademicaEmpty,
+  isIdiomaComplete,
+  isIdiomaEmpty,
+} from './utils/item-validators'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
@@ -201,10 +208,16 @@ function hasExperienciaRequiredFieldsFilled(
   return hasValidEmprego || hasValidConquista
 }
 
+type FormacaoSnapshot = Pick<
+  CurriculoFormacaoFormValues,
+  'escolaridade' | 'formacaoAcademica' | 'idiomas'
+>
+
 interface FormacaoAccordionContentProps {
   cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoFormacaoFormValues) => void
+  snapshot: FormacaoSnapshot | null
 }
 
 const defaultExperienciaValues: CurriculoExperienciaFormValues = {
@@ -231,15 +244,36 @@ function FormacaoAccordionContent({
   cpf,
   onCancel,
   onSaveSuccess,
+  snapshot,
 }: FormacaoAccordionContentProps) {
   const { watch, register, control, formState, trigger, getValues, setFocus } =
     useFormContext<CurriculoFormacaoFormValues>()
   const { errors } = formState
-  const escolaridade = watch('escolaridade')
+  const formValues = watch()
+  const escolaridade = formValues.escolaridade
   const hasSelection = Boolean(escolaridade)
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'formacaoAcademica',
+  })
+
+  const { canSave } = useFormDirtyState({
+    currentValues: formValues,
+    snapshot,
+    getSnapshot: getFormacaoSnapshot,
+    hasRequiredFields: hasFormacaoRequiredFields,
+    arrayFields: [
+      {
+        fieldPath: 'idiomas',
+        isItemComplete: isIdiomaComplete,
+        isItemEmpty: isIdiomaEmpty,
+      },
+      {
+        fieldPath: 'formacaoAcademica',
+        isItemComplete: isFormacaoAcademicaComplete,
+        isItemEmpty: isFormacaoAcademicaEmpty,
+      },
+    ],
   })
 
   const handleFormacaoSave = async () => {
@@ -486,6 +520,7 @@ function FormacaoAccordionContent({
           size="lg"
           className="flex-1 rounded-full"
           onClick={() => handleFormacaoSave()}
+          disabled={!canSave}
         >
           Salvar
         </CustomButton>
@@ -891,20 +926,23 @@ interface SituacaoAtualAccordionContentProps {
   cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoSituacaoFormValues) => void
+  snapshot: CurriculoSituacaoFormValues | null
 }
 
 function SituacaoAtualAccordionContent({
   cpf,
   onCancel,
   onSaveSuccess,
+  snapshot,
 }: SituacaoAtualAccordionContentProps) {
   const { watch, control, formState, trigger, getValues, setFocus, setValue } =
     useFormContext<CurriculoSituacaoFormValues>()
   const { errors } = formState
   const { situacoesAtual, disponibilidades, regimesContratacao } =
     useSituacaoApi()
+  const formValues = watch()
 
-  const idSituacao = watch('idSituacao')
+  const idSituacao = formValues.idSituacao
   const tempoProcurandoEmprego = watch('tempoProcurandoEmprego')
   const idDisponibilidade = watch('idDisponibilidade')
   const idsTiposVinculo = watch('idsTiposVinculo')
@@ -948,6 +986,14 @@ function SituacaoAtualAccordionContent({
   const hasTipoVinculoSelection = Boolean(
     idsTiposVinculo && idsTiposVinculo.length > 0
   )
+
+  const { canSave } = useFormDirtyState({
+    currentValues: formValues,
+    snapshot,
+    getSnapshot: getSituacaoSnapshot,
+    hasRequiredFields: (values: CurriculoSituacaoFormValues) =>
+      hasSituacaoRequiredFields(values, situacaoLabel),
+  })
 
   const handleSituacaoSave = async () => {
     const isValid = await trigger([...SITUACAO_FIELD_NAMES])
@@ -1145,6 +1191,7 @@ function SituacaoAtualAccordionContent({
           size="lg"
           className="flex-1 rounded-full"
           onClick={handleSituacaoSave}
+          disabled={!canSave}
         >
           Salvar
         </CustomButton>
@@ -1522,6 +1569,7 @@ export function CurriculoContent({
                         cpf={cpf}
                         onCancel={handleFormacaoCancel}
                         onSaveSuccess={handleFormacaoSaveSuccess}
+                        snapshot={formacaoSnapshotRef.current}
                       />
                     </AccordionContent>
                   </AccordionItem>
@@ -1553,6 +1601,7 @@ export function CurriculoContent({
                         cpf={cpf ?? ''}
                         onCancel={handleExperienciaCancel}
                         onSaveSuccess={handleExperienciaSaveSuccess}
+                        snapshot={experienciaSnapshotRef.current}
                       />
                     </AccordionContent>
                   </AccordionItem>
@@ -1584,6 +1633,7 @@ export function CurriculoContent({
                         cpf={cpf}
                         onCancel={handleSituacaoCancel}
                         onSaveSuccess={handleSituacaoSaveSuccess}
+                        snapshot={situacaoSnapshotRef.current}
                       />
                     </AccordionContent>
                   </AccordionItem>
