@@ -94,7 +94,9 @@ export function useFormDirtyState<T>({
 
     for (const { fieldPath, isItemComplete, isItemEmpty } of arrayFields) {
       const currentArray =
-        ((currentSnapshot as Record<string, unknown[]>)[fieldPath] as unknown[]) ?? []
+        ((currentSnapshot as Record<string, unknown[]>)[
+          fieldPath
+        ] as unknown[]) ?? []
       const snapshotArray =
         ((snapshot as Record<string, unknown[]>)[fieldPath] as unknown[]) ?? []
 
@@ -152,7 +154,8 @@ export function useFormDirtyState<T>({
     // 3. AND required fields are filled
     const meetsRequirements = hasRequiredFields(currentValues)
     const hasMeaningfulChanges = isDirty || hasValidNewItems
-    const canSave = hasMeaningfulChanges && !hasIncompleteNewItems && meetsRequirements
+    const canSave =
+      hasMeaningfulChanges && !hasIncompleteNewItems && meetsRequirements
 
     return { isDirty, hasValidNewItems, canSave }
   }, [currentValues, snapshot, getSnapshot, hasRequiredFields, arrayFields])

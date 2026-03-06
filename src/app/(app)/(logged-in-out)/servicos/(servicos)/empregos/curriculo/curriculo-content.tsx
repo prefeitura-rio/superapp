@@ -51,6 +51,7 @@ import type {
   InitialIdiomaItem,
 } from './get-curriculo-formacao-data'
 import type { InitialSituacaoData } from './get-curriculo-situacao-data'
+import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
 import { saveFormacaoAccordion } from './save-formacao-action'
@@ -64,7 +65,6 @@ import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
-import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import {
   isFormacaoAcademicaComplete,
   isFormacaoAcademicaEmpty,

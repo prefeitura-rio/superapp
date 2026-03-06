@@ -1,11 +1,11 @@
 import type {
-  FormacaoAcademicaItem,
-  IdiomaItem,
-} from '../curriculo-formacao-schema'
-import type {
   ConquistaItem,
   EmpregoItem,
 } from '../curriculo-experiencia-schema'
+import type {
+  FormacaoAcademicaItem,
+  IdiomaItem,
+} from '../curriculo-formacao-schema'
 
 /**
  * Helper to check if a string value has content (non-empty after trimming).
@@ -49,7 +49,9 @@ export const isFormacaoAcademicaComplete = (
 /**
  * Checks if a formacao academica item is completely empty (no fields filled).
  */
-export const isFormacaoAcademicaEmpty = (item: FormacaoAcademicaItem): boolean =>
+export const isFormacaoAcademicaEmpty = (
+  item: FormacaoAcademicaItem
+): boolean =>
   !hasContent(item.tipoFormacaoId) &&
   !hasContent(item.nomeInstituicao) &&
   !hasContent(item.nomeCurso) &&

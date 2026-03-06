@@ -14,9 +14,9 @@ import { curriculoExperienciaSchema } from './curriculo-experiencia-schema'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import { useExperienciaApi } from './experiencia-api-context'
 import { ExperienciaComprovadaDrawerContent } from './experiencia-comprovada-drawer-content'
+import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import { saveExperienciaAction } from './save-experiencia-action'
 import { TipoConquistaDrawerContent } from './tipo-conquista-drawer-content'
-import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import {
   isConquistaComplete,
   isConquistaEmpty,
@@ -480,10 +480,7 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="primary"
           size="lg"
-          className={cn(
-            'flex-1 rounded-full',
-            !canSave && 'opacity-50'
-          )}
+          className={cn('flex-1 rounded-full', !canSave && 'opacity-50')}
           onClick={() => handleExperienciaSave()}
         >
           Salvar

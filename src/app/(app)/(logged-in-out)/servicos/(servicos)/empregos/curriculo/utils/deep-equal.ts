@@ -35,7 +35,9 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   // Arrays
   if (Array.isArray(normalizedA) && Array.isArray(normalizedB)) {
     if (normalizedA.length !== normalizedB.length) return false
-    return normalizedA.every((item, index) => deepEqual(item, normalizedB[index]))
+    return normalizedA.every((item, index) =>
+      deepEqual(item, normalizedB[index])
+    )
   }
 
   // One is array, other is not
