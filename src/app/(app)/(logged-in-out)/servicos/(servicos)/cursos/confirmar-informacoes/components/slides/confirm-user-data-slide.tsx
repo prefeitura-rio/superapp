@@ -149,7 +149,7 @@ export default function ConfirmUserDataSlide({
               Nome
             </p>
             <p className="text-foreground font-normal">
-              {formatTitleCase(userAuthInfo?.name) || 'Informação indisponível'}
+              {formatTitleCase(userInfo?.name) || formatTitleCase(userAuthInfo?.name) || 'Informação indisponível'}
             </p>
           </div>
 
