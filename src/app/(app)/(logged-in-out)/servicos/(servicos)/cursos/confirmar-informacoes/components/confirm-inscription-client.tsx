@@ -639,7 +639,7 @@ export function ConfirmInscriptionClient({
           courseId,
           userInfo: {
             cpf: userAuthInfo.cpf,
-            name: userAuthInfo.name,
+            name: userInfo.name || userAuthInfo.name,
             email: getEmailValue(userInfo.email),
             phone: getPhoneValue(userInfo.phone),
             birthDate: userInfo.nascimento?.data,

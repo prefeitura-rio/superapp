@@ -28,7 +28,7 @@ export default async function ProfilePage() {
       const userDataResponse = await getDalCitizenCpf(userInfo.cpf)
       if (userDataResponse.status === 200) {
         const userData = userDataResponse.data
-        userDisplayName = getDisplayName(userData.nome_exibicao, userInfo.name)
+        userDisplayName = getDisplayName(userData.nome_exibicao, userData.nome)
       } else {
         userDisplayName = getDisplayName(undefined, userInfo.name)
       }
