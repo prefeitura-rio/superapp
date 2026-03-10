@@ -1,7 +1,16 @@
 'use client'
 
+import { AddressLink } from '@/components/ui/custom/address-link'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
-import { Check, ChevronDown, ChevronUp, Copy, MapPin } from 'lucide-react'
+import { buildGoogleMapsUrl } from '@/lib/google-maps-utils'
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  ExternalLink,
+  MapPin,
+} from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -15,6 +24,7 @@ interface AddressItemProps {
 
 function AddressItem({ address }: AddressItemProps) {
   const { copy, isCopied } = useCopyToClipboard()
+  const mapsUrl = buildGoogleMapsUrl(address)
 
   const handleCopy = async () => {
     const success = await copy(address)
@@ -25,29 +35,51 @@ function AddressItem({ address }: AddressItemProps) {
     }
   }
 
+  const handleOpenMaps = () => {
+    if (mapsUrl) {
+      window.open(mapsUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="flex items-center gap-3 bg-card/50 rounded-xl p-3 w-full text-left hover:bg-card/80 transition-colors group"
-    >
-      {/* Pin icon muted */}
+    <div className="flex items-center gap-3 bg-card/50 rounded-xl p-3 w-full hover:bg-card/80 transition-colors group">
+      {/* Pin icon - decorativo */}
       <div className="flex-shrink-0 -ml-2">
         <MapPin className="w-4 h-4 text-muted-foreground" />
       </div>
 
-      {/* Address text */}
-      <span className="text-sm text-foreground flex-1 pr-3">{address}</span>
+      {/* Endereço com link para Maps */}
+      <AddressLink
+        address={address}
+        className="flex-1 pr-3 text-sm text-foreground hover:underline"
+      >
+        <span>{address}</span>
+      </AddressLink>
 
-      {/* Copy/Check icon */}
-      <div className="flex-shrink-0">
+      {mapsUrl && (
+        <button
+          type="button"
+          onClick={handleOpenMaps}
+          className="flex-shrink-0 p-1 hover:bg-card rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Abrir no Google Maps"
+        >
+          <ExternalLink className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+        </button>
+      )}
+
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="flex-shrink-0 p-1 hover:bg-card rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label="Copiar endereço"
+      >
         {isCopied ? (
           <Check className="w-4 h-4 text-green-600 animate-in zoom-in-50 duration-200" />
         ) : (
-          <Copy className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
         )}
-      </div>
-    </button>
+      </button>
+    </div>
   )
 }
 
@@ -62,6 +94,8 @@ export function QuickInfoAddress({ addresses }: QuickInfoAddressProps) {
 
   // Single address - show with copy functionality
   if (addresses.length === 1) {
+    const mapsUrl = buildGoogleMapsUrl(addresses[0])
+
     const handleCopy = async () => {
       const success = await copy(addresses[0])
       if (success) {
@@ -71,33 +105,55 @@ export function QuickInfoAddress({ addresses }: QuickInfoAddressProps) {
       }
     }
 
+    const handleOpenMaps = () => {
+      if (mapsUrl) {
+        window.open(mapsUrl, '_blank', 'noopener,noreferrer')
+      }
+    }
+
     return (
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="flex items-center gap-4 bg-card rounded-2xl p-4 w-full cursor-pointer hover:bg-card/80 transition-colors focus:outline-none group"
-      >
+      <div className="flex items-center gap-4 bg-card rounded-2xl p-4 w-full hover:bg-card/80 transition-colors group">
         <div className="flex-shrink-0 text-foreground">
           <MapPin className="w-5 h-5 text-foreground-light" />
         </div>
 
-        <div className="flex flex-col flex-1 min-w-0 items-start">
+        <AddressLink
+          address={addresses[0]}
+          className="flex flex-col flex-1 min-w-0 items-start"
+        >
           <span className="text-xs font-normal text-foreground-light">
             Endereço
           </span>
-          <span className="text-sm text-primary font-normal leading-5 tracking-normal text-left">
+          <span className="text-sm text-primary font-normal leading-5 tracking-normal text-left group-hover:underline">
             {addresses[0]}
           </span>
-        </div>
+        </AddressLink>
 
-        <div className="flex-shrink-0">
+        {mapsUrl && (
+          <button
+            type="button"
+            onClick={handleOpenMaps}
+            className="flex-shrink-0 p-2 hover:bg-background/50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Abrir no Google Maps"
+          >
+            <ExternalLink className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+          </button>
+        )}
+
+        {/* Botão Copy isolado */}
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex-shrink-0 p-2 hover:bg-background/50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Copiar endereço"
+        >
           {isCopied ? (
             <Check className="w-5 h-5 text-green-600 animate-in zoom-in-50 duration-200" />
           ) : (
-            <Copy className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <Copy className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
           )}
-        </div>
-      </button>
+        </button>
+      </div>
     )
   }
 
