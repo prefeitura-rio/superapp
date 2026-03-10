@@ -84,7 +84,7 @@ export default async function PersonalInfoForm() {
             id="fullName"
             label="Nome completo"
             defaultValue={
-              formatTitleCase(userInfo?.nome_exibicao || userInfo?.nome || userAuthInfo?.name) ||
+              formatTitleCase(userInfo?.nome || userAuthInfo?.name) ||
               'Informação indisponível'
             }
             isEditable={false}
