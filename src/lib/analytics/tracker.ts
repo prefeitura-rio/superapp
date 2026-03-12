@@ -101,6 +101,8 @@ export function sendEvent(event: AnalyticsEvent): boolean {
       user_authenticated: event.user_authenticated,
       page_path: event.page_path,
       timestamp: event.timestamp,
+      // Enable debug mode in development to see events in GA DebugView
+      debug_mode: isDebugMode(),
     }
 
     // Send to Google Analytics
