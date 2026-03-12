@@ -18,11 +18,11 @@ import {
   CardDescription,
   CardHeader,
 } from '@/components/ui/card'
+import { useAnalytics } from '@/hooks/useAnalytics'
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
-import { useAnalytics } from '@/hooks/useAnalytics'
 import { Clock } from 'lucide-react'
 import { MarkdownRenderer } from './components/markdown-renderer'
 
@@ -38,8 +38,16 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
   // Analytics tracking
   const { trackServiceClick } = useAnalytics()
 
-  // Handle button click tracking
-  const handleButtonClick = (button: ModelsButton, index: number) => {
+  // Handle button click tracking with delay to ensure event is sent
+  const handleButtonClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    button: ModelsButton,
+    index: number
+  ) => {
+    // Prevent immediate navigation
+    event.preventDefault()
+
+    // Track the event
     trackServiceClick({
       service_id: serviceData.id || '',
       service_name: serviceData.nome_servico,
@@ -48,6 +56,11 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
       button_index: index,
       destination_url: button.url_service || '',
     })
+
+    // Allow navigation after a short delay to ensure event is sent
+    setTimeout(() => {
+      window.open(button.url_service, '_blank', 'noopener,noreferrer')
+    }, 200)
   }
 
   // Extract data for QuickInfo
@@ -97,7 +110,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                   href={enabledButtons[0].url_service}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => handleButtonClick(enabledButtons[0], 0)}
+                  onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
                   className="text-background text-sm leading-5 font-normal"
                 >
                   {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
@@ -126,7 +139,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                           href={button.url_service}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => handleButtonClick(button, index)}
+                          onClick={e => handleButtonClick(e, button, index)}
                           className="text-background"
                         >
                           {button.titulo}

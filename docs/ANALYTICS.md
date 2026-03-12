@@ -618,6 +618,52 @@ window.gtag
 
 ---
 
+### Problema: Eventos param de ser enviados após alguns cliques
+
+**Sintomas:**
+
+- Primeiros cliques funcionam, mas depois os eventos param de ser enviados
+- Eventos aparecem no console mas não no GA
+
+**Causa:**
+
+- Links com `target="_blank"` navegam imediatamente, cancelando eventos pendentes
+- O navegador abre nova aba antes do gtag enviar o evento
+
+**Solução:**
+
+A implementação atual usa `event.preventDefault()` + `setTimeout()` para garantir envio:
+
+```typescript
+const handleButtonClick = (
+  event: React.MouseEvent<HTMLAnchorElement>,
+  button: ModelsButton,
+  index: number
+) => {
+  // Prevenir navegação imediata
+  event.preventDefault()
+
+  // Enviar evento
+  trackServiceClick({ ... })
+
+  // Navegar após 100ms
+  setTimeout(() => {
+    window.open(button.url_service, '_blank', 'noopener,noreferrer')
+  }, 100)
+}
+```
+
+**Por que funciona:**
+
+- `preventDefault()` impede navegação automática do link
+- Evento é enviado sincronamente
+- 100ms de delay garante que gtag processou o evento
+- `window.open()` abre a aba manualmente
+
+**Já está implementado** no `page-client.tsx`!
+
+---
+
 ### Problema: Eventos duplicados
 
 **Sintomas:**

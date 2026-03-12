@@ -124,9 +124,7 @@ export function sanitizeParam(value: string, maxLength = 100): string {
 
   // Truncate if exceeds max length
   const truncated =
-    value.length > maxLength
-      ? `${value.substring(0, maxLength - 3)}...`
-      : value
+    value.length > maxLength ? `${value.substring(0, maxLength - 3)}...` : value
 
   // Remove leading/trailing whitespace
   return truncated.trim()
