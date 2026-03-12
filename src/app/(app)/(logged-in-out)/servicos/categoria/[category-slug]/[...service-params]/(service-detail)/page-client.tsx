@@ -22,6 +22,7 @@ import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
+import { useAnalytics } from '@/hooks/useAnalytics'
 import { Clock } from 'lucide-react'
 import { MarkdownRenderer } from './components/markdown-renderer'
 
@@ -33,6 +34,21 @@ interface PageClientProps {
 export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
   const enabledButtons = buttons.filter(btn => btn.is_enabled)
+
+  // Analytics tracking
+  const { trackServiceClick } = useAnalytics()
+
+  // Handle button click tracking
+  const handleButtonClick = (button: ModelsButton, index: number) => {
+    trackServiceClick({
+      service_id: serviceData.id || '',
+      service_name: serviceData.nome_servico,
+      service_category: serviceData.tema_geral,
+      button_label: button.titulo || '',
+      button_index: index,
+      destination_url: button.url_service || '',
+    })
+  }
 
   // Extract data for QuickInfo
   const serviceCost = serviceData?.custo_servico
@@ -81,6 +97,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                   href={enabledButtons[0].url_service}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleButtonClick(enabledButtons[0], 0)}
                   className="text-background text-sm leading-5 font-normal"
                 >
                   {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
@@ -109,6 +126,7 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
                           href={button.url_service}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => handleButtonClick(button, index)}
                           className="text-background"
                         >
                           {button.titulo}
