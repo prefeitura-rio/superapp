@@ -11,7 +11,11 @@
 
 import { ANALYTICS_CONFIG, isAnalyticsEnabled, isDebugMode } from './config'
 import { getTimestamp, sanitizeParam } from './context-collector'
-import type { AnalyticsEvent, ServiceButtonClickParams } from './types'
+import type {
+  AnalyticsEvent,
+  ServiceButtonClickParams,
+  UserLoginParams,
+} from './types'
 import { AnalyticsEventType } from './types'
 
 /**
@@ -177,6 +181,39 @@ export function trackServiceButtonClick(
   const event: AnalyticsEvent = {
     event_name: AnalyticsEventType.SERVICE_BUTTON_CLICK,
     user_authenticated: userAuthenticated,
+    page_path: pagePath,
+    timestamp: getTimestamp(),
+    event_params: sanitizedParams,
+  }
+
+  return sendEvent(event)
+}
+
+/**
+ * Track a user login event
+ *
+ * @param params - User login parameters (user_id, user_name, login_method)
+ * @param pagePath - Current page path
+ * @returns True if event was tracked successfully
+ *
+ * @remarks
+ * Fired once per authentication flow, right after the Keycloak/GovBR
+ * callback sets the `just_logged_in` cookie. The cookie is consumed
+ * and deleted immediately so the event is never sent twice.
+ */
+export function trackUserLogin(
+  params: UserLoginParams,
+  pagePath: string
+): boolean {
+  const sanitizedParams: UserLoginParams = {
+    name: sanitizeParam(params.name),
+    preferred_username: sanitizeParam(params.preferred_username, 50),
+    email: sanitizeParam(params.email),
+  }
+
+  const event: AnalyticsEvent = {
+    event_name: AnalyticsEventType.USER_LOGIN,
+    user_authenticated: true,
     page_path: pagePath,
     timestamp: getTimestamp(),
     event_params: sanitizedParams,

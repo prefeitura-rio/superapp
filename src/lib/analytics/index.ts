@@ -72,6 +72,7 @@ export type {
   NavigationContext,
   ServiceButtonClickParams,
   UserContext,
+  UserLoginParams,
 } from './types'
 
 /**
@@ -119,7 +120,7 @@ export {
  * - You're implementing custom tracking logic
  * - You're adding a new event type
  */
-export { sendEvent, trackServiceButtonClick } from './tracker'
+export { sendEvent, trackServiceButtonClick, trackUserLogin } from './tracker'
 
 // ============================================================================
 // Context Collection Exports

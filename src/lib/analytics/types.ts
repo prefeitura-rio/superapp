@@ -29,6 +29,8 @@ export enum AnalyticsEventType {
   // Future event types (not yet implemented):
   // PAGE_VIEW = 'page_view',
   // SEARCH = 'search',
+   /** User completed authentication via Keycloak/GovBR */
+  USER_LOGIN = 'user_login',
 }
 
 /**
@@ -138,6 +140,20 @@ export interface ServiceButtonClickParams {
 }
 
 /**
+ * Parameters for user login event tracking
+ */
+export interface UserLoginParams {
+  /** Full name from Keycloak JWT */
+  name: string
+
+  /** CPF or username from Keycloak JWT */
+  preferred_username: string
+
+  /** Email from Keycloak JWT */
+  email: string
+}
+
+/**
  * Complete event payload sent to Google Analytics
  *
  * @remarks
@@ -159,9 +175,8 @@ export interface AnalyticsEvent extends BaseEventParams {
    *
    * @remarks
    * Optional object containing additional parameters specific to the event type.
-   * For SERVICE_BUTTON_CLICK events, this will be `ServiceButtonClickParams`.
    */
-  event_params?: ServiceButtonClickParams
+  event_params?: ServiceButtonClickParams | UserLoginParams
 }
 
 /**
