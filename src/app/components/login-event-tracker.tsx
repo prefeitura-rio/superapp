@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 function getAndClearLoginCookie(): UserLoginParams | null {
   const match = document.cookie
     .split('; ')
-    .find((row) => row.startsWith('just_logged_in='))
+    .find(row => row.startsWith('just_logged_in='))
 
   if (!match) return null
 

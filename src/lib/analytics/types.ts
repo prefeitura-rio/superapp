@@ -29,7 +29,7 @@ export enum AnalyticsEventType {
   // Future event types (not yet implemented):
   // PAGE_VIEW = 'page_view',
   // SEARCH = 'search',
-   /** User completed authentication via Keycloak/GovBR */
+  /** User completed authentication via Keycloak/GovBR */
   USER_LOGIN = 'user_login',
 }
 
