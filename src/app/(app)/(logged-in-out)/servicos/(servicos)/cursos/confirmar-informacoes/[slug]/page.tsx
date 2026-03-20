@@ -10,7 +10,7 @@ import type {
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { ConfirmInscriptionClient } from '../components/confirm-inscription-client'
 
 interface PageProps {
@@ -59,7 +59,7 @@ export default async function ConfirmInscriptionPage({
   ])
 
   if (userInfoResponse.status !== 200 || courseInfoResponse.status !== 200) {
-    notFound()
+    throw new Error('Failed to fetch user or course data')
   }
 
   const userInfo = userInfoResponse.data
