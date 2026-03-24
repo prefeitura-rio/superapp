@@ -8,7 +8,13 @@ import Link from 'next/link'
 
 export interface VagaBadge {
   text: string
-  type?: 'modality' | 'bairro' | 'salary' | 'acessivel_pcd' | 'preferencial_pcd'
+  type?:
+    | 'modality'
+    | 'bairro'
+    | 'salary'
+    | 'acessivel_pcd'
+    | 'preferencial_pcd'
+    | 'exclusivo_pcd'
 }
 
 export interface VagaCardData {
@@ -37,6 +43,7 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
       return <DollarSign className="h-3.5 w-3.5 shrink-0" />
     case 'acessivel_pcd':
     case 'preferencial_pcd':
+    case 'exclusivo_pcd':
       return null
     default:
       return null

@@ -31,6 +31,18 @@ export const MOCK_VAGAS: VagaCardData[] = [
     ],
   },
   {
+    id: '14',
+    titulo: 'Auxiliar Administrativo - Exclusivo PcD',
+    empresaNome: 'Prefeitura Municipal do Rio de Janeiro',
+    empresaCnpj: '41442565000180',
+    badges: [
+      { text: 'Presencial', type: 'modality' },
+      { text: 'Centro', type: 'bairro' },
+      { text: 'R$2.500,00', type: 'salary' },
+      { text: 'Exclusivo PCD', type: 'exclusivo_pcd' },
+    ],
+  },
+  {
     id: '3',
     titulo: 'Engenheiro de Processos Sênior',
     empresaNome: 'Petrobrás S.A.',
@@ -225,7 +237,7 @@ function getDefaultMockDetail(
   const modalityBadge = vaga.badges.find(b => b.type === 'modality')
   const bairroBadge = vaga.badges.find(b => b.type === 'bairro')
   const pcd = vaga.badges.find(
-    b => b.type === 'preferencial_pcd' || b.type === 'acessivel_pcd'
+    b => b.type === 'preferencial_pcd' || b.type === 'acessivel_pcd' || b.type === 'exclusivo_pcd'
   )
   const override = MOCK_DETAIL_BY_ID[vaga.id] ?? {}
 
@@ -241,7 +253,9 @@ function getDefaultMockDetail(
       (pcd
         ? pcd.type === 'preferencial_pcd'
           ? 'Preferencial para PcD'
-          : 'Acessível para PcD'
+          : pcd.type === 'exclusivo_pcd'
+            ? 'Exclusivo para PcD'
+            : 'Acessível para PcD'
         : 'Não informado'),
     descricao:
       override.descricao ??
