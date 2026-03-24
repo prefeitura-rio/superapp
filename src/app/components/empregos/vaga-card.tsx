@@ -8,7 +8,13 @@ import Link from 'next/link'
 
 export interface VagaBadge {
   text: string
-  type?: 'modality' | 'bairro' | 'salary' | 'acessivel_pcd' | 'preferencial_pcd' | 'exclusivo_pcd'
+  type?:
+    | 'modality'
+    | 'bairro'
+    | 'salary'
+    | 'acessivel_pcd'
+    | 'preferencial_pcd'
+    | 'exclusivo_pcd'
 }
 
 export interface VagaCardData {

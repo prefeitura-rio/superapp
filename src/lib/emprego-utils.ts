@@ -213,12 +213,13 @@ export function mapEmpregabilidadeVagaToDetail(
 
   // Badges de acessibilidade PCD
   const preferencialPcd = vaga.acessibilidade_pcd === 'preferencial_pcd'
-  const acessivelPcd =
-    vaga.acessibilidade_pcd === 'para_pcd' ||
-    vaga.acessibilidade_pcd === 'exclusivo_pcd'
+  const exclusivoPcd = vaga.acessibilidade_pcd === 'exclusivo_pcd'
+  const acessivelPcd = vaga.acessibilidade_pcd === 'para_pcd'
 
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
+  } else if (exclusivoPcd) {
+    badges.push({ text: 'Exclusivo PcD', type: 'exclusivo_pcd' })
   } else if (acessivelPcd) {
     badges.push({ text: 'Acessível PcD', type: 'acessivel_pcd' })
   }
@@ -226,9 +227,11 @@ export function mapEmpregabilidadeVagaToDetail(
   // Label de acessibilidade
   const acessibilidadeLabel = preferencialPcd
     ? 'Preferencial para PcD'
-    : acessivelPcd
-      ? 'Acessível para PcD'
-      : 'Não informado'
+    : exclusivoPcd
+      ? 'Exclusivo para PcD'
+      : acessivelPcd
+        ? 'Acessível para PcD'
+        : 'Não informado'
 
   // Valor da vaga formatado
   const valorVaga =

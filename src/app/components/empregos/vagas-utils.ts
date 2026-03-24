@@ -72,10 +72,12 @@ export function transformVagaToCardData(
       text: 'Preferencial PCD',
       type: 'preferencial_pcd',
     })
-  } else if (
-    vaga.acessibilidade_pcd === 'para_pcd' ||
-    vaga.acessibilidade_pcd === 'exclusivo_pcd'
-  ) {
+  } else if (vaga.acessibilidade_pcd === 'exclusivo_pcd') {
+    badges.push({
+      text: 'Exclusivo PCD',
+      type: 'exclusivo_pcd',
+    })
+  } else if (vaga.acessibilidade_pcd === 'para_pcd') {
     badges.push({
       text: 'Acessível PCD',
       type: 'acessivel_pcd',
