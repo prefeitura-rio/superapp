@@ -32,6 +32,7 @@ function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
       return <DollarSign className="h-3.5 w-3.5 shrink-0" />
     case 'acessivel_pcd':
     case 'preferencial_pcd':
+    case 'exclusivo_pcd':
       return <Accessibility className="h-3.5 w-3.5 shrink-0" />
     default:
       return <FileText className="h-3.5 w-3.5 shrink-0" />
