@@ -6,7 +6,7 @@ const FAQ_SECTIONS: FaqSection[] = [
     id: 'plataforma',
     title: 'O que é a Plataforma Oportunidades Cariocas?',
     content:
-      'O Oportunidades Cariocas é uma plataforma digital que reúne em um só lugar todas as informações e inscrições de cursos, oficinas, palestras e quaisquer atividades educativas oferecidas pela Prefeitura do Rio e instituições parceiras. ',
+      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que centraliza informações e inscrições para cursos, oficinas e atividades educativas oferecidas pelo município e instituições parceiras. Focado no desenvolvimento profissional e pessoal, o portal também oferece um espaço exclusivo para Microempreendedores Individuais (MEIs), funcionando como um canal direto para quem busca qualificação e novas oportunidades no mercado carioca.',
   },
   {
     id: 'quem-pode',
@@ -37,7 +37,7 @@ const FAQ_SECTIONS: FaqSection[] = [
     id: 'apto-aulas',
     title: 'Ao solicitar a inscrição, já estou apto(a) para as aulas?',
     content:
-      'Não. Ao solicitar sua inscrição, você deverá aguardar a confirmação por e-mail ou telefone da unidade responsável pela atividade. \n\n Por isso, é muito importante manter seus dados de contato sempre atualizados.',
+      'Ao solicitar sua inscrição, você deverá aguardar a confirmação por e-mail e/ou telefone da unidade responsável pela atividade. \n\n Por isso, é muito importante manter seus dados de contato sempre atualizados.',
   },
   {
     id: 'varios-cursos',
@@ -45,16 +45,16 @@ const FAQ_SECTIONS: FaqSection[] = [
     content: 'Sim, você pode se inscrever em mais de um curso ao mesmo tempo.',
   },
   {
-    id: 'cursos-gratuitos',
-    title: 'Todos os cursos são gratuitos?',
+    id: 'trocar-turma-cursos',
+    title: 'Como faço para trocar de turma/horário na atividade inscrita?',
     content:
-      'Não. A maioria dos cursos é gratuita, mas alguns podem ter um custo. Se houver, essa informação estará sempre destacada na descrição do próprio curso.',
+      'Para trocar sua turma ou horário, acesse a página da atividade no portal Oportunidades Cariocas e clique no botão “Trocar turma / horário”. Em seguida, basta selecionar a nova opção de sua preferência entre os horários que estiverem disponíveis. \n\n Fique atento: ao confirmar a alteração, sua inscrição na turma antiga será automaticamente cancelada e substituída pela nova escolha. Por isso, certifique-se de que o novo horário é realmente o ideal antes de finalizar o processo.',
   },
   {
     id: 'cancelar',
     title: 'Como faço para cancelar minha inscrição?',
     content:
-      'Para cancelar sua inscrição, basta ir até a página da atividade desejada no Oportunidades Cariocas e clicar em "Cancelar inscrição".',
+      'Para cancelar sua inscrição, acesse a página da atividade desejada no portal Oportunidades Cariocas e clique na opção “Cancelar inscrição”. \n\n Importante: Antes de confirmar, tenha certeza de que não poderá comparecer, pois o cancelamento não pode ser desfeito. Caso mude de ideia, você precisará realizar uma nova inscrição, que estará sujeita à disponibilidade de vagas no momento.',
   },
   {
     id: 'certificado',
