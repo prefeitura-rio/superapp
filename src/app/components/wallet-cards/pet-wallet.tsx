@@ -14,6 +14,7 @@ interface PetWalletCardProps {
   showInitialShine?: boolean
   petData: ModelsPet
   onClick?: () => void
+  className?: string
 }
 
 const sexSerializer: Record<string, string> = {
@@ -28,6 +29,7 @@ export function PetCard({
   asLink = false,
   showInitialShine = false,
   onClick,
+  className = '',
 }: PetWalletCardProps) {
   const specieSerialized =
     petData.especie_nome!.charAt(0).toUpperCase() +
@@ -42,7 +44,7 @@ export function PetCard({
     : 'Não disponível'
 
   const frontContent = (
-    <PetCardBase>
+    <PetCardBase className={className}>
       <PetCardFrontContent
         title="REGISTRO GERAL DE ANIMAIS"
         name={petData.animal_nome!}
@@ -59,7 +61,7 @@ export function PetCard({
   )
 
   const backContent = (
-    <PetCardBase isBack>
+    <PetCardBase isBack className={className}>
       <PetCardBackContent
         birthDate={birthDate}
         castrated={petData.indicador_castrado ? 'Sim' : 'Não'}

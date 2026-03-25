@@ -9,6 +9,7 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
+  ModelsPet,
 } from '@/http/models'
 import type { RiskStatusProps } from '@/types/health'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
@@ -17,6 +18,7 @@ import { getWalletDataInfo } from '@/lib/wallet-utils'
 interface WalletData {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
+  pets?: ModelsPet[]
   healthCardData?: {
     href: string
     title: string
@@ -55,7 +57,8 @@ export default function WalletSectionClient() {
             data.walletData,
             maintenanceStats.total
           )
-          setShouldShowWallet(walletInfo.hasData)
+          const petsCount = Array.isArray(data.pets) ? data.pets.length : 0
+          setShouldShowWallet(walletInfo.hasData || petsCount > 0)
         } else {
           console.error('Failed to fetch wallet data:', response.status)
         }
@@ -90,6 +93,7 @@ export default function WalletSectionClient() {
           walletData={walletData.walletData}
           maintenanceRequests={walletData.maintenanceRequests}
           healthCardData={walletData.healthCardData}
+          pets={walletData.pets}
         />
       }
       desktopComponent={
@@ -97,6 +101,7 @@ export default function WalletSectionClient() {
           walletData={walletData.walletData}
           maintenanceRequests={walletData.maintenanceRequests}
           healthCardData={walletData.healthCardData}
+          pets={walletData.pets}
         />
       }
       desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}

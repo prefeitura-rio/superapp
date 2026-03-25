@@ -7,10 +7,10 @@ export default function PetPageLoading() {
       <SecondaryHeader
         title="Carteira"
         route="/carteira"
-        className="max-w-xl"
+        className="max-w-xl mt-2"
       />
 
-      <div className="pt-25">
+      <div className="pt-21 md:pt-25">
         <div className="px-4 flex flex-col gap-4">
           <Skeleton className="w-full h-[185px] rounded-2xl" />
           <div className="flex justify-center gap-1">
@@ -20,7 +20,7 @@ export default function PetPageLoading() {
         </div>
 
         <div className="overflow-x-auto no-scrollbar">
-          <div className="flex flex-row pl-4 gap-4 justify-start mt-8 min-w-max">
+          <div className="flex flex-row pl-6 gap-4 justify-start pt-10 min-w-max">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="flex flex-col items-center">
                 <Skeleton className="w-16 h-16 rounded-full" />
