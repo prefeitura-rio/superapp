@@ -33,9 +33,9 @@ export function WalletContent({
 
       <div className="mt-6">
         {isPetsView ? (
-          <div className="max-w-xl mx-auto pb-10">
+          <div className="max-w-xl mx-auto pb-10 w-full">
             <div className="z-50">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 w-full">
                 {pets.length > 0 ? (
                   pets.map(pet => (
                     <PetCard
@@ -45,6 +45,7 @@ export function WalletContent({
                       asLink
                       showInitialShine
                       href={`/carteira/pet/${pet.id_animal}`}
+                      className="w-full"
                     />
                   ))
                 ) : (
