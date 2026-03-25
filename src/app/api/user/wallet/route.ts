@@ -11,6 +11,9 @@ import {
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
+import type { ModelsPet } from '@/http/models'
+
 
 export async function GET() {
   try {
@@ -22,6 +25,7 @@ export async function GET() {
         walletData: null,
         maintenanceRequests: null,
         healthCardData: null,
+        pets: [],
         shouldShowWallet: false,
       })
     }
@@ -30,6 +34,7 @@ export async function GET() {
     let maintenanceRequests
     let healthUnitData
     let healthUnitRiskData
+    let pets: ModelsPet[] = []
 
     // Fetch wallet data
     try {
@@ -93,6 +98,24 @@ export async function GET() {
       console.error('Error fetching maintenance requests:', error)
     }
 
+    // Fetch pets associated with the logged-in CPF
+    try {
+      const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
+
+      if (
+        petsResponse.status === 200 &&
+        petsResponse.data?.data &&
+        Array.isArray(petsResponse.data.data)
+      ) {
+        pets = petsResponse.data.data
+      } else {
+        pets = []
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+      pets = []
+    }
+
     // healthCardData - only create if clinica_familia exists and indicador is true
     let healthCardData = undefined
     if (
@@ -135,6 +158,7 @@ export async function GET() {
       walletData,
       maintenanceRequests,
       healthCardData,
+      pets,
     })
   } catch (error) {
     console.error('Error in wallet API route:', error)
@@ -143,6 +167,7 @@ export async function GET() {
         walletData: null,
         maintenanceRequests: null,
         healthCardData: null,
+        pets: [],
         error: 'Failed to fetch wallet data',
       },
       { status: 500 }

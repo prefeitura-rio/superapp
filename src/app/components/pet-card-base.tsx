@@ -54,10 +54,10 @@ export function PetCardBase({
 
   return (
     <div
-      className={`block w-full rounded-3xl shadow-md text-orange-900 relative overflow-hidden ${className}`}
+      className={`block w-[310px] h-[188px] sm:w-full sm:h-full rounded-3xl shadow-md text-orange-900 relative overflow-hidden ${className}`}
       style={{ backgroundColor: '#FFF0DF' }}
     >
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {generatePawPattern()}
       </div>
 

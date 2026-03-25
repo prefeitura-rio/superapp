@@ -42,20 +42,21 @@ export function PetClientPage({
       <SecondaryHeader
         title="Carteira"
         route="/carteira"
-        className="max-w-xl"
+        className="max-w-xl mt-2"
       />
-      <div className="pt-25">
+      <div className="pt-21 md:pt-25">
         <div className="px-4 flex flex-col gap-4">
           <PetCard
             key={pet.id_animal}
             petData={pet}
             enableFlip
             showInitialShine
+            className="w-full h-full"
           />
         </div>
 
         <div className="overflow-x-auto no-scrollbar">
-          <div className="flex flex-row pl-4 gap-3 justify-start mt-8 min-w-max">
+          <div className="flex flex-row pl-4 gap-3 justify-start pt-14 min-w-max">
             <a
               href={SMPDA_ATENDIMENTO_URL}
               target="_blank"

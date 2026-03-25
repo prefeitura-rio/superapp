@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
+  ModelsPet,
 } from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
@@ -25,11 +26,13 @@ import { useEffect, useState } from 'react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
+import { PetCard } from './wallet-cards/pet-wallet'
 import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
 
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
+  pets?: ModelsPet[]
   healthCardData?: {
     href: string
     title: string
@@ -70,6 +73,7 @@ export default function CarteiraSection({
   walletData,
   maintenanceRequests,
   healthCardData,
+  pets,
 }: CartereiraSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   // Calculate maintenance requests statistics
@@ -94,7 +98,7 @@ export default function CarteiraSection({
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
       </div>
 
-      {walletInfo.hasData ? (
+      {walletInfo.hasData || (pets?.length ?? 0) > 0 ? (
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="flex px-4 gap-2 w-max">
             {/* Health Card - only show if wallet has health data */}
@@ -238,6 +242,31 @@ export default function CarteiraSection({
                 />
               </div>
             )}
+
+            {/* Pet cards */}
+            {(pets || [])
+              .filter(
+                pet =>
+                  pet.id_animal &&
+                  pet.animal_nome &&
+                  pet.especie_nome &&
+                  pet.sexo_sigla &&
+                  pet.raca_nome
+              )
+              .map(pet => (
+                <div
+                  key={pet.id_animal}
+                  className="min-w-[300px]"
+                >
+                  <PetCard
+                    petData={pet}
+                    enableFlip={false}
+                    asLink
+                    showInitialShine={false}
+                    href={`/carteira/pet/${pet.id_animal}`}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       ) : (

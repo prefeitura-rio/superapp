@@ -28,7 +28,7 @@ export function WalletContent({
   const isPetsView = searchParams.get('pets') === 'true'
 
   return (
-    <>
+    <div className="pt-2">
       <WalletTabs activeTab={isPetsView ? 'pets' : 'cards'} />
 
       <div className="mt-6">
@@ -93,6 +93,6 @@ export function WalletContent({
           />
         )}
       </div>
-    </>
+    </div>
   )
 }

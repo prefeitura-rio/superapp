@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
+  ModelsPet,
 } from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
@@ -27,11 +28,13 @@ import { useEffect, useState } from 'react'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
+import { PetCard } from './wallet-cards/pet-wallet'
 import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
 
 interface CartereiraSectionSwipeProps {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
+  pets?: ModelsPet[]
   healthCardData?: {
     href: string
     title: string
@@ -97,6 +100,7 @@ export default function CarteiraSectionSwipe({
   walletData,
   maintenanceRequests,
   healthCardData,
+  pets,
 }: CartereiraSectionSwipeProps) {
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -116,6 +120,15 @@ export default function CarteiraSectionSwipe({
 
   // Prepare wallet cards array
   const walletCards: JSX.Element[] = []
+
+  const petsToShow = (pets || []).filter(
+    pet =>
+      pet.id_animal &&
+      pet.animal_nome &&
+      pet.especie_nome &&
+      pet.sexo_sigla &&
+      pet.raca_nome
+  )
 
   if (
     walletData?.saude?.clinica_familia &&
@@ -258,13 +271,27 @@ export default function CarteiraSectionSwipe({
     )
   }
 
+  // Pets cards (render after the other carteira cards)
+  for (const pet of petsToShow) {
+    walletCards.push(
+      <PetCard
+        key={pet.id_animal}
+        petData={pet}
+        enableFlip={false}
+        asLink
+        showInitialShine={false}
+        href={`/carteira/pet/${pet.id_animal}`}
+      />
+    )
+  }
+
   return (
     <section className="mt-6 w-full overflow-x-auto">
       <div className="flex items-center px-4 justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
       </div>
 
-      {walletInfo.hasData ? (
+      {walletInfo.hasData || petsToShow.length > 0 ? (
         <div className="hidden sm:block px-4 pb-4  overflow-hidden">
           <SwiperWrapper
             showArrows={true}
