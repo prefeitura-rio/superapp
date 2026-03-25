@@ -1,13 +1,13 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
+import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
+import { WalletTabs } from '@/app/components/wallet-tabs'
+import petsEmptyImage from '@/assets/dog-pet.svg'
+import type { ModelsPet } from '@/http/models'
 import Image from 'next/image'
 import Link from 'next/link'
-import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
-import { WalletTabs } from '@/app/components/wallet-tabs'
-import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
-import type { ModelsPet } from '@/http/models'
-import petsEmptyImage from '@/assets/dog-pet.svg'
+import { useSearchParams } from 'next/navigation'
 
 interface WalletContentProps {
   pets: ModelsPet[]
@@ -67,7 +67,14 @@ export function WalletContent({
                         a carteira dele.
                       </p> */}
                       <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
-                       Conheça o <Link href="/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27" target="_blank" className="text-primary">SISBICHO</Link>
+                        Conheça o{' '}
+                        <Link
+                          href="/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27"
+                          target="_blank"
+                          className="text-primary"
+                        >
+                          SISBICHO
+                        </Link>
                       </p>
                     </div>
 

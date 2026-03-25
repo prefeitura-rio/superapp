@@ -1,3 +1,5 @@
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
+import type { ModelsPet } from '@/http/models'
 import {
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -11,9 +13,6 @@ import {
 } from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
-import { getCitizenCpfPets } from '@/http/citizen/citizen'
-import type { ModelsPet } from '@/http/models'
-
 
 export async function GET() {
   try {
