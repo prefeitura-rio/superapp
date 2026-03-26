@@ -88,8 +88,7 @@ function hasExperienciaRequiredFieldsFilled(
       (e.cargo?.trim()?.length ?? 0) > 0 &&
       (e.empresa?.trim()?.length ?? 0) > 0 &&
       (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
-      e.tempoExperienciaMeses != null &&
-      e.tempoExperienciaMeses >= 1 &&
+      ((e.tempoExperienciaAnos ?? 0) * 12 + (e.tempoExperienciaMeses ?? 0)) >= 1 &&
       (e.experienciaComprovadaCarteira === 'Sim' ||
         e.experienciaComprovadaCarteira === 'Não')
   )
@@ -285,23 +284,82 @@ function ExperienciaProfissionalAccordionContentInner({
             </div>
 
             <div className="space-y-2">
-              <CustomInput
-                {...register(`empregos.${index}.tempoExperienciaMeses`, {
-                  setValueAs: (v: string | number) => {
-                    if (v === '' || v === undefined) return undefined
-                    const n = Number(v)
-                    return Number.isNaN(n) ? undefined : n
-                  },
-                })}
-                id={`emprego-${index}-tempo`}
-                label="Tempo de experiência (em meses)"
-                placeholder="Tempo de experiência"
-                type="number"
-                min={1}
-                max={600}
-                error={errors.empregos?.[index]?.tempoExperienciaMeses?.message}
-                className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-              />
+              <span
+                className={cn(
+                  'text-sm font-normal block',
+                  errors.empregos?.[index]?.tempoExperienciaAnos ||
+                    errors.empregos?.[index]?.tempoExperienciaMeses
+                    ? 'text-destructive'
+                    : 'text-primary'
+                )}
+              >
+                Tempo de experiência
+              </span>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="relative">
+                    <CustomInput
+                      {...register(`empregos.${index}.tempoExperienciaAnos`, {
+                        setValueAs: (v: string | number) => {
+                          if (v === '' || v === undefined) return undefined
+                          const n = Number(v)
+                          return Number.isNaN(n) ? undefined : n
+                        },
+                      })}
+                      id={`emprego-${index}-tempo-anos`}
+                      placeholder="0"
+                      type="number"
+                      min={0}
+                      max={50}
+                      className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background pr-16"
+                    />
+                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                      ano(s)
+                    </span>
+                  </div>
+                </div>
+
+                <span className="text-sm text-foreground font-medium">e</span>
+
+                <div className="flex-1">
+                  <div className="relative">
+                    <CustomInput
+                      {...register(`empregos.${index}.tempoExperienciaMeses`, {
+                        setValueAs: (v: string | number) => {
+                          if (v === '' || v === undefined) return undefined
+                          const n = Number(v)
+                          return Number.isNaN(n) ? undefined : n
+                        },
+                      })}
+                      id={`emprego-${index}-tempo-meses`}
+                      placeholder="0"
+                      type="number"
+                      min={0}
+                      max={11}
+                      className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background pr-16"
+                    />
+                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                      mês(es)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {(errors.empregos?.[index]?.tempoExperienciaAnos?.message ||
+                errors.empregos?.[index]?.tempoExperienciaMeses?.message) && (
+                <p className="text-sm text-destructive">
+                  {errors.empregos?.[index]?.tempoExperienciaAnos?.message ||
+                    errors.empregos?.[index]?.tempoExperienciaMeses?.message}
+                </p>
+              )}
+
+              {!errors.empregos?.[index]?.tempoExperienciaAnos &&
+                !errors.empregos?.[index]?.tempoExperienciaMeses && (
+                  <p className={HINT_CLASS}>
+                    Informe pelo menos 1 mês de experiência no total
+                  </p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -348,6 +406,7 @@ function ExperienciaProfissionalAccordionContentInner({
               meuEmpregoAtual: false,
               empresa: '',
               descricaoAtividades: '',
+              tempoExperienciaAnos: undefined,
               tempoExperienciaMeses: undefined,
               experienciaComprovadaCarteira: '',
             })

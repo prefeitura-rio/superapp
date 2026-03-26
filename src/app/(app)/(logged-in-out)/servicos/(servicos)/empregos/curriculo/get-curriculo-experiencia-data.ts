@@ -3,27 +3,35 @@ import {
   getApiV1EmpregabilidadeCurriculoCpfExperiencias,
 } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
+import { convertMonthsToYearsAndMonths } from '@/lib/experiencia-utils'
 
 function parseExperienciasArray(
   data: unknown
 ): CurriculoExperienciaFormValues['empregos'] {
   const arr = Array.isArray(data) ? data : []
-  return arr.map((item: Record<string, unknown>) => ({
-    cargo: String(item.cargo ?? ''),
-    meuEmpregoAtual: Boolean(item.eh_trabalho_atual),
-    empresa: String(item.empresa ?? ''),
-    descricaoAtividades: String(item.descricao_atividades ?? ''),
-    tempoExperienciaMeses:
+  return arr.map((item: Record<string, unknown>) => {
+    // Convert total months from API to years + months for the form
+    const totalMonths =
       typeof item.tempo_experiencia_meses === 'number'
         ? item.tempo_experiencia_meses
-        : undefined,
-    experienciaComprovadaCarteira:
-      item.experiencia_comprovada_ct === true
-        ? 'Sim'
-        : item.experiencia_comprovada_ct === false
-          ? 'Não'
-          : '',
-  }))
+        : undefined
+    const converted = convertMonthsToYearsAndMonths(totalMonths)
+
+    return {
+      cargo: String(item.cargo ?? ''),
+      meuEmpregoAtual: Boolean(item.eh_trabalho_atual),
+      empresa: String(item.empresa ?? ''),
+      descricaoAtividades: String(item.descricao_atividades ?? ''),
+      tempoExperienciaAnos: converted?.anos ?? undefined,
+      tempoExperienciaMeses: converted?.meses ?? undefined,
+      experienciaComprovadaCarteira:
+        item.experiencia_comprovada_ct === true
+          ? 'Sim'
+          : item.experiencia_comprovada_ct === false
+            ? 'Não'
+            : '',
+    }
+  })
 }
 
 function parseConquistasArray(
@@ -53,6 +61,7 @@ export async function getCurriculoExperienciaData(
           meuEmpregoAtual: false,
           empresa: '',
           descricaoAtividades: '',
+          tempoExperienciaAnos: undefined,
           tempoExperienciaMeses: undefined,
           experienciaComprovadaCarteira: '',
         },
@@ -89,6 +98,7 @@ export async function getCurriculoExperienciaData(
               meuEmpregoAtual: false,
               empresa: '',
               descricaoAtividades: '',
+              tempoExperienciaAnos: undefined,
               tempoExperienciaMeses: undefined,
               experienciaComprovadaCarteira: '',
             },

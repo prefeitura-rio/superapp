@@ -7,28 +7,37 @@ import type {
   EmpregabilidadeExperienciaProfissionalAccordionRequest,
 } from '@/http-courses/models'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
+import { convertYearsAndMonthsToMonths } from '@/lib/experiencia-utils'
 
 function buildExperiencias(
   empregos: CurriculoExperienciaFormValues['empregos']
 ): EmpregabilidadeCurriculoExperiencia[] {
   return empregos
-    .filter(
-      e =>
+    .filter(e => {
+      const totalMonths = convertYearsAndMonthsToMonths(
+        e.tempoExperienciaAnos,
+        e.tempoExperienciaMeses
+      )
+      return (
         (e.cargo?.trim()?.length ?? 0) > 0 &&
         (e.empresa?.trim()?.length ?? 0) > 0 &&
         (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
-        e.tempoExperienciaMeses != null &&
-        e.tempoExperienciaMeses >= 1 &&
+        totalMonths != null &&
+        totalMonths >= 1 &&
         (e.experienciaComprovadaCarteira === 'Sim' ||
           e.experienciaComprovadaCarteira === 'Não')
-    )
+      )
+    })
     .map(e => ({
       cargo: e.cargo?.trim() || undefined,
       empresa: e.empresa?.trim() || undefined,
       descricao_atividades: e.descricaoAtividades?.trim() || undefined,
       eh_trabalho_atual: e.meuEmpregoAtual,
       experiencia_comprovada_ct: e.experienciaComprovadaCarteira === 'Sim',
-      tempo_experiencia_meses: e.tempoExperienciaMeses ?? undefined,
+      tempo_experiencia_meses: convertYearsAndMonthsToMonths(
+        e.tempoExperienciaAnos,
+        e.tempoExperienciaMeses
+      ),
     }))
 }
 
