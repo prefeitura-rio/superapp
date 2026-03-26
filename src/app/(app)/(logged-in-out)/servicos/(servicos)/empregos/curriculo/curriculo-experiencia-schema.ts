@@ -19,10 +19,16 @@ const empregoItemSchema = z
       .optional()
       .refine(val => !val || val.length >= 30, 'Mínimo de 30 caracteres')
       .refine(val => !val || val.length <= 300, 'Máximo de 300 caracteres'),
+    tempoExperienciaAnos: z
+      .number({ invalid_type_error: 'Informe os anos' })
+      .min(0, 'Não pode ser negativo')
+      .max(50, 'Máximo de 50 anos')
+      .optional()
+      .nullable(),
     tempoExperienciaMeses: z
-      .number({ invalid_type_error: 'Informe o tempo de experiência' })
-      .min(1, 'Mínimo de 1 mês')
-      .max(600, 'Máximo de 600 meses')
+      .number({ invalid_type_error: 'Informe os meses' })
+      .min(0, 'Não pode ser negativo')
+      .max(11, 'Máximo de 11 meses')
       .optional()
       .nullable(),
     experienciaComprovadaCarteira: z
@@ -40,6 +46,7 @@ const empregoItemSchema = z
       (data.cargo?.trim()?.length ?? 0) > 0 ||
       (data.empresa?.trim()?.length ?? 0) > 0 ||
       (data.descricaoAtividades?.trim()?.length ?? 0) > 0 ||
+      (data.tempoExperienciaAnos != null && data.tempoExperienciaAnos > 0) ||
       (data.tempoExperienciaMeses != null && data.tempoExperienciaMeses > 0) ||
       (data.experienciaComprovadaCarteira?.length ?? 0) > 0
 
@@ -73,15 +80,20 @@ const empregoItemSchema = z
       })
     }
 
-    if (
-      data.tempoExperienciaMeses == null ||
-      data.tempoExperienciaMeses < 1 ||
-      data.tempoExperienciaMeses > 600
-    ) {
+    const totalMonths =
+      (data.tempoExperienciaAnos ?? 0) * 12 + (data.tempoExperienciaMeses ?? 0)
+
+    if (totalMonths < 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['tempoExperienciaMeses'],
-        message: 'Informe o tempo de experiência (1 a 600 meses)',
+        message: 'Informe pelo menos 1 mês de experiência',
+      })
+    } else if (totalMonths > 600) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tempoExperienciaAnos'],
+        message: 'Experiência não pode ultrapassar 50 anos (600 meses)',
       })
     }
 
