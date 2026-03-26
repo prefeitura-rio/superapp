@@ -88,7 +88,8 @@ function hasExperienciaRequiredFieldsFilled(
       (e.cargo?.trim()?.length ?? 0) > 0 &&
       (e.empresa?.trim()?.length ?? 0) > 0 &&
       (e.descricaoAtividades?.trim()?.length ?? 0) > 0 &&
-      ((e.tempoExperienciaAnos ?? 0) * 12 + (e.tempoExperienciaMeses ?? 0)) >= 1 &&
+      (e.tempoExperienciaAnos ?? 0) * 12 + (e.tempoExperienciaMeses ?? 0) >=
+        1 &&
       (e.experienciaComprovadaCarteira === 'Sim' ||
         e.experienciaComprovadaCarteira === 'Não')
   )

@@ -27,11 +27,7 @@ export function convertMonthsToYearsAndMonths(
   totalMonths: number | undefined | null
 ): YearsAndMonths | null {
   // Handle invalid inputs
-  if (
-    totalMonths == null ||
-    Number.isNaN(totalMonths) ||
-    totalMonths < 0
-  ) {
+  if (totalMonths == null || Number.isNaN(totalMonths) || totalMonths < 0) {
     return null
   }
 
@@ -61,8 +57,10 @@ export function convertYearsAndMonthsToMonths(
   meses: number | undefined | null
 ): number | undefined {
   // Normalize inputs - treat null/undefined/NaN as 0
-  const validAnos = Number.isNaN(anos) || anos == null ? 0 : Math.max(0, Math.floor(anos))
-  const validMeses = Number.isNaN(meses) || meses == null ? 0 : Math.max(0, Math.floor(meses))
+  const validAnos =
+    Number.isNaN(anos) || anos == null ? 0 : Math.max(0, Math.floor(anos))
+  const validMeses =
+    Number.isNaN(meses) || meses == null ? 0 : Math.max(0, Math.floor(meses))
 
   const totalMonths = validAnos * 12 + validMeses
 

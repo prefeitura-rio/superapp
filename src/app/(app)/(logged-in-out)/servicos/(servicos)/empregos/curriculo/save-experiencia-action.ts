@@ -6,8 +6,8 @@ import type {
   EmpregabilidadeCurriculoExperiencia,
   EmpregabilidadeExperienciaProfissionalAccordionRequest,
 } from '@/http-courses/models'
-import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import { convertYearsAndMonthsToMonths } from '@/lib/experiencia-utils'
+import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 
 function buildExperiencias(
   empregos: CurriculoExperienciaFormValues['empregos']

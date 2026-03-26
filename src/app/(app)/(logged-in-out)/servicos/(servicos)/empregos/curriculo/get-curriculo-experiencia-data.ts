@@ -2,8 +2,8 @@ import {
   getApiV1EmpregabilidadeCurriculoCpfConquistas,
   getApiV1EmpregabilidadeCurriculoCpfExperiencias,
 } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
-import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 import { convertMonthsToYearsAndMonths } from '@/lib/experiencia-utils'
+import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 
 function parseExperienciasArray(
   data: unknown

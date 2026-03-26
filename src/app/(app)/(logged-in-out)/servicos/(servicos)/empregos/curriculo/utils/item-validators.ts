@@ -69,7 +69,8 @@ export const isEmpregoComplete = (item: EmpregoItem): boolean =>
   hasContent(item.cargo) &&
   hasContent(item.empresa) &&
   hasContent(item.descricaoAtividades) &&
-  ((item.tempoExperienciaAnos ?? 0) * 12 + (item.tempoExperienciaMeses ?? 0)) >= 1 &&
+  (item.tempoExperienciaAnos ?? 0) * 12 + (item.tempoExperienciaMeses ?? 0) >=
+    1 &&
   (item.experienciaComprovadaCarteira === 'Sim' ||
     item.experienciaComprovadaCarteira === 'Não')
 
