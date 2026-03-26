@@ -89,7 +89,7 @@
     "eslint-config-next": "16.1.1",
     "jsdom": "^27.0.1",
     "msw": "^2.12.7",
-    "orval": "7.21.0",
+    "orval": "8.6.2",
     "tw-animate-css": "^1.2.8",
     "typescript": "^5",
     "vitest": "^3.2.4"
