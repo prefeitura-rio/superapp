@@ -71,6 +71,8 @@ import {
   isIdiomaComplete,
   isIdiomaEmpty,
 } from './utils/item-validators'
+import { deepEqual } from './utils/deep-equal'
+import { DiscardChangesDrawer } from './discard-changes-drawer'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
@@ -1282,6 +1284,12 @@ export function CurriculoContent({
   )
   const situacaoSnapshotRef = useRef<CurriculoSituacaoFormValues | null>(null)
 
+  // Estados para controle do modal de confirmação
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+  const [pendingAccordionClose, setPendingAccordionClose] = useState<
+    'formacao' | 'experiencia' | 'situacao' | null
+  >(null)
+
   const defaultFormacaoAcademica =
     (initialFormacoes?.length ?? 0) > 0
       ? (initialFormacoes ?? []).map(f => ({
@@ -1365,7 +1373,63 @@ export function CurriculoContent({
     hasExperienciaRequiredFieldsFilled(formValues)
   const termosAceitos = form.watch('termosAceitos')
 
+  /**
+   * Verifica se o accordion específico tem mudanças não salvas.
+   * Compara o snapshot capturado ao abrir com os valores atuais.
+   */
+  const hasUnsavedChanges = (
+    accordionType: 'formacao' | 'experiencia' | 'situacao'
+  ): boolean => {
+    const currentValues = form.getValues()
+
+    if (accordionType === 'formacao') {
+      const snapshot = formacaoSnapshotRef.current
+      if (!snapshot) return false
+
+      const currentSnapshot = getFormacaoSnapshot(currentValues)
+      return !deepEqual(currentSnapshot, snapshot)
+    }
+
+    if (accordionType === 'experiencia') {
+      const snapshot = experienciaSnapshotRef.current
+      if (!snapshot) return false
+
+      const currentSnapshot = getExperienciaSnapshot(currentValues)
+      return !deepEqual(currentSnapshot, snapshot)
+    }
+
+    if (accordionType === 'situacao') {
+      const snapshot = situacaoSnapshotRef.current
+      if (!snapshot) return false
+
+      const currentSnapshot = getSituacaoSnapshot(currentValues)
+      return !deepEqual(currentSnapshot, snapshot)
+    }
+
+    return false
+  }
+
   const handleAccordionValueChange = (value: string) => {
+    // Detectar fechamento de accordion
+    const isClosing = value === '' && accordionValue !== ''
+
+    if (isClosing) {
+      // Determinar qual accordion está fechando
+      const closingAccordion = accordionValue as
+        | 'formacao'
+        | 'experiencia'
+        | 'situacao'
+
+      // Verificar se há mudanças não salvas
+      if (hasUnsavedChanges(closingAccordion)) {
+        // Bloquear fechamento e abrir modal
+        setPendingAccordionClose(closingAccordion)
+        setShowDiscardDialog(true)
+        return // NÃO fecha o accordion ainda
+      }
+    }
+
+    // Comportamento original (abrir accordion = capturar snapshot)
     if (value === 'formacao') {
       formacaoSnapshotRef.current = getFormacaoSnapshot(form.getValues())
     }
@@ -1375,6 +1439,7 @@ export function CurriculoContent({
     if (value === 'situacao') {
       situacaoSnapshotRef.current = getSituacaoSnapshot(form.getValues())
     }
+
     setAccordionValue(value)
   }
 
@@ -1451,6 +1516,38 @@ export function CurriculoContent({
   const handleSituacaoSaveSuccess = (data: CurriculoSituacaoFormValues) => {
     situacaoSnapshotRef.current = getSituacaoSnapshot(data)
     setAccordionValue('')
+  }
+
+  /**
+   * Handler quando usuário clica "Cancelar" no modal.
+   * Fecha o modal e mantém o accordion aberto.
+   */
+  const handleCancelDiscard = () => {
+    setShowDiscardDialog(false)
+    setPendingAccordionClose(null)
+    // Accordion permanece aberto (accordionValue não muda)
+  }
+
+  /**
+   * Handler quando usuário clica "Descartar alterações" no modal.
+   * Reverte para snapshot e fecha o accordion.
+   */
+  const handleConfirmDiscard = () => {
+    if (!pendingAccordionClose) return
+
+    // Reverter mudanças usando handlers existentes
+    if (pendingAccordionClose === 'formacao') {
+      handleFormacaoCancel()
+    } else if (pendingAccordionClose === 'experiencia') {
+      handleExperienciaCancel()
+    } else if (pendingAccordionClose === 'situacao') {
+      handleSituacaoCancel()
+    }
+
+    // Fechar modal e accordion
+    setShowDiscardDialog(false)
+    setPendingAccordionClose(null)
+    // Nota: handleXxxCancel já fecha o accordion (setAccordionValue(''))
   }
 
   const handleContinuar = () => {
@@ -1685,6 +1782,13 @@ export function CurriculoContent({
           </ExperienciaApiProvider>
         </SituacaoApiProvider>
       </FormacaoApiProvider>
+
+      <DiscardChangesDrawer
+        open={showDiscardDialog}
+        onOpenChange={setShowDiscardDialog}
+        onDiscard={handleConfirmDiscard}
+        onCancel={handleCancelDiscard}
+      />
 
       <CandidaturaEnviadaDrawer
         open={successSheetOpen}
