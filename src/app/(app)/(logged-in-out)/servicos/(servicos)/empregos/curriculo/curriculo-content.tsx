@@ -35,6 +35,7 @@ import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 import { curriculoSchema } from './curriculo-schema'
 import type { CurriculoFormValues } from './curriculo-schema'
 import type { CurriculoSituacaoFormValues } from './curriculo-situacao-schema'
+import { DiscardChangesDrawer } from './discard-changes-drawer'
 import { DisponibilidadeDrawerContent } from './disponibilidade-drawer-content'
 import { EscolaridadeDrawerContent } from './escolaridade-drawer-content'
 import { ExperienciaApiProvider } from './experiencia-api-context'
@@ -65,14 +66,13 @@ import { TempoProcurandoEmpregoDrawerContent } from './tempo-procurando-emprego-
 import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
+import { deepEqual } from './utils/deep-equal'
 import {
   isFormacaoAcademicaComplete,
   isFormacaoAcademicaEmpty,
   isIdiomaComplete,
   isIdiomaEmpty,
 } from './utils/item-validators'
-import { deepEqual } from './utils/deep-equal'
-import { DiscardChangesDrawer } from './discard-changes-drawer'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
