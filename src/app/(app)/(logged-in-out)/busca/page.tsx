@@ -38,7 +38,7 @@ export default function Search() {
   const handleBack = () => {
     handleBackNavigation(router)
   }
-
+  const test = ''
   const handleSearchItemClick = (item: SearchResultItem) => {
     handleItemClick(item, query, router, url => {
       setSelectedExternalUrl(url)
