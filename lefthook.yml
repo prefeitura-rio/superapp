@@ -6,8 +6,9 @@
 
 # Como funciona na prática
 # Ao commitar: formata (Biome) o que está no stage nos tipos listados e, se houver TS/TSX no stage, roda o typecheck.
-# Ao dar push: roda de novo typecheck, depois verificação Biome (lint “check”), depois testes com cobertura — desde que os hooks estejam instalados e os comandos não sejam pulados pelo glob.
-# Se algo falhar (Biome, tsc ou Vitest), o commit ou o push é bloqueado até corrigir ou ajustar a configuração.
+# Ao dar push: roda de novo typecheck, depois verificação Biome (lint “check”), depois testes com cobertura e Playwright (E2E) — desde que os hooks estejam instalados e os comandos não sejam pulados pelo glob.
+# E2E é mais pesado (sobe o app e o browser). Para pular só os E2E no push: SKIP_E2E=1 git push
+# Se algo falhar (Biome, tsc, Vitest ou Playwright), o commit ou o push é bloqueado até corrigir ou ajustar a configuração.
 
 # Antes de gravar o commit.
 pre-commit:
@@ -23,6 +24,7 @@ pre-push:
   commands:
     # De novo o typecheck antes de enviar a branch.
     validate:
+      priority: 1
       glob: '*.{ts,tsx}'
       run: npm run typecheck
     # Biome: formatter + linter (sem --write; falha se algo não estiver de acordo com biome.json).
@@ -32,5 +34,13 @@ pre-push:
     #   run: npm run lint
     # Testes unitários com cobertura (Vitest).
     test:
+      priority: 2
       glob: '*.{ts,tsx}'
       run: npm run test:coverage
+    # Playwright E2E (mesmo critério de glob que os testes unitários). Ver cabeçalho: SKIP_E2E=1 para pular.
+    e2e:
+      priority: 3
+      glob: '*.{ts,tsx}'
+      run: npm run test:e2e:hook
+      skip:
+        - run: test -n "$SKIP_E2E"
