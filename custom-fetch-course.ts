@@ -71,8 +71,26 @@ export const customFetch = async <T>(
     keepalive: true,
   }
 
+  // Log detalhado da requisição
+  console.log('🌐 [customFetch] REQUISIÇÃO:', {
+    url: requestUrl,
+    method: options.method,
+    headers: requestHeaders,
+    body: options.body,
+  })
+
   const response = await fetch(requestUrl, requestInit)
+
+  console.log('📥 [customFetch] RESPOSTA:', {
+    url: requestUrl,
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries(response.headers.entries()),
+  })
+
   const data = await getBody<T>(response)
+
+  console.log('📦 [customFetch] DATA:', data)
 
   return { status: response.status, data, headers: response.headers } as T
 }
