@@ -11,7 +11,6 @@ export default function WalletLoading() {
             {/* Search button skeleton */}
             <Skeleton className="rounded-full h-12 w-12" />
           </div>
-
           <div className="grid w-full gap-2">
             {/* Wallet card skeletons */}
             {Array.from({ length: 4 }).map((_, i) => (
