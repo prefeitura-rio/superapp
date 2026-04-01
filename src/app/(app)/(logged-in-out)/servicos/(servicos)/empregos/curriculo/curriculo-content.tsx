@@ -279,8 +279,11 @@ function FormacaoAccordionContent({
   })
 
   const handleFormacaoSave = async () => {
+    console.log('🚀 [handleFormacaoSave] INICIANDO SALVAMENTO')
+
     const isValid = await trigger([...FORMACAO_FIELD_NAMES])
     if (!isValid) {
+      console.error('❌ [handleFormacaoSave] VALIDAÇÃO FALHOU:', errors)
       toast.error('Por favor, revise todos os campos.')
       const firstErrorField = getFirstErrorField(errors)
       if (firstErrorField) {
@@ -290,23 +293,35 @@ function FormacaoAccordionContent({
     }
 
     if (!cpf?.trim()) {
+      console.error('❌ [handleFormacaoSave] CPF NÃO DISPONÍVEL')
       toast.error('CPF não disponível. Faça login novamente.')
       return
     }
 
     const values = getValues()
+    console.log('📋 [handleFormacaoSave] VALUES DO FORM:', values)
+
     const snapshot = getFormacaoSnapshot(values)
+    console.log('📸 [handleFormacaoSave] SNAPSHOT:', snapshot)
+
     const apiPayload = getFormacaoApiPayload(values)
+    console.log('📦 [handleFormacaoSave] API PAYLOAD FINAL:', apiPayload)
 
     try {
+      console.log('🌐 [handleFormacaoSave] ENVIANDO PARA API com CPF:', cpf)
       const result = await saveFormacaoAccordion(cpf, apiPayload)
+      console.log('📥 [handleFormacaoSave] RESPOSTA DA API:', result)
+
       if (result.success) {
+        console.log('✅ [handleFormacaoSave] SUCESSO!')
         toast.success('Formação salva com sucesso')
         onSaveSuccess(snapshot)
       } else {
+        console.error('❌ [handleFormacaoSave] FALHA NA API:', result)
         toast.error('Não foi possível salvar. Tente novamente.')
       }
-    } catch {
+    } catch (error) {
+      console.error('💥 [handleFormacaoSave] EXCEÇÃO:', error)
       toast.error('Erro ao salvar formação. Tente novamente.')
     }
   }
@@ -868,6 +883,11 @@ function getFormacaoPayload(
 function getFormacaoApiPayload(
   values: CurriculoFormacaoFormValues
 ): EmpregabilidadeFormacaoAccordionRequest {
+  console.log('🔍 [getFormacaoApiPayload] VALUES RECEBIDOS:', {
+    idiomas: values.idiomas,
+    formacaoAcademica: values.formacaoAcademica,
+  })
+
   const formacoes = (values.formacaoAcademica ?? [])
     .filter(
       f =>
@@ -884,7 +904,10 @@ function getFormacaoApiPayload(
       ano_conclusao: f.anoConclusao!.trim(),
     }))
 
-  const idiomas = (values.idiomas ?? [])
+  const idiomasAntesDoFilter = values.idiomas ?? []
+  console.log('🔍 [getFormacaoApiPayload] IDIOMAS ANTES DO FILTER:', idiomasAntesDoFilter)
+
+  const idiomas = idiomasAntesDoFilter
     .filter(
       i =>
         (i.idIdioma?.trim()?.length ?? 0) > 0 &&
@@ -894,6 +917,9 @@ function getFormacaoApiPayload(
       id_idioma: i.idIdioma!.trim(),
       id_nivel: i.idNivel!.trim(),
     }))
+
+  console.log('✅ [getFormacaoApiPayload] IDIOMAS DEPOIS DO FILTER:', idiomas)
+  console.log('📤 [getFormacaoApiPayload] PAYLOAD FINAL:', { formacoes, idiomas })
 
   return { formacoes, idiomas }
 }
