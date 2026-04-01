@@ -29,6 +29,7 @@ import { MapPin } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import { z } from 'zod'
 
 // Define the schema for address validation
@@ -290,9 +291,11 @@ export default function AddressForm() {
         })
         setDrawerOpen(false)
         setFeedbackDrawerOpen(true)
+      } else {
+        toast.error(result.error || 'Erro ao atualizar endereço')
       }
     } catch (error: any) {
-      // Redirect to session expired page on any error
+      // Only redirect on unexpected errors (network failures, etc.)
       router.push('/sessao-expirada')
     }
   }
@@ -409,7 +412,7 @@ export default function AddressForm() {
                 if (returnUrl) {
                   router.push(returnUrl)
                 } else {
-                  router.back()
+                  router.push('/meu-perfil/endereco')
                 }
               }}
             >
