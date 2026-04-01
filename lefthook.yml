@@ -26,9 +26,10 @@ pre-push:
       glob: '*.{ts,tsx}'
       run: npm run typecheck
     # Biome: formatter + linter (sem --write; falha se algo não estiver de acordo com biome.json).
-    lint:
-      glob: '*.{ts,tsx}'
-      run: npm run lint
+    # TODO: Enable on the future. Disabled so that we do not face git conflicts.
+    # lint:
+    #   glob: '*.{ts,tsx}'
+    #   run: npm run lint
     # Testes unitários com cobertura (Vitest).
     test:
       glob: '*.{ts,tsx}'
