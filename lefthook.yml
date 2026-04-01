@@ -37,7 +37,7 @@ pre-push:
       priority: 2
       glob: '*.{ts,tsx}'
       run: npm run test:coverage
-    # Playwright E2E (mesmo critério de glob que os testes unitários). Ver cabeçalho: SKIP_E2E=1 para pular.
+    # Playwright E2E (mesmo critério de glob que os testes unitários). Ver cabeçalho: SKIP_E2E=1 para pular
     e2e:
       priority: 3
       glob: '*.{ts,tsx}'
