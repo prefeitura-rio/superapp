@@ -905,7 +905,10 @@ function getFormacaoApiPayload(
     }))
 
   const idiomasAntesDoFilter = values.idiomas ?? []
-  console.log('🔍 [getFormacaoApiPayload] IDIOMAS ANTES DO FILTER:', idiomasAntesDoFilter)
+  console.log(
+    '🔍 [getFormacaoApiPayload] IDIOMAS ANTES DO FILTER:',
+    idiomasAntesDoFilter
+  )
 
   const idiomas = idiomasAntesDoFilter
     .filter(
@@ -919,7 +922,10 @@ function getFormacaoApiPayload(
     }))
 
   console.log('✅ [getFormacaoApiPayload] IDIOMAS DEPOIS DO FILTER:', idiomas)
-  console.log('📤 [getFormacaoApiPayload] PAYLOAD FINAL:', { formacoes, idiomas })
+  console.log('📤 [getFormacaoApiPayload] PAYLOAD FINAL:', {
+    formacoes,
+    idiomas,
+  })
 
   return { formacoes, idiomas }
 }

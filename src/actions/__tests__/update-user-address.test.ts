@@ -32,16 +32,20 @@ describe('updateAddress', () => {
   })
 
   describe('error scenarios', () => {
-    test('throws error for API failure (status 400)', async () => {
+    test('returns error payload for API failure (status 400)', async () => {
       server.use(
         http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/address`, () => {
           return HttpResponse.json({ error: 'CEP inválido' }, { status: 400 })
         })
       )
 
-      await expect(updateAddress(validAddressData)).rejects.toThrow(
-        'CEP inválido'
-      )
+      const result = await updateAddress(validAddressData)
+
+      expect(result).toEqual({
+        success: false,
+        error: 'CEP inválido',
+        status: 400,
+      })
     })
 
     test('throws error when user not authenticated', async () => {

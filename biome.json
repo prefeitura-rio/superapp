@@ -52,7 +52,10 @@
       "next-env.d.ts",
       "node_modules/**",
       "package-lock.json",
-      "**/*.js"
+      "**/*.js",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**"
     ]
   }
 }

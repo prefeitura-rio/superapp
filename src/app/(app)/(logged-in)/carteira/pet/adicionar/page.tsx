@@ -1,12 +1,6 @@
 import { buildAuthUrl } from '@/constants/url'
-import {
-  hasValidEmail,
-  normalizeEmailData,
-} from '@/helpers/email-data-helpers'
-import {
-  hasValidPhone,
-  normalizePhoneData,
-} from '@/helpers/phone-data-helpers'
+import { hasValidEmail, normalizeEmailData } from '@/helpers/email-data-helpers'
+import { hasValidPhone, normalizePhoneData } from '@/helpers/phone-data-helpers'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,

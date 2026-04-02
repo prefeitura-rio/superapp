@@ -168,7 +168,10 @@ describe('getCourseEnrollmentInfo', () => {
   })
 
   test('returns available for concluded user without certificate', () => {
-    const course = createCourse({ has_certificate: false })
+    const course = createCourse({
+      has_certificate: false,
+      modalidade: 'LIVRE_FORMACAO_ONLINE',
+    })
     const enrollment = createEnrollment({ status: 'concluded' })
 
     const result = getCourseEnrollmentInfo(course, enrollment)
@@ -228,7 +231,7 @@ describe('getCourseEnrollmentInfo', () => {
   })
 
   test('returns available when no restrictions', () => {
-    const course = createCourse()
+    const course = createCourse({ modalidade: 'LIVRE_FORMACAO_ONLINE' })
 
     const result = getCourseEnrollmentInfo(course)
 
@@ -240,6 +243,7 @@ describe('getCourseEnrollmentInfo', () => {
 
   test('returns available when enrollment dates are in range', () => {
     const course = createCourse({
+      modalidade: 'LIVRE_FORMACAO_ONLINE',
       enrollment_start_date: '2026-01-01T00:00:00Z',
       enrollment_end_date: '2026-02-01T00:00:00Z',
     })
@@ -326,6 +330,7 @@ describe('sortCourses', () => {
       }),
       createCourse({
         id: 2,
+        modalidade: 'LIVRE_FORMACAO_ONLINE',
         created_at: '2026-01-01T00:00:00Z',
       }),
     ]

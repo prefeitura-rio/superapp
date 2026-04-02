@@ -1316,7 +1316,9 @@ export function CourseDetails({
         <CourseContent course={course} />
         {/* Bottom action button - hide for approved users since buttons are shown above description */}
         {userEnrollment?.status !== 'approved' && (
-          <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
+          <div className="p-4 w-full max-w-4xl pt-8">
+            {renderActionButton()}
+          </div>
         )}
       </div>
     </div>

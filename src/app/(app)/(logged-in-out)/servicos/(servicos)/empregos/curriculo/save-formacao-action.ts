@@ -10,13 +10,18 @@ export async function saveFormacaoAccordion(
 ): Promise<{ success: boolean; status?: number; error?: string }> {
   console.log('🔄 [saveFormacaoAccordion] INICIANDO SERVER ACTION')
   console.log('👤 [saveFormacaoAccordion] CPF:', cpf)
-  console.log('📦 [saveFormacaoAccordion] PAYLOAD RECEBIDO:', JSON.stringify(payload, null, 2))
+  console.log(
+    '📦 [saveFormacaoAccordion] PAYLOAD RECEBIDO:',
+    JSON.stringify(payload, null, 2)
+  )
 
   try {
     const normalizedCpf = cpf.replace(/\D/g, '')
     console.log('✂️ [saveFormacaoAccordion] CPF NORMALIZADO:', normalizedCpf)
 
-    console.log('🌐 [saveFormacaoAccordion] CHAMANDO API putApiV1EmpregabilidadeCurriculoCpfFormacoes...')
+    console.log(
+      '🌐 [saveFormacaoAccordion] CHAMANDO API putApiV1EmpregabilidadeCurriculoCpfFormacoes...'
+    )
     const response = await putApiV1EmpregabilidadeCurriculoCpfFormacoes(
       normalizedCpf,
       payload

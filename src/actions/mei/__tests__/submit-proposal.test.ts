@@ -12,6 +12,7 @@ describe('submitMeiProposal', () => {
     meiEmpresaId: 'mei-empresa-456',
     valorProposta: 1500.0,
     prazoExecucaoDias: 30,
+    aceitaCustosIntegrais: true,
     telefone: '21999999999',
     email: 'mei@example.com',
   }

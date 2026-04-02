@@ -22,7 +22,10 @@ export function parseContent(text: string): ContentPart[] {
   const boldRegex = /\*\*([^*]+)\*\*/g // Picks bold text
 
   let lastIndex = 0
-  const matches: Array<{ type: 'video' | 'url' | 'bold'; match: RegExpExecArray }> = []
+  const matches: Array<{
+    type: 'video' | 'url' | 'bold'
+    match: RegExpExecArray
+  }> = []
 
   let videoMatch = videoTitleRegex.exec(text)
   while (videoMatch !== null) {

@@ -237,7 +237,10 @@ function getDefaultMockDetail(
   const modalityBadge = vaga.badges.find(b => b.type === 'modality')
   const bairroBadge = vaga.badges.find(b => b.type === 'bairro')
   const pcd = vaga.badges.find(
-    b => b.type === 'preferencial_pcd' || b.type === 'acessivel_pcd' || b.type === 'exclusivo_pcd'
+    b =>
+      b.type === 'preferencial_pcd' ||
+      b.type === 'acessivel_pcd' ||
+      b.type === 'exclusivo_pcd'
   )
   const override = MOCK_DETAIL_BY_ID[vaga.id] ?? {}
 

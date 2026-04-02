@@ -5,7 +5,9 @@ interface MicroshippingStatusCardProps {
   href: string
 }
 
-export function MicroshippingStatusCard({ href }: MicroshippingStatusCardProps) {
+export function MicroshippingStatusCard({
+  href,
+}: MicroshippingStatusCardProps) {
   return (
     <a
       href={href}
