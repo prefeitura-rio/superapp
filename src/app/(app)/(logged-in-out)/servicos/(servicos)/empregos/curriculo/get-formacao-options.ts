@@ -2,6 +2,7 @@ import { getApiV1EmpregabilidadeEscolaridades } from '@/http-courses/empregabili
 import { getApiV1EmpregabilidadeIdiomas } from '@/http-courses/empregabilidade-idiomas/empregabilidade-idiomas'
 import { getApiV1EmpregabilidadeNiveisIdioma } from '@/http-courses/empregabilidade-niveis-idioma/empregabilidade-niveis-idioma'
 import type { FormacaoApiItem, FormacaoOptions } from './formacao-options-types'
+import { sortLanguageLevels } from './utils/language-sorting'
 
 function parseListResponse(data: unknown): FormacaoApiItem[] {
   const body = data as {
@@ -42,7 +43,7 @@ export async function getFormacaoOptions(): Promise<FormacaoOptions> {
         : [],
     niveisIdioma:
       niveisRes.status === 200 && niveisRes.data
-        ? parseListResponse(niveisRes.data)
+        ? sortLanguageLevels(parseListResponse(niveisRes.data))
         : [],
   }
 }
