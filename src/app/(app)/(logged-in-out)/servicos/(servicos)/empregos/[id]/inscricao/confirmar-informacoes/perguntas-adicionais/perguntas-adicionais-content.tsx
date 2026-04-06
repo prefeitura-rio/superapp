@@ -408,12 +408,16 @@ export function PerguntasAdicionaisContent({
 
       <CandidaturaEnviadaDrawer
         open={successDrawerOpen}
-        onOpenChange={open => {
+        onOpenChange={async open => {
           setSuccessDrawerOpen(open)
           if (!open) {
             if (onSuccessClose) {
               onSuccessClose()
             } else {
+              const { revalidateEmpregosPage } = await import(
+                '../../revalidate-empregos-action'
+              )
+              await revalidateEmpregosPage()
               router.push('/servicos/empregos')
             }
           }

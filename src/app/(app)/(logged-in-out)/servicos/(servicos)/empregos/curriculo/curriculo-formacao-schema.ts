@@ -3,6 +3,7 @@ import {
   ANO_CONCLUSAO_FORMACAO_OPCOES,
   STATUS_FORMACAO_OPCOES,
 } from './constants'
+import { findDuplicateLanguageIds } from './utils/language-duplicate-detection'
 
 const formacaoAcademicaItemSchema = z
   .object({
@@ -57,11 +58,31 @@ export const curriculoFormacaoSchema = z.object({
   escolaridade: z.string().min(1, 'Escolaridade é obrigatória'),
   formacaoAcademica: z.array(formacaoAcademicaItemSchema),
   idiomas: z.array(idiomaItemSchema).superRefine((arr, ctx) => {
+    // Check for duplicate languages FIRST
+    const duplicateIds = findDuplicateLanguageIds(arr)
+
+    // Track which duplicates we've already flagged to show error on first occurrence
+    const flaggedDuplicates = new Set<string>()
+
     arr.forEach((item, index) => {
       const hasIdioma = (item.idIdioma?.trim()?.length ?? 0) > 0
       const hasNivel = (item.idNivel?.trim()?.length ?? 0) > 0
       const isComplete = hasIdioma && hasNivel
 
+      // Check if this language is a duplicate
+      if (hasIdioma && duplicateIds.has(item.idIdioma!.trim())) {
+        if (!flaggedDuplicates.has(item.idIdioma!.trim())) {
+          flaggedDuplicates.add(item.idIdioma!.trim())
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [index, 'idIdioma'],
+            message:
+              'Este idioma já foi adicionado. Por favor, remova ou selecione outro.',
+          })
+        }
+      }
+
+      // Existing validation for completeness
       if (!isComplete) {
         if (!hasIdioma) {
           ctx.addIssue({

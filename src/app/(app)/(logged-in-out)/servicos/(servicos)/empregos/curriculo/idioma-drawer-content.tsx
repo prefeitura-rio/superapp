@@ -4,6 +4,7 @@ import { RadioList } from '@/components/ui/custom/radio-list'
 import { useFormContext } from 'react-hook-form'
 import type { CurriculoFormacaoFormValues } from './curriculo-formacao-schema'
 import { useFormacaoApi } from './formacao-api-context'
+import { getSelectedLanguageIds } from './utils/language-duplicate-detection'
 
 interface IdiomaDrawerContentProps {
   fieldIndex: number
@@ -18,10 +19,21 @@ export function IdiomaDrawerContent({
   const { idiomas, isLoading } = useFormacaoApi()
   const value = watch(`idiomas.${fieldIndex}.idIdioma`) ?? ''
 
-  const options = idiomas.map(item => ({
-    label: item.descricao,
-    value: item.id,
-  }))
+  // Get all selected languages except current field
+  const allIdiomas = watch('idiomas')
+  const selectedLanguageIds = getSelectedLanguageIds(allIdiomas, fieldIndex)
+
+  // Transform options to include disabled state for already-selected languages
+  const options = idiomas.map(item => {
+    const isAlreadySelected = selectedLanguageIds.has(item.id)
+    return {
+      label: isAlreadySelected
+        ? `${item.descricao} (já adicionado)`
+        : item.descricao,
+      value: item.id,
+      disabled: isAlreadySelected,
+    }
+  })
 
   const handleSelect = (selected: string) => {
     setValue(`idiomas.${fieldIndex}.idIdioma`, selected, {

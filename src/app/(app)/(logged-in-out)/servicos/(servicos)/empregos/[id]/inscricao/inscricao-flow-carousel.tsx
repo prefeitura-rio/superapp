@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { revalidateEmpregosPage } from './revalidate-empregos-action'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
 import type { CurriculoExperienciaFormValues } from '../../curriculo/curriculo-experiencia-schema'
 import type { ExperienciaOptions } from '../../curriculo/experiencia-options-types'
@@ -134,11 +135,13 @@ export function InscricaoFlowCarousel({
     goToNext()
   }, [goToNext])
 
-  const handleCurriculoSuccessClose = useCallback(() => {
+  const handleCurriculoSuccessClose = useCallback(async () => {
+    await revalidateEmpregosPage()
     router.push('/servicos/empregos')
   }, [router])
 
-  const handlePerguntasSuccessClose = useCallback(() => {
+  const handlePerguntasSuccessClose = useCallback(async () => {
+    await revalidateEmpregosPage()
     router.push('/servicos/empregos')
   }, [router])
 
