@@ -1601,12 +1601,16 @@ export function CurriculoContent({
     )()
   }
 
-  const handleSuccessSheetOpenChange = (open: boolean) => {
+  const handleSuccessSheetOpenChange = async (open: boolean) => {
     setSuccessSheetOpen(open)
     if (!open) {
       if (onSuccessClose) {
         onSuccessClose()
       } else {
+        const { revalidateEmpregosPage } = await import(
+          '../[id]/inscricao/revalidate-empregos-action'
+        )
+        await revalidateEmpregosPage()
         router.push('/servicos/empregos')
       }
     }
