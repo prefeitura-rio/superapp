@@ -227,7 +227,7 @@ Todos os testes requerem `E2E_ACCESS_TOKEN`.
 - Label do switch reflete estado atual ("Autorizo" / "Não autorizo")
 - Toggle do switch: liga sem confirmação; desliga abre drawer de confirmação (teste cancela para não alterar estado real)
 
-`**/meu-perfil/configuracoes**`
+`**/meu-perfil/configuracoes`**
 
 - Exibe heading e opções de tema (Modo Claro / Modo Escuro) como radio buttons
 - Alterna para Modo Escuro e restaura Modo Claro

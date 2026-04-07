@@ -11,7 +11,7 @@ export default defineConfig({
   globalSetup: './e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 2,
+  retries: 2,
   workers: 1,
   expect: { timeout: process.env.CI ? 15000 : 15000 },
   reporter: 'html',
