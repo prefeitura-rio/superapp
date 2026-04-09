@@ -107,6 +107,22 @@ export async function middleware(request: NextRequest) {
         }
       }
 
+      // FUTURE: cadastro de pet — rota desativada até a feature entrar no ar
+      if (
+        path === '/carteira/pet/adicionar' ||
+        path.startsWith('/carteira/pet/adicionar/')
+      ) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/not-found'
+
+        const response = NextResponse.rewrite(url)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
+      }
+
       const publicRoute = publicRoutes.find(route =>
         matchRoute(path, route.path)
       )

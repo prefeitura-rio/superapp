@@ -1,7 +1,8 @@
 import EmptyWallet from '@/app/components/empty-wallet'
 import { FloatNavigation } from '@/app/components/float-navigation'
 import { SearchButton } from '@/app/components/search-button'
-import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
+import { WalletContent } from '@/app/components/wallet-content'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
 import {
   getDalCitizenCpfMaintenanceRequest,
   getDalCitizenCpfWallet,
@@ -10,9 +11,19 @@ import {
 } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
+import { Suspense } from 'react'
 
 export default async function Wallet() {
   const userAuthInfo = await getUserInfoFromToken()
+
+  const petsResponse = await getCitizenCpfPets(userAuthInfo.cpf)
+  const pets =
+    petsResponse.status === 200 &&
+    'data' in petsResponse.data &&
+    Array.isArray(petsResponse.data.data)
+      ? petsResponse.data.data
+      : []
+
   let walletData
   let maintenanceRequests: any[] | undefined = []
   let healthUnitData
@@ -33,7 +44,6 @@ export default async function Wallet() {
       console.error('Error fetching wallet data:', error)
     }
 
-    // Fetch health unit data if CNES is available
     const cnes = walletData?.saude?.clinica_familia?.id_cnes
     if (cnes) {
       try {
@@ -61,13 +71,12 @@ export default async function Wallet() {
       }
     }
 
-    // Fetch maintenance requests data
     try {
       const maintenanceResponse = await getDalCitizenCpfMaintenanceRequest(
         userAuthInfo.cpf,
         {
           page: 1,
-          per_page: 100, // Get all requests: TODO: paginate
+          per_page: 100,
         }
       )
       if (maintenanceResponse.status === 200) {
@@ -83,40 +92,36 @@ export default async function Wallet() {
     }
   }
 
-  // Get wallet data info (count and hasData)
   const walletInfo = getWalletDataInfo(
     walletData,
     maintenanceRequests?.length || 0
   )
 
   return (
-    <>
-      {/* <MainHeader /> */}
-      <main className="max-w-xl mx-auto text-white">
-        {walletInfo?.hasData ? (
-          <section className="pb-30 px-4 relative h-full ">
-            <div className="flex items-start justify-between pt-6 pb-6">
-              <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
-                Carteira
-              </h2>
+    <main className="min-h-lvh max-w-xl mx-auto text-white">
+      {walletInfo?.hasData || pets.length > 0 ? (
+        <section className="pb-30 px-4 relative h-full">
+          <div className="flex items-center justify-between pt-6 pb-4">
+            <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+              Carteira
+            </h2>
+            <SearchButton />
+          </div>
 
-              <SearchButton />
-            </div>
-
-            {walletInfo && (
-              <WalletCardsWrapper
-                walletData={walletData}
-                maintenanceRequests={maintenanceRequests}
-                healthUnitData={healthUnitData}
-                healthUnitRiskData={healthUnitRiskData}
-              />
-            )}
-          </section>
-        ) : (
-          <EmptyWallet />
-        )}
-        <FloatNavigation />
-      </main>
-    </>
+          <Suspense>
+            <WalletContent
+              pets={pets}
+              walletData={walletData}
+              maintenanceRequests={maintenanceRequests}
+              healthUnitData={healthUnitData}
+              healthUnitRiskData={healthUnitRiskData}
+            />
+          </Suspense>
+        </section>
+      ) : (
+        <EmptyWallet />
+      )}
+      <FloatNavigation />
+    </main>
   )
 }
