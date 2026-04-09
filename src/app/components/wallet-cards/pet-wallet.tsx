@@ -37,11 +37,11 @@ export function PetCard({
 
   const registerDate = petData.registro_data
     ? new Date(petData.registro_data).toLocaleDateString('pt-BR')
-    : 'Não disponível'
+    : undefined
 
   const birthDate = petData.nascimento_data
     ? new Date(petData.nascimento_data).toLocaleDateString('pt-BR')
-    : 'Não disponível'
+    : undefined
 
   const frontContent = (
     <PetCardBase className={className}>
@@ -66,8 +66,7 @@ export function PetCard({
         birthDate={birthDate}
         castrated={petData.indicador_castrado ? 'Sim' : 'Não'}
         registrationDate={registerDate}
-        communityAnimal={'Não disponível'}
-        breed={petData.raca_nome!}
+        breed={petData.raca_nome || undefined}
       />
     </PetCardBase>
   )
