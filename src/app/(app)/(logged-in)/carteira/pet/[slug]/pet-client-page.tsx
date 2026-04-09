@@ -18,6 +18,11 @@ interface PetClientPageProps {
     phone: string
     email: string
   }
+  outrosTutores?: {
+    cpf: string
+    nome: string
+    email: string
+  }[]
 }
 
 const SMPDA_ATENDIMENTO_URL =
@@ -33,6 +38,7 @@ export function PetClientPage({
   petClinicName,
   petHasMicrochip,
   tutorInfoObj,
+  outrosTutores,
 }: PetClientPageProps) {
   const showCastracao = pet.indicador_castrado !== true
   const showMicrochipActions = !petHasMicrochip
@@ -148,6 +154,21 @@ export function PetClientPage({
           phone={tutorInfoObj?.phone ?? ''}
           email={tutorInfoObj?.email ?? ''}
         />
+        {outrosTutores &&
+          outrosTutores.length > 0 &&
+          outrosTutores.map(tutor => (
+            <div key={tutor.cpf}>
+              <div className="px-4">
+                <div className="bg-border h-px" />
+              </div>
+              <TutorInfo
+                name={tutor.nome}
+                cpf={tutor.cpf}
+                phone=""
+                email={tutor.email}
+              />
+            </div>
+          ))}
       </div>
     </div>
   )

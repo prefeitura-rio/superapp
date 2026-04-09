@@ -14,18 +14,21 @@ interface PetCardFrontContentProps {
   petImageUrl?: string
 }
 
+const FALLBACK_CANINE =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar9.png'
+const FALLBACK_FELINE =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar11.png'
+
 interface FallbackImageProps {
   src?: string
   alt?: string
   width?: number
   height?: number
   className?: string
+  fallback: string
 }
 
-const FallbackImage = ({ src, alt, ...props }: FallbackImageProps) => {
-  const fallback =
-    'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar9.png'
-
+const FallbackImage = ({ src, alt, fallback, ...props }: FallbackImageProps) => {
   const [imgSrc, setImgSrc] = useState(src)
 
   return createElement(Image, {
@@ -65,6 +68,7 @@ export function PetCardFrontContent({
             width={80}
             height={80}
             className="w-full h-full object-cover"
+            fallback={species.toUpperCase() === 'FELINA' ? FALLBACK_FELINE : FALLBACK_CANINE}
           />
         </div>
 
