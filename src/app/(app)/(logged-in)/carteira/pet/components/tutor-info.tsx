@@ -1,5 +1,7 @@
 'use client'
 
+import { formatCpf } from '@/lib/format-cpf'
+
 interface TutorInfoProps {
   name: string
   cpf: string
@@ -21,7 +23,7 @@ export function TutorInfo({ name, cpf, phone, email }: TutorInfoProps) {
           <span className="text-foreground-light leading-5 dark:text-foreground-light/70">
             CPF{' '}
           </span>
-          <span className="text-foreground leading-5">{cpf}</span>
+          <span className="text-foreground leading-5">{formatCpf(cpf)}</span>
         </div>
         <div className="text-sm">
           <span className="text-foreground-light leading-5 dark:text-foreground-light/70">
