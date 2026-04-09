@@ -55,7 +55,9 @@ export default async function PetPage({ params }: PetPageProps) {
     return <PetNotFound />
   }
 
-  const uniquePetData = uniquePet.data
+  const uniquePetData = uniquePet.data as typeof uniquePet.data & {
+    outros_tutores?: { cpf: string; nome: string; email: string }[]
+  }
 
   const petHasMicrochip = !!uniquePetData?.microchip_numero
 
@@ -68,6 +70,7 @@ export default async function PetPage({ params }: PetPageProps) {
       petClinicName={petClinicName}
       petHasMicrochip={petHasMicrochip}
       tutorInfoObj={userInfoObj}
+      outrosTutores={uniquePetData?.outros_tutores}
     />
   )
 }
