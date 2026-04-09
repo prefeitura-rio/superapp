@@ -59,13 +59,13 @@ export function PetCardFrontContent({
 
       <div className="flex gap-4">
         <div className="w-20 h-20 rounded-xl overflow-hidden text-[#2A2D32] flex-shrink-0">
-          {/* <FallbackImage
+          <FallbackImage
             src={petImageUrl}
             alt={`Foto de ${name}`}
             width={80}
             height={80}
             className="w-full h-full object-cover"
-          /> */}
+          />
         </div>
 
         <div className="flex flex-col justify-between flex-1">
