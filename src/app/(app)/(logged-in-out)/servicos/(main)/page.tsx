@@ -17,7 +17,7 @@ export default async function ServicesPage() {
       <header className="px-4 py-6 flex justify-between items-start">
         <h1 className="text-2xl font-bold">Serviços</h1>
 
-        <SearchButton />
+        <SearchButton href="/busca?tipo=servicos" />
       </header>
 
       {/* Most Accessed Service Cards*/}

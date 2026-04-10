@@ -39,7 +39,7 @@ export function MeiHeader({ isLoggedIn }: MeiHeaderProps) {
 
         <div className="flex items-center space-x-2">
           <Link
-            href="/servicos/mei/busca"
+            href="/busca?tipo=mei"
             className="rounded-full bg-transparent p-4"
           >
             <SearchIcon className="h-5 w-5 text-foreground" />

@@ -12,6 +12,7 @@ import type { VagaDetail } from '@/lib/emprego-utils'
 import { Accessibility, Briefcase, DollarSign, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { handleBackNavigation } from '@/app/(app)/(logged-in-out)/busca/utils/navigation-helpers'
 import { useRouter } from 'next/navigation'
 
 interface VagaDetailContentProps {
@@ -105,7 +106,7 @@ export function VagaDetailContent({
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => handleBackNavigation(router, '/servicos/empregos')}
             className="flex items-center justify-center rounded-full w-11 h-11 bg-black/5 text-white hover:bg-black/20 hover:cursor-pointer transition-colors"
             aria-label="Voltar"
           >
