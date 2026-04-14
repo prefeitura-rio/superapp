@@ -18,6 +18,10 @@ type BannerProps = {
   route: string
 }
 
+const _featureFlag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
+const _empregosEnabled =
+  _featureFlag === 'false' || _featureFlag.split(',').includes('empregos')
+
 export const suggestedBanners: BannerProps[] = [
   {
     id: 'empregabilidade',
@@ -68,4 +72,4 @@ export const suggestedBanners: BannerProps[] = [
   //   subtitle: 'E ganhe até 50% de desconto',
   //   route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
   // },
-]
+].filter(banner => banner.id !== 'empregabilidade' || _empregosEnabled)
