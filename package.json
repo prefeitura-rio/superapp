@@ -99,7 +99,7 @@
     "jsdom": "^27.0.1",
     "lefthook": "^2.1.4",
     "msw": "^2.12.7",
-    "orval": "8.6.2",
+    "orval": "8.8.0",
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.2.8",
     "typescript": "^5",
