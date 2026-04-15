@@ -67,7 +67,7 @@
     "postcss": "^8.5.3",
     "react": "19.1.2",
     "react-day-picker": "^9.7.0",
-    "react-dom": "19.2.5",
+    "react-dom": "19.1.2",
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.57.0",
     "react-hot-toast": "^2.5.2",
