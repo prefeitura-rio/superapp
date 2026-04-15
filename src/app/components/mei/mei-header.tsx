@@ -3,7 +3,10 @@
 import { SearchIcon } from '@/assets/icons'
 import { HelpCircleIcon } from '@/assets/icons/help-circle-icon'
 import { MenuIcon } from '@/assets/icons/menu-icon'
-import OportunidadesCariocas from '@/assets/oportunidades-cariocas-icon.png'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -17,17 +20,26 @@ export function MeiHeader({ isLoggedIn }: MeiHeaderProps) {
       <div className="mx-auto md:px-4 flex max-w-4xl items-center justify-between">
         <div className="flex justify-center">
           <Image
-            src={OportunidadesCariocas}
+            src={oportunidadesCariocasLogo}
             alt="Oportunidades Cariocas Logo"
             width={170}
             height={38}
-            className="rounded-full"
+            className="dark:hidden"
+            priority
+          />
+          <Image
+            src={oportunidadesCariocasLogoDark}
+            alt="Oportunidades Cariocas Logo"
+            width={170}
+            height={38}
+            className="hidden dark:block"
+            priority
           />
         </div>
 
         <div className="flex items-center space-x-2">
           <Link
-            href="/servicos/mei/busca"
+            href="/busca?tipo=mei"
             className="rounded-full bg-transparent p-4"
           >
             <SearchIcon className="h-5 w-5 text-foreground" />

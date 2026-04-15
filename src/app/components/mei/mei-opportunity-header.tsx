@@ -66,7 +66,7 @@ export function MeiOpportunityHeader({
       )}
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-        <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
+        <h1 className="text-white font-medium text-3xl leading-snug">
           {title}
         </h1>
       </div>

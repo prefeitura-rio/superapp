@@ -87,8 +87,7 @@ export async function changeSchedule({
 
     if (response.status === 400) {
       const errorData = response.data as { message?: string; error?: string }
-      errorMessage =
-        errorData?.message || errorData?.error || 'Dados inválidos'
+      errorMessage = errorData?.message || errorData?.error || 'Dados inválidos'
     } else if (response.status === 403) {
       errorMessage = 'Você não tem permissão para esta ação'
     } else if (response.status === 404) {

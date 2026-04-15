@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { calculateAge } from '@/lib/calculate-age'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 describe('calculateAge', () => {
   beforeEach(() => {

@@ -9,14 +9,14 @@ export async function validateUserPhoneToken(
   data: ModelsPhoneVerificationValidateRequest
 ) {
   const user = await getUserInfoFromToken()
-  
+
   if (!user.cpf) {
     throw new Error('Usuário não autenticado')
   }
-  
+
   try {
     const response = await postCitizenCpfPhoneValidate(user.cpf, data)
-    
+
     // Check if the response indicates an error
     if (response.status !== 200) {
       const errorData = response.data as HandlersErrorResponse
@@ -24,10 +24,10 @@ export async function validateUserPhoneToken(
       return {
         success: false,
         error: errorData?.error || 'Token inválido',
-        status: response.status
+        status: response.status,
       }
     }
-    
+
     revalidateTag(`user-info-${user.cpf}`)
     // Revalidate MEI proposal pages that use citizen contact info
     revalidatePath('/servicos/mei', 'layout')
@@ -41,7 +41,7 @@ export async function validateUserPhoneToken(
         error: err?.error || 'Token inválido',
       }
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

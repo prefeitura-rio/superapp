@@ -1,4 +1,4 @@
-import type { SearchResultItem } from '@/helpers/search-helpers'
+import type { SearchContext, SearchResultItem } from '@/helpers/search-helpers'
 import {
   loadSearchHistory,
   performSearch,
@@ -49,7 +49,9 @@ function updateSearchUrl(
   router.replace(newUrl, { scroll: false })
 }
 
-export function useSearch(): UseSearchReturn {
+export function useSearch(
+  historyContext: SearchContext = 'servicos'
+): UseSearchReturn {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -71,9 +73,9 @@ export function useSearch(): UseSearchReturn {
 
   // Load search history from localStorage on mount
   useEffect(() => {
-    const history = loadSearchHistory()
+    const history = loadSearchHistory(historyContext)
     setSearchHistory(history)
-  }, [])
+  }, [historyContext])
 
   // Load query from URL on mount and when URL changes (browser back/forward)
   useEffect(() => {
@@ -97,7 +99,10 @@ export function useSearch(): UseSearchReturn {
               setLoading(true)
               const mergedResults = await performSearch(urlQuery)
               setResults(mergedResults)
-              const updatedHistory = saveSearchToHistoryHelper(urlQuery)
+              const updatedHistory = saveSearchToHistoryHelper(
+                urlQuery,
+                historyContext
+              )
               setSearchHistory(updatedHistory)
             } catch (error) {
               console.error('Error in initial search:', error)
@@ -136,7 +141,7 @@ export function useSearch(): UseSearchReturn {
         }
       }
     }
-  }, [searchParams])
+  }, [searchParams, historyContext])
 
   // Auto-focus the search input when component mounts
   useEffect(() => {
@@ -154,7 +159,10 @@ export function useSearch(): UseSearchReturn {
         setResults(mergedResults)
 
         // Save to search history after successful search
-        const updatedHistory = saveSearchToHistoryHelper(searchQuery)
+        const updatedHistory = saveSearchToHistoryHelper(
+          searchQuery,
+          historyContext
+        )
         setSearchHistory(updatedHistory)
 
         // Update URL with search query
@@ -171,7 +179,7 @@ export function useSearch(): UseSearchReturn {
         setIsSearching(false)
       }
     },
-    [router, pathname]
+    [router, pathname, historyContext]
   )
 
   const onQueryChange = useCallback(
@@ -202,10 +210,16 @@ export function useSearch(): UseSearchReturn {
     updateSearchUrl('', pathname, router, isUpdatingUrl)
   }, [router, pathname])
 
-  const removeFromHistory = useCallback((itemToRemove: string) => {
-    const updatedHistory = removeFromHistoryHelper(itemToRemove)
-    setSearchHistory(updatedHistory)
-  }, [])
+  const removeFromHistory = useCallback(
+    (itemToRemove: string) => {
+      const updatedHistory = removeFromHistoryHelper(
+        itemToRemove,
+        historyContext
+      )
+      setSearchHistory(updatedHistory)
+    },
+    [historyContext]
+  )
 
   return {
     query,

@@ -117,7 +117,11 @@ export const SelectUnitSlide = ({
                     </p>
                   </div>
                   <div className="flex items-center">
-                    <RadioGroupItem value={unit.id} id={unit.id} disabled={!isAvailable} />
+                    <RadioGroupItem
+                      value={unit.id}
+                      id={unit.id}
+                      disabled={!isAvailable}
+                    />
                   </div>
                 </label>
               )

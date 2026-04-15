@@ -4,18 +4,18 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ConfirmInscriptionClient } from '../confirm-inscription-client'
 
+import { basicCourseInfo, courseId, courseSlug } from './fixtures/course-info'
+import {
+  emptyUnits,
+  nearbyUnitsSingle,
+  onlineClassesSingle,
+} from './fixtures/nearby-units'
 import {
   completeUserInfo,
   incompleteUserInfo,
   userAuthInfo,
   userAuthInfoIncomplete,
 } from './fixtures/user-info'
-import {
-  nearbyUnitsSingle,
-  emptyUnits,
-  onlineClassesSingle,
-} from './fixtures/nearby-units'
-import { basicCourseInfo, courseId, courseSlug } from './fixtures/course-info'
 
 // Mock next/navigation
 const mockPush = vi.fn()
@@ -91,9 +91,7 @@ describe('ConfirmInscriptionClient', () => {
         />
       )
 
-      expect(
-        screen.getByText(/confirme suas informações/i)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
       expect(screen.getByText(userAuthInfo.name)).toBeInTheDocument()
     })
 
@@ -270,7 +268,9 @@ describe('ConfirmInscriptionClient', () => {
       await user.click(confirmButton)
 
       await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith('Usuário já inscrito neste curso')
+        expect(mockToastError).toHaveBeenCalledWith(
+          'Usuário já inscrito neste curso'
+        )
       })
 
       await waitFor(() => {
@@ -343,9 +343,7 @@ describe('ConfirmInscriptionClient', () => {
         />
       )
 
-      expect(
-        screen.getByText(/confirme suas informações/i)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
     })
   })
 })

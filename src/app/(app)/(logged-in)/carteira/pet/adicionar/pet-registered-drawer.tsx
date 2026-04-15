@@ -30,7 +30,9 @@ export function PetRegisteredDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} modal dismissible={false}>
       <DrawerHeader className="sr-only">
-        <DrawerTitle className="sr-only">Pet cadastrado com sucesso</DrawerTitle>
+        <DrawerTitle className="sr-only">
+          Pet cadastrado com sucesso
+        </DrawerTitle>
       </DrawerHeader>
       <DrawerContent className="max-w-none mx-auto rounded-t-none min-h-screen 3xl:justify-center flex flex-col">
         <div className="flex flex-col min-h-screen 3xl:min-h-[70vh] justify-between bg-background px-4 py-12 max-w-4xl mx-auto w-full">
@@ -53,7 +55,9 @@ export function PetRegisteredDrawer({
             onClick={handleViewPets}
             className="rounded-full"
           >
-            <span className="text-primary-foreground">Ver pets cadastrados</span>
+            <span className="text-primary-foreground">
+              Ver pets cadastrados
+            </span>
           </CustomButton>
         </div>
       </DrawerContent>

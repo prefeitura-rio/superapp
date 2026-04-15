@@ -42,6 +42,8 @@ import {
   deslogadoIcon,
   iptuBannerIcon,
   licencaBannerIcon,
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
 } from './banners'
 
 import { brasaoPrefHeaderIcon, logoPrefHeaderIcon } from './logos'
@@ -78,6 +80,8 @@ export {
   logoPrefHeaderIcon,
   multasIcon,
   obrasIcon,
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
   ordemPublicaIcon,
   ouvidoriaIcon,
   peticionamentosIcon,

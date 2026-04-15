@@ -100,8 +100,8 @@ export function transformCategoriesToFilters(
     })
 
   // Separate "Rio do Futuro" category from others (check by name, case-insensitive)
-  const rioDoFuturo = filters.find(cat =>
-    cat.label.toLowerCase().trim() === 'rio do futuro'
+  const rioDoFuturo = filters.find(
+    cat => cat.label.toLowerCase().trim() === 'rio do futuro'
   )
   const otherCategories = filters
     .filter(cat => cat.label.toLowerCase().trim() !== 'rio do futuro')

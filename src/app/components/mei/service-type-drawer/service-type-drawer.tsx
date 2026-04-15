@@ -5,7 +5,11 @@ import { CnaeIncompatibleSheet } from './cnae-incompatible-sheet'
 import { CnaeInfoSheet } from './cnae-info-sheet'
 import { IrregularStatusSheet } from './irregular-status-sheet'
 import { NoMeiSheet } from './no-mei-sheet'
-import type { ServiceTypeDrawerProps, ServiceTypeSheetType, UserMeiContext } from './types'
+import type {
+  ServiceTypeDrawerProps,
+  ServiceTypeSheetType,
+  UserMeiContext,
+} from './types'
 
 function determineSheetType(
   userContext: UserMeiContext,

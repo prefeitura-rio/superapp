@@ -1,5 +1,6 @@
 import type { SearchResultItem } from '@/helpers/search-helpers'
 import { normalizeCategorySlug } from '@/helpers/search-helpers'
+import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { sendGAEvent } from '@next/third-parties/google'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
@@ -7,9 +8,12 @@ import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.
  * Handles navigation back from search page
  * Checks sessionStorage and document.referrer to determine the best navigation path
  */
-export function handleBackNavigation(router: AppRouterInstance): void {
+export function handleBackNavigation(
+  router: AppRouterInstance,
+  fallback = '/'
+): void {
   if (typeof window === 'undefined') {
-    router.push('/')
+    router.push(fallback)
     return
   }
 
@@ -63,8 +67,8 @@ export function handleBackNavigation(router: AppRouterInstance): void {
     // sessionStorage or other errors, continue to default
   }
 
-  // No valid previous route (direct access), navigate to "/"
-  router.push('/')
+  // No valid previous route (direct access), navigate to fallback
+  router.push(fallback)
 }
 
 /**
@@ -107,5 +111,58 @@ export function handleSearchItemClick(
     )
   } else if (item.url) {
     window.open(item.url, '_blank')
+  }
+}
+
+/**
+ * Handles click on a universal catalog search result item (ModelsSearchItem)
+ */
+export function handleCatalogItemClick(
+  item: ModelsSearchItem,
+  query: string,
+  router: AppRouterInstance,
+  onExternalLinkClick: (url: string) => void
+): void {
+  sendGAEvent('event', 'universal_search_result_click', {
+    search_query: query,
+    result_title: item.title,
+    result_type: item.type,
+    event_timestamp: new Date().toISOString(),
+  })
+
+  const metadata = item.metadata as Record<string, unknown> | undefined
+
+  if (item.type === 'service') {
+    const slug = metadata?.slug as string | undefined
+    const temaGeral = metadata?.tema_geral as string | undefined
+    if (slug && temaGeral) {
+      const categorySlug = normalizeCategorySlug(temaGeral)
+      router.push(`/servicos/categoria/${encodeURIComponent(categorySlug)}/${slug}`)
+    } else if (item.url) {
+      onExternalLinkClick(item.url)
+    }
+    return
+  }
+
+  if (item.type === 'course') {
+    const courseId = (metadata?.id as string | undefined) ?? item.id
+    router.push(`/servicos/cursos/${courseId}`)
+    return
+  }
+
+  if (item.type === 'job') {
+    const jobId = (metadata?.id as string | undefined) ?? item.id
+    router.push(`/servicos/empregos/${jobId}`)
+    return
+  }
+
+  if (item.type === 'mei_opportunity') {
+    const meiId = (metadata?.id as string | undefined) ?? item.id
+    router.push(`/servicos/mei/${meiId}`)
+    return
+  }
+
+  if (item.url) {
+    onExternalLinkClick(item.url)
   }
 }

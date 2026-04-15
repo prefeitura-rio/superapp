@@ -1,10 +1,10 @@
-import { http, HttpResponse } from 'msw'
-import { describe, expect, test, vi } from 'vitest'
-import { server } from '@/test/mocks/server'
-import { TEST_ENV } from '@/test/mocks/env'
-import { updateUserPhone } from '../update-user-phone'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import { TEST_ENV } from '@/test/mocks/env'
+import { server } from '@/test/mocks/server'
+import { http, HttpResponse } from 'msw'
 import { revalidateTag } from 'next/cache'
+import { describe, expect, test, vi } from 'vitest'
+import { updateUserPhone } from '../update-user-phone'
 
 const RMI_BASE_URL = TEST_ENV.NEXT_PUBLIC_BASE_API_URL_RMI
 

@@ -8,15 +8,16 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updateUserFamilyIncome(familyIncome: string) {
   const userInfo = await getUserInfoFromToken()
-  
+
   if (!userInfo.cpf) {
     throw new Error('CPF do usuário não encontrado')
   }
 
-  const modelsSelfDeclaredRendaFamiliarInput: ModelsSelfDeclaredRendaFamiliarInput = {
-    valor: familyIncome,
-  }
-  
+  const modelsSelfDeclaredRendaFamiliarInput: ModelsSelfDeclaredRendaFamiliarInput =
+    {
+      valor: familyIncome,
+    }
+
   try {
     const response = await putCitizenCpfFamilyIncome(
       userInfo.cpf,
@@ -28,7 +29,7 @@ export async function updateUserFamilyIncome(familyIncome: string) {
       const errorData = response.data as HandlersErrorResponse
       throw new Error(errorData?.error || 'Erro ao atualizar renda familiar')
     }
-    
+
     revalidateTag(`user-info-${userInfo.cpf}`)
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Renda familiar atualizada com sucesso.' }
@@ -38,9 +39,8 @@ export async function updateUserFamilyIncome(familyIncome: string) {
       const err = error as HandlersErrorResponse
       throw new Error(err?.error || 'Erro ao atualizar renda familiar')
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }
 }
-

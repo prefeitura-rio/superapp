@@ -16,6 +16,7 @@ interface SecondaryHeaderProps {
   defaultRoute?: string
   style?: React.CSSProperties
   fixed?: boolean
+  forceRoute?: boolean
 }
 
 /**
@@ -134,12 +135,19 @@ export function SecondaryHeader({
   defaultRoute = '/',
   style,
   fixed = true,
+  forceRoute = false,
 }: SecondaryHeaderProps) {
   const router = useRouter()
 
   const handleBack = () => {
     // If a specific route is provided, use it as fallback
     const fallbackRoute = route || defaultRoute
+
+    // If forceRoute is true, always use the specified route
+    if (forceRoute && route) {
+      router.push(route)
+      return
+    }
 
     // Check if there's an internal history to go back to
     // Pass the preferred route so we can ignore history when appropriate

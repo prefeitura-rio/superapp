@@ -1,4 +1,8 @@
-export type ProposalStatus = 'aprovada' | 'em_analise' | 'recusada' | 'concluida'
+export type ProposalStatus =
+  | 'aprovada'
+  | 'em_analise'
+  | 'recusada'
+  | 'concluida'
 
 export interface MeiProposal {
   id: string

@@ -1,7 +1,7 @@
+import { TEST_ENV } from '@/test/mocks/env'
+import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, test } from 'vitest'
-import { server } from '@/test/mocks/server'
-import { TEST_ENV } from '@/test/mocks/env'
 import { submitMeiProposal } from '../submit-proposal'
 
 const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
@@ -12,6 +12,7 @@ describe('submitMeiProposal', () => {
     meiEmpresaId: 'mei-empresa-456',
     valorProposta: 1500.0,
     prazoExecucaoDias: 30,
+    aceitaCustosIntegrais: true,
     telefone: '21999999999',
     email: 'mei@example.com',
   }

@@ -1,22 +1,22 @@
 import type {
-  ModelsOportunidadeMEI,
-  ModelsPropostaMEI,
-  ModelsPropostaMEIStatusCidadao,
-} from '@/http-courses/models'
-import type { ModelsLegalEntity } from '@/http/models'
-import type {
-  MeiOpportunity,
-  MeiOpportunityDetailData,
-  MeiAttachment,
-} from '@/app/components/mei'
+  MeiCompanyFullData,
+  MeiCompanyStatus,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/mei/meu-mei/types'
 import type {
   MeiProposal,
   ProposalStatus,
 } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/mei/minhas-propostas/types'
 import type {
-  MeiCompanyFullData,
-  MeiCompanyStatus,
-} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/mei/meu-mei/types'
+  MeiAttachment,
+  MeiOpportunity,
+  MeiOpportunityDetailData,
+} from '@/app/components/mei'
+import type {
+  ModelsOportunidadeMEI,
+  ModelsPropostaMEI,
+  ModelsPropostaMEIStatusCidadao,
+} from '@/http-courses/models'
+import type { ModelsLegalEntity } from '@/http/models'
 
 /**
  * Mapeia forma de pagamento da API para texto legível
@@ -191,10 +191,7 @@ export function mapApiToMeiProposal(
 export function formatCnpj(cnpj: string): string {
   const digits = cnpj.replace(/\D/g, '')
   if (digits.length !== 14) return cnpj
-  return digits.replace(
-    /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-    '$1.$2.$3/$4-$5'
-  )
+  return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
 }
 
 /**
@@ -223,7 +220,9 @@ export function mapLegalEntityToMeiCompanyFullData(
     cnpj: formatCnpj(entity.cnpj || ''),
     razaoSocial: entity.razao_social || '',
     nomeFantasia: entity.nome_fantasia || '',
-    situacaoCadastral: mapSituacaoCadastral(entity.situacao_cadastral?.descricao),
+    situacaoCadastral: mapSituacaoCadastral(
+      entity.situacao_cadastral?.descricao
+    ),
     telefone: {
       ddi: '55',
       ddd: phone?.ddd || '',
@@ -263,7 +262,7 @@ export function hasCompatibleCnae(
   }
 
   const normalizedOpportunity = opportunityCnaes.map(normalizeCnaeForComparison)
-  return userCnaes.some((userCnae) =>
+  return userCnaes.some(userCnae =>
     normalizedOpportunity.includes(normalizeCnaeForComparison(userCnae))
   )
 }
@@ -303,4 +302,3 @@ export function mapLegalEntityToMeiCompanyData(
     email: entity.contato?.email || '',
   }
 }
-

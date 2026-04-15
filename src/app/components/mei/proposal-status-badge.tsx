@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<
     icon: CheckCircleIcon,
     iconColor: 'text-success',
     bgColor: 'bg-success/10',
-    getText: (deadline) =>
+    getText: deadline =>
       deadline
         ? `Sua proposta foi aprovada. Você tem até o dia ${deadline} para concluí-la.`
         : 'Sua proposta foi aprovada.',

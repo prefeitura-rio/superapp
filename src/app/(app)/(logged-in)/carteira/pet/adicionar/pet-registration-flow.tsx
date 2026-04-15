@@ -314,9 +314,7 @@ export function PetRegistrationFlow({
                 <div className="flex-1 overflow-y-auto">
                   {SPECIES_OPTIONS.map((option, index) => (
                     <div key={option}>
-                      {index > 0 && (
-                        <div className="h-px w-full bg-border" />
-                      )}
+                      {index > 0 && <div className="h-px w-full bg-border" />}
                       <label className="flex items-center py-4 cursor-pointer">
                         <input
                           type="radio"
@@ -363,9 +361,7 @@ export function PetRegistrationFlow({
                 <div className="flex-1">
                   {SEX_OPTIONS.map((option, index) => (
                     <div key={option}>
-                      {index > 0 && (
-                        <div className="h-px w-full bg-border" />
-                      )}
+                      {index > 0 && <div className="h-px w-full bg-border" />}
                       <label className="flex items-center py-4 cursor-pointer">
                         <input
                           type="radio"
@@ -413,9 +409,7 @@ export function PetRegistrationFlow({
                 <div className="flex-1">
                   {CASTRATED_OPTIONS.map((option, index) => (
                     <div key={option}>
-                      {index > 0 && (
-                        <div className="h-px w-full bg-border" />
-                      )}
+                      {index > 0 && <div className="h-px w-full bg-border" />}
                       <label className="flex items-center py-4 cursor-pointer">
                         <input
                           type="radio"
@@ -464,10 +458,14 @@ export function PetRegistrationFlow({
                 <div className="flex-1">
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="text-sm text-muted-foreground mb-1 block">
+                      <label
+                        htmlFor="pet-birth-day"
+                        className="text-sm text-muted-foreground mb-1 block"
+                      >
                         Dia
                       </label>
                       <Input
+                        id="pet-birth-day"
                         placeholder="DD"
                         value={watchedValues.birthDay || ''}
                         onChange={e => {
@@ -481,10 +479,14 @@ export function PetRegistrationFlow({
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="text-sm text-muted-foreground mb-1 block">
+                      <label
+                        htmlFor="pet-birth-month"
+                        className="text-sm text-muted-foreground mb-1 block"
+                      >
                         Mês
                       </label>
                       <Input
+                        id="pet-birth-month"
                         placeholder="MM"
                         value={watchedValues.birthMonth || ''}
                         onChange={e => {
@@ -498,10 +500,14 @@ export function PetRegistrationFlow({
                       />
                     </div>
                     <div className="flex-[1.5]">
-                      <label className="text-sm text-muted-foreground mb-1 block">
+                      <label
+                        htmlFor="pet-birth-year"
+                        className="text-sm text-muted-foreground mb-1 block"
+                      >
                         Ano
                       </label>
                       <Input
+                        id="pet-birth-year"
                         placeholder="AAAA"
                         value={watchedValues.birthYear || ''}
                         onChange={e => {

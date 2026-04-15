@@ -29,7 +29,7 @@ export async function fetchCnaesByIds(
   }
 
   try {
-    const cnaePromises = cnaeIds.map(async (id) => {
+    const cnaePromises = cnaeIds.map(async id => {
       const response = await getCnaes({ subclasse: id, per_page: 1 })
       if (response.status === 200 && response.data?.cnaes?.length) {
         const cnae = response.data.cnaes[0]
@@ -42,7 +42,7 @@ export async function fetchCnaesByIds(
     })
 
     const results = await Promise.all(cnaePromises)
-    return results.filter((c) => c.codigo)
+    return results.filter(c => c.codigo)
   } catch (error) {
     console.error('[MEI] Error fetching CNAEs:', error)
     return []

@@ -1,10 +1,7 @@
-import { NextResponse } from 'next/server'
-import {
-  getDalCitizenCpf,
-  getDalCitizenCpfAvatar,
-} from '@/lib/dal'
+import { getDalCitizenCpf, getDalCitizenCpfAvatar } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { getDisplayName } from '@/lib/utils'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -72,4 +69,3 @@ export async function GET() {
     )
   }
 }
-

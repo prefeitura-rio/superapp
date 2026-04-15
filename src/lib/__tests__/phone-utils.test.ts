@@ -1,10 +1,10 @@
-import { describe, expect, test } from 'vitest'
 import {
   formatPhoneNumber,
   getPhonePlaceholder,
   isValidPhone,
   parsePhoneNumberForApi,
 } from '@/lib/phone-utils'
+import { describe, expect, test } from 'vitest'
 
 describe('formatPhoneNumber', () => {
   test('returns empty string for empty input', () => {

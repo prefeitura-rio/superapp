@@ -1,18 +1,18 @@
-import { NextResponse } from 'next/server'
+import { getCitizenCpfPets } from '@/http/citizen/citizen'
+import type { ModelsPet } from '@/http/models'
 import {
-  getDalCitizenCpfWallet,
   getDalCitizenCpfMaintenanceRequest,
+  getDalCitizenCpfWallet,
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
-import { getUserInfoFromToken } from '@/lib/user-info'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
   formatHealthOperatingHours,
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
-import { getCitizenCpfPets } from '@/http/citizen/citizen'
-import type { ModelsPet } from '@/http/models'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -173,4 +173,3 @@ export async function GET() {
     )
   }
 }
-

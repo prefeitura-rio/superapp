@@ -55,3 +55,10 @@ next-env.d.ts
 k6/results/
 k6/analysis-*/
 .github/scripts/test-output/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
