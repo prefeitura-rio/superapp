@@ -103,6 +103,6 @@
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.2.8",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.4"
   }
 }
