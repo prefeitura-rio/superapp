@@ -1,19 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import CarteiraSection from './wallet-section'
-import CarteiraSectionSwipe, {
-  CarteiraSectionSwipeSkeleton,
-} from './wallet-section-swipe'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
-import type { RiskStatusProps } from '@/types/health'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
+import type { RiskStatusProps } from '@/types/health'
+import { useEffect, useState } from 'react'
+import CarteiraSection from './wallet-section'
+import CarteiraSectionSwipe, {
+  CarteiraSectionSwipeSkeleton,
+} from './wallet-section-swipe'
 
 interface WalletData {
   walletData?: ModelsCitizenWallet
@@ -108,4 +108,3 @@ export default function WalletSectionClient() {
     />
   )
 }
-

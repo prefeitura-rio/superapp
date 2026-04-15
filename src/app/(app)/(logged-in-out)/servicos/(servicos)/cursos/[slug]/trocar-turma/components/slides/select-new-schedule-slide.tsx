@@ -46,7 +46,8 @@ export const SelectNewScheduleSlide = ({
   const currentEnrolledUnitId = (currentEnrollment as any)?.enrolled_unit?.id
 
   // Check if user is viewing their current enrolled unit
-  const isInCurrentUnit = !isOnlineCourse && selectedUnit?.id === currentEnrolledUnitId
+  const isInCurrentUnit =
+    !isOnlineCourse && selectedUnit?.id === currentEnrolledUnitId
 
   // Determine which schedules to show
   const schedulesToShow = isOnlineCourse

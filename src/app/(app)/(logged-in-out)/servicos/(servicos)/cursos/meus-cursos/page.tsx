@@ -1,9 +1,9 @@
 import { MyCoursesCard } from '@/app/components/courses/my-course-card'
-import { MyCoursesBackButton } from './components/back-button'
 import { buildAuthUrl } from '@/constants/url'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
+import { MyCoursesBackButton } from './components/back-button'
 
 export default async function MyCoursesPage() {
   const userInfo = await getUserInfoFromToken()

@@ -16,7 +16,7 @@ export type GetApiV1EmpregabilidadeCandidaturasParams = {
    */
   pageSize?: number
   /**
-   * Filtrar por CPF (apenas admin)
+   * Filtrar por CPF
    */
   cpf?: string
   /**
@@ -28,7 +28,7 @@ export type GetApiV1EmpregabilidadeCandidaturasParams = {
    */
   status?: string
   /**
-   * Busca parcial por CPF, nome ou email (apenas admin)
+   * Busca parcial por CPF, nome ou email
    */
   search?: string
   /**

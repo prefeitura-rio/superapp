@@ -5,7 +5,12 @@ import { RadioGroup, RadioGroupItem } from '../radio-group'
 interface RadioListProps {
   options:
     | string[]
-    | { label: string | React.ReactNode; value: string; key?: string }[]
+    | {
+        label: string | React.ReactNode
+        value: string
+        key?: string
+        disabled?: boolean
+      }[]
   value?: string
   onValueChange?: (value: string) => void
   disabled?: boolean
@@ -33,13 +38,16 @@ export function RadioList({
         const optionLabel = typeof option === 'string' ? option : option.label
         const optionKey =
           typeof option === 'string' ? option : option.key || option.value
+        const optionDisabled =
+          typeof option === 'string' ? false : option.disabled || false
+        const isItemDisabled = disabled || optionDisabled
 
         return (
           <label
             key={optionKey}
             className={cn(
               'flex items-center justify-between cursor-pointer py-2 rounded-md transition-colors hover:bg-accent/40',
-              disabled && 'opacity-50 cursor-not-allowed'
+              isItemDisabled && 'opacity-50 cursor-not-allowed'
             )}
             htmlFor={`${name}-${optionKey}`}
           >
@@ -47,7 +55,7 @@ export function RadioList({
             <RadioGroupItem
               id={`${name}-${optionKey}`}
               value={optionValue}
-              disabled={disabled}
+              disabled={isItemDisabled}
             />
           </label>
         )

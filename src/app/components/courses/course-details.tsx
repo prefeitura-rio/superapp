@@ -431,7 +431,8 @@ function OnlineClassSelection({
                   {singleClass.vacancies}
                   {singleClass.remaining_vacancies !== undefined && (
                     <span className="text-muted-foreground">
-                      {' '}({singleClass.remaining_vacancies} disponíveis)
+                      {' '}
+                      ({singleClass.remaining_vacancies} disponíveis)
                     </span>
                   )}
                 </span>
@@ -684,7 +685,8 @@ function OnlineClassSelection({
                   {selectedClass.vacancies}
                   {selectedClass.remaining_vacancies !== undefined && (
                     <span className="text-muted-foreground">
-                      {' '}({selectedClass.remaining_vacancies} disponíveis)
+                      {' '}
+                      ({selectedClass.remaining_vacancies} disponíveis)
                     </span>
                   )}
                 </span>
@@ -1124,6 +1126,11 @@ export function CourseDetails({
     )
 
   const renderActionButton = () => {
+    // Don't render button if user concluded course without certificate
+    if (userEnrollment?.status === 'concluded' && !course.has_certificate) {
+      return null
+    }
+
     const isAvailable = enrollmentInfo.status === 'available'
     const baseButtonClasses =
       'block text-sm md:text-base w-full py-3 text-center rounded-full hover:brightness-90 transition outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
@@ -1269,6 +1276,7 @@ export function CourseDetails({
           <CourseStatusCard
             status={userEnrollment.status as any}
             className="mx-4"
+            hasCertificate={course.has_certificate}
           />
         )}
         {/* Action buttons for approved users - below status card, above description */}
@@ -1308,7 +1316,9 @@ export function CourseDetails({
         <CourseContent course={course} />
         {/* Bottom action button - hide for approved users since buttons are shown above description */}
         {userEnrollment?.status !== 'approved' && (
-          <div className="p-4 w-full max-w-4xl pt-8">{renderActionButton()}</div>
+          <div className="p-4 w-full max-w-4xl pt-8">
+            {renderActionButton()}
+          </div>
         )}
       </div>
     </div>

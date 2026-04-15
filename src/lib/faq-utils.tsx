@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { cn } from './utils'
 
 export type ContentPart = {
-  type: 'text' | 'video-title' | 'link'
+  type: 'text' | 'video-title' | 'link' | 'bold'
   content: string
   href?: string
 }
@@ -19,9 +19,13 @@ export function parseContent(text: string): ContentPart[] {
   const parts: ContentPart[] = []
   const videoTitleRegex = /"([^"]+)"/g // Picks up the text between double quotes
   const urlRegex = /(https?:\/\/[^\s]+)/g // Picks urls
+  const boldRegex = /\*\*([^*]+)\*\*/g // Picks bold text
 
   let lastIndex = 0
-  const matches: Array<{ type: 'video' | 'url'; match: RegExpExecArray }> = []
+  const matches: Array<{
+    type: 'video' | 'url' | 'bold'
+    match: RegExpExecArray
+  }> = []
 
   let videoMatch = videoTitleRegex.exec(text)
   while (videoMatch !== null) {
@@ -33,6 +37,12 @@ export function parseContent(text: string): ContentPart[] {
   while (urlMatch !== null) {
     matches.push({ type: 'url', match: urlMatch })
     urlMatch = urlRegex.exec(text)
+  }
+
+  let boldMatch = boldRegex.exec(text)
+  while (boldMatch !== null) {
+    matches.push({ type: 'bold', match: boldMatch })
+    boldMatch = boldRegex.exec(text)
   }
 
   matches.sort((a, b) => a.match.index - b.match.index)
@@ -48,6 +58,11 @@ export function parseContent(text: string): ContentPart[] {
     if (type === 'video') {
       parts.push({
         type: 'video-title',
+        content: match[1],
+      })
+    } else if (type === 'bold') {
+      parts.push({
+        type: 'bold',
         content: match[1],
       })
     } else {
@@ -87,6 +102,13 @@ export const FormattedContent = memo(
             return (
               <span key={i} className="italic opacity-100">
                 "{part.content}"
+              </span>
+            )
+          }
+          if (part.type === 'bold') {
+            return (
+              <span key={i} className="font-semibold opacity-100">
+                {part.content}
               </span>
             )
           }

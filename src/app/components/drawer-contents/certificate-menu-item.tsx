@@ -14,7 +14,10 @@ interface CertificateMenuItemProps {
   className?: string
 }
 
-export const CertificateMenuItem = forwardRef<HTMLButtonElement, CertificateMenuItemProps>(
+export const CertificateMenuItem = forwardRef<
+  HTMLButtonElement,
+  CertificateMenuItemProps
+>(
   (
     {
       icon,

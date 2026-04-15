@@ -254,10 +254,7 @@ export default function CarteiraSection({
                   pet.raca_nome
               )
               .map(pet => (
-                <div
-                  key={pet.id_animal}
-                  className="min-w-[300px]"
-                >
+                <div key={pet.id_animal} className="min-w-[300px]">
                   <PetCard
                     petData={pet}
                     enableFlip={false}

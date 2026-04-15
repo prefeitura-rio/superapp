@@ -20,7 +20,9 @@ const getUrl = (contextUrl: string): string => {
   const baseUrl = process.env.NEXT_PUBLIC_COURSES_BASE_API_URL
 
   if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_COURSES_BASE_API_URL environment variable is not set.')
+    throw new Error(
+      'NEXT_PUBLIC_COURSES_BASE_API_URL environment variable is not set.'
+    )
   }
 
   // Ensure baseUrl ends with '/' and contextUrl doesn't start with '/'
@@ -69,8 +71,26 @@ export const customFetch = async <T>(
     keepalive: true,
   }
 
+  // Log detalhado da requisição
+  console.log('🌐 [customFetch] REQUISIÇÃO:', {
+    url: requestUrl,
+    method: options.method,
+    headers: requestHeaders,
+    body: options.body,
+  })
+
   const response = await fetch(requestUrl, requestInit)
+
+  console.log('📥 [customFetch] RESPOSTA:', {
+    url: requestUrl,
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries(response.headers.entries()),
+  })
+
   const data = await getBody<T>(response)
+
+  console.log('📦 [customFetch] DATA:', data)
 
   return { status: response.status, data, headers: response.headers } as T
 }

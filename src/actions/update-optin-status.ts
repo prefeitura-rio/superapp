@@ -13,13 +13,15 @@ export async function updateOptInStatus(optin: boolean) {
 
   try {
     const response = await putCitizenCpfOptin(user.cpf, { opt_in: optin })
-    
+
     // Check if the response indicates an error
     if (response.status !== 200) {
       const errorData = response.data as HandlersErrorResponse
-      throw new Error(errorData?.error || 'Erro ao atualizar status de autorização')
+      throw new Error(
+        errorData?.error || 'Erro ao atualizar status de autorização'
+      )
     }
-    
+
     revalidateTag('user-authorizations')
     return { success: true }
   } catch (error: any) {
@@ -28,7 +30,7 @@ export async function updateOptInStatus(optin: boolean) {
       const err = error as HandlersErrorResponse
       throw new Error(err?.error || 'Erro ao atualizar status de autorização')
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

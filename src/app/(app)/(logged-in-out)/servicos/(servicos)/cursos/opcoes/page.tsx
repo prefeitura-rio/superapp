@@ -8,7 +8,7 @@ export default async function ProfilePage() {
   return (
     <div className="pb-25 pt-20 max-w-4xl mx-auto text-white flex flex-col">
       {/* Header */}
-      <SecondaryHeader title="" route="/servicos/cursos" />
+      <SecondaryHeader title="Menu" route="/servicos/cursos" />
 
       {/* Menu Items */}
       <div className="flex-1 px-4">

@@ -86,15 +86,41 @@ export async function middleware(request: NextRequest) {
         .replace(/\s{2,}/g, ' ')
         .trim()
 
-      // TEMPORARY: Block access to "mei" routes when feature flag is enabled
-      // TODO: Remove this block once the feature is ready
-      // Only block routes where "mei" is a complete path segment (e.g., /mei, /servicos/mei, /mei/qualquercoisa)
+      // Parse the feature flag as a comma-separated list of enabled services.
+      // When the flag is 'false' (or absent), all services are visible (staging/dev).
+      // In production, only services listed in the flag are enabled.
+      // Examples: 'cursos' | 'cursos,empregos' | 'cursos,empregos,mei'
+      const _featureFlag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
+      const _isProduction = _featureFlag !== 'false'
+
+      // Block access to "mei" routes when MEI is not in the enabled services list
+      // Only block routes where "mei" is a complete path segment (e.g., /mei, /servicos/mei)
       // This prevents blocking routes like "meio ambiente" which contains "mei" as a substring
-      if (process.env.NEXT_PUBLIC_FEATURE_FLAG === 'true') {
-        const pathSegments = path.split('/').filter(Boolean) // Split path and remove empty strings
+      if (_isProduction && !_featureFlag.split(',').includes('mei')) {
+        const pathSegments = path.split('/').filter(Boolean)
         const hasMeiSegment = pathSegments.some(segment => segment === 'mei')
 
         if (hasMeiSegment) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/not-found'
+
+          const response = NextResponse.rewrite(url)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          return response
+        }
+      }
+
+      // Block access to "empregos" and "empresas" routes when Empregos is not enabled
+      if (_isProduction && !_featureFlag.split(',').includes('empregos')) {
+        const pathSegments = path.split('/').filter(Boolean)
+        const hasEmpregosSegment = pathSegments.some(
+          segment => segment === 'empregos' || segment === 'empresas'
+        )
+
+        if (hasEmpregosSegment) {
           const url = request.nextUrl.clone()
           url.pathname = '/not-found'
 

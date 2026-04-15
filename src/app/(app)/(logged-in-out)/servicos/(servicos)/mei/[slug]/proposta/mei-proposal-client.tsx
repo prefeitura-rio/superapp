@@ -7,10 +7,10 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import { DurationStep } from './steps/duration-step'
 import { ReviewStep } from './steps/review-step'
 import { ValueStep } from './steps/value-step'
-import toast from 'react-hot-toast'
 
 export interface MeiCompanyData {
   cnpj: string
@@ -87,7 +87,8 @@ export function MeiProposalClient({
       duration: savedFormData.duration ?? existingProposal?.duration ?? 0,
       phone: `(${companyData.telefone.ddd}) ${companyData.telefone.valor}`,
       email: companyData.email,
-      acceptedTerms: savedFormData.acceptedTerms ?? existingProposal?.acceptedTerms ?? false,
+      acceptedTerms:
+        savedFormData.acceptedTerms ?? existingProposal?.acceptedTerms ?? false,
     },
   })
 
@@ -244,9 +245,12 @@ export function MeiProposalClient({
     (currentStep === 'duration' && duration <= 0) ||
     isSubmitting
 
-  const buttonText = currentStep === 'review' 
-    ? (existingProposal ? 'Atualizar proposta' : 'Enviar proposta')
-    : 'Continuar'
+  const buttonText =
+    currentStep === 'review'
+      ? existingProposal
+        ? 'Atualizar proposta'
+        : 'Enviar proposta'
+      : 'Continuar'
 
   return (
     <FormProvider {...form}>

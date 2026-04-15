@@ -1,8 +1,8 @@
+import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import { type NextRequest, NextResponse } from 'next/server'
-import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 export async function GET(req: NextRequest) {
-  return withSpan('api.cep_lookup', async (span) => {
+  return withSpan('api.cep_lookup', async span => {
     const placeId = req.nextUrl.searchParams.get('place_id')
     const number = req.nextUrl.searchParams.get('number')
 
@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
     span.setAttribute('google_maps.has_number', !!number)
 
     if (!placeId) {
-      addSpanEvent('google_maps.validation.failed', { reason: 'missing_place_id' })
+      addSpanEvent('google_maps.validation.failed', {
+        reason: 'missing_place_id',
+      })
       return NextResponse.json(
         { error: 'Missing place_id parameter' },
         { status: 400 }
@@ -19,7 +21,9 @@ export async function GET(req: NextRequest) {
 
     const apiKey = process.env.GOOGLE_MAPS_API_KEY
     if (!apiKey) {
-      addSpanEvent('google_maps.validation.failed', { reason: 'missing_api_key' })
+      addSpanEvent('google_maps.validation.failed', {
+        reason: 'missing_api_key',
+      })
       return NextResponse.json(
         { error: 'Missing Google Maps API key' },
         { status: 500 }
@@ -73,70 +77,72 @@ export async function GET(req: NextRequest) {
       if (number && cep) {
         try {
           addSpanEvent('google_maps.geocoding.request.start')
-        const streetName = addressComponents.find((component: any) =>
-          component.types.includes('route')
-        )?.long_name
+          const streetName = addressComponents.find((component: any) =>
+            component.types.includes('route')
+          )?.long_name
 
-        const neighborhood = addressComponents.find(
-          (component: any) =>
-            component.types.includes('sublocality') ||
-            component.types.includes('political')
-        )?.long_name
+          const neighborhood = addressComponents.find(
+            (component: any) =>
+              component.types.includes('sublocality') ||
+              component.types.includes('political')
+          )?.long_name
 
-        const city = addressComponents.find((component: any) =>
-          component.types.includes('administrative_area_level_2')
-        )?.long_name
+          const city = addressComponents.find((component: any) =>
+            component.types.includes('administrative_area_level_2')
+          )?.long_name
 
-        if (streetName && city) {
-          const fullAddress =
-            `${streetName}, ${number}, ${neighborhood || ''}, ${city}, Brasil`.replace(
-              ', ,',
-              ','
-            )
-          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`
+          if (streetName && city) {
+            const fullAddress =
+              `${streetName}, ${number}, ${neighborhood || ''}, ${city}, Brasil`.replace(
+                ', ,',
+                ','
+              )
+            const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`
 
-          const geocodeRes = await fetch(geocodeUrl)
-          if (geocodeRes.ok) {
-            const geocodeData = await geocodeRes.json()
-            if (geocodeData.results?.[0]) {
-              const specificPostalCode =
-                geocodeData.results[0].address_components?.find(
-                  (component: any) => component.types.includes('postal_code')
-                )
+            const geocodeRes = await fetch(geocodeUrl)
+            if (geocodeRes.ok) {
+              const geocodeData = await geocodeRes.json()
+              if (geocodeData.results?.[0]) {
+                const specificPostalCode =
+                  geocodeData.results[0].address_components?.find(
+                    (component: any) => component.types.includes('postal_code')
+                  )
 
-              if (specificPostalCode) {
-                const specificCep = specificPostalCode.long_name
-                if (specificCep && specificCep.length === 8) {
-                  cep = `${specificCep.slice(0, 5)}-${specificCep.slice(5)}`
-                } else if (
-                  specificCep &&
-                  specificCep.length === 9 &&
-                  specificCep.includes('-')
-                ) {
-                  cep = specificCep
+                if (specificPostalCode) {
+                  const specificCep = specificPostalCode.long_name
+                  if (specificCep && specificCep.length === 8) {
+                    cep = `${specificCep.slice(0, 5)}-${specificCep.slice(5)}`
+                  } else if (
+                    specificCep &&
+                    specificCep.length === 9 &&
+                    specificCep.includes('-')
+                  ) {
+                    cep = specificCep
+                  }
+                  addSpanEvent('google_maps.geocoding.specific_cep_found', {
+                    cep,
+                  })
                 }
-                addSpanEvent('google_maps.geocoding.specific_cep_found', { cep })
               }
             }
           }
+        } catch (error) {
+          // If specific geocoding fails, use the original CEP
+          console.warn('Failed to get specific CEP, using general one:', error)
+          addSpanEvent('google_maps.geocoding.failed')
         }
-      } catch (error) {
-        // If specific geocoding fails, use the original CEP
-        console.warn('Failed to get specific CEP, using general one:', error)
-        addSpanEvent('google_maps.geocoding.failed')
       }
+
+      addSpanEvent('google_maps.cep.final', { 'cep.value': cep || 'null' })
+
+      return NextResponse.json({ cep })
+    } catch (error) {
+      console.error('Error in CEP lookup:', error)
+      span.recordException(error as Error)
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      )
     }
-
-    addSpanEvent('google_maps.cep.final', { 'cep.value': cep || 'null' })
-
-    return NextResponse.json({ cep })
-  } catch (error) {
-    console.error('Error in CEP lookup:', error)
-    span.recordException(error as Error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
   })
 }

@@ -26,15 +26,12 @@ export function PetNotFound() {
             </h2>
 
             <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
-              O pet que você está procurando não existe ou não está cadastrado na
-              sua carteira.
+              O pet que você está procurando não existe ou não está cadastrado
+              na sua carteira.
             </p>
 
             <div className="mt-6">
-              <CustomButton
-                size="xl"
-                fullWidth
- className="rounded-full"              >
+              <CustomButton size="xl" fullWidth className="rounded-full">
                 <Link href="/carteira?pets=true">Voltar para carteira</Link>
               </CustomButton>
             </div>

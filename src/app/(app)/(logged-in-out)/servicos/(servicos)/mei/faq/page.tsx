@@ -6,7 +6,7 @@ const MEI_FAQ_SECTIONS: FaqSection[] = [
     id: 'plataforma',
     title: 'O que é a Plataforma Oportunidades Cariocas?',
     content:
-      'O Oportunidades Cariocas é uma plataforma digital da Prefeitura do Rio que conecta você a oportunidades de desenvolvimento profissional e pessoal. Nela, além dos cursos oferecidos pela Prefeitura e por instituições parceiras, há um espaço exclusivo de oportunidades a Microempreendedores Individuais (MEIs), impulsionando o empreendedorismo local.',
+      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que centraliza informações e inscrições para cursos, oficinas e atividades educativas oferecidas pelo município e instituições parceiras. Focado no desenvolvimento profissional e pessoal, o portal também oferece um espaço exclusivo para Microempreendedores Individuais (MEIs), funcionando como um canal direto para quem busca qualificação e novas oportunidades no mercado carioca.',
   },
   {
     id: 'quem-pode',
@@ -18,7 +18,7 @@ const MEI_FAQ_SECTIONS: FaqSection[] = [
     id: 'govbr',
     title: 'O que é a conta Gov.br e por que preciso dela para me cadastrar?',
     content:
-      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta.\n\nÉ o meio de acesso para que possamos garantir a segurança dos seus dados e a validação da sua identidade, além de simplificar o processo de contratação dos serviços oferecidos na plataforma.',
+      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta.\n\n O acesso pelo gov.br garante a segurança dos seus dados e valida sua identidade, trazendo mais confiança para o processo. Com ele, você envia suas propostas de prestação de serviços de forma simplificada e rápida, acompanhando cada etapa diretamente pela plataforma.',
   },
   {
     id: 'criar-govbr',

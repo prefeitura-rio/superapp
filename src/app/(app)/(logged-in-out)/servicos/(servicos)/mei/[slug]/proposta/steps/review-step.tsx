@@ -1,14 +1,17 @@
 'use client'
 
-import { InfoIcon } from '@/assets/icons/info-icon'
 import { EditIcon } from '@/assets/icons/edit-icon'
+import { InfoIcon } from '@/assets/icons/info-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import type { MeiCompanyData, MeiProposalFormData } from '../mei-proposal-client'
+import type {
+  MeiCompanyData,
+  MeiProposalFormData,
+} from '../mei-proposal-client'
 
 interface ReviewStepProps {
   companyData: MeiCompanyData
@@ -88,7 +91,12 @@ function formatCurrency(value: number): string {
   })
 }
 
-export function ReviewStep({ companyData, showTermsError, slug, hasExistingProposal }: ReviewStepProps) {
+export function ReviewStep({
+  companyData,
+  showTermsError,
+  slug,
+  hasExistingProposal,
+}: ReviewStepProps) {
   const router = useRouter()
   const { watch, setValue } = useFormContext<MeiProposalFormData>()
   const proposalValue = watch('value')
@@ -152,11 +160,10 @@ export function ReviewStep({ companyData, showTermsError, slug, hasExistingPropo
         <Checkbox
           id="terms"
           checked={acceptedTerms}
-          onCheckedChange={(checked) => setValue('acceptedTerms', checked === true)}
-          className={cn(
-            'mt-0.5',
-            showTermsError && 'border-destructive'
-          )}
+          onCheckedChange={checked =>
+            setValue('acceptedTerms', checked === true)
+          }
+          className={cn('mt-0.5', showTermsError && 'border-destructive')}
         />
         <label
           htmlFor="terms"
@@ -165,7 +172,8 @@ export function ReviewStep({ companyData, showTermsError, slug, hasExistingPropo
             showTermsError && 'text-destructive'
           )}
         >
-          Declaro que a minha proposta inclui a integralidade dos custos dos serviços e também dos materiais necessários para a execução do serviço
+          Declaro que a minha proposta inclui a integralidade dos custos dos
+          serviços e também dos materiais necessários para a execução do serviço
         </label>
       </div>
     </div>

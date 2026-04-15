@@ -8,7 +8,7 @@ import { revalidateTag } from 'next/cache'
 
 export async function updateUserEthnicity(race: string) {
   const userInfo = await getUserInfoFromToken()
-  
+
   if (!userInfo.cpf) {
     throw new Error('CPF do usuário não encontrado')
   }
@@ -16,7 +16,7 @@ export async function updateUserEthnicity(race: string) {
   const modelsSelfDeclaredRacaInput: ModelsSelfDeclaredRacaInput = {
     valor: race,
   }
-  
+
   try {
     const response = await putCitizenCpfEthnicity(
       userInfo.cpf,
@@ -28,7 +28,7 @@ export async function updateUserEthnicity(race: string) {
       const errorData = response.data as HandlersErrorResponse
       throw new Error(errorData?.error || 'Erro ao atualizar etnia')
     }
-    
+
     revalidateTag(`user-info-${userInfo.cpf}`)
     return { success: true, message: 'Etnia atualizada com sucesso.' }
   } catch (error: any) {
@@ -37,7 +37,7 @@ export async function updateUserEthnicity(race: string) {
       const err = error as HandlersErrorResponse
       throw new Error(err?.error || 'Erro ao atualizar etnia')
     }
-    
+
     // For other errors (network, etc.), throw as well
     throw error
   }

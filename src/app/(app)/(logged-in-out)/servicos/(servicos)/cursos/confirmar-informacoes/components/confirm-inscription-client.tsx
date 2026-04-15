@@ -200,9 +200,8 @@ export function ConfirmInscriptionClient({
   const getInitialScheduleId = () => {
     if (initialUnit && initialUnit.schedules) {
       // Filter available schedules (with remaining_vacancies > 0)
-      const availableSchedules = initialUnit.schedules.filter(
-        isScheduleAvailable
-      )
+      const availableSchedules =
+        initialUnit.schedules.filter(isScheduleAvailable)
       if (availableSchedules.length === 1) {
         return availableSchedules[0].id
       }
@@ -223,7 +222,10 @@ export function ConfirmInscriptionClient({
       }
     }
     // Otherwise, if there's only one available online class, automatically select it
-    if (availableOnlineClasses.length === 1 && isClassAvailable(availableOnlineClasses[0])) {
+    if (
+      availableOnlineClasses.length === 1 &&
+      isClassAvailable(availableOnlineClasses[0])
+    ) {
       return availableOnlineClasses[0].id
     }
     // If multiple classes, start with empty (user must select)
@@ -597,9 +599,8 @@ export function ConfirmInscriptionClient({
             finalScheduleId = availableOnlineClasses[0].id
           } else if (selectedUnit && selectedUnit.schedules) {
             // Filter available schedules (with remaining_vacancies > 0)
-            const availableSchedules = selectedUnit.schedules.filter(
-              isScheduleAvailable
-            )
+            const availableSchedules =
+              selectedUnit.schedules.filter(isScheduleAvailable)
             if (availableSchedules.length === 1) {
               // Auto-select if only one available schedule in selected unit
               finalScheduleId = availableSchedules[0].id

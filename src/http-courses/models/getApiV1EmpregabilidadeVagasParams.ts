@@ -16,7 +16,7 @@ export type GetApiV1EmpregabilidadeVagasParams = {
    */
   pageSize?: number
   /**
-   * Filtrar por status (em_edicao, em_aprovacao, publicado_ativo, publicado_expirado)
+   * Filtrar por status (em_edicao, em_aprovacao, publicado_ativo, publicado_expirado, vaga_congelada, vaga_descontinuada)
    */
   status?: string
   /**

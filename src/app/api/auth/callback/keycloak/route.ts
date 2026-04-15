@@ -4,7 +4,20 @@ import {
   getAccessTokenCookieConfig,
   getRefreshTokenCookieConfig,
 } from '@/lib/auth-cookie-config'
+import { jwtDecode } from 'jwt-decode'
 import { type NextRequest, NextResponse } from 'next/server'
+
+interface KeycloakJwtPayload {
+  sub?: string
+  name?: string
+  preferred_username?: string
+  email?: string
+}
+
+function formatCpf(raw: string): string {
+  const digits = raw.replace(/\D/g, '').padStart(11, '0')
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -65,6 +78,28 @@ export async function GET(req: NextRequest) {
       data.refresh_token,
       getRefreshTokenCookieConfig()
     )
+
+    // Short-lived, non-httpOnly cookie so client JS can detect a fresh login
+    // and fire a one-time GA event. Decoded server-side to avoid exposing the
+    // full JWT to client code.
+    try {
+      const decoded = jwtDecode<KeycloakJwtPayload>(data.access_token)
+      const cpf = decoded.preferred_username ?? ''
+      const loginInfo = JSON.stringify({
+        name: decoded.name ?? '',
+        preferred_username: cpf ? formatCpf(cpf) : '',
+        email: decoded.email ?? '',
+      })
+      res.cookies.set('just_logged_in', btoa(loginInfo), {
+        path: '/',
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60,
+      })
+    } catch {
+      // Non-critical: if JWT decode fails, skip the analytics cookie
+    }
 
     return res
   } catch (error) {

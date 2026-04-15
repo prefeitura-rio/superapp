@@ -1,5 +1,6 @@
 'use client'
 
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { MenuItem } from '@/components/ui/custom/menu-item'
@@ -13,12 +14,8 @@ export default function MeiMenuPage() {
   }
 
   return (
-    <main className="max-w-xl min-h-lvh mx-auto text-foreground pb-10">
-      <header className="px-4 py-4 w-full max-w-xl mx-auto z-50 bg-background text-foreground">
-        <div className="flex justify-start">
-          <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
-        </div>
-      </header>
+    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
+      <SecondaryHeader fixed={false} title="Menu" route="/servicos/mei" />
       <div className="px-4 pt-3.4">
         <MenuItem
           label="Minhas propostas"

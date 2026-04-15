@@ -97,10 +97,7 @@ export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
           onEditClick={handleEmailEdit}
         />
 
-        <MeiDataItem
-          label="Natureza jurídica"
-          value={data.naturezaJuridica}
-        />
+        <MeiDataItem label="Natureza jurídica" value={data.naturezaJuridica} />
 
         <MeiDataItem
           label="CNAE principal"
@@ -108,10 +105,7 @@ export function MeiCompanyDetails({ data }: MeiCompanyDetailsProps) {
         />
 
         {secondaryCnaes.length > 0 && (
-          <MeiDataItem
-            label="CNAE secundário"
-            value={secondaryCnaes}
-          />
+          <MeiDataItem label="CNAE secundário" value={secondaryCnaes} />
         )}
       </div>
     </div>

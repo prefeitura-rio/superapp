@@ -1,4 +1,5 @@
 import { CursosBanner } from '@/app/components/banners/cursos-banner'
+import { EmpregabilidadeBanner } from '@/app/components/banners/empregabilidade-banner'
 import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
@@ -17,7 +18,18 @@ type BannerProps = {
   route: string
 }
 
+const _featureFlag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
+const _empregosEnabled =
+  _featureFlag === 'false' || _featureFlag.split(',').includes('empregos')
+
 export const suggestedBanners: BannerProps[] = [
+  {
+    id: 'empregabilidade',
+    component: EmpregabilidadeBanner,
+    title: 'Encontre seu emprego',
+    subtitle: 'no Oportunidades Cariocas',
+    route: '/servicos/empregos/',
+  },
   {
     id: 'cursos',
     component: CursosBanner,
@@ -60,4 +72,4 @@ export const suggestedBanners: BannerProps[] = [
   //   subtitle: 'E ganhe até 50% de desconto',
   //   route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
   // },
-]
+].filter(banner => banner.id !== 'empregabilidade' || _empregosEnabled)

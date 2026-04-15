@@ -57,7 +57,7 @@ export function CnaeIncompatibleSheet({
 
         {isLoading ? (
           <div className="space-y-3">
-            {(cnaeIds || []).map((id) => (
+            {(cnaeIds || []).map(id => (
               <div key={id} className="animate-pulse">
                 <div className="h-4 bg-muted rounded w-24 mb-1" />
                 <div className="h-3 bg-muted rounded w-full" />
@@ -66,7 +66,7 @@ export function CnaeIncompatibleSheet({
           </div>
         ) : (
           <div className="space-y-4">
-            {cnaes.map((cnae) => (
+            {cnaes.map(cnae => (
               <div key={cnae.codigo}>
                 <p className="text-sm text-foreground">
                   <span className="font-medium">{cnae.codigo}</span>

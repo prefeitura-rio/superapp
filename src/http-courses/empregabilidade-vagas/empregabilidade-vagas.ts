@@ -20,6 +20,8 @@ import type {
   GetApiV1EmpregabilidadeVagasParams,
   PostApiV1EmpregabilidadeVagas400,
   PostApiV1EmpregabilidadeVagas500,
+  PostApiV1EmpregabilidadeVagasDraft400,
+  PostApiV1EmpregabilidadeVagasDraft500,
   PutApiV1EmpregabilidadeVagasId400,
   PutApiV1EmpregabilidadeVagasId500,
   PutApiV1EmpregabilidadeVagasIdDiscontinue200,
@@ -157,6 +159,54 @@ export const postApiV1EmpregabilidadeVagas = async (
 ): Promise<postApiV1EmpregabilidadeVagasResponse> => {
   return customFetch<postApiV1EmpregabilidadeVagasResponse>(
     getPostApiV1EmpregabilidadeVagasUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeVagaBody),
+    }
+  )
+}
+
+/**
+ * Cria uma nova vaga
+ * @summary Criar vaga
+ */
+export type postApiV1EmpregabilidadeVagasDraftResponse201 = {
+  data: EmpregabilidadeVaga
+  status: 201
+}
+
+export type postApiV1EmpregabilidadeVagasDraftResponse400 = {
+  data: PostApiV1EmpregabilidadeVagasDraft400
+  status: 400
+}
+
+export type postApiV1EmpregabilidadeVagasDraftResponse500 = {
+  data: PostApiV1EmpregabilidadeVagasDraft500
+  status: 500
+}
+
+export type postApiV1EmpregabilidadeVagasDraftResponseComposite =
+  | postApiV1EmpregabilidadeVagasDraftResponse201
+  | postApiV1EmpregabilidadeVagasDraftResponse400
+  | postApiV1EmpregabilidadeVagasDraftResponse500
+
+export type postApiV1EmpregabilidadeVagasDraftResponse =
+  postApiV1EmpregabilidadeVagasDraftResponseComposite & {
+    headers: Headers
+  }
+
+export const getPostApiV1EmpregabilidadeVagasDraftUrl = () => {
+  return `/api/v1/empregabilidade/vagas/draft`
+}
+
+export const postApiV1EmpregabilidadeVagasDraft = async (
+  empregabilidadeVagaBody: EmpregabilidadeVagaBody,
+  options?: RequestInit
+): Promise<postApiV1EmpregabilidadeVagasDraftResponse> => {
+  return customFetch<postApiV1EmpregabilidadeVagasDraftResponse>(
+    getPostApiV1EmpregabilidadeVagasDraftUrl(),
     {
       ...options,
       method: 'POST',

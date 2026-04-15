@@ -1,6 +1,6 @@
+import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type { GoogleAddressSuggestion } from '@/types/address'
 import { type NextRequest, NextResponse } from 'next/server'
-import { withSpan, addSpanEvent } from '@/lib/telemetry'
 
 interface GoogleMapsPrediction {
   description: string
@@ -16,7 +16,7 @@ interface GoogleMapsResponse {
 }
 
 export async function GET(req: NextRequest) {
-  return withSpan('api.address_autocomplete', async (span) => {
+  return withSpan('api.address_autocomplete', async span => {
     const query = req.nextUrl.searchParams.get('q')
 
     span.setAttribute('autocomplete.query', query || '')
@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
 
     const apiKey = process.env.GOOGLE_MAPS_API_KEY
     if (!apiKey) {
-      addSpanEvent('autocomplete.validation.failed', { reason: 'missing_api_key' })
+      addSpanEvent('autocomplete.validation.failed', {
+        reason: 'missing_api_key',
+      })
       return NextResponse.json(
         { error: 'Missing Google Maps API key' },
         { status: 500 }
