@@ -26,16 +26,30 @@ export default function ServicosLayout({
     pathname === '/servicos/empregos' ||
     pathname === '/servicos/empregos/'
 
+  // Determina se o toggle terá mais de 1 aba visível (staging sempre sim; produção
+  // depende de quantos serviços estão listados na flag)
+  const flag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
+  const isProduction = flag !== 'false'
+  const enabledServicesCount = isProduction
+    ? flag.split(',').filter(Boolean).length
+    : 3
+  const toggleHasMultipleTabs = enabledServicesCount > 1
+
   return (
     <AuthHeaderProvider>
       <div>
-        {shouldShowToggle && (
-          <div className="max-w-4xl mx-auto pt-12 pb-0 px-4">
-            <div className="mb-5 mt-2">
-              <ServiceTypeToggle activeType={activeType} />
+        {shouldShowToggle &&
+          (toggleHasMultipleTabs ? (
+            <div className="max-w-4xl mx-auto pt-12 pb-0 px-4">
+              <div className="mb-5 mt-2">
+                <ServiceTypeToggle activeType={activeType} />
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            // Quando só há 1 serviço habilitado, o toggle não aparece mas ainda é
+            // necessário um espaçamento para o conteúdo não ficar atrás do header fixo
+            <div className="h-20 sm:h-24" />
+          ))}
         <main>{children}</main>
         {shouldShowToggle && <FloatNavigationWrapper />}
       </div>
