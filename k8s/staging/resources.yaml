@@ -1,14 +1,22 @@
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: app
   annotations:
     secrets.infisical.com/auto-reload: "true"
 spec:
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: app
+  strategy:
+    blueGreen:
+      activeService: app
+      previewService: app-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      previewReplicaCount: 1
   template:
     metadata:
       labels:
@@ -25,27 +33,30 @@ spec:
               containerPort: 3000
               protocol: TCP
           livenessProbe:
-            tcpSocket:
-              port: http
-            initialDelaySeconds: 0
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
             periodSeconds: 30
-            timeoutSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 6
           readinessProbe:
-            tcpSocket:
-              port: http
-            initialDelaySeconds: 0
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 3
           startupProbe:
-            tcpSocket:
-              port: http
+            httpGet:
+              path: /api/health
+              port: 3000
             initialDelaySeconds: 0
             periodSeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 20
+            failureThreshold: 24
           resources:
             requests:
               cpu: 500m
@@ -73,6 +84,8 @@ metadata:
   name: app-scaled-object
 spec:
   scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: app
   minReplicaCount: 3
   maxReplicaCount: 30
@@ -120,6 +133,21 @@ metadata:
   labels:
     app: app
   name: app
+spec:
+  ports:
+    - name: "80"
+      port: 80
+      targetPort: 3000
+  selector:
+    app: app
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: app
+  name: app-preview
 spec:
   ports:
     - name: "80"
