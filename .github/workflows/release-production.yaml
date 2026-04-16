@@ -1,0 +1,283 @@
+name: Release and Deploy to Production
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+
+      - name: Extract release version
+        id: version
+        run: |
+          VERSION=${{ github.ref_name }}
+          VERSION_NO_V=${VERSION#v}
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
+          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
+          echo "IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/superapp" >> $GITHUB_ENV
+
+      - name: Build and Push Docker Image (Production)
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idrio.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp.apps.rio.gov.br" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://pref.rio/api/auth/callback/keycloak" \
+            --build-arg NEXT_PUBLIC_HOME_URL="https://pref.rio/" \
+            --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="true" \
+            --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746 \
+            --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital \
+            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
+            --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
+            --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-6FY8VVMJ5T" \
+            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-WTQV6K6W" \
+            --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="false" \
+            --build-arg NEXT_PUBLIC_FEATURE_FLAG="true" \
+            --tag $IMAGE_NAME:$VERSION \
+            --tag $IMAGE_NAME:$VERSION_NO_V \
+            --tag $IMAGE_NAME:stable \
+            --push .
+
+      - name: Get image digest
+        id: digest
+        run: |
+          DIGEST=$(docker buildx imagetools inspect $IMAGE_NAME:$VERSION --format '{{.Manifest.Digest}}' | grep -oE 'sha256:[a-f0-9]+' | head -n1)
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+          echo "Image digest: $DIGEST"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Install gke-gcloud-auth-plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: latest
+
+      - name: Configure kubectl for GKE (Production)
+        run: gcloud container clusters get-credentials application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
+
+      - name: Update ArgoCD Application image override
+        run: |
+          echo "Updating production ArgoCD Application image override..."
+          echo "Image: $IMAGE_NAME:$VERSION@$DIGEST"
+
+          kubectl patch application app -n argocd --type=json \
+            -p="[{\"op\": \"replace\", \"path\": \"/spec/source/kustomize/images/0\", \"value\": \"$IMAGE_NAME:$VERSION@$DIGEST\"}]"
+
+          echo "✅ ArgoCD Application updated with new image override"
+
+      - name: Wait for ArgoCD sync and rollout to start
+        timeout-minutes: 5
+        run: |
+          echo "Waiting for ArgoCD to sync and rollout to use new image..."
+          echo "Expected image: $IMAGE_NAME:$VERSION@$DIGEST"
+
+          for i in {1..60}; do
+            CURRENT_IMAGE=$(kubectl get rollout app -n app -o jsonpath='{.spec.template.spec.containers[0].image}')
+            SYNC_STATUS=$(kubectl get application app -n argocd -o jsonpath='{.status.sync.status}')
+
+            echo "Attempt $i/60: Image=$CURRENT_IMAGE, ArgoCD Sync=$SYNC_STATUS"
+
+            if [[ "$CURRENT_IMAGE" == "$IMAGE_NAME:$VERSION@$DIGEST" ]]; then
+              echo "✅ Rollout spec updated with correct image!"
+              break
+            fi
+
+            if [ $i -eq 60 ]; then
+              echo "❌ Timeout waiting for rollout image update"
+              echo "Expected: $IMAGE_NAME:$VERSION@$DIGEST"
+              echo "Got: $CURRENT_IMAGE"
+              exit 1
+            fi
+
+            sleep 5
+          done
+
+      - name: Monitor Rollout
+        timeout-minutes: 45
+        run: |
+          echo "Monitoring rollout progress for version $VERSION..."
+
+          while true; do
+            PHASE=$(kubectl get rollout app -n app -o jsonpath='{.status.phase}')
+            MESSAGE=$(kubectl get rollout app -n app -o jsonpath='{.status.message}')
+            CURRENT_IMAGE=$(kubectl get rollout app -n app -o jsonpath='{.spec.template.spec.containers[0].image}')
+
+            echo "Rollout phase: $PHASE"
+            echo "Message: $MESSAGE"
+            echo "Current image: $CURRENT_IMAGE"
+
+            if [[ "$CURRENT_IMAGE" != "$IMAGE_NAME:$VERSION@$DIGEST" ]]; then
+              echo "⚠️ WARNING: Rollout image changed unexpectedly!"
+            fi
+
+            if [ "$PHASE" = "Healthy" ]; then
+              echo "✅ Rollout completed successfully!"
+              exit 0
+            fi
+
+            if [ "$PHASE" = "Degraded" ]; then
+              echo "❌ Rollout failed - status is Degraded"
+              kubectl get rollout app -n app -o yaml
+              exit 1
+            fi
+
+            if [ "$PHASE" = "Aborted" ]; then
+              echo "❌ Rollout was aborted (likely due to failed analysis)"
+              kubectl get analysisrun -n app --sort-by=.metadata.creationTimestamp -o yaml || true
+              exit 1
+            fi
+
+            kubectl get rollout app -n app
+            echo "Waiting 30s before next check..."
+            sleep 30
+          done
+
+      - name: Create deployment summary
+        if: always()
+        run: |
+          echo "## 🚀 Production Release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: $COMMIT_HASH" >> $GITHUB_STEP_SUMMARY
+          echo "**Image**: \`$IMAGE_NAME:$VERSION@${DIGEST:0:12}...\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          PHASE=$(kubectl get rollout app -n app -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+          echo "**Final Status**: $PHASE" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$PHASE" = "Healthy" ]; then
+            echo "### ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+            echo "Canary deployment completed and is serving 100% production traffic." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Check logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Send Discord notification
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "Discord webhook not configured, skipping notification"
+            exit 0
+          fi
+
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s' ${{ github.sha }})
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' ${{ github.sha }})
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/$VERSION"
+
+          PHASE=$(kubectl get rollout app -n app -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+
+          if [ "$PHASE" = "Healthy" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="Successful"
+            COLOR="3066993"
+            DESCRIPTION="Canary deployment completed. New version is serving 100% production traffic."
+          elif [ "$PHASE" = "Aborted" ]; then
+            STATUS_EMOJI="🛑"
+            STATUS_TEXT="Aborted"
+            COLOR="15105570"
+            DESCRIPTION="Rollout was aborted due to failed analysis metrics. Rolled back to stable version."
+          elif [ "$PHASE" = "Degraded" ]; then
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Failed"
+            COLOR="15158332"
+            DESCRIPTION="Rollout entered degraded state. Check logs for details."
+          else
+            STATUS_EMOJI="⚠️"
+            STATUS_TEXT="Unknown"
+            COLOR="16776960"
+            DESCRIPTION="Rollout status could not be determined. Manual investigation required."
+          fi
+
+          DISCORD_PAYLOAD=$(cat <<EOF
+          {
+            "content": "<@&903644455582695494>",
+            "embeds": [{
+              "title": "${STATUS_EMOJI} Production Release ${STATUS_TEXT}",
+              "description": "${DESCRIPTION}",
+              "color": ${COLOR},
+              "fields": [
+                {
+                  "name": "🏷️ Version",
+                  "value": "[${VERSION}](${RELEASE_URL})",
+                  "inline": true
+                },
+                {
+                  "name": "📊 Status",
+                  "value": "\`${PHASE}\`",
+                  "inline": true
+                },
+                {
+                  "name": "📝 Commit",
+                  "value": "[${COMMIT_MSG:0:50}](${COMMIT_URL})",
+                  "inline": false
+                },
+                {
+                  "name": "👤 Author",
+                  "value": "${COMMIT_AUTHOR}",
+                  "inline": true
+                },
+                {
+                  "name": "🔖 Hash",
+                  "value": "\`${COMMIT_HASH}\`",
+                  "inline": true
+                },
+                {
+                  "name": "🐳 Image",
+                  "value": "\`${IMAGE_NAME}:${VERSION}\`",
+                  "inline": false
+                }
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
+              "footer": {
+                "text": "GitHub Actions"
+              }
+            }]
+          }
+          EOF
+          )
+
+          curl -H "Content-Type: application/json" \
+               -d "$DISCORD_PAYLOAD" \
+               "$DISCORD_WEBHOOK"

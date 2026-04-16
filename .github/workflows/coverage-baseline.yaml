@@ -1,0 +1,122 @@
+name: Update Coverage Baseline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  update-baseline:
+    name: Update Coverage Baseline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: |
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Test attempt $ATTEMPT of $MAX_ATTEMPTS..."
+
+            if npx vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text; then
+              echo "✅ Tests passed on attempt $ATTEMPT"
+              break
+            else
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "⚠️ Tests failed on attempt $ATTEMPT, retrying..."
+                ATTEMPT=$((ATTEMPT + 1))
+                sleep 2
+              else
+                echo "❌ Tests failed after $MAX_ATTEMPTS attempts"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Extract coverage percentage
+        id: coverage
+        run: |
+          COVERAGE=$(./scripts/get-coverage.sh coverage/coverage-summary.json)
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "Coverage: $COVERAGE%"
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+        continue-on-error: true
+
+      - name: Create gh-pages branch if it doesn't exist
+        run: |
+          if [ ! -d "gh-pages-dir/.git" ]; then
+            echo "Creating gh-pages branch..."
+            mkdir -p gh-pages-dir
+            cd gh-pages-dir
+            git init
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git checkout -b gh-pages
+            echo "# Coverage Reports" > README.md
+            git add README.md
+            git commit -m "Initialize gh-pages branch"
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git push -u origin gh-pages
+          fi
+
+      - name: Update coverage baseline
+        run: |
+          cd gh-pages-dir
+          echo "${{ steps.coverage.outputs.coverage }}" > coverage-baseline.txt
+
+          COVERAGE="${{ steps.coverage.outputs.coverage }}"
+          COLOR="red"
+          if (( $(echo "$COVERAGE >= 80" | bc -l) )); then COLOR="brightgreen"; fi
+          if (( $(echo "$COVERAGE >= 60 && $COVERAGE < 80" | bc -l) )); then COLOR="yellow"; fi
+          if (( $(echo "$COVERAGE >= 40 && $COVERAGE < 60" | bc -l) )); then COLOR="orange"; fi
+
+          cat > coverage-badge.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "coverage",
+            "message": "${COVERAGE}%",
+            "color": "${COLOR}"
+          }
+          EOF
+
+          echo "Last updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > coverage-updated.txt
+          echo "Commit: ${{ github.sha }}" >> coverage-updated.txt
+
+      - name: Commit and push baseline
+        run: |
+          cd gh-pages-dir
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add coverage-baseline.txt coverage-badge.json coverage-updated.txt
+          git commit -m "Update coverage baseline to ${{ steps.coverage.outputs.coverage }}%" || exit 0
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
+
+      - name: Generate coverage report
+        run: |
+          echo "## 📊 Coverage Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Coverage**: ${{ steps.coverage.outputs.coverage }}%" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Baseline updated in gh-pages branch." >> $GITHUB_STEP_SUMMARY

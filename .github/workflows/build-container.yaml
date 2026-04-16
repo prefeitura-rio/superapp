@@ -1,13 +1,12 @@
-name: Build and Push image
+name: Build and Push Staging Image
 
 on:
   push:
     branches:
-      - main
       - staging
-  pull_request: 
-    branches: 
-      - staging 
+  pull_request:
+    branches:
+      - staging
 
 jobs:
   build:
@@ -29,21 +28,14 @@ jobs:
         id: meta
         run: |
           IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/superapp"
-          if [ "${GITHUB_REF##*/}" == "main" ]; then
-            COMMIT_HASH=${{ github.sha }}
-            TAG1="stable"
-            TAG2="$COMMIT_HASH"
-          elif [ "${GITHUB_REF##*/}" == "staging" ]; then
-            COMMIT_HASH=${{ github.sha }}
-            TAG1="latest"
-            TAG2="$COMMIT_HASH"
-          fi
+          COMMIT_HASH=${{ github.sha }}
+          TAG1="latest"
+          TAG2="$COMMIT_HASH"
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
           echo "TAG1=$TAG1" >> $GITHUB_ENV
           echo "TAG2=$TAG2" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image for Staging
-        if: github.ref == 'refs/heads/staging'
         run: |
           docker buildx build \
             --platform linux/amd64 \
@@ -62,40 +54,10 @@ jobs:
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.staging.app.dados.rio/catalogo/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --tag $IMAGE_NAME:$TAG1 \
-            --tag $IMAGE_NAME:$TAG2 \
-            --push .
-
-      - name: Build and Push Docker Image for Production
-        if: github.ref == 'refs/heads/main'
-        run: |
-          docker buildx build \
-            --platform linux/amd64 \
-            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idrio.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect" \
-            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp.apps.rio.gov.br" \
-            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://pref.rio/api/auth/callback/keycloak" \
-            --build-arg NEXT_PUBLIC_HOME_URL="https://pref.rio/" \
-            --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.acesso.gov.br/" \
-            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="true" \
-            --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
-            --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746 \
-            --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital \
-            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
-            --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
-            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-6FY8VVMJ5T" \
-            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-WTQV6K6W" \
-            --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.pref.rio/catalogo/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
-            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="false" \
-            --build-arg NEXT_PUBLIC_FEATURE_FLAG="cursos" \
             --tag $IMAGE_NAME:$TAG1 \
             --tag $IMAGE_NAME:$TAG2 \
             --push .

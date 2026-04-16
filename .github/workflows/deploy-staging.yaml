@@ -1,0 +1,335 @@
+name: Deploy to Staging with Blue-Green
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-and-test:
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if k8s-only changes
+        id: check-k8s-only
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          NON_K8S_FILES=$(echo "$CHANGED_FILES" | grep -v "^k8s/" || true)
+
+          if [ -z "$NON_K8S_FILES" ] && [ -n "$CHANGED_FILES" ]; then
+            echo "k8s_only=true" >> $GITHUB_OUTPUT
+            echo "Only k8s/ files changed, skipping build and tests"
+          else
+            echo "k8s_only=false" >> $GITHUB_OUTPUT
+            echo "Non-k8s files changed, proceeding with build and tests"
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+
+      - name: Extract metadata for Docker
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        id: meta
+        run: |
+          COMMIT_HASH=${{ github.sha }}
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/superapp"
+
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
+          echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
+
+      - name: Build and Push Docker Image (Staging)
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
+            --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
+            --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
+            --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746_v2_llm \
+            --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital_v2_llm \
+            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
+            --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
+            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
+            --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
+            --tag $IMAGE_NAME:latest \
+            --tag $IMAGE_NAME:$COMMIT_HASH \
+            --push .
+
+      - name: Get image digest
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        id: digest
+        run: |
+          DIGEST=$(docker buildx imagetools inspect $IMAGE_NAME:latest --format '{{.Manifest.Digest}}' | grep -oE 'sha256:[a-f0-9]+' | head -n1)
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+          echo "Image digest: $DIGEST"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Install gke-gcloud-auth-plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: latest
+
+      - name: Install Argo Rollouts kubectl plugin
+        run: |
+          curl -fLO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x ./kubectl-argo-rollouts-linux-amd64
+          sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
+      - name: Configure kubectl for GKE (Staging)
+        run: gcloud container clusters get-credentials application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
+
+      - name: Update ArgoCD Application image override
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: |
+          echo "Updating ArgoCD Application image override..."
+          echo "Image: $IMAGE_NAME:$COMMIT_HASH@$DIGEST"
+
+          kubectl patch application app -n argocd --type=json \
+            -p="[{\"op\": \"replace\", \"path\": \"/spec/source/kustomize/images/0\", \"value\": \"$IMAGE_NAME:$COMMIT_HASH@$DIGEST\"}]"
+
+          echo "✅ ArgoCD Application updated with new image override"
+
+      - name: Wait for ArgoCD sync and blue-green preview
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        timeout-minutes: 10
+        run: |
+          echo "Waiting for ArgoCD to sync and create blue-green preview..."
+          echo "Expected image: $IMAGE_NAME:$COMMIT_HASH@$DIGEST"
+
+          for i in {1..60}; do
+            CURRENT_IMAGE=$(kubectl get rollout app -n app -o jsonpath='{.spec.template.spec.containers[0].image}')
+            SYNC_STATUS=$(kubectl get application app -n argocd -o jsonpath='{.status.sync.status}')
+
+            echo "Attempt $i/60: Image=$CURRENT_IMAGE, ArgoCD Sync=$SYNC_STATUS"
+
+            if [[ "$CURRENT_IMAGE" == "$IMAGE_NAME:$COMMIT_HASH@$DIGEST" ]]; then
+              echo "✅ Rollout spec updated with new image!"
+              break
+            fi
+
+            if [ $i -eq 60 ]; then
+              echo "❌ Timeout waiting for rollout image update"
+              echo "Expected: $IMAGE_NAME:$COMMIT_HASH@$DIGEST"
+              echo "Got: $CURRENT_IMAGE"
+              echo ""
+              echo "ArgoCD Application status:"
+              kubectl get application app -n argocd -o yaml
+              echo ""
+              echo "Rollout status:"
+              kubectl get rollout app -n app -o yaml
+              exit 1
+            fi
+
+            sleep 5
+          done
+
+          echo "Waiting for blue-green preview pod to reach Running state..."
+          for i in {1..60}; do
+            PREVIEW_POD=$(kubectl get pods -n app -l app=app --field-selector=status.phase=Running \
+              -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            if [ -n "$PREVIEW_POD" ]; then
+              echo "Preview pod $PREVIEW_POD is Running"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timeout waiting for preview pod to reach Running state"
+              kubectl get pods -n app -l app=app
+              exit 1
+            fi
+            echo "Attempt $i/60: No Running preview pod yet, waiting 3s..."
+            sleep 3
+          done
+
+          kubectl argo rollouts get rollout app -n app
+
+      - name: Set up port forward to preview service
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: |
+          echo "Setting up port forward to preview service..."
+          kubectl port-forward -n app service/app-preview 3000:80 &
+          PORT_FORWARD_PID=$!
+          echo "PORT_FORWARD_PID=$PORT_FORWARD_PID" >> $GITHUB_ENV
+
+          echo "Waiting for port-forward to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "Port-forward is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Port-forward failed to become ready"
+              kill $PORT_FORWARD_PID 2>/dev/null || true
+              exit 1
+            fi
+            echo "Attempt $i/30: Waiting for port-forward..."
+            sleep 2
+          done
+
+      - name: Set up Node.js for E2E tests
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: npm ci
+
+      - name: Install Playwright browsers
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests Against Preview
+        if: steps.check-k8s-only.outputs.k8s_only != 'true'
+        env:
+          BASE_URL: "http://localhost:3000"
+        run: npm run test:e2e:hook
+
+      - name: Clean up port forward
+        if: steps.check-k8s-only.outputs.k8s_only != 'true' && always()
+        run: |
+          kill $PORT_FORWARD_PID 2>/dev/null || true
+
+      - name: Promote to Stable
+        if: steps.check-k8s-only.outputs.k8s_only != 'true' && success()
+        run: |
+          echo "✅ Tests passed! Promoting to stable..."
+          kubectl argo rollouts promote app -n app
+          kubectl argo rollouts status app -n app --timeout=5m
+
+      - name: Rollback on Failure
+        if: steps.check-k8s-only.outputs.k8s_only != 'true' && failure()
+        run: |
+          echo "❌ Tests failed! Aborting rollout..."
+          kubectl argo rollouts abort app -n app || true
+          echo "Rollout aborted. Preview discarded. Stable service unchanged."
+          exit 1
+
+      - name: Create deployment summary
+        if: always() && steps.check-k8s-only.outputs.k8s_only != 'true'
+        run: |
+          echo "## 🚀 Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: $SHORT_HASH" >> $GITHUB_STEP_SUMMARY
+          echo "**Image**: \`$IMAGE_NAME:$COMMIT_HASH@${DIGEST:0:12}...\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "### ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+            echo "- Preview tests passed" >> $GITHUB_STEP_SUMMARY
+            echo "- Promoted to active service" >> $GITHUB_STEP_SUMMARY
+            echo "- Blue-green rollout complete" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+            echo "- E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "- Rollout aborted" >> $GITHUB_STEP_SUMMARY
+            echo "- Active service unchanged" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Send Discord notification
+        if: always() && steps.check-k8s-only.outputs.k8s_only != 'true'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "Discord webhook not configured, skipping notification"
+            exit 0
+          fi
+
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s' ${{ github.sha }})
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' ${{ github.sha }})
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="Succeeded"
+            COLOR="3066993"
+            DESCRIPTION="Preview tests passed and deployment promoted to active service. Blue-green rollout complete."
+          else
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Failed"
+            COLOR="15158332"
+            DESCRIPTION="E2E tests failed. Rollout aborted. Active service unchanged."
+          fi
+
+          DISCORD_PAYLOAD=$(cat <<EOF
+          {
+            "embeds": [{
+              "title": "${STATUS_EMOJI} Staging Deployment ${STATUS_TEXT}",
+              "description": "${DESCRIPTION}",
+              "color": ${COLOR},
+              "fields": [
+                {
+                  "name": "📝 Commit",
+                  "value": "[${COMMIT_MSG:0:50}](${COMMIT_URL})",
+                  "inline": false
+                },
+                {
+                  "name": "👤 Author",
+                  "value": "${COMMIT_AUTHOR}",
+                  "inline": true
+                },
+                {
+                  "name": "🔖 Version",
+                  "value": "\`${SHORT_HASH}\`",
+                  "inline": true
+                },
+                {
+                  "name": "🐳 Image",
+                  "value": "\`${IMAGE_NAME}:${COMMIT_HASH}\`",
+                  "inline": false
+                }
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
+              "footer": {
+                "text": "GitHub Actions"
+              }
+            }]
+          }
+          EOF
+          )
+
+          curl -H "Content-Type: application/json" \
+               -d "$DISCORD_PAYLOAD" \
+               "$DISCORD_WEBHOOK"
