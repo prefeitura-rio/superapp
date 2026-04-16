@@ -98,8 +98,9 @@ jobs:
           echo "Updating production ArgoCD Application image override..."
           echo "Image: $IMAGE_NAME:$VERSION@$DIGEST"
 
-          kubectl patch application app -n argocd --type=json \
-            -p="[{\"op\": \"replace\", \"path\": \"/spec/source/kustomize/images/0\", \"value\": \"$IMAGE_NAME:$VERSION@$DIGEST\"}]"
+          # Use merge patch - works on first deploy even without pre-existing kustomize.images
+          kubectl patch application app -n argocd --type=merge \
+            -p="{\"spec\":{\"source\":{\"kustomize\":{\"images\":[\"$IMAGE_NAME:$VERSION@$DIGEST\"]}}}}"
 
           echo "✅ ArgoCD Application updated with new image override"
 
