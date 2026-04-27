@@ -89,68 +89,38 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
   )
 }
 
-/**
- * Check if a course should be visible in the course list
- * Only shows courses with status "opened" and handles class end date logic
- *
- * Special handling:
- * - LIVRE_FORMACAO_ONLINE: Uses enrollment_end_date instead of class_end_date
- * - Other courses: Uses the latest class end date from schedules or remote_class
- */
+const LISTING_STATUSES = new Set([
+  'opened',
+  'published',
+  'scheduled',
+  'accepting_enrollments',
+  'in_progress',
+])
+
+const URL_STATUSES = new Set([
+  ...LISTING_STATUSES,
+  'finished',
+  'closed',
+  'canceled',
+])
+
 export interface ShouldShowCourseProps {
   course: ModelsCurso
   renderByUrl?: boolean
 }
+
 export function shouldShowCourse({
   course,
   renderByUrl = false,
 }: ShouldShowCourseProps): boolean {
-  // Only show courses with "opened" status
-  if (course.status !== 'opened') {
-    return false
+  const status = course.status as string
+
+  if (renderByUrl) {
+    return URL_STATUSES.has(status)
   }
 
-  // Check visibility flag; if false and not rendering by URL, hide the course
-  if (course.is_visible === false && !renderByUrl) {
-    return false
-  }
-
-  const now = new Date()
-
-  // Special handling for LIVRE_FORMACAO_ONLINE: use enrollment_end_date instead of class_end_date
-  if (course.modalidade === 'LIVRE_FORMACAO_ONLINE') {
-    // Skip 30-day rule when rendering by URL (direct access to course page)
-    if (!renderByUrl && course.enrollment_end_date) {
-      const enrollmentEndDate = new Date(course.enrollment_end_date as string)
-      const thirtyDaysAfterEnd = new Date(enrollmentEndDate)
-      thirtyDaysAfterEnd.setDate(thirtyDaysAfterEnd.getDate() + 30)
-
-      // Hide course if enrollment ended more than 30 days ago
-      if (now > thirtyDaysAfterEnd) {
-        return false
-      }
-    }
-    return true
-  }
-
-  // For all other courses: use the latest class end date from schedules or remote_class
-  // This handles:
-  // - Online courses with multiple classes (locations with schedules)
-  // - In-person/semi-in-person courses with multiple classes (locations with schedules)
-  // - Legacy structure (remote_class or locations[].class_end_date)
-  const latestClassEndDate = getLatestClassEndDate(course)
-
-  // Check if class has ended and if it's been more than 30 days (1 month)
-  // If the last schedule ended more than 30 days ago, hide the course
-  // Skip this check when rendering by URL (direct access to course page)
-  if (!renderByUrl && latestClassEndDate) {
-    const thirtyDaysAfterEnd = new Date(latestClassEndDate)
-    thirtyDaysAfterEnd.setDate(thirtyDaysAfterEnd.getDate() + 30)
-
-    if (now > thirtyDaysAfterEnd) {
-      return false
-    }
-  }
+  if (!LISTING_STATUSES.has(status)) return false
+  if (course.is_visible === false) return false
 
   return true
 }
@@ -288,39 +258,65 @@ export function getCourseEnrollmentInfo(
     }
   }
 
-  // Check if enrollment start date is in the future
-  if (course.enrollment_start_date) {
-    const enrollmentStartDate = new Date(course.enrollment_start_date as string)
-    if (now < enrollmentStartDate) {
-      return {
-        status: 'coming_soon',
-        buttonText: 'Disponível em breve',
-        isDisabled: true,
-        canEnroll: false,
-      }
-    }
-  }
-
-  // Check if class has ended FIRST (this takes priority over enrollment status)
-  const latestClassEndDate = getLatestClassEndDate(course)
-  if (latestClassEndDate && now > latestClassEndDate) {
+  // Course is no longer available for new enrollments
+  const courseStatus = course.status as string
+  if (['finished', 'closed', 'canceled'].includes(courseStatus)) {
     return {
-      status: 'course_ended',
-      buttonText: 'Curso encerrado',
+      status: 'not_available',
+      buttonText: 'Curso não está mais disponível',
       isDisabled: true,
       canEnroll: false,
     }
   }
 
-  // Check if enrollment end date has passed (only if class hasn't ended)
-  if (course.enrollment_end_date) {
-    const enrollmentEndDate = new Date(course.enrollment_end_date as string)
-    if (now > enrollmentEndDate) {
+  // Backend explicitly says enrollment is scheduled — trust it over date math
+  if (courseStatus === 'scheduled') {
+    return {
+      status: 'coming_soon',
+      buttonText: 'Disponível em breve',
+      isDisabled: true,
+      canEnroll: false,
+    }
+  }
+
+  // Backend explicitly says enrollment is open — skip date-based checks, go straight to vacancies
+  if (courseStatus !== 'accepting_enrollments') {
+    // Check if enrollment start date is in the future
+    if (course.enrollment_start_date) {
+      const enrollmentStartDate = new Date(
+        course.enrollment_start_date as string
+      )
+      if (now < enrollmentStartDate) {
+        return {
+          status: 'coming_soon',
+          buttonText: 'Disponível em breve',
+          isDisabled: true,
+          canEnroll: false,
+        }
+      }
+    }
+
+    // Check if class has ended FIRST (this takes priority over enrollment status)
+    const latestClassEndDate = getLatestClassEndDate(course)
+    if (latestClassEndDate && now > latestClassEndDate) {
       return {
-        status: 'enrollment_closed',
-        buttonText: 'Inscrições encerradas',
+        status: 'course_ended',
+        buttonText: 'Curso encerrado',
         isDisabled: true,
         canEnroll: false,
+      }
+    }
+
+    // Check if enrollment end date has passed (only if class hasn't ended)
+    if (course.enrollment_end_date) {
+      const enrollmentEndDate = new Date(course.enrollment_end_date as string)
+      if (now > enrollmentEndDate) {
+        return {
+          status: 'enrollment_closed',
+          buttonText: 'Inscrições encerradas',
+          isDisabled: true,
+          canEnroll: false,
+        }
       }
     }
   }

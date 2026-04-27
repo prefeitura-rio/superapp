@@ -35,21 +35,18 @@ function createEnrollment(
 }
 
 describe('shouldShowCourse', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-01-11T12:00:00Z'))
+  test('returns true for listing statuses', () => {
+    for (const status of ['opened', 'published', 'scheduled', 'accepting_enrollments', 'in_progress']) {
+      const course = createCourse({ status: status as any })
+      expect(shouldShowCourse({ course })).toBe(true)
+    }
   })
 
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  test('returns false when status is not opened', () => {
-    const course = createCourse({ status: 'closed' })
-
-    const result = shouldShowCourse({ course })
-
-    expect(result).toBe(false)
+  test('returns false for non-listing statuses', () => {
+    for (const status of ['finished', 'closed', 'canceled', 'draft', 'needs_changes', 'in_review', 'pending_deletion']) {
+      const course = createCourse({ status: status as any })
+      expect(shouldShowCourse({ course })).toBe(false)
+    }
   })
 
   test('returns false when is_visible is false and not renderByUrl', () => {
@@ -68,7 +65,7 @@ describe('shouldShowCourse', () => {
     expect(result).toBe(true)
   })
 
-  test('returns true for opened course with no end date', () => {
+  test('returns true for opened course', () => {
     const course = createCourse()
 
     const result = shouldShowCourse({ course })
@@ -76,68 +73,19 @@ describe('shouldShowCourse', () => {
     expect(result).toBe(true)
   })
 
-  describe('LIVRE_FORMACAO_ONLINE courses', () => {
-    test('returns true when within 30 days of enrollment end date', () => {
-      const course = createCourse({
-        modalidade: 'LIVRE_FORMACAO_ONLINE',
-        enrollment_end_date: '2026-01-01T00:00:00Z',
-      })
-
-      const result = shouldShowCourse({ course })
-
-      expect(result).toBe(true)
+  describe('renderByUrl', () => {
+    test('returns true for finished, closed, canceled via direct URL', () => {
+      for (const status of ['finished', 'closed', 'canceled']) {
+        const course = createCourse({ status: status as any })
+        expect(shouldShowCourse({ course, renderByUrl: true })).toBe(true)
+      }
     })
 
-    test('returns false when more than 30 days past enrollment end date', () => {
-      const course = createCourse({
-        modalidade: 'LIVRE_FORMACAO_ONLINE',
-        enrollment_end_date: '2025-12-01T00:00:00Z',
-      })
-
-      const result = shouldShowCourse({ course })
-
-      expect(result).toBe(false)
-    })
-
-    test('returns true when renderByUrl ignores 30 day rule', () => {
-      const course = createCourse({
-        modalidade: 'LIVRE_FORMACAO_ONLINE',
-        enrollment_end_date: '2025-12-01T00:00:00Z',
-      })
-
-      const result = shouldShowCourse({ course, renderByUrl: true })
-
-      expect(result).toBe(true)
-    })
-  })
-
-  describe('regular courses with schedules', () => {
-    test('returns true when within 30 days of class end date', () => {
-      const course = createCourse({
-        locations: [
-          {
-            schedules: [{ class_end_date: '2026-01-01T00:00:00Z' }],
-          },
-        ],
-      } as any)
-
-      const result = shouldShowCourse({ course })
-
-      expect(result).toBe(true)
-    })
-
-    test('returns false when more than 30 days past class end date', () => {
-      const course = createCourse({
-        locations: [
-          {
-            schedules: [{ class_end_date: '2025-11-01T00:00:00Z' }],
-          },
-        ],
-      } as any)
-
-      const result = shouldShowCourse({ course })
-
-      expect(result).toBe(false)
+    test('returns false for draft/review statuses even via direct URL', () => {
+      for (const status of ['draft', 'needs_changes', 'in_review', 'pending_deletion']) {
+        const course = createCourse({ status: status as any })
+        expect(shouldShowCourse({ course, renderByUrl: true })).toBe(false)
+      }
     })
   })
 })
@@ -241,6 +189,49 @@ describe('getCourseEnrollmentInfo', () => {
     expect(result.canEnroll).toBe(true)
   })
 
+  test('returns not_available for finished, closed, canceled courses', () => {
+    for (const status of ['finished', 'closed', 'canceled']) {
+      const course = createCourse({ status: status as any })
+
+      const result = getCourseEnrollmentInfo(course)
+
+      expect(result.status).toBe('not_available')
+      expect(result.buttonText).toBe('Curso não está mais disponível')
+      expect(result.isDisabled).toBe(true)
+      expect(result.canEnroll).toBe(false)
+    }
+  })
+
+  test('returns available for accepting_enrollments even when class_end_date is in the past', () => {
+    const course = createCourse({
+      status: 'accepting_enrollments' as any,
+      locations: [{ schedules: [{ class_end_date: '2026-01-01T00:00:00Z' }] }],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('available')
+    expect(result.canEnroll).toBe(true)
+  })
+
+  test('returns coming_soon for scheduled status regardless of dates', () => {
+    const course = createCourse({ status: 'scheduled' as any })
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('coming_soon')
+    expect(result.isDisabled).toBe(true)
+  })
+
+  test('returns certificate_available for concluded user even when course is finished', () => {
+    const course = createCourse({ status: 'finished' as any, has_certificate: true })
+    const enrollment = createEnrollment({ status: 'concluded', certificate_url: 'https://example.com/cert' })
+
+    const result = getCourseEnrollmentInfo(course, enrollment)
+
+    expect(result.status).toBe('certificate_available')
+  })
+
   test('returns available when enrollment dates are in range', () => {
     const course = createCourse({
       modalidade: 'LIVRE_FORMACAO_ONLINE',
@@ -282,26 +273,22 @@ describe('normalizeModalityDisplay', () => {
 })
 
 describe('filterVisibleCourses', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-01-11T12:00:00Z'))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  test('filters out courses that should not be shown', () => {
+  test('shows listing statuses and hides others', () => {
     const courses = [
       createCourse({ id: 1, status: 'opened' }),
-      createCourse({ id: 2, status: 'closed' }),
-      createCourse({ id: 3, status: 'opened', is_visible: false }),
+      createCourse({ id: 2, status: 'published' as any }),
+      createCourse({ id: 3, status: 'scheduled' as any }),
+      createCourse({ id: 4, status: 'accepting_enrollments' as any }),
+      createCourse({ id: 5, status: 'in_progress' as any }),
+      createCourse({ id: 6, status: 'finished' as any }),
+      createCourse({ id: 7, status: 'closed' }),
+      createCourse({ id: 8, status: 'draft' }),
+      createCourse({ id: 9, status: 'opened', is_visible: false }),
     ]
 
     const result = filterVisibleCourses(courses)
 
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe(1)
+    expect(result.map(c => c.id)).toEqual([1, 2, 3, 4, 5])
   })
 
   test('returns empty array for empty input', () => {
