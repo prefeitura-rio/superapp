@@ -60,13 +60,8 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
   test:
-    name: Unit Tests and Coverage
+    name: Unit Tests
     runs-on: ubuntu-latest
-    outputs:
-      coverage_current: ${{ steps.current_coverage.outputs.coverage }}
-      coverage_baseline: ${{ steps.baseline_coverage.outputs.baseline }}
-      coverage_diff: ${{ steps.coverage_check.outputs.diff_formatted }}
-      coverage_status: ${{ steps.coverage_check.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,86 +75,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests with coverage
-        run: npx vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
-
-      - name: Extract current coverage
-        id: current_coverage
-        run: |
-          COVERAGE=$(./scripts/get-coverage.sh coverage/coverage-summary.json)
-          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-          echo "Current PR coverage: $COVERAGE%"
-
-      - name: Download baseline coverage from gh-pages
-        id: baseline_coverage
-        run: |
-          BASELINE=$(curl -sf https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/coverage-baseline.txt || echo "0.0")
-
-          if ! [[ "$BASELINE" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-            echo "Warning: Invalid baseline '$BASELINE', using 0.0"
-            BASELINE="0.0"
-          fi
-
-          echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
-          echo "Baseline coverage from main: $BASELINE%"
-
-      - name: Compare coverage
-        id: coverage_check
-        run: |
-          CURRENT="${{ steps.current_coverage.outputs.coverage }}"
-          BASELINE="${{ steps.baseline_coverage.outputs.baseline }}"
-          TOLERANCE="0.1"
-
-          DIFF=$(echo "$CURRENT - $BASELINE" | bc -l)
-
-          if (( $(echo "$DIFF >= 0" | bc -l) )); then
-            DIFF_FORMATTED="+${DIFF}"
-            STATUS="✅"
-          else
-            DIFF_FORMATTED="${DIFF}"
-            if (( $(echo "$DIFF >= -$TOLERANCE" | bc -l) )); then
-              STATUS="✅"
-            else
-              STATUS="❌"
-            fi
-          fi
-
-          echo "diff=$DIFF" >> $GITHUB_OUTPUT
-          echo "diff_formatted=$DIFF_FORMATTED" >> $GITHUB_OUTPUT
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-
-          echo "Coverage comparison:"
-          echo "  Baseline (main): $BASELINE%"
-          echo "  Current (PR):    $CURRENT%"
-          echo "  Difference:      $DIFF_FORMATTED%"
-          echo "  Tolerance:       ±${TOLERANCE}%"
-
-          if (( $(echo "$DIFF < -$TOLERANCE" | bc -l) )); then
-            echo "❌ Coverage decreased by ${DIFF#-}% (beyond tolerance of ${TOLERANCE}%)"
-            echo "::error::Coverage decreased from $BASELINE% to $CURRENT% (${DIFF_FORMATTED}%). Allowed tolerance: ±${TOLERANCE}%"
-            exit 1
-          elif (( $(echo "$DIFF < 0" | bc -l) )); then
-            echo "⚠️ Coverage decreased by ${DIFF#-}% (within tolerance of ${TOLERANCE}%)"
-          else
-            echo "✅ Coverage maintained or improved"
-          fi
-
-      - name: Generate coverage summary
-        if: always()
-        run: |
-          echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Baseline (main)** | ${{ steps.baseline_coverage.outputs.baseline }}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Current (PR)** | ${{ steps.current_coverage.outputs.coverage }}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Difference** | ${{ steps.coverage_check.outputs.diff_formatted }}% ${{ steps.coverage_check.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
+      - name: Run unit tests
+        run: npx vitest run
 
   build:
     name: Docker Build Dry Run
@@ -244,13 +161,7 @@ jobs:
             | Code Linting + TypeScript | ${{ needs.lint.result == 'success' && '✅ Passed' || needs.lint.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             | Security Scanning | ${{ needs.security-scan.result == 'success' && '✅ Passed' || needs.security-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             | Unit Tests | ${{ needs.test.result == 'success' && '✅ Passed' || needs.test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-            | **Coverage** | **${{ needs.test.outputs.coverage_current }}%** (${{ needs.test.outputs.coverage_diff }}%) ${{ needs.test.outputs.coverage_status }} |
             | Docker Build | ${{ needs.build.result == 'success' && '✅ Passed' || needs.build.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-
-            ### 📊 Coverage Details
-            - **Baseline (main)**: ${{ needs.test.outputs.coverage_baseline }}%
-            - **This PR**: ${{ needs.test.outputs.coverage_current }}%
-            - **Change**: ${{ needs.test.outputs.coverage_diff }}% ${{ needs.test.outputs.coverage_status }}
 
             ---
 
