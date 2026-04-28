@@ -18,7 +18,6 @@ spec:
         istio:
           virtualService:
             name: app-virtual-service
-            namespace: istio-system
             routes:
               - primary
               - next-static
