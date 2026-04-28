@@ -195,6 +195,7 @@ jobs:
             --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.staging.app.dados.rio/catalogo/" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
             --load \
             .
