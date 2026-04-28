@@ -166,7 +166,7 @@ jobs:
 
           echo "Waiting for rollout to reach Paused phase (preview healthy)..."
           for i in {1..60}; do
-            PHASE=$(kubectl argo rollouts get rollout app -n app -o json | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',{}).get('phase',''))" 2>/dev/null || echo "")
+            PHASE=$(kubectl get rollout app -n app -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
             echo "Attempt $i/60: Rollout phase=$PHASE"
             if [ "$PHASE" = "Paused" ]; then
               echo "✅ Preview is healthy and ready to promote"
