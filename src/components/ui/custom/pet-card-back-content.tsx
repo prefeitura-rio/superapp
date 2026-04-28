@@ -63,7 +63,9 @@ export function PetCardBackContent({
       {breed && (
         <div className="mt-2">
           <span className="text-xs text-[#2A2D32] opacity-70 block">Raça</span>
-          <span className="text-sm text-[#2A2D32] block leading-5">{breed}</span>
+          <span className="text-sm text-[#2A2D32] block leading-5">
+            {breed}
+          </span>
         </div>
       )}
     </div>

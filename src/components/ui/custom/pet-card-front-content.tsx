@@ -28,7 +28,12 @@ interface FallbackImageProps {
   fallback: string
 }
 
-const FallbackImage = ({ src, alt, fallback, ...props }: FallbackImageProps) => {
+const FallbackImage = ({
+  src,
+  alt,
+  fallback,
+  ...props
+}: FallbackImageProps) => {
   const [imgSrc, setImgSrc] = useState(src)
 
   return createElement(Image, {
@@ -68,7 +73,11 @@ export function PetCardFrontContent({
             width={80}
             height={80}
             className="w-full h-full object-cover"
-            fallback={species.toUpperCase() === 'FELINA' ? FALLBACK_FELINE : FALLBACK_CANINE}
+            fallback={
+              species.toUpperCase() === 'FELINA'
+                ? FALLBACK_FELINE
+                : FALLBACK_CANINE
+            }
           />
         </div>
 

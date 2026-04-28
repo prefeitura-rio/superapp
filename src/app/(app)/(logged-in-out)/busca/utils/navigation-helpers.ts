@@ -137,7 +137,9 @@ export function handleCatalogItemClick(
     const temaGeral = metadata?.tema_geral as string | undefined
     if (slug && temaGeral) {
       const categorySlug = normalizeCategorySlug(temaGeral)
-      router.push(`/servicos/categoria/${encodeURIComponent(categorySlug)}/${slug}`)
+      router.push(
+        `/servicos/categoria/${encodeURIComponent(categorySlug)}/${slug}`
+      )
     } else if (item.url) {
       onExternalLinkClick(item.url)
     }

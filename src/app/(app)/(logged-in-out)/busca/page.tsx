@@ -11,7 +11,10 @@ import { sendGAEvent } from '@next/third-parties/google'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { CatalogSearchContext } from './hooks/use-catalog-search'
-import { saveCatalogHistory, useCatalogSearch } from './hooks/use-catalog-search'
+import {
+  saveCatalogHistory,
+  useCatalogSearch,
+} from './hooks/use-catalog-search'
 import {
   handleBackNavigation,
   handleCatalogItemClick as handleItemClick,
@@ -38,11 +41,26 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
 
 const STATIC_POPULAR: { title: string; href: string }[] = [
   { title: 'IPTU 2026', href: '/servicos/categoria/taxas/iptu-2025-94ff5567' },
-  { title: 'CADRio Agendamento', href: '/servicos/categoria/familia/cadrio-agendamento-770618f7' },
-  { title: 'Consulta de Multas', href: '/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90' },
-  { title: 'Alvará: Consulta prévia de local', href: '/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969' },
-  { title: 'Licença Sanitária de Funcionamento', href: '/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857' },
-  { title: 'Dívida Ativa: Débitos de IPTU', href: '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610' },
+  {
+    title: 'CADRio Agendamento',
+    href: '/servicos/categoria/familia/cadrio-agendamento-770618f7',
+  },
+  {
+    title: 'Consulta de Multas',
+    href: '/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90',
+  },
+  {
+    title: 'Alvará: Consulta prévia de local',
+    href: '/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969',
+  },
+  {
+    title: 'Licença Sanitária de Funcionamento',
+    href: '/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857',
+  },
+  {
+    title: 'Dívida Ativa: Débitos de IPTU',
+    href: '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610',
+  },
 ]
 
 const DYNAMIC_CONTEXT_TYPE: Record<string, string> = {
@@ -68,9 +86,13 @@ function ResultItem({
   onClick: () => void
 }) {
   const badge = item.type ? TYPE_BADGE[item.type] : undefined
-  const metadataDescription = (item.metadata as Record<string, unknown> | undefined)?.description as string | undefined
+  const metadataDescription = (
+    item.metadata as Record<string, unknown> | undefined
+  )?.description as string | undefined
   const description =
-    metadataDescription || item.short_desc || (item.tags && item.tags.length > 0 ? item.tags[0] : '')
+    metadataDescription ||
+    item.short_desc ||
+    (item.tags && item.tags.length > 0 ? item.tags[0] : '')
 
   return (
     <li
@@ -108,7 +130,9 @@ export default function Search() {
   const searchParams = useSearchParams()
   const [externalLinkDrawerOpen, setExternalLinkDrawerOpen] = useState(false)
   const [selectedExternalUrl, setSelectedExternalUrl] = useState<string>('')
-  const [dynamicSuggestions, setDynamicSuggestions] = useState<ModelsSearchItem[]>([])
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<
+    ModelsSearchItem[]
+  >([])
   const [suggestionsLoading, setSuggestionsLoading] = useState(false)
 
   const tipoParam = searchParams.get('tipo') as CatalogSearchContext | null
@@ -284,11 +308,14 @@ export default function Search() {
             )}
 
             {/* Dynamic list (empregos / mei / cursos) */}
-            {isDynamicContext && (
-              suggestionsLoading ? (
+            {isDynamicContext &&
+              (suggestionsLoading ? (
                 <ul>
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <li key={i} className="flex justify-between items-center py-4 border-b border-border">
+                    <li
+                      key={i}
+                      className="flex justify-between items-center py-4 border-b border-border"
+                    >
                       <div className="h-4 w-48 rounded bg-card-foreground/10 animate-pulse" />
                       <div className="h-6 w-6 rounded-full bg-card-foreground/10 animate-pulse" />
                     </li>
@@ -316,8 +343,7 @@ export default function Search() {
                     </li>
                   ))}
                 </ul>
-              )
-            )}
+              ))}
           </div>
         )}
       </div>
