@@ -1,0 +1,268 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Code and Dockerfile Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Biome (lint + format check)
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+      - name: Run Hadolint (Dockerfile linter)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy (Vulnerability Scanning)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  test:
+    name: Unit Tests and Coverage
+    runs-on: ubuntu-latest
+    outputs:
+      coverage_current: ${{ steps.current_coverage.outputs.coverage }}
+      coverage_baseline: ${{ steps.baseline_coverage.outputs.baseline }}
+      coverage_diff: ${{ steps.coverage_check.outputs.diff_formatted }}
+      coverage_status: ${{ steps.coverage_check.outputs.status }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npx vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
+
+      - name: Extract current coverage
+        id: current_coverage
+        run: |
+          COVERAGE=$(./scripts/get-coverage.sh coverage/coverage-summary.json)
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "Current PR coverage: $COVERAGE%"
+
+      - name: Download baseline coverage from gh-pages
+        id: baseline_coverage
+        run: |
+          BASELINE=$(curl -sf https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/coverage-baseline.txt || echo "0.0")
+
+          if ! [[ "$BASELINE" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+            echo "Warning: Invalid baseline '$BASELINE', using 0.0"
+            BASELINE="0.0"
+          fi
+
+          echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+          echo "Baseline coverage from main: $BASELINE%"
+
+      - name: Compare coverage
+        id: coverage_check
+        run: |
+          CURRENT="${{ steps.current_coverage.outputs.coverage }}"
+          BASELINE="${{ steps.baseline_coverage.outputs.baseline }}"
+          TOLERANCE="0.1"
+
+          DIFF=$(echo "$CURRENT - $BASELINE" | bc -l)
+
+          if (( $(echo "$DIFF >= 0" | bc -l) )); then
+            DIFF_FORMATTED="+${DIFF}"
+            STATUS="✅"
+          else
+            DIFF_FORMATTED="${DIFF}"
+            if (( $(echo "$DIFF >= -$TOLERANCE" | bc -l) )); then
+              STATUS="✅"
+            else
+              STATUS="❌"
+            fi
+          fi
+
+          echo "diff=$DIFF" >> $GITHUB_OUTPUT
+          echo "diff_formatted=$DIFF_FORMATTED" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          echo "Coverage comparison:"
+          echo "  Baseline (main): $BASELINE%"
+          echo "  Current (PR):    $CURRENT%"
+          echo "  Difference:      $DIFF_FORMATTED%"
+          echo "  Tolerance:       ±${TOLERANCE}%"
+
+          if (( $(echo "$DIFF < -$TOLERANCE" | bc -l) )); then
+            echo "❌ Coverage decreased by ${DIFF#-}% (beyond tolerance of ${TOLERANCE}%)"
+            echo "::error::Coverage decreased from $BASELINE% to $CURRENT% (${DIFF_FORMATTED}%). Allowed tolerance: ±${TOLERANCE}%"
+            exit 1
+          elif (( $(echo "$DIFF < 0" | bc -l) )); then
+            echo "⚠️ Coverage decreased by ${DIFF#-}% (within tolerance of ${TOLERANCE}%)"
+          else
+            echo "✅ Coverage maintained or improved"
+          fi
+
+      - name: Generate coverage summary
+        if: always()
+        run: |
+          echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Baseline (main)** | ${{ steps.baseline_coverage.outputs.baseline }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Current (PR)** | ${{ steps.current_coverage.outputs.coverage }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Difference** | ${{ steps.coverage_check.outputs.diff_formatted }}% ${{ steps.coverage_check.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  build:
+    name: Docker Build Dry Run
+    runs-on: ubuntu-latest
+    needs: [lint, security-scan, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image (dry run - staging args)
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL="https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID="superapp" \
+            --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
+            --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
+            --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
+            --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746_v2_llm \
+            --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital_v2_llm \
+            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
+            --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
+            --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
+            --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
+            --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
+            --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
+            --load \
+            .
+
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }}'
+          format: 'sarif'
+          output: 'trivy-image-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy image scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-image-results.sarif'
+
+  summary:
+    name: Quality Gate Summary
+    runs-on: ubuntu-latest
+    needs: [lint, security-scan, test, build]
+    if: always()
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find previous quality gate comment
+        uses: peter-evans/find-comment@v2
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '🚦 PR Quality Gate Results'
+
+      - name: Create or update PR comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ## 🚦 PR Quality Gate Results
+
+            | Check | Status |
+            |-------|--------|
+            | Code Linting + TypeScript | ${{ needs.lint.result == 'success' && '✅ Passed' || needs.lint.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | Security Scanning | ${{ needs.security-scan.result == 'success' && '✅ Passed' || needs.security-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | Unit Tests | ${{ needs.test.result == 'success' && '✅ Passed' || needs.test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | **Coverage** | **${{ needs.test.outputs.coverage_current }}%** (${{ needs.test.outputs.coverage_diff }}%) ${{ needs.test.outputs.coverage_status }} |
+            | Docker Build | ${{ needs.build.result == 'success' && '✅ Passed' || needs.build.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+
+            ### 📊 Coverage Details
+            - **Baseline (main)**: ${{ needs.test.outputs.coverage_baseline }}%
+            - **This PR**: ${{ needs.test.outputs.coverage_current }}%
+            - **Change**: ${{ needs.test.outputs.coverage_diff }}% ${{ needs.test.outputs.coverage_status }}
+
+            ---
+
+            ${{ needs.lint.result == 'success' && needs.security-scan.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' && '### ✅ All quality checks passed - PR is ready to merge' || '### ❌ Quality gate failed - PR is not ready to merge' }}
+
+            **Commit**: ${{ github.event.pull_request.head.sha }}
+            **Run**: [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Fail workflow if any check failed
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.security-scan.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            exit 1
+          fi
