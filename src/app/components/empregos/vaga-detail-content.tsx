@@ -1,5 +1,6 @@
 'use client'
 
+import { handleBackNavigation } from '@/app/(app)/(logged-in-out)/busca/utils/navigation-helpers'
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { CandidaturaFeedbackCard } from '@/app/components/empregos/candidatura-feedback-card'
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
@@ -12,7 +13,6 @@ import type { VagaDetail } from '@/lib/emprego-utils'
 import { Accessibility, Briefcase, DollarSign, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { handleBackNavigation } from '@/app/(app)/(logged-in-out)/busca/utils/navigation-helpers'
 import { useRouter } from 'next/navigation'
 
 interface VagaDetailContentProps {

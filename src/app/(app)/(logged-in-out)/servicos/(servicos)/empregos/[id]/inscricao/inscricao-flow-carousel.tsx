@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { revalidateEmpregosPage } from './revalidate-empregos-action'
 import { CurriculoContent } from '../../curriculo/curriculo-content'
 import type { CurriculoExperienciaFormValues } from '../../curriculo/curriculo-experiencia-schema'
 import type { ExperienciaOptions } from '../../curriculo/experiencia-options-types'
@@ -23,6 +22,7 @@ import type {
   ContactUpdateStatus,
   EmpregosUserInfo,
 } from './confirmar-informacoes/types'
+import { revalidateEmpregosPage } from './revalidate-empregos-action'
 
 import 'swiper/css'
 

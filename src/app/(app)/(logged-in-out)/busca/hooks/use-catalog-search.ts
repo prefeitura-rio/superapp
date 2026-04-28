@@ -1,5 +1,5 @@
-import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { saveSearchToHistory as saveSearchToHistoryHelper } from '@/helpers/search-helpers'
+import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -67,7 +67,9 @@ function updateSearchUrl(
     params.delete('q')
   }
 
-  const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
+  const newUrl = params.toString()
+    ? `${pathname}?${params.toString()}`
+    : pathname
 
   isUpdatingUrlRef.current = true
   router.replace(newUrl, { scroll: false })
@@ -82,7 +84,9 @@ export function useCatalogSearch(
 
   const [query, setQuery] = useState('')
   const [primaryResults, setPrimaryResults] = useState<ModelsSearchItem[]>([])
-  const [secondaryResults, setSecondaryResults] = useState<ModelsSearchItem[]>([])
+  const [secondaryResults, setSecondaryResults] = useState<ModelsSearchItem[]>(
+    []
+  )
   const [loading, setLoading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -180,9 +184,12 @@ export function useCatalogSearch(
         setLoading(true)
         await performAndSetResults(searchQuery)
         saveCatalogHistory(searchQuery)
-        const saved = typeof window !== 'undefined'
-          ? JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]') as string[]
-          : []
+        const saved =
+          typeof window !== 'undefined'
+            ? (JSON.parse(
+                localStorage.getItem(HISTORY_STORAGE_KEY) || '[]'
+              ) as string[])
+            : []
         setSearchHistory(saved)
         updateSearchUrl(searchQuery, pathname, router, isUpdatingUrl)
       } catch (error) {
@@ -226,7 +233,9 @@ export function useCatalogSearch(
 
   const removeFromHistory = useCallback((itemToRemove: string) => {
     if (typeof window === 'undefined') return
-    const current = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]') as string[]
+    const current = JSON.parse(
+      localStorage.getItem(HISTORY_STORAGE_KEY) || '[]'
+    ) as string[]
     const updated = current.filter(item => item !== itemToRemove)
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated))
     setSearchHistory(updated)
@@ -249,9 +258,12 @@ export function useCatalogSearch(
 }
 
 export function saveCatalogHistory(query: string) {
-  if (typeof window === 'undefined' || !query.trim() || query.length <= 2) return
+  if (typeof window === 'undefined' || !query.trim() || query.length <= 2)
+    return
   const trimmed = query.trim()
-  const current = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]') as string[]
+  const current = JSON.parse(
+    localStorage.getItem(HISTORY_STORAGE_KEY) || '[]'
+  ) as string[]
   const filtered = current.filter(item => item !== trimmed)
   const updated = [trimmed, ...filtered].slice(0, 10)
   localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated))

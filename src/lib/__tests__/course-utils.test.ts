@@ -36,14 +36,28 @@ function createEnrollment(
 
 describe('shouldShowCourse', () => {
   test('returns true for listing statuses', () => {
-    for (const status of ['opened', 'published', 'scheduled', 'accepting_enrollments', 'in_progress']) {
+    for (const status of [
+      'opened',
+      'published',
+      'scheduled',
+      'accepting_enrollments',
+      'in_progress',
+    ]) {
       const course = createCourse({ status: status as any })
       expect(shouldShowCourse({ course })).toBe(true)
     }
   })
 
   test('returns false for non-listing statuses', () => {
-    for (const status of ['finished', 'closed', 'canceled', 'draft', 'needs_changes', 'in_review', 'pending_deletion']) {
+    for (const status of [
+      'finished',
+      'closed',
+      'canceled',
+      'draft',
+      'needs_changes',
+      'in_review',
+      'pending_deletion',
+    ]) {
       const course = createCourse({ status: status as any })
       expect(shouldShowCourse({ course })).toBe(false)
     }
@@ -82,7 +96,12 @@ describe('shouldShowCourse', () => {
     })
 
     test('returns false for draft/review statuses even via direct URL', () => {
-      for (const status of ['draft', 'needs_changes', 'in_review', 'pending_deletion']) {
+      for (const status of [
+        'draft',
+        'needs_changes',
+        'in_review',
+        'pending_deletion',
+      ]) {
         const course = createCourse({ status: status as any })
         expect(shouldShowCourse({ course, renderByUrl: true })).toBe(false)
       }
@@ -226,8 +245,14 @@ describe('getCourseEnrollmentInfo', () => {
   })
 
   test('returns certificate_available for concluded user even when course is finished', () => {
-    const course = createCourse({ status: 'finished' as any, has_certificate: true })
-    const enrollment = createEnrollment({ status: 'concluded', certificate_url: 'https://example.com/cert' })
+    const course = createCourse({
+      status: 'finished' as any,
+      has_certificate: true,
+    })
+    const enrollment = createEnrollment({
+      status: 'concluded',
+      certificate_url: 'https://example.com/cert',
+    })
 
     const result = getCourseEnrollmentInfo(course, enrollment)
 
