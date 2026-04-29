@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { HandTalkPlugin } from '@/components/hand-talk-plugin'
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
@@ -61,6 +62,12 @@ export default async function RootLayout({
           nonce={nonce}
           gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
         />
+        {process.env.NEXT_PUBLIC_HAND_TALK_TOKEN && (
+          <HandTalkPlugin
+            token={process.env.NEXT_PUBLIC_HAND_TALK_TOKEN}
+            nonce={nonce}
+          />
+        )}
       </head>
       <body
         className={`${dmSans.className} antialiased`}
