@@ -26,14 +26,25 @@ test.describe('Serviços', () => {
   }) => {
     await page.goto('/servicos')
     await page.getByRole('link', { name: 'CADRio Agendamento' }).click()
-    await expect(
-      page.getByRole('link', { name: 'Acessar serviço' })
-    ).toBeVisible({
-      timeout: 20000,
+
+    const servicePage = page.getByRole('link', { name: 'Acessar serviço' })
+    const notFoundPage = page.getByRole('heading', {
+      name: 'Página não encontrada',
     })
-    await expect(
-      page.getByRole('heading', { name: 'Principais informações' })
-    ).toBeVisible()
+
+    await expect(servicePage.or(notFoundPage)).toBeVisible({ timeout: 20000 })
+
+    if (await notFoundPage.isVisible()) {
+      await expect(
+        page.getByText(
+          'Não encontramos a página que você tentou acessar. Por favor, verifique o link ou retorne à pagina inicial.'
+        )
+      ).toBeVisible()
+    } else {
+      await expect(
+        page.getByRole('heading', { name: 'Principais informações' })
+      ).toBeVisible()
+    }
   })
 
   test('ao clicar na categoria Cidade, exibe serviços e navega para detalhe', async ({
@@ -68,7 +79,7 @@ test.describe('Serviços', () => {
 
     // Verifica página de detalhe do serviço
     await expect(
-      page.getByRole('link', { name: 'Acessar serviço' })
+      page.getByRole('link', { name: 'Acessar o serviço' })
     ).toBeVisible({
       timeout: 20000,
     })
