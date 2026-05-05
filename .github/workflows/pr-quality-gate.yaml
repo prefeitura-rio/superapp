@@ -78,6 +78,65 @@ jobs:
       - name: Run unit tests
         run: npx vitest run
 
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID: "superapp"
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
+          NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
+          NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
+          NEXT_PUBLIC_USE_GOVBR_HINT: "false"
+          NEXT_PUBLIC_COURSES_BASE_API_URL: "https://services.staging.app.dados.rio/go"
+          NEXT_PUBLIC_BUSCA_1746_COLLECTION: "1746_v2_llm"
+          NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION: "carioca-digital_v2_llm"
+          NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION: "prefrio_services_base"
+          GOOGLE_MAPS_API_KEY: "placeholder"
+          NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
+          NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
+          API_KEY_SUBPAV_OSA_SMS: "placeholder"
+          NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH: "https://services.staging.app.dados.rio/app-busca-search/"
+          NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API: "https://services.staging.app.dados.rio/subpav-osa-api/"
+          NEXT_PUBLIC_BASE_API_URL_RMI: "https://services.staging.app.dados.rio/rmi/"
+          NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
+          NEXT_PUBLIC_FEATURE_FLAG: "false"
+          NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO: "https://services.staging.app.dados.rio/catalogo/"
+          NEXT_PUBLIC_HAND_TALK_TOKEN: "8258d2ba4e13dae4501312c932c5ef7c"
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: "true"
+          PORT: "3000"
+          E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   build:
     name: Docker Build Dry Run
     runs-on: ubuntu-latest
@@ -135,7 +194,7 @@ jobs:
   summary:
     name: Quality Gate Summary
     runs-on: ubuntu-latest
-    needs: [lint, security-scan, test, build]
+    needs: [lint, security-scan, test, build, e2e]
     if: always()
     permissions:
       pull-requests: write
@@ -163,10 +222,11 @@ jobs:
             | Security Scanning | ${{ needs.security-scan.result == 'success' && '✅ Passed' || needs.security-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             | Unit Tests | ${{ needs.test.result == 'success' && '✅ Passed' || needs.test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             | Docker Build | ${{ needs.build.result == 'success' && '✅ Passed' || needs.build.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | E2E Tests | ${{ needs.e2e.result == 'success' && '✅ Passed' || needs.e2e.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
 
             ---
 
-            ${{ needs.lint.result == 'success' && needs.security-scan.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' && '### ✅ All quality checks passed - PR is ready to merge' || '### ❌ Quality gate failed - PR is not ready to merge' }}
+            ${{ needs.lint.result == 'success' && needs.security-scan.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' && needs.e2e.result == 'success' && '### ✅ All quality checks passed - PR is ready to merge' || '### ❌ Quality gate failed - PR is not ready to merge' }}
 
             **Commit**: ${{ github.event.pull_request.head.sha }}
             **Run**: [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
@@ -176,6 +236,7 @@ jobs:
           if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.security-scan.result }}" != "success" ] || \
              [ "${{ needs.test.result }}" != "success" ] || \
-             [ "${{ needs.build.result }}" != "success" ]; then
+             [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.e2e.result }}" != "success" ]; then
             exit 1
           fi
