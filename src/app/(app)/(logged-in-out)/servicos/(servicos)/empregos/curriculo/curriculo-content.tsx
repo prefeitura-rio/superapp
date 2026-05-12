@@ -1663,7 +1663,7 @@ export function CurriculoContent({
           <ExperienciaApiProvider initialData={experienciaOptions}>
             <FormProvider {...form}>
               <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
+                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-4">
                   Meu Currículo
                 </h1>
 
@@ -1676,11 +1676,11 @@ export function CurriculoContent({
                 >
                   <AccordionItem
                     value="formacao"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Formação
@@ -1708,11 +1708,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="experiencia"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Experiência Profissional
@@ -1740,11 +1740,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="situacao"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Situação atual
@@ -1772,11 +1772,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="termos"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Termos de Uso

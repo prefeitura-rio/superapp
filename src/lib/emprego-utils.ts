@@ -41,6 +41,8 @@ export interface VagaDetail {
   statusCandidatura?: EmpregabilidadeStatusCandidatura
   /** Órgão parceiro da vaga; quando presente, exibe o card "Vaga oferecida em parceria com" */
   orgaoParceiro?: string
+  /** Tipos de deficiência para vagas PcD */
+  tiposPcd?: string[]
 }
 
 function formatSalary(value: number): string {
@@ -83,7 +85,7 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
   if (bairro) badges.push({ text: bairro, type: 'bairro' })
   const tipoContratacao = emprego.tipo_contratacao
   if (tipoContratacao) {
-    badges.push({ text: String(tipoContratacao), type: undefined })
+    badges.push({ text: String(tipoContratacao), type: 'regime' })
   }
   const salario = emprego.salario_min ?? emprego.salario_max
   if (salario != null) {
@@ -199,7 +201,7 @@ export function mapEmpregabilidadeVagaToDetail(
   if (vaga.regime_contratacao?.descricao) {
     badges.push({
       text: vaga.regime_contratacao.descricao,
-      type: undefined,
+      type: 'regime',
     })
   }
 
@@ -271,5 +273,8 @@ export function mapEmpregabilidadeVagaToDetail(
     beneficios: vaga.beneficios || '',
     etapasProcessoSeletivo,
     orgaoParceiro: vaga.orgao_parceiro?.name,
+    tiposPcd: vaga.tipos_pcd
+      ?.map(t => t.descricao)
+      .filter((d): d is string => Boolean(d)),
   }
 }

@@ -13,7 +13,7 @@ import Link from 'next/link'
 
 function HeaderIconSkeleton() {
   return (
-    <div className="rounded-full bg-transparent p-4">
+    <div className="rounded-full bg-transparent p-3">
       <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />
     </div>
   )
@@ -47,7 +47,7 @@ export function EmpregosHeaderClient() {
         <div className="flex items-center space-x-2">
           <Link
             href="/busca?tipo=empregos"
-            className="rounded-full bg-transparent p-4"
+            className="rounded-full bg-transparent p-3"
           >
             <SearchIcon className="h-5 w-5 text-foreground" />
             <span className="sr-only">Buscar empregos</span>
@@ -57,7 +57,7 @@ export function EmpregosHeaderClient() {
           ) : data.isLoggedIn ? (
             <Link
               href="/servicos/empregos/menu"
-              className="rounded-full bg-transparent p-4"
+              className="rounded-full bg-transparent p-3"
             >
               <MenuIcon className="h-5 w-5 text-foreground" />
               <span className="sr-only">Menu</span>
@@ -65,7 +65,7 @@ export function EmpregosHeaderClient() {
           ) : (
             <Link
               href="/servicos/empregos/faq"
-              className="rounded-full bg-transparent p-4"
+              className="rounded-full bg-transparent p-3"
             >
               <HelpCircleIcon className="h-5 w-5 text-foreground" />
               <span className="sr-only">Ajuda</span>

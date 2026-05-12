@@ -21,7 +21,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedVagas.map(vaga => (
-            <div key={vaga.id} className="shrink-0 h-[11.75rem] w-[11.75rem]">
+            <div key={vaga.id} className="shrink-0 h-49.5 w-49.5">
               <VagaCard
                 vaga={vaga}
                 variant="recent"
@@ -39,7 +39,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
               key={vaga.id}
               vaga={vaga}
               variant="recent"
-              className="w-full min-h-[11.75rem]"
+              className="w-full md:aspect-square"
             />
           ))}
         </div>

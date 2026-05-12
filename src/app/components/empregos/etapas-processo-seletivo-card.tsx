@@ -75,7 +75,7 @@ export function EtapasProcessoSeletivoCard({
       <h3 className="text-sm font-normal leading-5 text-foreground mb-2">
         Etapas do processo seletivo
       </h3>
-      <div className="bg-card rounded-xl p-4">
+      <div className="bg-card rounded-xl p-4 px-6">
         <Accordion
           type="single"
           collapsible

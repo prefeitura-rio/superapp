@@ -12,7 +12,7 @@ export function AllVagas({ vagas }: AllVagasProps) {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+      <h3 className="pb-4 text-base font-medium text-foreground leading-5 px-4">
         Todas as vagas
       </h3>
       {/* Mobile: layout empilhado, cards h-41 w-auto (10.25rem altura) */}
