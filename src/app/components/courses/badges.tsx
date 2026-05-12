@@ -1,7 +1,13 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { type AccessibilityTypes, accessibilityLabel } from '@/types/course'
-import { Accessibility, Briefcase, Clock, DollarSign, MapPin } from 'lucide-react'
+import {
+  Accessibility,
+  Briefcase,
+  Clock,
+  DollarSign,
+  MapPin,
+} from 'lucide-react'
 
 interface AccessibilityBadgeProps {
   accessibility?: AccessibilityTypes | string | undefined | ''
@@ -89,7 +95,9 @@ export function ModalityBadge({
 }: { modality?: string; className?: string }) {
   const label = getModalityLabel(modality)
   if (!label) return null
-  return <CoursePillBadge icon={Briefcase} label={label} className={className} />
+  return (
+    <CoursePillBadge icon={Briefcase} label={label} className={className} />
+  )
 }
 
 export function WorkloadBadge({
@@ -101,7 +109,9 @@ export function WorkloadBadge({
 }
 
 export function ScholarshipBadge({ className }: { className?: string }) {
-  return <CoursePillBadge icon={DollarSign} label="Bolsa" className={className} />
+  return (
+    <CoursePillBadge icon={DollarSign} label="Bolsa" className={className} />
+  )
 }
 
 export function NeighborhoodBadge({
@@ -109,7 +119,9 @@ export function NeighborhoodBadge({
   className,
 }: { neighborhood?: string; className?: string }) {
   if (!neighborhood) return null
-  return <CoursePillBadge icon={MapPin} label={neighborhood} className={className} />
+  return (
+    <CoursePillBadge icon={MapPin} label={neighborhood} className={className} />
+  )
 }
 
 export function AccessibilityPillBadge({
@@ -130,5 +142,7 @@ export function AccessibilityPillBadge({
   const label = accessibilityLabel[normalized]
   if (!label) return null
 
-  return <CoursePillBadge icon={Accessibility} label={label} className={className} />
+  return (
+    <CoursePillBadge icon={Accessibility} label={label} className={className} />
+  )
 }

@@ -32,7 +32,9 @@ export function AllCourses({ courses }: AllCoursesProps) {
                 coverImage={course.cover_image as string}
                 accessibility={course.accessibility as AccessibilityProps}
                 courseManagementType={course.course_management_type}
-                enrollmentEndDate={course.enrollment_end_date ?? course.data_limite_inscricoes}
+                enrollmentEndDate={
+                  course.enrollment_end_date ?? course.data_limite_inscricoes
+                }
                 neighborhood={(course as any).locations?.[0]?.neighborhood}
                 variant="horizontal"
                 className="py-4"
@@ -56,7 +58,9 @@ export function AllCourses({ courses }: AllCoursesProps) {
               coverImage={course.cover_image as string}
               accessibility={course.accessibility as AccessibilityProps}
               courseManagementType={course.course_management_type}
-              enrollmentEndDate={course.enrollment_end_date ?? course.data_limite_inscricoes}
+              enrollmentEndDate={
+                course.enrollment_end_date ?? course.data_limite_inscricoes
+              }
               neighborhood={(course as any).locations?.[0]?.neighborhood}
               className="w-full"
             />

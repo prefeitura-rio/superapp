@@ -107,7 +107,9 @@ export default async function CoursesCategoryPage({
                   coverImage={course.cover_image as string}
                   accessibility={course.accessibility as AccessibilityProps}
                   courseManagementType={course.course_management_type}
-                  enrollmentEndDate={course.enrollment_end_date ?? course.data_limite_inscricoes}
+                  enrollmentEndDate={
+                    course.enrollment_end_date ?? course.data_limite_inscricoes
+                  }
                   neighborhood={(course as any).locations?.[0]?.neighborhood}
                   variant="horizontal"
                   className="py-3 first:pt-0 last:pb-0"

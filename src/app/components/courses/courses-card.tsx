@@ -83,10 +83,7 @@ export function CourseCard({
     return (
       <Link
         href={`/servicos/cursos/${courseId}`}
-        className={cn(
-          'w-full cursor-pointer group flex gap-3',
-          className
-        )}
+        className={cn('w-full cursor-pointer group flex gap-3', className)}
       >
         {/* Imagem à esquerda */}
         <div className="relative w-26 h-26 shrink-0 overflow-hidden rounded-xl">
