@@ -20,9 +20,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
           {courses.map((course, index) => (
             <div
               key={course.id != null ? String(course.id) : `course-${index}`}
-              className={`border-b border-border py-4 ${
-                index === courses.length - 1 ? 'border-b-0 pb-0' : ''
-              }`}
+              className={`border-b border-border ${index === courses.length - 1 ? 'border-b-0' : ''}`}
             >
               <CourseCard
                 courseId={course.id}
@@ -34,8 +32,12 @@ export function AllCourses({ courses }: AllCoursesProps) {
                 coverImage={course.cover_image as string}
                 accessibility={course.accessibility as AccessibilityProps}
                 courseManagementType={course.course_management_type}
+                enrollmentEndDate={
+                  course.enrollment_end_date ?? course.data_limite_inscricoes
+                }
+                neighborhood={(course as any).locations?.[0]?.neighborhood}
                 variant="horizontal"
-                badgesOutside={true}
+                className="py-4"
               />
             </div>
           ))}
@@ -56,6 +58,10 @@ export function AllCourses({ courses }: AllCoursesProps) {
               coverImage={course.cover_image as string}
               accessibility={course.accessibility as AccessibilityProps}
               courseManagementType={course.course_management_type}
+              enrollmentEndDate={
+                course.enrollment_end_date ?? course.data_limite_inscricoes
+              }
+              neighborhood={(course as any).locations?.[0]?.neighborhood}
               className="w-full"
             />
           ))}

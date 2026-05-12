@@ -1,12 +1,39 @@
 'use client'
 
-import { normalizeModalityDisplay } from '@/lib/course-utils'
 import { cn } from '@/lib/utils'
 import type { AccessibilityProps, CourseManagementType } from '@/types/course'
-import { shouldShowExternalPartnerBadge } from '@/types/course'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
+import {
+  AccessibilityPillBadge,
+  ModalityBadge,
+  NeighborhoodBadge,
+  ScholarshipBadge,
+  WorkloadBadge,
+} from './badges'
+
+const PT_MONTHS = [
+  'JAN',
+  'FEV',
+  'MAR',
+  'ABR',
+  'MAI',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SET',
+  'OUT',
+  'NOV',
+  'DEZ',
+]
+
+function getEnrollmentText(enrollmentEndDate?: string): string | null {
+  if (!enrollmentEndDate) return null
+  const endDate = new Date(enrollmentEndDate)
+  if (new Date() > endDate) return 'Inscrições encerradas'
+  return `Inscrições até ${endDate.getUTCDate()} ${PT_MONTHS[endDate.getUTCMonth()]}`
+}
 
 interface CourseCardProps {
   courseId?: number
@@ -22,7 +49,11 @@ interface CourseCardProps {
   coverImage?: string
   className?: string
   variant?: 'vertical' | 'horizontal'
-  badgesOutside?: boolean // Se true, badges aparecem embaixo do texto no layout horizontal
+  /** @deprecated No longer used */
+  badgesOutside?: boolean
+  enrollmentEndDate?: string
+  hasBolsa?: boolean
+  neighborhood?: string
 }
 
 export function CourseCard({
@@ -38,43 +69,31 @@ export function CourseCard({
   coverImage,
   className = '',
   variant = 'vertical',
-  badgesOutside = false,
+  enrollmentEndDate,
+  hasBolsa = false,
+  neighborhood,
 }: CourseCardProps) {
-  // Use courseManagementType if available, otherwise fall back to isExternalPartner for backward compatibility
-  const showExternalBadge =
-    courseManagementType !== undefined
-      ? shouldShowExternalPartnerBadge(courseManagementType)
-      : isExternalPartner === true
+  const enrollmentText = getEnrollmentText(enrollmentEndDate)
+
+  const badgeHoverClasses =
+    'group-hover:bg-terciary group-hover:text-foreground-light'
+
   // Layout horizontal: imagem à esquerda, texto à direita
   if (variant === 'horizontal') {
     return (
       <Link
         href={`/servicos/cursos/${courseId}`}
-        className={cn(
-          'w-full rounded-xl overflow-hidden bg-background cursor-pointer group flex gap-3',
-          className
-        )}
+        className={cn('w-full cursor-pointer group flex gap-3', className)}
       >
         {/* Imagem à esquerda */}
         <div className="relative w-26 h-26 shrink-0 overflow-hidden rounded-xl">
           {coverImage && (
-            <>
-              <Image
-                src={coverImage}
-                alt="Imagem de capa do curso"
-                fill
-                className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
-              {/* Badges dentro da imagem apenas se badgesOutside for false */}
-              {!badgesOutside && (
-                <div className="absolute bottom-1 left-1 flex flex-col gap-1">
-                  {accessibility && (
-                    <AccessibilityBadge accessibility={accessibility} />
-                  )}
-                  {showExternalBadge && <IsExternalPartnerBadge />}
-                </div>
-              )}
-            </>
+            <Image
+              src={coverImage}
+              alt="Imagem de capa do curso"
+              fill
+              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
           )}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -98,57 +117,50 @@ export function CourseCard({
         </div>
 
         {/* Conteúdo à direita */}
-        <div className="flex-1 flex flex-col justify-center py-2 min-w-0">
+        <div className="flex-1 flex flex-col justify-center py-2 min-w-0 gap-1">
           <h3 className="text-sm font-medium text-foreground line-clamp-2">
             {title}
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            {normalizeModalityDisplay(modality)} • {workload}
-          </p>
-          {/* Badges embaixo do texto se badgesOutside for true */}
-          {badgesOutside && (
-            <div className="flex flex-col gap-0.5 mt-2">
-              {accessibility && (
-                <AccessibilityBadge accessibility={accessibility} />
-              )}
-              {showExternalBadge && <IsExternalPartnerBadge />}
-            </div>
+          {enrollmentText && (
+            <p className="text-xs text-card-2 leading-4 font-normal">
+              {enrollmentText}
+            </p>
           )}
+          <div className="flex flex-wrap gap-1">
+            <ModalityBadge modality={modality} />
+            <WorkloadBadge workload={workload} />
+            <NeighborhoodBadge neighborhood={neighborhood} />
+            {hasBolsa && <ScholarshipBadge />}
+            <AccessibilityPillBadge accessibility={accessibility} />
+          </div>
         </div>
       </Link>
     )
   }
 
-  // Layout vertical padrão: imagem no topo, texto embaixo
+  // Layout vertical: imagem no topo, texto embaixo
   return (
     <Link
       href={`/servicos/cursos/${courseId}`}
       className={cn(
-        'w-[197px] rounded-xl overflow-hidden bg-background cursor-pointer group block',
+        'w-[238px] min-h-[256px] rounded-2xl overflow-hidden bg-card cursor-pointer group flex flex-col hover:bg-secondary transition-colors duration-200',
         className
       )}
     >
-      <div className="relative w-full h-[120px] overflow-hidden rounded-xl">
+      {/* Imagem — cantos superiores cortados pelo overflow-hidden do card, sem radius em baixo */}
+      <div className="relative w-full h-[120px] overflow-hidden">
         {coverImage && (
-          <>
-            <Image
-              src={coverImage}
-              alt="Imagem de capa do curso"
-              fill
-              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-            />
-            <div className="absolute bottom-2 left-2 flex flex-col gap-1">
-              {accessibility && (
-                <AccessibilityBadge accessibility={accessibility} />
-              )}
-              {showExternalBadge && <IsExternalPartnerBadge />}
-            </div>
-          </>
+          <Image
+            src={coverImage}
+            alt="Imagem de capa do curso"
+            fill
+            className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+          />
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
+        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
           {institutionaLogo ? (
             <div className="relative w-full h-full">
               <Image
@@ -166,13 +178,37 @@ export function CourseCard({
         </div>
       </div>
 
-      <div className="py-2">
+      {/* Conteúdo */}
+      <div className="p-4 flex flex-col flex-1">
         <h3 className="text-sm font-medium text-foreground line-clamp-2">
           {title}
         </h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          {normalizeModalityDisplay(modality)} • {workload}
-        </p>
+        {enrollmentText && (
+          <p className="mt-1 text-xs text-card-2 leading-4 font-normal">
+            {enrollmentText}
+          </p>
+        )}
+        <div className="flex flex-wrap gap-1 mt-auto pt-3">
+          <ModalityBadge
+            modality={modality}
+            className={`bg-secondary ${badgeHoverClasses}`}
+          />
+          <WorkloadBadge
+            workload={workload}
+            className={`bg-secondary ${badgeHoverClasses}`}
+          />
+          <NeighborhoodBadge
+            neighborhood={neighborhood}
+            className={`bg-secondary ${badgeHoverClasses}`}
+          />
+          {hasBolsa && (
+            <ScholarshipBadge className={`bg-secondary ${badgeHoverClasses}`} />
+          )}
+          <AccessibilityPillBadge
+            accessibility={accessibility}
+            className={`bg-secondary ${badgeHoverClasses}`}
+          />
+        </div>
       </div>
     </Link>
   )

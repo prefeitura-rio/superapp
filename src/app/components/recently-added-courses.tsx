@@ -39,6 +39,10 @@ export default function RecentlyAddedCourses({
                 accessibility={course.accessibility as AccessibilityProps}
                 coverImage={course.cover_image as string}
                 courseManagementType={course.course_management_type}
+                enrollmentEndDate={
+                  course.enrollment_end_date ?? course.data_limite_inscricoes
+                }
+                neighborhood={(course as any).locations?.[0]?.neighborhood}
               />
             </div>
           ))}
@@ -59,6 +63,9 @@ export default function RecentlyAddedCourses({
               accessibility={course.accessibility as AccessibilityProps}
               coverImage={course.cover_image as string}
               courseManagementType={course.course_management_type}
+              enrollmentEndDate={
+                course.enrollment_end_date ?? course.data_limite_inscricoes
+              }
               className="w-full"
             />
           ))}
