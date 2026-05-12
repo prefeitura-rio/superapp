@@ -31,7 +31,7 @@ export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
               'flex-1 py-3 leading-5 rounded-full text-sm font-normal transition-colors text-center',
               activeType === tab.id
                 ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                : 'text-foreground'
             )}
           >
             {tab.label}
@@ -62,7 +62,7 @@ export function ServiceTypeToggle({ activeType }: ServiceTypeToggleProps) {
             'flex-1 py-3 leading-5 rounded-full text-sm font-normal transition-colors text-center',
             activeType === tab.id
               ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+              : 'text-foreground'
           )}
         >
           {tab.label}

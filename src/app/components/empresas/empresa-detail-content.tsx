@@ -35,7 +35,7 @@ export function EmpresaDetailContent({
 
         {/* Logo + nome da empresa abaixo do header */}
         <div className="mt-6 flex items-center gap-3 min-w-0">
-          <div className="h-15 w-15 shrink-0 overflow-hidden rounded-full bg-white flex items-center justify-center">
+          <div className="h-15 w-15 border border-border shrink-0 overflow-hidden rounded-full bg-white flex items-center justify-center">
             {empresa.logo ? (
               <Image
                 src={empresa.logo}
@@ -78,7 +78,7 @@ export function EmpresaDetailContent({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-sm text-[#0a84ff] hover:underline"
+                className="block text-sm text-primary hover:underline"
               >
                 {empresa.site.replace(/^https?:\/\//, '')}
               </a>
