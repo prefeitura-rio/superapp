@@ -1,17 +1,12 @@
-import { createCourseSlug } from '@/actions/courses/utils'
-import { AccessibilityBadge } from '@/app/components/courses/badges'
+import { CourseCard } from '@/app/components/courses/courses-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
-import {
-  filterVisibleCourses,
-  normalizeModalityDisplay,
-} from '@/lib/course-utils'
+import { filterVisibleCourses } from '@/lib/course-utils'
 import { getDalCategorias, getDalCourses } from '@/lib/dal'
-import Image from 'next/image'
-import Link from 'next/link'
+import type { AccessibilityProps } from '@/types/course'
 
 interface CoursesApiResponse {
   data: {
@@ -33,7 +28,6 @@ export default async function CoursesCategoryPage({
 }) {
   const { slug: categorySlug } = await params
 
-  // Fetch categories to get the category name and ID from slug
   let categoryName = 'Categoria'
   let categoryId: number | undefined
   let courses: ModelsCurso[] = []
@@ -59,7 +53,6 @@ export default async function CoursesCategoryPage({
     console.error('Error fetching category name:', error)
   }
 
-  // Fetch courses filtered by category
   if (categoryId) {
     try {
       const coursesResponse = await getDalCourses({
@@ -101,44 +94,24 @@ export default async function CoursesCategoryPage({
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="flex flex-col divide-y divide-border">
               {courses.map(course => (
-                <Link
+                <CourseCard
                   key={course.id}
-                  href={`/servicos/cursos/${createCourseSlug(
-                    course.id?.toString() || '',
-                    course.title || ''
-                  )}`}
-                  className="block py-3 first:pt-0 last:pb-0 group"
-                >
-                  <div className="flex gap-3 items-center">
-                    {course.cover_image && (
-                      <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden">
-                        <Image
-                          src={course.cover_image}
-                          alt={course.title || 'Curso'}
-                          fill
-                          className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-foreground line-clamp-2">
-                        {course.title || 'Curso sem título'}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {course.modalidade &&
-                          `${normalizeModalityDisplay(course.modalidade)}`}
-                        {course.workload && ` • ${course.workload}`}
-                      </p>
-                      <AccessibilityBadge
-                        accessibility={course.accessibility}
-                        className="mt-2"
-                      />
-                    </div>
-                  </div>
-                </Link>
+                  courseId={course.id}
+                  title={course.title as string}
+                  modality={course.modalidade as string}
+                  workload={course.workload as string}
+                  institutionaLogo={course.institutional_logo as string}
+                  provider={course.organization as string}
+                  coverImage={course.cover_image as string}
+                  accessibility={course.accessibility as AccessibilityProps}
+                  courseManagementType={course.course_management_type}
+                  enrollmentEndDate={course.enrollment_end_date ?? course.data_limite_inscricoes}
+                  neighborhood={(course as any).locations?.[0]?.neighborhood}
+                  variant="horizontal"
+                  className="py-3 first:pt-0 last:pb-0"
+                />
               ))}
             </div>
           )}
