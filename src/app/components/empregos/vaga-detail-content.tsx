@@ -40,7 +40,7 @@ function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
       return <MapPinIcon className="h-3 w-3 shrink-0" />
     case 'salary':
       return <DollarSign className="h-3 w-3 shrink-0" />
-    case 'acessivel_pcd':
+    case 'para_pcd':
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
       return <PcdIcon className="h-3 w-3 shrink-0" />

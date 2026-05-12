@@ -97,13 +97,13 @@ export function mapEmpregoToVagaDetail(emprego: ModelsEmprego): VagaDetail {
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
   } else if (acessivelPcd) {
-    badges.push({ text: 'Acessível PcD', type: 'acessivel_pcd' })
+    badges.push({ text: 'Para PcD', type: 'para_pcd' })
   }
 
   const acessibilidadeLabel = preferencialPcd
-    ? 'Preferencial para PcD'
+    ? 'Preferencial PcD'
     : acessivelPcd
-      ? 'Acessível para PcD'
+      ? 'Para PcD'
       : 'Não informado'
 
   const valorVaga = salario != null ? formatSalary(salario) : 'A combinar'
@@ -161,7 +161,7 @@ export function mapModelsEmpregoToVagaCardData(
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
   } else if (acessivelPcd) {
-    badges.push({ text: 'Acessível PcD', type: 'acessivel_pcd' })
+    badges.push({ text: 'Para PcD', type: 'para_pcd' })
   }
 
   return {
@@ -221,18 +221,18 @@ export function mapEmpregabilidadeVagaToDetail(
   if (preferencialPcd) {
     badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
   } else if (exclusivoPcd) {
-    badges.push({ text: 'Exclusivo PcD', type: 'exclusivo_pcd' })
+    badges.push({ text: 'Exclusiva PcD', type: 'exclusivo_pcd' })
   } else if (acessivelPcd) {
-    badges.push({ text: 'Acessível PcD', type: 'acessivel_pcd' })
+    badges.push({ text: 'Para PcD', type: 'para_pcd' })
   }
 
   // Label de acessibilidade
   const acessibilidadeLabel = preferencialPcd
-    ? 'Preferencial para PcD'
+    ? 'Preferencial PcD'
     : exclusivoPcd
-      ? 'Exclusivo para PcD'
+      ? 'Exclusiva PcD'
       : acessivelPcd
-        ? 'Acessível para PcD'
+        ? 'Para PcD'
         : 'Não informado'
 
   // Valor da vaga formatado

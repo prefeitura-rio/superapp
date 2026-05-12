@@ -13,7 +13,7 @@ export interface VagaBadge {
     | 'bairro'
     | 'salary'
     | 'regime'
-    | 'acessivel_pcd'
+    | 'para_pcd'
     | 'preferencial_pcd'
     | 'exclusivo_pcd'
 }
@@ -44,7 +44,7 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
       return <MapPinIcon className="h-3 w-3 shrink-0" />
     case 'salary':
       return <DollarSign className="h-3 w-3 shrink-0" />
-    case 'acessivel_pcd':
+    case 'para_pcd':
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
       return <PcdIcon className="h-3 w-3 shrink-0" />
@@ -54,7 +54,7 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
 }
 
 const PCD_TYPES = new Set<VagaBadge['type']>([
-  'acessivel_pcd',
+  'para_pcd',
   'preferencial_pcd',
   'exclusivo_pcd',
 ])
@@ -62,7 +62,7 @@ const PCD_TYPES = new Set<VagaBadge['type']>([
 const BADGE_PRIORITY: Partial<Record<NonNullable<VagaBadge['type']>, number>> =
   {
     modality: 0,
-    acessivel_pcd: 1,
+    para_pcd: 1,
     preferencial_pcd: 1,
     exclusivo_pcd: 1,
     bairro: 2,
