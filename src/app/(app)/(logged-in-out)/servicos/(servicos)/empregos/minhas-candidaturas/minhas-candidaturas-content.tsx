@@ -47,9 +47,10 @@ function CandidaturaCard({
     return () => clearTimeout(timer)
   }, [targetProgress])
 
-  const href = candidatura.idVaga
-    ? `/servicos/empregos/${candidatura.idVaga}`
-    : undefined
+  const href =
+    candidatura.idVaga && candidatura.vagaAcessivel
+      ? `/servicos/empregos/${candidatura.idVaga}`
+      : undefined
 
   const cardContent = (
     <>
