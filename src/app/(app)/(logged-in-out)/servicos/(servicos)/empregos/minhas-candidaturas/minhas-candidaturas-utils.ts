@@ -1,3 +1,4 @@
+import { isVagaValida } from '@/app/components/empregos/vagas-utils'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
 import type { EmpregabilidadeStatusCandidatura } from '@/http-courses/models'
 
@@ -16,6 +17,7 @@ export interface CandidaturaCardData {
   status: StatusUi
   etapaAtual: number
   totalEtapas: number
+  vagaAcessivel: boolean
 }
 
 function mapApiStatusToUi(
@@ -59,5 +61,6 @@ export function candidaturaToCardData(
     status: mapApiStatusToUi(c.status),
     etapaAtual,
     totalEtapas,
+    vagaAcessivel: c.vaga ? isVagaValida(c.vaga) : false,
   }
 }

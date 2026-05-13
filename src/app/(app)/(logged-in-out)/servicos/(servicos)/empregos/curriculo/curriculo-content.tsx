@@ -1794,7 +1794,10 @@ export function CurriculoContent({
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="pt-5 pb-4">
-                      <TermosUsoAccordionContent cpf={cpf} />
+                      <TermosUsoAccordionContent
+                        cpf={cpf}
+                        onCancel={() => setAccordionValue('')}
+                      />
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
