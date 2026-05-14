@@ -21,7 +21,9 @@ export default async function EmpregosPage() {
   let vagas: EmpregabilidadeVaga[] = []
 
   try {
-    const response = await getApiPublicEmpregabilidadeVagas()
+    const response = await getApiPublicEmpregabilidadeVagas({
+      status: 'publicado_ativo',
+    })
 
     if (response.status === 200 && response.data) {
       // A API retorna { data: EmpregabilidadeVaga[] }

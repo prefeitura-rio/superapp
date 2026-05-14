@@ -45,7 +45,7 @@
 ```
   api: {
     input:
-      'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/staging/docs/openapi-v3.json',
+      'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.yaml',
     output: {
       target: './src/http-courses/api.ts',
       schemas: './src/http-courses/models',
