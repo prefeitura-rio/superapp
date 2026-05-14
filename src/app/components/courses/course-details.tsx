@@ -20,6 +20,7 @@ import {
 } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import type { UserInfo } from '@/lib/user-info'
+import { cn } from '@/lib/utils'
 import { getBackRoute } from '@/lib/utils'
 import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
 import {
@@ -205,7 +206,12 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
             src={course.cover_image}
             alt={course.title || ''}
             fill
-            className="object-cover"
+            className={cn(
+              'object-cover',
+              course.enrollment_end_date &&
+                new Date() > new Date(course.enrollment_end_date) &&
+                'grayscale'
+            )}
           />
           <div className="absolute top-6 right-2 flex flex-col gap-1">
             {course.accessibility && (

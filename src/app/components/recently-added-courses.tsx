@@ -21,8 +21,8 @@ export default function RecentlyAddedCourses({
       <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Mais recentes
       </h3>
-      {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
-      <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
+      {/* Scroll horizontal com cards fixos (abaixo de 896px) */}
+      <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[895px]:block min-[896px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
             <div
@@ -48,9 +48,9 @@ export default function RecentlyAddedCourses({
           ))}
         </div>
       </div>
-      {/* Desktop: grid de 4 colunas sem scroll (acima de max-w-xl = 576px) */}
-      <div className="hidden min-[577px]:block px-4 pb-6">
-        <div className="grid grid-cols-4 gap-2">
+      {/* Desktop: grid de 4 colunas sem scroll (896px+) */}
+      <div className="hidden min-[896px]:block px-4 pb-6">
+        <div className="flex gap-2">
           {limitedCourses.map((course, index) => (
             <CourseCard
               courseId={course.id}
@@ -66,7 +66,6 @@ export default function RecentlyAddedCourses({
               enrollmentEndDate={
                 course.enrollment_end_date ?? course.data_limite_inscricoes
               }
-              className="w-full"
             />
           ))}
         </div>
