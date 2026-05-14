@@ -40,7 +40,7 @@ export default function ServicosLayout({
       <div>
         {shouldShowToggle &&
           (toggleHasMultipleTabs ? (
-            <div className="max-w-4xl mx-auto pt-12 pb-0 px-4">
+            <div className="max-w-4xl mx-auto pt-12 pb-0 px-1">
               <div className="mb-5 mt-2">
                 <ServiceTypeToggle activeType={activeType} />
               </div>

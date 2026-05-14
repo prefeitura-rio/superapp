@@ -16,7 +16,7 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
   return (
     <>
       <Link href="/servicos/cursos/meus-cursos">
-        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 cursor-pointer hover:opacity-80 transition-opacity">
+        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-1 cursor-pointer hover:opacity-80 transition-opacity">
           Meus Cursos
         </h3>
       </Link>
