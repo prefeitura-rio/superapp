@@ -9,6 +9,7 @@ import { ClockIcon } from '@/assets/icons/clock-icon'
 import { CycleIcon } from '@/assets/icons/cycle-icon'
 import { GroupIcon } from '@/assets/icons/group-icon'
 import { PersonIcon } from '@/assets/icons/person-icon'
+import { cn } from '@/lib/utils'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
@@ -205,7 +206,12 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
             src={course.cover_image}
             alt={course.title || ''}
             fill
-            className="object-cover"
+            className={cn(
+              'object-cover',
+              course.enrollment_end_date &&
+                new Date() > new Date(course.enrollment_end_date) &&
+                'grayscale'
+            )}
           />
           <div className="absolute top-6 right-2 flex flex-col gap-1">
             {course.accessibility && (
