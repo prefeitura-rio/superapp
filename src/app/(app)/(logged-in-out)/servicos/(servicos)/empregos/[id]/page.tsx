@@ -1,5 +1,4 @@
 import { VagaDetailContent } from '@/app/components/empregos/vaga-detail-content'
-import { isVagaValida } from '@/app/components/empregos/vagas-utils'
 import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
@@ -29,10 +28,7 @@ export default async function VagaDetailPage({ params }: PageProps) {
       notFound()
     }
 
-    if (!isVagaValida(response.data)) {
-      notFound()
-    }
-
+    const vagaAtiva = response.data.status === 'publicado_ativo'
     const vaga = mapEmpregabilidadeVagaToDetail(response.data)
 
     // Fallback: se o backend não retornou orgao_parceiro mas temos o ID,
@@ -88,6 +84,7 @@ export default async function VagaDetailPage({ params }: PageProps) {
           vaga={vaga}
           isLoggedIn={isLoggedIn}
           hasCandidatura={hasCandidatura}
+          vagaAtiva={vagaAtiva}
         />
       </div>
     )

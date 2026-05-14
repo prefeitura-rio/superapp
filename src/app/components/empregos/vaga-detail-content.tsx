@@ -15,6 +15,7 @@ import {
   PcdIcon,
   ShareIcon,
 } from '@/assets/icons'
+import { Button } from '@/components/ui/button'
 import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
 import { DollarSign, FileText } from 'lucide-react'
@@ -27,6 +28,8 @@ interface VagaDetailContentProps {
   isLoggedIn: boolean
   /** Indica se o usuário já se candidatou a esta vaga */
   hasCandidatura?: boolean
+  /** Indica se a vaga está com status publicado_ativo */
+  vagaAtiva?: boolean
 }
 
 function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
@@ -85,6 +88,7 @@ export function VagaDetailContent({
   vaga,
   isLoggedIn,
   hasCandidatura = false,
+  vagaAtiva = true,
 }: VagaDetailContentProps) {
   const router = useRouter()
   const hasEtapas = (vaga.etapasProcessoSeletivo?.length ?? 0) > 0
@@ -228,6 +232,16 @@ export function VagaDetailContent({
                 statusCandidatura={vaga.statusCandidatura}
                 hasCandidatura
               />
+            ) : !vagaAtiva ? (
+              <div className="cursor-not-allowed">
+                <Button
+                  type="button"
+                  disabled
+                  className="w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14"
+                >
+                  Inscrições encerradas para esta vaga
+                </Button>
+              </div>
             ) : isLoggedIn ? (
               <Link
                 href={`/servicos/empregos/${vaga.id}/inscricao`}

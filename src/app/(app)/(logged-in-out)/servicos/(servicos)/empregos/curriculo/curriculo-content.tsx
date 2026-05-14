@@ -328,49 +328,55 @@ function FormacaoAccordionContent({
 
   return (
     <div className="space-y-6">
-      <Controller
-        control={control}
-        name="escolaridade"
-        render={({ field }) => (
-          <ActionDiv
-            ref={field.ref}
-            label="Escolaridade"
-            isRequired
-            content={
-              hasSelection ? (
-                formatEducation(escolaridade)
-              ) : (
-                <span className="text-foreground-light">
-                  Selecione sua escolaridade
-                </span>
-              )
-            }
-            disabled
-            variant="default"
-            error={errors.escolaridade?.message}
-            rightIcon={
-              <ChevronDownIcon
-                className={
-                  hasSelection
-                    ? 'text-primary stroke-[1.5] size-5'
-                    : 'text-foreground-light stroke-[1.5] size-5'
-                }
-              />
-            }
-            drawerContent={<EscolaridadeDrawerContent />}
-            drawerTitle="Escolaridade"
-          />
-        )}
-      />
+      <div data-testid="field-escolaridade">
+        <Controller
+          control={control}
+          name="escolaridade"
+          render={({ field }) => (
+            <ActionDiv
+              ref={field.ref}
+              label="Escolaridade"
+              isRequired
+              content={
+                hasSelection ? (
+                  formatEducation(escolaridade)
+                ) : (
+                  <span className="text-foreground-light">
+                    Selecione sua escolaridade
+                  </span>
+                )
+              }
+              disabled
+              variant="default"
+              error={errors.escolaridade?.message}
+              rightIcon={
+                <ChevronDownIcon
+                  className={
+                    hasSelection
+                      ? 'text-primary stroke-[1.5] size-5'
+                      : 'text-foreground-light stroke-[1.5] size-5'
+                  }
+                />
+              }
+              drawerContent={<EscolaridadeDrawerContent />}
+              drawerTitle="Escolaridade"
+            />
+          )}
+        />
+      </div>
 
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">Formação</p>
         {fields.map((field, index) => (
           <div
             key={field.id}
+            data-testid={`formacao-card-${index}`}
             className="rounded-xl bg-card p-4 space-y-4 shadow-none"
           >
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-testid={`field-tipo-formacao-${index}`}
+            >
               <span
                 className={cn(
                   'text-sm font-normal block',
@@ -429,7 +435,10 @@ function FormacaoAccordionContent({
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-testid={`field-status-formacao-${index}`}
+            >
               <span
                 className={cn(
                   'text-sm font-normal block',
@@ -559,9 +568,10 @@ function IdiomasFields() {
       {fields.map((field, index) => (
         <div
           key={field.id}
+          data-testid={`idioma-card-${index}`}
           className="rounded-xl bg-card p-4 space-y-4 shadow-none"
         >
-          <div className="space-y-2">
+          <div className="space-y-2" data-testid={`field-idioma-${index}`}>
             <span
               className={cn(
                 'text-sm font-normal block',
@@ -1057,7 +1067,7 @@ function SituacaoAtualAccordionContent({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
+      <div className="space-y-2" data-testid="field-encontra-se">
         <Controller
           control={control}
           name="idSituacao"
