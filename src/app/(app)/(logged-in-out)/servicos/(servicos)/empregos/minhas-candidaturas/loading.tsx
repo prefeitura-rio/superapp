@@ -30,7 +30,7 @@ export default function MinhasCandidaturasLoading() {
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
       <SecondaryHeader fixed={false} title="Minhas candidaturas" />
 
-      <div className="px-4">
+      <div className="px-4 pt-2 md:pt-0">
         <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <CandidaturaCardSkeleton key={i} />

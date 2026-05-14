@@ -9,6 +9,7 @@ export function BriefcaseIcon(props: IconProps) {
       viewBox="0 0 12 12"
       fill="none"
       className="text-foreground"
+      xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <path

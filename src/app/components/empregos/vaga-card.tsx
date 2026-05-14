@@ -1,8 +1,8 @@
 'use client'
 
-import { MapPinIcon } from '@/assets/icons'
+import { BriefcaseIcon, CltIcon, MapPinIcon, PcdIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
-import { Briefcase, DollarSign } from 'lucide-react'
+import { DollarSign } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -12,7 +12,8 @@ export interface VagaBadge {
     | 'modality'
     | 'bairro'
     | 'salary'
-    | 'acessivel_pcd'
+    | 'regime'
+    | 'para_pcd'
     | 'preferencial_pcd'
     | 'exclusivo_pcd'
 }
@@ -36,22 +37,63 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
   if (!type) return null
   switch (type) {
     case 'modality':
-      return <Briefcase className="h-3.5 w-3.5 shrink-0" />
+      return <BriefcaseIcon className="h-3 w-3 shrink-0" />
+    case 'regime':
+      return <CltIcon className="h-3 w-3 shrink-0" />
     case 'bairro':
-      return <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+      return <MapPinIcon className="h-3 w-3 shrink-0" />
     case 'salary':
-      return <DollarSign className="h-3.5 w-3.5 shrink-0" />
-    case 'acessivel_pcd':
+      return <DollarSign className="h-3 w-3 shrink-0" />
+    case 'para_pcd':
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
-      return null
+      return <PcdIcon className="h-3 w-3 shrink-0" />
     default:
       return null
   }
 }
 
+const PCD_TYPES = new Set<VagaBadge['type']>([
+  'para_pcd',
+  'preferencial_pcd',
+  'exclusivo_pcd',
+])
+
+const BADGE_PRIORITY: Partial<Record<NonNullable<VagaBadge['type']>, number>> =
+  {
+    modality: 0,
+    para_pcd: 1,
+    preferencial_pcd: 1,
+    exclusivo_pcd: 1,
+    bairro: 2,
+  }
+
+function sortBadges(badges: VagaBadge[]): VagaBadge[] {
+  return [...badges].sort((a, b) => {
+    const pa = a.type ? (BADGE_PRIORITY[a.type] ?? 99) : 99
+    const pb = b.type ? (BADGE_PRIORITY[b.type] ?? 99) : 99
+    return pa - pb
+  })
+}
+
 export function VagaCard({ vaga, variant, className }: VagaCardProps) {
   const isRecent = variant === 'recent'
+
+  const displayedBadges = isRecent
+    ? (() => {
+        const accessibility = vaga.badges.filter(
+          b => b.type && PCD_TYPES.has(b.type)
+        )
+        const others = sortBadges(
+          vaga.badges.filter(b => !b.type || !PCD_TYPES.has(b.type))
+        )
+        const remainingSlots = Math.max(0, 3 - accessibility.length)
+        return sortBadges([
+          ...accessibility,
+          ...others.slice(0, remainingSlots),
+        ])
+      })()
+    : sortBadges(vaga.badges)
 
   return (
     <Link
@@ -107,22 +149,20 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
 
       {/* Info badges */}
       <div className="flex flex-wrap items-center gap-x-1 gap-y-1 self-stretch content-center min-h-0 shrink-0">
-        {(isRecent ? vaga.badges.slice(0, 3) : vaga.badges).map(
-          (badge, index) => (
-            <span
-              key={`${badge.text}-${index}`}
-              className={cn(
-                'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full',
-                isRecent
-                  ? 'bg-white/10 text-white'
-                  : 'bg-foreground/5 text-foreground'
-              )}
-            >
-              {!isRecent && <BadgeIcon type={badge.type} />}
-              <span className="text-xs">{badge.text}</span>
-            </span>
-          )
-        )}
+        {displayedBadges.map((badge, index) => (
+          <span
+            key={`${badge.text}-${index}`}
+            className={cn(
+              'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full',
+              isRecent
+                ? 'bg-white/10 text-white'
+                : 'bg-foreground/5 text-foreground'
+            )}
+          >
+            {!isRecent && <BadgeIcon type={badge.type} />}
+            <span className="text-xs">{badge.text}</span>
+          </span>
+        ))}
       </div>
     </Link>
   )

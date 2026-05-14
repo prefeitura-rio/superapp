@@ -58,7 +58,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement, ExtendedMenuItemProps>(
               <span className="text-sm text-muted-foreground">{title}</span>
             )}
             <div className="flex items-center gap-2 min-w-0">
-              <span className="min-w-0 truncate">{label}</span>
+              <span className="min-w-0 truncate text-sm">{label}</span>
               {showBadge && (
                 <Badge
                   variant="destructive"

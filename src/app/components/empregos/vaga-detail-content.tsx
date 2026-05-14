@@ -6,11 +6,19 @@ import { CandidaturaFeedbackCard } from '@/app/components/empregos/candidatura-f
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
-import { MapPinIcon } from '@/assets/icons'
-import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@/assets/icons'
+import {
+  BriefcaseIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CltIcon,
+  MapPinIcon,
+  PcdIcon,
+  ShareIcon,
+} from '@/assets/icons'
+import { Button } from '@/components/ui/button'
 import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
-import { Accessibility, Briefcase, DollarSign, FileText } from 'lucide-react'
+import { DollarSign, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -20,23 +28,27 @@ interface VagaDetailContentProps {
   isLoggedIn: boolean
   /** Indica se o usuário já se candidatou a esta vaga */
   hasCandidatura?: boolean
+  /** Indica se a vaga está com status publicado_ativo */
+  vagaAtiva?: boolean
 }
 
 function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
-  if (!type) return <FileText className="h-3.5 w-3.5 shrink-0" />
+  if (!type) return <FileText className="h-3 w-3 shrink-0" />
   switch (type) {
     case 'modality':
-      return <Briefcase className="h-3.5 w-3.5 shrink-0" />
+      return <BriefcaseIcon className="h-3 w-3 shrink-0" />
+    case 'regime':
+      return <CltIcon className="h-3 w-3 shrink-0" />
     case 'bairro':
-      return <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+      return <MapPinIcon className="h-3 w-3 shrink-0" />
     case 'salary':
-      return <DollarSign className="h-3.5 w-3.5 shrink-0" />
-    case 'acessivel_pcd':
+      return <DollarSign className="h-3 w-3 shrink-0" />
+    case 'para_pcd':
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
-      return <Accessibility className="h-3.5 w-3.5 shrink-0" />
+      return <PcdIcon className="h-3 w-3 shrink-0" />
     default:
-      return <FileText className="h-3.5 w-3.5 shrink-0" />
+      return <FileText className="h-3 w-3 shrink-0" />
   }
 }
 
@@ -76,6 +88,7 @@ export function VagaDetailContent({
   vaga,
   isLoggedIn,
   hasCandidatura = false,
+  vagaAtiva = true,
 }: VagaDetailContentProps) {
   const router = useRouter()
   const hasEtapas = (vaga.etapasProcessoSeletivo?.length ?? 0) > 0
@@ -127,7 +140,7 @@ export function VagaDetailContent({
         <p className="text-sm text-white leading-5 pb-6 font-normal">
           Inscrições até {vaga.dataEncerramentoInscricoes}
         </p>
-        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-3">
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-0">
           {vaga.badges.map((badge, index) => (
             <span
               key={`${badge.text}-${index}`}
@@ -148,7 +161,7 @@ export function VagaDetailContent({
             href={`/servicos/empresas/${encodeURIComponent(vaga.empresaCnpj)}`}
             className="flex items-center gap-3 rounded-xl transition-opacity hover:opacity-90"
           >
-            <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+            <div className="size-10 border border-border shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
               {vaga.empresaLogo ? (
                 <Image
                   src={vaga.empresaLogo}
@@ -219,17 +232,27 @@ export function VagaDetailContent({
                 statusCandidatura={vaga.statusCandidatura}
                 hasCandidatura
               />
+            ) : !vagaAtiva ? (
+              <div className="cursor-not-allowed">
+                <Button
+                  type="button"
+                  disabled
+                  className="w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14"
+                >
+                  Inscrições encerradas para esta vaga
+                </Button>
+              </div>
             ) : isLoggedIn ? (
               <Link
                 href={`/servicos/empregos/${vaga.id}/inscricao`}
-                className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 ${candidacyButtonClassName}`}
+                className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 ${candidacyButtonClassName}`}
               >
                 Candidatar-se à vaga
               </Link>
             ) : (
               <Link
                 href={buildAuthUrl(`/servicos/empregos/${vaga.id}/inscricao`)}
-                className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-12 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
+                className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
               >
                 Fazer login para se candidatar
               </Link>
@@ -261,6 +284,21 @@ export function VagaDetailContent({
           />
           {vaga.acessibilidade && vaga.acessibilidade !== 'Não informado' && (
             <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
+          )}
+          {(vaga.tiposPcd?.length ?? 0) > 0 && (
+            <>
+              <div className="h-[0.5px] bg-terciary mt-3 mb-4" />
+              <div className="text-sm font-normal">
+                <p className="text-foreground-light pb-1">
+                  Vaga oferecida preferencialmente para pessoas com deficiência:
+                </p>
+                <ul className="ml-2 mt-2 list-disc list-inside leading-6 text-foreground marker:text-[12px]">
+                  {vaga.tiposPcd!.map(tipo => (
+                    <li key={tipo}>{tipo}</li>
+                  ))}
+                </ul>
+              </div>
+            </>
           )}
         </div>
 

@@ -328,49 +328,55 @@ function FormacaoAccordionContent({
 
   return (
     <div className="space-y-6">
-      <Controller
-        control={control}
-        name="escolaridade"
-        render={({ field }) => (
-          <ActionDiv
-            ref={field.ref}
-            label="Escolaridade"
-            isRequired
-            content={
-              hasSelection ? (
-                formatEducation(escolaridade)
-              ) : (
-                <span className="text-foreground-light">
-                  Selecione sua escolaridade
-                </span>
-              )
-            }
-            disabled
-            variant="default"
-            error={errors.escolaridade?.message}
-            rightIcon={
-              <ChevronDownIcon
-                className={
-                  hasSelection
-                    ? 'text-primary stroke-[1.5] size-5'
-                    : 'text-foreground-light stroke-[1.5] size-5'
-                }
-              />
-            }
-            drawerContent={<EscolaridadeDrawerContent />}
-            drawerTitle="Escolaridade"
-          />
-        )}
-      />
+      <div data-testid="field-escolaridade">
+        <Controller
+          control={control}
+          name="escolaridade"
+          render={({ field }) => (
+            <ActionDiv
+              ref={field.ref}
+              label="Escolaridade"
+              isRequired
+              content={
+                hasSelection ? (
+                  formatEducation(escolaridade)
+                ) : (
+                  <span className="text-foreground-light">
+                    Selecione sua escolaridade
+                  </span>
+                )
+              }
+              disabled
+              variant="default"
+              error={errors.escolaridade?.message}
+              rightIcon={
+                <ChevronDownIcon
+                  className={
+                    hasSelection
+                      ? 'text-primary stroke-[1.5] size-5'
+                      : 'text-foreground-light stroke-[1.5] size-5'
+                  }
+                />
+              }
+              drawerContent={<EscolaridadeDrawerContent />}
+              drawerTitle="Escolaridade"
+            />
+          )}
+        />
+      </div>
 
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">Formação</p>
         {fields.map((field, index) => (
           <div
             key={field.id}
+            data-testid={`formacao-card-${index}`}
             className="rounded-xl bg-card p-4 space-y-4 shadow-none"
           >
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-testid={`field-tipo-formacao-${index}`}
+            >
               <span
                 className={cn(
                   'text-sm font-normal block',
@@ -429,7 +435,10 @@ function FormacaoAccordionContent({
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-testid={`field-status-formacao-${index}`}
+            >
               <span
                 className={cn(
                   'text-sm font-normal block',
@@ -559,9 +568,10 @@ function IdiomasFields() {
       {fields.map((field, index) => (
         <div
           key={field.id}
+          data-testid={`idioma-card-${index}`}
           className="rounded-xl bg-card p-4 space-y-4 shadow-none"
         >
-          <div className="space-y-2">
+          <div className="space-y-2" data-testid={`field-idioma-${index}`}>
             <span
               className={cn(
                 'text-sm font-normal block',
@@ -1057,7 +1067,7 @@ function SituacaoAtualAccordionContent({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
+      <div className="space-y-2" data-testid="field-encontra-se">
         <Controller
           control={control}
           name="idSituacao"
@@ -1663,7 +1673,7 @@ export function CurriculoContent({
           <ExperienciaApiProvider initialData={experienciaOptions}>
             <FormProvider {...form}>
               <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-6">
+                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pt-2 pb-4">
                   Meu Currículo
                 </h1>
 
@@ -1676,11 +1686,11 @@ export function CurriculoContent({
                 >
                   <AccordionItem
                     value="formacao"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Formação
@@ -1708,11 +1718,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="experiencia"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Experiência Profissional
@@ -1740,11 +1750,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="situacao"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Situação atual
@@ -1772,11 +1782,11 @@ export function CurriculoContent({
                   </AccordionItem>
                   <AccordionItem
                     value="termos"
-                    className="border-b border-border py-5 last:border-b-0"
+                    className="border-b border-border py-2 last:border-b-0"
                   >
                     <AccordionTrigger
                       chevronClassName="text-primary stroke-[1.5]"
-                      className="py-0 text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                     >
                       <span className="flex items-center gap-2.5">
                         Termos de Uso

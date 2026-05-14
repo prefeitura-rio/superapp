@@ -69,18 +69,18 @@ export function transformVagaToCardData(
   // Adiciona badge de acessibilidade PCD
   if (vaga.acessibilidade_pcd === 'preferencial_pcd') {
     badges.push({
-      text: 'Preferencial PCD',
+      text: 'Preferencial PcD',
       type: 'preferencial_pcd',
     })
   } else if (vaga.acessibilidade_pcd === 'exclusivo_pcd') {
     badges.push({
-      text: 'Exclusivo PCD',
+      text: 'Exclusiva PcD',
       type: 'exclusivo_pcd',
     })
   } else if (vaga.acessibilidade_pcd === 'para_pcd') {
     badges.push({
-      text: 'Acessível PCD',
-      type: 'acessivel_pcd',
+      text: 'Para PcD',
+      type: 'para_pcd',
     })
   }
 

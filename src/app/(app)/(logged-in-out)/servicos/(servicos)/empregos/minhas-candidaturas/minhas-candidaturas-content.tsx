@@ -56,7 +56,7 @@ function CandidaturaCard({
     <>
       <div>
         <Badge
-          className={`${statusConfig.className} text-xs font-normal rounded-full px-3 py-1`}
+          className={`${statusConfig.className} text-xs font-normal rounded-full px-3 `}
         >
           {statusConfig.label}
         </Badge>
@@ -124,7 +124,7 @@ export function MinhasCandidaturasContent({
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
       <SecondaryHeader fixed={false} title="Minhas candidaturas" />
 
-      <div className="px-4">
+      <div className="px-4 pt-2 md:pt-0">
         {hasError ? (
           <p className="text-foreground font-medium">
             Não foi possível carregar suas candidaturas. Tente novamente.

@@ -363,7 +363,10 @@ function ExperienciaProfissionalAccordionContentInner({
                 )}
             </div>
 
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-testid={`field-experiencia-comprovada-${index}`}
+            >
               <span
                 className={cn(
                   'text-sm font-normal block',
