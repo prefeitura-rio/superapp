@@ -25,6 +25,7 @@ e2e/
   meu-perfil.spec.ts          ← testes das telas de perfil (autenticado)
   meu-perfil-atualizacao.spec.ts  ← fluxos de atualização de dados (autenticado)
   servicos.spec.ts            ← testes públicos da rota /servicos e categoria
+  empregos.spec.ts            ← testes do módulo Oportunidades Cariocas (público + autenticado)
 ```
 
 ---
@@ -266,6 +267,101 @@ Todos os testes requerem `E2E_ACCESS_TOKEN`. Fazem chamadas reais às APIs de ho
 
 ---
 
+### `e2e/empregos.spec.ts`
+
+Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacionadas). Contém ~60 testes organizados em 10 grupos.
+
+> **Helper local:** `clickActionDrawer(page, labelText)` — mesma lógica do `meu-perfil.spec.ts`, navega até a área clicável de um `ActionDiv` pelo texto do label.
+>
+> **Helper local:** `getFirstVagaHref(page)` — abre a home de empregos, localiza o primeiro card de vaga disponível e retorna seu `href`. Usado para evitar hardcode de IDs de vaga.
+
+**Home de empregos — público** (`Empregos — home (público)`)
+
+- Logo "Oportunidades Cariocas Logo" e ícone de busca apontando para `/busca?tipo=empregos` visíveis
+- Header deslogado exibe ícone de ajuda linkando para `/servicos/empregos/faq`
+- Seções "Vagas mais recentes" e "Todas as vagas" com pelo menos 1 card
+- Card "Candidaturas enviadas" **não** visível sem autenticação
+- Clicar no primeiro card de vaga navega para `/servicos/empregos/[id]`
+
+**Home de empregos — autenticado** (`Empregos — home (autenticado)`) — requer `E2E_ACCESS_TOKEN`
+
+- Header logado exibe ícone de menu linkando para `/servicos/empregos/menu` (e **não** exibe ícone de ajuda)
+- Card "Candidaturas enviadas" (quando presente) aponta para `/minhas-candidaturas` e exibe o subtexto correto
+- Clicar no card "Candidaturas enviadas" navega para a tela de candidaturas
+
+**Página da vaga — público** (`Empregos — página da vaga (público)`)
+
+- Carrega com `h1`, texto "Inscrições até" e seção "Informações gerais"
+- Labels de informações gerais: Valor da Vaga, Regime de contratação, Modelo de trabalho, Local de trabalho, Data limite de inscrição
+- Botões Voltar e Compartilhar visíveis (`aria-label`)
+- Botão "Fazer login para se candidatar" visível sem auth
+- Link da empresa (quando há CNPJ) navega para `/servicos/empresas/[cnpj]`
+- Card de etapas do processo seletivo visível quando a vaga tem etapas
+
+**Página da vaga — autenticado** (`Empregos — página da vaga (autenticado)`) — requer `E2E_ACCESS_TOKEN`
+
+- Exibe "Candidatar-se à vaga" ou card de feedback (`.or()` para tolerar ambos os estados)
+- Botão "Candidatar-se à vaga" aponta para `/inscricao` quando presente
+- Vaga com candidatura exibe card de feedback ("Sua inscrição foi enviada...", "Parabéns!", etc.)
+
+**Fluxo de candidatura — autenticado** (`Empregos — fluxo de candidatura (autenticado)`) — requer `E2E_ACCESS_TOKEN`
+
+- Página de inscrição exibe Meu Currículo, tela de bem-vindo ou confirmar informações (`.or()` sobre os 3 estados do carousel)
+- Tela de bem-vindo (quando `is_first_login = true`): título "Bem vindo ao Cadastro de oportunidades de Emprego" e botão "Continuar" habilitado
+- Tela de confirmar informações (quando dados estão incompletos): CPF no formato esperado e botão "Continuar"
+- Meu Currículo no fluxo de inscrição: exibe botão "Continuar" no rodapé (ausente na versão standalone)
+
+**Meu Currículo — standalone** (`Empregos — Meu Currículo (autenticado)`) — requer `E2E_ACCESS_TOKEN` — **seção mais extensa (~20 testes)**
+
+- *Estrutura*: heading "Meu Currículo", 4 accordions (Formação, Experiência Profissional, Situação atual, Termos de Uso), ausência do botão "Continuar" na versão standalone
+- *Accordion Formação*: abre e exibe campos (Escolaridade, Tipo de formação, Nome do Curso, Nome da Instituição, Status, Ano de conclusão, Idiomas); botões "Adicionar outra formação" / "Adicionar outro idioma" inserem novos blocos; "Remover formação" / "Remover idioma" aparecem com 2+ itens e removem corretamente; "Cancelar" fecha o accordion; drawers de Escolaridade (todas as 9 opções), Status (Completo, Em andamento, Incompleto) e Idioma
+- *Discard Changes*: fechar o accordion com dados não salvos abre o modal "Descartar alterações?"; "Cancelar" mantém o accordion aberto com os dados; "Descartar" fecha e reverte para o snapshot anterior
+- *Accordion Experiência Profissional*: abre com campos Cargo, Empresa, "Meu emprego atual"; botões Salvar e Cancelar visíveis; drawer "Experiência comprovada em carteira" exibe opções Sim/Não
+- *Accordion Situação atual*: campo "Encontra-se" (obrigatório); drawer com opções de situação; campo condicional "Há quanto tempo procurando emprego?" aparece ao selecionar situação de desemprego; drawers de Disponibilidade e Tipo de vínculo
+- *Accordion Termos de Uso*: texto dos termos e checkbox visíveis; marcar checkbox exibe ícone check verde no título do accordion
+
+**Página da empresa — público** (`Empregos — página da empresa (público)`)
+
+- `h1` com nome da empresa, seção "Sobre a empresa" e "Vagas ofertadas pela empresa"
+- Informações: Setor, Tamanho da empresa, Especializações
+- Estado com vagas: VagaCards visíveis; estado sem vagas: "Nenhuma vaga aberta no momento."
+- Botão Voltar retorna para a vaga anterior (via `router.back()`)
+
+**Minhas candidaturas — autenticado** (`Empregos — minhas candidaturas (autenticado)`) — requer `E2E_ACCESS_TOKEN`
+
+- Heading "Minhas candidaturas"
+- Estado vazio: "Você ainda não possui candidaturas enviadas"
+- Estado com candidaturas: badge de status (Em análise, Aprovado, Não selecionado, Vaga encerrada, Vaga descontinuada), barra de progresso ou "Esta vaga não possui etapas."
+- Card com `idVaga` é um `<a>` com `href=/servicos/empregos/[id]` e navega para a página da vaga
+
+**Menu de empregos — autenticado** (`Empregos — menu (autenticado)`) — requer `E2E_ACCESS_TOKEN`
+
+- Heading "Menu" com 3 itens: "Minhas candidaturas" → `/minhas-candidaturas`, "Meu currículo" → `/curriculo`, "FAQ" → `/servicos/empregos/faq`
+- Cada link é testado com clique + `waitForURL` + verificação do heading da página de destino
+
+**FAQ de empregos — público** (`Empregos — FAQ (público)`)
+
+- Heading "FAQ" e perguntas específicas de empregos: "O que é a Plataforma Oportunidades Cariocas?", candidatura, conta Gov.br, acompanhamento e status de candidaturas
+
+---
+
+### Padrões específicos do `empregos.spec.ts`
+
+**Testes condicionais:** situações que dependem do estado do usuário (ex: ter ou não candidaturas) usam `.or()` do Playwright ou verificação com `.isVisible().catch(() => false)`:
+
+```ts
+await expect(candidatarBtn.or(feedbackCard).first()).toBeVisible({ timeout: 20000 })
+
+const isVisible = await card.isVisible({ timeout: 5000 }).catch(() => false)
+if (isVisible) { /* asserts apenas quando o estado existir */ }
+```
+
+**Sem hardcode de IDs:** todos os testes que precisam de uma vaga específica chamam `getFirstVagaHref(page)` para capturar o primeiro card disponível dinamicamente.
+
+**Empresa condicional:** a página de empresa só é acessível quando a vaga tem CNPJ. Os testes verificam a existência do link antes de navegar e fazem `test.skip()` se não houver.
+
+---
+
 ### `e2e/servicos.spec.ts`
 
 Testes públicos (não requerem `E2E_ACCESS_TOKEN`). Cobrem a rota `/servicos` e o fluxo de navegação por categoria.
@@ -309,7 +405,7 @@ Dispara em `push` e `pull_request` para o branch `**staging`**.
   - busca
   - cursos
   - mei
-  - empregabilidade
+  - ~~empregabilidade~~ ✅ coberto em `empregos.spec.ts`
 - Incluir cobertura para WebKit/Firefox 
 - Criar um projeto Playwright dedicado só para testes públicos (útil para PRs de forks sem secrets)
 - Adicionar `data-testid` nos elementos mais usados pelos testes para desacoplar dos textos de UI

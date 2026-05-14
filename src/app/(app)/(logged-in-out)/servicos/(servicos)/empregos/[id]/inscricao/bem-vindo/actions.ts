@@ -2,7 +2,6 @@
 
 import { putApiV1EmpregabilidadeOnboardingCpfComplete } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidatePath } from 'next/cache'
 
 interface CompleteOnboardingResult {
   success: boolean
@@ -11,7 +10,13 @@ interface CompleteOnboardingResult {
 
 /**
  * Marca o primeiro login do usuário no módulo de empregabilidade como concluído (PUT).
- * Revalida a página de inscrição para que refetch use is_first_login atualizado.
+ *
+ * Não chama revalidatePath aqui: a página de inscrição usa `force-dynamic`, portanto
+ * o próximo acesso já buscará `is_first_login` atualizado do servidor sem necessidade
+ * de revalidação. Chamar revalidatePath causava um re-render do Server Component
+ * enquanto o Swiper ainda estava na tela de Bem-vindo, removendo aquele slide do DOM
+ * e fazendo com que slideNext() avançasse para o slide errado (Meu Currículo em vez
+ * de Confirmar Informações).
  */
 export async function completeOnboarding(): Promise<CompleteOnboardingResult> {
   try {
@@ -29,7 +34,6 @@ export async function completeOnboarding(): Promise<CompleteOnboardingResult> {
     )
 
     if (response.status === 200) {
-      revalidatePath('/servicos/empregos', 'layout')
       return {
         success: true,
       }
