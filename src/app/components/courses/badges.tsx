@@ -1,13 +1,8 @@
+import { BriefcaseIcon } from '@/assets/icons'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { type AccessibilityTypes, accessibilityLabel } from '@/types/course'
-import {
-  Accessibility,
-  Briefcase,
-  Clock,
-  DollarSign,
-  MapPin,
-} from 'lucide-react'
+import { Accessibility, Clock, DollarSign, MapPin } from 'lucide-react'
 
 interface AccessibilityBadgeProps {
   accessibility?: AccessibilityTypes | string | undefined | ''
@@ -96,7 +91,7 @@ export function ModalityBadge({
   const label = getModalityLabel(modality)
   if (!label) return null
   return (
-    <CoursePillBadge icon={Briefcase} label={label} className={className} />
+    <CoursePillBadge icon={BriefcaseIcon} label={label} className={className} />
   )
 }
 
