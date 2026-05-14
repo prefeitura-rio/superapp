@@ -14,7 +14,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-1">
         Vagas mais recentes
       </h3>
       {/* Mobile: cards h-47 w-47 (11.75rem) em linha com scroll horizontal */}
