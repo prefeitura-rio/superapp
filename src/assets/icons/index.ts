@@ -1,3 +1,4 @@
+import { BriefcaseIcon } from './briefcase-icon'
 import { CalendarIcon } from './calendar-icon'
 import { CheckCircleIcon } from './check-circle-icon'
 import { CheckIcon } from './check-icon'
@@ -34,6 +35,7 @@ import { XCircleIcon } from './x-circle-icon'
 import { XIcon } from './x-icon'
 
 export {
+  BriefcaseIcon,
   CalendarIcon,
   CheckCircleIcon,
   CheckIcon,
