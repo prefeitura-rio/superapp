@@ -45,7 +45,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
       </div>
       {/* 896px+: grid de 4 colunas com cards fixos */}
       <div className="hidden min-[896px]:block px-4 pb-6">
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-4">
           {courses.map((course, index) => (
             <CourseCard
               courseId={course.id}
