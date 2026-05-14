@@ -74,6 +74,7 @@ export function CourseCard({
   neighborhood,
 }: CourseCardProps) {
   const enrollmentText = getEnrollmentText(enrollmentEndDate)
+  const isEnrollmentClosed = enrollmentText === 'Inscrições encerradas'
 
   const badgeHoverClasses =
     'group-hover:bg-terciary group-hover:text-foreground-light'
@@ -92,13 +93,14 @@ export function CourseCard({
               src={coverImage}
               alt="Imagem de capa do curso"
               fill
-              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+              className={cn(
+                'object-cover transition-transform duration-300 ease-in-out group-hover:scale-105',
+                isEnrollmentClosed && 'grayscale'
+              )}
             />
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          <div className="absolute top-1 left-1 z-20 w-6 h-6 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
+          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-[#E2E8F0]">
             {institutionaLogo ? (
               <div className="relative w-full h-full">
                 <Image
@@ -143,24 +145,22 @@ export function CourseCard({
     <Link
       href={`/servicos/cursos/${courseId}`}
       className={cn(
-        'w-[238px] min-h-[256px] rounded-2xl overflow-hidden bg-card cursor-pointer group flex flex-col hover:bg-secondary transition-colors duration-200',
+        'w-[212px] h-[252px] rounded-2xl overflow-hidden bg-card cursor-pointer group flex flex-col hover:bg-secondary transition-colors duration-200',
         className
       )}
     >
       {/* Imagem — cantos superiores cortados pelo overflow-hidden do card, sem radius em baixo */}
-      <div className="relative w-full h-[120px] overflow-hidden">
+      <div className="relative w-full h-[100px] overflow-hidden">
         {coverImage && (
           <Image
             src={coverImage}
             alt="Imagem de capa do curso"
             fill
-            className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            className={cn('object-cover', isEnrollmentClosed && 'grayscale')}
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
+        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-[#E2E8F0]">
           {institutionaLogo ? (
             <div className="relative w-full h-full">
               <Image
@@ -179,7 +179,7 @@ export function CourseCard({
       </div>
 
       {/* Conteúdo */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="px-4 py-3 flex flex-col flex-1">
         <h3 className="text-sm font-medium text-foreground line-clamp-2">
           {title}
         </h3>
