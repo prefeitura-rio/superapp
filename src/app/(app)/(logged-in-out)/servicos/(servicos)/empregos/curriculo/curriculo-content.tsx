@@ -1626,6 +1626,9 @@ export function CurriculoContent({
           const result = await onEnviarCandidatura(inscricaoVagaId)
           if (result.success) {
             queryClient.invalidateQueries({ queryKey: ['candidaturas'] })
+            queryClient.invalidateQueries({
+              queryKey: ['candidatura', inscricaoVagaId],
+            })
             confetti({
               particleCount: 100,
               spread: 70,
