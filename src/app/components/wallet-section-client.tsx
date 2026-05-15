@@ -6,71 +6,39 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
+import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
+import {
+  formatHealthOperatingHours,
+  getHealthOperatingStatus,
+} from '@/lib/operating-status'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
-import type { RiskStatusProps } from '@/types/health'
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import CarteiraSection from './wallet-section'
 import CarteiraSectionSwipe, {
   CarteiraSectionSwipeSkeleton,
 } from './wallet-section-swipe'
 
-interface WalletData {
+type ApiWalletData = {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
   pets?: ModelsPet[]
-  healthCardData?: {
-    href: string
-    title: string
-    name?: string
-    statusLabel: string
-    statusValue: string
-    extraLabel: string
-    extraValue: string
-    address?: string
-    phone?: string
-    email?: string
-    risco?: RiskStatusProps
-  }
+  healthUnitData?: any
+  healthUnitRiskData?: any
+}
+
+async function fetchWalletData(): Promise<ApiWalletData> {
+  const res = await fetch('/api/user/wallet', { cache: 'no-store' })
+  if (!res.ok) throw new Error('Failed to fetch wallet data')
+  return res.json()
 }
 
 export default function WalletSectionClient() {
-  const [walletData, setWalletData] = useState<WalletData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [shouldShowWallet, setShouldShowWallet] = useState(false)
-
-  useEffect(() => {
-    async function fetchWalletData() {
-      try {
-        const response = await fetch('/api/user/wallet', {
-          cache: 'no-store',
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setWalletData(data)
-
-          // Calculate if wallet should be shown
-          const maintenanceStats = getMaintenanceRequestStats(
-            data.maintenanceRequests || []
-          )
-          const walletInfo = getWalletDataInfo(
-            data.walletData,
-            maintenanceStats.total
-          )
-          const petsCount = Array.isArray(data.pets) ? data.pets.length : 0
-          setShouldShowWallet(walletInfo.hasData || petsCount > 0)
-        } else {
-          console.error('Failed to fetch wallet data:', response.status)
-        }
-      } catch (error) {
-        console.error('Error fetching wallet data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchWalletData()
-  }, [])
+  const { data, isLoading } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: fetchWalletData,
+    staleTime: 5 * 60 * 1000,
+  })
 
   if (isLoading) {
     return (
@@ -82,26 +50,56 @@ export default function WalletSectionClient() {
     )
   }
 
-  if (!shouldShowWallet || !walletData) {
-    return null
+  if (!data) return null
+
+  const {
+    walletData,
+    maintenanceRequests,
+    pets,
+    healthUnitData,
+    healthUnitRiskData,
+  } = data
+
+  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests || [])
+  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+  const petsCount = Array.isArray(pets) ? pets.length : 0
+
+  if (!walletInfo.hasData && petsCount === 0) return null
+
+  // Derive healthCardData from raw health unit data (used by CarteiraSection/CarteiraSectionSwipe)
+  const riskStatus = healthUnitRiskData
+    ? getHealthUnitRiskStatus(healthUnitRiskData)
+    : null
+  const healthCardData = {
+    href: '/carteira/clinica-da-familia',
+    title: 'CLÍNICA DA FAMÍLIA',
+    statusLabel: 'Status',
+    extraLabel: 'Horário de atendimento',
+    statusValue: healthUnitData
+      ? getHealthOperatingStatus(healthUnitData.funcionamento_dia_util)
+      : 'Não informado',
+    extraValue: healthUnitData
+      ? formatHealthOperatingHours(healthUnitData.funcionamento_dia_util)
+      : 'Não informado',
+    risco: riskStatus?.risco,
   }
 
   return (
     <ResponsiveWrapper
       mobileComponent={
         <CarteiraSection
-          walletData={walletData.walletData}
-          maintenanceRequests={walletData.maintenanceRequests}
-          healthCardData={walletData.healthCardData}
-          pets={walletData.pets}
+          walletData={walletData}
+          maintenanceRequests={maintenanceRequests}
+          healthCardData={healthCardData}
+          pets={pets}
         />
       }
       desktopComponent={
         <CarteiraSectionSwipe
-          walletData={walletData.walletData}
-          maintenanceRequests={walletData.maintenanceRequests}
-          healthCardData={walletData.healthCardData}
-          pets={walletData.pets}
+          walletData={walletData}
+          maintenanceRequests={maintenanceRequests}
+          healthCardData={healthCardData}
+          pets={pets}
         />
       }
       desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}

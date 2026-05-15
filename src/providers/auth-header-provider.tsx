@@ -1,13 +1,7 @@
 'use client'
 
-import {
-  type ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { type ReactNode, createContext, useCallback, useContext } from 'react'
 
 export interface AuthHeaderData {
   isLoggedIn: boolean
@@ -37,48 +31,40 @@ const AuthHeaderContext = createContext<AuthHeaderContextType>({
 
 export const useAuthHeader = () => useContext(AuthHeaderContext)
 
+async function fetchHeaderData(): Promise<AuthHeaderData> {
+  const response = await fetch('/api/user/header', {
+    cache: 'no-store',
+    credentials: 'include',
+  })
+  if (!response.ok) return defaultData
+  const d = await response.json()
+  return {
+    isLoggedIn: d.isLoggedIn ?? false,
+    userName: d.userName ?? '',
+    userAvatarUrl: d.userAvatarUrl ?? null,
+    userAvatarName: d.userAvatarName ?? null,
+  }
+}
+
 export function AuthHeaderProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AuthHeaderData>(defaultData)
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchAuthHeader = useCallback(async () => {
-    try {
-      const response = await fetch('/api/user/header', {
-        cache: 'no-store',
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        setData(defaultData)
-        return
-      }
-
-      const responseData = await response.json()
-      setData({
-        isLoggedIn: responseData.isLoggedIn ?? false,
-        userName: responseData.userName ?? '',
-        userAvatarUrl: responseData.userAvatarUrl ?? null,
-        userAvatarName: responseData.userAvatarName ?? null,
-      })
-    } catch (error) {
-      console.error('Error fetching auth header:', error)
-      setData(defaultData)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+  const {
+    data,
+    isLoading,
+    refetch: queryRefetch,
+  } = useQuery({
+    queryKey: ['header'],
+    queryFn: fetchHeaderData,
+    staleTime: 5 * 60 * 1000,
+  })
 
   const refetch = useCallback(async () => {
-    setIsLoading(true)
-    await fetchAuthHeader()
-  }, [fetchAuthHeader])
-
-  useEffect(() => {
-    fetchAuthHeader()
-  }, [fetchAuthHeader])
+    await queryRefetch()
+  }, [queryRefetch])
 
   return (
-    <AuthHeaderContext.Provider value={{ data, isLoading, refetch }}>
+    <AuthHeaderContext.Provider
+      value={{ data: data ?? defaultData, isLoading, refetch }}
+    >
       {children}
     </AuthHeaderContext.Provider>
   )

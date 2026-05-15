@@ -16,6 +16,7 @@ import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/mod
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -248,6 +249,7 @@ function FormacaoAccordionContent({
   onSaveSuccess,
   snapshot,
 }: FormacaoAccordionContentProps) {
+  const queryClient = useQueryClient()
   const { watch, register, control, formState, trigger, getValues, setFocus } =
     useFormContext<CurriculoFormacaoFormValues>()
   const { errors } = formState
@@ -315,6 +317,7 @@ function FormacaoAccordionContent({
       if (result.success) {
         console.log('✅ [handleFormacaoSave] SUCESSO!')
         toast.success('Formação salva com sucesso')
+        queryClient.invalidateQueries({ queryKey: ['curriculo'] })
         onSaveSuccess(snapshot)
       } else {
         console.error('❌ [handleFormacaoSave] FALHA NA API:', result)
@@ -979,6 +982,7 @@ function SituacaoAtualAccordionContent({
   onSaveSuccess,
   snapshot,
 }: SituacaoAtualAccordionContentProps) {
+  const queryClient = useQueryClient()
   const { watch, control, formState, trigger, getValues, setFocus, setValue } =
     useFormContext<CurriculoSituacaoFormValues>()
   const { errors } = formState
@@ -1056,6 +1060,7 @@ function SituacaoAtualAccordionContent({
       const result = await saveSituacaoAction(cpf, data)
       if (result.success) {
         toast.success('Situação atual salva com sucesso')
+        queryClient.invalidateQueries({ queryKey: ['curriculo'] })
         onSaveSuccess(data)
       } else {
         toast.error('Não foi possível salvar. Tente novamente.')
@@ -1317,6 +1322,7 @@ export function CurriculoContent({
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
   const [isEnviandoCandidatura, setIsEnviandoCandidatura] = useState(false)
   const router = useRouter()
+  const queryClient = useQueryClient() // used for invalidating ['candidaturas'] after enviarCandidatura
   const formacaoSnapshotRef = useRef<Pick<
     CurriculoFormacaoFormValues,
     'escolaridade' | 'formacaoAcademica' | 'idiomas'
@@ -1619,6 +1625,10 @@ export function CurriculoContent({
         try {
           const result = await onEnviarCandidatura(inscricaoVagaId)
           if (result.success) {
+            queryClient.invalidateQueries({ queryKey: ['candidaturas'] })
+            queryClient.invalidateQueries({
+              queryKey: ['candidatura', inscricaoVagaId],
+            })
             confetti({
               particleCount: 100,
               spread: 70,

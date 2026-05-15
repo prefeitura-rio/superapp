@@ -6,13 +6,14 @@ import {
   getDalHealthUnitInfo,
   getDalHealthUnitRisk,
 } from '@/lib/dal'
-import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
-import {
-  formatHealthOperatingHours,
-  getHealthOperatingStatus,
-} from '@/lib/operating-status'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+}
 
 export async function GET() {
   try {
@@ -20,13 +21,16 @@ export async function GET() {
     const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
 
     if (!isLoggedIn) {
-      return NextResponse.json({
-        walletData: null,
-        maintenanceRequests: null,
-        healthCardData: null,
-        pets: [],
-        shouldShowWallet: false,
-      })
+      return NextResponse.json(
+        {
+          walletData: null,
+          maintenanceRequests: null,
+          healthUnitData: null,
+          healthUnitRiskData: null,
+          pets: [],
+        },
+        { headers: NO_CACHE_HEADERS }
+      )
     }
 
     let walletData
@@ -115,61 +119,28 @@ export async function GET() {
       pets = []
     }
 
-    // healthCardData - only create if clinica_familia exists and indicador is true
-    let healthCardData = undefined
-    if (
-      walletData?.saude?.clinica_familia &&
-      walletData?.saude?.clinica_familia?.indicador === true
-    ) {
-      // Use wallet data as primary source, only supplement with API data for specific fields
-      const clinicaFamilia = walletData.saude.clinica_familia
-
-      // Only use health unit API for operating hours and current status
-      const operatingHours = healthUnitData
-        ? formatHealthOperatingHours(healthUnitData.funcionamento_dia_util)
-        : 'Não informado'
-
-      const statusValue = healthUnitData
-        ? getHealthOperatingStatus(healthUnitData.funcionamento_dia_util)
-        : 'Não informado'
-
-      // Only use health unit API for risk status
-      const riskStatus = healthUnitRiskData
-        ? getHealthUnitRiskStatus(healthUnitRiskData)
-        : null
-
-      healthCardData = {
-        href: '/carteira/clinica-da-familia',
-        title: 'CLÍNICA DA FAMÍLIA',
-        name: clinicaFamilia.nome || 'Nome não disponível',
-        statusLabel: 'Status',
-        statusValue,
-        extraLabel: 'Horário de atendimento',
-        extraValue: operatingHours,
-        address: clinicaFamilia.endereco || 'Endereço não disponível',
-        phone: clinicaFamilia.telefone,
-        email: clinicaFamilia.email,
-        risco: riskStatus?.risco,
-      }
-    }
-
-    return NextResponse.json({
-      walletData,
-      maintenanceRequests,
-      healthCardData,
-      pets,
-    })
+    return NextResponse.json(
+      {
+        walletData,
+        maintenanceRequests,
+        healthUnitData,
+        healthUnitRiskData,
+        pets,
+      },
+      { headers: NO_CACHE_HEADERS }
+    )
   } catch (error) {
     console.error('Error in wallet API route:', error)
     return NextResponse.json(
       {
         walletData: null,
         maintenanceRequests: null,
-        healthCardData: null,
+        healthUnitData: null,
+        healthUnitRiskData: null,
         pets: [],
         error: 'Failed to fetch wallet data',
       },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     )
   }
 }

@@ -3,18 +3,27 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { getDisplayName } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+}
+
 export async function GET() {
   try {
     const userAuthInfo = await getUserInfoFromToken()
     const isLoggedIn = !!(userAuthInfo.cpf && userAuthInfo.name)
 
     if (!isLoggedIn) {
-      return NextResponse.json({
-        isLoggedIn: false,
-        userName: '',
-        userAvatarUrl: null,
-        userAvatarName: null,
-      })
+      return NextResponse.json(
+        {
+          isLoggedIn: false,
+          userName: '',
+          userAvatarUrl: null,
+          userAvatarName: null,
+        },
+        { headers: NO_CACHE_HEADERS }
+      )
     }
 
     let userAvatarUrl: string | null = null
@@ -49,12 +58,15 @@ export async function GET() {
       console.log('Could not fetch user avatar:', error)
     }
 
-    return NextResponse.json({
-      isLoggedIn: true,
-      userName: userDisplayName || userAuthInfo.name,
-      userAvatarUrl,
-      userAvatarName,
-    })
+    return NextResponse.json(
+      {
+        isLoggedIn: true,
+        userName: userDisplayName || userAuthInfo.name,
+        userAvatarUrl,
+        userAvatarName,
+      },
+      { headers: NO_CACHE_HEADERS }
+    )
   } catch (error) {
     console.error('Error in header API route:', error)
     return NextResponse.json(
@@ -63,9 +75,8 @@ export async function GET() {
         userName: '',
         userAvatarUrl: null,
         userAvatarName: null,
-        error: 'Failed to fetch user data',
       },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     )
   }
 }

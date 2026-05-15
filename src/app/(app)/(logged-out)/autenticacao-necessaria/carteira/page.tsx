@@ -1,4 +1,4 @@
-import { FloatNavigation } from '@/app/components/float-navigation'
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 // import authReqWalletCards from '@/assets/auth-req-wallet-cards.png'
 import govbrLogo from '@/assets/govbr.svg'
 import { buildAuthUrl } from '@/constants/url'
@@ -81,7 +81,7 @@ export default async function WalletAuthenticationRequired() {
       </main>
 
       {/* Float Navigation */}
-      <FloatNavigation />
+      <FloatNavigationWrapper />
     </>
   )
 }

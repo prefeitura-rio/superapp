@@ -7,6 +7,7 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { ChevronDownIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -157,6 +158,7 @@ export function PerguntasAdicionaisContent({
   onEnviarCandidatura,
 }: PerguntasAdicionaisContentProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successDrawerOpen, setSuccessDrawerOpen] = useState(false)
 
@@ -195,6 +197,8 @@ export function PerguntasAdicionaisContent({
           )
           return
         }
+        queryClient.invalidateQueries({ queryKey: ['candidaturas'] })
+        queryClient.invalidateQueries({ queryKey: ['candidatura', vagaId] })
       }
 
       confetti({

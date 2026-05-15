@@ -1,55 +1,39 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import MainHeader from './main-header'
 import SearchPlaceholder from './search-placeholder'
 
-interface HeaderData {
-  isLoggedIn: boolean
-  userName: string
-  userAvatarUrl?: string | null
-  userAvatarName?: string | null
+async function fetchHeaderData() {
+  const response = await fetch('/api/user/header', {
+    cache: 'no-store',
+    credentials: 'include',
+  })
+  if (!response.ok)
+    return {
+      isLoggedIn: false,
+      userName: '',
+      userAvatarUrl: null,
+      userAvatarName: null,
+    }
+  return response.json()
 }
 
 export default function HeaderWrapperClient() {
-  const [headerData, setHeaderData] = useState<HeaderData>({
-    isLoggedIn: false,
-    userName: '',
-    userAvatarUrl: null,
-    userAvatarName: null,
+  const { data, isLoading } = useQuery({
+    queryKey: ['header'],
+    queryFn: fetchHeaderData,
+    staleTime: 5 * 60 * 1000,
   })
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchHeaderData() {
-      try {
-        const response = await fetch('/api/user/header', {
-          cache: 'no-store',
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setHeaderData(data)
-        } else {
-          console.error('Failed to fetch header data:', response.status)
-        }
-      } catch (error) {
-        console.error('Error fetching header data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchHeaderData()
-  }, [])
 
   return (
     <>
       <MainHeader
-        userName={headerData.userName}
-        isLoggedIn={headerData.isLoggedIn}
+        userName={data?.userName ?? ''}
+        isLoggedIn={data?.isLoggedIn ?? false}
         showSearchIcon={true}
-        userAvatarUrl={headerData.userAvatarUrl}
-        userAvatarName={headerData.userAvatarName}
+        userAvatarUrl={data?.userAvatarUrl ?? null}
+        userAvatarName={data?.userAvatarName ?? null}
         isLoading={isLoading}
       />
 

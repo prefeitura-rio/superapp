@@ -1,5 +1,5 @@
 import { CategoryGrid } from '@/app/components/category-grid'
-import { FloatNavigation } from '@/app/components/float-navigation'
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import { SearchButton } from '@/app/components/search-button'
 import { additionalCategories } from '@/constants/aditional-services'
@@ -26,7 +26,7 @@ export default async function ServicesPage() {
       {/* Category Grid*/}
       <CategoryGrid title="Categorias" categories={allCategories} />
 
-      <FloatNavigation />
+      <FloatNavigationWrapper />
     </main>
   )
 }

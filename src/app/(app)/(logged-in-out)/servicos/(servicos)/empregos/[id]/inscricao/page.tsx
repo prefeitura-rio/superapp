@@ -14,13 +14,6 @@ import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
-import { getCurriculoExperienciaData } from '../../curriculo/get-curriculo-experiencia-data'
-import { getCurriculoFormacaoData } from '../../curriculo/get-curriculo-formacao-data'
-import { getCurriculoSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
-import { getCurriculoTermosAceitos } from '../../curriculo/get-curriculo-termos-data'
-import { getExperienciaOptions } from '../../curriculo/get-experiencia-options'
-import { getFormacaoOptions } from '../../curriculo/get-formacao-options'
-import { getSituacaoOptions } from '../../curriculo/get-situacao-options'
 import type { EmpregosUserInfo } from './confirmar-informacoes/types'
 import { enviarCandidatura } from './enviar-candidatura-action'
 import { InscricaoFlowCarousel } from './inscricao-flow-carousel'
@@ -96,35 +89,17 @@ export default async function InscricaoPage({
       meta: { page: number; page_size: number; total: number }
     }
     const candidaturas = Array.isArray(body.data) ? body.data : []
-    // Se já existe uma candidatura para esta vaga, redireciona
     if (candidaturas.length > 0) {
       redirect('/servicos/empregos/minhas-candidaturas')
     }
   }
 
-  const [
-    vagaResponse,
-    onboardingResponse,
-    userInfoResponse,
-    formacaoOptions,
-    situacaoOptions,
-    experienciaOptions,
-    curriculoFormacaoData,
-    curriculoSituacaoData,
-    curriculoExperienciaData,
-    curriculoTermosAceitos,
-  ] = await Promise.all([
-    getApiPublicEmpregabilidadeVagasId(vagaId),
-    getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
-    getDalCitizenCpf(userAuthInfo.cpf),
-    getFormacaoOptions(),
-    getSituacaoOptions(),
-    getExperienciaOptions(),
-    getCurriculoFormacaoData(userAuthInfo.cpf),
-    getCurriculoSituacaoData(userAuthInfo.cpf),
-    getCurriculoExperienciaData(userAuthInfo.cpf),
-    getCurriculoTermosAceitos(userAuthInfo.cpf),
-  ])
+  const [vagaResponse, onboardingResponse, userInfoResponse] =
+    await Promise.all([
+      getApiPublicEmpregabilidadeVagasId(vagaId),
+      getApiV1EmpregabilidadeOnboardingCpf(userAuthInfo.cpf),
+      getDalCitizenCpf(userAuthInfo.cpf),
+    ])
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
     notFound()
@@ -167,10 +142,7 @@ export default async function InscricaoPage({
     months: 6,
   })
 
-  const contactUpdateStatus = {
-    phoneNeedsUpdate,
-    emailNeedsUpdate,
-  }
+  const contactUpdateStatus = { phoneNeedsUpdate, emailNeedsUpdate }
 
   const onboardingData =
     onboardingResponse.status === 200 && onboardingResponse.data
@@ -194,9 +166,6 @@ export default async function InscricaoPage({
       mapInformacaoComplementar
     ) ?? []
 
-  const citizen = userInfo as ModelsCitizen
-  const initialEscolaridade = citizen.escolaridade?.trim() || undefined
-
   return (
     <div className="min-h-lvh pb-10">
       <InscricaoFlowCarousel
@@ -208,15 +177,6 @@ export default async function InscricaoPage({
         userInfo={transformedUserInfo}
         userAuthInfo={userAuthInfo}
         contactUpdateStatus={contactUpdateStatus}
-        formacaoOptions={formacaoOptions}
-        initialFormacoes={curriculoFormacaoData.formacoes}
-        initialIdiomas={curriculoFormacaoData.idiomas}
-        situacaoOptions={situacaoOptions}
-        initialSituacao={curriculoSituacaoData}
-        experienciaOptions={experienciaOptions}
-        initialExperiencia={curriculoExperienciaData}
-        initialTermosAceitos={curriculoTermosAceitos}
-        initialEscolaridade={initialEscolaridade}
         informacoesComplementares={informacoesComplementares}
         onEnviarCandidatura={enviarCandidatura}
       />
