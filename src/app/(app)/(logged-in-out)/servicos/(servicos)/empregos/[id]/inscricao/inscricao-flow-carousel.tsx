@@ -1,19 +1,10 @@
 'use client'
 
+import { CurriculoSlide } from '@/app/components/empregos/curriculo-slide'
 import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { CurriculoContent } from '../../curriculo/curriculo-content'
-import type { CurriculoExperienciaFormValues } from '../../curriculo/curriculo-experiencia-schema'
-import type { ExperienciaOptions } from '../../curriculo/experiencia-options-types'
-import type { FormacaoOptions } from '../../curriculo/formacao-options-types'
-import type {
-  InitialFormacaoItem,
-  InitialIdiomaItem,
-} from '../../curriculo/get-curriculo-formacao-data'
-import type { InitialSituacaoData } from '../../curriculo/get-curriculo-situacao-data'
-import type { SituacaoOptions } from '../../curriculo/situacao-options-types'
 import { BemVindoContent } from './bem-vindo/bem-vindo-content'
 import { ConfirmarInformacoesContent } from './confirmar-informacoes/confirmar-informacoes-content'
 import { PerguntasAdicionaisContent } from './confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
@@ -58,17 +49,7 @@ interface InscricaoFlowCarouselProps {
   userInfo: EmpregosUserInfo
   userAuthInfo: { cpf: string; name: string }
   contactUpdateStatus: ContactUpdateStatus
-  formacaoOptions: FormacaoOptions
-  initialFormacoes?: InitialFormacaoItem[]
-  initialIdiomas?: InitialIdiomaItem[]
-  situacaoOptions: SituacaoOptions
-  initialSituacao?: InitialSituacaoData
-  experienciaOptions: ExperienciaOptions
-  initialExperiencia?: CurriculoExperienciaFormValues
-  initialTermosAceitos?: boolean
-  initialEscolaridade?: string
   informacoesComplementares: InformacaoComplementarForPerguntas[]
-  /** Server action para enviar candidatura (curriculo sem perguntas ou perguntas-adicionais). */
   onEnviarCandidatura?: (
     vagaId: string,
     respostas?: RespostaInfoComplementarPayload[]
@@ -84,15 +65,6 @@ export function InscricaoFlowCarousel({
   userInfo,
   userAuthInfo,
   contactUpdateStatus,
-  formacaoOptions,
-  initialFormacoes,
-  initialIdiomas,
-  situacaoOptions,
-  initialSituacao,
-  experienciaOptions,
-  initialExperiencia,
-  initialTermosAceitos,
-  initialEscolaridade = '',
   informacoesComplementares,
   onEnviarCandidatura,
 }: InscricaoFlowCarouselProps) {
@@ -123,17 +95,9 @@ export function InscricaoFlowCarousel({
       ? `/servicos/empregos/${vagaId}/inscricao?step=${confirmarStepIndex}`
       : `/servicos/empregos/${vagaId}/inscricao`
 
-  const handleBemVindoSuccess = useCallback(() => {
-    goToNext()
-  }, [goToNext])
-
-  const handleConfirmarContinuar = useCallback(() => {
-    goToNext()
-  }, [goToNext])
-
-  const handleCurriculoToNext = useCallback(() => {
-    goToNext()
-  }, [goToNext])
+  const handleBemVindoSuccess = useCallback(() => goToNext(), [goToNext])
+  const handleConfirmarContinuar = useCallback(() => goToNext(), [goToNext])
+  const handleCurriculoToNext = useCallback(() => goToNext(), [goToNext])
 
   const handleCurriculoSuccessClose = useCallback(async () => {
     await revalidateEmpregosPage()
@@ -180,27 +144,14 @@ export function InscricaoFlowCarousel({
           </SwiperSlide>
         )}
         <SwiperSlide key="curriculo" className="h-auto!">
-          <CurriculoContent
+          <CurriculoSlide
             cpf={userAuthInfo.cpf}
-            formacaoOptions={formacaoOptions}
-            initialFormacoes={initialFormacoes}
-            initialIdiomas={initialIdiomas}
-            situacaoOptions={situacaoOptions}
-            initialSituacao={initialSituacao}
-            experienciaOptions={experienciaOptions}
-            initialExperiencia={initialExperiencia}
-            initialTermosAceitos={initialTermosAceitos}
             inscricaoVagaId={vagaId}
             backRoute={`/servicos/empregos/${vagaId}`}
             hasPerguntasAdicionais={hasPerguntasAdicionais}
-            initialEscolaridade={initialEscolaridade}
             onContinuarToNext={handleCurriculoToNext}
             onSuccessClose={handleCurriculoSuccessClose}
-            onEnviarCandidatura={
-              onEnviarCandidatura
-                ? vagaIdToSend => onEnviarCandidatura(vagaIdToSend)
-                : undefined
-            }
+            onEnviarCandidatura={onEnviarCandidatura}
           />
         </SwiperSlide>
         {hasPerguntasAdicionais && (

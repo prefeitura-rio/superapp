@@ -1,21 +1,34 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { AllVagas } from './all-vagas'
 import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
 import { RecentlyAddedVagas } from './recently-added-vagas'
 import type { VagaCardData } from './vaga-card'
 import { separateVagas } from './vagas-utils'
 
-interface EmpregosPageClientProps {
-  vagas: VagaCardData[]
-  hasCandidaturas?: boolean
+async function fetchCandidaturas() {
+  const res = await fetch('/api/user/empregos/candidaturas', {
+    cache: 'no-store',
+  })
+  if (!res.ok) return { hasCandidaturas: false }
+  return res.json()
 }
 
-export function EmpregosPageClient({
-  vagas,
-  hasCandidaturas = false,
-}: EmpregosPageClientProps) {
+interface EmpregosPageClientProps {
+  vagas: VagaCardData[]
+}
+
+export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
   const { recentVagas, allVagas } = separateVagas(vagas)
+
+  const { data } = useQuery({
+    queryKey: ['candidaturas'],
+    queryFn: fetchCandidaturas,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const hasCandidaturas = data?.hasCandidaturas ?? false
 
   return (
     <>
