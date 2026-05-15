@@ -1,4 +1,4 @@
-import { FloatNavigation } from '@/app/components/float-navigation'
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function WalletLoading() {
@@ -21,7 +21,7 @@ export default function WalletLoading() {
             ))}
           </div>
         </section>
-        <FloatNavigation />
+        <FloatNavigationWrapper />
       </main>
     </>
   )

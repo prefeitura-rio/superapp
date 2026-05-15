@@ -1,4 +1,4 @@
-import { FloatNavigation } from '@/app/components/float-navigation'
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
@@ -38,7 +38,7 @@ export default async function Home() {
 
         {/* Carteira section - fetched client-side to avoid cache issues */}
         <WalletSectionClient />
-        <FloatNavigation />
+        <FloatNavigationWrapper />
       </main>
     </AuthStatusProvider>
   )

@@ -1,4 +1,4 @@
-import { FloatNavigation } from '@/app/components/float-navigation'
+import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ServicesLoading() {
@@ -83,7 +83,7 @@ export default function ServicesLoading() {
           ))}
         </div>
       </div>
-      <FloatNavigation />
+      <FloatNavigationWrapper />
     </main>
   )
 }

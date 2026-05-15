@@ -1,8 +1,20 @@
 import { server } from '@/test/mocks/server'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, test } from 'vitest'
 import { AuthHeaderProvider, useAuthHeader } from '../auth-header-provider'
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+  }
+}
 
 // Test component that consumes the context
 function TestConsumer() {
@@ -33,7 +45,8 @@ describe('AuthHeaderProvider', () => {
     render(
       <AuthHeaderProvider>
         <div>Child content</div>
-      </AuthHeaderProvider>
+      </AuthHeaderProvider>,
+      { wrapper: createWrapper() }
     )
 
     expect(screen.getByText('Child content')).toBeInTheDocument()
@@ -50,7 +63,8 @@ describe('AuthHeaderProvider', () => {
     render(
       <AuthHeaderProvider>
         <TestConsumer />
-      </AuthHeaderProvider>
+      </AuthHeaderProvider>,
+      { wrapper: createWrapper() }
     )
 
     expect(screen.getByText('Loading...')).toBeInTheDocument()
@@ -71,7 +85,8 @@ describe('AuthHeaderProvider', () => {
     render(
       <AuthHeaderProvider>
         <TestConsumer />
-      </AuthHeaderProvider>
+      </AuthHeaderProvider>,
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
@@ -95,7 +110,8 @@ describe('AuthHeaderProvider', () => {
     render(
       <AuthHeaderProvider>
         <TestConsumer />
-      </AuthHeaderProvider>
+      </AuthHeaderProvider>,
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
@@ -114,7 +130,8 @@ describe('AuthHeaderProvider', () => {
     render(
       <AuthHeaderProvider>
         <TestConsumer />
-      </AuthHeaderProvider>
+      </AuthHeaderProvider>,
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
