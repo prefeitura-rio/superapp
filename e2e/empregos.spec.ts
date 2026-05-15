@@ -455,7 +455,20 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     }
 
     await candidatarBtn.click()
-    await page.waitForURL('**/inscricao**', { timeout: 15000 })
+    await page.waitForURL(
+      url =>
+        url.pathname.includes('/inscricao') ||
+        url.pathname.includes('/minhas-candidaturas'),
+      { timeout: 15000 }
+    )
+
+    if (page.url().includes('/minhas-candidaturas')) {
+      test.skip(
+        true,
+        'Usuário já está inscrito nesta vaga; redirecionado para minhas-candidaturas'
+      )
+      return
+    }
 
     // A página exibe um dos 3 estados possíveis do carousel
     const bemVindo = page.getByText('Cadastro de oportunidades de Emprego', {
