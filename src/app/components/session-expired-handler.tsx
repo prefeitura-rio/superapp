@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
-import { ONBOARDING_SESSION_KEY } from './onboarding-wrapper-client'
 
 export function SessionExpiredHandler() {
   const pathname = usePathname()
@@ -13,7 +12,6 @@ export function SessionExpiredHandler() {
         try {
           // First logout from Keycloak
           await fetch('/api/auth/logout')
-          sessionStorage.removeItem(ONBOARDING_SESSION_KEY)
 
           // Then logout from gov.br via hidden iframe
           const redirectUri = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`

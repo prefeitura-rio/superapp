@@ -3,8 +3,6 @@
 import { LogoutIcon } from '@/assets/icons'
 import { useState } from 'react'
 import { MenuItem } from './menu-item'
-import { ONBOARDING_SESSION_KEY } from './onboarding-wrapper-client'
-
 export function LogoutButton() {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -18,7 +16,6 @@ export function LogoutButton() {
       const redirectUri = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
       // primeiro faz logout do keycloak
       await fetch('/api/auth/logout')
-      sessionStorage.removeItem(ONBOARDING_SESSION_KEY)
       // depois faz logout do gov.br via iframe oculto
       const govbrLogoutUrl = `${process.env.NEXT_PUBLIC_GOVBR_BASE_URL}logout?post_logout_redirect_uri=${encodeURIComponent(redirectUri)}`
       const iframe = document.createElement('iframe')
