@@ -268,7 +268,7 @@ function ExperienciaProfissionalAccordionContentInner({
                 placeholder="Atividades realizadas"
                 maxLength={300}
                 error={errors.empregos?.[index]?.descricaoAtividades?.message}
-                className="rounded-xl border-2 border-border min-h-24 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
+                className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
               />
               {errors.empregos?.[index]?.descricaoAtividades?.message && (
                 <p className="text-sm text-destructive mt-1">
@@ -486,7 +486,7 @@ function ExperienciaProfissionalAccordionContentInner({
                 placeholder="Escreva a descrição"
                 maxLength={300}
                 error={errors.conquistas?.[index]?.descricao?.message}
-                className="rounded-xl border-2 border-border min-h-24 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
+                className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
               />
               {errors.conquistas?.[index]?.descricao?.message && (
                 <p className="text-sm text-destructive mt-1">
