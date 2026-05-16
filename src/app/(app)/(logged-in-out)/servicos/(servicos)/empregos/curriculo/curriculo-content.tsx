@@ -68,12 +68,6 @@ import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 import { deepEqual } from './utils/deep-equal'
-import {
-  isFormacaoAcademicaComplete,
-  isFormacaoAcademicaEmpty,
-  isIdiomaComplete,
-  isIdiomaEmpty,
-} from './utils/item-validators'
 
 const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
@@ -220,7 +214,6 @@ interface FormacaoAccordionContentProps {
   cpf?: string
   onCancel: () => void
   onSaveSuccess: (data: CurriculoFormacaoFormValues) => void
-  snapshot: FormacaoSnapshot | null
 }
 
 const defaultExperienciaValues: CurriculoExperienciaFormValues = {
@@ -247,7 +240,6 @@ function FormacaoAccordionContent({
   cpf,
   onCancel,
   onSaveSuccess,
-  snapshot,
 }: FormacaoAccordionContentProps) {
   const queryClient = useQueryClient()
   const { watch, register, control, formState, trigger, getValues, setFocus } =
@@ -261,24 +253,7 @@ function FormacaoAccordionContent({
     name: 'formacaoAcademica',
   })
 
-  const { canSave } = useFormDirtyState({
-    currentValues: formValues,
-    snapshot,
-    getSnapshot: getFormacaoSnapshot,
-    hasRequiredFields: hasFormacaoRequiredFields,
-    arrayFields: [
-      {
-        fieldPath: 'idiomas',
-        isItemComplete: isIdiomaComplete,
-        isItemEmpty: isIdiomaEmpty,
-      },
-      {
-        fieldPath: 'formacaoAcademica',
-        isItemComplete: isFormacaoAcademicaComplete,
-        isItemEmpty: isFormacaoAcademicaEmpty,
-      },
-    ],
-  })
+  const canSave = hasFormacaoRequiredFields(formValues)
 
   const handleFormacaoSave = async () => {
     console.log('🚀 [handleFormacaoSave] INICIANDO SALVAMENTO')
@@ -370,134 +345,163 @@ function FormacaoAccordionContent({
 
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">Formação</p>
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            data-testid={`formacao-card-${index}`}
-            className="rounded-xl bg-card p-4 space-y-4 shadow-none"
-          >
-            <div
-              className="space-y-2"
-              data-testid={`field-tipo-formacao-${index}`}
-            >
-              <span
-                className={cn(
-                  'text-sm font-normal block',
-                  errors.formacaoAcademica?.[index]?.tipoFormacaoId
-                    ? 'text-destructive'
-                    : 'text-primary'
-                )}
-              >
-                Tipo de formação
-              </span>
-              <TipoFormacaoField
-                index={index}
-                error={
-                  errors.formacaoAcademica?.[index]?.tipoFormacaoId?.message
-                }
-              />
-              {!errors.formacaoAcademica?.[index]?.tipoFormacaoId && (
-                <p className={HINT_CLASS}>
-                  Escolha a opção que melhor descreve o tipo dessa formação
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <CustomInput
-                {...register(`formacaoAcademica.${index}.nomeCurso`)}
-                id={`formacao-academica-${index}-nome-curso`}
-                label="Nome do Curso"
-                placeholder="Preencha com o nome do curso"
-                maxLength={50}
-                error={errors.formacaoAcademica?.[index]?.nomeCurso?.message}
-                className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-              />
-              {!errors.formacaoAcademica?.[index]?.nomeCurso && (
-                <p className={HINT_CLASS}>
-                  Informe o nome do curso principal que você está cursando ou
-                  concluiu
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <CustomInput
-                {...register(`formacaoAcademica.${index}.nomeInstituicao`)}
-                id={`formacao-academica-${index}-nome-instituicao`}
-                label="Nome da Instituição"
-                placeholder="Preencha com o nome da instituição"
-                maxLength={50}
-                error={
-                  errors.formacaoAcademica?.[index]?.nomeInstituicao?.message
-                }
-                className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
-              />
-              {!errors.formacaoAcademica?.[index]?.nomeInstituicao && (
-                <p className={HINT_CLASS}>
-                  Escreva o nome da escola, faculdade ou curso onde você estudou
-                  ou está estudando
-                </p>
-              )}
-            </div>
-            <div
-              className="space-y-2"
-              data-testid={`field-status-formacao-${index}`}
-            >
-              <span
-                className={cn(
-                  'text-sm font-normal block',
-                  errors.formacaoAcademica?.[index]?.status
-                    ? 'text-destructive'
-                    : 'text-primary'
-                )}
-              >
-                Status
-              </span>
-              <StatusFormacaoField
-                index={index}
-                error={errors.formacaoAcademica?.[index]?.status?.message}
-              />
-              {!errors.formacaoAcademica?.[index]?.status && (
-                <p className={HINT_CLASS}>
-                  Escolha a opção que melhor descreve sua situação nesse curso
-                </p>
-              )}
-            </div>
+        {fields.map((field, index) => {
+          const hasTipoFormacao =
+            (formValues.formacaoAcademica?.[index]?.tipoFormacaoId?.trim()
+              ?.length ?? 0) > 0
+          const dependentFieldsDisabled = !hasTipoFormacao
 
-            <div className="space-y-2">
-              <span
+          return (
+            <div
+              key={field.id}
+              data-testid={`formacao-card-${index}`}
+              className="rounded-xl bg-card p-4 space-y-4 shadow-none"
+            >
+              <div
+                className="space-y-2"
+                data-testid={`field-tipo-formacao-${index}`}
+              >
+                <span
+                  className={cn(
+                    'text-sm font-normal block',
+                    errors.formacaoAcademica?.[index]?.tipoFormacaoId
+                      ? 'text-destructive'
+                      : 'text-primary'
+                  )}
+                >
+                  Tipo de formação
+                </span>
+                <TipoFormacaoField
+                  index={index}
+                  error={
+                    errors.formacaoAcademica?.[index]?.tipoFormacaoId?.message
+                  }
+                />
+                {!errors.formacaoAcademica?.[index]?.tipoFormacaoId && (
+                  <p className={HINT_CLASS}>
+                    Escolha a opção que melhor descreve o tipo dessa formação
+                  </p>
+                )}
+              </div>
+              <div
                 className={cn(
-                  'text-sm font-normal block',
-                  errors.formacaoAcademica?.[index]?.anoConclusao
-                    ? 'text-destructive'
-                    : 'text-primary'
+                  'space-y-2',
+                  dependentFieldsDisabled && 'opacity-50 pointer-events-none'
                 )}
               >
-                Ano de conclusão
-              </span>
-              <AnoConclusaoFormacaoField
-                index={index}
-                error={errors.formacaoAcademica?.[index]?.anoConclusao?.message}
-              />
-              {!errors.formacaoAcademica?.[index]?.anoConclusao && (
-                <p className={HINT_CLASS}>
-                  Informe qual o ano de conclusão do curso principal que você
-                  concluiu, caso já tenha finalizado
-                </p>
+                <CustomInput
+                  {...register(`formacaoAcademica.${index}.nomeCurso`)}
+                  id={`formacao-academica-${index}-nome-curso`}
+                  label="Nome do Curso"
+                  placeholder="Preencha com o nome do curso"
+                  maxLength={50}
+                  error={errors.formacaoAcademica?.[index]?.nomeCurso?.message}
+                  className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
+                />
+                {!errors.formacaoAcademica?.[index]?.nomeCurso && (
+                  <p className={HINT_CLASS}>
+                    Informe o nome do curso principal que você está cursando ou
+                    concluiu
+                  </p>
+                )}
+              </div>
+              <div
+                className={cn(
+                  'space-y-2',
+                  dependentFieldsDisabled && 'opacity-50 pointer-events-none'
+                )}
+              >
+                <CustomInput
+                  {...register(`formacaoAcademica.${index}.nomeInstituicao`)}
+                  id={`formacao-academica-${index}-nome-instituicao`}
+                  label="Nome da Instituição"
+                  placeholder="Preencha com o nome da instituição"
+                  maxLength={50}
+                  error={
+                    errors.formacaoAcademica?.[index]?.nomeInstituicao?.message
+                  }
+                  className="rounded-xl border-2 border-border h-16 bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! focus:bg-background"
+                />
+                {!errors.formacaoAcademica?.[index]?.nomeInstituicao && (
+                  <p className={HINT_CLASS}>
+                    Escreva o nome da escola, faculdade ou curso onde você
+                    estudou ou está estudando
+                  </p>
+                )}
+              </div>
+              <div
+                className={cn(
+                  'space-y-2',
+                  dependentFieldsDisabled && 'opacity-50 pointer-events-none'
+                )}
+                data-testid={`field-status-formacao-${index}`}
+              >
+                <span
+                  className={cn(
+                    'text-sm font-normal block',
+                    errors.formacaoAcademica?.[index]?.status
+                      ? 'text-destructive'
+                      : 'text-primary'
+                  )}
+                >
+                  Status
+                </span>
+                <StatusFormacaoField
+                  index={index}
+                  error={errors.formacaoAcademica?.[index]?.status?.message}
+                  disabled={dependentFieldsDisabled}
+                />
+                {!errors.formacaoAcademica?.[index]?.status && (
+                  <p className={HINT_CLASS}>
+                    Escolha a opção que melhor descreve sua situação nesse curso
+                  </p>
+                )}
+              </div>
+
+              <div
+                className={cn(
+                  'space-y-2',
+                  dependentFieldsDisabled && 'opacity-50 pointer-events-none'
+                )}
+              >
+                <span
+                  className={cn(
+                    'text-sm font-normal block',
+                    errors.formacaoAcademica?.[index]?.anoConclusao
+                      ? 'text-destructive'
+                      : 'text-primary'
+                  )}
+                >
+                  Ano de conclusão
+                </span>
+                <AnoConclusaoFormacaoField
+                  index={index}
+                  error={
+                    errors.formacaoAcademica?.[index]?.anoConclusao?.message
+                  }
+                  disabled={dependentFieldsDisabled}
+                />
+                {!errors.formacaoAcademica?.[index]?.anoConclusao && (
+                  <p className={HINT_CLASS}>
+                    Informe qual o ano de conclusão do curso principal que você
+                    concluiu, caso já tenha finalizado
+                  </p>
+                )}
+              </div>
+
+              {fields.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  className="flex hover:cursor-pointer items-center gap-2 text-primary text-sm mt-2"
+                >
+                  <Trash2 className="size-4" />
+                  Remover formação
+                </button>
               )}
             </div>
-
-            {fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => remove(index)}
-                className="flex hover:cursor-pointer items-center gap-2 text-primary text-sm mt-2"
-              >
-                <Trash2 className="size-4" />
-                Remover formação
-              </button>
-            )}
-          </div>
-        ))}
+          )
+        })}
 
         <CustomButton
           type="button"
@@ -505,13 +509,16 @@ function FormacaoAccordionContent({
           size="lg"
           className="w-full rounded-full bg-card text-primary"
           onClick={() =>
-            append({
-              tipoFormacaoId: '',
-              nomeInstituicao: '',
-              nomeCurso: '',
-              status: '',
-              anoConclusao: '',
-            })
+            append(
+              {
+                tipoFormacaoId: '',
+                nomeInstituicao: '',
+                nomeCurso: '',
+                status: '',
+                anoConclusao: '',
+              },
+              { shouldFocus: false }
+            )
           }
         >
           Adicionar outra formação
@@ -776,9 +783,11 @@ function TipoFormacaoField({
 function StatusFormacaoField({
   index,
   error,
+  disabled = false,
 }: {
   index: number
   error?: string
+  disabled?: boolean
 }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
   const value = watch(`formacaoAcademica.${index}.status`) ?? ''
@@ -813,8 +822,12 @@ function StatusFormacaoField({
               }
             />
           }
-          drawerContent={<StatusFormacaoDrawerContent fieldIndex={index} />}
-          drawerTitle="Status"
+          drawerContent={
+            disabled ? undefined : (
+              <StatusFormacaoDrawerContent fieldIndex={index} />
+            )
+          }
+          drawerTitle={disabled ? undefined : 'Status'}
         />
       )}
     />
@@ -824,9 +837,11 @@ function StatusFormacaoField({
 function AnoConclusaoFormacaoField({
   index,
   error,
+  disabled = false,
 }: {
   index: number
   error?: string
+  disabled?: boolean
 }) {
   const { watch, control } = useFormContext<CurriculoFormacaoFormValues>()
   const value = watch(`formacaoAcademica.${index}.anoConclusao`) ?? ''
@@ -861,8 +876,12 @@ function AnoConclusaoFormacaoField({
               }
             />
           }
-          drawerContent={<AnoConclusaoDrawerContent fieldIndex={index} />}
-          drawerTitle="Ano de conclusão"
+          drawerContent={
+            disabled ? undefined : (
+              <AnoConclusaoDrawerContent fieldIndex={index} />
+            )
+          }
+          drawerTitle={disabled ? undefined : 'Ano de conclusão'}
         />
       )}
     />
@@ -902,19 +921,17 @@ function getFormacaoApiPayload(
   })
 
   const formacoes = (values.formacaoAcademica ?? [])
-    .filter(
-      f =>
-        (f.tipoFormacaoId?.trim()?.length ?? 0) > 0 &&
-        (f.nomeCurso?.trim()?.length ?? 0) > 0 &&
-        (f.status?.trim()?.length ?? 0) > 0 &&
-        (f.anoConclusao?.trim()?.length ?? 0) > 0
-    )
+    .filter(f => (f.tipoFormacaoId?.trim()?.length ?? 0) > 0)
     .map(f => ({
       id_escolaridade: f.tipoFormacaoId!.trim(),
-      nome_curso: f.nomeCurso!.trim(),
+      nome_curso: f.nomeCurso?.trim() || undefined,
       nome_instituicao: f.nomeInstituicao?.trim() || undefined,
-      status: f.status!.trim() as 'Completo' | 'Em andamento' | 'Incompleto',
-      ano_conclusao: f.anoConclusao!.trim(),
+      status: (f.status?.trim() || undefined) as
+        | 'Completo'
+        | 'Em andamento'
+        | 'Incompleto'
+        | undefined,
+      ano_conclusao: f.anoConclusao?.trim() || undefined,
     }))
 
   const idiomasAntesDoFilter = values.idiomas ?? []
@@ -1722,7 +1739,6 @@ export function CurriculoContent({
                         cpf={cpf}
                         onCancel={handleFormacaoCancel}
                         onSaveSuccess={handleFormacaoSaveSuccess}
-                        snapshot={formacaoSnapshotRef.current}
                       />
                     </AccordionContent>
                   </AccordionItem>

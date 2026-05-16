@@ -34,17 +34,12 @@ export const isIdiomaEmpty = (item: IdiomaItem): boolean =>
 // ============================================================================
 
 /**
- * Checks if a formacao academica item has all required fields filled.
- * Required: tipoFormacaoId, nomeCurso, status, anoConclusao
- * Optional: nomeInstituicao
+ * Checks if a formacao academica item has the minimum required field filled.
+ * Only tipoFormacaoId is required; the remaining fields are optional.
  */
 export const isFormacaoAcademicaComplete = (
   item: FormacaoAcademicaItem
-): boolean =>
-  hasContent(item.tipoFormacaoId) &&
-  hasContent(item.nomeCurso) &&
-  hasContent(item.status) &&
-  hasContent(item.anoConclusao)
+): boolean => hasContent(item.tipoFormacaoId)
 
 /**
  * Checks if a formacao academica item is completely empty (no fields filled).
