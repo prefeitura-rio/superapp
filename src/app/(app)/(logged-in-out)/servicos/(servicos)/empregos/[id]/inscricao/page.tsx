@@ -66,7 +66,6 @@ export default async function InscricaoPage({
 }: PageProps) {
   const { id: vagaId } = await params
   const { step: stepParam } = await searchParams
-  const initialStep = Math.max(0, Number.parseInt(stepParam ?? '0', 10) || 0)
 
   const userAuthInfo = await getUserInfoFromToken()
 
@@ -157,6 +156,9 @@ export default async function InscricaoPage({
     !transformedUserInfo.escolaridade ||
     !transformedUserInfo.renda_familiar ||
     !transformedUserInfo.deficiencia
+
+  const requestedStep = Math.max(0, Number.parseInt(stepParam ?? '0', 10) || 0)
+  const initialStep = showBemVindo || needsConfirmar ? 0 : requestedStep
 
   const hasPerguntasAdicionais =
     (vagaResponse.data.informacoes_complementares?.length ?? 0) > 0
