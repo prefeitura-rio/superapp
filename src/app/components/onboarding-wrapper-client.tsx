@@ -1,7 +1,7 @@
 'use client'
 
 import { setFirstLoginFalse } from '@/actions/first-login'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Onboarding from './on-boarding'
 
 type UserInfo = { cpf: string; name: string }
@@ -13,20 +13,25 @@ async function fetchOnboardingStatus(): Promise<OnboardingStatusData> {
   return res.json()
 }
 
-async function completeOnboarding(cpf: string) {
-  return setFirstLoginFalse(cpf)
-}
-
 export function OnboardingWrapperClient({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const queryClient = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ['onboarding-status'],
     queryFn: fetchOnboardingStatus,
     staleTime: 5 * 60 * 1000,
   })
+
+  async function completeOnboarding(cpf: string) {
+    await setFirstLoginFalse(cpf)
+    queryClient.setQueryData<OnboardingStatusData>(['onboarding-status'], {
+      firstLogin: false,
+      userInfo: data?.userInfo ?? null,
+    })
+  }
 
   if (isLoading || !data?.firstLogin || !data?.userInfo) {
     return <>{children}</>
