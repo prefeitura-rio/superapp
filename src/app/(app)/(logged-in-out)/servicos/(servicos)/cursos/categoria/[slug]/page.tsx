@@ -110,7 +110,6 @@ export default async function CoursesCategoryPage({
                   enrollmentEndDate={
                     course.enrollment_end_date ?? course.data_limite_inscricoes
                   }
-                  neighborhood={(course as any).locations?.[0]?.neighborhood}
                   variant="horizontal"
                   className="py-3 first:pt-0 last:pb-0"
                 />

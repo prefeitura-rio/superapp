@@ -18,10 +18,11 @@ export function AccessibilityBadge({
     ? (accessibility.toUpperCase().trim() as AccessibilityTypes)
     : undefined
 
-  // Only show badge for ACESSIVEL or EXCLUSIVO
+  // Only show badge for ACESSIVEL, PREFERENCIAL or EXCLUSIVO
   if (
     !normalizedAccessibility ||
     (normalizedAccessibility !== 'ACESSIVEL' &&
+      normalizedAccessibility !== 'PREFERENCIAL' &&
       normalizedAccessibility !== 'EXCLUSIVO')
   ) {
     return null
@@ -129,7 +130,9 @@ export function AccessibilityPillBadge({
 
   if (
     !normalized ||
-    (normalized !== 'ACESSIVEL' && normalized !== 'EXCLUSIVO')
+    (normalized !== 'ACESSIVEL' &&
+      normalized !== 'PREFERENCIAL' &&
+      normalized !== 'EXCLUSIVO')
   ) {
     return null
   }

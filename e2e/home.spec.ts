@@ -11,7 +11,7 @@ import {
  * Ancoramos o conteúdo da home pela classe do `<main>` interno.
  */
 function homeMain(page: Page) {
-  return page.locator('main.max-w-4xl')
+  return page.locator('main.max-w-4xl').first()
 }
 
 test.describe('Home (público)', () => {

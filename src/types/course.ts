@@ -51,14 +51,20 @@ interface Location {
   updated_at: string
 }
 
-export type AccessibilityTypes = 'ACESSIVEL' | 'EXCLUSIVO' | 'NAO_ACESSIVEL'
+export type AccessibilityTypes =
+  | 'ACESSIVEL'
+  | 'PREFERENCIAL'
+  | 'EXCLUSIVO'
+  | 'NAO_ACESSIVEL'
 export const ACCESSIBILITY_OPTIONS: AccessibilityTypes[] = [
   'ACESSIVEL',
+  'PREFERENCIAL',
   'EXCLUSIVO',
   'NAO_ACESSIVEL',
 ] as const
 export const accessibilityLabel: Record<AccessibilityTypes, string> = {
   ACESSIVEL: 'Acessível PcD',
+  PREFERENCIAL: 'Preferencial PcD',
   EXCLUSIVO: 'Exclusivo PcD',
   NAO_ACESSIVEL: 'Não acessível PcD',
 }
