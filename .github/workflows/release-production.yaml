@@ -59,7 +59,7 @@ jobs:
             --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="false" \
-            --build-arg NEXT_PUBLIC_FEATURE_FLAG="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_FLAG="cursos,empregos" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.pref.rio/catalogo/" \
             --tag $IMAGE_NAME:$VERSION \
             --tag $IMAGE_NAME:$VERSION_NO_V \
