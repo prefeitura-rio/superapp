@@ -11,7 +11,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-1">
+      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 md:px-1">
         Todos os cursos
       </h3>
       {/* Abaixo de 896px: listagem horizontal */}
