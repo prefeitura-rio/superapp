@@ -6,6 +6,24 @@ import { server } from './mocks/server'
 // Setup test environment variables before anything else
 setupTestEnv()
 
+// jsdom doesn't implement window.matchMedia — polyfill it for components that
+// use prefers-color-scheme (e.g. ThemeAwareVideo). Guard against node env tests.
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 // Mock next/cache
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),

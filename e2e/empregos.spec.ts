@@ -1515,6 +1515,156 @@ test.describe('Empregos — menu (autenticado)', () => {
 })
 
 // ---------------------------------------------------------------------------
+// BUSCA DE EMPREGOS — PÚBLICO
+// ---------------------------------------------------------------------------
+
+test.describe('Empregos — busca (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('navegar para busca via ícone exibe input e seção "Mais recentes"', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/empregos')
+    await expect(page.locator('a[href="/busca?tipo=empregos"]')).toBeVisible({
+      timeout: 15000,
+    })
+
+    await page.locator('a[href="/busca?tipo=empregos"]').first().click()
+    await page.waitForURL('**/busca?tipo=empregos', { timeout: 15000 })
+
+    await expect(
+      page.getByRole('heading', { name: 'Mais recentes' })
+    ).toBeVisible({ timeout: 20000 })
+  })
+
+  test('exibe sugestões dinâmicas de vagas antes de pesquisar', async ({
+    page,
+  }) => {
+    await page.goto('/busca?tipo=empregos')
+
+    await expect(
+      page.getByRole('heading', { name: 'Mais recentes' })
+    ).toBeVisible({ timeout: 20000 })
+
+    // Deve haver pelo menos um item na lista de sugestões
+    const listItem = page.locator('ul li').first()
+    await expect(listItem).toBeVisible({ timeout: 15000 })
+  })
+
+  test('digitar 3+ caracteres exibe seção "Resultados da Pesquisa" ou mensagem vazia', async ({
+    page,
+  }) => {
+    await page.goto('/busca?tipo=empregos')
+
+    await expect(
+      page.getByRole('heading', { name: 'Mais recentes' })
+    ).toBeVisible({ timeout: 20000 })
+
+    const input = page.getByPlaceholder('Do que você precisa?')
+    await expect(input).toBeVisible()
+    await input.fill('dev')
+
+    // Aguarda resultados ou estado vazio
+    const resultados = page.getByRole('heading', {
+      name: 'Resultados da Pesquisa',
+    })
+    const semResultados = page.getByText(
+      'Ops... nenhum resultado encontrado para a sua busca',
+      { exact: false }
+    )
+    await expect(resultados.or(semResultados).first()).toBeVisible({
+      timeout: 20000,
+    })
+  })
+
+  test('resultados de empregos exibem badge "Emprego" quando há resultados', async ({
+    page,
+  }) => {
+    await page.goto('/busca?tipo=empregos')
+
+    await expect(
+      page.getByRole('heading', { name: 'Mais recentes' })
+    ).toBeVisible({ timeout: 20000 })
+
+    const input = page.getByPlaceholder('Do que você precisa?')
+    await input.fill('assistente')
+
+    const resultados = page.getByRole('heading', {
+      name: 'Resultados da Pesquisa',
+    })
+    const semResultados = page.getByText('Ops... nenhum resultado encontrado', {
+      exact: false,
+    })
+
+    await expect(resultados.or(semResultados).first()).toBeVisible({
+      timeout: 20000,
+    })
+
+    const hasResults = await resultados
+      .isVisible({ timeout: 3000 })
+      .catch(() => false)
+    if (hasResults) {
+      await expect(page.getByText('Emprego').first()).toBeVisible()
+    }
+  })
+
+  test('limpar busca via botão X retorna ao estado inicial', async ({
+    page,
+  }) => {
+    await page.goto('/busca?tipo=empregos')
+
+    await expect(
+      page.getByRole('heading', { name: 'Mais recentes' })
+    ).toBeVisible({ timeout: 20000 })
+
+    const input = page.getByPlaceholder('Do que você precisa?')
+    await input.fill('emprego')
+
+    // Aguarda estado de busca
+    await expect(
+      page
+        .getByRole('heading', { name: 'Resultados da Pesquisa' })
+        .or(page.getByText('nenhum resultado', { exact: false }))
+        .first()
+    ).toBeVisible({ timeout: 20000 })
+
+    // Clica no botão X para limpar
+    const clearBtn = page
+      .locator('button[aria-label*="lear"], button[aria-label*="limpar"]')
+      .first()
+    const hasClearBtn = await clearBtn
+      .isVisible({ timeout: 3000 })
+      .catch(() => false)
+
+    if (hasClearBtn) {
+      await clearBtn.click()
+      await expect(
+        page.getByRole('heading', { name: 'Mais recentes' })
+      ).toBeVisible({ timeout: 10000 })
+    }
+  })
+
+  test('busca via URL com parâmetro ?q= exibe resultados automaticamente', async ({
+    page,
+  }) => {
+    await page.goto('/busca?tipo=empregos&q=assistente')
+
+    const resultados = page.getByRole('heading', {
+      name: 'Resultados da Pesquisa',
+    })
+    const semResultados = page.getByText('Ops... nenhum resultado encontrado', {
+      exact: false,
+    })
+
+    await expect(resultados.or(semResultados).first()).toBeVisible({
+      timeout: 20000,
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
 // FAQ DE EMPREGOS — PÚBLICO
 // ---------------------------------------------------------------------------
 
