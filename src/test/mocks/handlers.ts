@@ -8,6 +8,15 @@ const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
 // Default success responses
 const DEFAULT_SUCCESS_RESPONSE = { message: 'Success' }
 
+const MOCK_CURRICULO_COMPLETO = {
+  formacoes: [],
+  experiencias: [],
+  idiomas: [],
+  conquistas: [],
+  cursos_complementares: [],
+  situacao_interesses: undefined,
+}
+
 export const handlers = [
   // RMI - Update phone
   http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/phone`, () => {
@@ -47,4 +56,14 @@ export const handlers = [
       )
     }
   ),
+
+  // Empregabilidade - Currículo por CPF
+  http.get(`${COURSES_BASE_URL}/api/v1/empregabilidade/curriculo/:cpf`, () => {
+    return HttpResponse.json(MOCK_CURRICULO_COMPLETO, { status: 200 })
+  }),
+
+  // Empregabilidade - Criar candidatura
+  http.post(`${COURSES_BASE_URL}/api/v1/empregabilidade/candidaturas`, () => {
+    return HttpResponse.json({ id: 'candidatura-123' }, { status: 201 })
+  }),
 ]
