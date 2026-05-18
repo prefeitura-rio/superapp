@@ -16,7 +16,7 @@ interface EmpregosHeaderProps {
 
 export function EmpregosHeader({ isLoggedIn }: EmpregosHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3">
+    <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3 min-h-13">
       <div className="mx-auto md:px-4 flex max-w-4xl items-center justify-between">
         <div className="flex justify-center">
           <Image

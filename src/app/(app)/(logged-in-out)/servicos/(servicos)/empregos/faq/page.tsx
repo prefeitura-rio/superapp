@@ -6,13 +6,13 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
     id: 'plataforma',
     title: 'O que é a Plataforma Oportunidades Cariocas? ',
     content:
-      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que reúne, em um só lugar, inscrições para cursos, oficinas e diversas atividades educativas do município e de instituições parceiras. Focado no seu desenvolvimento, o Oportunidades Cariocas também funciona como uma ponte para o mercado de trabalho, oferecendo vagas de emprego atualizadas e um ambiente exclusivo para Microempreendedores Individuais (MEIs) encontrarem novas oportunidades de serviços e impulsionarem seus negócios.',
+      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que reúne cursos, oficinas, palestras e diversas atividades educativas oferecidas pelo município e por instituições parceiras. Além de qualificação, a plataforma funciona como uma ponte direta com o mercado de trabalho, reunindo vagas atualizadas para ajudar o cidadão carioca a conquistar o emprego que deseja.',
   },
   {
     id: 'objetivo',
     title: 'Quem pode se candidatar às vagas de emprego?',
     content:
-      'Qualquer cidadão morador do Rio de Janeiro pode se candidatar, desde que possua uma conta ativa no Gov.br. \n\n No Oportunidades Cariocas, você pode consultar as vagas abertas, conferir se o seu perfil se encaixa nas exigências de cada empregador e enviar sua candidatura de forma rápida e gratuita.',
+      'Qualquer cidadão pode se candidatar, desde que possua uma conta ativa no Gov.br. \n\n No Oportunidades Cariocas, você pode consultar as vagas abertas, conferir se o seu perfil se encaixa nas exigências de cada empregador e enviar sua candidatura de forma rápida e gratuita.',
   },
   {
     id: 'conta-govbr',
@@ -30,43 +30,49 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
     id: 'esqueci-senha',
     title: 'Esqueci a senha da minha conta Gov.br. O que devo fazer?',
     content:
-      'Você pode recuperar sua senha diretamente no site ou aplicativo do Gov.br. Basta seguir o processo de "Esqueci minha senha" e usar o método de recuperação que preferir (e-mail, celular ou reconhecimento facial, dependendo do nível da sua conta). \n\n Ficou com dúvida? Assista o vídeo “Como recuperar a senha de sua conta GOV.BR? [OFICIAL]” através do link https://www.youtube.com/watch?v=H5LC7saob7M&t=1s',
+      'Você pode recuperar sua senha diretamente no site ou aplicativo do Gov.br. Basta seguir o processo de “Esqueci minha senha” e usar o método de recuperação que preferir (e-mail, celular ou reconhecimento facial, dependendo do nível da sua conta). \n\n Ficou com dúvida? Assista o vídeo “Como recuperar a senha de sua conta GOV.BR? [OFICIAL]” através do link https://www.youtube.com/watch?v=H5LC7saob7M&t=1s',
   },
   {
     id: 'candidatura',
     title: 'Como realizar a candidatura em uma vaga de emprego?',
     content:
-      'Escolha a vaga de seu interesse e, após conferir os requisitos, clique em “Fazer login para se candidatar” (ou diretamente em “Candidatar-se à vaga”, caso já esteja logado). \n\n Na sequência, preencha os campos para criar seu currículo. Suas informações ficarão salvas na plataforma, o que agiliza sua inscrição em outras vagas de interesse e permite que você atualize seus dados sempre que quiser. \n\n Para finalizar, clique em “Continuar” e conclua sua candidatura. Depois disso, basta acompanhar o status do processo seletivo aqui na plataforma. Fique de olho também no seu e-mail, pois enviaremos atualizações por lá sempre que houver novidades.',
+      'Escolha a vaga de seu interesse e, após conferir os requisitos, clique em “Fazer login para se candidatar” (ou diretamente em “Candidatar-se à vaga”, caso já esteja logado). \n\n Na sequência, preencha os campos para criar seu currículo. Suas informações ficarão salvas na plataforma, o que agiliza sua inscrição em outras vagas de interesse e permite que você atualize seus dados sempre que quiser. \n\n Para finalizar, clique em “Continuar” e conclua sua candidatura.',
+  },
+  {
+    id: 'apos-candidatura',
+    title: 'Você se candidatou à vaga. E agora?',
+    content:
+      'Após a candidatura, seu perfil passará por uma análise de compatibilidade com os requisitos definidos pela empresa para a vaga. \n\n Caso seja identificado alinhamento entre seu perfil e a oportunidade, você poderá ser encaminhado para as próximas etapas do processo seletivo junto à empresa. \n\n É importante destacar que a decisão final de contratação é de responsabilidade exclusiva da empresa, que adotará seus próprios critérios de avaliação.',
   },
   {
     id: 'mais-de-uma-vaga',
     title: 'Posso me inscrever em mais de uma vaga de emprego?',
     content:
-      'Sim, você pode se inscrever em mais de uma vaga de emprego ao mesmo tempo.',
+      'Sim, você pode se inscrever em mais de uma vaga de emprego ao mesmo tempo. \n\n **Atenção: Confira os requisitos da vaga.** Antes de enviar a candidatura, leia atentamente a descrição da vaga. Certifique-se de que as exigências solicitadas pela empresa contratante realmente combinam com o seu perfil profissional.',
   },
   {
     id: 'acompanhar-candidatura',
     title: 'Como posso acompanhar a minha candidatura na vaga?',
     content:
-      'Assim que você finalizar sua inscrição, enviaremos uma confirmação para o seu e-mail cadastrado. Através desse mesmo e-mail, você também receberá avisos sobre os resultados e as atualizações de cada etapa do processo seletivo. \n\n Se preferir, você pode acompanhar o status da sua candidatura a qualquer momento pelo Oportunidades Cariocas. Basta fazer login e acessar a aba "Minhas candidaturas", no canto superior direito. Lá, você encontrará o histórico completo de todas as suas inscrições e o progresso de cada uma delas.',
+      'Assim que você finalizar sua inscrição, enviaremos uma confirmação para o seu e-mail cadastrado. Através desse mesmo e-mail, você também receberá avisos sobre os resultados e as atualizações de cada etapa do processo seletivo. \n\n Se preferir, você pode acompanhar o status da sua candidatura a qualquer momento pelo Oportunidades Cariocas. Basta fazer login e acessar a aba “Minhas candidaturas”, no canto superior direito da tela. Lá, você encontrará o histórico completo de todas as suas inscrições e o progresso de cada uma delas.',
   },
   {
     id: 'candidatura-aprovada',
     title: 'O que fazer quando minha candidatura for aprovada?',
     content:
-      'Enviaremos um e-mail informando o resultado da sua candidatura. Caso você seja selecionado, a empresa ou o órgão parceiro também entrará em contato por telefone ou e-mail. Por isso, é muito importante manter seus dados sempre atualizados para não perder nenhuma oportunidade.',
+      'Enviaremos um e-mail informando o resultado da sua candidatura. Vale ressaltar que a seleção final e a contratação são de responsabilidade da empresa contratante. Caso você seja escolhido, eles entrarão em contato diretamente por telefone ou e-mail. Por isso, mantenha seus dados sempre atualizados.',
   },
   {
     id: 'candidatura-status',
     title: 'O que significa os status que aparecem nas minhas candidaturas?',
     content:
-      '**Candidatura “Em análise”**:  Indica que a candidatura foi recebida e que você está participando do processo seletivo. A empresa ou o órgão parceiro está avaliando os perfis, o que pode incluir a triagem de currículos ou a realização de etapas como entrevistas e dinâmicas. \n\n **Candidatura “Aprovado”**: Indica que você foi selecionado para a vaga . Agora, é só ficar de olho no seu telefone ou e-mail e aguardar o contato da empresa para os próximos passos. \n\n **Candidatura “Não selecionado”**:  Indica que o processo avançou com outros perfis que atendiam mais especificamente aos critérios da vaga no momento. Seu currículo permanece no sistema para futuras oportunidades que combinem com suas experiências. \n\n **Candidatura “Vaga descontinuada”**: Indica que a empresa optou por cancelar a oferta da vaga ou suspender o processo seletivo.',
+      '**Candidatura “Em análise”**:  Indica que a candidatura foi enviada e que você está participando do processo seletivo, o que pode incluir a triagem de currículos ou a realização de etapas como entrevistas e dinâmicas. \n\n **Candidatura “Aprovado”**: Indica que você foi selecionado para a vaga . Agora, é só ficar de olho no seu telefone ou e-mail e aguardar o contato da empresa para os próximos passos. \n\n **Candidatura “Não selecionado”**:  Indica que o processo avançou com outros perfis que atendiam mais especificamente aos critérios da vaga no momento. Seu currículo permanece no sistema para futuras oportunidades que combinem com suas experiências. \n\n **Candidatura “Vaga descontinuada”**: Indica que a empresa optou por cancelar a oferta da vaga ou suspender o processo seletivo.',
   },
   {
     id: 'alteracoes-curriculo',
     title: 'Como incluir ou alterar informações do meu currículo?',
     content:
-      'Faça login e clique na aba "Meu currículo", no canto superior direito da tela. Lá, você pode atualizar suas informações ou incluir novas experiências profissionais sempre que precisar.',
+      'Faça login e clique na aba “Meu currículo”, no canto superior direito da tela. Lá, você pode atualizar suas informações ou incluir novas experiências profissionais sempre que precisar.',
   },
 ]
 
