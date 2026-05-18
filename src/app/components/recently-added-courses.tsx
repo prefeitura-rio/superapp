@@ -42,7 +42,6 @@ export default function RecentlyAddedCourses({
                 enrollmentEndDate={
                   course.enrollment_end_date ?? course.data_limite_inscricoes
                 }
-                neighborhood={(course as any).locations?.[0]?.neighborhood}
               />
             </div>
           ))}
