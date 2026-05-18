@@ -269,7 +269,9 @@ Todos os testes requerem `E2E_ACCESS_TOKEN`. Fazem chamadas reais às APIs de ho
 
 ### `e2e/empregos.spec.ts`
 
-Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacionadas). Contém ~60 testes organizados em 10 grupos.
+Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacionadas). Contém **69 testes** organizados em **11 grupos**.
+
+> Documentação detalhada de todos os cenários, tabela de regressão e instruções de cobertura: [`docs/testes-empregabilidade.md`](./testes-empregabilidade.md).
 
 > **Helper local:** `clickActionDrawer(page, labelText)` — mesma lógica do `meu-perfil.spec.ts`, navega até a área clicável de um `ActionDiv` pelo texto do label.
 >
@@ -339,6 +341,14 @@ Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacio
 - Heading "Menu" com 3 itens: "Minhas candidaturas" → `/minhas-candidaturas`, "Meu currículo" → `/curriculo`, "FAQ" → `/servicos/empregos/faq`
 - Cada link é testado com clique + `waitForURL` + verificação do heading da página de destino
 
+**Busca de empregos — público** (`Empregos — busca (público)`)
+
+- Navega para `/busca?tipo=empregos` via ícone de busca; verifica input e seção "Mais recentes" com sugestões dinâmicas de vagas
+- Digitar 3+ caracteres exibe "Resultados da Pesquisa" ou mensagem de vazio
+- Resultados de vagas exibem badge "Emprego"
+- Botão X limpa a busca e retorna ao estado inicial
+- URL com `?q=` dispara busca automaticamente ao carregar
+
 **FAQ de empregos — público** (`Empregos — FAQ (público)`)
 
 - Heading "FAQ" e perguntas específicas de empregos: "O que é a Plataforma Oportunidades Cariocas?", candidatura, conta Gov.br, acompanhamento e status de candidaturas
@@ -402,7 +412,7 @@ Dispara em `push` e `pull_request` para o branch `**staging`**.
 ## Próximos passos
 
 - Adicionar cobertura para:
-  - busca
+  - ~~busca~~ ✅ coberto em `empregos.spec.ts` (grupo "busca (público)")
   - cursos
   - mei
   - ~~empregabilidade~~ ✅ coberto em `empregos.spec.ts`
