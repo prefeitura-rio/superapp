@@ -8,7 +8,6 @@ import Link from 'next/link'
 import {
   AccessibilityPillBadge,
   ModalityBadge,
-  NeighborhoodBadge,
   ScholarshipBadge,
   WorkloadBadge,
 } from './badges'
@@ -53,7 +52,6 @@ interface CourseCardProps {
   badgesOutside?: boolean
   enrollmentEndDate?: string
   hasBolsa?: boolean
-  neighborhood?: string
 }
 
 export function CourseCard({
@@ -71,7 +69,6 @@ export function CourseCard({
   variant = 'vertical',
   enrollmentEndDate,
   hasBolsa = false,
-  neighborhood,
 }: CourseCardProps) {
   const enrollmentText = getEnrollmentText(enrollmentEndDate)
   const isEnrollmentClosed = enrollmentText === 'Inscrições encerradas'
@@ -100,7 +97,7 @@ export function CourseCard({
             />
           )}
 
-          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-[#E2E8F0]">
+          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0]">
             {institutionaLogo ? (
               <div className="relative w-full h-full">
                 <Image
@@ -131,7 +128,6 @@ export function CourseCard({
           <div className="flex flex-wrap gap-1">
             <ModalityBadge modality={modality} />
             <WorkloadBadge workload={workload} />
-            <NeighborhoodBadge neighborhood={neighborhood} />
             {hasBolsa && <ScholarshipBadge />}
             <AccessibilityPillBadge accessibility={accessibility} />
           </div>
@@ -160,7 +156,7 @@ export function CourseCard({
           />
         )}
 
-        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-[#E2E8F0]">
+        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0]">
           {institutionaLogo ? (
             <div className="relative w-full h-full">
               <Image
@@ -195,10 +191,6 @@ export function CourseCard({
           />
           <WorkloadBadge
             workload={workload}
-            className={`bg-secondary ${badgeHoverClasses}`}
-          />
-          <NeighborhoodBadge
-            neighborhood={neighborhood}
             className={`bg-secondary ${badgeHoverClasses}`}
           />
           {hasBolsa && (
