@@ -30,6 +30,16 @@ export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
 
   const hasCandidaturas = data?.hasCandidaturas ?? false
 
+  if (vagas.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full px-4 pt-24">
+        <p className="text-lg text-muted-foreground text-center">
+          Nenhuma vaga de emprego encontrada
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       {hasCandidaturas && (
