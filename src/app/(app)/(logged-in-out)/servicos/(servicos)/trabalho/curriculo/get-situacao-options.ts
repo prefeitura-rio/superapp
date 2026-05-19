@@ -43,7 +43,9 @@ export async function getSituacaoOptions(): Promise<SituacaoOptions> {
         : [],
     regimesContratacao:
       regimesRes.status === 200 && regimesRes.data
-        ? parseListResponse(regimesRes.data)
+        ? parseListResponse(regimesRes.data).filter(
+            item => item.descricao.toLowerCase() !== 'pj'
+          )
         : [],
   }
 }
