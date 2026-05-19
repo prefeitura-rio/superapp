@@ -35,11 +35,14 @@ export const ANO_CONCLUSAO_OPCOES = Array.from(
   (_, i) => String(START_YEAR + i)
 ).reverse() // 2026 primeiro
 
-/** Anos de conclusão 2015 a 2025 para formação acadêmica no currículo */
+const FORMACAO_START_YEAR = 1970
+const FORMACAO_END_YEAR = 2026
+
+/** Anos de conclusão 1970 a 2026 para formação acadêmica no currículo */
 export const ANO_CONCLUSAO_FORMACAO_OPCOES = Array.from(
-  { length: 2025 - START_YEAR + 1 },
-  (_, i) => String(2025 - i)
-) // 2025 primeiro
+  { length: FORMACAO_END_YEAR - FORMACAO_START_YEAR + 1 },
+  (_, i) => String(FORMACAO_END_YEAR - i)
+) // 2026 primeiro
 
 export const IDIOMAS_OPCOES = [
   'Português',
