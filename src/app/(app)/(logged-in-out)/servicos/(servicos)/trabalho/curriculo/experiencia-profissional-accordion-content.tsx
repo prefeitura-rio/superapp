@@ -79,7 +79,7 @@ function getFirstErrorField(errors: Record<string, unknown>): string | null {
   return null
 }
 
-/** True if at least one complete emprego OR one complete conquista exists. */
+/** True if at least one complete emprego exists, OR the accordion is completely empty. */
 function hasExperienciaRequiredFieldsFilled(
   values: CurriculoExperienciaFormValues
 ): boolean {
@@ -93,13 +93,26 @@ function hasExperienciaRequiredFieldsFilled(
       (e.experienciaComprovadaCarteira === 'Sim' ||
         e.experienciaComprovadaCarteira === 'Não')
   )
-  const hasValidConquista = values.conquistas.some(
+
+  if (hasValidEmprego) return true
+
+  const hasAnyEmprego = values.empregos.some(
+    e =>
+      (e.cargo?.trim()?.length ?? 0) > 0 ||
+      (e.empresa?.trim()?.length ?? 0) > 0 ||
+      (e.descricaoAtividades?.trim()?.length ?? 0) > 0 ||
+      (e.tempoExperienciaAnos != null && e.tempoExperienciaAnos > 0) ||
+      (e.tempoExperienciaMeses != null && e.tempoExperienciaMeses > 0) ||
+      (e.experienciaComprovadaCarteira?.length ?? 0) > 0
+  )
+  const hasAnyConquista = values.conquistas.some(
     c =>
-      (c.idTipoConquista?.trim()?.length ?? 0) > 0 &&
-      (c.titulo?.trim()?.length ?? 0) > 0 &&
+      (c.idTipoConquista?.trim()?.length ?? 0) > 0 ||
+      (c.titulo?.trim()?.length ?? 0) > 0 ||
       (c.descricao?.trim()?.length ?? 0) > 0
   )
-  return hasValidEmprego || hasValidConquista
+
+  return !hasAnyEmprego && !hasAnyConquista
 }
 
 interface ExperienciaProfissionalAccordionContentProps {
@@ -203,6 +216,7 @@ function ExperienciaProfissionalAccordionContentInner({
                 {...register(`empregos.${index}.cargo`)}
                 id={`emprego-${index}-cargo`}
                 label="Cargo"
+                isRequired
                 placeholder="Nome do cargo"
                 maxLength={50}
                 error={errors.empregos?.[index]?.cargo?.message}
