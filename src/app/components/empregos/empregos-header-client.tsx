@@ -56,7 +56,7 @@ export function EmpregosHeaderClient() {
             <HeaderIconSkeleton />
           ) : data.isLoggedIn ? (
             <Link
-              href="/servicos/empregos/menu"
+              href="/servicos/trabalho/menu"
               className="rounded-full bg-transparent p-4"
             >
               <MenuIcon className="h-5 w-5 text-foreground" />
@@ -64,7 +64,7 @@ export function EmpregosHeaderClient() {
             </Link>
           ) : (
             <Link
-              href="/servicos/empregos/faq"
+              href="/servicos/trabalho/faq"
               className="rounded-full bg-transparent p-4"
             >
               <HelpCircleIcon className="h-5 w-5 text-foreground" />

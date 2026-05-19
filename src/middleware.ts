@@ -114,11 +114,11 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Block access to "empregos" and "empresas" routes when Empregos is not enabled
+      // Block access to "trabalho" and "empresas" routes when Empregos is not enabled
       if (_isProduction && !_featureFlag.split(',').includes('empregos')) {
         const pathSegments = path.split('/').filter(Boolean)
         const hasEmpregosSegment = pathSegments.some(
-          segment => segment === 'empregos' || segment === 'empresas'
+          segment => segment === 'trabalho' || segment === 'empresas'
         )
 
         if (hasEmpregosSegment) {

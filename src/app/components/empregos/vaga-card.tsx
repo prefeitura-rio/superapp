@@ -97,7 +97,7 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
 
   return (
     <Link
-      href={`/servicos/empregos/${vaga.id}`}
+      href={`/servicos/trabalho/${vaga.id}`}
       className={cn(
         'flex flex-col justify-between p-4 rounded-3xl transition-opacity hover:opacity-90 overflow-hidden min-h-0',
         isRecent && 'bg-[#3E5782] text-background shrink-0',

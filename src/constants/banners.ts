@@ -28,7 +28,7 @@ export const suggestedBanners: BannerProps[] = [
     component: EmpregabilidadeBanner,
     title: 'Encontre seu emprego',
     subtitle: 'no Oportunidades Cariocas',
-    route: '/servicos/empregos/',
+    route: '/servicos/trabalho/',
   },
   {
     id: 'cursos',

@@ -102,7 +102,7 @@ export function handleSearchItemClick(
     router.push(`/servicos/cursos/${item.id}`)
   } else if (item.tipo === 'job' && item.id) {
     // Navigate to job detail page
-    router.push(`/servicos/empregos/${item.id}`)
+    router.push(`/servicos/trabalho/${item.id}`)
   } else if (item.tipo === 'servico' && item.category && item.slug) {
     // Normalize category name to slug format
     const categorySlug = normalizeCategorySlug(item.category)
@@ -154,7 +154,7 @@ export function handleCatalogItemClick(
 
   if (item.type === 'job') {
     const jobId = (metadata?.id as string | undefined) ?? item.id
-    router.push(`/servicos/empregos/${jobId}`)
+    router.push(`/servicos/trabalho/${jobId}`)
     return
   }
 
