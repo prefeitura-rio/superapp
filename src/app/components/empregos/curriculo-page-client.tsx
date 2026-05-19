@@ -1,6 +1,6 @@
 'use client'
 
-import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/curriculo/curriculo-content'
+import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery } from '@tanstack/react-query'
@@ -35,7 +35,7 @@ function CurriculoSkeleton() {
         <SecondaryHeader
           fixed={false}
           className="max-w-4xl mx-auto"
-          route="/servicos/empregos"
+          route="/servicos/trabalho"
         />
       </div>
       <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">

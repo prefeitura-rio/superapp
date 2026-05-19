@@ -7,7 +7,7 @@ export default async function CurriculoPage() {
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
-    return redirect(buildAuthUrl('/servicos/empregos/curriculo'))
+    return redirect(buildAuthUrl('/servicos/trabalho/curriculo'))
   }
 
   return <CurriculoPageClient cpf={userAuthInfo.cpf} />

@@ -228,7 +228,7 @@ export function PerguntasAdicionaisContent({
           className="max-w-4xl mx-auto"
           route={
             backRoute ??
-            `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+            `/servicos/trabalho/${vagaId}/inscricao/confirmar-informacoes`
           }
         />
       </div>
@@ -422,7 +422,7 @@ export function PerguntasAdicionaisContent({
                 '../../revalidate-empregos-action'
               )
               await revalidateEmpregosPage()
-              router.push('/servicos/empregos')
+              router.push('/servicos/trabalho')
             }
           }
         }}

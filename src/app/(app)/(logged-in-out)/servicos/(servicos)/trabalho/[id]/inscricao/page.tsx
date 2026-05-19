@@ -70,7 +70,7 @@ export default async function InscricaoPage({
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
-    redirect(buildAuthUrl(`/servicos/empregos/${vagaId}/inscricao`))
+    redirect(buildAuthUrl(`/servicos/trabalho/${vagaId}/inscricao`))
   }
 
   // Verifica se o usuário já está inscrito nesta vaga
@@ -89,7 +89,7 @@ export default async function InscricaoPage({
     }
     const candidaturas = Array.isArray(body.data) ? body.data : []
     if (candidaturas.length > 0) {
-      redirect('/servicos/empregos/minhas-candidaturas')
+      redirect('/servicos/trabalho/minhas-candidaturas')
     }
   }
 

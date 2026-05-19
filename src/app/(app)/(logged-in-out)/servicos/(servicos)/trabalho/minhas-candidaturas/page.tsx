@@ -7,7 +7,7 @@ export default async function MinhasCandidaturasPage() {
   const userAuthInfo = await getUserInfoFromToken()
 
   if (!userAuthInfo.cpf) {
-    return redirect(buildAuthUrl('/servicos/empregos/minhas-candidaturas'))
+    return redirect(buildAuthUrl('/servicos/trabalho/minhas-candidaturas'))
   }
 
   return <MinhasCandidaturasPageClient />

@@ -59,7 +59,7 @@ export function TermosUsoAccordionContent({
       <p className="text-primary text-sm font-normal leading-5">
         Ao preencher e enviar este formulário, você declara que leu e concorda
         com nossos{' '}
-        <Link href="/servicos/empregos/termos-de-uso" className="underline">
+        <Link href="/servicos/trabalho/termos-de-uso" className="underline">
           Termos de Uso e nosso Aviso de Privacidade
         </Link>
         . Seus dados serão compartilhados com a instituição responsável por esta

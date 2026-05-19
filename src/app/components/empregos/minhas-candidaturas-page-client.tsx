@@ -1,7 +1,7 @@
 'use client'
 
-import { MinhasCandidaturasContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/minhas-candidaturas/minhas-candidaturas-content'
-import type { CandidaturaCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/minhas-candidaturas/minhas-candidaturas-utils'
+import { MinhasCandidaturasContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-content'
+import type { CandidaturaCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-utils'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery } from '@tanstack/react-query'

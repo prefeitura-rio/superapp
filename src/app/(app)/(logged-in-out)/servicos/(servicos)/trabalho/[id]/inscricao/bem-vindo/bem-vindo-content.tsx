@@ -33,20 +33,20 @@ export function BemVindoContent({
           onContinuarSuccess()
         } else {
           router.push(
-            `/servicos/empregos/${vagaId}/inscricao/confirmar-informacoes`
+            `/servicos/trabalho/${vagaId}/inscricao/confirmar-informacoes`
           )
         }
       } else {
         // Falha: mostra toast e redireciona para lista de empregos
         toast.error(result.error || 'Algo deu errado. Tente novamente.')
-        router.push('/servicos/empregos')
+        router.push('/servicos/trabalho')
       }
     } catch (error) {
       console.error('Erro ao continuar:', error)
       toast.error('Algo deu errado. Tente novamente.')
 
       setTimeout(() => {
-        router.push('/servicos/empregos')
+        router.push('/servicos/trabalho')
       }, 2000)
     } finally {
       setIsLoading(false)
@@ -59,7 +59,7 @@ export function BemVindoContent({
         <SecondaryHeader
           fixed={false}
           className="max-w-4xl mx-auto"
-          route={`/servicos/empregos/${vagaId}`}
+          route={`/servicos/trabalho/${vagaId}`}
         />
       </div>
       {/* Espaçamento entre header fixo e conteúdo */}

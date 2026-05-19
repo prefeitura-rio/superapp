@@ -92,8 +92,8 @@ export function InscricaoFlowCarousel({
   const confirmarStepIndex = steps.indexOf('confirmar-informacoes')
   const returnUrlConfirmar =
     confirmarStepIndex >= 0
-      ? `/servicos/empregos/${vagaId}/inscricao?step=${confirmarStepIndex}`
-      : `/servicos/empregos/${vagaId}/inscricao`
+      ? `/servicos/trabalho/${vagaId}/inscricao?step=${confirmarStepIndex}`
+      : `/servicos/trabalho/${vagaId}/inscricao`
 
   const handleBemVindoSuccess = useCallback(() => goToNext(), [goToNext])
   const handleConfirmarContinuar = useCallback(() => goToNext(), [goToNext])
@@ -101,12 +101,12 @@ export function InscricaoFlowCarousel({
 
   const handleCurriculoSuccessClose = useCallback(async () => {
     await revalidateEmpregosPage()
-    router.push('/servicos/empregos')
+    router.push('/servicos/trabalho')
   }, [router])
 
   const handlePerguntasSuccessClose = useCallback(async () => {
     await revalidateEmpregosPage()
-    router.push('/servicos/empregos')
+    router.push('/servicos/trabalho')
   }, [router])
 
   return (
@@ -147,7 +147,7 @@ export function InscricaoFlowCarousel({
           <CurriculoSlide
             cpf={userAuthInfo.cpf}
             inscricaoVagaId={vagaId}
-            backRoute={`/servicos/empregos/${vagaId}`}
+            backRoute={`/servicos/trabalho/${vagaId}`}
             hasPerguntasAdicionais={hasPerguntasAdicionais}
             onContinuarToNext={handleCurriculoToNext}
             onSuccessClose={handleCurriculoSuccessClose}
@@ -160,7 +160,7 @@ export function InscricaoFlowCarousel({
               vagaId={vagaId}
               informacoesComplementares={informacoesComplementares}
               onSuccessClose={handlePerguntasSuccessClose}
-              backRoute={`/servicos/empregos/${vagaId}`}
+              backRoute={`/servicos/trabalho/${vagaId}`}
               onEnviarCandidatura={onEnviarCandidatura}
             />
           </SwiperSlide>
