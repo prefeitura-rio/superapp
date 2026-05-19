@@ -139,6 +139,17 @@ jobs:
           echo "Waiting for ArgoCD to sync and create blue-green preview..."
           echo "Expected image: $IMAGE_NAME:$COMMIT_HASH@$DIGEST"
 
+          # Verificar se ArgoCD não está em ComparisonError antes de aguardar
+          ARGOCD_CONDITIONS=$(kubectl get application app -n argocd -o jsonpath='{.status.conditions[*].type}' 2>/dev/null || echo "")
+          if [[ "$ARGOCD_CONDITIONS" == *"ComparisonError"* ]]; then
+            echo "❌ ArgoCD está em ComparisonError — verifique se o targetRevision da Application aponta para uma branch existente"
+            kubectl get application app -n argocd -o jsonpath='{.status.conditions}' | python3 -m json.tool || true
+            echo ""
+            echo "targetRevision atual:"
+            kubectl get application app -n argocd -o jsonpath='{.spec.source.targetRevision}'
+            exit 1
+          fi
+
           for i in {1..60}; do
             CURRENT_IMAGE=$(kubectl get rollout app -n app -o jsonpath='{.spec.template.spec.containers[0].image}')
             SYNC_STATUS=$(kubectl get application app -n argocd -o jsonpath='{.status.sync.status}')
@@ -228,7 +239,7 @@ jobs:
             echo "- Blue-green rollout complete" >> $GITHUB_STEP_SUMMARY
           else
             echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
-            echo "- E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "- Timeout ou falha no rollout (testes E2E desabilitados)" >> $GITHUB_STEP_SUMMARY
             echo "- Rollout aborted" >> $GITHUB_STEP_SUMMARY
             echo "- Active service unchanged" >> $GITHUB_STEP_SUMMARY
           fi
