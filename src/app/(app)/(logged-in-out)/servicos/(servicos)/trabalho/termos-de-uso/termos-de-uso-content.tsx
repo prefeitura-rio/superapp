@@ -19,7 +19,7 @@ export function TermosDeUsoContent() {
       <SecondaryHeader
         fixed={false}
         title="Termos de Uso"
-        route="/servicos/empregos/menu"
+        route="/servicos/trabalho/menu"
       />
 
       <div className="px-4 pt-6">
@@ -750,7 +750,7 @@ export function TermosDeUsoContent() {
 
         <div className="flex justify-center pb-6">
           <Link
-            href="/servicos/empregos/curriculo"
+            href="/servicos/trabalho/curriculo"
             className="flex w-[328px] items-center justify-center gap-(--button-large-spacing,12px) rounded-(--button-small-radius-pill,999px) bg-(--theme-color-primary,#13335A) px-(--button-large-h-padding,24px) py-(--button-large-v-padding,16px) text-white hover:bg-(--theme-color-primary-focused,#2A476A) transition-colors"
           >
             Voltar para a tela anterior

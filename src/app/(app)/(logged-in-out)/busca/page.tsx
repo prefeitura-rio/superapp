@@ -173,7 +173,7 @@ export default function Search() {
 
   const CONTEXT_BACK_ROUTE: Record<CatalogSearchContext, string> = {
     servicos: '/servicos',
-    empregos: '/servicos/empregos',
+    empregos: '/servicos/trabalho',
     cursos: '/servicos/cursos',
     mei: '/servicos/mei',
   }

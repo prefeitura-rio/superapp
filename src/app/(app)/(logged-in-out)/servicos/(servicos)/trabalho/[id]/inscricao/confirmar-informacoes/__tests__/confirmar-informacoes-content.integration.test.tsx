@@ -206,7 +206,7 @@ describe('ConfirmarInformacoesContent', () => {
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
       expect(mockPush).toHaveBeenCalledWith(
-        '/servicos/empregos/vaga-456/inscricao/curriculo'
+        '/servicos/trabalho/vaga-456/inscricao/curriculo'
       )
     })
   })

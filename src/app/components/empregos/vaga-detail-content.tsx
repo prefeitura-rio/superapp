@@ -119,7 +119,7 @@ export function VagaDetailContent({
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => handleBackNavigation(router, '/servicos/empregos')}
+            onClick={() => handleBackNavigation(router, '/servicos/trabalho')}
             className="flex items-center justify-center rounded-full w-11 h-11 bg-black/5 text-white hover:bg-black/20 hover:cursor-pointer transition-colors"
             aria-label="Voltar"
           >
@@ -244,14 +244,14 @@ export function VagaDetailContent({
               </div>
             ) : isLoggedIn ? (
               <Link
-                href={`/servicos/empregos/${vaga.id}/inscricao`}
+                href={`/servicos/trabalho/${vaga.id}/inscricao`}
                 className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 ${candidacyButtonClassName}`}
               >
                 Candidatar-se à vaga
               </Link>
             ) : (
               <Link
-                href={buildAuthUrl(`/servicos/empregos/${vaga.id}/inscricao`)}
+                href={buildAuthUrl(`/servicos/trabalho/${vaga.id}/inscricao`)}
                 className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
               >
                 Fazer login para se candidatar

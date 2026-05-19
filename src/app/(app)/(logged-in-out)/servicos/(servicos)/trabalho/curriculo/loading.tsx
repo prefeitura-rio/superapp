@@ -27,7 +27,7 @@ export default function CurriculoLoading() {
         <SecondaryHeader
           fixed={false}
           className="max-w-4xl mx-auto"
-          route="/servicos/empregos"
+          route="/servicos/trabalho"
         />
       </div>
 

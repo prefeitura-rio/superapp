@@ -10,7 +10,7 @@ interface ServiceTypeToggleProps {
 }
 
 const ALL_TABS = [
-  { id: 'empregabilidade', label: 'Empregos', href: '/servicos/empregos/' },
+  { id: 'empregabilidade', label: 'Trabalho', href: '/servicos/trabalho/' },
   { id: 'mei', label: 'MEI', href: '/servicos/mei' },
   { id: 'cursos', label: 'Cursos', href: '/servicos/cursos' },
 ] as const

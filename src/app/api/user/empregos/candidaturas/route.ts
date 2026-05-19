@@ -1,4 +1,4 @@
-import { candidaturaToCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/minhas-candidaturas/minhas-candidaturas-utils'
+import { candidaturaToCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-utils'
 import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import type { EmpregabilidadeCandidatura } from '@/http-courses/models'
 import { getUserInfoFromToken } from '@/lib/user-info'

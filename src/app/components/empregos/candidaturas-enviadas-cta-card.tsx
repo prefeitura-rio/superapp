@@ -6,7 +6,7 @@ import Link from 'next/link'
 export function CandidaturasEnviadasCtaCard() {
   return (
     <Link
-      href="/servicos/empregos/minhas-candidaturas"
+      href="/servicos/trabalho/minhas-candidaturas"
       className="flex items-center justify-between gap-3 rounded-2xl bg-card px-4 py-4 w-full text-left transition-opacity hover:opacity-90 active:opacity-95"
     >
       <div className="min-w-0 flex-1">

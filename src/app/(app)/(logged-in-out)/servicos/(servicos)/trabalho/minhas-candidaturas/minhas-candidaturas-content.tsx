@@ -49,7 +49,7 @@ function CandidaturaCard({
 
   const href =
     candidatura.idVaga && candidatura.vagaAcessivel
-      ? `/servicos/empregos/${candidatura.idVaga}`
+      ? `/servicos/trabalho/${candidatura.idVaga}`
       : undefined
 
   const cardContent = (

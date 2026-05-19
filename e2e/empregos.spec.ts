@@ -28,18 +28,18 @@ async function clickActionDrawer(page: Page, labelText: string) {
  * descartando os cards duplicados do carrossel mobile (display:none no desktop).
  */
 async function getFirstVagaHref(page: Page): Promise<string> {
-  await page.goto('/servicos/empregos')
+  await page.goto('/servicos/trabalho')
   const vagasHeading = page.getByRole('heading', {
     name: 'Vagas mais recentes',
   })
   await expect(vagasHeading).toBeVisible({ timeout: 20000 })
   const firstVagaLink = vagasHeading
-    .locator('xpath=following::a[starts-with(@href, "/servicos/empregos/")]')
+    .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
     .and(page.getByRole('link'))
     .first()
   await expect(firstVagaLink).toBeVisible({ timeout: 10000 })
   const href =
-    (await firstVagaLink.getAttribute('href')) ?? '/servicos/empregos'
+    (await firstVagaLink.getAttribute('href')) ?? '/servicos/trabalho'
   return href
 }
 
@@ -55,7 +55,7 @@ test.describe('Empregos — home (público)', () => {
   test('exibe logo Oportunidades Cariocas e ícone de busca', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
 
     await expect(
       page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
@@ -66,12 +66,12 @@ test.describe('Empregos — home (público)', () => {
     ).toBeVisible()
   })
 
-  test('header deslogado exibe ícone de ajuda para /servicos/empregos/faq', async ({
+  test('header deslogado exibe ícone de ajuda para /servicos/trabalho/faq', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('a[href="/servicos/empregos/faq"]').first()
+      page.locator('a[href="/servicos/trabalho/faq"]').first()
     ).toBeVisible({
       timeout: 15000,
     })
@@ -80,20 +80,20 @@ test.describe('Empregos — home (público)', () => {
   test('exibe seção "Vagas mais recentes" com pelo menos 1 card', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
 
     await expect(
       page.getByRole('heading', { name: 'Vagas mais recentes' })
     ).toBeVisible({ timeout: 20000 })
 
-    const vagaLinks = page.locator('a[href^="/servicos/empregos/"]').filter({
-      hasNot: page.locator('[href="/servicos/empregos/menu"]'),
+    const vagaLinks = page.locator('a[href^="/servicos/trabalho/"]').filter({
+      hasNot: page.locator('[href="/servicos/trabalho/menu"]'),
     })
     await expect(vagaLinks.first()).toBeVisible({ timeout: 20000 })
   })
 
   test('exibe seção "Todas as vagas"', async ({ page }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
       page.getByRole('heading', { name: 'Todas as vagas' })
     ).toBeVisible({ timeout: 20000 })
@@ -102,7 +102,7 @@ test.describe('Empregos — home (público)', () => {
   test('não exibe card "Candidaturas enviadas" sem autenticação', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
       page.getByRole('heading', { name: 'Vagas mais recentes' })
     ).toBeVisible({ timeout: 20000 })
@@ -112,13 +112,13 @@ test.describe('Empregos — home (público)', () => {
   test('ao clicar no primeiro card de vaga, navega para página da vaga', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     const vagasHeading = page.getByRole('heading', {
       name: 'Vagas mais recentes',
     })
     await expect(vagasHeading).toBeVisible({ timeout: 20000 })
     const firstVagaLink = vagasHeading
-      .locator('xpath=following::a[starts-with(@href, "/servicos/empregos/")]')
+      .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
       .and(page.getByRole('link'))
       .first()
     await expect(firstVagaLink).toBeVisible({ timeout: 10000 })
@@ -147,25 +147,25 @@ test.describe('Empregos — home (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('header autenticado exibe ícone de menu para /servicos/empregos/menu', async ({
+  test('header autenticado exibe ícone de menu para /servicos/trabalho/menu', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('a[href="/servicos/empregos/menu"]').first()
+      page.locator('a[href="/servicos/trabalho/menu"]').first()
     ).toBeVisible({ timeout: 15000 })
   })
 
   test('header autenticado não exibe ícone de ajuda (FAQ) no header', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('a[href="/servicos/empregos/menu"]').first()
+      page.locator('a[href="/servicos/trabalho/menu"]').first()
     ).toBeVisible({ timeout: 15000 })
     // Ícone de ajuda só aparece para deslogados; menu aparece para logados
     const faqHeaderLink = page.locator(
-      'header a[href="/servicos/empregos/faq"]'
+      'header a[href="/servicos/trabalho/faq"]'
     )
     await expect(faqHeaderLink).toHaveCount(0)
   })
@@ -173,9 +173,9 @@ test.describe('Empregos — home (autenticado)', () => {
   test('card "Candidaturas enviadas" (quando presente) aponta para /minhas-candidaturas', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('a[href="/servicos/empregos/menu"]').first()
+      page.locator('a[href="/servicos/trabalho/menu"]').first()
     ).toBeVisible({ timeout: 15000 })
 
     const candidaturasCard = page.getByRole('link', {
@@ -188,7 +188,7 @@ test.describe('Empregos — home (autenticado)', () => {
     if (isVisible) {
       await expect(candidaturasCard).toHaveAttribute(
         'href',
-        '/servicos/empregos/minhas-candidaturas'
+        '/servicos/trabalho/minhas-candidaturas'
       )
       await expect(
         page.getByText('Acompanhe aqui o andamento de suas candidaturas')
@@ -199,9 +199,9 @@ test.describe('Empregos — home (autenticado)', () => {
   test('clicar no card "Candidaturas enviadas" navega para /minhas-candidaturas', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('a[href="/servicos/empregos/menu"]').first()
+      page.locator('a[href="/servicos/trabalho/menu"]').first()
     ).toBeVisible({ timeout: 15000 })
 
     const candidaturasCard = page.getByRole('link', {
@@ -213,7 +213,7 @@ test.describe('Empregos — home (autenticado)', () => {
 
     if (isVisible) {
       await candidaturasCard.click()
-      await page.waitForURL('**/servicos/empregos/minhas-candidaturas', {
+      await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
         timeout: 15000,
       })
       await expect(
@@ -388,10 +388,10 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
   test('vaga em que usuário se candidatou exibe card de feedback e etapas', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
 
     const hasCandidaturas = await page
-      .locator('a[href^="/servicos/empregos/"]')
+      .locator('a[href^="/servicos/trabalho/"]')
       .first()
       .isVisible({ timeout: 10000 })
       .catch(() => false)
@@ -399,10 +399,10 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
     if (!hasCandidaturas) return
 
     const firstCandidaturaLink = page
-      .locator('a[href^="/servicos/empregos/"]')
+      .locator('a[href^="/servicos/trabalho/"]')
       .first()
     await firstCandidaturaLink.click()
-    await page.waitForURL('**/servicos/empregos/**', { timeout: 15000 })
+    await page.waitForURL('**/servicos/trabalho/**', { timeout: 15000 })
 
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
@@ -611,7 +611,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   // ── Estrutura geral ──────────────────────────────────────────────────────
 
   test('exibe heading "Meu Currículo" e 4 accordions', async ({ page }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
 
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
@@ -628,7 +628,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   })
 
   test('não exibe botão "Continuar" na versão standalone', async ({ page }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -640,7 +640,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação abre ao clicar e exibe campos esperados', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -699,7 +699,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação — botão "Adicionar outra formação" insere novo bloco', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -721,7 +721,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação — "Remover formação" aparece com 2+ formações', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -748,7 +748,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação — botão "Adicionar outro idioma" insere novo bloco de idioma', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -767,7 +767,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação — "Remover idioma" aparece com 2+ idiomas e remove', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -790,7 +790,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Formação — botão Cancelar fecha o accordion', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -811,7 +811,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('drawer Escolaridade exibe todas as opções de nível de ensino', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -849,7 +849,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('drawer Status da formação exibe opções Completo, Em andamento, Incompleto', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -875,7 +875,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   })
 
   test('drawer Idioma exibe lista de idiomas disponíveis', async ({ page }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -905,7 +905,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Experiência Profissional abre e exibe campos de emprego e conquistas', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -925,7 +925,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Experiência — botões Salvar e Cancelar estão visíveis', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -941,7 +941,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Experiência — drawer Experiência comprovada abre com opções', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -969,7 +969,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Situação atual abre e exibe campo "Encontra-se"', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -986,7 +986,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('drawer Situação atual exibe opções de situação de trabalho', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1012,7 +1012,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('campo condicional "Há quanto tempo procurando emprego?" aparece após selecionar desempregado', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1047,7 +1047,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   })
 
   test('drawer Disponibilidade abre com opções', async ({ page }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1067,7 +1067,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   })
 
   test('drawer Tipo de vínculo abre com opções', async ({ page }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1089,7 +1089,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Situação atual exibe botões Salvar e Cancelar', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1107,7 +1107,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Termos de Uso abre e exibe texto dos termos e checkbox', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1127,7 +1127,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
   test('accordion Termos — aceitar o checkbox exibe check verde no título', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/curriculo')
+    await page.goto('/servicos/trabalho/curriculo')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
@@ -1252,7 +1252,7 @@ test.describe('Empregos — página da empresa (público)', () => {
       page.getByRole('heading', { name: 'Vagas ofertadas pela empresa' })
     ).toBeVisible({ timeout: 15000 })
 
-    const vagaLinks = page.locator('a[href^="/servicos/empregos/"]')
+    const vagaLinks = page.locator('a[href^="/servicos/trabalho/"]')
     const semVagas = page.getByText('Nenhuma vaga aberta no momento.', {
       exact: true,
     })
@@ -1305,14 +1305,14 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
   })
 
   test('exibe heading "Minhas candidaturas"', async ({ page }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
   })
 
   test('exibe candidaturas ou mensagem de lista vazia', async ({ page }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
@@ -1331,7 +1331,7 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
   test('cards de candidaturas exibem badge de status, título e empresa', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
@@ -1354,13 +1354,13 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
   })
 
   test('card com idVaga é um link para a página da vaga', async ({ page }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
     const candidaturaLink = page
-      .locator('a[href^="/servicos/empregos/"]')
+      .locator('a[href^="/servicos/trabalho/"]')
       .first()
     const isVisible = await candidaturaLink
       .isVisible({ timeout: 10000 })
@@ -1369,19 +1369,19 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
     if (!isVisible) return
 
     const href = await candidaturaLink.getAttribute('href')
-    expect(href).toMatch(/^\/servicos\/empregos\/[^/]+$/)
+    expect(href).toMatch(/^\/servicos\/trabalho\/[^/]+$/)
   })
 
   test('clicar em card de candidatura navega para página da vaga', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
     const candidaturaLink = page
-      .locator('a[href^="/servicos/empregos/"]')
+      .locator('a[href^="/servicos/trabalho/"]')
       .first()
     const isVisible = await candidaturaLink
       .isVisible({ timeout: 10000 })
@@ -1412,7 +1412,7 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
   test('barra de progresso ou texto "Esta vaga não possui etapas" visível nos cards', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/minhas-candidaturas')
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
     await expect(
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
@@ -1452,7 +1452,7 @@ test.describe('Empregos — menu (autenticado)', () => {
   test('exibe heading "Menu" com todos os itens e links corretos', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/menu')
+    await page.goto('/servicos/trabalho/menu')
 
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
       timeout: 15000,
@@ -1460,28 +1460,28 @@ test.describe('Empregos — menu (autenticado)', () => {
 
     await expect(
       page.getByRole('link', { name: 'Minhas candidaturas' })
-    ).toHaveAttribute('href', '/servicos/empregos/minhas-candidaturas')
+    ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
 
     await expect(
       page.getByRole('link', { name: 'Meu currículo' })
-    ).toHaveAttribute('href', '/servicos/empregos/curriculo')
+    ).toHaveAttribute('href', '/servicos/trabalho/curriculo')
 
     await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
       'href',
-      '/servicos/empregos/faq'
+      '/servicos/trabalho/faq'
     )
   })
 
   test('clicar em "Minhas candidaturas" navega para /minhas-candidaturas', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/menu')
+    await page.goto('/servicos/trabalho/menu')
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
       timeout: 15000,
     })
 
     await page.getByRole('link', { name: 'Minhas candidaturas' }).click()
-    await page.waitForURL('**/servicos/empregos/minhas-candidaturas', {
+    await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
       timeout: 15000,
     })
     await expect(
@@ -1490,28 +1490,28 @@ test.describe('Empregos — menu (autenticado)', () => {
   })
 
   test('clicar em "Meu currículo" navega para /curriculo', async ({ page }) => {
-    await page.goto('/servicos/empregos/menu')
+    await page.goto('/servicos/trabalho/menu')
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
       timeout: 15000,
     })
 
     await page.getByRole('link', { name: 'Meu currículo' }).click()
-    await page.waitForURL('**/servicos/empregos/curriculo', { timeout: 15000 })
+    await page.waitForURL('**/servicos/trabalho/curriculo', { timeout: 15000 })
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('clicar em "FAQ" navega para /servicos/empregos/faq', async ({
+  test('clicar em "FAQ" navega para /servicos/trabalho/faq', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/menu')
+    await page.goto('/servicos/trabalho/menu')
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
       timeout: 15000,
     })
 
     await page.getByRole('link', { name: 'FAQ' }).click()
-    await page.waitForURL('**/servicos/empregos/faq', { timeout: 15000 })
+    await page.waitForURL('**/servicos/trabalho/faq', { timeout: 15000 })
     await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
       timeout: 15000,
     })
@@ -1530,7 +1530,7 @@ test.describe('Empregos — busca (público)', () => {
   test('navegar para busca via ícone exibe input e seção "Mais recentes"', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos')
+    await page.goto('/servicos/trabalho')
     await expect(
       page.locator('a[href="/busca?tipo=empregos"]').first()
     ).toBeVisible({
@@ -1694,7 +1694,7 @@ test.describe('Empregos — FAQ (público)', () => {
   test('exibe heading "FAQ" e perguntas frequentes sobre empregos', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/faq')
+    await page.goto('/servicos/trabalho/faq')
 
     await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
       timeout: 15000,
@@ -1708,7 +1708,7 @@ test.describe('Empregos — FAQ (público)', () => {
   })
 
   test('exibe perguntas sobre candidatura e conta Gov.br', async ({ page }) => {
-    await page.goto('/servicos/empregos/faq')
+    await page.goto('/servicos/trabalho/faq')
     await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
       timeout: 15000,
     })
@@ -1731,7 +1731,7 @@ test.describe('Empregos — FAQ (público)', () => {
   test('exibe pergunta sobre acompanhar candidatura e status', async ({
     page,
   }) => {
-    await page.goto('/servicos/empregos/faq')
+    await page.goto('/servicos/trabalho/faq')
     await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
       timeout: 15000,
     })

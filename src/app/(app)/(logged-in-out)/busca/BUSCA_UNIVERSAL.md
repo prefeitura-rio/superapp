@@ -141,7 +141,7 @@ Ao clicar em um resultado, o comportamento depende do tipo:
 | ----------------- | ------------------------------------------------------------------------------------------------- |
 | `service`         | `/servicos/categoria/[tema]/[slug]` (rota interna) ou abre `ExternalLinkDrawer` se não tiver slug |
 | `course`          | `/servicos/cursos/[id]`                                                                           |
-| `job`             | `/servicos/empregos/[metadata.id]`                                                                |
+| `job`             | `/servicos/trabalho/[metadata.id]`                                                                |
 | `mei_opportunity` | `/servicos/mei/[metadata.id]`                                                                     |
 
 

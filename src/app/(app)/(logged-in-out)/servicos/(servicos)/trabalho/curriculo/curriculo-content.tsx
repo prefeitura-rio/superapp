@@ -1319,7 +1319,7 @@ export interface CurriculoContentProps {
 
 export function CurriculoContent({
   inscricaoVagaId,
-  backRoute = '/servicos/empregos',
+  backRoute = '/servicos/trabalho',
   hasPerguntasAdicionais = false,
   initialEscolaridade = '',
   cpf,
@@ -1624,7 +1624,7 @@ export function CurriculoContent({
             onContinuarToNext()
           } else {
             router.push(
-              `/servicos/empregos/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
+              `/servicos/trabalho/${inscricaoVagaId}/inscricao/confirmar-informacoes/perguntas-adicionais`
             )
           }
           return
@@ -1680,7 +1680,7 @@ export function CurriculoContent({
           '../[id]/inscricao/revalidate-empregos-action'
         )
         await revalidateEmpregosPage()
-        router.push('/servicos/empregos')
+        router.push('/servicos/trabalho')
       }
     }
   }

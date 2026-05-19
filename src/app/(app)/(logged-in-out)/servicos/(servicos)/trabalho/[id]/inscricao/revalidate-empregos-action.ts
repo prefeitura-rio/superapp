@@ -7,5 +7,5 @@ import { revalidatePath } from 'next/cache'
  * Usado após candidatura bem-sucedida para atualizar o card "Candidaturas enviadas".
  */
 export async function revalidateEmpregosPage() {
-  revalidatePath('/servicos/empregos', 'page')
+  revalidatePath('/servicos/trabalho', 'page')
 }

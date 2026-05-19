@@ -7,7 +7,7 @@ export default async function EmpregosMenuPage() {
   const userInfo = await getUserInfoFromToken()
 
   if (!userInfo.cpf) {
-    return redirect(buildAuthUrl('/servicos/empregos/menu'))
+    return redirect(buildAuthUrl('/servicos/trabalho/menu'))
   }
 
   return <EmpregosMenuContent />

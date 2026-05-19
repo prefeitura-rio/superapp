@@ -87,7 +87,7 @@ Após o envio bem-sucedido da candidatura:
    - Título "Candidatura enviada"
    - Mensagem explicativa sobre análise da candidatura
    - `ThemeAwareVideo` com animação de sucesso
-   - Botão "Voltar para a tela inicial" que redireciona para `/servicos/empregos`
+   - Botão "Voltar para a tela inicial" que redireciona para `/servicos/trabalho`
 
 ### Características do Drawer
 

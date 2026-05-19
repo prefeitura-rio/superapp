@@ -1,7 +1,7 @@
 'use client'
 
-import type { RespostaInfoComplementarPayload } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/[id]/inscricao/confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
-import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/empregos/curriculo/curriculo-content'
+import type { RespostaInfoComplementarPayload } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/[id]/inscricao/confirmar-informacoes/perguntas-adicionais/perguntas-adicionais-content'
+import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery } from '@tanstack/react-query'
 

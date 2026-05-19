@@ -15,7 +15,7 @@ export default function ServicosLayout({
   // Determina qual tipo está ativo baseado na rota
   const activeType = pathname?.includes('/servicos/cursos')
     ? 'cursos'
-    : pathname?.includes('/servicos/empregos')
+    : pathname?.includes('/servicos/trabalho')
       ? 'empregabilidade'
       : 'mei'
 
@@ -23,8 +23,8 @@ export default function ServicosLayout({
   const shouldShowToggle =
     pathname === '/servicos/cursos' ||
     pathname === '/servicos/mei' ||
-    pathname === '/servicos/empregos' ||
-    pathname === '/servicos/empregos/'
+    pathname === '/servicos/trabalho' ||
+    pathname === '/servicos/trabalho/'
 
   // Determina se o toggle terá mais de 1 aba visível (staging sempre sim; produção
   // depende de quantos serviços estão listados na flag)
