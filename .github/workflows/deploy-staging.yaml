@@ -320,4 +320,4 @@ jobs:
 
           curl -H "Content-Type: application/json" \
                -d "$DISCORD_PAYLOAD" \
-               "$DISCORD_WEBHOOK"
+               "$DISCORD_WEBHOOK?thread_id=1465648387566338140"
