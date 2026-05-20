@@ -4,13 +4,13 @@ import { type FaqSection, FormattedContent } from '@/lib/faq-utils'
 const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   {
     id: 'plataforma',
-    title: 'O que é a Plataforma Oportunidades Cariocas? ',
+    title: 'O que é a Plataforma Oportunidades Cariocas?',
     content:
       'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que reúne cursos, oficinas, palestras e diversas atividades educativas oferecidas pelo município e por instituições parceiras. Além de qualificação, a plataforma funciona como uma ponte direta com o mercado de trabalho, reunindo vagas atualizadas para ajudar o cidadão carioca a conquistar sua próxima oportunidade.',
   },
   {
     id: 'objetivo',
-    title: 'Quem pode se candidatar às vagas de emprego?',
+    title: 'Quem pode se candidatar às oportunidades de trabalho?',
     content:
       'Qualquer cidadão pode se candidatar, desde que possua uma conta ativa no Gov.br. \n\n No Oportunidades Cariocas, você pode consultar as vagas abertas, conferir se o seu perfil se encaixa nas exigências de cada empregador e enviar sua candidatura de forma rápida e gratuita.',
   },
@@ -18,7 +18,7 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
     id: 'conta-govbr',
     title: 'O que é a conta Gov.br e por que preciso dela para me cadastrar?',
     content:
-      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n O acesso pelo gov.br garante a segurança dos seus dados e valida sua identidade, trazendo mais confiança para o processo. Com ele, você envia suas candidaturas de forma rápida e acompanha cada etapa do processo seletivo diretamente pela plataforma.',
+      'A conta Gov.br é a sua identidade digital para acessar de forma segura e prática os serviços digitais do governo. Qualquer cidadão brasileiro ou estrangeiro com registro na base de dados do Cadastro de Pessoas Físicas (CPF) pode criar a sua conta. \n\n O acesso pelo gov.br garante a segurança dos seus dados e valida sua identidade, trazendo mais confiança para o processo.',
   },
   {
     id: 'sem-conta-govbr',
@@ -34,7 +34,7 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   },
   {
     id: 'candidatura',
-    title: 'Como realizar a candidatura em uma vaga de emprego?',
+    title: 'Como realizar a candidatura em uma oportunidade de trabalho?',
     content:
       'Escolha a vaga de seu interesse e, após conferir os requisitos, clique em “Fazer login para se candidatar” (ou diretamente em “Candidatar-se à vaga”, caso já esteja logado). \n\n Na sequência, preencha os campos para criar seu currículo. Suas informações ficarão salvas na plataforma, o que agiliza sua inscrição em outras vagas de interesse e permite que você atualize seus dados sempre que quiser. \n\n Para finalizar, clique em “Continuar” e conclua sua candidatura.',
   },
@@ -46,9 +46,9 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   },
   {
     id: 'mais-de-uma-vaga',
-    title: 'Posso me inscrever em mais de uma vaga de emprego?',
+    title: 'Posso me inscrever em mais de uma vaga?',
     content:
-      'Sim, você pode se inscrever em mais de uma vaga de emprego ao mesmo tempo. \n\n **Atenção: Confira os requisitos da vaga.** Antes de enviar a candidatura, leia atentamente a descrição da vaga. Certifique-se de que as exigências solicitadas pela empresa contratante realmente combinam com o seu perfil profissional.',
+      'Sim, você pode se inscrever em mais de uma oportunidade de trabalho ao mesmo tempo. \n\n **Atenção: Confira os requisitos da vaga.** Antes de enviar a candidatura, leia atentamente a descrição da vaga. Certifique-se de que as exigências solicitadas pela empresa contratante realmente combinam com o seu perfil profissional.',
   },
   {
     id: 'acompanhar-candidatura',
