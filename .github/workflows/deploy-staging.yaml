@@ -215,6 +215,17 @@ jobs:
           kubectl argo rollouts promote app -n app
           kubectl argo rollouts status app -n app --timeout=5m
 
+      - name: Invalidate CDN Cache
+        if: steps.check-k8s-only.outputs.k8s_only != 'true' && success()
+        run: |
+          echo "Invalidating Cloud CDN cache for staging..."
+          gcloud compute url-maps invalidate-cdn-cache \
+            k8s2-um-xr1ivql5-istio-system-ingress-istio-app-dluxmjag \
+            --path "/*" \
+            --project=rj-superapp-staging \
+            --global
+          echo "✅ CDN cache invalidated"
+
       - name: Rollback on Failure
         if: steps.check-k8s-only.outputs.k8s_only != 'true' && failure()
         run: |
