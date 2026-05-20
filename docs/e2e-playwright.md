@@ -309,7 +309,7 @@ Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacio
 **Fluxo de candidatura — autenticado** (`Empregos — fluxo de candidatura (autenticado)`) — requer `E2E_ACCESS_TOKEN`
 
 - Página de inscrição exibe Meu Currículo, tela de bem-vindo ou confirmar informações (`.or()` sobre os 3 estados do carousel)
-- Tela de bem-vindo (quando `is_first_login = true`): título "Bem vindo ao Cadastro de oportunidades de Emprego" e botão "Continuar" habilitado
+- Tela de bem-vindo (quando `is_first_login = true`): título "Bem vindo ao Cadastro de oportunidades de Trabalho" e botão "Continuar" habilitado
 - Tela de confirmar informações (quando dados estão incompletos): CPF no formato esperado e botão "Continuar"
 - Meu Currículo no fluxo de inscrição: exibe botão "Continuar" no rodapé (ausente na versão standalone)
 
@@ -345,7 +345,7 @@ Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacio
 
 - Navega para `/busca?tipo=empregos` via ícone de busca; verifica input e seção "Mais recentes" com sugestões dinâmicas de vagas
 - Digitar 3+ caracteres exibe "Resultados da Pesquisa" ou mensagem de vazio
-- Resultados de vagas exibem badge "Emprego"
+- Resultados de vagas exibem badge "Trabalho"
 - Botão X limpa a busca e retorna ao estado inicial
 - URL com `?q=` dispara busca automaticamente ao carregar
 

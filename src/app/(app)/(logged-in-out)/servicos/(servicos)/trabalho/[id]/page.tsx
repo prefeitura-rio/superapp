@@ -32,7 +32,7 @@ export default async function VagaDetailPage({ params }: PageProps) {
           vaga.orgaoParceiro = departmentResponse.data.nome_ua
         }
       } catch (error) {
-        console.error('[Emprego] Erro ao buscar órgão parceiro.', error)
+        console.error('[Trabalho] Erro ao buscar órgão parceiro.', error)
       }
     }
 

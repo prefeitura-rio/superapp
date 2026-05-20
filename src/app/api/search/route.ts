@@ -83,7 +83,7 @@ export async function GET(request: Request) {
                 slug: result.id, // jobs use ID as slug
                 titulo: jobData.titulo,
                 descricao: jobData.descricao,
-                category: 'Emprego',
+                category: 'Trabalho',
                 tipo: 'job' as const,
                 collection: result.collection,
               }

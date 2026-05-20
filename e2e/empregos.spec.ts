@@ -475,7 +475,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     }
 
     // A página exibe um dos 3 estados possíveis do carousel
-    const bemVindo = page.getByText('Cadastro de oportunidades de Emprego', {
+    const bemVindo = page.getByText('Cadastro de oportunidades de Trabalho', {
       exact: false,
     })
     const confirmarInfos = page.getByText('confirme suas informações', {
@@ -509,7 +509,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     await candidatarBtn.click()
     await page.waitForURL('**/inscricao**', { timeout: 15000 })
 
-    const bemVindo = page.getByText('Cadastro de oportunidades de Emprego', {
+    const bemVindo = page.getByText('Cadastro de oportunidades de Trabalho', {
       exact: false,
     })
     const isBemVindo = await bemVindo
@@ -1585,7 +1585,7 @@ test.describe('Empregos — busca (público)', () => {
     })
   })
 
-  test('resultados de empregos exibem badge "Emprego" quando há resultados', async ({
+  test('resultados de empregos exibem badge "Trabalho" quando há resultados', async ({
     page,
   }) => {
     await page.goto('/busca?tipo=empregos')
@@ -1616,9 +1616,9 @@ test.describe('Empregos — busca (público)', () => {
       .isVisible({ timeout: 1000 })
       .catch(() => false)
     if (hasResults) {
-      // Badge "Emprego" only appears when the API returns job-type items.
+      // Badge "Trabalho" only appears when the API returns job-type items.
       // If the query returns no jobs (only secondary results), skip the assertion.
-      const badge = page.getByText('Emprego').first()
+      const badge = page.getByText('Trabalho').first()
       const hasBadge = await badge
         .isVisible({ timeout: 3000 })
         .catch(() => false)

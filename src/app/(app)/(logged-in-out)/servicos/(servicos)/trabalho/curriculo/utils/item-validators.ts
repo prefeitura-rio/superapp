@@ -54,7 +54,7 @@ export const isFormacaoAcademicaEmpty = (
   !hasContent(item.anoConclusao)
 
 // ============================================================================
-// Emprego Validators
+// Trabalho Validators
 // ============================================================================
 
 /**

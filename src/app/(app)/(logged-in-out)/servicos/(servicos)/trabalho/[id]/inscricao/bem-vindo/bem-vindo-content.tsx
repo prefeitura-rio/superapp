@@ -71,7 +71,7 @@ export function BemVindoContent({
         <h1 className="text-3xl font-medium leading-9 text-foreground">
           Bem vindo ao{' '}
           <span className="text-primary">
-            Cadastro de oportunidades de Emprego
+            Cadastro de oportunidades de Trabalho
           </span>
         </h1>
         <p className="text-sm font-normal leading-5 text-foreground-light pt-2 pb-6">
