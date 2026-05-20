@@ -245,6 +245,7 @@ jobs:
 
           DISCORD_PAYLOAD=$(cat <<EOF
           {
+            "thread_name": "${STATUS_EMOJI} Production · ${VERSION} · ${STATUS_TEXT}",
             "content": "<@&903644455582695494>",
             "embeds": [{
               "title": "${STATUS_EMOJI} Production Release ${STATUS_TEXT}",
