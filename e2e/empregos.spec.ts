@@ -92,10 +92,10 @@ test.describe('Empregos — home (público)', () => {
     await expect(vagaLinks.first()).toBeVisible({ timeout: 20000 })
   })
 
-  test('exibe seção "Todas as vagas"', async ({ page }) => {
+  test('exibe seção "Encontre sua vaga"', async ({ page }) => {
     await page.goto('/servicos/trabalho')
     await expect(
-      page.getByRole('heading', { name: 'Todas as vagas' })
+      page.getByRole('heading', { name: 'Encontre sua vaga' })
     ).toBeVisible({ timeout: 20000 })
   })
 

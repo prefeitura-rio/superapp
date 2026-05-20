@@ -18,7 +18,7 @@ const empregoItemSchema = z
       .string()
       .optional()
       .refine(val => !val || val.length >= 30, 'Mínimo de 30 caracteres')
-      .refine(val => !val || val.length <= 600, 'Máximo de 600 caracteres'),
+      .refine(val => !val || val.length <= 2000, 'Máximo de 1500 caracteres'),
     tempoExperienciaAnos: z
       .number({ invalid_type_error: 'Informe os anos' })
       .min(0, 'Não pode ser negativo')
@@ -118,7 +118,7 @@ const conquistaItemSchema = z
       .string()
       .optional()
       .refine(val => !val || val.length >= 30, 'Mínimo de 30 caracteres')
-      .refine(val => !val || val.length <= 600, 'Máximo de 600 caracteres'),
+      .refine(val => !val || val.length <= 2000, 'Máximo de 1500 caracteres'),
   })
   .superRefine((data, ctx) => {
     const hasAny =

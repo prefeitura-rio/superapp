@@ -43,7 +43,7 @@ export const EmpregabilidadeBanner = ({
       image={
         <Image
           src={empregabilidadeBannerIcon}
-          alt="Encontre seu emprego no Oportunidades Cariocas."
+          alt="Encontre seu trabalho no Oportunidades Cariocas."
           width={200}
           height={200}
           className="h-30 w-auto absolute bottom-0 right-0 z-20 md:right-0"

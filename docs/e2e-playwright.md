@@ -281,7 +281,7 @@ Cobre o módulo **Oportunidades Cariocas** (`/servicos/empregos` e rotas relacio
 
 - Logo "Oportunidades Cariocas Logo" e ícone de busca apontando para `/busca?tipo=empregos` visíveis
 - Header deslogado exibe ícone de ajuda linkando para `/servicos/empregos/faq`
-- Seções "Vagas mais recentes" e "Todas as vagas" com pelo menos 1 card
+- Seções "Vagas mais recentes" e "Encontre sua vaga" com pelo menos 1 card
 - Card "Candidaturas enviadas" **não** visível sem autenticação
 - Clicar no primeiro card de vaga navega para `/servicos/empregos/[id]`
 

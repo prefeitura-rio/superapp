@@ -280,7 +280,7 @@ function ExperienciaProfissionalAccordionContentInner({
                 {...register(`empregos.${index}.descricaoAtividades`)}
                 id={`emprego-${index}-descricao`}
                 placeholder="Atividades realizadas"
-                maxLength={600}
+                maxLength={2000}
                 error={errors.empregos?.[index]?.descricaoAtividades?.message}
                 className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
               />
@@ -498,7 +498,7 @@ function ExperienciaProfissionalAccordionContentInner({
                 {...register(`conquistas.${index}.descricao`)}
                 id={`conquista-${index}-descricao`}
                 placeholder="Escreva a descrição"
-                maxLength={600}
+                maxLength={2000}
                 error={errors.conquistas?.[index]?.descricao?.message}
                 className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
               />
