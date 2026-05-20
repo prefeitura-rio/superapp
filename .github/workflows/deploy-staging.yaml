@@ -283,7 +283,6 @@ jobs:
 
           DISCORD_PAYLOAD=$(cat <<EOF
           {
-            "thread_name": "${STATUS_EMOJI} Staging · ${SHORT_HASH} · ${STATUS_TEXT}",
             "embeds": [{
               "title": "${STATUS_EMOJI} Staging Deployment ${STATUS_TEXT}",
               "description": "${DESCRIPTION}",
@@ -321,4 +320,4 @@ jobs:
 
           curl -H "Content-Type: application/json" \
                -d "$DISCORD_PAYLOAD" \
-               "$DISCORD_WEBHOOK"
+               "$DISCORD_WEBHOOK?thread_id=1465648387566338140"
