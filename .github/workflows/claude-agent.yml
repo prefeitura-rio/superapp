@@ -1,0 +1,51 @@
+name: Claude Code Agent
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude:
+    if: |
+      contains(github.event.comment.body, '@claude') ||
+      contains(github.event.issue.body, '@claude') ||
+      contains(github.event.pull_request.body, '@claude')
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CLAUDE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_GITHUB_APP_PRIVATE_KEY }}
+
+      - name: Setup GCP credentials
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > /tmp/gcp-key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json" >> $GITHUB_ENV
+          echo "ANTHROPIC_VERTEX_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
+          echo "CLOUD_ML_REGION=us-east5" >> $GITHUB_ENV
+
+      - uses: anthropics/claude-code-action@beta
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-sonnet-4-6@default"
+          allowed_tools: "Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr ready:*)"

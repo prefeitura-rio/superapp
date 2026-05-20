@@ -172,6 +172,17 @@ jobs:
             sleep 30
           done
 
+      - name: Invalidate CDN Cache
+        if: success()
+        run: |
+          echo "Invalidating Cloud CDN cache for production..."
+          gcloud compute url-maps invalidate-cdn-cache \
+            k8s2-um-ikae1jxm-istio-system-ingress-istio-app-yo7cj2t9 \
+            --path "/*" \
+            --project=rj-superapp \
+            --global
+          echo "✅ CDN cache invalidated"
+
       - name: Create deployment summary
         if: always()
         run: |
