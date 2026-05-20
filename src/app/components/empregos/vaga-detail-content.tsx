@@ -16,6 +16,10 @@ import {
   ShareIcon,
 } from '@/assets/icons'
 import { Button } from '@/components/ui/button'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
 import { DollarSign, FileText } from 'lucide-react'
@@ -125,6 +129,17 @@ export function VagaDetailContent({
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
+          <div className="flex justify-center">
+            <Link href="/servicos/trabalho">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+              />
+            </Link>
+          </div>
           <button
             type="button"
             onClick={handleShare}

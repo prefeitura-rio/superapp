@@ -64,7 +64,7 @@ Para simular erros em testes individuais, use `server.use()` para sobrescrever o
 | Logo e ícone de busca | Logo "Oportunidades Cariocas" e link `a[href="/busca?tipo=empregos"]` visíveis |
 | Header deslogado | Ícone de ajuda aponta para `/servicos/empregos/faq` |
 | Seção "Vagas mais recentes" | Heading e ao menos 1 card de vaga |
-| Seção "Todas as vagas" | Heading visível |
+| Seção "Encontre sua vaga" | Heading visível |
 | Ausência do card de candidaturas | Texto "Candidaturas enviadas" não aparece sem auth |
 | Clique no card de vaga | Navega para `/servicos/empregos/[id]` |
 
@@ -84,7 +84,7 @@ Para simular erros em testes individuais, use `server.use()` para sobrescrever o
 | Navegar via ícone | Input de busca e seção "Mais recentes" visíveis em `/busca?tipo=empregos` |
 | Sugestões dinâmicas | Lista de vagas mais recentes carregada antes de pesquisar |
 | Digitar 3+ caracteres | Seção "Resultados da Pesquisa" ou mensagem de vazio aparece |
-| Badge "Emprego" | Resultados de vagas exibem badge verde (quando há resultados) |
+| Badge "Trabalho" | Resultados de vagas exibem badge verde (quando há resultados) |
 | Limpar via botão X | Volta ao estado inicial com "Mais recentes" |
 | Busca via URL `?q=` | Parâmetro `q` dispara busca automaticamente ao carregar a página |
 

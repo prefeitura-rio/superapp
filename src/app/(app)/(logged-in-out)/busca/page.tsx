@@ -30,7 +30,7 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
     className: 'bg-primary/10 text-primary border border-primary/20',
   },
   job: {
-    label: 'Emprego',
+    label: 'Trabalho',
     className: 'bg-green-500/10 text-green-500 border border-green-500/20',
   },
   mei_opportunity: {

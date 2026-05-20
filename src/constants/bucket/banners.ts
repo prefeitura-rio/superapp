@@ -16,7 +16,5 @@ export const acessarCarteiraIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/acessar-carteira.png'
 export const empregabilidadeBannerIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/avatar-empregabilidade.png'
-export const oportunidadesCariocasLogo =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas.png'
-export const oportunidadesCariocasLogoDark =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas-dark.png'
+export { default as oportunidadesCariocasLogo } from '../../../public/oportunidades-cariocas-rio-light.png'
+export { default as oportunidadesCariocasLogoDark } from '../../../public/oportunidades-cariocas-rio-dark.png'

@@ -6,7 +6,7 @@ const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
     id: 'plataforma',
     title: 'O que é a Plataforma Oportunidades Cariocas? ',
     content:
-      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que reúne cursos, oficinas, palestras e diversas atividades educativas oferecidas pelo município e por instituições parceiras. Além de qualificação, a plataforma funciona como uma ponte direta com o mercado de trabalho, reunindo vagas atualizadas para ajudar o cidadão carioca a conquistar o emprego que deseja.',
+      'O Oportunidades Cariocas é a plataforma digital da Prefeitura do Rio que reúne cursos, oficinas, palestras e diversas atividades educativas oferecidas pelo município e por instituições parceiras. Além de qualificação, a plataforma funciona como uma ponte direta com o mercado de trabalho, reunindo vagas atualizadas para ajudar o cidadão carioca a conquistar sua próxima oportunidade.',
   },
   {
     id: 'objetivo',

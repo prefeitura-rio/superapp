@@ -105,7 +105,7 @@ Renderização:
 ├─────────────────────────────────┤
 │ Você também pode estar          │  ← secondaryResults (com badge)
 │ procurando                      │     (só exibe se não vazio)
-│  • item C  [Emprego]            │
+│  • item C  [Trabalho]            │
 │  • item D  [Curso]              │
 └─────────────────────────────────┘
 ```
@@ -126,7 +126,7 @@ Cada card de resultado exibe um badge identificando seu tipo:
 | ----------------- | ----------- | --------------- |
 | `service`         | **Serviço** | Azul            |
 | `course`          | **Curso**   | Primária (roxo) |
-| `job`             | **Emprego** | Verde           |
+| `job`             | **Trabalho** | Verde           |
 | `mei_opportunity` | **MEI**     | Laranja         |
 
 

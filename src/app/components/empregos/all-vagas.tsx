@@ -13,7 +13,7 @@ export function AllVagas({ vagas }: AllVagasProps) {
   return (
     <>
       <h3 className="pb-4 text-base font-medium text-foreground leading-5 px-4">
-        Todas as vagas
+        Encontre sua vaga
       </h3>
       {/* Mobile: layout empilhado, cards h-41 w-auto (10.25rem altura) */}
       <div className="px-4 pb-6 max-[576px]:block min-[577px]:hidden">
