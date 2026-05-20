@@ -27,7 +27,7 @@ const MENSAGEM_NAO_SEGUIU_CANDIDATURA =
 
 interface EtapasProcessoSeletivoCardProps {
   etapas: EtapaProcessoSeletivo[]
-  /** Índice da etapa atual do candidato (0-based no array de etapas da API); quando definido, indica etapa em que está. */
+  /** Índice da etapa atual do candidato (0 based no array de etapas da API); quando definido, indica etapa em que está. */
   etapaAtualCandidatura?: number
   /** Status da candidatura; quando reprovada/congelada/descontinuada, a etapa seguinte (que não foi alcançada) exibe X e mensagem. */
   statusCandidatura?: string
