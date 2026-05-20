@@ -1116,7 +1116,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
 
     await expect(
       page.getByText(
-        'Ao preencher e enviar este formulário, você declara estar ciente',
+        'Ao preencher e enviar este formulário, você declara que leu e concorda',
         { exact: false }
       )
     ).toBeVisible({ timeout: 10000 })
