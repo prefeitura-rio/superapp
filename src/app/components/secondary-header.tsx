@@ -166,27 +166,23 @@ export function SecondaryHeader({
         className={`px-4 py-4 md:py-6 ${fixed ? 'fixed' : 'relative'} w-full ${className} mx-auto ${fixed ? 'z-50' : ''} bg-background text-foreground h-auto transition-all duration-200`}
         style={fixed ? { top: 0, ...style } : style}
       >
-        <div className="grid grid-cols-3 items-center">
-          {/* Left column - IconButton */}
-          <div className="flex justify-start">
-            <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+        <div className="relative flex items-center justify-between">
+          <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+
+          {/* Center - absolutely positioned so it never competes with side buttons */}
+          <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              {logo ? (
+                logo
+              ) : (
+                <h1 className="text-xl text-nowrap font-medium text-center text-foreground">
+                  {title}
+                </h1>
+              )}
+            </div>
           </div>
 
-          {/* Center column - Title or Logo */}
-          <div className="flex justify-center">
-            {logo ? (
-              logo
-            ) : (
-              <h1 className="text-xl text-nowrap font-medium text-center text-foreground">
-                {title}
-              </h1>
-            )}
-          </div>
-
-          {/* Right column - SearchButton or empty space */}
-          <div className="flex justify-end">
-            {showSearchButton && <SearchButton href={searchHref} />}
-          </div>
+          <div>{showSearchButton && <SearchButton href={searchHref} />}</div>
         </div>
       </header>
 

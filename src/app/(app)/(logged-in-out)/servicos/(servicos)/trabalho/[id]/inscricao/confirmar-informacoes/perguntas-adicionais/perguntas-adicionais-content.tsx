@@ -6,10 +6,16 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { ChevronDownIcon } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
@@ -229,6 +235,26 @@ export function PerguntasAdicionaisContent({
           route={
             backRoute ??
             `/servicos/trabalho/${vagaId}/inscricao/confirmar-informacoes`
+          }
+          logo={
+            <Link href="/servicos/trabalho">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:block hidden"
+              />
+              <Image
+                src={oportunidadesCariocasLogo}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:hidden block"
+              />
+            </Link>
           }
         />
       </div>

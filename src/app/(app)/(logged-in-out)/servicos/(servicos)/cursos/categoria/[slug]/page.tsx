@@ -1,12 +1,18 @@
 import { CourseCard } from '@/app/components/courses/courses-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
 import { filterVisibleCourses } from '@/lib/course-utils'
 import { getDalCategorias, getDalCourses } from '@/lib/dal'
 import type { AccessibilityProps } from '@/types/course'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface CoursesApiResponse {
   data: {
@@ -75,14 +81,36 @@ export default async function CoursesCategoryPage({
     <>
       <div className="min-h-lvh max-w-4xl mx-auto pt-20 md:pt-22 pb-20">
         <SecondaryHeader
-          title={categoryName}
           className="max-w-4xl"
           showSearchButton
           searchHref="/servicos/cursos/busca"
           route="/servicos/cursos"
+          logo={
+            <Link href="/servicos/cursos">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:block hidden"
+              />
+              <Image
+                src={oportunidadesCariocasLogo}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:hidden block"
+              />
+            </Link>
+          }
         />
 
-        <section className="px-4 mt-6">
+        <section className="px-4 mt-2">
+          <h1 className="text-3xl font-medium text-foreground pb-4">
+            {categoryName}
+          </h1>
           {courses.length === 0 ? (
             <div className="flex flex-col items-center text-center justify-center py-8">
               <ThemeAwareVideo

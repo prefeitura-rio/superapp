@@ -12,6 +12,10 @@ import {
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/models'
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
@@ -19,6 +23,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -1692,6 +1698,26 @@ export function CurriculoContent({
           fixed={false}
           className="max-w-4xl mx-auto"
           route={backRoute}
+          logo={
+            <Link href="/servicos/trabalho">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:block hidden"
+              />
+              <Image
+                src={oportunidadesCariocasLogo}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:hidden block"
+              />
+            </Link>
+          }
         />
       </div>
 

@@ -7,6 +7,12 @@ import type { SwiperRef } from 'swiper/react'
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { ConfirmInscriptionSlider } from './confirm-inscription-slider'
@@ -798,7 +804,7 @@ export function ConfirmInscriptionClient({
   return (
     <div className="fixed inset-0 w-full bg-background flex flex-col overflow-hidden">
       <div className="w-full max-w-4xl mx-auto px-4 flex flex-col h-full">
-        <div className="relative h-11 pb-4 flex-shrink-0 pt-8 justify-self-start self-start flex items-center">
+        <div className="relative h-11 pb-4 flex-shrink-0 pt-8 w-full flex items-center">
           <CustomButton
             className={`bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
               showBackButton
@@ -811,6 +817,28 @@ export function ConfirmInscriptionClient({
           >
             <ChevronLeftIcon className="text-foreground" />
           </CustomButton>
+          <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              <Link href="/servicos/cursos">
+                <Image
+                  src={oportunidadesCariocasLogoDark}
+                  alt="Oportunidades Cariocas"
+                  width={170}
+                  height={38}
+                  priority
+                  className="dark:block hidden"
+                />
+                <Image
+                  src={oportunidadesCariocasLogo}
+                  alt="Oportunidades Cariocas"
+                  width={170}
+                  height={38}
+                  priority
+                  className="dark:hidden block"
+                />
+              </Link>
+            </div>
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden py-8">

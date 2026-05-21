@@ -8,6 +8,10 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { formatCpf } from '@/lib/format-cpf'
@@ -16,6 +20,8 @@ import { formatEducation } from '@/lib/format-education'
 import { formatFamilyIncome } from '@/lib/format-family-income'
 import { formatGender } from '@/lib/format-gender'
 import { formatTitleCase } from '@/lib/utils'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { ContactUpdateStatus, EmpregosUserInfo } from './types'
@@ -94,6 +100,26 @@ export function ConfirmarInformacoesContent({
           fixed={false}
           className="max-w-4xl mx-auto"
           route={`/servicos/trabalho/${vagaId}`}
+          logo={
+            <Link href="/servicos/trabalho">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:block hidden"
+              />
+              <Image
+                src={oportunidadesCariocasLogo}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+                className="dark:hidden block"
+              />
+            </Link>
+          }
         />
       </div>
 

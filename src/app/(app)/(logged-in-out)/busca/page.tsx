@@ -5,9 +5,15 @@ import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { sendGAEvent } from '@next/third-parties/google'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { CatalogSearchContext } from './hooks/use-catalog-search'
@@ -200,8 +206,33 @@ export default function Search() {
 
   const showStaticPopular = context === 'servicos' || context === null
 
+  const logoHref =
+    context === 'empregos' ? '/servicos/trabalho' : '/servicos/cursos'
+
   return (
-    <div className="min-h-lvh max-w-4xl px-4 mx-auto pt-5 flex flex-col pb-4">
+    <div className="min-h-lvh max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
+      {(context === 'empregos' || context === 'cursos') && (
+        <div className="flex justify-center mb-8">
+          <Link href={logoHref}>
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+        </div>
+      )}
       <SearchInput
         ref={searchInputRef}
         placeholder="Do que você precisa?"

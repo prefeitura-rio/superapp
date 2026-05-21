@@ -1,8 +1,14 @@
 import { MyCertificatesCard } from '@/app/components/courses/certified-card'
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { buildAuthUrl } from '@/constants/url'
 import { getApiV1EnrollmentsUserCpf } from '@/http-courses/enrollments/enrollments'
 import { getUserInfoFromToken } from '@/lib/user-info'
+import Image from 'next/image'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 export default async function CoursesCertifiedPage({
@@ -16,6 +22,27 @@ export default async function CoursesCertifiedPage({
   if (!userInfo.cpf) {
     return redirect(buildAuthUrl('/servicos/cursos/certificados'))
   }
+
+  const logo = (
+    <Link href="/servicos/cursos">
+      <Image
+        src={oportunidadesCariocasLogoDark}
+        alt="Oportunidades Cariocas"
+        width={170}
+        height={38}
+        priority
+        className="dark:block hidden"
+      />
+      <Image
+        src={oportunidadesCariocasLogo}
+        alt="Oportunidades Cariocas"
+        width={170}
+        height={38}
+        priority
+        className="dark:hidden block"
+      />
+    </Link>
+  )
 
   try {
     // Fetch user enrollments with pagination
@@ -77,7 +104,7 @@ export default async function CoursesCertifiedPage({
 
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Certificados" route="/servicos/cursos" />
+        <SecondaryHeader route="/servicos/cursos" logo={logo} />
 
         {certificatesWithEnrollments.length === 0 ? (
           <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
@@ -87,6 +114,9 @@ export default async function CoursesCertifiedPage({
           </div>
         ) : (
           <div className="relative overflow-hidden mt-16 px-4">
+            <h1 className="text-base font-medium text-foreground">
+              Certificados
+            </h1>
             <MyCertificatesCard
               certificates={certificatesWithEnrollments}
               autoOpenCourseId={resolvedSearchParams.courseId}
@@ -97,10 +127,9 @@ export default async function CoursesCertifiedPage({
     )
   } catch (error) {
     console.error('Error fetching user certificates:', error)
-    // Return empty certificates array on error
     return (
       <div className="max-w-4xl mx-auto py-6">
-        <SecondaryHeader title="Certificados" route="/servicos/cursos" />
+        <SecondaryHeader route="/servicos/cursos" logo={logo} />
         <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
           <p className="block text-lg text-muted-foreground text-center">
             Erro ao carregar certificados. Tente novamente mais tarde.

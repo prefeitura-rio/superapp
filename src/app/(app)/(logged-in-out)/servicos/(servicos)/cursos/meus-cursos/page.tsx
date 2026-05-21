@@ -53,18 +53,23 @@ export default async function MyCoursesPage() {
     return (
       <div className="max-w-4xl mx-auto py-6">
         <MyCoursesBackButton />
-        <div className="relative overflow-hidden mt-20 px-4">
+        <div className="relative overflow-hidden mt-16 px-4">
+          <h1 className="text-base font-medium text-foreground ">
+            Meus cursos
+          </h1>
           <MyCoursesCard courses={coursesWithEnrollments} />
         </div>
       </div>
     )
   } catch (error) {
     console.error('Error fetching user enrollments:', error)
-    // Return empty courses array on error
     return (
       <div className="max-w-4xl mx-auto py-6">
         <MyCoursesBackButton />
         <div className="relative overflow-hidden mt-20 px-4">
+          <h1 className="text-3xl font-medium text-foreground pb-4">
+            Meus cursos
+          </h1>
           <MyCoursesCard courses={[]} />
         </div>
       </div>
