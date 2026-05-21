@@ -1714,7 +1714,7 @@ test.describe('Empregos — FAQ (público)', () => {
     })
 
     await expect(
-      page.getByText('Quem pode se candidatar às vagas de emprego?', {
+      page.getByText('Quem pode se candidatar às oportunidades de trabalho?', {
         exact: false,
       })
     ).toBeVisible()
@@ -1722,9 +1722,12 @@ test.describe('Empregos — FAQ (público)', () => {
       page.getByText('O que é a conta Gov.br', { exact: false })
     ).toBeVisible()
     await expect(
-      page.getByText('Como realizar a candidatura em uma vaga de emprego?', {
-        exact: false,
-      })
+      page.getByText(
+        'Como realizar a candidatura em uma oportunidade de trabalho?',
+        {
+          exact: false,
+        }
+      )
     ).toBeVisible()
   })
 
