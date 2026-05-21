@@ -2,6 +2,7 @@
 
 import { CoursesHeaderClient } from '@/app/components/courses/courses-header-client'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
+import { useUserEnrollments } from '@/hooks/courses/use-user-enrollments'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
@@ -12,25 +13,29 @@ import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleto
 import { CategoryFiltersSwipe } from './category-filters-swipe'
 import { CategoryFiltersSwipeSkeleton } from './category-filters-swipe-skeleton'
 import { MyCoursesHome } from './my-courses-home'
+import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
 
 export default function CoursePageClient({
   courses,
-  myCourses,
   categoryFilters,
-  isLoadingCategories = false,
 }: {
   courses: ModelsCurso[]
-  myCourses: ModelsCurso[]
   categoryFilters: CategoryFilter[]
-  isLoadingCategories?: boolean
 }) {
-  // Filter courses for "Mais recentes" - exclude myCourses
-  const recentlyAddedCourses = useMemo(() => {
-    return filterCoursesExcludingMyCourses(courses, myCourses)
-  }, [courses, myCourses])
+  const { data: enrollmentsData, isLoading: isLoadingEnrollments } =
+    useUserEnrollments()
 
-  // Filter courses for "Todos os cursos" - exclude only myCourses (include recentlyAddedCourses)
-  const allCoursesFiltered = useMemo(() => {
+  const myCourses: ModelsCurso[] = useMemo(() => {
+    const enrollments = enrollmentsData?.enrollments || []
+    return enrollments
+      .map((enrollment: any) => ({
+        ...enrollment.curso,
+        id: enrollment.course_id,
+      }))
+      .filter((course: any) => course.id)
+  }, [enrollmentsData])
+
+  const coursesExcludingMine = useMemo(() => {
     return filterCoursesExcludingMyCourses(courses, myCourses)
   }, [courses, myCourses])
 
@@ -48,36 +53,30 @@ export default function CoursePageClient({
       </div>
     )
   }
+
   return (
     <div className="min-h-lvh">
       <CoursesHeaderClient />
       <main className="max-w-4xl mx-auto pb-34 text-white">
-        {isLoadingCategories ? (
+        {categoryFilters.length > 0 && (
           <>
             <div className="block sm:hidden">
-              <CategoryFiltersMobileSkeleton />
+              <CategoryFiltersMobile categoryFilters={categoryFilters} />
             </div>
             <div className="hidden sm:block">
-              <CategoryFiltersSwipeSkeleton />
+              <CategoryFiltersSwipe categoryFilters={categoryFilters} />
             </div>
           </>
-        ) : (
-          categoryFilters.length > 0 && (
-            <>
-              <div className="block sm:hidden">
-                <CategoryFiltersMobile categoryFilters={categoryFilters} />
-              </div>
-              <div className="hidden sm:block">
-                <CategoryFiltersSwipe categoryFilters={categoryFilters} />
-              </div>
-            </>
-          )
         )}
 
-        {myCourses.length > 0 && <MyCoursesHome courses={myCourses} />}
+        {isLoadingEnrollments ? (
+          <RecentlyAddedCoursesSwipeSkeleton />
+        ) : (
+          myCourses.length > 0 && <MyCoursesHome courses={myCourses} />
+        )}
 
-        <RecentlyAddedCourses courses={recentlyAddedCourses} />
-        <AllCourses courses={allCoursesFiltered} />
+        <RecentlyAddedCourses courses={coursesExcludingMine} />
+        <AllCourses courses={coursesExcludingMine} />
       </main>
     </div>
   )

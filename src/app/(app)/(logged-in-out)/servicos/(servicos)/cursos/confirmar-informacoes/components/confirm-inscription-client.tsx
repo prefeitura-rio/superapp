@@ -29,6 +29,7 @@ import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { calculateAge } from '@/lib/calculate-age'
 import { formatAddressComplete } from '@/lib/format-address-complete'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   type CourseUserInfo,
   type CustomField,
@@ -86,6 +87,7 @@ export function ConfirmInscriptionClient({
   const swiperRef = useRef<SwiperRef>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   // Helper to check if a value is valid (not null, undefined, empty string, or "null" string)
   const isValidAddressValue = (value: string | null | undefined): boolean => {
@@ -771,6 +773,12 @@ export function ConfirmInscriptionClient({
         if (!result.success) {
           throw new Error(result.error || 'Erro ao fazer inscrição')
         }
+
+        // Invalidate enrollment cache so the course page reflects the new status
+        await queryClient.invalidateQueries({ queryKey: ['user-enrollments'] })
+        await queryClient.invalidateQueries({
+          queryKey: ['user-enrollment', Number.parseInt(courseId)],
+        })
 
         // Success - show success slide
         setShowSuccess(true)

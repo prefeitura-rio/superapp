@@ -13,24 +13,22 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
+import { oportunidadesCariocasLogoDark } from '@/constants/bucket'
+import { useUserEnrollment } from '@/hooks/courses/use-user-enrollment'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
   normalizeModalityDisplay,
 } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
-import type { UserInfo } from '@/lib/user-info'
 import { cn } from '@/lib/utils'
 import { getBackRoute } from '@/lib/utils'
-import type { Course, CourseScheduleInfo, UserEnrollment } from '@/types'
+import type { Course, CourseScheduleInfo } from '@/types'
 import {
   shouldShowExternalPartnerBadge,
   shouldShowExternalPartnerModal,
 } from '@/types/course'
+import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -41,8 +39,6 @@ import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
 
 interface CourseDetailsProps {
   course: Course
-  userEnrollment: UserEnrollment | null
-  userInfo: UserInfo
   department: ModelsDepartmentResponse | null
 }
 
@@ -1049,13 +1045,13 @@ function CourseContent({ course }: CourseContentProps) {
 }
 
 // Main component
-export function CourseDetails({
-  course,
-  userEnrollment,
-  userInfo,
-  department,
-}: CourseDetailsProps) {
+export function CourseDetails({ course, department }: CourseDetailsProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const { data: enrollmentData, isLoading: isLoadingEnrollment } =
+    useUserEnrollment(course.id)
+  const userEnrollment = enrollmentData?.enrollment ?? null
+
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false)
@@ -1127,6 +1123,10 @@ export function CourseDetails({
         console.error('Failed to cancel enrollment:', result.error)
       } else {
         toast.success('Inscrição cancelada com sucesso')
+        await queryClient.invalidateQueries({ queryKey: ['user-enrollments'] })
+        await queryClient.invalidateQueries({
+          queryKey: ['user-enrollment', course.id],
+        })
       }
     } catch (error) {
       const errorMessage = 'Erro ao cancelar inscrição. Tente novamente.'
@@ -1145,6 +1145,10 @@ export function CourseDetails({
     )
 
   const renderActionButton = () => {
+    if (isLoadingEnrollment) {
+      return <div className="w-full h-12 rounded-full bg-card animate-pulse" />
+    }
+
     // Don't render button if user concluded course without certificate
     if (userEnrollment?.status === 'concluded' && !course.has_certificate) {
       return null
