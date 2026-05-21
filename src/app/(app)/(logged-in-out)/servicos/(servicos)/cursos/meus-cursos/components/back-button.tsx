@@ -2,6 +2,12 @@
 
 import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 
@@ -102,11 +108,30 @@ export function MyCoursesBackButton() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-background">
       <div className="max-w-4xl mx-auto px-4 py-4 md:py-6">
-        <div className="flex items-center">
+        <div className="relative flex items-center">
           <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
-          <h1 className="text-xl font-medium text-center flex-1 mr-12">
-            Meus cursos
-          </h1>
+          <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              <Link href="/servicos/cursos">
+                <Image
+                  src={oportunidadesCariocasLogoDark}
+                  alt="Oportunidades Cariocas"
+                  width={170}
+                  height={38}
+                  priority
+                  className="dark:block hidden"
+                />
+                <Image
+                  src={oportunidadesCariocasLogo}
+                  alt="Oportunidades Cariocas"
+                  width={170}
+                  height={38}
+                  priority
+                  className="dark:hidden block"
+                />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

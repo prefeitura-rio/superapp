@@ -1,14 +1,41 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function MyCoursesLoading() {
   return (
     <div className="max-w-4xl mx-auto py-6">
-      {/* Header */}
-      <SecondaryHeader title="Meus cursos" route="/servicos/cursos/opcoes" />
+      <SecondaryHeader
+        route="/servicos/cursos/opcoes"
+        logo={
+          <Link href="/servicos/cursos">
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+        }
+      />
 
-      {/* Course Cards Skeleton */}
       <div className="relative overflow-hidden mt-16 px-4">
+        <Skeleton className="h-4 w-28 mb-4" />
         <div className="flex flex-col gap-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
