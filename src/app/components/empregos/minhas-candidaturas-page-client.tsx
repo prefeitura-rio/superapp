@@ -4,7 +4,13 @@ import { MinhasCandidaturasContent } from '@/app/(app)/(logged-in-out)/servicos/
 import type { CandidaturaCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-utils'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { useQuery } from '@tanstack/react-query'
+import Image from 'next/image'
+import Link from 'next/link'
 
 async function fetchCandidaturas(): Promise<{
   candidaturas: CandidaturaCardData[]
@@ -20,11 +26,39 @@ async function fetchCandidaturas(): Promise<{
 function MinhasCandidaturasSkeleton() {
   return (
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader fixed={false} title="Minhas candidaturas" />
-      <div className="px-4 pt-2 md:pt-0 flex flex-col gap-2 md:grid md:grid-cols-2">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-36 rounded-3xl" />
-        ))}
+      <SecondaryHeader
+        fixed={false}
+        route="/servicos/trabalho"
+        logo={
+          <Link href="/servicos/trabalho">
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+        }
+      />
+      <div className="px-4 pt-2 md:pt-0">
+        <h1 className="text-3xl font-medium text-foreground pb-2">
+          Minhas candidaturas
+        </h1>
+        <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-36 rounded-3xl" />
+          ))}
+        </div>
       </div>
     </main>
   )

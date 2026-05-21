@@ -1,5 +1,11 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
+import Image from 'next/image'
+import Link from 'next/link'
 
 function CandidaturaCardSkeleton() {
   return (
@@ -28,9 +34,34 @@ function CandidaturaCardSkeleton() {
 export default function MinhasCandidaturasLoading() {
   return (
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader fixed={false} title="Minhas candidaturas" />
-
+      <SecondaryHeader
+        fixed={false}
+        route="/servicos/trabalho"
+        logo={
+          <Link href="/servicos/trabalho">
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+        }
+      />
       <div className="px-4 pt-2 md:pt-0">
+        <h1 className="text-3xl font-medium text-foreground pb-2">
+          Minhas candidaturas
+        </h1>
         <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <CandidaturaCardSkeleton key={i} />

@@ -1,5 +1,11 @@
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import { type FaqSection, FormattedContent } from '@/lib/faq-utils'
+import Image from 'next/image'
+import Link from 'next/link'
 
 const EMPREGOS_FAQ_SECTIONS: FaqSection[] = [
   {
@@ -81,8 +87,32 @@ export const dynamic = 'force-static'
 export default function EmpregosFaqPage() {
   return (
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader title="FAQ" fixed={false} />
+      <SecondaryHeader
+        fixed={false}
+        route="/servicos/trabalho"
+        logo={
+          <Link href="/servicos/trabalho">
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+        }
+      />
       <div className="p-5 pt-4 max-w-4xl mx-auto">
+        <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
         <div className="space-y-8">
           {EMPREGOS_FAQ_SECTIONS.map((section, index) => (
             <div key={section.id}>
