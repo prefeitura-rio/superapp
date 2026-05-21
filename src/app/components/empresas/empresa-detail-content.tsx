@@ -3,8 +3,13 @@
 import type { VagaCardData } from '@/app/components/empregos/vaga-card'
 import { VagaCard } from '@/app/components/empregos/vaga-card'
 import { ChevronLeftIcon } from '@/assets/icons'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import type { EmpresaDetail } from '@/lib/empresa-utils'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 interface EmpresaDetailContentProps {
@@ -21,8 +26,8 @@ export function EmpresaDetailContent({
   return (
     <div className="min-h-lvh bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
-        {/* Header: apenas botão de voltar */}
-        <div className="flex items-start">
+        {/* Header: botão de voltar + logo centralizada */}
+        <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={() => router.back()}
@@ -31,6 +36,25 @@ export function EmpresaDetailContent({
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
+          <Link href="/servicos/trabalho">
+            <Image
+              src={oportunidadesCariocasLogoDark}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:block hidden"
+            />
+            <Image
+              src={oportunidadesCariocasLogo}
+              alt="Oportunidades Cariocas"
+              width={170}
+              height={38}
+              priority
+              className="dark:hidden block"
+            />
+          </Link>
+          <div className="w-11" aria-hidden="true" />
         </div>
 
         {/* Logo + nome da empresa abaixo do header */}

@@ -13,6 +13,10 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { Separator } from '@/components/ui/separator'
+import {
+  oportunidadesCariocasLogo,
+  oportunidadesCariocasLogoDark,
+} from '@/constants/bucket'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
@@ -193,37 +197,46 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
   }
   return (
     <div className="h-[320px] md:h-[380px] w-full relative">
-      <div className="flex justify-start">
-        <IconButton
-          icon={ChevronLeftIcon}
-          className="top-4 left-4 absolute z-10"
-          onClick={handleBack}
-        />
-      </div>
-      {course.cover_image && (
-        <>
-          <Image
-            src={course.cover_image}
-            alt={course.title || ''}
-            fill
-            className={cn(
-              'object-cover',
-              course.enrollment_end_date &&
-                new Date() > new Date(course.enrollment_end_date) &&
-                'grayscale'
-            )}
-          />
-          <div className="absolute top-6 right-2 flex flex-col gap-1">
-            {course.accessibility && (
-              <AccessibilityBadge accessibility={course.accessibility} />
-            )}
-            {shouldShowExternalPartnerBadge(course.course_management_type) && (
-              <IsExternalPartnerBadge />
-            )}
+      {/* Header bar: botão + logo centralizados verticalmente */}
+      <div className="absolute top-0 inset-x-0 z-10 flex items-center px-4 py-4">
+        <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+        <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto">
+            <Link href="/servicos/cursos">
+              <Image
+                src={oportunidadesCariocasLogoDark}
+                alt="Oportunidades Cariocas"
+                width={170}
+                height={38}
+                priority
+              />
+            </Link>
           </div>
-        </>
+        </div>
+      </div>
+
+      {course.cover_image && (
+        <Image
+          src={course.cover_image}
+          alt={course.title || ''}
+          fill
+          className={cn(
+            'object-cover',
+            course.enrollment_end_date &&
+              new Date() > new Date(course.enrollment_end_date) &&
+              'grayscale'
+          )}
+        />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
+        <div className="flex flex-col gap-1 mb-4">
+          {course.accessibility && (
+            <AccessibilityBadge accessibility={course.accessibility} />
+          )}
+          {shouldShowExternalPartnerBadge(course.course_management_type) && (
+            <IsExternalPartnerBadge />
+          )}
+        </div>
         <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
           {course.title || 'Título não disponível'}
         </h1>
