@@ -1,14 +1,9 @@
 //@ts-nocheck
 //não use isso a menos que saiba oque estiver fazendo!
-import { getUserEnrollment } from '@/actions/courses/get-user-enrollment'
 import { CourseDetails } from '@/app/components/courses/course-details'
 import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
-import {
-  type UserEnrollmentExtended,
-  shouldShowCourse,
-} from '@/lib/course-utils'
-import { getUserInfoFromToken } from '@/lib/user-info'
+import { shouldShowCourse } from '@/lib/course-utils'
 import { notFound } from 'next/navigation'
 
 export default async function CoursePage({
@@ -17,7 +12,6 @@ export default async function CoursePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug: courseSlug } = await params
-  const userInfo = await getUserInfoFromToken()
 
   try {
     const response = await getApiV1CoursesCourseId(Number.parseInt(courseSlug))
@@ -28,24 +22,11 @@ export default async function CoursePage({
 
     const course = response.data.data
 
-    // Show course even when it is over 30 days since the last class ended
     if (!shouldShowCourse({ course, renderByUrl: true })) {
       notFound()
     }
 
-    // Get user enrollment status for this course
-    let userEnrollment: UserEnrollmentExtended | null = null
-    try {
-      userEnrollment = await getUserEnrollment(course.id)
-    } catch (enrollmentError) {
-      console.error(
-        'Error fetching user enrollment, continuing without it:',
-        enrollmentError
-      )
-      // Continue without enrollment data - user will see 'Inscreva-se' button
-    }
-
-    // Fetch department/organization data if orgao_id exists
+    // Fetch department/organization data if orgao_id exists (public data)
     let departmentData = null
     if (course.orgao_id) {
       try {
@@ -61,14 +42,9 @@ export default async function CoursePage({
       }
     }
 
-    return (
-      <CourseDetails
-        course={course}
-        userEnrollment={userEnrollment}
-        userInfo={userInfo}
-        department={departmentData}
-      />
-    )
+    // User enrollment is fetched client-side via TanStack Query
+    // to avoid CDN caching authenticated data
+    return <CourseDetails course={course} department={departmentData} />
   } catch (error) {
     console.error('Error fetching course:', error)
     notFound()

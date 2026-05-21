@@ -16,12 +16,12 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
   return (
     <>
       <Link href="/servicos/cursos/meus-cursos">
-        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-1 cursor-pointer hover:opacity-80 transition-opacity">
+        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 md:px-1 cursor-pointer hover:opacity-80 transition-opacity">
           Meus Cursos
         </h3>
       </Link>
       {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
-      <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[576px]:block min-[577px]:hidden">
+      <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[895px]:block min-[896px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
           {limitedCourses.map((course, index) => (
             <div
@@ -44,8 +44,8 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
         </div>
       </div>
       {/* Desktop: grid de 4 colunas sem scroll (acima de max-w-xl = 576px) */}
-      <div className="hidden min-[577px]:block px-4 pb-6">
-        <div className="grid grid-cols-4 gap-2">
+      <div className="hidden min-[896px]:block px-1 pb-6">
+        <div className="flex gap-4">
           {limitedCourses.map((course, index) => (
             <CourseCard
               courseId={course.id}
@@ -58,7 +58,6 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
               coverImage={course.cover_image as string}
               accessibility={course.accessibility as AccessibilityProps}
               courseManagementType={course.course_management_type}
-              className="w-full"
             />
           ))}
         </div>

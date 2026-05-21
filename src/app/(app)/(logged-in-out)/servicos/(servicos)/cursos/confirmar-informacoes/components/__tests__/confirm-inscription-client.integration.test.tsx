@@ -1,5 +1,7 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ConfirmInscriptionClient } from '../confirm-inscription-client'
@@ -72,6 +74,15 @@ import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 
 const mockSubmitCourseInscription = vi.mocked(submitCourseInscription)
 
+function wrapper({ children }: { children: ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+}
+
 describe('ConfirmInscriptionClient', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -88,7 +99,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
@@ -104,7 +116,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       expect(screen.getByText(/Informe seu celular/i)).toBeInTheDocument()
@@ -121,7 +134,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       expect(
@@ -140,7 +154,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const continueButton = screen.getByRole('button', {
@@ -158,7 +173,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const continueButton = screen.getByRole('button', {
@@ -185,7 +201,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const confirmButton = screen.getByRole('button', {
@@ -218,7 +235,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const confirmButton = screen.getByRole('button', {
@@ -258,7 +276,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const confirmButton = screen.getByRole('button', {
@@ -291,7 +310,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const confirmButton = screen.getByRole('button', {
@@ -318,7 +338,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       const backButton = screen.getByTestId('back-button')
@@ -340,7 +361,8 @@ describe('ConfirmInscriptionClient', () => {
           courseInfo={basicCourseInfo}
           courseId={courseId}
           courseSlug={courseSlug}
-        />
+        />,
+        { wrapper }
       )
 
       expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
