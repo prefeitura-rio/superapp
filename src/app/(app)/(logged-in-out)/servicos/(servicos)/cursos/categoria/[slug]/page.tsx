@@ -8,7 +8,7 @@ import {
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
-import { filterVisibleCourses } from '@/lib/course-utils'
+import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
 import { getDalCategorias, getDalCourses } from '@/lib/dal'
 import type { AccessibilityProps } from '@/types/course'
 import Image from 'next/image'
@@ -70,7 +70,7 @@ export default async function CoursesCategoryPage({
       if (coursesResponse.status === 200) {
         const data = coursesResponse.data as unknown as CoursesApiResponse
         const allCourses: ModelsCurso[] = data?.data?.courses || []
-        courses = filterVisibleCourses(allCourses)
+        courses = sortCourses(filterVisibleCourses(allCourses))
       }
     } catch (error) {
       console.error('Error fetching courses by category:', error)
