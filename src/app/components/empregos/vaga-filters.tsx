@@ -4,7 +4,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CheckboxList } from '@/components/ui/custom/checkbox-list'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { RadioList } from '@/components/ui/custom/radio-list'
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { ChevronDown } from 'lucide-react'
@@ -406,6 +411,9 @@ export function VagaFilters({ onFiltersChange }: VagaFiltersProps) {
             isSearchable ? 'h-[70vh] flex flex-col' : 'flex flex-col'
           )}
         >
+          <DrawerTitle className="sr-only">
+            {currentFilter?.label ?? 'Filtro'}
+          </DrawerTitle>
           {/* Handle */}
           <div className="flex justify-center pt-8 pb-6 shrink-0">
             <div className="w-8.5 h-1 rounded-full bg-popover-line" />
