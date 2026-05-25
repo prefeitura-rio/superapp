@@ -42,14 +42,14 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(
         <DrawerContent
           ref={ref}
           className={cn(
-            'p-8 max-w-4xl mx-auto !rounded-t-3xl pb-12',
+            'p-8 max-w-4xl mx-auto !rounded-t-3xl pb-12 relative',
             contentClassName
           )}
           {...props}
         >
           {/* Handle */}
           {showHandle && (
-            <div className="flex justify-center  pb-1">
+            <div className="flex justify-center pb-6">
               <div className="w-8.5 h-1 rounded-full bg-popover-line" />
             </div>
           )}
