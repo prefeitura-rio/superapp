@@ -2,28 +2,18 @@ import type { EmpregabilidadeVaga } from '@/http-courses/models'
 import type { VagaCardData } from './vaga-card'
 
 /**
- * Verifica se uma vaga é válida para exibição
- * Critérios:
- * 1. Status deve ser "publicado_ativo"
- * 2. data_limite não pode estar no passado (ou pode ser null)
+ * Verifica se uma vaga está dentro do prazo para exibição.
+ * Nota: filtragem por status é feita pela API — esta função não repete essa verificação.
  */
 export function isVagaValida(vaga: EmpregabilidadeVaga): boolean {
-  // Verifica status
-  if (vaga.status !== 'publicado_ativo') {
-    return false
-  }
-
-  // Verifica data_limite
   if (vaga.data_limite) {
     const dataLimite = new Date(vaga.data_limite)
     const hoje = new Date()
-    hoje.setHours(0, 0, 0, 0) // Zera horas para comparar apenas datas
-
+    hoje.setHours(0, 0, 0, 0)
     if (dataLimite < hoje) {
       return false
     }
   }
-
   return true
 }
 
