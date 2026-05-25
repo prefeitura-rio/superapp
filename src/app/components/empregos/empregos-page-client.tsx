@@ -5,7 +5,6 @@ import { AllVagas } from './all-vagas'
 import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
 import { RecentlyAddedVagas } from './recently-added-vagas'
 import type { VagaCardData } from './vaga-card'
-import { separateVagas } from './vagas-utils'
 
 async function fetchCandidaturas() {
   const res = await fetch('/api/user/empregos/candidaturas', {
@@ -16,12 +15,10 @@ async function fetchCandidaturas() {
 }
 
 interface EmpregosPageClientProps {
-  vagas: VagaCardData[]
+  recentVagas: VagaCardData[]
 }
 
-export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
-  const { recentVagas, allVagas } = separateVagas(vagas)
-
+export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
   const { data } = useQuery({
     queryKey: ['candidaturas'],
     queryFn: fetchCandidaturas,
@@ -29,16 +26,6 @@ export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
   })
 
   const hasCandidaturas = data?.hasCandidaturas ?? false
-
-  if (vagas.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full px-4 pt-24">
-        <p className="text-lg text-muted-foreground text-center">
-          Nenhuma vaga de emprego encontrada
-        </p>
-      </div>
-    )
-  }
 
   return (
     <>
@@ -48,7 +35,7 @@ export function EmpregosPageClient({ vagas }: EmpregosPageClientProps) {
         </div>
       )}
       <RecentlyAddedVagas vagas={recentVagas} />
-      <AllVagas vagas={allVagas} />
+      <AllVagas />
     </>
   )
 }
