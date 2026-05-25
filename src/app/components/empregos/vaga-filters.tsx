@@ -1,12 +1,13 @@
 'use client'
 
+import { Checkbox } from '@/components/ui/checkbox'
 import { CheckboxList } from '@/components/ui/custom/checkbox-list'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { ChevronDown, Search } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VAGA_FILTERS } from './vaga-filter-config'
 
@@ -141,15 +142,14 @@ function InfiniteCheckList({
 
   return (
     <div className="flex flex-col min-h-0 flex-1">
-      <div className="relative shrink-0">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+      <div className="shrink-0">
         <input
           type="text"
           value={query}
           onChange={e => onQueryChange(e.target.value)}
           placeholder={placeholder}
           className={cn(
-            'w-full pl-9 pr-4 py-3 rounded-xl border border-border bg-background',
+            'w-full px-4 py-3 rounded-xl border border-border bg-background',
             'text-sm text-foreground placeholder:text-muted-foreground',
             'focus:outline-none focus:border-muted-foreground transition-colors'
           )}
@@ -170,16 +170,18 @@ function InfiniteCheckList({
           items.map(item => (
             <label
               key={item.value}
+              htmlFor={`infinite-check-${item.value}`}
               className="flex items-center justify-between cursor-pointer py-2 rounded-md transition-colors hover:bg-accent/40"
             >
               <span className="text-sm text-foreground truncate pr-4">
                 {item.label}
               </span>
-              <input
-                type="checkbox"
+              <Checkbox
+                id={`infinite-check-${item.value}`}
                 checked={value.includes(item.value)}
-                onChange={e => handleToggle(item.value, e.target.checked)}
-                className="accent-foreground size-4 shrink-0 rounded-sm border border-border"
+                onCheckedChange={checked =>
+                  handleToggle(item.value, checked === true)
+                }
               />
             </label>
           ))}
@@ -290,7 +292,7 @@ function EmpresaSheet({ value, onValueChange }: EmpresaSheetProps) {
       onQueryChange={q => {
         setQuery(q)
       }}
-      placeholder="Busque pelo nome da empresa"
+      placeholder="Encontre a empresa desejada"
     />
   )
 }
