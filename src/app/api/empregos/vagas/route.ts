@@ -171,17 +171,26 @@ export async function GET(request: NextRequest) {
     }),
   }
 
-  const regimeDescricoes = searchParams
-    .getAll('regime_descricao')
+  const regimeDescricoes = (searchParams.get('regime_descricao') ?? '')
+    .split(',')
+    .map(s => s.trim())
     .filter(Boolean)
-  const modeloDescricoes = searchParams
-    .getAll('modelo_descricao')
+  const modeloDescricoes = (searchParams.get('modelo_descricao') ?? '')
+    .split(',')
+    .map(s => s.trim())
     .filter(Boolean)
-  const acessibilidades = searchParams
-    .getAll('acessibilidade_pcd')
+  const acessibilidades = (searchParams.get('acessibilidade_pcd') ?? '')
+    .split(',')
+    .map(s => s.trim())
     .filter(Boolean)
-  const bairros = searchParams.getAll('bairro').filter(Boolean)
-  const contratantes = searchParams.getAll('contratante').filter(Boolean)
+  const bairros = (searchParams.get('bairro') ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+  const contratantes = (searchParams.get('contratante') ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
 
   console.log('[VAGAS] modeloDescricoes recebidos:', modeloDescricoes)
   console.log('[VAGAS] regimeDescricoes recebidos:', regimeDescricoes)
