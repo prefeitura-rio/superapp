@@ -33,31 +33,31 @@ function buildQueryString(filters: VagaFilterState): string {
 
   // tipo_vaga: descricao do regime (ex: 'CLT', 'PJ') — route handler resolve UUID
   const tipoVaga = filters.tipo_vaga
-  if (Array.isArray(tipoVaga)) {
-    for (const v of tipoVaga) params.append('regime_descricao', v)
+  if (Array.isArray(tipoVaga) && tipoVaga.length > 0) {
+    params.set('regime_descricao', tipoVaga.join(','))
   }
 
   // modalidade: descricao do modelo (ex: 'Presencial', 'Remoto') — route handler resolve UUID
   const modalidade = filters.modalidade
-  if (Array.isArray(modalidade)) {
-    for (const v of modalidade) params.append('modelo_descricao', v)
+  if (Array.isArray(modalidade) && modalidade.length > 0) {
+    params.set('modelo_descricao', modalidade.join(','))
   }
 
   const empresa = filters.empresa
-  if (Array.isArray(empresa)) {
-    for (const v of empresa) params.append('contratante', v)
+  if (Array.isArray(empresa) && empresa.length > 0) {
+    params.set('contratante', empresa.join(','))
   } else if (typeof empresa === 'string' && empresa.trim()) {
-    params.append('contratante', empresa.trim())
+    params.set('contratante', empresa.trim())
   }
 
   const acessibilidade = filters.acessibilidade
-  if (Array.isArray(acessibilidade)) {
-    for (const v of acessibilidade) params.append('acessibilidade_pcd', v)
+  if (Array.isArray(acessibilidade) && acessibilidade.length > 0) {
+    params.set('acessibilidade_pcd', acessibilidade.join(','))
   }
 
   const localizacao = filters.localizacao
-  if (Array.isArray(localizacao)) {
-    for (const v of localizacao) params.append('bairro', v)
+  if (Array.isArray(localizacao) && localizacao.length > 0) {
+    params.set('bairro', localizacao.join(','))
   }
 
   return params.toString()
