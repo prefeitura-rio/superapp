@@ -153,14 +153,27 @@ function InfiniteCheckList({
           value={query}
           onChange={e => onQueryChange(e.target.value)}
           placeholder={placeholder}
+          style={{
+            borderWidth: '1.4px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            height: '32px',
+            paddingTop: '16px',
+            paddingBottom: '16px',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+            boxSizing: 'content-box',
+            width: 'calc(100% - 40px)',
+          }}
           className={cn(
-            'w-full px-4 py-3 rounded-xl border border-border bg-background',
-            'text-sm text-foreground placeholder:text-muted-foreground',
-            'focus:outline-none focus:border-muted-foreground transition-colors'
+            'w-full rounded-[12px] bg-background',
+            'text-sm font-normal leading-5 tracking-normal text-foreground',
+            'placeholder:text-muted-foreground placeholder:text-sm placeholder:font-normal placeholder:leading-5 placeholder:tracking-normal',
+            'focus:outline-none transition-colors'
           )}
         />
       </div>
-      <div className="overflow-y-auto flex-1 min-h-0 mt-4">
+      <div className="overflow-y-auto flex-1 min-h-0 mt-6">
         {/* Skeleton: primeira carga ou nova query (isLoading=true) */}
         {isLoading && (
           <div className="flex flex-col gap-2">
@@ -337,12 +350,9 @@ export function VagaFilters({ onFiltersChange }: VagaFiltersProps) {
   }
 
   function handleClear() {
-    if (!activeFilter) return
-    const next = { ...filterState }
-    delete next[activeFilter]
-    setFilterState(next)
-    onFiltersChange?.(next)
-    setActiveFilter(null)
+    const currentFilter = VAGA_FILTERS.find(f => f.id === activeFilter)
+    if (!currentFilter) return
+    setDraftValue(currentFilter.type === 'multiple' ? [] : '')
   }
 
   function getSelectionCount(id: string): number {
@@ -375,7 +385,7 @@ export function VagaFilters({ onFiltersChange }: VagaFiltersProps) {
               type="button"
               onClick={() => openFilter(filter.id)}
               className={cn(
-                'flex h-8 items-center gap-1.5 px-4 rounded-full border whitespace-nowrap transition-colors shrink-0',
+                'flex h-8 items-center gap-1.5 px-4 rounded-full border whitespace-nowrap transition-colors shrink-0 cursor-pointer',
                 'text-sm font-normal leading-5 tracking-normal',
                 selected
                   ? 'border-foreground bg-card'
@@ -467,19 +477,19 @@ export function VagaFilters({ onFiltersChange }: VagaFiltersProps) {
 
           {hasDivider && <div className="h-px bg-border mt-6 shrink-0" />}
 
-          <DrawerFooter className="flex-row gap-3 px-8 pt-6 pb-10 shrink-0">
+          <DrawerFooter className="flex-row gap-2 px-8 pt-6 pb-10 shrink-0">
             <CustomButton
               variant="outline"
               onClick={handleClear}
               size="lg"
-              className="flex-1 rounded-full bg-card border-0 text-foreground"
+              className="flex-1 rounded-full bg-card border-0 text-foreground h-auto py-4 px-6"
             >
               Limpar
             </CustomButton>
             <CustomButton
               onClick={handleApply}
               size="lg"
-              className="flex-1 rounded-full"
+              className="flex-1 rounded-full h-auto py-4 px-6"
             >
               Aplicar
             </CustomButton>
