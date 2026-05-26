@@ -97,7 +97,7 @@ export function CourseCard({
             />
           )}
 
-          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0]">
+          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0] bg-white">
             {institutionaLogo ? (
               <div className="relative w-full h-full">
                 <Image
@@ -156,7 +156,7 @@ export function CourseCard({
           />
         )}
 
-        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0]">
+        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden border border-[#E2E8F0] bg-white">
           {institutionaLogo ? (
             <div className="relative w-full h-full">
               <Image
