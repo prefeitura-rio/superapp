@@ -120,7 +120,7 @@ jobs:
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
           NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO: "https://services.staging.app.dados.rio/catalogo/"
-          NEXT_PUBLIC_HAND_TALK_TOKEN: "8258d2ba4e13dae4501312c932c5ef7c"
+          NEXT_PUBLIC_HAND_TALK_TOKEN: "17a931fe38db57f3f3db2f9d8745f29b"
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -172,7 +172,7 @@ jobs:
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.staging.app.dados.rio/catalogo/" \
-            --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="8258d2ba4e13dae4501312c932c5ef7c" \
+            --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="17a931fe38db57f3f3db2f9d8745f29b" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
             --load \
             .
