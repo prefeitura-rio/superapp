@@ -27,11 +27,19 @@ const PT_MONTHS = [
   'DEZ',
 ]
 
+function parseDateLocal(dateString: string): Date {
+  const datePart = dateString.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 function getEnrollmentText(enrollmentEndDate?: string): string | null {
   if (!enrollmentEndDate) return null
-  const endDate = new Date(enrollmentEndDate)
-  if (new Date() > endDate) return 'Inscrições encerradas'
-  return `Inscrições até ${endDate.getUTCDate()} ${PT_MONTHS[endDate.getUTCMonth()]}`
+  const endDate = parseDateLocal(enrollmentEndDate)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (today > endDate) return 'Inscrições encerradas'
+  return `Inscrições até ${endDate.getDate()} ${PT_MONTHS[endDate.getMonth()]}`
 }
 
 interface CourseCardProps {
