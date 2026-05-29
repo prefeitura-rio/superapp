@@ -107,7 +107,19 @@ describe('formatDate', () => {
   test('formats ISO datetime to Brazilian format', () => {
     const result = formatDate('2025-12-25T10:30:00Z')
 
-    expect(result).toMatch(/25\/12\/2025/)
+    expect(result).toBe('25/12/2025')
+  })
+
+  test('formats date-only string without UTC shift', () => {
+    const result = formatDate('2026-08-08')
+
+    expect(result).toBe('08/08/2026')
+  })
+
+  test('formats UTC midnight timestamp without shifting to previous day', () => {
+    const result = formatDate('2026-08-08T00:00:00Z')
+
+    expect(result).toBe('08/08/2026')
   })
 })
 

@@ -34,10 +34,22 @@ export function formatTimeRange(timeRange: string | null): string {
   return `${startTime}h às ${endTime}h`
 }
 
+/**
+ * Parses a date string without UTC shift.
+ * Extracts the YYYY-MM-DD portion and constructs a Date in local time,
+ * so a value like "2026-08-08T00:00:00Z" always yields August 8th regardless
+ * of the browser timezone.
+ */
+function parseDateLocal(dateString: string): Date {
+  const datePart = dateString.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export const formatDate = (dateString: string | null): string | null => {
   if (!dateString) return null
   try {
-    const date = new Date(dateString)
+    const date = parseDateLocal(dateString)
     return date.toLocaleDateString('pt-BR')
   } catch {
     return null
