@@ -20,8 +20,6 @@ interface LookupListResponse {
   data: LookupItem[]
 }
 
-const MAX_PARALLEL = 5
-
 const BASE_URL = (process.env.NEXT_PUBLIC_COURSES_BASE_API_URL ?? '').replace(
   /\/$/,
   ''
@@ -116,49 +114,6 @@ async function resolveModeloUUIDs(descricoes: string[]): Promise<string[]> {
   }
 }
 
-/**
- * Expande filtros multi-valor em múltiplos conjuntos de params (produto cartesiano).
- * Limitado a MAX_PARALLEL requisições.
- */
-function expandParams(
-  base: GetApiPublicEmpregabilidadeVagasParams,
-  regimes: string[],
-  modelos: string[],
-  acessibilidades: string[],
-  bairros: string[],
-  contratantes: string[]
-): GetApiPublicEmpregabilidadeVagasParams[] {
-  const r = regimes.length > 0 ? regimes : [undefined]
-  const m = modelos.length > 0 ? modelos : [undefined]
-  const a = acessibilidades.length > 0 ? acessibilidades : [undefined]
-  const b = bairros.length > 0 ? bairros : [undefined]
-  const c = contratantes.length > 0 ? contratantes : [undefined]
-
-  const combos: GetApiPublicEmpregabilidadeVagasParams[] = []
-
-  outer: for (const regime of r) {
-    for (const modelo of m) {
-      for (const acess of a) {
-        for (const bairro of b) {
-          for (const contratante of c) {
-            combos.push({
-              ...base,
-              ...(regime !== undefined && { id_regime_contratacao: regime }),
-              ...(modelo !== undefined && { id_modelo_trabalho: modelo }),
-              ...(acess !== undefined && { acessibilidade_pcd: acess }),
-              ...(bairro !== undefined && { bairro }),
-              ...(contratante !== undefined && { contratante }),
-            })
-            if (combos.length >= MAX_PARALLEL) break outer
-          }
-        }
-      }
-    }
-  }
-
-  return combos
-}
-
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
 
@@ -192,60 +147,39 @@ export async function GET(request: NextRequest) {
     .map(s => s.trim())
     .filter(Boolean)
 
-  console.log('[VAGAS] modeloDescricoes recebidos:', modeloDescricoes)
-  console.log('[VAGAS] regimeDescricoes recebidos:', regimeDescricoes)
-
-  // Resolve descricoes → UUIDs em paralelo (lê access_token via cookies())
+  // Resolve descricoes → UUIDs em paralelo
   const [regimes, modelos] = await Promise.all([
     resolveRegimeUUIDs(regimeDescricoes),
     resolveModeloUUIDs(modeloDescricoes),
   ])
 
-  console.log('[VAGAS] regimes UUIDs resolvidos:', regimes)
-  console.log('[VAGAS] modelos UUIDs resolvidos:', modelos)
-
   // Se havia filtro de regime/modelo mas não resolveu nenhum UUID → sem resultados
   if (regimeDescricoes.length > 0 && regimes.length === 0) {
-    console.warn('[VAGAS] regime não resolveu UUID, retornando vazio')
     return NextResponse.json({ data: [], meta: { total: 0 } })
   }
   if (modeloDescricoes.length > 0 && modelos.length === 0) {
-    console.warn('[VAGAS] modalidade não resolveu UUID, retornando vazio')
     return NextResponse.json({ data: [], meta: { total: 0 } })
   }
 
-  const paramSets = expandParams(
-    base,
-    regimes,
-    modelos,
-    acessibilidades,
-    bairros,
-    contratantes
-  )
-  console.log('[VAGAS] paramSets expandidos:', JSON.stringify(paramSets))
+  const params: GetApiPublicEmpregabilidadeVagasParams = {
+    ...base,
+    ...(regimes.length > 0 && { id_regime_contratacao: regimes.join(',') }),
+    ...(modelos.length > 0 && { id_modelo_trabalho: modelos.join(',') }),
+    ...(acessibilidades.length > 0 && {
+      acessibilidade_pcd: acessibilidades.join(','),
+    }),
+    ...(bairros.length > 0 && { bairro: bairros.join(',') }),
+    ...(contratantes.length > 0 && { contratante: contratantes.join(',') }),
+  }
 
   try {
-    const responses = await Promise.all(
-      paramSets.map(params => getApiPublicEmpregabilidadeVagas(params))
-    )
+    const response = await getApiPublicEmpregabilidadeVagas(params)
+    const body = response.data as unknown as VagasApiResponse
+    const vagas: EmpregabilidadeVaga[] = Array.isArray(body?.data)
+      ? body.data
+      : []
 
-    // Mescla e deduplica por id
-    const seen = new Set<string>()
-    const merged: EmpregabilidadeVaga[] = []
-
-    for (const res of responses) {
-      if (res.status !== 200) continue
-      const body = res.data as unknown as VagasApiResponse
-      const vagas = Array.isArray(body?.data) ? body.data : []
-      for (const vaga of vagas) {
-        if (vaga.id && !seen.has(vaga.id)) {
-          seen.add(vaga.id)
-          merged.push(vaga)
-        }
-      }
-    }
-
-    return NextResponse.json({ data: merged, meta: { total: merged.length } })
+    return NextResponse.json({ data: vagas, meta: { total: vagas.length } })
   } catch (error) {
     console.error('Erro ao buscar vagas:', error)
     return NextResponse.json({ data: [], meta: {} }, { status: 500 })
