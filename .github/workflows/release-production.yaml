@@ -62,6 +62,7 @@ jobs:
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="cursos,empregos" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.pref.rio/catalogo/" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://storage.googleapis.com/rio-queue" \
+            --build-arg NEXT_PUBLIC_RIO_QUEUE_API_URL="https://rio-queue.dados.rio" \
             --tag $IMAGE_NAME:$VERSION \
             --tag $IMAGE_NAME:$VERSION_NO_V \
             --tag $IMAGE_NAME:stable \
