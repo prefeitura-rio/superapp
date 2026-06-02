@@ -27,7 +27,6 @@ export const VAGA_FILTERS: FilterConfig[] = [
     type: 'multiple',
     options: [
       { label: 'Efetivo (CLT)', value: 'CLT' },
-      { label: 'Pessoa Jurídica (PJ)', value: 'PJ' },
       { label: 'Estágio', value: 'Estágio' },
       { label: 'Aprendiz', value: 'Aprendiz' },
       { label: 'Temporário', value: 'Temporário' },
@@ -60,7 +59,6 @@ export const VAGA_FILTERS: FilterConfig[] = [
     label: 'Acessibilidade',
     type: 'multiple',
     options: [
-      { label: 'Para PcD', value: 'para_pcd' },
       { label: 'Preferencial PcD', value: 'preferencial_pcd' },
       { label: 'Exclusivo PcD', value: 'exclusivo_pcd' },
     ],
