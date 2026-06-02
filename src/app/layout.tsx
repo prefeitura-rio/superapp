@@ -76,6 +76,7 @@ export default async function RootLayout({
               data-n-c="prefeiturario"
               data-n-e="superapp"
               data-n-url={process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL}
+              nonce={nonce}
               async
             />
           )}
