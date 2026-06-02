@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
 import { HandTalkPlugin } from '@/components/hand-talk-plugin'
+import { QueueGate } from '@/components/queue-gate'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -66,6 +67,13 @@ export default async function RootLayout({
           <HandTalkPlugin
             token={process.env.NEXT_PUBLIC_HAND_TALK_TOKEN}
             nonce={nonce}
+          />
+        )}
+        {process.env.NEXT_PUBLIC_RIO_QUEUE_URL && (
+          <QueueGate
+            customer="prefeiturario"
+            queue="superapp"
+            apiUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_URL}
           />
         )}
       </head>
