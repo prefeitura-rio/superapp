@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
 import { HandTalkPlugin } from '@/components/hand-talk-plugin'
-import { QueueGate } from '@/components/queue-gate'
+
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -69,14 +69,16 @@ export default async function RootLayout({
             nonce={nonce}
           />
         )}
-        {process.env.NEXT_PUBLIC_RIO_QUEUE_URL && process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
-          <QueueGate
-            customer="prefeiturario"
-            queue="superapp"
-            scriptUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_URL}
-            apiUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL}
-          />
-        )}
+        {process.env.NEXT_PUBLIC_RIO_QUEUE_URL &&
+          process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
+            <script
+              src={`${process.env.NEXT_PUBLIC_RIO_QUEUE_URL}/rio-queue.min.js`}
+              data-n-c="prefeiturario"
+              data-n-e="superapp"
+              data-n-url={process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL}
+              async
+            />
+          )}
       </head>
       <body
         className={`${dmSans.className} antialiased`}
