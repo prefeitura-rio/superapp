@@ -81,6 +81,7 @@ jobs:
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
             --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.staging.app.dados.rio/catalogo/" \
             --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="17a931fe38db57f3f3db2f9d8745f29b" \
+            --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://rio-queue.dados.rio" \
             --tag $IMAGE_NAME:latest \
             --tag $IMAGE_NAME:$COMMIT_HASH \
             --push .
