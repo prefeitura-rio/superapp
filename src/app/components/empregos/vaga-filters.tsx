@@ -131,7 +131,7 @@ function InfiniteCheckList({
         entries => {
           if (entries[0].isIntersecting) onLoadMore()
         },
-        { threshold: 1.0 }
+        { threshold: 0, rootMargin: '100px' }
       )
       observerRef.current.observe(node)
     },
@@ -214,9 +214,7 @@ function InfiniteCheckList({
         )}
 
         {/* Sentinel para infinite scroll */}
-        {!isLoading && hasMore && !isFetchingNextPage && (
-          <div ref={sentinelRef} className="h-4" />
-        )}
+        {!isLoading && hasMore && <div ref={sentinelRef} className="h-4" />}
 
         {/* Empty state: só quando de fato não há resultados */}
         {!isLoading && !isFetchingNextPage && items.length === 0 && (
