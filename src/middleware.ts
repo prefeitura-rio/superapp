@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
 
       const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
-  script-src ${scriptSrcDirectives.join(' ')} https://plugin.handtalk.me;
+  script-src ${scriptSrcDirectives.join(' ')} https://plugin.handtalk.me https://storage.googleapis.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.handtalk.me;
   img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://*.handtalk.me;
   font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://*.handtalk.me;
