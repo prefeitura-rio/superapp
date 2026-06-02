@@ -28,11 +28,13 @@ function Checkbox({
         className="absolute inset-0 group-data-[state=checked]:hidden"
         aria-hidden
       >
-        <path
-          d="M20.75 2.75V18.5C20.75 19.0967 20.5129 19.669 20.091 20.091C19.669 20.5129 19.0967 20.75 18.5 20.75H2.75C2.15326 20.75 1.58097 20.5129 1.15901 20.091C0.737053 19.669 0.5 19.0967 0.5 18.5V2.75C0.5 2.15326 0.737053 1.58097 1.15901 1.15901C1.58097 0.737053 2.15326 0.5 2.75 0.5L18.5 0.5"
+        <rect
+          x="0.5"
+          y="0.5"
+          width="21"
+          height="21"
+          rx="3.5"
           stroke="#A1A1A1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
         />
       </svg>
 
