@@ -20,7 +20,12 @@ interface QueueGateProps {
   apiUrl: string
 }
 
-export function QueueGate({ customer, queue, scriptUrl, apiUrl }: QueueGateProps) {
+export function QueueGate({
+  customer,
+  queue,
+  scriptUrl,
+  apiUrl,
+}: QueueGateProps) {
   if (!scriptUrl || !apiUrl) return null
 
   return (
