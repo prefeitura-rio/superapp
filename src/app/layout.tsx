@@ -69,11 +69,12 @@ export default async function RootLayout({
             nonce={nonce}
           />
         )}
-        {process.env.NEXT_PUBLIC_RIO_QUEUE_URL && (
+        {process.env.NEXT_PUBLIC_RIO_QUEUE_URL && process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
           <QueueGate
             customer="prefeiturario"
             queue="superapp"
-            apiUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_URL}
+            scriptUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_URL}
+            apiUrl={process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL}
           />
         )}
       </head>
