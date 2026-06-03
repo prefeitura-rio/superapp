@@ -68,11 +68,11 @@ export async function middleware(request: NextRequest) {
 
       const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
-  script-src ${scriptSrcDirectives.join(' ')} https://plugin.handtalk.me https://storage.googleapis.com https://cdn.equalweb.com https://access.equalweb.com https://*.pertoplugin.link;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  connect-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://*.handtalk.me https://rio-queue.dados.rio https://*.equalweb.com https://*.pertoplugin.link https://us-central1-pertodigital-fe5e0.cloudfunctions.net;
+  script-src ${scriptSrcDirectives.join(' ')} https://plugin.handtalk.me https://storage.googleapis.com https://cdn.equalweb.com https://access.equalweb.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.handtalk.me https://*.equalweb.com;
+  img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://*.handtalk.me https://*.equalweb.com;
+  font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://*.handtalk.me https://*.equalweb.com;
+  connect-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://*.handtalk.me https://rio-queue.dados.rio https://*.equalweb.com;
   frame-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net https://plugin.handtalk.me https://*.equalweb.com;
   media-src 'self' https://storage.googleapis.com data: blob: https://*.handtalk.me https://*.equalweb.com;
 
