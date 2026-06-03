@@ -7,6 +7,13 @@ interface HandTalkPluginConfig {
   side?: 'left' | 'right'
   /** "top" | "center" | "bottom" — padrão: centro */
   align?: 'top' | 'default' | 'bottom'
+  addonsMap?: {
+    colorControl?: {
+      contrastMode?: boolean
+      saturationMode?: boolean
+      pageColors?: boolean
+    }
+  }
 }
 
 declare global {
@@ -32,6 +39,11 @@ export function HandTalkPlugin({
           token,
           side: 'right',
           align: 'default',
+          addonsMap: {
+            colorControl: {
+              contrastMode: false,
+            },
+          },
         })
       }}
     />
