@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
+import { EqualWebPlugin } from '@/components/equalweb-plugin'
 import { HandTalkPlugin } from '@/components/hand-talk-plugin'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
@@ -65,6 +66,12 @@ export default async function RootLayout({
         {process.env.NEXT_PUBLIC_HAND_TALK_TOKEN && (
           <HandTalkPlugin
             token={process.env.NEXT_PUBLIC_HAND_TALK_TOKEN}
+            nonce={nonce}
+          />
+        )}
+        {process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY && (
+          <EqualWebPlugin
+            sitekey={process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY}
             nonce={nonce}
           />
         )}
