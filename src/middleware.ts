@@ -62,6 +62,7 @@ export async function middleware(request: NextRequest) {
         "'self'",
         `'nonce-${nonce}'`,
         "'strict-dynamic'",
+        "'wasm-unsafe-eval'",
         ...scriptHashes.map(hash => `'${hash}'`),
         ...(isDevelopment ? ["'unsafe-eval'"] : []),
       ]
@@ -72,7 +73,7 @@ export async function middleware(request: NextRequest) {
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
   img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
   font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://*.handtalk.me https://rio-queue.dados.rio https://*.equalweb.com https://*.pertoplugin.link https://us-central1-pertodigital-fe5e0.cloudfunctions.net https://cdn.jsdelivr.net;
+  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://*.handtalk.me https://rio-queue.dados.rio https://*.equalweb.com https://*.pertoplugin.link https://us-central1-pertodigital-fe5e0.cloudfunctions.net https://cdn.jsdelivr.net https://glosa.pertodigital.com.br/ https://transcricao.pertodigital.com.br:3001/ https://simplificador.pertodigital.com.br:3001/;
   frame-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net https://plugin.handtalk.me https://*.equalweb.com;
   media-src 'self' https://storage.googleapis.com data: blob: https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
 
