@@ -1,7 +1,7 @@
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc'
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import {
   AlwaysOnSampler,
@@ -67,7 +67,7 @@ export async function register() {
   })
 
   // Create resource with service information
-  const resource = new Resource({
+  const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: serviceName,
     [ATTR_SERVICE_VERSION]: serviceVersion,
     [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: environment,
