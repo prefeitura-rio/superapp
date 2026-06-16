@@ -95,12 +95,12 @@
 
 > ## API RMI
 
-- https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.json
+- https://raw.githubusercontent.com/prefeitura-rio/app-rmi/refs/heads/main/docs/swagger.json
 
 ```
  api: {
     input:
-      'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.json',
+      'https://raw.githubusercontent.com/prefeitura-rio/app-rmi/refs/heads/main/docs/swagger.json',
     output: {
       target: './src/http/api.ts',
       schemas: './src/http/models',
