@@ -2,7 +2,9 @@
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioList } from '@/components/ui/custom/radio-list'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { applyMask } from '@/lib/input-mask'
 import type { UseFormReturn } from 'react-hook-form'
 import { Controller } from 'react-hook-form'
 import type { CustomField } from '../../types'
@@ -28,10 +30,53 @@ export function CustomFieldSlide({
   const error = errors[fieldName]
   const watchedValue = watch(fieldName)
 
+  const MASKED_FORMATS = ['cpf', 'phone', 'cep', 'date', 'number'] as const
+  const PLACEHOLDER: Record<string, string> = {
+    cpf: '000.000.000-00',
+    phone: '(00) 00000-0000',
+    cep: '00000-000',
+    date: 'DD/MM/AAAA',
+    number: 'Somente números',
+  }
+
+  const inputClassName =
+    'w-full border-0 border-b border-border rounded-none shadow-none ' +
+    'bg-transparent px-0 py-2 h-auto ' +
+    'placeholder:text-muted-foreground ' +
+    'focus-visible:ring-0 focus-visible:border-primary'
+
   const renderTextField = () => {
-    const textValue = watchedValue || ''
-    const characterCount = textValue.length
-    const maxCharacters = 50
+    const fmt = field.format_type ?? 'free'
+
+    if (fmt === 'email') {
+      return (
+        <Input
+          {...register(fieldName)}
+          type="email"
+          inputMode="email"
+          placeholder="exemplo@email.com"
+          className={inputClassName}
+        />
+      )
+    }
+
+    if ((MASKED_FORMATS as readonly string[]).includes(fmt)) {
+      return (
+        <Controller
+          name={fieldName}
+          control={control}
+          render={({ field: ctrl }) => (
+            <Input
+              value={ctrl.value || ''}
+              onChange={e => ctrl.onChange(applyMask(e.target.value, fmt))}
+              inputMode={fmt === 'number' ? 'numeric' : 'tel'}
+              placeholder={PLACEHOLDER[fmt] ?? ''}
+              className={inputClassName}
+            />
+          )}
+        />
+      )
+    }
 
     return (
       <div className="space-y-2">
@@ -43,11 +88,9 @@ export function CustomFieldSlide({
            placeholder:text-muted-foreground
            focus-visible:ring-0 focus-visible:border-primary"
           rows={3}
-          maxLength={maxCharacters}
+          maxLength={50}
         />
-        <p className="text-muted-foreground text-sm">
-          Limite de {maxCharacters} caracteres
-        </p>
+        <p className="text-muted-foreground text-sm">Limite de 50 caracteres</p>
       </div>
     )
   }

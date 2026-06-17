@@ -462,10 +462,9 @@ export function ConfirmInscriptionClient({
       }
 
       if (currentSlide.id.startsWith('custom-field-')) {
-        // Validate custom fields if they are required
         const fieldId = currentSlide.id.replace('custom-field-', '')
         const field = customFields.find(f => f.id === fieldId)
-        if (field?.required) {
+        if (field) {
           const fieldName = `custom_${field.id}` as keyof InscriptionFormData
           const isValid = await form.trigger(fieldName)
           if (!isValid) return
@@ -560,16 +559,14 @@ export function ConfirmInscriptionClient({
     // Check custom fields
     for (let i = 0; i < customFields.length; i++) {
       const field = customFields[i]
-      if (field.required) {
-        const fieldName = `custom_${field.id}` as keyof InscriptionFormData
-        const isFieldValid = await form.trigger(fieldName)
-        if (!isFieldValid) {
-          const customFieldSlideIndex = slides.findIndex(
-            slide => slide.id === `custom-field-${field.id}`
-          )
-          if (customFieldSlideIndex !== -1) {
-            return customFieldSlideIndex
-          }
+      const fieldName = `custom_${field.id}` as keyof InscriptionFormData
+      const isFieldValid = await form.trigger(fieldName)
+      if (!isFieldValid) {
+        const customFieldSlideIndex = slides.findIndex(
+          slide => slide.id === `custom-field-${field.id}`
+        )
+        if (customFieldSlideIndex !== -1) {
+          return customFieldSlideIndex
         }
       }
     }

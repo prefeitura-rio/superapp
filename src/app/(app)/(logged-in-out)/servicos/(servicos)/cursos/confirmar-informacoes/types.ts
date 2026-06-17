@@ -55,11 +55,21 @@ export interface CustomFieldOption {
   value: string
 }
 
+export type FormatType =
+  | 'free'
+  | 'number'
+  | 'date'
+  | 'phone'
+  | 'cpf'
+  | 'cep'
+  | 'email'
+
 export interface CustomField {
   id: string
   curso_id: number
   title: string
   field_type: 'text' | 'radio' | 'select' | 'multiselect'
+  format_type?: FormatType | string | null
   required: boolean
   options?: CustomFieldOption[]
   created_at: string
@@ -70,6 +80,42 @@ export const inscriptionSchema = z.object({
   unitId: z.string().min(1, 'Selecione uma unidade'),
   description: z.string().min(5, 'Descreva em pelo menos 5 caracteres'),
 })
+
+function buildTextFieldSchema(field: CustomField, required: boolean) {
+  const fmt = field.format_type ?? 'free'
+  let base: z.ZodString
+
+  switch (fmt) {
+    case 'cpf':
+      base = z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido')
+      break
+    case 'phone':
+      base = z.string().regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido')
+      break
+    case 'cep':
+      base = z.string().regex(/^\d{5}-\d{3}$/, 'CEP inválido')
+      break
+    case 'date':
+      base = z
+        .string()
+        .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data inválida (DD/MM/AAAA)')
+      break
+    case 'number':
+      base = z.string().regex(/^\d+$/, 'Somente números são permitidos')
+      break
+    case 'email':
+      base = z.string().email('E-mail inválido')
+      break
+    default:
+      base = z.string().max(50, 'O texto não pode ultrapassar 50 caracteres')
+  }
+
+  if (required) {
+    return base.min(1, 'Este campo é obrigatório')
+  }
+  // When optional: allow empty string (user left it blank) but validate if something was typed
+  return z.union([base, z.literal('')])
+}
 
 // Dynamic schema that makes unitId optional when there are no nearby units
 // and includes all custom fields dynamically
@@ -111,18 +157,10 @@ export const createInscriptionSchema = (
     } else {
       // For other field types, use string
       if (field.field_type === 'text') {
-        // Text fields have a max length of 50 characters
-        if (field.required) {
-          customFieldSchema[fieldKey] = z
-            .string()
-            .min(1, 'Este campo é obrigatório')
-            .max(50, 'O texto não pode ultrapassar 50 caracteres')
-        } else {
-          customFieldSchema[fieldKey] = z
-            .string()
-            .max(50, 'O texto não pode ultrapassar 50 caracteres')
-            .optional()
-        }
+        customFieldSchema[fieldKey] = buildTextFieldSchema(
+          field,
+          field.required
+        )
       } else {
         // For radio and select fields
         if (field.required) {
