@@ -82,10 +82,16 @@ test.describe('Empregos — home (público)', () => {
       page.getByRole('heading', { name: 'Vagas mais recentes' })
     ).toBeVisible({ timeout: 20000 })
 
-    const vagaLinks = page.locator('a[href^="/servicos/trabalho/"]').filter({
-      hasNot: page.locator('[href="/servicos/trabalho/menu"]'),
+    const vagasHeading = page.getByRole('heading', {
+      name: 'Vagas mais recentes',
     })
-    await expect(vagaLinks.first()).toBeVisible({ timeout: 20000 })
+    const firstCard = vagasHeading
+      .locator(
+        'xpath=following::a[starts-with(@href, "/servicos/trabalho/") and not(@href="/servicos/trabalho/menu")]'
+      )
+      .and(page.getByRole('link'))
+      .first()
+    await expect(firstCard).toBeVisible({ timeout: 20000 })
   })
 
   test('exibe seção "Encontre sua vaga"', async ({ page }) => {
