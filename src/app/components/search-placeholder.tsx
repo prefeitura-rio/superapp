@@ -1,13 +1,17 @@
+'use client'
+
 import { SearchIcon } from '@/assets/icons'
 import { sendGAEvent } from '@next/third-parties/google'
 import Link from 'next/link'
 
 interface SearchPlaceholderProps {
   isCourseSearch?: boolean
+  searchUrl?: string
 }
 
 export default function SearchPlaceholder({
   isCourseSearch = false,
+  searchUrl,
 }: SearchPlaceholderProps) {
   const handleSearchClick = () => {
     if (!isCourseSearch) {
@@ -17,11 +21,12 @@ export default function SearchPlaceholder({
     }
   }
 
-  const searchUrl = isCourseSearch ? '/servicos/cursos/busca' : '/busca'
+  const resolvedUrl =
+    searchUrl ?? (isCourseSearch ? '/servicos/cursos/busca' : '/busca')
 
   return (
     <div className="px-4 mb-2">
-      <Link href={searchUrl} className="block">
+      <Link href={resolvedUrl} className="block">
         <div
           className="flex items-center space-x-4 bg-card rounded-full px-4 py-4"
           onClick={handleSearchClick}
