@@ -43,7 +43,7 @@ export default function CoursePageClient({
     return (
       <div className="min-h-lvh">
         <CoursesHeaderClient />
-        <main className="max-w-4xl mx-auto pt-30 pb-20 text-white">
+        <main className="max-w-4xl mx-auto pb-20 text-white">
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
               Nenhum curso encontrado

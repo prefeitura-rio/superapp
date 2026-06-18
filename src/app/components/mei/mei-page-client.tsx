@@ -21,7 +21,7 @@ export function MeiPageClient({
     return (
       <div className="min-h-lvh">
         <MeiHeaderClient />
-        <main className="max-w-4xl mx-auto pt-24 pb-34 px-4">
+        <main className="max-w-4xl mx-auto pb-34 px-4">
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
               Nenhuma oportunidade encontrada
