@@ -77,10 +77,11 @@ function AllCoursesSkeleton() {
 
 export default async function CoursesLoading() {
   const userInfo = await getUserInfoFromToken()
+  const isLoggedIn = !!(userInfo.cpf && userInfo.name)
 
   return (
     <div className="min-h-lvh">
-      <CoursesHeader userInfo={userInfo} />
+      <CoursesHeader isLoggedIn={isLoggedIn} isLoading={false} />
       <main className="max-w-4xl mx-auto pb-34 text-white">
         {/* Category Filters - renderizando ambos e usando classes responsivas para evitar layout shift */}
         <div className="block sm:hidden">

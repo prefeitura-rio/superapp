@@ -1,23 +1,16 @@
 'use client'
 
-import { SearchIcon } from '@/assets/icons'
-import { HelpCircleIcon } from '@/assets/icons/help-circle-icon'
+import { UserIcon } from '@/assets/icons'
 import { MenuIcon } from '@/assets/icons/menu-icon'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   oportunidadesCariocasLogo,
   oportunidadesCariocasLogoDark,
 } from '@/constants/bucket'
+import { buildAuthUrl } from '@/constants/url'
 import { useAuthHeader } from '@/providers/auth-header-provider'
 import Image from 'next/image'
 import Link from 'next/link'
-
-function HeaderIconSkeleton() {
-  return (
-    <div className="rounded-full bg-transparent p-4">
-      <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />
-    </div>
-  )
-}
 
 export function CoursesHeaderClient() {
   const { data, isLoading } = useAuthHeader()
@@ -45,30 +38,41 @@ export function CoursesHeaderClient() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Link
-            href="/servicos/cursos/busca"
-            className="rounded-full bg-transparent p-4"
-          >
-            <SearchIcon className="h-5 w-5 text-foreground" />
-            <span className="sr-only">Buscar cursos</span>
-          </Link>
           {isLoading ? (
-            <HeaderIconSkeleton />
+            <Skeleton className="rounded-full h-11 w-11" />
           ) : data.isLoggedIn ? (
-            <Link
-              href="/servicos/cursos/opcoes"
-              className="rounded-full bg-transparent p-4"
-            >
-              <MenuIcon className="h-5 w-5 text-foreground" />
-              <span className="sr-only">Options</span>
-            </Link>
+            <div className="flex items-center space-x-2">
+              <Link href="/meu-perfil">
+                <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden">
+                  {data.userAvatarUrl ? (
+                    <Image
+                      src={data.userAvatarUrl}
+                      alt={data.userAvatarName || 'Avatar'}
+                      width={44}
+                      height={44}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon className="h-5 w-5" />
+                  )}
+                </div>
+              </Link>
+              <Link
+                href="/servicos/cursos/opcoes"
+                className="rounded-full bg-card hover:bg-secondary p-3 flex items-center justify-center"
+              >
+                <MenuIcon className="h-5 w-5 text-foreground" />
+                <span className="sr-only">Menu</span>
+              </Link>
+            </div>
           ) : (
-            <Link
-              href="/servicos/cursos/faq"
-              className="rounded-full bg-transparent p-4"
-            >
-              <HelpCircleIcon className="h-5 w-5 text-foreground" />
-              <span className="sr-only">FAQ</span>
+            <Link href={buildAuthUrl('/')} className="flex items-center gap-2">
+              <span className="text-sm font-normal text-muted-foreground">
+                Login
+              </span>
+              <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center">
+                <UserIcon className="h-5 w-5" />
+              </div>
             </Link>
           )}
         </div>

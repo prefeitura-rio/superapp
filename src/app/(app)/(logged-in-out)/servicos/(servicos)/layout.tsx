@@ -2,6 +2,7 @@
 
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { ServiceTypeToggle } from '@/app/components/mei/service-type-toggle'
+import SearchPlaceholder from '@/app/components/search-placeholder'
 import { AuthHeaderProvider } from '@/providers/auth-header-provider'
 import { usePathname } from 'next/navigation'
 
@@ -35,19 +36,25 @@ export default function ServicosLayout({
     : 3
   const toggleHasMultipleTabs = enabledServicesCount > 1
 
+  const searchUrl =
+    activeType === 'cursos'
+      ? '/servicos/cursos/busca'
+      : activeType === 'mei'
+        ? '/busca?tipo=mei'
+        : '/busca?tipo=empregos'
+
   return (
     <AuthHeaderProvider>
       <div>
         {shouldShowToggle &&
           (toggleHasMultipleTabs ? (
-            <div className="max-w-4xl mx-auto pt-12 pb-0 px-1">
-              <div className="mb-5 mt-2">
+            <div className="max-w-4xl mx-auto pt-[74px] pb-0">
+              <SearchPlaceholder searchUrl={searchUrl} />
+              <div className="mb-5 mt-2 px-1">
                 <ServiceTypeToggle activeType={activeType} />
               </div>
             </div>
           ) : (
-            // Quando só há 1 serviço habilitado, o toggle não aparece mas ainda é
-            // necessário um espaçamento para o conteúdo não ficar atrás do header fixo
             <div className="h-20 sm:h-24" />
           ))}
         <main>{children}</main>
