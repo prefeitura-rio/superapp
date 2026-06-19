@@ -11,9 +11,11 @@ import { buildAuthUrl } from '@/constants/url'
 import { useAuthHeader } from '@/providers/auth-header-provider'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function MeiHeaderClient() {
   const { data, isLoading } = useAuthHeader()
+  const pathname = usePathname()
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-background text-foreground px-4 py-3">
@@ -66,7 +68,10 @@ export function MeiHeaderClient() {
               </Link>
             </div>
           ) : (
-            <Link href={buildAuthUrl('/')} className="flex items-center gap-2">
+            <Link
+              href={buildAuthUrl(pathname)}
+              className="flex items-center gap-2"
+            >
               <span className="text-sm font-normal text-muted-foreground">
                 Login
               </span>
