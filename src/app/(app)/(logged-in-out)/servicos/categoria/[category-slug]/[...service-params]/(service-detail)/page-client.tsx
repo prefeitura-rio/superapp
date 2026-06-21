@@ -25,6 +25,8 @@ import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
 import { Clock } from 'lucide-react'
 import { MarkdownRenderer } from './components/markdown-renderer'
+import { ServiceFlow } from './components/service-flow'
+import { ServiceRelations } from './components/service-relations'
 
 interface PageClientProps {
   serviceData: ModelsPrefRioService
@@ -96,6 +98,12 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
             className="text-sm font-normal text-foreground-light leading-5"
           />
         </div>
+
+        {/* Guided deterministic flow (flowspec2) — before the external link */}
+        <ServiceFlow
+          slug={serviceData.slug}
+          serviceName={serviceData.nome_servico}
+        />
 
         {/* Buttons - One Button or Multiple Buttons */}
         {enabledButtons.length > 0 && (
@@ -199,6 +207,9 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
           </span>
         </div>
       )}
+
+      {/* Related services, citizen journey, thematic cluster (facilita) */}
+      <ServiceRelations slug={serviceData.slug} />
     </>
   )
 }
