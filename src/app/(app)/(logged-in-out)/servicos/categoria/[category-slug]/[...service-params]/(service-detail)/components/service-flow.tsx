@@ -121,7 +121,7 @@ export function ServiceFlow({
   }
 
   return (
-    <Card className="border border-border bg-card">
+    <Card className="gap-0 border border-border bg-card py-0">
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center gap-2.5">
           <ListChecks className="h-5 w-5 shrink-0 text-primary" />
