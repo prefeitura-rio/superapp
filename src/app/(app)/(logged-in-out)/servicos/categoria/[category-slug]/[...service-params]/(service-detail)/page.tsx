@@ -61,23 +61,27 @@ export default async function ServicePage({
       !Number.isNaN(numericValue) && String(orgaoGestorValue).trim() !== ''
 
     if (isNumericId) {
-      // It's an ID - fetch from API
-      try {
-        const departmentResult = await getDepartmentsCdUa(
-          String(orgaoGestorValue)
-        )
+      // It's an ID — resolve the name via the Departments (RMI) API, but only
+      // when RMI is configured. Without it (e.g. local dev), skip the lookup and
+      // leave the panel hidden rather than surfacing a bare numeric id.
+      if (process.env.NEXT_PUBLIC_BASE_API_URL_RMI) {
+        try {
+          const departmentResult = await getDepartmentsCdUa(
+            String(orgaoGestorValue)
+          )
 
-        if (departmentResult.status === 200 && departmentResult.data) {
-          const { nome_ua, sigla_ua } = departmentResult.data
+          if (departmentResult.status === 200 && departmentResult.data) {
+            const { nome_ua, sigla_ua } = departmentResult.data
 
-          if (nome_ua) {
-            orgaoGestorName = sigla_ua ? `${nome_ua} (${sigla_ua})` : nome_ua
+            if (nome_ua) {
+              orgaoGestorName = sigla_ua ? `${nome_ua} (${sigla_ua})` : nome_ua
+            }
           }
+        } catch (error) {
+          // RMI unreachable — hide the panel instead of showing a raw id.
+          console.warn('Órgão gestor lookup failed; hiding the panel:', error)
+          orgaoGestorName = null
         }
-      } catch (error) {
-        console.error('Error fetching orgao gestor:', error)
-        // Fallback to the ID
-        orgaoGestorName = String(orgaoGestorValue)
       }
     } else {
       // It's already a name - use it directly
