@@ -28,6 +28,25 @@ export async function GET(req: NextRequest) {
 
     const apiKey = process.env.GOOGLE_MAPS_API_KEY
     if (!apiKey) {
+      // Local demo fallback (no real key): only when explicitly opted in via
+      // FACILITA_FLOW_MOCK_PLACES. In every real environment the key is set, so
+      // this branch never runs there and the guided flow uses real Google data.
+      if (process.env.FACILITA_FLOW_MOCK_PLACES === 'true') {
+        addSpanEvent('autocomplete.mock_fallback')
+        const bairros = [
+          'Copacabana, Rio de Janeiro - RJ, Brasil',
+          'Tijuca, Rio de Janeiro - RJ, Brasil',
+          'Campo Grande, Rio de Janeiro - RJ, Brasil',
+          'Botafogo, Rio de Janeiro - RJ, Brasil',
+          'Madureira, Rio de Janeiro - RJ, Brasil',
+        ]
+        const results: GoogleAddressSuggestion[] = bairros.map((b, i) => ({
+          main_text: query,
+          secondary_text: b,
+          place_id: `mock-${i}`,
+        }))
+        return NextResponse.json({ results })
+      }
       addSpanEvent('autocomplete.validation.failed', {
         reason: 'missing_api_key',
       })
