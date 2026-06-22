@@ -3,6 +3,7 @@
 import { updateUserAvatar } from '@/actions/update-user-avatar'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import type { ModelsAvatarResponse } from '@/http/models'
+import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -29,6 +30,7 @@ export function AvatarSelector({
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   // Pre-select current avatar if available
   useEffect(() => {
@@ -61,6 +63,7 @@ export function AvatarSelector({
 
       if (result.success) {
         toast.success('Avatar atualizado com sucesso!')
+        await queryClient.invalidateQueries({ queryKey: ['header'] })
         router.push('/meu-perfil')
       } else {
         toast.error(result.error || 'Erro ao atualizar avatar')
