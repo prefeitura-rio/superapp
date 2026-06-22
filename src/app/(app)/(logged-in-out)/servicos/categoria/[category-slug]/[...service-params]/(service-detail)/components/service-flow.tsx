@@ -331,9 +331,21 @@ export function ServiceFlow({
           {/* header */}
           <div className="shrink-0 px-5 pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <ListChecks className="h-5 w-5" />
-              </span>
+              {answers.length > 0 && !step?.done ? (
+                <button
+                  type="button"
+                  onClick={goBack}
+                  disabled={busy}
+                  aria-label="Voltar à pergunta anterior"
+                  className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-foreground-light transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              ) : (
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ListChecks className="h-5 w-5" />
+                </span>
+              )}
               <div className="min-w-0 flex-1">
                 <DrawerTitle className="truncate text-base font-medium text-foreground">
                   {serviceName || 'Atendimento guiado'}
@@ -412,17 +424,6 @@ export function ServiceFlow({
               </div>
             ) : (
               <div className="space-y-3">
-                {answers.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    disabled={busy}
-                    className="-mt-1 flex items-center gap-1 text-xs text-foreground-light transition-colors hover:text-foreground disabled:opacity-50"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                    Voltar
-                  </button>
-                )}
                 <p className="text-base font-medium text-foreground leading-6">
                   {step.title}
                 </p>
