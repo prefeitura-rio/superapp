@@ -15,7 +15,7 @@ import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CatalogSearchContext } from './hooks/use-catalog-search'
 import {
   saveCatalogHistory,
@@ -25,6 +25,25 @@ import {
   handleBackNavigation,
   handleCatalogItemClick as handleItemClick,
 } from './utils/navigation-helpers'
+
+type SuggestItem = { title: string; slug: string; url: string }
+
+type CatalogResultItem = ModelsSearchItem & {
+  reason?: string | null
+  match_reason?: string | null
+}
+
+type AiSummarySegment = {
+  text: string
+  slug?: string | null
+  url?: string | null
+}
+
+type AiSummary = {
+  query: string
+  segments: AiSummarySegment[]
+  generated: boolean
+}
 
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   service: {
@@ -88,7 +107,7 @@ function ResultItem({
   item,
   onClick,
 }: {
-  item: ModelsSearchItem
+  item: CatalogResultItem
   onClick: () => void
 }) {
   const badge = item.type ? TYPE_BADGE[item.type] : undefined
@@ -99,6 +118,8 @@ function ResultItem({
     metadataDescription ||
     item.short_desc ||
     (item.tags && item.tags.length > 0 ? item.tags[0] : '')
+  const reason = item.reason
+  const matchReason = item.match_reason
 
   return (
     <li
@@ -124,6 +145,16 @@ function ResultItem({
         {description && (
           <div className="pt-1 line-clamp-2 text-muted-foreground text-xs font-normal leading-4">
             {description}
+          </div>
+        )}
+        {reason && (
+          <div className="pt-1 text-[11px] italic text-primary/70">
+            {reason}
+          </div>
+        )}
+        {matchReason && (
+          <div className="pt-1 text-[11px] font-medium text-primary/80">
+            {matchReason}
           </div>
         )}
       </div>
@@ -166,6 +197,9 @@ export default function Search() {
     query,
     primaryResults,
     secondaryResults,
+    lowConfidence,
+    suggestedQueries,
+    recommendations,
     loading,
     isSearching,
     searchHistory,
@@ -176,6 +210,81 @@ export default function Search() {
     removeFromHistory,
     searchInputRef,
   } = useCatalogSearch(context)
+
+  // Typeahead autocomplete (facilita /api/v1/suggest via /api/suggest)
+  const [suggestions, setSuggestions] = useState<SuggestItem[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const suggestTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (suggestTimeout.current) clearTimeout(suggestTimeout.current)
+    const trimmed = query.trim()
+    if (trimmed.length < 2) {
+      setSuggestions([])
+      return
+    }
+    const controller = new AbortController()
+    suggestTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/suggest?q=${encodeURIComponent(trimmed)}`,
+          { signal: controller.signal }
+        )
+        if (!res.ok) return
+        const data = await res.json()
+        setSuggestions((data.suggestions as SuggestItem[]) || [])
+        setHighlightedIndex(-1)
+      } catch {
+        // aborted (stale query) or network error — ignore
+      }
+    }, 180)
+    return () => {
+      if (suggestTimeout.current) clearTimeout(suggestTimeout.current)
+      controller.abort()
+    }
+  }, [query])
+
+  // AI search summary (facilita /api/v1/summarize via /api/summary) — debounced
+  // longer than autocomplete since each call hits Gemini; the box hides itself when
+  // the backend returns generated:false (feature off / keyless / model failure).
+  const [summary, setSummary] = useState<AiSummary | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+
+  useEffect(() => {
+    const trimmed = query.trim()
+    if (trimmed.length <= 2) {
+      setSummary(null)
+      setSummaryLoading(false)
+      return
+    }
+    const controller = new AbortController()
+    setSummaryLoading(true)
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/summary?q=${encodeURIComponent(trimmed)}`,
+          {
+            signal: controller.signal,
+          }
+        )
+        if (!res.ok) {
+          setSummary(null)
+          return
+        }
+        const data = (await res.json()) as AiSummary
+        setSummary(data?.generated ? data : null)
+      } catch {
+        // aborted (stale query) or network error — ignore
+      } finally {
+        if (!controller.signal.aborted) setSummaryLoading(false)
+      }
+    }, 600)
+    return () => {
+      clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [query])
 
   const CONTEXT_BACK_ROUTE: Record<CatalogSearchContext, string> = {
     servicos: '/servicos',
@@ -209,6 +318,15 @@ export default function Search() {
   const logoHref =
     context === 'empregos' ? '/servicos/trabalho' : '/servicos/cursos'
 
+  const suggestionsOpen =
+    showSuggestions && suggestions.length > 0 && query.trim().length >= 2
+
+  const selectSuggestion = (suggestion: SuggestItem) => {
+    setShowSuggestions(false)
+    saveCatalogHistory(suggestion.title)
+    router.push(suggestion.url)
+  }
+
   return (
     <div className="min-h-lvh max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
       {(context === 'empregos' || context === 'cursos') && (
@@ -233,16 +351,110 @@ export default function Search() {
           </Link>
         </div>
       )}
-      <SearchInput
-        ref={searchInputRef}
-        placeholder="Do que você precisa?"
-        value={query}
-        onChange={e => onQueryChange(e.target.value)}
-        onBack={handleBack}
-        onClear={clearSearch}
-      />
+      <div className="relative">
+        <SearchInput
+          ref={searchInputRef}
+          placeholder="Do que você precisa?"
+          value={query}
+          onChange={e => onQueryChange(e.target.value)}
+          onBack={handleBack}
+          onClear={clearSearch}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+          role="combobox"
+          aria-expanded={suggestionsOpen}
+          aria-controls="suggest-listbox"
+          aria-autocomplete="list"
+          aria-activedescendant={
+            highlightedIndex >= 0
+              ? `suggest-opt-${highlightedIndex}`
+              : undefined
+          }
+          onKeyDown={e => {
+            if (!suggestionsOpen) return
+            if (e.key === 'ArrowDown') {
+              e.preventDefault()
+              setHighlightedIndex(i => (i + 1) % suggestions.length)
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault()
+              setHighlightedIndex(i =>
+                i <= 0 ? suggestions.length - 1 : i - 1
+              )
+            } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+              e.preventDefault()
+              selectSuggestion(suggestions[highlightedIndex])
+            } else if (e.key === 'Escape') {
+              setShowSuggestions(false)
+            }
+          }}
+        />
+        {suggestionsOpen && (
+          <div
+            id="suggest-listbox"
+            role="listbox"
+            className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg"
+          >
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={suggestion.slug}
+                id={`suggest-opt-${index}`}
+                role="option"
+                aria-selected={index === highlightedIndex}
+                className={`line-clamp-1 cursor-pointer px-4 py-2.5 text-sm text-foreground ${
+                  index === highlightedIndex ? 'bg-card/70' : 'hover:bg-card/70'
+                }`}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onMouseDown={() => selectSuggestion(suggestion)}
+              >
+                {suggestion.title}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="text-white space-y-3 mt-6">
+        {/* AI summary (Gemini) — rendered above results from the moment a query
+            starts, so the loading indicator is visible throughout generation */}
+        {hasQuery && (summaryLoading || summary) && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-primary/80">
+              <span aria-hidden="true">✨</span> Resumo por IA
+              {summaryLoading && (
+                <span
+                  role="status"
+                  aria-label="Gerando resumo"
+                  className="ml-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-primary/30 border-t-primary"
+                />
+              )}
+            </div>
+            {summary ? (
+              <p className="text-sm leading-5 text-foreground">
+                {summary.segments.map((segment, index) =>
+                  segment.url ? (
+                    <Link
+                      key={`seg-${index}`}
+                      href={segment.url}
+                      className="text-primary underline underline-offset-2 hover:opacity-80"
+                    >
+                      {segment.text}
+                    </Link>
+                  ) : (
+                    <span key={`seg-${index}`}>{segment.text}</span>
+                  )
+                )}
+              </p>
+            ) : (
+              <div className="space-y-1.5" aria-hidden="true">
+                <div className="h-3 w-full animate-pulse rounded bg-muted" />
+                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+              </div>
+            )}
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              Resumo gerado por IA — confira sempre nos serviços oficiais.
+            </p>
+          </div>
+        )}
         {isLoading ? (
           <div>
             <h2 className="text-base text-foreground font-medium">
@@ -252,6 +464,39 @@ export default function Search() {
           </div>
         ) : hasQuery ? (
           <>
+            {/* Low-confidence / out-of-scope notice */}
+            {lowConfidence && (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                Baixa confiança: sua busca pode estar fora do escopo dos
+                serviços cadastrados. Tente reformular ou use uma sugestão
+                abaixo.
+              </div>
+            )}
+
+            {/* "Você quis dizer" suggested queries */}
+            {suggestedQueries.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Você quis dizer
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {suggestedQueries.map(suggestion => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => {
+                        setQuery(suggestion)
+                        handleSearch(suggestion)
+                      }}
+                      className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground hover:bg-card/70"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Primary results – context type */}
             {hasPrimary ? (
               <div>
@@ -290,6 +535,24 @@ export default function Search() {
                   {secondaryResults.map((item, index) => (
                     <ResultItem
                       key={item.id ?? index}
+                      item={item}
+                      onClick={() => handleResultClick(item)}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Serviços relacionados (recommendations) */}
+            {recommendations.length > 0 && (
+              <div className="pt-4">
+                <h2 className="text-base text-foreground font-medium">
+                  Serviços relacionados
+                </h2>
+                <ul className="space-y-2 pt-4">
+                  {recommendations.map((item, index) => (
+                    <ResultItem
+                      key={item.id ?? `rec-${index}`}
                       item={item}
                       onClick={() => handleResultClick(item)}
                     />

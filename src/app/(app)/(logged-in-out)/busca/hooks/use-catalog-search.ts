@@ -18,6 +18,9 @@ interface UseCatalogSearchReturn {
   query: string
   primaryResults: ModelsSearchItem[]
   secondaryResults: ModelsSearchItem[]
+  lowConfidence: boolean
+  suggestedQueries: string[]
+  recommendations: ModelsSearchItem[]
   loading: boolean
   isSearching: boolean
   searchHistory: string[]
@@ -29,12 +32,31 @@ interface UseCatalogSearchReturn {
   searchInputRef: React.RefObject<HTMLInputElement | null>
 }
 
-async function fetchCatalogSearch(q: string): Promise<ModelsSearchItem[]> {
+export interface CatalogSearchPayload {
+  items: ModelsSearchItem[]
+  lowConfidence: boolean
+  suggestedQueries: string[]
+  recommendations: ModelsSearchItem[]
+}
+
+const EMPTY_PAYLOAD: CatalogSearchPayload = {
+  items: [],
+  lowConfidence: false,
+  suggestedQueries: [],
+  recommendations: [],
+}
+
+async function fetchCatalogSearch(q: string): Promise<CatalogSearchPayload> {
   const params = new URLSearchParams({ q })
   const response = await fetch(`/api/catalog-search?${params.toString()}`)
-  if (!response.ok) return []
+  if (!response.ok) return EMPTY_PAYLOAD
   const data = await response.json()
-  return (data.items as ModelsSearchItem[]) || []
+  return {
+    items: (data.items as ModelsSearchItem[]) || [],
+    lowConfidence: Boolean(data.low_confidence),
+    suggestedQueries: (data.suggested_queries as string[]) || [],
+    recommendations: (data.recommendations as ModelsSearchItem[]) || [],
+  }
 }
 
 function splitResults(
@@ -87,6 +109,9 @@ export function useCatalogSearch(
   const [secondaryResults, setSecondaryResults] = useState<ModelsSearchItem[]>(
     []
   )
+  const [lowConfidence, setLowConfidence] = useState(false)
+  const [suggestedQueries, setSuggestedQueries] = useState<string[]>([])
+  const [recommendations, setRecommendations] = useState<ModelsSearchItem[]>([])
   const [loading, setLoading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -114,10 +139,13 @@ export function useCatalogSearch(
 
   const performAndSetResults = useCallback(
     async (searchQuery: string) => {
-      const items = await fetchCatalogSearch(searchQuery)
-      const { primary, secondary } = splitResults(items, context)
+      const payload = await fetchCatalogSearch(searchQuery)
+      const { primary, secondary } = splitResults(payload.items, context)
       setPrimaryResults(primary)
       setSecondaryResults(secondary)
+      setLowConfidence(payload.lowConfidence)
+      setSuggestedQueries(payload.suggestedQueries)
+      setRecommendations(payload.recommendations)
     },
     [context]
   )
@@ -167,6 +195,9 @@ export function useCatalogSearch(
         } else {
           setPrimaryResults([])
           setSecondaryResults([])
+          setLowConfidence(false)
+          setSuggestedQueries([])
+          setRecommendations([])
         }
       }
     }
@@ -218,6 +249,9 @@ export function useCatalogSearch(
       } else {
         setPrimaryResults([])
         setSecondaryResults([])
+        setLowConfidence(false)
+        setSuggestedQueries([])
+        setRecommendations([])
         setIsSearching(false)
       }
     },
@@ -228,6 +262,9 @@ export function useCatalogSearch(
     setQuery('')
     setPrimaryResults([])
     setSecondaryResults([])
+    setLowConfidence(false)
+    setSuggestedQueries([])
+    setRecommendations([])
     updateSearchUrl('', pathname, router, isUpdatingUrl)
   }, [router, pathname])
 
@@ -245,6 +282,9 @@ export function useCatalogSearch(
     query,
     primaryResults,
     secondaryResults,
+    lowConfidence,
+    suggestedQueries,
+    recommendations,
     loading,
     isSearching,
     searchHistory,
