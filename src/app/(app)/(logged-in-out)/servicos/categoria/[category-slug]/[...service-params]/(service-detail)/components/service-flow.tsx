@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import {
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ListChecks,
   Loader2,
@@ -82,10 +83,29 @@ function whatsappHref(
     )
     .map(e => `• ${e.question} ${e.answer}`)
     .join('\n')
+  // standardized message: a single intro, with the answers appended when the
+  // citizen already started the guided flow
+  const base = `Olá! Quero atendimento sobre "${service}" (Prefeitura do Rio).`
   const message = lines
-    ? `Olá! Comecei o atendimento de "${service}" no site da Prefeitura e quero continuar por aqui.\n\nO que já informei:\n${lines}`
-    : `Olá! Quero atendimento sobre "${service}" (Prefeitura do Rio).`
+    ? `${base}\n\nJá adiantei estas informações:\n${lines}`
+    : base
   return `https://wa.me/${WHATSAPP_BOT_NUMBER}?text=${encodeURIComponent(message)}`
+}
+
+// Standardized "continue on WhatsApp" button — same look and label everywhere
+// it appears (service card and the guided-flow runner).
+function WhatsAppButton({ href }: { href: string }) {
+  return (
+    <Button
+      asChild
+      className="h-11 w-full rounded-full bg-[#25D366] text-white hover:bg-[#1ebe57]"
+    >
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        <MessageCircle className="h-4 w-4" />
+        Atendimento pelo WhatsApp
+      </a>
+    </Button>
+  )
 }
 
 // Field-aware placeholder for free-text steps.
@@ -137,6 +157,11 @@ export function ServiceFlow({
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([])
   const [busy, setBusy] = useState(false)
   const [textValue, setTextValue] = useState('')
+  // raw submissions, so "back" can deterministically replay the flow up to the
+  // previous question (the backend session is server-side, so we re-walk it)
+  const [answers, setAnswers] = useState<
+    { value: string; correction: boolean }[]
+  >([])
   const bodyRef = useRef<HTMLDivElement>(null)
 
   function scrollBodyToBottom() {
@@ -163,6 +188,7 @@ export function ServiceFlow({
   async function start() {
     setBusy(true)
     setTranscript([])
+    setAnswers([])
     setStep(null)
     setOpen(true)
     try {
@@ -182,6 +208,7 @@ export function ServiceFlow({
     if (!step) return
     setBusy(true)
     setTranscript(prev => [...prev, { question: step.title, answer: label }])
+    setAnswers(prev => [...prev, { value, correction }])
     setTextValue('')
     try {
       const res = await fetch(
@@ -202,6 +229,43 @@ export function ServiceFlow({
         return
       }
       setStep((await res.json()) as FlowStep)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Go back one question: re-open a fresh session and replay every answer except
+  // the last (the flow is deterministic, so this lands on the previous step).
+  async function goBack() {
+    if (busy || answers.length === 0) return
+    const replay = answers.slice(0, -1)
+    const keptTranscript = transcript.slice(0, -1)
+    setBusy(true)
+    setTextValue('')
+    try {
+      const startRes = await fetch(
+        `/api/flow/${encodeURIComponent(slug ?? '')}/start`,
+        { method: 'POST' }
+      )
+      let cur = (await startRes.json()) as FlowStep
+      for (const a of replay) {
+        const res = await fetch(
+          `/api/flow/${encodeURIComponent(slug ?? '')}/step`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              session_id: cur.session_id,
+              value: a.value,
+              correction: a.correction,
+            }),
+          }
+        )
+        cur = (await res.json()) as FlowStep
+      }
+      setStep(cur)
+      setTranscript(keptTranscript)
+      setAnswers(replay)
     } finally {
       setBusy(false)
     }
@@ -235,20 +299,7 @@ export function ServiceFlow({
             Iniciar atendimento
           </Button>
           {/* go straight to the WhatsApp bot, without the in-page flow */}
-          <Button
-            asChild
-            variant="outline"
-            className="h-11 w-full rounded-full border-[#25D366] text-[#128C2E] hover:bg-[#25D366]/10"
-          >
-            <a
-              href={whatsappHref(serviceName, [])}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Atender pelo WhatsApp
-            </a>
-          </Button>
+          <WhatsAppButton href={whatsappHref(serviceName, [])} />
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-1 text-xs text-foreground-light hover:text-foreground">
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
@@ -361,6 +412,17 @@ export function ServiceFlow({
               </div>
             ) : (
               <div className="space-y-3">
+                {answers.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    disabled={busy}
+                    className="-mt-1 flex items-center gap-1 text-xs text-foreground-light transition-colors hover:text-foreground disabled:opacity-50"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    Voltar
+                  </button>
+                )}
                 <p className="text-base font-medium text-foreground leading-6">
                   {step.title}
                 </p>
@@ -535,19 +597,7 @@ export function ServiceFlow({
             {/* footer: hand off to the WhatsApp bot + trust mark */}
             {step && !step.done && (
               <div className="space-y-2 border-t border-border pt-3">
-                <Button
-                  asChild
-                  className="h-11 w-full rounded-full bg-[#25D366] text-white hover:bg-[#20bd5a]"
-                >
-                  <a
-                    href={whatsappHref(serviceName, transcript)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Continuar no WhatsApp
-                  </a>
-                </Button>
+                <WhatsAppButton href={whatsappHref(serviceName, transcript)} />
                 <p className="flex items-center justify-center gap-1.5 text-[11px] text-foreground-light">
                   <Lock className="h-3 w-3" />
                   Suas respostas seguem com você · atendimento oficial da
