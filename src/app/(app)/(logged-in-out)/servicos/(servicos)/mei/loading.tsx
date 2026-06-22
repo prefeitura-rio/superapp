@@ -1,4 +1,4 @@
-import { MeiHeader } from '@/app/components/mei/mei-header'
+import { MeiHeaderClient } from '@/app/components/mei/mei-header-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -47,7 +47,7 @@ export default async function MeiLoading() {
 
   return (
     <div className="min-h-lvh">
-      <MeiHeader isLoggedIn={isLoggedIn} isLoading={false} />
+      <MeiHeaderClient />
       <main className="max-w-4xl mx-auto pb-34 px-4">
         {/* Minhas oportunidades - só mostra skeleton se logado */}
         {isLoggedIn && (

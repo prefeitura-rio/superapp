@@ -49,7 +49,7 @@ async function fetchHeaderData(): Promise<AuthHeaderData> {
 export function AuthHeaderProvider({ children }: { children: ReactNode }) {
   const {
     data,
-    isLoading,
+    isPending,
     refetch: queryRefetch,
   } = useQuery({
     queryKey: ['header'],
@@ -63,7 +63,7 @@ export function AuthHeaderProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthHeaderContext.Provider
-      value={{ data: data ?? defaultData, isLoading, refetch }}
+      value={{ data: data ?? defaultData, isLoading: isPending, refetch }}
     >
       {children}
     </AuthHeaderContext.Provider>
