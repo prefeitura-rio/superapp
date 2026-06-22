@@ -1,12 +1,11 @@
 import { CategoryFiltersMobileSkeleton } from '@/app/components/courses/category-filters-mobile-skeleton'
 import { CategoryFiltersSwipeSkeleton } from '@/app/components/courses/category-filters-swipe-skeleton'
-import CoursesHeader from '@/app/components/courses/courses-header'
+import { CoursesHeaderClient } from '@/app/components/courses/courses-header-client'
 import {
   CourseCardSkeleton,
   RecentlyAddedCoursesSwipeSkeleton,
 } from '@/app/components/courses/recently-added-courses-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getUserInfoFromToken } from '@/lib/user-info'
 
 function MyCoursesHomeSkeleton() {
   return (
@@ -75,13 +74,10 @@ function AllCoursesSkeleton() {
   )
 }
 
-export default async function CoursesLoading() {
-  const userInfo = await getUserInfoFromToken()
-  const isLoggedIn = !!(userInfo.cpf && userInfo.name)
-
+export default function CoursesLoading() {
   return (
     <div className="min-h-lvh">
-      <CoursesHeader isLoggedIn={isLoggedIn} isLoading={false} />
+      <CoursesHeaderClient />
       <main className="max-w-4xl mx-auto pb-34 text-white">
         {/* Category Filters - renderizando ambos e usando classes responsivas para evitar layout shift */}
         <div className="block sm:hidden">
