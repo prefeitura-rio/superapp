@@ -85,7 +85,7 @@ function whatsappHref(
     .join('\n')
   // standardized message: a single intro, with the answers appended when the
   // citizen already started the guided flow
-  const base = `Olá! Quero atendimento sobre "${service}" (Prefeitura do Rio).`
+  const base = `Olá! Quero atendimento sobre "${service}".`
   const message = lines
     ? `${base}\n\nJá adiantei estas informações:\n${lines}`
     : base
