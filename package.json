@@ -46,7 +46,7 @@
     "@tailwindcss/postcss": "^4.1.5",
     "@tanstack/react-query": "^5.100.10",
     "@tiptap/extension-character-count": "^3.11.0",
-    "@tiptap/extension-link": "^3.11.0",
+    "@tiptap/extension-link": "^3.26.0",
     "@tiptap/extension-task-item": "^3.11.0",
     "@tiptap/extension-task-list": "^3.22.3",
     "@tiptap/extension-typography": "^3.11.0",
