@@ -14,6 +14,7 @@ import {
   MapPinIcon,
   PcdIcon,
   ShareIcon,
+  UsersIcon,
 } from '@/assets/icons'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,6 +52,8 @@ function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
       return <PcdIcon className="h-3 w-3 shrink-0" />
+    case 'contratacoes':
+      return <UsersIcon className="h-3 w-3 shrink-0" />
     default:
       return <FileText className="h-3 w-3 shrink-0" />
   }
