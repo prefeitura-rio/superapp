@@ -34,16 +34,37 @@ export function formatTimeRange(timeRange: string | null): string {
   return `${startTime}h às ${endTime}h`
 }
 
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
+const UTC_MIDNIGHT_PATTERN = /^(\d{4}-\d{2}-\d{2})T00:00:00(\.\d{1,3})?Z?$/
+
+function parseCalendarDate(datePart: string): Date {
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 /**
- * Parses a date string converting from UTC to Brazil/Sao_Paulo timezone (UTC-3)
- * before extracting the calendar date. This is necessary because dates are stored
- * as TIMESTAMPTZ in UTC after being converted from local time via toISOString().
- * A timestamp like "2026-08-01T02:59:59Z" is actually July 31st at 23:59:59 in
- * Brasília (UTC-3), so we must convert to the correct timezone before displaying.
+ * Parses a date string for display as a calendar date in pt-BR.
+ *
+ * Date-only strings and UTC midnight timestamps are treated as calendar dates
+ * without timezone shift (e.g. "2026-08-08" and "2026-08-08T00:00:00Z" → Aug 8).
+ *
+ * Timestamps with a meaningful time component are converted to America/Sao_Paulo
+ * before extracting the calendar date. This handles values stored as TIMESTAMPTZ
+ * in UTC after local-time conversion via toISOString() — e.g.
+ * "2026-08-01T02:59:59Z" is July 31st at 23:59:59 in Brasília (UTC-3).
  */
 function parseDateLocal(dateString: string): Date {
+  const dateOnlyMatch = dateString.match(DATE_ONLY_PATTERN)
+  if (dateOnlyMatch) {
+    return parseCalendarDate(dateOnlyMatch[0])
+  }
+
+  const utcMidnightMatch = dateString.match(UTC_MIDNIGHT_PATTERN)
+  if (utcMidnightMatch) {
+    return parseCalendarDate(utcMidnightMatch[1])
+  }
+
   const date = new Date(dateString)
-  // Format in Brazil/Sao_Paulo timezone to get the correct calendar date
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Sao_Paulo',
     year: 'numeric',
