@@ -40,7 +40,7 @@
 
 > ### app-go-api
 
-* https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/staging/docs/openapi-v3.json
+* https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.yaml
 
 ```
   api: {

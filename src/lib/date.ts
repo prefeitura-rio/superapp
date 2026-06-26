@@ -35,14 +35,24 @@ export function formatTimeRange(timeRange: string | null): string {
 }
 
 /**
- * Parses a date string without UTC shift.
- * Extracts the YYYY-MM-DD portion and constructs a Date in local time,
- * so a value like "2026-08-08T00:00:00Z" always yields August 8th regardless
- * of the browser timezone.
+ * Parses a date string converting from UTC to Brazil/Sao_Paulo timezone (UTC-3)
+ * before extracting the calendar date. This is necessary because dates are stored
+ * as TIMESTAMPTZ in UTC after being converted from local time via toISOString().
+ * A timestamp like "2026-08-01T02:59:59Z" is actually July 31st at 23:59:59 in
+ * Brasília (UTC-3), so we must convert to the correct timezone before displaying.
  */
 function parseDateLocal(dateString: string): Date {
-  const datePart = dateString.split('T')[0]
-  const [year, month, day] = datePart.split('-').map(Number)
+  const date = new Date(dateString)
+  // Format in Brazil/Sao_Paulo timezone to get the correct calendar date
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const year = Number(parts.find(p => p.type === 'year')?.value)
+  const month = Number(parts.find(p => p.type === 'month')?.value)
+  const day = Number(parts.find(p => p.type === 'day')?.value)
   return new Date(year, month - 1, day)
 }
 
