@@ -31,6 +31,7 @@ import { ShareIcon } from './share-icon'
 import { SunIcon } from './sun-icon'
 import { TrashIcon } from './trash-icon'
 import { UserIcon } from './user-icon'
+import { UsersIcon } from './users-icon'
 import { WalletIcon } from './wallet-icon'
 import { WhatsappIcon } from './whatsapp-icon'
 import { XCircleIcon } from './x-circle-icon'
@@ -70,6 +71,7 @@ export {
   SunIcon,
   TrashIcon,
   UserIcon,
+  UsersIcon,
   WalletIcon,
   WhatsappIcon,
   XCircleIcon,
