@@ -1,6 +1,12 @@
 'use client'
 
-import { BriefcaseIcon, CltIcon, MapPinIcon, PcdIcon } from '@/assets/icons'
+import {
+  BriefcaseIcon,
+  CltIcon,
+  MapPinIcon,
+  PcdIcon,
+  UsersIcon,
+} from '@/assets/icons'
 import { cn } from '@/lib/utils'
 import { DollarSign } from 'lucide-react'
 import Image from 'next/image'
@@ -16,6 +22,7 @@ export interface VagaBadge {
     | 'para_pcd'
     | 'preferencial_pcd'
     | 'exclusivo_pcd'
+    | 'contratacoes'
 }
 
 export interface VagaCardData {
@@ -48,6 +55,8 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
       return <PcdIcon className="h-3 w-3 shrink-0" />
+    case 'contratacoes':
+      return <UsersIcon className="h-3 w-3 shrink-0" />
     default:
       return null
   }
@@ -66,6 +75,7 @@ const BADGE_PRIORITY: Partial<Record<NonNullable<VagaBadge['type']>, number>> =
     preferencial_pcd: 1,
     exclusivo_pcd: 1,
     bairro: 2,
+    contratacoes: 100,
   }
 
 function sortBadges(badges: VagaBadge[]): VagaBadge[] {
@@ -81,16 +91,23 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
 
   const displayedBadges = isRecent
     ? (() => {
+        const contratacoesBadge = vaga.badges.filter(
+          b => b.type === 'contratacoes'
+        )
         const accessibility = vaga.badges.filter(
           b => b.type && PCD_TYPES.has(b.type)
         )
         const others = sortBadges(
-          vaga.badges.filter(b => !b.type || !PCD_TYPES.has(b.type))
+          vaga.badges.filter(
+            b =>
+              !b.type || (!PCD_TYPES.has(b.type) && b.type !== 'contratacoes')
+          )
         )
         const remainingSlots = Math.max(0, 3 - accessibility.length)
         return sortBadges([
           ...accessibility,
           ...others.slice(0, remainingSlots),
+          ...contratacoesBadge,
         ])
       })()
     : sortBadges(vaga.badges)
