@@ -74,6 +74,17 @@ export function transformVagaToCardData(
     })
   }
 
+  if (
+    vaga.quantidade_estimada_contratacoes &&
+    vaga.quantidade_estimada_contratacoes > 0
+  ) {
+    const qtd = vaga.quantidade_estimada_contratacoes
+    badges.push({
+      text: qtd === 1 ? '1 vaga' : `${qtd} vagas`,
+      type: 'contratacoes',
+    })
+  }
+
   return {
     id: vaga.id || '',
     titulo: vaga.titulo || 'Título não disponível',
