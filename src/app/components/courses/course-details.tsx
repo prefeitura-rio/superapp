@@ -1183,8 +1183,11 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
       )
     }
 
-    // Handle approved status - show both "Trocar turma" and "Cancelar inscrição" buttons
-    if (userEnrollment?.status === 'approved') {
+    // Handle approved/pending status - show both "Trocar turma" and "Cancelar inscrição" buttons
+    if (
+      userEnrollment?.status === 'approved' ||
+      userEnrollment?.status === 'pending'
+    ) {
       return (
         <div className="flex flex-col gap-3">
           <Link
@@ -1302,8 +1305,9 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
             hasCertificate={course.has_certificate}
           />
         )}
-        {/* Action buttons for approved users - below status card, above description */}
-        {userEnrollment?.status === 'approved' && (
+        {/* Action buttons for approved/pending users - below status card, above description */}
+        {(userEnrollment?.status === 'approved' ||
+          userEnrollment?.status === 'pending') && (
           <div className="px-4 py-6 pb-0 w-full max-w-4xl">
             {renderActionButton()}
           </div>
@@ -1337,12 +1341,13 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
         />
         <div className="my-12" />
         <CourseContent course={course} />
-        {/* Bottom action button - hide for approved users since buttons are shown above description */}
-        {userEnrollment?.status !== 'approved' && (
-          <div className="p-4 w-full max-w-4xl pt-8">
-            {renderActionButton()}
-          </div>
-        )}
+        {/* Bottom action button - hide for approved/pending users since buttons are shown above description */}
+        {userEnrollment?.status !== 'approved' &&
+          userEnrollment?.status !== 'pending' && (
+            <div className="p-4 w-full max-w-4xl pt-8">
+              {renderActionButton()}
+            </div>
+          )}
       </div>
     </div>
   )
