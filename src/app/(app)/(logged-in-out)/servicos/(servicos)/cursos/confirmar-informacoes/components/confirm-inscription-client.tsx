@@ -858,6 +858,8 @@ export function ConfirmInscriptionClient({
                 slides={slides}
                 onSlideChange={index => setCurrentIndex(index)}
                 showPagination={currentSlide?.showPagination !== false}
+                currentIndex={currentIndex}
+                onNext={handleNext}
               />
             </div>
           )}

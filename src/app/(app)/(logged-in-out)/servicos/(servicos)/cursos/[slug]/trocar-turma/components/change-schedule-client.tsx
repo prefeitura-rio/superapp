@@ -330,6 +330,7 @@ export function ChangeScheduleClient({
                 slides={slides}
                 onSlideChange={index => setCurrentIndex(index)}
                 showPagination={currentSlide?.showPagination !== false}
+                currentIndex={currentIndex}
               />
             </div>
           )}

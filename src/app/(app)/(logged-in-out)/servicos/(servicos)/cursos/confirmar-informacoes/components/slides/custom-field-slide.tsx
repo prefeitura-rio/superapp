@@ -56,6 +56,7 @@ export function CustomFieldSlide({
           inputMode="email"
           placeholder="exemplo@email.com"
           className={inputClassName}
+          enterKeyHint="next"
         />
       )
     }
@@ -72,6 +73,7 @@ export function CustomFieldSlide({
               inputMode={fmt === 'number' ? 'numeric' : 'tel'}
               placeholder={PLACEHOLDER[fmt] ?? ''}
               className={inputClassName}
+              enterKeyHint="next"
             />
           )}
         />
@@ -89,6 +91,7 @@ export function CustomFieldSlide({
            focus-visible:ring-0 focus-visible:border-primary"
           rows={3}
           maxLength={50}
+          enterKeyHint="next"
         />
         <p className="text-muted-foreground text-sm">Limite de 50 caracteres</p>
       </div>
