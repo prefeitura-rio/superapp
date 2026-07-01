@@ -5,10 +5,10 @@ import {
   CltIcon,
   MapPinIcon,
   PcdIcon,
+  SalaryIcon,
   UsersIcon,
 } from '@/assets/icons'
 import { cn } from '@/lib/utils'
-import { DollarSign } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -32,6 +32,7 @@ export interface VagaCardData {
   empresaLogo?: string
   empresaCnpj?: string
   badges: VagaBadge[]
+  dataPublicacao?: string
 }
 
 interface VagaCardProps {
@@ -50,7 +51,7 @@ function BadgeIcon({ type }: { type: VagaBadge['type'] }) {
     case 'bairro':
       return <MapPinIcon className="h-3 w-3 shrink-0" />
     case 'salary':
-      return <DollarSign className="h-3 w-3 shrink-0" />
+      return <SalaryIcon className="h-3 w-3 shrink-0" />
     case 'para_pcd':
     case 'preferencial_pcd':
     case 'exclusivo_pcd':
@@ -70,11 +71,12 @@ const PCD_TYPES = new Set<VagaBadge['type']>([
 
 const BADGE_PRIORITY: Partial<Record<NonNullable<VagaBadge['type']>, number>> =
   {
-    modality: 0,
-    para_pcd: 1,
-    preferencial_pcd: 1,
-    exclusivo_pcd: 1,
-    bairro: 2,
+    regime: 0,
+    modality: 1,
+    para_pcd: 2,
+    preferencial_pcd: 2,
+    exclusivo_pcd: 2,
+    bairro: 3,
     contratacoes: 100,
   }
 
@@ -116,14 +118,15 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
     <Link
       href={`/servicos/trabalho/${vaga.id}`}
       className={cn(
-        'flex flex-col justify-between p-4 rounded-3xl transition-opacity hover:opacity-90 overflow-hidden min-h-0',
-        isRecent && 'bg-[#3E5782] text-background shrink-0',
-        !isRecent && 'bg-card',
+        'flex flex-col transition-opacity hover:opacity-90 overflow-hidden min-h-0',
+        isRecent &&
+          'justify-between p-4 bg-[#3E5782] text-background shrink-0 rounded-2xl shadow-[0_2px_10px_1px_rgba(0,0,0,0.20)]',
+        !isRecent && 'justify-between p-6 bg-card rounded-2xl',
         className
       )}
     >
-      {/* Header */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Header: logo + nome da empresa + data de publicação */}
+      <div className="flex items-start gap-2 shrink-0">
         <div className="size-8 shrink-0 overflow-hidden rounded-full bg-white flex items-center justify-center">
           {vaga.empresaLogo ? (
             <Image
@@ -144,14 +147,26 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
             </span>
           )}
         </div>
-        <span
-          className={cn(
-            'text-xs font-normal leading-4 line-clamp-2 min-w-0',
-            isRecent ? 'text-white' : 'text-card-foreground'
+        <div className="flex flex-col min-w-0">
+          <span
+            className={cn(
+              'text-xs font-normal leading-4 line-clamp-1 min-w-0',
+              isRecent ? 'text-white' : 'text-card-foreground'
+            )}
+          >
+            {vaga.empresaNome}
+          </span>
+          {vaga.dataPublicacao && (
+            <span
+              className={cn(
+                'font-sans text-xs font-normal leading-4 tracking-normal',
+                isRecent ? 'text-[rgba(255,255,255,0.60)]' : 'text-[#0084D1]'
+              )}
+            >
+              Publicada em {vaga.dataPublicacao}
+            </span>
           )}
-        >
-          {vaga.empresaNome}
-        </span>
+        </div>
       </div>
 
       {/* Title */}
@@ -170,14 +185,19 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
           <span
             key={`${badge.text}-${index}`}
             className={cn(
-              'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full',
+              'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full font-sans font-normal leading-4 tracking-normal',
               isRecent
-                ? 'bg-white/10 text-white'
-                : 'bg-foreground/5 text-foreground'
+                ? 'bg-white/10 text-white text-xs'
+                : 'bg-foreground/5 text-xs'
             )}
+            style={
+              !isRecent
+                ? { color: 'var(--theme-color-foreground-light, #71717B)' }
+                : undefined
+            }
           >
             {!isRecent && <BadgeIcon type={badge.type} />}
-            <span className="text-xs">{badge.text}</span>
+            <span>{badge.text}</span>
           </span>
         ))}
       </div>

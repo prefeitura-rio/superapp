@@ -13,7 +13,7 @@ export function AllVagas() {
   return (
     <>
       <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
-        Encontre sua vaga
+        Encontre seu trabalho
       </h3>
       <VagaFilters onFiltersChange={setActiveFilters} />
 
@@ -22,7 +22,7 @@ export function AllVagas() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="w-full h-41 rounded-2xl bg-muted animate-pulse"
+              className="w-full h-[200px] rounded-2xl bg-muted animate-pulse"
             />
           ))}
         </div>
@@ -54,7 +54,7 @@ export function AllVagas() {
                   key={vaga.id}
                   vaga={vaga}
                   variant="all"
-                  className="w-full h-41 min-h-41"
+                  className="w-full h-[200px]"
                 />
               ))}
             </div>
@@ -67,7 +67,7 @@ export function AllVagas() {
                   key={vaga.id}
                   vaga={vaga}
                   variant="all"
-                  className="w-full min-h-41"
+                  className="w-full h-[200px]"
                 />
               ))}
             </div>

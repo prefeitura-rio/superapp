@@ -1,6 +1,20 @@
 import type { EmpregabilidadeVaga } from '@/http-courses/models'
 import type { VagaCardData } from './vaga-card'
 
+function toTitleCase(str: string): string {
+  return str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase())
+}
+
+function formatarDataPublicacao(dateStr: string): string {
+  const date = new Date(dateStr)
+  const dia = date.getUTCDate()
+  const mes = date
+    .toLocaleDateString('pt-BR', { month: 'short', timeZone: 'UTC' })
+    .replace('.', '')
+    .toUpperCase()
+  return `${dia} ${mes}`
+}
+
 /**
  * Verifica se uma vaga está dentro do prazo para exibição.
  * Nota: filtragem por status é feita pela API — esta função não repete essa verificação.
@@ -24,6 +38,18 @@ export function transformVagaToCardData(
   vaga: EmpregabilidadeVaga
 ): VagaCardData {
   const badges: VagaCardData['badges'] = []
+
+  // Regime de contratação — obrigatório
+  const REGIME_LABEL: Record<string, string> = {
+    CLT: 'Efetivo (CLT)',
+  }
+  if (vaga.regime_contratacao?.descricao) {
+    const descricao = vaga.regime_contratacao.descricao
+    badges.push({
+      text: REGIME_LABEL[descricao] ?? descricao,
+      type: 'regime',
+    })
+  }
 
   // Adiciona badge do modelo de trabalho
   if (vaga.modelo_trabalho?.descricao) {
@@ -88,13 +114,18 @@ export function transformVagaToCardData(
   return {
     id: vaga.id || '',
     titulo: vaga.titulo || 'Título não disponível',
-    empresaNome:
+    empresaNome: toTitleCase(
       vaga.contratante?.nome_fantasia ||
-      vaga.contratante?.razao_social ||
-      'Empresa não disponível',
+        vaga.contratante?.razao_social ||
+        'Empresa não disponível'
+    ),
     empresaLogo: vaga.contratante?.url_logo,
     empresaCnpj: vaga.contratante?.cnpj,
     badges,
+    dataPublicacao:
+      (vaga.created_at ?? vaga.updated_at)
+        ? formatarDataPublicacao((vaga.created_at ?? vaga.updated_at)!)
+        : undefined,
   }
 }
 
