@@ -24,6 +24,7 @@ import { PcdIcon } from './pcd-icon'
 import { PhoneIcon } from './phone-icon'
 import { PlusIcon } from './plus-icon'
 import { PrinterIcon } from './printer-icon'
+import { SalaryIcon } from './salary-icon'
 import { SearchIcon } from './search-icon'
 import { ServicesIcon } from './services-icon'
 import { SettingsIcon } from './settings-icon'
@@ -63,6 +64,7 @@ export {
   PcdIcon,
   PhoneIcon,
   PlusIcon,
+  SalaryIcon,
   PrinterIcon,
   SearchIcon,
   ServicesIcon,
