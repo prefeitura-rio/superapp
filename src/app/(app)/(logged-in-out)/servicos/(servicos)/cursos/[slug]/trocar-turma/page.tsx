@@ -41,9 +41,11 @@ export default async function ChangeSchedulePage({ params }: PageProps) {
     console.error('Error fetching user enrollment:', error)
   }
 
-  // Validate: user must have an approved enrollment to change schedule
-  if (!userEnrollment || userEnrollment.status !== 'approved') {
-    // Redirect back to course page if not approved
+  // Validate: user must have an approved or pending enrollment to change schedule
+  const canChangeSchedule =
+    userEnrollment?.status === 'approved' ||
+    userEnrollment?.status === 'pending'
+  if (!userEnrollment || !canChangeSchedule) {
     redirect(`/servicos/cursos/${courseSlug}`)
   }
 
