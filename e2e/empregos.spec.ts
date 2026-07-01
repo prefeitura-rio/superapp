@@ -21,7 +21,7 @@ async function clickActionDrawer(page: Page, labelText: string) {
  * Navega para a home de empregos, aguarda os cards e retorna o href do
  * primeiro card de vaga encontrado na página.
  *
- * Usa o heading "Vagas mais recentes" como âncora XPath para excluir
+ * Usa o heading "Mais recentes" como âncora XPath para excluir
  * estruturalmente quaisquer links acima dele (ex.: CandidaturasEnviadasCtaCard),
  * sem precisar de lista de :not() hardcoded.
  * getByRole('link') garante que só elementos visíveis são retornados,
@@ -30,7 +30,7 @@ async function clickActionDrawer(page: Page, labelText: string) {
 async function getFirstVagaHref(page: Page): Promise<string> {
   await page.goto('/servicos/trabalho')
   const vagasHeading = page.getByRole('heading', {
-    name: 'Vagas mais recentes',
+    name: 'Mais recentes',
   })
   await expect(vagasHeading).toBeVisible({ timeout: 20000 })
   const firstVagaLink = vagasHeading
@@ -73,17 +73,17 @@ test.describe('Empregos — home (público)', () => {
     )
   })
 
-  test('exibe seção "Vagas mais recentes" com pelo menos 1 card', async ({
+  test('exibe seção "Mais recentes" com pelo menos 1 card', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
 
     await expect(
-      page.getByRole('heading', { name: 'Vagas mais recentes' })
+      page.getByRole('heading', { name: 'Mais recentes' })
     ).toBeVisible({ timeout: 20000 })
 
     const vagasHeading = page.getByRole('heading', {
-      name: 'Vagas mais recentes',
+      name: 'Mais recentes',
     })
     const firstCard = vagasHeading
       .locator(
@@ -94,10 +94,10 @@ test.describe('Empregos — home (público)', () => {
     await expect(firstCard).toBeVisible({ timeout: 20000 })
   })
 
-  test('exibe seção "Encontre sua vaga"', async ({ page }) => {
+  test('exibe seção "Encontre seu trabalho"', async ({ page }) => {
     await page.goto('/servicos/trabalho')
     await expect(
-      page.getByRole('heading', { name: 'Encontre sua vaga' })
+      page.getByRole('heading', { name: 'Encontre seu trabalho' })
     ).toBeVisible({ timeout: 20000 })
   })
 
@@ -106,7 +106,7 @@ test.describe('Empregos — home (público)', () => {
   }) => {
     await page.goto('/servicos/trabalho')
     await expect(
-      page.getByRole('heading', { name: 'Vagas mais recentes' })
+      page.getByRole('heading', { name: 'Mais recentes' })
     ).toBeVisible({ timeout: 20000 })
     await expect(page.getByText('Candidaturas enviadas')).toHaveCount(0)
   })
@@ -116,7 +116,7 @@ test.describe('Empregos — home (público)', () => {
   }) => {
     await page.goto('/servicos/trabalho')
     const vagasHeading = page.getByRole('heading', {
-      name: 'Vagas mais recentes',
+      name: 'Mais recentes',
     })
     await expect(vagasHeading).toBeVisible({ timeout: 20000 })
     const firstVagaLink = vagasHeading
