@@ -1,7 +1,8 @@
 import { getUserEnrollment } from '@/actions/courses/get-user-enrollment'
 import { buildAuthUrl } from '@/constants/url'
-import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getApiPublicCoursesCourseId } from '@/http-courses/courses/courses'
 import type { UserEnrollmentExtended } from '@/lib/course-utils'
+import { parseCourseDetailResponse } from '@/lib/course-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
 import { ChangeScheduleClient } from './components/change-schedule-client'
@@ -23,20 +24,25 @@ export default async function ChangeSchedulePage({ params }: PageProps) {
   }
 
   // Fetch course data
-  const courseResponse = await getApiV1CoursesCourseId(
+  const courseResponse = await getApiPublicCoursesCourseId(
     Number.parseInt(courseSlug)
   )
+  const course = parseCourseDetailResponse(courseResponse.data)
 
-  if (courseResponse.status !== 200 || !(courseResponse.data as any)?.data) {
+  if (courseResponse.status !== 200 || !course) {
     notFound()
   }
 
-  const course = (courseResponse.data as any).data
+  if (course.id == null) {
+    notFound()
+  }
+
+  const courseId = course.id
 
   // Get user enrollment
   let userEnrollment: UserEnrollmentExtended | null = null
   try {
-    userEnrollment = await getUserEnrollment(course.id)
+    userEnrollment = await getUserEnrollment(courseId)
   } catch (error) {
     console.error('Error fetching user enrollment:', error)
   }

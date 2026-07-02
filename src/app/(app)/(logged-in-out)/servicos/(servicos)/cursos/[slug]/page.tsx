@@ -1,9 +1,9 @@
 //@ts-nocheck
 //não use isso a menos que saiba oque estiver fazendo!
 import { CourseDetails } from '@/app/components/courses/course-details'
-import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getApiPublicCoursesCourseId } from '@/http-courses/courses/courses'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
-import { shouldShowCourse } from '@/lib/course-utils'
+import { parseCourseDetailResponse, shouldShowCourse } from '@/lib/course-utils'
 import { notFound } from 'next/navigation'
 
 export default async function CoursePage({
@@ -14,13 +14,14 @@ export default async function CoursePage({
   const { slug: courseSlug } = await params
 
   try {
-    const response = await getApiV1CoursesCourseId(Number.parseInt(courseSlug))
+    const response = await getApiPublicCoursesCourseId(
+      Number.parseInt(courseSlug)
+    )
+    const course = parseCourseDetailResponse(response.data)
 
-    if (response.status !== 200 || !response.data?.data) {
+    if (response.status !== 200 || !course) {
       notFound()
     }
-
-    const course = response.data.data
 
     if (!shouldShowCourse({ course, renderByUrl: true })) {
       notFound()

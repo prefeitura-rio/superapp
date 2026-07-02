@@ -2,11 +2,12 @@ import { extractCourseId } from '@/actions/courses/utils'
 import { buildAuthUrl } from '@/constants/url'
 import { hasValidEmail, normalizeEmailData } from '@/helpers/email-data-helpers'
 import { hasValidPhone, normalizePhoneData } from '@/helpers/phone-data-helpers'
-import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getApiPublicCoursesCourseId } from '@/http-courses/courses/courses'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
 } from '@/http/models'
+import { parseCourseDetailResponse } from '@/lib/course-utils'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -55,7 +56,7 @@ export default async function ConfirmInscriptionPage({
 
   const [userInfoResponse, courseInfoResponse] = await Promise.all([
     getDalCitizenCpf(userAuthInfo.cpf),
-    getApiV1CoursesCourseId(Number.parseInt(courseSlug)),
+    getApiPublicCoursesCourseId(Number.parseInt(courseSlug)),
   ])
 
   if (userInfoResponse.status !== 200 || courseInfoResponse.status !== 200) {
@@ -63,7 +64,14 @@ export default async function ConfirmInscriptionPage({
   }
 
   const userInfo = userInfoResponse.data
-  const courseInfo = courseInfoResponse.data
+  const courseData = parseCourseDetailResponse(courseInfoResponse.data)
+
+  if (!courseData) {
+    throw new Error('Failed to fetch course data')
+  }
+
+  // ModelsCurso from Orval omits nested schedule/location fields returned by the API
+  const courseWithDetails = courseData as any
 
   // Type assertion for self-declared fields
   const userInfoExtended = userInfo as typeof userInfo & {
@@ -171,14 +179,13 @@ export default async function ConfirmInscriptionPage({
     addressNeedsUpdate,
   }
 
-  const courseData = (courseInfo as any).data
-  const modality = courseData?.modalidade?.toLowerCase()
+  const modality = courseWithDetails?.modalidade?.toLowerCase()
   const isOnlineCourse = modality === 'online' || modality === 'remoto'
 
   // Extract online classes from remote_class.schedules if available
   const onlineClasses =
-    isOnlineCourse && courseData?.remote_class?.schedules
-      ? courseData.remote_class.schedules.map((schedule: any) => ({
+    isOnlineCourse && courseWithDetails?.remote_class?.schedules
+      ? courseWithDetails.remote_class.schedules.map((schedule: any) => ({
           id: schedule.id,
           location_id: schedule.location_id,
           vacancies: schedule.vacancies,
@@ -193,7 +200,7 @@ export default async function ConfirmInscriptionPage({
       : []
 
   const nearbyUnits =
-    courseData?.locations?.map((location: any) => ({
+    courseWithDetails?.locations?.map((location: any) => ({
       id: location.id,
       curso_id: location.curso_id,
       address: location.address,
@@ -213,7 +220,7 @@ export default async function ConfirmInscriptionPage({
       userAuthInfo={userAuthInfo}
       nearbyUnits={nearbyUnits}
       onlineClasses={onlineClasses}
-      courseInfo={courseInfo}
+      courseInfo={courseInfoResponse.data}
       courseId={courseUuid}
       courseSlug={courseSlug}
       preselectedLocationId={preselectedLocationId}
