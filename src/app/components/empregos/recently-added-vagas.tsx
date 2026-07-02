@@ -69,7 +69,7 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
               <ChevronLeftIcon
                 width={20}
                 height={20}
-                className={canScrollLeft ? 'text-[#09090B]' : 'text-[#A1A1A1]'}
+                className={canScrollLeft ? 'text-foreground' : 'text-[#A1A1A1]'}
               />
             </button>
             <button
@@ -82,7 +82,9 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
               <ChevronRightIcon
                 width={20}
                 height={20}
-                className={canScrollRight ? 'text-[#09090B]' : 'text-[#A1A1A1]'}
+                className={
+                  canScrollRight ? 'text-foreground' : 'text-[#A1A1A1]'
+                }
               />
             </button>
           </div>
