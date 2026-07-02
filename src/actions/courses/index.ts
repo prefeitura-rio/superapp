@@ -1,5 +1,6 @@
-import { getApiV1CoursesCourseId } from '@/http-courses/courses/courses'
+import { getApiPublicCoursesCourseId } from '@/http-courses/courses/courses'
 import type { ModelsCurso } from '@/http-courses/models'
+import { parseCourseDetailResponse } from '@/lib/course-utils'
 import { FAVORITES_KEY, getFavoritesFromStorage } from './utils'
 
 /*
@@ -21,11 +22,11 @@ export const getAllFavoritesCourses = async (): Promise<ModelsCurso[]> => {
   const favoritesData = await Promise.all(
     favoriteIds.map(async (courseId: string) => {
       try {
-        const response = await getApiV1CoursesCourseId(
+        const response = await getApiPublicCoursesCourseId(
           Number.parseInt(courseId)
         )
         if (response.status === 200 && response.data) {
-          return response.data
+          return parseCourseDetailResponse(response.data)
         }
         return null
       } catch (error) {

@@ -8,24 +8,15 @@ import {
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsCurso } from '@/http-courses/models'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
-import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
+import {
+  filterVisibleCourses,
+  parseCoursesListResponse,
+  sortCourses,
+} from '@/lib/course-utils'
 import { getDalCategorias, getDalCourses } from '@/lib/dal'
 import type { AccessibilityProps } from '@/types/course'
 import Image from 'next/image'
 import Link from 'next/link'
-
-interface CoursesApiResponse {
-  data: {
-    courses: ModelsCurso[]
-    pagination: {
-      limit: number
-      page: number
-      total: number
-      total_pages: number
-    }
-  }
-  success: boolean
-}
 
 export default async function CoursesCategoryPage({
   params,
@@ -68,8 +59,7 @@ export default async function CoursesCategoryPage({
       })
 
       if (coursesResponse.status === 200) {
-        const data = coursesResponse.data as unknown as CoursesApiResponse
-        const allCourses: ModelsCurso[] = data?.data?.courses || []
+        const allCourses = parseCoursesListResponse(coursesResponse.data)
         courses = sortCourses(filterVisibleCourses(allCourses))
       }
     } catch (error) {

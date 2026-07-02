@@ -8,9 +8,9 @@ import {
   getApiV1SubcategoriesSubcategoryServices,
 } from '@/http-busca-search/subcategories/subcategories'
 import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
-import { getApiV1Courses } from '@/http-courses/courses/courses'
+import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
-import type { GetApiV1CoursesParams } from '@/http-courses/models'
+import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -341,7 +341,7 @@ export async function revalidateDalCategorias() {
 
 // Courses search caching (shared across all users, but with different filters)
 // 5-minute cache since courses can change frequently
-export async function getDalCourses(params?: GetApiV1CoursesParams) {
+export async function getDalCourses(params?: GetApiPublicCoursesParams) {
   return withSpan('dal.getCourses', async span => {
     span.setAttribute('cache.strategy', 'force-cache')
     span.setAttribute('cache.revalidate', 300)
@@ -353,7 +353,7 @@ export async function getDalCourses(params?: GetApiV1CoursesParams) {
     if (params?.modalidade)
       span.setAttribute('filter.modalidade', params.modalidade)
 
-    const result = await getApiV1Courses(params, {
+    const result = await getApiPublicCourses(params, {
       cache: 'force-cache',
       next: {
         revalidate: 300, // 5 minutes - optimal for courses that can change frequently

@@ -1,24 +1,12 @@
 import CoursePageClient from '@/app/components/courses/courses-client'
-import { getApiV1Courses } from '@/http-courses/courses/courses'
-import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
-import { filterVisibleCourses, sortCourses } from '@/lib/course-utils'
-import { getDalCategorias } from '@/lib/dal'
-
-// Type for the expected API response structure
-interface CoursesApiResponse {
-  data: {
-    courses: ModelsCurso[]
-    pagination: {
-      limit: number
-      page: number
-      total: number
-      total_pages: number
-    }
-  }
-  success: boolean
-}
+import {
+  filterVisibleCourses,
+  parseCoursesListResponse,
+  sortCourses,
+} from '@/lib/course-utils'
+import { getDalCategorias, getDalCourses } from '@/lib/dal'
 
 export default async function CoursesPage() {
   try {
@@ -41,13 +29,13 @@ export default async function CoursesPage() {
     }
 
     // Fetch all courses (public data, cached via DAL)
-    const response = await getApiV1Courses({
+    const response = await getDalCourses({
       page: 1,
       limit: 100,
     })
-    const data = response.data as CoursesApiResponse
-
-    const allCourses: ModelsCurso[] = data?.data?.courses || []
+    const allCourses = parseCoursesListResponse(
+      response.status === 200 ? response.data : null
+    )
     const visibleCourses = filterVisibleCourses(allCourses)
     const sortedCourses = sortCourses(visibleCourses)
 

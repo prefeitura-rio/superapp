@@ -4,24 +4,14 @@ import {
   getCategoryIdBySlug,
   transformCategoriesToFilters,
 } from '@/lib/course-category-helpers'
-import { filterVisibleCourses } from '@/lib/course-utils'
+import {
+  filterVisibleCourses,
+  parseCoursesListPagination,
+  parseCoursesListResponse,
+} from '@/lib/course-utils'
 import { getDalCategorias } from '@/lib/dal'
 import { getDalCourses } from '@/lib/dal'
 import { NextResponse } from 'next/server'
-
-// Type for the expected API response structure
-interface CoursesApiResponse {
-  data: {
-    courses: ModelsCurso[]
-    pagination: {
-      limit: number
-      page: number
-      total: number
-      total_pages: number
-    }
-  }
-  success: boolean
-}
 
 export interface SearchCoursesFilters {
   q?: string
@@ -132,18 +122,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ courses: [] }, { status: 200 })
     }
 
-    // Cast through unknown first since GetApiV1Courses200 is { [key: string]: unknown }
-    const data = response.data as unknown as CoursesApiResponse
-
     // Extract courses array from the API response
-    const allCourses: ModelsCurso[] = data?.data?.courses || []
-
-    // Filter courses to only show those that should be visible
+    const allCourses = parseCoursesListResponse(response.data)
     const visibleCourses = filterVisibleCourses(allCourses)
 
     const result: SearchCoursesResult = {
       courses: visibleCourses,
-      pagination: data?.data?.pagination,
+      pagination: parseCoursesListPagination(response.data),
     }
 
     return NextResponse.json(result)

@@ -1,5 +1,51 @@
 import type { ModelsCurso } from '@/http-courses/models'
 
+interface CoursesListApiResponse {
+  data?: {
+    courses?: ModelsCurso[]
+    pagination?: {
+      limit: number
+      page: number
+      total: number
+      total_pages: number
+    }
+  }
+}
+
+export function parseCoursesListResponse(data: unknown): ModelsCurso[] {
+  if (!data || typeof data !== 'object') return []
+
+  const response = data as CoursesListApiResponse
+  return response.data?.courses ?? []
+}
+
+export function parseCoursesListPagination(data: unknown) {
+  if (!data || typeof data !== 'object') return undefined
+
+  const response = data as CoursesListApiResponse
+  return response.data?.pagination
+}
+
+export function parseCourseDetailResponse(data: unknown): ModelsCurso | null {
+  if (!data || typeof data !== 'object') return null
+
+  const response = data as { data?: ModelsCurso } & Partial<ModelsCurso>
+
+  if (
+    response.data &&
+    typeof response.data === 'object' &&
+    response.data.id != null
+  ) {
+    return response.data
+  }
+
+  if (response.id != null) {
+    return response as ModelsCurso
+  }
+
+  return null
+}
+
 export type EnrollmentStatus =
   | 'available'
   | 'coming_soon'
