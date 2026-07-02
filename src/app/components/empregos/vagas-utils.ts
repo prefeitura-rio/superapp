@@ -51,14 +51,6 @@ export function transformVagaToCardData(
     })
   }
 
-  // Adiciona badge do modelo de trabalho
-  if (vaga.modelo_trabalho?.descricao) {
-    badges.push({
-      text: vaga.modelo_trabalho.descricao,
-      type: 'modality',
-    })
-  }
-
   // Adiciona badge do bairro
   if (vaga.bairro) {
     badges.push({
@@ -79,24 +71,6 @@ export function transformVagaToCardData(
     badges.push({
       text: valorFormatado,
       type: 'salary',
-    })
-  }
-
-  // Adiciona badge de acessibilidade PCD
-  if (vaga.acessibilidade_pcd === 'preferencial_pcd') {
-    badges.push({
-      text: 'Preferencial PcD',
-      type: 'preferencial_pcd',
-    })
-  } else if (vaga.acessibilidade_pcd === 'exclusivo_pcd') {
-    badges.push({
-      text: 'Exclusiva PcD',
-      type: 'exclusivo_pcd',
-    })
-  } else if (vaga.acessibilidade_pcd === 'para_pcd') {
-    badges.push({
-      text: 'Para PcD',
-      type: 'para_pcd',
     })
   }
 
