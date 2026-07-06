@@ -11,7 +11,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 md:px-1">
+      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Todos os cursos
       </h3>
       {/* Abaixo de 896px: listagem horizontal */}
@@ -43,7 +43,7 @@ export function AllCourses({ courses }: AllCoursesProps) {
         </div>
       </div>
       {/* 896px+: grid de 4 colunas com cards fixos */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="grid grid-cols-4 gap-4">
           {courses.map((course, index) => (
             <CourseCard

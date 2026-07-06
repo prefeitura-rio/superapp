@@ -18,7 +18,7 @@ export default function RecentlyAddedCourses({
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 md:px-1">
+      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Mais recentes
       </h3>
       {/* Scroll horizontal com cards fixos (abaixo de 896px) */}
@@ -48,7 +48,7 @@ export default function RecentlyAddedCourses({
         </div>
       </div>
       {/* Desktop: grid de 4 colunas sem scroll (896px+) */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="flex gap-4">
           {limitedCourses.map((course, index) => (
             <CourseCard

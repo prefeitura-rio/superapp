@@ -16,7 +16,7 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
   return (
     <>
       <Link href="/servicos/cursos/meus-cursos">
-        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 md:px-1 cursor-pointer hover:opacity-80 transition-opacity">
+        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 cursor-pointer hover:opacity-80 transition-opacity">
           Meus Cursos
         </h3>
       </Link>
@@ -44,7 +44,7 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
         </div>
       </div>
       {/* Desktop: grid de 4 colunas sem scroll (acima de max-w-xl = 576px) */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="flex gap-4">
           {limitedCourses.map((course, index) => (
             <CourseCard
