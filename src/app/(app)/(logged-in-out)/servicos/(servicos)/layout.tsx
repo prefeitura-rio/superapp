@@ -50,7 +50,7 @@ export default function ServicosLayout({
           (toggleHasMultipleTabs ? (
             <div className="max-w-4xl mx-auto pt-[74px] pb-0">
               <SearchPlaceholder searchUrl={searchUrl} />
-              <div className="mb-5 mt-2 px-1">
+              <div className="mb-5 mt-2 px-4">
                 <ServiceTypeToggle activeType={activeType} />
               </div>
             </div>
