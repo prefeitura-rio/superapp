@@ -22,7 +22,7 @@ function MyCoursesHomeSkeleton() {
         </div>
       </div>
       {/* Desktop (896px+) */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="flex gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CourseCardSkeleton key={i} />
@@ -63,7 +63,7 @@ function AllCoursesSkeleton() {
         </div>
       </div>
       {/* Desktop (896px+): grid de 4 colunas */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <CourseCardSkeleton key={i} />

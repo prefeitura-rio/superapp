@@ -43,7 +43,7 @@ export function RecentlyAddedCoursesSwipeSkeleton() {
       </div>
 
       {/* Desktop (896px+) */}
-      <div className="hidden min-[896px]:block px-1 pb-6">
+      <div className="hidden min-[896px]:block px-4 pb-6">
         <div className="flex gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CourseCardSkeleton key={i} />
