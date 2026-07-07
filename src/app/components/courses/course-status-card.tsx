@@ -1,5 +1,6 @@
-import { Badge } from '@/components/ui/badge'
+import { ClockIcon } from '@/assets/icons/clock-icon'
 import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 interface CourseStatusCardProps {
   status: 'pending' | 'approved' | 'concluded' | 'rejected' | 'cancelled'
@@ -7,41 +8,87 @@ interface CourseStatusCardProps {
   hasCertificate?: boolean
 }
 
-const statusConfig = {
+function CheckCircleIcon({ color }: { color: 'black' | 'green' }) {
+  const bg = color === 'green' ? '#22c55e' : '#09090B'
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="10" cy="10" r="10" fill={bg} />
+      <path
+        d="M6 10.5L8.5 13L14 7.5"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function XCircleIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="10" cy="10" r="10" fill="#ef4444" />
+      <path
+        d="M7 7L13 13M13 7L7 13"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+interface StatusConfig {
+  icon: ReactNode
+  message: string
+}
+
+const statusConfig: Record<string, StatusConfig> = {
   pending: {
-    badgeText: 'Em análise',
+    icon: (
+      <ClockIcon
+        className="text-foreground-light shrink-0"
+        width={20}
+        height={20}
+      />
+    ),
     message:
-      'Sua inscrição foi enviada e está sendo avaliada pela organização responsável. Você receberá um e-mail com mais informações em breve.',
-    badgeClassName: 'bg-card-5 text-background dark:text-foreground',
+      'Sua inscrição foi enviada e está sendo avaliada pela organização responsável.',
   },
   approved: {
-    badgeText: 'Inscrito',
+    icon: <CheckCircleIcon color="black" />,
     message:
       'Sua inscrição foi aprovada com sucesso. Você já está confirmado no curso e receberá por e-mail mais informações sobre as próximas etapas.',
-    badgeClassName: 'bg-card-3 text-background dark:text-foreground',
-  },
-  rejected: {
-    badgeText: 'Recusado',
-    message:
-      'Sua inscrição foi analisada, mas não pôde ser aprovada neste momento. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
-    badgeClassName: 'bg-destructive text-background dark:text-foreground',
   },
   concluded: {
-    badgeText: 'Finalizado',
+    icon: <CheckCircleIcon color="green" />,
     message:
       'Parabéns! Você concluiu o curso.\nO certificado já está disponível e pode ser acessado diretamente pelo botão abaixo.',
-    badgeClassName: 'bg-secondary text-foreground',
+  },
+  rejected: {
+    icon: <XCircleIcon />,
+    message:
+      'Sua inscrição foi analisada, mas não pôde ser aprovada neste momento. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
   },
   cancelled: {
-    badgeText: 'Reprovado',
+    icon: <XCircleIcon />,
     message:
-      'Sua inscrição foi reprovada. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
-    badgeClassName: 'bg-destructive text-background dark:text-foreground',
+      'Sua inscrição foi analisada, mas não pôde ser aprovada neste momento. Isso pode ter ocorrido devido ao não atendimento dos requisitos ou critérios estabelecidos pela organização responsável.\n\nCaso queira, você poderá se inscrever novamente em uma próxima oportunidade ou buscar mais informações junto à equipe responsável pelo processo.',
   },
-} as const
-
-const concludedMessageWithoutCertificate =
-  'Parabéns! Você concluiu o curso com sucesso.'
+}
 
 export function CourseStatusCard({
   status,
@@ -50,25 +97,22 @@ export function CourseStatusCard({
 }: CourseStatusCardProps) {
   const config = statusConfig[status]
 
-  // For concluded status, use different message based on certificate availability
   const message =
     status === 'concluded' && !hasCertificate
-      ? concludedMessageWithoutCertificate
+      ? 'Parabéns! Você concluiu o curso com sucesso.'
       : config.message
 
   return (
     <div
       className={cn(
-        'p-4 bg-card mt-6 rounded-2xl border-muted-foreground border-dashed border',
+        'flex items-center gap-3 p-4 rounded-xl bg-card',
         className
       )}
     >
-      <div className="flex flex-col items-start justify-between gap-2">
-        <Badge className={config.badgeClassName}>{config.badgeText}</Badge>
-        <p className="text-xs md:text-sm text-foreground-light leading-4 md:leading-5 whitespace-pre-line">
-          {message}
-        </p>
-      </div>
+      <span className="shrink-0">{config.icon}</span>
+      <p className="text-foreground-light text-xs font-normal leading-4 whitespace-pre-line">
+        {message}
+      </p>
     </div>
   )
 }
