@@ -20,6 +20,7 @@ export interface ModelsSearchItem {
   relevance_score?: number
   short_desc?: string
   source?: ModelsItemSource
+  slug?: string
   tags?: string[]
   title?: string
   type?: ModelsItemType

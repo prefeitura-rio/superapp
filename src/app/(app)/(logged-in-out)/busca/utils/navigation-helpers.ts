@@ -153,8 +153,27 @@ export function handleCatalogItemClick(
   }
 
   if (item.type === 'job') {
-    const jobId = (metadata?.id as string | undefined) ?? item.id
-    router.push(`/servicos/trabalho/${jobId}`)
+    // Prioriza o slug SEO da vaga; cai para o id real da vaga (metadata.id)
+    // quando o slug está ausente OU vazio. Strings vazias são ignoradas para
+    // não curto-circuitar o fallback (o backend serializa slug:"" quando não há
+    // slug). item.id é o UUID interno do catálogo, que o app-go-api não
+    // reconhece, então fica fora da cadeia.
+    const jobIdentifier = [
+      item.slug,
+      metadata?.slug as string | undefined,
+      metadata?.id as string | undefined,
+    ].find(
+      (value): value is string => typeof value === 'string' && value.length > 0
+    )
+
+    if (!jobIdentifier) {
+      if (item.url) {
+        onExternalLinkClick(item.url)
+      }
+      return
+    }
+
+    router.push(`/servicos/trabalho/${encodeURIComponent(jobIdentifier)}`)
     return
   }
 

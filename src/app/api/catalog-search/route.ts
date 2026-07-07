@@ -13,10 +13,7 @@ export async function GET(request: Request) {
     const response = await getApiPublicSearch(
       { q, page, per_page, types },
       {
-        next: {
-          revalidate: q ? 300 : 600, // 5min com query, 10min para sugestões (sem query)
-          tags: ['catalog-search'],
-        },
+        cache: 'no-store',
       }
     )
 
