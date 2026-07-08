@@ -1,5 +1,11 @@
 import type { NextConfig } from 'next'
 
+const oportunidadesCariocasLegacyPaths = [
+  '/oportunidadescariocas',
+  '/oportunidades-cariocas',
+  '/oportunidades.cariocas',
+]
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   async redirects() {
@@ -14,6 +20,18 @@ const nextConfig: NextConfig = {
         destination: '/servicos/trabalho/:path*',
         permanent: true,
       },
+      ...oportunidadesCariocasLegacyPaths.flatMap(source => [
+        {
+          source,
+          destination: '/servicos/trabalho',
+          permanent: true,
+        },
+        {
+          source: `${source}/:path*`,
+          destination: '/servicos/trabalho/:path*',
+          permanent: true,
+        },
+      ]),
     ]
   },
   images: {
