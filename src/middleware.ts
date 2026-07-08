@@ -19,6 +19,12 @@ const publicRoutes = [
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
 ] as const
 
+const oportunidadesCariocasLegacyPaths = [
+  '/oportunidadescariocas',
+  '/oportunidades-cariocas',
+  '/oportunidades.cariocas',
+] as const
+
 function matchRoute(pathname: string, routePath: string): boolean {
   // Handle exact match
   if (routePath === pathname) {
@@ -128,6 +134,24 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          return response
+        }
+      }
+
+      // Legacy URLs: Oportunidades Cariocas → serviços de trabalho
+      for (const legacyPath of oportunidadesCariocasLegacyPaths) {
+        if (path === legacyPath || path.startsWith(`${legacyPath}/`)) {
+          const url = request.nextUrl.clone()
+          url.pathname =
+            path === legacyPath
+              ? '/servicos/trabalho'
+              : `/servicos/trabalho${path.slice(legacyPath.length)}`
+
+          const response = NextResponse.redirect(url, 308)
           response.headers.set(
             'Content-Security-Policy',
             contentSecurityPolicyHeaderValue
