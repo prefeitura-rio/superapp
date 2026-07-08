@@ -155,9 +155,10 @@ export function handleCatalogItemClick(
   if (item.type === 'job') {
     // Prioriza o slug SEO da vaga; cai para o id real da vaga (metadata.id)
     // quando o slug está ausente OU vazio. Strings vazias são ignoradas para
-    // não curto-circuitar o fallback (o backend serializa slug:"" quando não há
-    // slug). item.id é o UUID interno do catálogo, que o app-go-api não
-    // reconhece, então fica fora da cadeia.
+    // não curto-circuitar o fallback — defesa contra vagas sincronizadas antes
+    // do slug existir ou por builds intermediários do backend. item.id é o
+    // UUID interno do catálogo, que o app-go-api não reconhece, então fica
+    // fora da cadeia.
     const jobIdentifier = [
       item.slug,
       metadata?.slug as string | undefined,

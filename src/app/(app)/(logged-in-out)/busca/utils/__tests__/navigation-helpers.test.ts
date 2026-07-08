@@ -66,8 +66,9 @@ describe('handleCatalogItemClick — vagas (job)', () => {
   })
 
   test('slug vazio ("") NÃO curto-circuita o fallback para metadata.id', () => {
-    // Regressão PREF-322: o source_data (metadata) serializa slug:"" quando a
-    // vaga não tem slug; a string vazia não pode "vencer" o fallback.
+    // Regressão PREF-322: mesmo que o source_data (metadata) traga slug:""
+    // (dados sincronizados antes do slug existir), a string vazia não pode
+    // "vencer" o fallback para metadata.id.
     const item = jobItem({
       metadata: { slug: '', id: '22222222-2222-4222-8222-222222222222' },
     })
