@@ -17,9 +17,17 @@ export async function getPublicVaga(
 ): Promise<PublicVagaResult> {
   if (UUID_PATTERN.test(identifier)) {
     const response = await getApiPublicEmpregabilidadeVagasId(identifier)
-    return response.status === 200 && response.data
-      ? { vaga: response.data }
-      : null
+    if (response.status !== 200 || !response.data) {
+      return null
+    }
+
+    // Canonicaliza para a URL SEO: acesso por id sempre redireciona para o
+    // slug quando disponível, preservando compatibilidade com links antigos.
+    if (response.data.slug) {
+      return { redirectSlug: response.data.slug }
+    }
+
+    return { vaga: response.data }
   }
 
   const response = await getApiPublicEmpregabilidadeVagasSlugSlug(identifier)
