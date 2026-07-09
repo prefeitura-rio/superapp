@@ -74,6 +74,15 @@ export function transformVagaToCardData(
     })
   }
 
+  // Badges de acessibilidade PCD
+  if (vaga.acessibilidade_pcd === 'preferencial_pcd') {
+    badges.push({ text: 'Preferencial PcD', type: 'preferencial_pcd' })
+  } else if (vaga.acessibilidade_pcd === 'exclusivo_pcd') {
+    badges.push({ text: 'Exclusiva PcD', type: 'exclusivo_pcd' })
+  } else if (vaga.acessibilidade_pcd === 'para_pcd') {
+    badges.push({ text: 'Para PcD', type: 'para_pcd' })
+  }
+
   if (
     vaga.quantidade_estimada_contratacoes &&
     vaga.quantidade_estimada_contratacoes > 0
