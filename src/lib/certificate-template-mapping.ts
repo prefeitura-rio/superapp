@@ -2,7 +2,14 @@
  * Mapping between organization IDs (cd_ua/orgao_id) and their corresponding certificate templates
  * Each organization should have its own PDF template in src/lib/templates/
  */
-export type CertificateTemplate = 'juvrio' | 'planetario' | 'smac' | 'smpd'
+export type CertificateTemplate =
+  | 'juvrio'
+  | 'planetario'
+  | 'smac'
+  | 'smpd'
+  | 'cvlsubtd'
+  | 'sesrio'
+  | 'spmrio'
 
 export interface OrganizationTemplateMapping {
   orgao_id: string // cd_ua do departamento
@@ -10,13 +17,28 @@ export interface OrganizationTemplateMapping {
 }
 
 /**
+ * Templates com layout v2 (banner lateral + texto alinhado à esquerda).
+ * planetario e smac permanecem no layout legado até migração futura.
+ */
+const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
+  'juvrio',
+  'smpd',
+  'cvlsubtd',
+  'sesrio',
+  'spmrio',
+])
+
+/**
  * Mapeamento dos IDs de organizações (orgao_id/cd_ua) para templates de certificado
  *
  * Templates disponíveis:
- * - juvrio.pdf: Secretaria Especial da Juventude Carioca - JUV-RIO
- * - planetario.pdf: Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO
- * - smac.pdf: Secretaria Municipal de Meio Ambiente e Clima - SMAC
- * - smpd.pdf: Secretaria Municipal da Pessoa com Deficiência - SMPD
+ * - juvrio.pdf: Secretaria Especial da Juventude Carioca - JUV-RIO (layout v2)
+ * - planetario.pdf: Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO (legado)
+ * - smac.pdf: Secretaria Municipal de Meio Ambiente e Clima - SMAC (legado)
+ * - smpd.pdf: Secretaria Municipal da Pessoa com Deficiência - SMPD (layout v2)
+ * - cvlsubtd.pdf: CVL / Subsecretaria (layout v2)
+ * - sesrio.pdf: SES-RIO (layout v2)
+ * - spmrio.pdf: Secretaria Especial de Políticas para Mulheres - SPM-RIO (layout v2)
  *
  * NOTA: Os orgao_id devem ser os valores de cd_ua retornados pela API de departamentos.
  * Para adicionar um novo mapeamento, consulte a API para obter o cd_ua correto.
@@ -38,7 +60,28 @@ const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
     orgao_id: '4000',
     template: 'smpd',
   },
+  {
+    orgao_id: '52451',
+    template: 'cvlsubtd',
+  },
+  {
+    orgao_id: '1900',
+    template: 'sesrio',
+  },
+  {
+    orgao_id: '4700',
+    template: 'spmrio',
+  },
 ]
+
+/**
+ * Indica se o template usa o layout v2 (banner + texto à esquerda).
+ */
+export function usesNewCertificateLayout(
+  template: CertificateTemplate
+): boolean {
+  return NEW_LAYOUT_TEMPLATES.has(template)
+}
 
 /**
  * Obtém o template de certificado baseado no ID do órgão (orgao_id/cd_ua)

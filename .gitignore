@@ -62,3 +62,6 @@ k6/analysis-*/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# tmp
+/tmp/

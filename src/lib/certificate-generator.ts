@@ -1,8 +1,13 @@
-import { getTemplateUrl } from '@/lib/certificate-template-mapping'
+import {
+  getCertificateTemplate,
+  getTemplateUrl,
+  usesNewCertificateLayout,
+} from '@/lib/certificate-template-mapping'
 import type {
   CertificateData,
   CertificateGenerationOptions,
 } from '@/types/certificate'
+import fontkit from '@pdf-lib/fontkit'
 import {
   PDFDocument,
   type PDFFont,
@@ -10,6 +15,42 @@ import {
   StandardFonts,
   rgb,
 } from 'pdf-lib'
+
+const MONTSERRAT_REGULAR_PATH = '/fonts/montserrat/Montserrat-Regular.ttf'
+const MONTSERRAT_BOLD_PATH = '/fonts/montserrat/Montserrat-Bold.ttf'
+
+/** Carrega bytes de fonte de /public (browser via fetch, Node via fs) */
+async function loadFontBytes(publicPath: string): Promise<Uint8Array> {
+  if (typeof window === 'undefined') {
+    const { promises: fs } = await import('node:fs')
+    const path = await import('node:path')
+    const filePath = path.join(
+      process.cwd(),
+      'public',
+      publicPath.replace(/^\//, '')
+    )
+    return new Uint8Array(await fs.readFile(filePath))
+  }
+
+  const res = await fetch(publicPath)
+  if (!res.ok) {
+    throw new Error(`Falha ao carregar fonte: ${publicPath}`)
+  }
+  return new Uint8Array(await res.arrayBuffer())
+}
+
+async function embedMontserratFonts(
+  pdfDoc: PDFDocument
+): Promise<{ regular: PDFFont; bold: PDFFont }> {
+  pdfDoc.registerFontkit(fontkit)
+  const [regularBytes, boldBytes] = await Promise.all([
+    loadFontBytes(MONTSERRAT_REGULAR_PATH),
+    loadFontBytes(MONTSERRAT_BOLD_PATH),
+  ])
+  const regular = await pdfDoc.embedFont(regularBytes)
+  const bold = await pdfDoc.embedFont(boldBytes)
+  return { regular, bold }
+}
 
 /**
  * Busca o nome do órgão pelo orgao_id através da API route
@@ -154,11 +195,7 @@ type InternalTypography = {
 }
 
 /**
- * Adiciona textos com:
- * - conjunto centralizado verticalmente (e deslocado para cima)
- * - 4 blocos igualmente espaçados (GAP constante)
- * - quebra de linha por largura
- * - título do curso com cor destacada
+ * Layout legado: textos centralizados (planetario, smac).
  */
 async function addTextToCertificate(
   page: PDFPage,
@@ -304,6 +341,271 @@ async function addTextToCertificate(
   )
 }
 
+// --- Layout v2 (banner lateral + texto alinhado à esquerda) ---
+
+const COLOR_BLACK = rgb(0, 0, 0)
+const COLOR_GRAY = rgb(0x66 / 255, 0x66 / 255, 0x66 / 255) // #666666
+const COLOR_BLUE = rgb(0x37 / 255, 0x57 / 255, 0xbe / 255) // #3757be
+
+interface TextRun {
+  text: string
+  size: number
+  color: ReturnType<typeof rgb>
+  font: PDFFont
+}
+
+/** Quebra runs mistos em linhas respeitando maxWidth */
+function wrapMixedRuns(runs: TextRun[], maxWidth: number): TextRun[][] {
+  const lines: TextRun[][] = []
+  let currentLine: TextRun[] = []
+  let currentWidth = 0
+
+  function pushRun(run: TextRun) {
+    const width = getTextWidth(run.text, run.font, run.size)
+    if (currentWidth + width <= maxWidth || currentLine.length === 0) {
+      currentLine.push(run)
+      currentWidth += width
+      return
+    }
+    lines.push(currentLine)
+    currentLine = [run]
+    currentWidth = width
+  }
+
+  for (const run of runs) {
+    const words = run.text.split(/(\s+)/)
+    for (const word of words) {
+      if (!word) continue
+      pushRun({ ...run, text: word })
+    }
+  }
+
+  if (currentLine.length > 0) lines.push(currentLine)
+  return lines
+}
+
+/** Desenha linhas de runs mistos alinhadas à esquerda; retorna Y final (abaixo da última linha) */
+function drawMixedRunLines(
+  page: PDFPage,
+  lines: TextRun[][],
+  startX: number,
+  startY: number,
+  lineHeight: number
+): number {
+  let y = startY
+  for (const line of lines) {
+    let x = startX
+    for (const run of line) {
+      if (!run.text) continue
+      page.drawText(run.text, {
+        x,
+        y,
+        size: run.size,
+        font: run.font,
+        color: run.color,
+      })
+      x += getTextWidth(run.text, run.font, run.size)
+    }
+    y -= lineHeight
+  }
+  return y
+}
+
+/**
+ * Layout v2: título + texto alinhado à esquerda na área branca
+ * (juvrio, smpd, cvlsubtd, sesrio, spmrio).
+ */
+function addTextLayoutV2(
+  page: PDFPage,
+  data: CertificateData,
+  fonts: { regular: PDFFont; bold: PDFFont }
+): void {
+  const bold = fonts.bold
+
+  // Área de conteúdo alinhada com a primeira assinatura (à direita do banner)
+  const contentX = 265
+  const maxTextWidth = 500
+  const gap = 22
+
+  let cursorY = 490
+
+  // --- Título ---
+  page.drawText('Certificado', {
+    x: contentX,
+    y: cursorY,
+    size: 35,
+    font: bold,
+    color: COLOR_BLACK,
+  })
+  // "de conclusão" bem junto de "Certificado"
+  cursorY -= 20
+  page.drawText('de conclusão', {
+    x: contentX,
+    y: cursorY,
+    size: 15,
+    font: bold,
+    color: COLOR_GRAY,
+  })
+  // Afastar o bloco de intro (~3x a distância anterior de gap+8 ≈ 30)
+  cursorY -= 50
+
+  // --- Intro mista ---
+  const introRuns: TextRun[] = [
+    { text: 'A ', size: 14, color: COLOR_GRAY, font: bold },
+    {
+      text: 'Prefeitura da Cidade do Rio de Janeiro',
+      size: 16,
+      color: COLOR_BLACK,
+      font: bold,
+    },
+    { text: ' certifica que', size: 14, color: COLOR_GRAY, font: bold },
+  ]
+  const introLines = wrapMixedRuns(introRuns, maxTextWidth)
+  cursorY = drawMixedRunLines(page, introLines, contentX, cursorY, 20)
+  // Nome bem próximo da linha "certifica que"
+  cursorY -= 8
+
+  // --- Nome (UPPERCASE, máx. 2 linhas) ---
+  const studentName = data.studentName.toUpperCase()
+  let nameSize = 21
+  let nameLH = 26
+  let nameLines = wrapText(studentName, bold, nameSize, maxTextWidth)
+  if (nameLines.length > 2) {
+    nameSize = Math.max(16, nameSize - 3)
+    nameLH = Math.max(20, nameLH - 3)
+    nameLines = wrapText(studentName, bold, nameSize, maxTextWidth)
+  }
+  // Limita a 2 linhas mesmo após redução
+  nameLines = nameLines.slice(0, 2)
+  // Mais espaço entre linhas quando o nome quebra em 2
+  if (nameLines.length === 2) nameLH = Math.max(nameLH, 32)
+  for (const line of nameLines) {
+    page.drawText(line, {
+      x: contentX,
+      y: cursorY,
+      size: nameSize,
+      font: bold,
+      color: COLOR_BLACK,
+    })
+    cursorY -= nameLH
+  }
+  // Capacitação mais próxima do nome (sobe o bloco de baixo)
+  cursorY -= 8
+
+  // --- Capacitação (fixo cinza + dinâmicos azuis) ---
+  const courseRuns: TextRun[] = [
+    {
+      text: 'participou da capacitação em ',
+      size: 14,
+      color: COLOR_GRAY,
+      font: bold,
+    },
+    {
+      text: data.courseTitle,
+      size: 16,
+      color: COLOR_BLUE,
+      font: bold,
+    },
+    { text: ', com ', size: 14, color: COLOR_GRAY, font: bold },
+    {
+      text: data.courseDuration,
+      size: 16,
+      color: COLOR_BLUE,
+      font: bold,
+    },
+    {
+      text: ' de duração sob a coordenação da ',
+      size: 14,
+      color: COLOR_GRAY,
+      font: bold,
+    },
+    {
+      text: data.issuingOrganization,
+      size: 16,
+      color: COLOR_BLUE,
+      font: bold,
+    },
+    {
+      text: ' da Cidade do Rio de Janeiro',
+      size: 14,
+      color: COLOR_GRAY,
+      font: bold,
+    },
+  ]
+  const courseLines = wrapMixedRuns(courseRuns, maxTextWidth)
+  cursorY = drawMixedRunLines(page, courseLines, contentX, cursorY, 28)
+  cursorY -= gap
+
+  // --- Data ---
+  const dateRuns: TextRun[] = [
+    { text: 'Rio de Janeiro, ', size: 14, color: COLOR_GRAY, font: bold },
+    {
+      text: data.issueDate,
+      size: 16,
+      color: COLOR_BLUE,
+      font: bold,
+    },
+  ]
+  drawMixedRunLines(
+    page,
+    wrapMixedRuns(dateRuns, maxTextWidth),
+    contentX,
+    cursorY,
+    20
+  )
+}
+
+/**
+ * Estampa os dados do certificado sobre bytes de um template PDF.
+ * Útil para scripts locais (sem fetch da API de templates).
+ */
+export async function stampCertificatePdf(
+  templateBytes: Uint8Array,
+  data: CertificateData,
+  options: {
+    layout?: 'v2' | 'legacy'
+    maxTextWidth?: number
+    gap?: number
+    offsetUp?: number
+    typography?: Partial<InternalTypography>
+  } = {}
+): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.load(templateBytes)
+  const page = pdfDoc.getPages()[0]
+
+  const layout =
+    options.layout ??
+    (data.orgao_id
+      ? (() => {
+          const template = getCertificateTemplate(data.orgao_id)
+          return template && usesNewCertificateLayout(template)
+            ? 'v2'
+            : 'legacy'
+        })()
+      : 'v2')
+
+  if (layout === 'v2') {
+    const fonts = await embedMontserratFonts(pdfDoc)
+    addTextLayoutV2(page, data, fonts)
+  } else {
+    const regular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    await addTextToCertificate(
+      page,
+      data,
+      { regular, bold },
+      {
+        maxTextWidth: options.maxTextWidth,
+        gap: options.gap,
+        offsetUp: options.offsetUp,
+        typography: options.typography,
+      }
+    )
+  }
+
+  return await pdfDoc.save()
+}
+
 /**
  * Gera um certificado PDF baseado no template da organização
  */
@@ -339,29 +641,8 @@ export async function generateCertificate(
     }
   }
 
-  // Carrega o template usando o orgao_id diretamente
   const templateBytes = await loadTemplate(data.orgao_id)
-  const pdfDoc = await PDFDocument.load(templateBytes)
-
-  // embute fontes no DOC
-  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-
-  const page = pdfDoc.getPages()[0]
-
-  await addTextToCertificate(
-    page,
-    data,
-    { regular, bold },
-    {
-      maxTextWidth: options.maxTextWidth,
-      gap: options.gap,
-      offsetUp: options.offsetUp,
-      typography: options.typography,
-    }
-  )
-
-  return await pdfDoc.save()
+  return stampCertificatePdf(templateBytes, data, options)
 }
 
 /** Gera e baixa o arquivo no browser */
