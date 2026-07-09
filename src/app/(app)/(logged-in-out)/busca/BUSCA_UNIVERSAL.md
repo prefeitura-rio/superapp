@@ -161,7 +161,7 @@ Lista estática que navega diretamente para a página do serviço (sem acionar b
 | Item                               | Destino                                                                             |
 | ---------------------------------- | ----------------------------------------------------------------------------------- |
 | IPTU 2026                          | `/servicos/categoria/taxas/iptu-2025-94ff5567`                                      |
-| CADRio Agendamento                 | `/servicos/categoria/familia/cadrio-agendamento-770618f7`                           |
+| CADRio Agendamento                 | `/servicos/categoria/familia/inscricao-e-atualizacao-do-cadastro-unico-8cafda60`     |
 | Consulta de Multas                 | `/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90`       |
 | Alvará: Consulta prévia de local   | `/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969`             |
 | Licença Sanitária de Funcionamento | `/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857`          |

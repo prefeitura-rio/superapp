@@ -49,7 +49,7 @@ const STATIC_POPULAR: { title: string; href: string }[] = [
   { title: 'IPTU 2026', href: '/servicos/categoria/taxas/iptu-2025-94ff5567' },
   {
     title: 'CADRio Agendamento',
-    href: '/servicos/categoria/familia/cadrio-agendamento-770618f7',
+    href: '/servicos/categoria/cidadania/inscricao-e-atualizacao-do-cadastro-unico-8cafda60',
   },
   {
     title: 'Consulta de Multas',
