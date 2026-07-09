@@ -16,21 +16,35 @@ Esta feature fornece geração automatizada de certificados para conclusões de 
 Mapeia IDs de organizações (orgao_id/cd_ua) para seus templates PDF correspondentes.
 
 **Templates Disponíveis:**
-- `juvrio.pdf` - Secretaria Especial da Juventude Carioca - JUV-RIO
-- `planetario.pdf` - Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO
-- `smac.pdf` - Secretaria Municipal do Ambiente e Clima - SMAC
-- `smpd.pdf` - Secretaria Municipal da Pessoa com Deficiência - SMPD
+
+| Template | Órgão | orgao_id | Layout |
+|----------|-------|----------|--------|
+| `juvrio.pdf` | Secretaria Especial da Juventude Carioca - JUV-RIO | `5300` | v2 |
+| `smpd.pdf` | Secretaria Municipal da Pessoa com Deficiência - SMPD | `4000` | v2 |
+| `cvlsubtd.pdf` | CVL / Subsecretaria | `52451` | v2 |
+| `sesrio.pdf` | SES-RIO | `1900` | v2 |
+| `spmrio.pdf` | Secretaria Especial de Políticas para Mulheres - SPM-RIO | `4700` | v2 |
+| `planetario.pdf` | Fundação Planetário da Cidade do Rio de Janeiro | `2641` | legado |
+| `smac.pdf` | Secretaria Municipal de Meio Ambiente e Clima - SMAC | `2400` | legado |
+
+> **Nota:** `planetario` e `smac` ainda usam o layout legado (texto centralizado). Serão migrados para o layout v2 quando os novos PDFs estiverem disponíveis.
 
 **Funções Principais:**
 - `getCertificateTemplate(orgao_id)` - Retorna o nome do template baseado no orgao_id ou `null` se não encontrado
 - `getTemplateUrl(orgao_id)` - Retorna o caminho completo da URL do template ou `null` se não encontrado
+- `usesNewCertificateLayout(template)` - Indica se o template usa o layout v2 (banner + texto à esquerda)
 
 **Uso:**
 ```typescript
-import { getTemplateUrl, getCertificateTemplate } from '@/lib/certificate-template-mapping'
+import {
+  getTemplateUrl,
+  getCertificateTemplate,
+  usesNewCertificateLayout,
+} from '@/lib/certificate-template-mapping'
 
-const template = getCertificateTemplate('SMAC') // Retorna 'smac' ou null (usa cd_ua real)
-const url = getTemplateUrl('SMAC') // Retorna '/api/templates/smac' ou null
+const template = getCertificateTemplate('2400') // Retorna 'smac'
+const url = getTemplateUrl('4700') // Retorna '/api/templates/spmrio'
+const isV2 = template ? usesNewCertificateLayout(template) : false
 ```
 
 **Comportamento de Erro:**
@@ -75,10 +89,10 @@ interface CertificateData {
 2. Se `issuingOrganization` não estiver preenchido, busca o nome do órgão pelo `orgao_id` através da API route `/api/departments/[cdUa]`
 3. Carrega o template PDF apropriado baseado no `orgao_id` diretamente (mapeamento por ID)
 4. **Se template não encontrado**: Lança erro em vez de usar padrão
-5. Adiciona o nome do estudante (36px, negrito)
-6. Adiciona texto do curso com título destacado
-7. Adiciona data e localização
-8. Retorna bytes do PDF
+5. Escolhe o layout pelo template (`usesNewCertificateLayout`):
+   - **Layout v2:** texto alinhado à esquerda na área branca (banner e assinaturas já estão no PDF)
+   - **Layout legado:** texto centralizado (planetario, smac)
+6. Retorna bytes do PDF
 
 **Tratamento de Erro:**
 - Se `orgao_id` não for fornecido, lança erro informando que é obrigatório
@@ -256,10 +270,7 @@ if (userEnrollment?.status === 'approved' && course.has_certificate) {
    ]
    ```
 
-4. **Atualize o tipo CertificateTemplate**:
-   ```typescript
-   export type CertificateTemplate = 'juvrio' | 'planetario' | 'smac' | 'smpd' | 'sme'
-   ```
+4. **Atualize o tipo CertificateTemplate** e, se for layout v2, inclua o template em `NEW_LAYOUT_TEMPLATES` / `usesNewCertificateLayout`.
 
 5. **Atualize a lista de templates válidos** em `src/app/api/templates/[template]/route.ts`:
    ```typescript
@@ -268,6 +279,9 @@ if (userEnrollment?.status === 'approved' && course.has_certificate) {
      'planetario',
      'smac',
      'smpd',
+     'cvlsubtd',
+     'sesrio',
+     'spmrio',
      'sme', // Novo template
    ]
    ```
@@ -280,32 +294,30 @@ if (userEnrollment?.status === 'approved' && course.has_certificate) {
 
 ## Layout do Conteúdo do Certificado
 
-O sistema adiciona dinamicamente as seguintes informações ao template PDF:
+### Layout v2 (juvrio, smpd, cvlsubtd, sesrio, spmrio)
 
-1. **Texto do Cabeçalho** (12px, cinza):
-   ```
-   "A Prefeitura da Cidade do Rio de Janeiro certifica que"
-   ```
+Banner azul e assinaturas já vêm no PDF. O gerador estampa apenas o texto na área branca (alinhado à esquerda):
 
-2. **Nome do Estudante** (36px, negrito, preto):
+1. **Título:** `"Certificado"` (35px, preto) + `"de conclusão"` (15px, `#666666`) logo abaixo
+2. **Intro:** `"A "` / `" certifica que"` em 14px `#666666`; `"Prefeitura da Cidade do Rio de Janeiro"` em 16px preto
+3. **Nome do participante:** UPPERCASE, 21px preto, no máximo 2 linhas
+4. **Capacitação:**
    ```
-   [Nome do Estudante]
+   participou da capacitação em [curso], com [duração] de duração sob a
+   coordenação da [órgão] da Cidade do Rio de Janeiro
    ```
-   - Suporte multi-linha
-   - Quebra automática para nomes longos
+   - Fixo: 14px `#666666` bold
+   - Dinâmico: 16px `#3757be` bold
+5. **Data:** `"Rio de Janeiro, "` (14px `#666666`) + data (16px `#3757be`)
 
-3. **Informações do Curso** (12px, com título destacado):
-   ```
-   participou do curso "[Título do Curso]", com [Duração] de duração,
-   sob a coordenação da [Organização Emitente]
-   ```
-   - Título do curso é destacado em preto
-   - Restante do texto é cinza
+### Layout legado (planetario, smac)
 
-4. **Data e Local** (12px, cinza):
-   ```
-   Rio de Janeiro, [Data Atual]
-   ```
+Texto centralizado no PDF:
+
+1. **Cabeçalho** (12px, cinza): `"A Prefeitura da Cidade do Rio de Janeiro certifica que"`
+2. **Nome** (36px, negrito, preto) — quebra automática
+3. **Curso** (12px): `participou do curso "[Título]", com [Duração] de duração, sob a coordenação da [Órgão]`
+4. **Data** (12px, cinza): `Rio de Janeiro, [Data Atual]`
 
 ## Tratamento de Erros
 
@@ -427,6 +439,11 @@ http://localhost:3000/servicos/cursos/certificados
 
 ## Histórico de Versões
 
+- **v5.0** - Layout v2 e novos templates
+  - ✅ Templates `cvlsubtd`, `sesrio`, `spmrio` + remapeamento visual de `juvrio`/`smpd`
+  - ✅ Layout v2: banner lateral no PDF + tipografia mista alinhada à esquerda
+  - ✅ `usesNewCertificateLayout` para rotear entre layout v2 e legado
+  - ✅ `planetario` e `smac` permanecem no layout legado até migração
 - **v4.1** - Mapeamento por `orgao_id` (cd_ua) em vez de nome
   - ✅ Mapeamento de templates agora usa `orgao_id` diretamente (mais confiável)
   - ✅ Elimina necessidade de buscar nome do órgão para mapear template

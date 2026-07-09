@@ -10,6 +10,9 @@ const VALID_TEMPLATES: CertificateTemplate[] = [
   'planetario',
   'smac',
   'smpd',
+  'cvlsubtd',
+  'sesrio',
+  'spmrio',
 ]
 
 export async function GET(
