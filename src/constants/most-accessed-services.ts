@@ -17,7 +17,7 @@ export const MOST_ACCESSED_SERVICES = [
   },
   {
     id: 'cadrio',
-    href: '/servicos/categoria/familia/cadrio-agendamento-770618f7',
+    href: '/servicos/categoria/cidadania/inscricao-e-atualizacao-do-cadastro-unico-8cafda60',
     icon: cadrioIcon,
     title: 'CADRio Agendamento',
     description: 'Agende seu atendimento',

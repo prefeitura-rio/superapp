@@ -19,7 +19,7 @@ export function CategoryFiltersSwipe({
   const itemsPerSlide = 8
 
   return (
-    <div className="px-1 pb-8">
+    <div className="px-2 pb-8">
       <SwiperWrapper
         showArrows
         showPagination

@@ -1,10 +1,11 @@
 'use client'
 
 import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
-import { CalendarIcon, ChevronLeftIcon, MapPinIcon } from '@/assets/icons'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons'
 import { CourseStatusCard } from './course-status-card'
 
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
+import { CalendarIcon } from '@/assets/icons'
 import { ClockIcon } from '@/assets/icons/clock-icon'
 import { CycleIcon } from '@/assets/icons/cycle-icon'
 import { GroupIcon } from '@/assets/icons/group-icon'
@@ -12,7 +13,6 @@ import { PersonIcon } from '@/assets/icons/person-icon'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
-import { Separator } from '@/components/ui/separator'
 import { oportunidadesCariocasLogoDark } from '@/constants/bucket'
 import { useUserEnrollment } from '@/hooks/courses/use-user-enrollment'
 import type { ModelsDepartmentResponse } from '@/http/models'
@@ -23,7 +23,7 @@ import {
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { getBackRoute } from '@/lib/utils'
-import type { Course, CourseScheduleInfo } from '@/types'
+import type { Course } from '@/types'
 import {
   shouldShowExternalPartnerBadge,
   shouldShowExternalPartnerModal,
@@ -32,124 +32,63 @@ import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { ExternalPartnerCourseDrawer } from '../drawer-contents/external-partner-course-drawer'
-import { AccessibilityBadge, IsExternalPartnerBadge } from './badges'
+import { IsExternalPartnerBadge } from './badges'
 
 interface CourseDetailsProps {
   course: Course
   department: ModelsDepartmentResponse | null
 }
 
-// Utility functions
-
-const getCourseScheduleInfo = (
-  course: Course,
-  selectedLocationId?: string,
-  selectedScheduleId?: string
-): CourseScheduleInfo => {
-  const modality = course.modalidade?.toLowerCase()
-
-  // Check for remote/online courses with multiple schedules
-  if ((modality === 'online' || modality === 'remoto') && course.remote_class) {
-    // If there are multiple schedules, find the selected one
-    if (
-      course.remote_class.schedules &&
-      course.remote_class.schedules.length > 0
-    ) {
-      const selectedSchedule = selectedScheduleId
-        ? course.remote_class.schedules.find(
-            sch => sch.id === selectedScheduleId
-          ) || course.remote_class.schedules[0]
-        : course.remote_class.schedules[0]
-
-      if (selectedSchedule) {
-        return {
-          startDate: selectedSchedule.class_start_date,
-          endDate: selectedSchedule.class_end_date,
-          time: selectedSchedule.class_time,
-          days: selectedSchedule.class_days,
-          vacancies: selectedSchedule.vacancies,
-          address: null,
-          neighborhood: null,
-        }
-      }
-    }
-    // Legacy structure: single remote_class
-    return {
-      startDate: course.remote_class.class_start_date,
-      endDate: course.remote_class.class_end_date,
-      time: course.remote_class.class_time,
-      days: course.remote_class.class_days,
-      vacancies: course.remote_class.vacancies,
-      address: null,
-      neighborhood: null,
-    }
-  }
-
-  // Check for presencial/semipresencial courses
-  if (
-    (modality === 'presencial' || modality === 'semipresencial') &&
-    course.locations &&
-    course.locations.length > 0
-  ) {
-    // Find selected location or use first one
-    const location = selectedLocationId
-      ? course.locations.find(loc => loc.id === selectedLocationId) ||
-        course.locations[0]
-      : course.locations[0]
-
-    // Find selected schedule or use first one
-    const schedule =
-      selectedScheduleId && location.schedules
-        ? location.schedules.find(sch => sch.id === selectedScheduleId) ||
-          location.schedules[0]
-        : location.schedules?.[0]
-
-    if (schedule) {
-      return {
-        startDate: schedule.class_start_date,
-        endDate: schedule.class_end_date,
-        time: schedule.class_time,
-        days: schedule.class_days,
-        vacancies: schedule.vacancies,
-        address: location.address,
-        neighborhood: location.neighborhood,
-      }
-    }
-  }
-
-  return {
-    startDate: null,
-    endDate: null,
-    time: null,
-    days: null,
-    vacancies: null,
-    address: null,
-    neighborhood: null,
-  }
-}
-
-// Format date or return fallback text
-function formatDateOrFallback(dateString: string | null | undefined): string {
-  const formatted = formatDate(dateString ?? null)
-  return formatted || 'Data não informada'
-}
-
 // Sub-components
-interface InfoRowProps {
-  label: string
-  value: string | number | null
+
+const PT_MONTHS = [
+  'JAN',
+  'FEV',
+  'MAR',
+  'ABR',
+  'MAI',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SET',
+  'OUT',
+  'NOV',
+  'DEZ',
+]
+
+function parseDateLocal(dateString: string): Date {
+  const datePart = dateString.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
 }
 
-function InfoRow({ label, value }: InfoRowProps) {
-  if (!value) return null
+function getEnrollmentText(enrollmentEndDate?: string | null): string | null {
+  if (!enrollmentEndDate) return null
+  const endDate = parseDateLocal(enrollmentEndDate)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (today > endDate) return null
+  return `Inscrições até ${endDate.getDate()} ${PT_MONTHS[endDate.getMonth()]}`
+}
 
+interface MetaCardProps {
+  label: string
+  value: string | number | null | undefined
+}
+
+function MetaCard({ label, value }: MetaCardProps) {
+  if (!value) return null
   return (
-    <div className="flex flex-row items-start justify-start gap-1">
-      <div className="text-foreground-light text-xs md:text-sm">{label}</div>
-      <div className="text-xs text-foreground md:text-sm">{value}</div>
+    <div className="flex flex-col items-start p-5 rounded-xl bg-card gap-0.5">
+      <span className="text-foreground-light text-sm font-normal leading-5">
+        {label}
+      </span>
+      <span className="text-foreground text-sm font-normal leading-5">
+        {value}
+      </span>
     </div>
   )
 }
@@ -192,7 +131,7 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
     router.push(backRoute)
   }
   return (
-    <div className="h-[320px] md:h-[380px] w-full relative">
+    <div className="h-[280px] md:h-[340px] w-full relative">
       {/* Header bar: botão + logo centralizados verticalmente */}
       <div className="absolute top-0 inset-x-0 z-10 flex items-center px-4 py-4">
         <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
@@ -224,19 +163,6 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
           )}
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-        <div className="flex flex-col gap-1 mb-4">
-          {course.accessibility && (
-            <AccessibilityBadge accessibility={course.accessibility} />
-          )}
-          {shouldShowExternalPartnerBadge(course.course_management_type) && (
-            <IsExternalPartnerBadge />
-          )}
-        </div>
-        <h1 className="text-white font-bold text-2xl md:text-3xl leading-snug">
-          {course.title || 'Título não disponível'}
-        </h1>
-      </div>
     </div>
   )
 }
@@ -247,21 +173,22 @@ interface CourseInfoProps {
 }
 
 function CourseInfo({ course, department }: CourseInfoProps) {
-  // Use department data if available, otherwise fall back to course.organization
   const organizationName =
     department?.nome_ua || course.organization || 'Instituição não informada'
   const organizationInitial = organizationName.charAt(0)
-
-  // Mobile: sigla_ua, Desktop: nome_ua
   const mobileName =
     department?.sigla_ua || course.organization || 'Instituição não informada'
   const desktopName =
     department?.nome_ua || course.organization || 'Instituição não informada'
 
+  const hasExternalPartner = shouldShowExternalPartnerBadge(
+    course.course_management_type
+  )
+
   return (
-    <div className="flex p-4 gap-2">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex items-center p-5 rounded-xl bg-card gap-3">
+        <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center overflow-hidden shrink-0">
           {course.institutional_logo ? (
             <Image
               src={course.institutional_logo}
@@ -271,18 +198,28 @@ function CourseInfo({ course, department }: CourseInfoProps) {
               height={40}
             />
           ) : (
-            <span className="text-2.5 font-semibold text-foreground uppercase">
+            <span className="text-xs font-semibold text-foreground uppercase">
               {organizationInitial}
             </span>
           )}
         </div>
-        <p className="text-sm block sm:hidden">{mobileName}</p>
-        <p className="text-sm hidden sm:block">{desktopName}</p>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-foreground-light text-sm font-normal leading-5">
+            {hasExternalPartner
+              ? 'Curso oferecido e gerido por'
+              : 'Curso oferecido por'}
+          </span>
+          <span className="text-foreground text-sm font-normal leading-5 block sm:hidden">
+            {mobileName}
+          </span>
+          <span className="text-foreground text-sm font-normal leading-5 hidden sm:block">
+            {desktopName}
+          </span>
+        </div>
       </div>
-
-      {shouldShowExternalPartnerBadge(course.course_management_type) && (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center overflow-hidden">
+      {hasExternalPartner && (
+        <div className="flex items-center p-5 rounded-xl bg-card gap-3">
+          <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center overflow-hidden shrink-0">
             {course.external_partner_logo_url ? (
               <Image
                 src={course.external_partner_logo_url}
@@ -292,14 +229,19 @@ function CourseInfo({ course, department }: CourseInfoProps) {
                 height={40}
               />
             ) : (
-              <span className="text-2.5 font-semibold text-foreground uppercase">
+              <span className="text-xs font-semibold text-foreground uppercase">
                 {course.external_partner_name?.charAt(0)}
               </span>
             )}
           </div>
-          <p className="text-sm">
-            {course.external_partner_name || 'Parceiro não informado'}
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-foreground-light text-sm font-normal leading-5">
+              Em parceria com
+            </span>
+            <span className="text-foreground text-sm font-normal leading-5">
+              {course.external_partner_name || 'Parceiro não informado'}
+            </span>
+          </div>
         </div>
       )}
     </div>
@@ -311,53 +253,41 @@ interface CourseMetadataProps {
 }
 
 function CourseMetadata({ course }: CourseMetadataProps) {
-  return (
-    <div className="flex justify-between px-4 text-sm">
-      <div className="flex gap-4">
-        <div>
-          <p className="text-foreground-light">Modalidade</p>
-          <p className="font-normal">
-            {course.modalidade === 'LIVRE_FORMACAO_ONLINE'
-              ? 'Remoto'
-              : normalizeModalityDisplay(course.modalidade) || 'Não informado'}
-          </p>
-        </div>
-        <div>
-          <p className="text-foreground-light">Carga horária</p>
-          <p className="font-normal">{course.workload || 'Não informado'}</p>
-        </div>
-        {course.enrollment_end_date && (
-          <div>
-            <p className="text-foreground-light">Inscrições até</p>
-            <p className="font-normal">
-              {formatDate(course.enrollment_end_date)}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+  const modality =
+    course.modalidade === 'LIVRE_FORMACAO_ONLINE'
+      ? 'Remoto'
+      : normalizeModalityDisplay(course.modalidade) || undefined
 
-interface CourseScheduleProps {
-  scheduleInfo: CourseScheduleInfo
-}
+  const firstStartDate = (() => {
+    const mod = course.modalidade?.toLowerCase()
+    if ((mod === 'online' || mod === 'remoto') && course.remote_class) {
+      const schedules = course.remote_class.schedules
+      if (schedules && schedules.length > 0)
+        return formatDate(schedules[0].class_start_date)
+      return formatDate(course.remote_class.class_start_date)
+    }
+    if (course.locations && course.locations.length > 0) {
+      const schedule = course.locations[0].schedules?.[0]
+      if (schedule) return formatDate(schedule.class_start_date)
+    }
+    return null
+  })()
 
-function CourseSchedule({ scheduleInfo }: CourseScheduleProps) {
+  const accessibilityLabel = course.accessibility
+    ? typeof course.accessibility === 'string'
+      ? course.accessibility
+      : ((course.accessibility as any)?.label ?? null)
+    : null
+
   return (
-    <div className="flex flex-col items-start px-4 gap-2">
-      <InfoRow label="Data início" value={formatDate(scheduleInfo.startDate)} />
-      <InfoRow label="Data final" value={formatDate(scheduleInfo.endDate)} />
-      <InfoRow label="Horário" value={formatTimeRange(scheduleInfo.time)} />
-      <InfoRow label="Dias de aula" value={scheduleInfo.days} />
-      <InfoRow label="Vagas" value={scheduleInfo.vacancies} />
-      {scheduleInfo.address && (
-        <InfoRow
-          label="Endereço"
-          value={`${scheduleInfo.address}${
-            scheduleInfo.neighborhood ? ` - ${scheduleInfo.neighborhood}` : ''
-          }`}
-        />
+    <div className="grid grid-cols-2 min-[320px]:grid-cols-2 gap-2 w-full">
+      <MetaCard label="Carga horária" value={course.workload} />
+      <MetaCard label="Modalidade" value={modality} />
+      {accessibilityLabel && (
+        <MetaCard label="Acessibilidade" value={accessibilityLabel} />
+      )}
+      {firstStartDate && (
+        <MetaCard label="Data início" value={firstStartDate} />
       )}
     </div>
   )
@@ -369,174 +299,94 @@ interface OnlineClassSelectionProps {
   onClassSelect: (classId: string) => void
 }
 
-function OnlineClassSelection({
-  course,
-  selectedClassId,
-  onClassSelect,
-}: OnlineClassSelectionProps) {
-  const modality = course.modalidade?.toLowerCase()
+const SCROLL_STEP = 208 + 12 // card width + gap
 
-  // Only show for online/remote courses with multiple schedules
-  if (modality !== 'online' && modality !== 'remoto') {
-    return null
-  }
-
-  if (
-    !course.remote_class?.schedules ||
-    course.remote_class.schedules.length === 0
-  ) {
-    return null
-  }
-
-  const onlineClasses = course.remote_class.schedules
-  const hasMultipleClasses = onlineClasses.length > 1
-
-  // If only one class, don't show selection but show the class info
-  if (!hasMultipleClasses) {
-    const singleClass = onlineClasses[0]
-    return (
-      <div className="space-y-4">
-        <div className="pt-12 px-4 space-y-4 text-sm">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-foreground-light">
-              <GroupIcon />
-              <span>Turma</span>
-            </div>
-            <div className="space-y-2.5 text-sm text-foreground-light">
-              {singleClass.class_start_date && (
-                <div className="flex items-center gap-3">
-                  <CalendarIcon />
-                  <span>Data início</span>
-                  <span className="text-foreground">
-                    {formatDate(singleClass.class_start_date)}
-                  </span>
-                </div>
-              )}
-              {singleClass.class_end_date && (
-                <div className="flex items-center gap-3">
-                  <CalendarIcon />
-                  <span>Data final</span>
-                  <span className="text-foreground">
-                    {formatDate(singleClass.class_end_date)}
-                  </span>
-                </div>
-              )}
-              {singleClass.class_days && (
-                <div className="flex items-center gap-3">
-                  <CycleIcon />
-                  <span>Dias de aula</span>
-                  <span className="text-foreground">
-                    {singleClass.class_days}
-                  </span>
-                </div>
-              )}
-              {singleClass.class_time && (
-                <div className="flex items-center gap-3">
-                  <ClockIcon />
-                  <span>Horário</span>
-                  <span className="text-foreground">
-                    {formatTimeRange(singleClass.class_time)}
-                  </span>
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                <PersonIcon />
-                <span>Vagas</span>
-                <span className="text-foreground">
-                  {singleClass.vacancies}
-                  {singleClass.remaining_vacancies !== undefined && (
-                    <span className="text-muted-foreground">
-                      {' '}
-                      ({singleClass.remaining_vacancies} disponíveis)
-                    </span>
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const selectedClass =
-    onlineClasses.find(cls => cls.id === selectedClassId) || onlineClasses[0]
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+function ScrollableCards({
+  children,
+  count,
+  label,
+}: {
+  children: ReactNode
+  count: number
+  label?: string
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const startXRef = useRef(0)
   const scrollLeftRef = useRef(0)
   const hasMovedRef = useRef(false)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 0)
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+  }, [])
 
   useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
+    const el = scrollRef.current
+    if (!el) return
+    updateScrollState()
+    el.addEventListener('scroll', updateScrollState, { passive: true })
+    const ro = new ResizeObserver(updateScrollState)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', updateScrollState)
+      ro.disconnect()
+    }
+  }, [updateScrollState])
 
-    // Only enable scroll features if there are 3 or more classes
-    if (onlineClasses.length < 3) return
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container || count < 3) return
 
-    // Drag to scroll - works on container and all children (including buttons)
     const handleMouseDown = (e: MouseEvent) => {
-      // Allow dragging even when clicking on buttons
       isDraggingRef.current = true
       hasMovedRef.current = false
       startXRef.current = e.pageX - container.offsetLeft
       scrollLeftRef.current = container.scrollLeft
       container.style.cursor = 'grabbing'
       container.style.userSelect = 'none'
-      // Prevent text selection on buttons during drag
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = 'none'
+      container.querySelectorAll('button').forEach(b => {
+        b.style.userSelect = 'none'
       })
     }
-
     const handleMouseLeave = () => {
       isDraggingRef.current = false
       hasMovedRef.current = false
       container.style.cursor = 'grab'
       container.style.userSelect = ''
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = ''
+      container.querySelectorAll('button').forEach(b => {
+        b.style.userSelect = ''
       })
     }
-
     const handleMouseUp = () => {
       isDraggingRef.current = false
       container.style.cursor = 'grab'
       container.style.userSelect = ''
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = ''
+      container.querySelectorAll('button').forEach(b => {
+        b.style.userSelect = ''
       })
-      // Only reset hasMoved after a small delay to allow click event to check it
       setTimeout(() => {
         hasMovedRef.current = false
       }, 0)
     }
-
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return
       e.preventDefault()
       hasMovedRef.current = true
-      const x = e.pageX - container.offsetLeft
-      const walk = (x - startXRef.current) * 2 // Scroll speed multiplier
-      container.scrollLeft = scrollLeftRef.current - walk
+      container.scrollLeft =
+        scrollLeftRef.current -
+        (e.pageX - container.offsetLeft - startXRef.current) * 2
     }
-
-    // Handle both vertical and horizontal scroll from touchpad
     const handleWheel = (e: WheelEvent) => {
-      // Only apply on desktop (not touch devices)
       if (window.innerWidth >= 768) {
         e.preventDefault()
-        // Support both horizontal (deltaX) and vertical (deltaY) scroll
-        // deltaX is for horizontal touchpad scroll, deltaY is for vertical scroll converted to horizontal
         container.scrollLeft += e.deltaX + e.deltaY
       }
     }
-
-    // Prevent click on buttons when dragging
     const handleClick = (e: MouseEvent) => {
       if (hasMovedRef.current && (e.target as HTMLElement).closest('button')) {
         e.preventDefault()
@@ -544,7 +394,6 @@ function OnlineClassSelection({
       }
     }
 
-    // Use capture phase to ensure events work even when clicking on buttons
     container.addEventListener('mousedown', handleMouseDown, true)
     container.addEventListener('mouseleave', handleMouseLeave)
     container.addEventListener('mouseup', handleMouseUp, true)
@@ -560,156 +409,214 @@ function OnlineClassSelection({
       container.removeEventListener('wheel', handleWheel)
       container.removeEventListener('click', handleClick, true)
     }
-  }, [onlineClasses.length])
+  }, [count])
 
-  // Check if a class is available (has remaining_vacancies > 0)
-  const isClassAvailable = (onlineClass: any) => {
+  const showChevrons = canScrollLeft || canScrollRight
+
+  return (
+    <div className="flex flex-col gap-3 w-full">
+      {/* Label row with chevrons — chevrons só em desktop quando há overflow */}
+      <div className="flex items-center justify-between">
+        {label && (
+          <span className="text-foreground-light text-sm">{label}</span>
+        )}
+        {showChevrons && (
+          <div className="flex items-center gap-1 ml-auto">
+            <button
+              type="button"
+              onClick={() =>
+                scrollRef.current?.scrollBy({
+                  left: -SCROLL_STEP,
+                  behavior: 'smooth',
+                })
+              }
+              disabled={!canScrollLeft}
+              aria-label="Anterior"
+              className="flex items-center justify-center"
+            >
+              <ChevronLeftIcon
+                width={20}
+                height={20}
+                className={canScrollLeft ? 'text-foreground' : 'text-[#A1A1A1]'}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                scrollRef.current?.scrollBy({
+                  left: SCROLL_STEP,
+                  behavior: 'smooth',
+                })
+              }
+              disabled={!canScrollRight}
+              aria-label="Próximo"
+              className="flex items-center justify-center"
+            >
+              <ChevronRightIcon
+                width={20}
+                height={20}
+                className={
+                  canScrollRight ? 'text-foreground' : 'text-[#A1A1A1]'
+                }
+              />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div
+        ref={scrollRef}
+        className={cn(
+          'w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
+          count >= 3 &&
+            'md:cursor-grab md:active:cursor-grabbing [&_button]:md:cursor-grab'
+        )}
+      >
+        <div className="flex gap-3 pb-2">
+          {children}
+          <div className="shrink-0 w-4" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ScheduleRow({
+  icon,
+  label,
+  value,
+}: { icon: ReactNode; label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 text-sm leading-5">
+      <span className="text-foreground-light shrink-0">{icon}</span>
+      <span className="text-foreground-light">{label}</span>
+      <span className="text-foreground">{value}</span>
+    </div>
+  )
+}
+
+function ScheduleCards({ schedules }: { schedules: any[] }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+      {schedules.map((schedule, index) => (
+        <div
+          key={schedule.id}
+          className="flex flex-col p-5 rounded-xl bg-card gap-2.5"
+        >
+          <ScheduleRow icon={<GroupIcon />} label="Turma" value={index + 1} />
+          {schedule.class_start_date && (
+            <ScheduleRow
+              icon={<CalendarIcon />}
+              label="Data início"
+              value={formatDate(schedule.class_start_date)}
+            />
+          )}
+          {schedule.class_end_date && (
+            <ScheduleRow
+              icon={<CalendarIcon />}
+              label="Data final"
+              value={formatDate(schedule.class_end_date)}
+            />
+          )}
+          {schedule.class_time && (
+            <ScheduleRow
+              icon={<ClockIcon />}
+              label="Horário"
+              value={formatTimeRange(schedule.class_time)}
+            />
+          )}
+          {schedule.class_days && (
+            <ScheduleRow
+              icon={<CycleIcon />}
+              label="Dias de aula"
+              value={schedule.class_days}
+            />
+          )}
+          <ScheduleRow
+            icon={<PersonIcon />}
+            label="Vagas"
+            value={schedule.vacancies}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function OnlineClassSelection({
+  course,
+  selectedClassId,
+  onClassSelect,
+}: OnlineClassSelectionProps) {
+  const modality = course.modalidade?.toLowerCase()
+
+  if (modality !== 'online' && modality !== 'remoto') return null
+  if (
+    !course.remote_class?.schedules ||
+    course.remote_class.schedules.length === 0
+  )
+    return null
+
+  const onlineClasses = course.remote_class.schedules
+  const hasMultiple = onlineClasses.length > 1
+
+  const isClassAvailable = (onlineClass: any) =>
+    onlineClass.remaining_vacancies !== undefined &&
+    onlineClass.remaining_vacancies !== null &&
+    onlineClass.remaining_vacancies > 0
+
+  if (!hasMultiple) {
     return (
-      onlineClass.remaining_vacancies !== undefined &&
-      onlineClass.remaining_vacancies !== null &&
-      onlineClass.remaining_vacancies > 0
+      <div className="space-y-4 pt-4">
+        <ScheduleCards schedules={onlineClasses} />
+      </div>
     )
   }
 
+  const selectedClass =
+    onlineClasses.find(cls => cls.id === selectedClassId) || onlineClasses[0]
+
   return (
-    <div className="space-y-4">
-      {/* Class Icon Label */}
-      <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
-        <GroupIcon />
-        <span>Selecione a turma</span>
-      </div>
-
-      {/* Horizontal Scrollable Class Cards */}
-      <div
-        ref={scrollContainerRef}
-        className={`w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
-          onlineClasses.length >= 3
-            ? 'cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing'
-            : ''
-        }`}
-      >
-        <div className="flex gap-3 pl-4 pb-2">
-          {onlineClasses.map((onlineClass, index) => {
-            const isAvailable = isClassAvailable(onlineClass)
-            return (
-              <button
-                type="button"
-                key={onlineClass.id}
-                onClick={() => isAvailable && onClassSelect(onlineClass.id)}
-                disabled={!isAvailable}
-                className={`shrink-0 w-[280px] p-4 rounded-lg border text-left transition-all ${
-                  isAvailable
-                    ? 'hover:border-muted-foreground hover:bg-secondary cursor-pointer'
-                    : 'opacity-50 cursor-not-allowed'
-                } ${
-                  selectedClassId === onlineClass.id
-                    ? 'border-muted-foreground bg-secondary'
-                    : 'border-none bg-card'
-                }`}
-              >
-                <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
-                  Turma {index + 1}
-                  {!isAvailable && (
-                    <span className="text-muted-foreground text-xs ml-2">
-                      (Sem vagas)
-                    </span>
-                  )}
-                </h4>
-                <p className="text-xs md:text-sm text-foreground-light mt-1">
-                  {!onlineClass.class_start_date && !onlineClass.class_end_date
-                    ? 'Datas a serem definidas'
-                    : `${formatDateOrFallback(onlineClass.class_start_date)} - ${formatDateOrFallback(onlineClass.class_end_date)}`}
-                </p>
-              </button>
-            )
-          })}
-          {/* Spacer for right padding in horizontal scroll */}
-          <div className="flex-shrink-0 w-4" aria-hidden="true" />
-        </div>
-      </div>
-
-      {/* Separator */}
-      <Separator className="max-w-[90%] md:max-w-[96%] mx-auto" />
-
-      {/* Class Information with Icons */}
-      {selectedClass && (
-        <div className="px-4 space-y-4 text-sm">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-foreground-light">
-              <GroupIcon />
-              <span className="flex flex-row gap-3">
-                Turma{' '}
-                <span className="text-foreground block">
-                  {onlineClasses.findIndex(cls => cls.id === selectedClass.id) +
-                    1}
-                </span>
-              </span>
-            </div>
-
-            {/* Class Details with Icons */}
-            <div className="space-y-2.5 text-sm text-foreground-light">
-              {/* Data início */}
-              {selectedClass.class_start_date && (
-                <div className="flex items-center gap-3">
-                  <CalendarIcon />
-                  <span>Data início</span>
-                  <span className="text-foreground">
-                    {formatDate(selectedClass.class_start_date)}
-                  </span>
-                </div>
+    <div className="space-y-4 pt-4">
+      <ScrollableCards count={onlineClasses.length} label="Selecione a turma">
+        {onlineClasses.map((onlineClass, index) => {
+          const isAvailable = isClassAvailable(onlineClass)
+          const isSelected = selectedClassId === onlineClass.id
+          return (
+            <button
+              type="button"
+              key={onlineClass.id}
+              onClick={() => isAvailable && onClassSelect(onlineClass.id)}
+              disabled={!isAvailable}
+              className={cn(
+                'shrink-0 w-[200px] p-4 rounded-xl border text-left transition-all',
+                isAvailable
+                  ? 'hover:border-muted-foreground hover:bg-secondary cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed',
+                isSelected
+                  ? 'border-muted-foreground bg-secondary'
+                  : 'border-transparent bg-card'
               )}
-
-              {/* Data final */}
-              {selectedClass.class_end_date && (
-                <div className="flex items-center gap-3">
-                  <CalendarIcon />
-                  <span>Data final</span>
-                  <span className="text-foreground">
-                    {formatDate(selectedClass.class_end_date)}
+            >
+              <h4 className="font-medium text-foreground text-sm">
+                Turma {index + 1}
+                {!isAvailable && (
+                  <span className="text-muted-foreground text-xs ml-2">
+                    (Sem vagas)
                   </span>
-                </div>
-              )}
+                )}
+              </h4>
+              <p className="text-xs text-foreground-light mt-1">
+                {!onlineClass.class_start_date && !onlineClass.class_end_date
+                  ? 'Datas a serem definidas'
+                  : `${formatDate(onlineClass.class_start_date) || 'N/D'} - ${formatDate(onlineClass.class_end_date) || 'N/D'}`}
+              </p>
+            </button>
+          )
+        })}
+      </ScrollableCards>
 
-              {/* Dias de aula */}
-              {selectedClass.class_days && (
-                <div className="flex items-center gap-3">
-                  <CycleIcon />
-                  <span>Dias de aula</span>
-                  <span className="text-foreground">
-                    {selectedClass.class_days}
-                  </span>
-                </div>
-              )}
-
-              {/* Horário */}
-              {selectedClass.class_time && (
-                <div className="flex items-center gap-3">
-                  <ClockIcon />
-                  <span>Horário</span>
-                  <span className="text-foreground">
-                    {formatTimeRange(selectedClass.class_time)}
-                  </span>
-                </div>
-              )}
-
-              {/* Vagas */}
-              <div className="flex items-center gap-3">
-                <PersonIcon />
-                <span>Vagas</span>
-                <span className="text-foreground">
-                  {selectedClass.vacancies}
-                  {selectedClass.remaining_vacancies !== undefined && (
-                    <span className="text-muted-foreground">
-                      {' '}
-                      ({selectedClass.remaining_vacancies} disponíveis)
-                    </span>
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {selectedClass && <ScheduleCards schedules={[selectedClass]} />}
     </div>
   )
 }
@@ -727,251 +634,55 @@ function LocationSelection({
 }: LocationSelectionProps) {
   const modality = course.modalidade?.toLowerCase()
 
-  // Only show for presencial/semipresencial courses
-  if (modality !== 'presencial' && modality !== 'semipresencial') {
-    return null
-  }
-
-  if (!course.locations || course.locations.length === 0) {
-    return null
-  }
-
-  const selectedLocation = course.locations.find(
-    loc => loc.id === selectedLocationId
-  )
-
-  const hasMultipleSchedules =
-    selectedLocation &&
-    selectedLocation.schedules &&
-    selectedLocation.schedules.length > 1
+  if (modality !== 'presencial' && modality !== 'semipresencial') return null
+  if (!course.locations || course.locations.length === 0) return null
 
   const hasMultipleLocations = course.locations.length > 1
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const isDraggingRef = useRef(false)
-  const startXRef = useRef(0)
-  const scrollLeftRef = useRef(0)
-  const hasMovedRef = useRef(false)
-
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-
-    // Only enable scroll features if there are 3 or more locations
-    if (!course.locations || course.locations.length < 3) return
-
-    // Drag to scroll - works on container and all children (including buttons)
-    const handleMouseDown = (e: MouseEvent) => {
-      // Allow dragging even when clicking on buttons
-      isDraggingRef.current = true
-      hasMovedRef.current = false
-      startXRef.current = e.pageX - container.offsetLeft
-      scrollLeftRef.current = container.scrollLeft
-      container.style.cursor = 'grabbing'
-      container.style.userSelect = 'none'
-      // Prevent text selection on buttons during drag
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = 'none'
-      })
-    }
-
-    const handleMouseLeave = () => {
-      isDraggingRef.current = false
-      hasMovedRef.current = false
-      container.style.cursor = 'grab'
-      container.style.userSelect = ''
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = ''
-      })
-    }
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false
-      container.style.cursor = 'grab'
-      container.style.userSelect = ''
-      const buttons = container.querySelectorAll('button')
-      buttons.forEach(button => {
-        button.style.userSelect = ''
-      })
-      // Only reset hasMoved after a small delay to allow click event to check it
-      setTimeout(() => {
-        hasMovedRef.current = false
-      }, 0)
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return
-      e.preventDefault()
-      hasMovedRef.current = true
-      const x = e.pageX - container.offsetLeft
-      const walk = (x - startXRef.current) * 2 // Scroll speed multiplier
-      container.scrollLeft = scrollLeftRef.current - walk
-    }
-
-    // Handle both vertical and horizontal scroll from touchpad
-    const handleWheel = (e: WheelEvent) => {
-      // Only apply on desktop (not touch devices)
-      if (window.innerWidth >= 768) {
-        e.preventDefault()
-        // Support both horizontal (deltaX) and vertical (deltaY) scroll
-        // deltaX is for horizontal touchpad scroll, deltaY is for vertical scroll converted to horizontal
-        container.scrollLeft += e.deltaX + e.deltaY
-      }
-    }
-
-    // Prevent click on buttons when dragging
-    const handleClick = (e: MouseEvent) => {
-      if (hasMovedRef.current && (e.target as HTMLElement).closest('button')) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    }
-
-    // Use capture phase to ensure events work even when clicking on buttons
-    container.addEventListener('mousedown', handleMouseDown, true)
-    container.addEventListener('mouseleave', handleMouseLeave)
-    container.addEventListener('mouseup', handleMouseUp, true)
-    container.addEventListener('mousemove', handleMouseMove, true)
-    container.addEventListener('wheel', handleWheel, { passive: false })
-    container.addEventListener('click', handleClick, true)
-
-    return () => {
-      container.removeEventListener('mousedown', handleMouseDown, true)
-      container.removeEventListener('mouseleave', handleMouseLeave)
-      container.removeEventListener('mouseup', handleMouseUp, true)
-      container.removeEventListener('mousemove', handleMouseMove, true)
-      container.removeEventListener('wheel', handleWheel)
-      container.removeEventListener('click', handleClick, true)
-    }
-  }, [course.locations])
+  const selectedLocation =
+    course.locations.find(loc => loc.id === selectedLocationId) ??
+    course.locations[0]
 
   return (
-    <div className="space-y-4">
-      {/* Location Icon Label */}
-      <div className="pt-12 px-4 flex items-center gap-2 text-foreground-light text-sm">
-        <MapPinIcon />
-        <span>{hasMultipleLocations ? 'Selecione a unidade' : 'Unidade'}</span>
-      </div>
-
-      {/* Horizontal Scrollable Location Cards */}
-      <div
-        ref={scrollContainerRef}
-        className={`w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
-          course.locations.length >= 3
-            ? 'cursor-grab active:cursor-grabbing md:cursor-grab md:active:cursor-grabbing [&_button]:cursor-grab [&_button]:active:cursor-grabbing'
-            : ''
-        }`}
+    <div className="space-y-4 pt-4">
+      <ScrollableCards
+        count={course.locations.length}
+        label={
+          hasMultipleLocations
+            ? 'Selecione a unidade para mais detalhes'
+            : 'Unidade'
+        }
       >
-        <div className="flex gap-3 pl-4 pb-2">
-          {course.locations.map(location => (
+        {course.locations.map(location => {
+          const isSelected = selectedLocationId === location.id
+          return (
             <button
               type="button"
               key={location.id}
               onClick={() => onLocationSelect(location.id)}
-              className={`shrink-0 w-[280px] p-4 rounded-lg border text-left transition-all hover:border-muted-foreground hover:bg-secondary cursor-pointer ${
-                selectedLocationId === location.id
+              className={cn(
+                'shrink-0 w-[200px] p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2',
+                isSelected
                   ? 'border-muted-foreground bg-secondary'
-                  : 'border-none bg-card'
-              }`}
+                  : 'border-transparent bg-card hover:border-muted-foreground hover:bg-secondary'
+              )}
             >
-              <h4 className="font-medium text-foreground text-sm md:text-sm line-clamp-2">
-                {location.address}
-              </h4>
-              <p className="text-xs md:text-sm text-foreground-light mt-1">
-                {location.neighborhood}
-              </p>
+              {location.neighborhood && (
+                <h4 className="text-foreground text-sm font-medium leading-4">
+                  {location.neighborhood}
+                </h4>
+              )}
+              {location.address && (
+                <p className="text-foreground-light text-xs font-normal leading-4">
+                  {location.address}
+                </p>
+              )}
             </button>
-          ))}
-          {/* Spacer for right padding in horizontal scroll */}
-          <div className="flex-shrink-0 w-4" aria-hidden="true" />
-        </div>
-      </div>
+          )
+        })}
+      </ScrollableCards>
 
-      {/* Separator */}
-      <Separator className="max-w-[90%] md:max-w-[96%] mx-auto" />
-
-      {/* Schedule Information with Icons */}
       {selectedLocation?.schedules && selectedLocation.schedules.length > 0 && (
-        <div className="px-4 space-y-4 text-sm">
-          {selectedLocation.schedules.map((schedule, index) => (
-            <div key={schedule.id} className="w-full">
-              <div className="space-y-3">
-                {/* Show "Turma n" only if there are multiple schedules */}
-                {hasMultipleSchedules && (
-                  <div className="flex items-center gap-3  text-foreground-light">
-                    <GroupIcon />
-                    <span className="flex flex-row gap-3">
-                      Turma{' '}
-                      <span className="text-foreground block">{index + 1}</span>
-                    </span>
-                  </div>
-                )}
-
-                {/* Schedule Details with Icons */}
-                <div className="space-y-2.5 text-sm text-foreground-light">
-                  {/* Data início */}
-                  {schedule.class_start_date && (
-                    <div className="flex items-center gap-3">
-                      <CalendarIcon />
-                      <span>Data início</span>
-                      <span className="text-foreground">
-                        {formatDate(schedule.class_start_date)}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Data final */}
-                  {schedule.class_end_date && (
-                    <div className="flex items-center gap-3">
-                      <CalendarIcon />
-                      <span>Data final</span>
-                      <span className="text-foreground">
-                        {formatDate(schedule.class_end_date)}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Horário */}
-                  <div className="flex items-center gap-3">
-                    <ClockIcon />
-                    <span>Horário</span>
-                    <span className="text-foreground">
-                      {formatTimeRange(schedule.class_time)}
-                    </span>
-                  </div>
-
-                  {/* Dias de aula */}
-                  {schedule.class_days && (
-                    <div className="flex items-center gap-3">
-                      <CycleIcon />
-                      <span>Dias de aula</span>
-                      <span className="text-foreground">
-                        {schedule.class_days}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Vagas */}
-                  <div className="flex items-center gap-3">
-                    <PersonIcon />
-                    <span>Vagas</span>
-                    <span className="text-foreground">
-                      {schedule.vacancies}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Separator between schedules (only if there are multiple schedules and not the last one) */}
-              {hasMultipleSchedules &&
-                index < selectedLocation.schedules.length - 1 && (
-                  <Separator className="mt-4" />
-                )}
-            </div>
-          ))}
-        </div>
+        <ScheduleCards schedules={selectedLocation.schedules} />
       )}
     </div>
   )
@@ -1259,6 +970,8 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
     )
   }
 
+  const enrollmentText = getEnrollmentText(course.enrollment_end_date)
+
   return (
     <div className="flex flex-col items-center pb-20">
       <div className="w-full max-w-3xl">
@@ -1295,59 +1008,95 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
             </CustomButton>
           </div>
         </BottomSheet>
+
+        {/* Cover image */}
         <CourseHeader course={course} />
-        <CourseInfo course={course} department={department} />
-        <CourseMetadata course={course} />
-        {userEnrollment?.status && (
-          <CourseStatusCard
-            status={userEnrollment.status as any}
-            className="mx-4"
-            hasCertificate={course.has_certificate}
-          />
-        )}
-        {/* Action buttons for approved/pending users - below status card, above description */}
-        {(userEnrollment?.status === 'approved' ||
-          userEnrollment?.status === 'pending') && (
-          <div className="px-4 py-6 pb-0 w-full max-w-4xl">
-            {renderActionButton()}
-          </div>
-        )}
-        <div className="px-4 py-6 pb-0">
-          {course.description ? (
-            <MarkdownRenderer
-              className="text-sm text-foreground-light"
-              content={course.description}
+
+        {/* Content area — bottom-sheet visual */}
+        <div className="flex flex-col items-center self-stretch rounded-t-2xl bg-background -mt-4 relative z-10">
+          {/* Drag indicator */}
+          <div className="w-[37px] h-1 rounded-full bg-[#E4E4E4] mt-4 mb-0 shrink-0" />
+
+          <div className="flex flex-col gap-4 px-4 w-full pt-4">
+            {/* Title + enrollment deadline — 4px gap between them */}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-foreground font-medium text-3xl leading-9 tracking-tight">
+                {course.title || 'Título não disponível'}
+              </h1>
+              {enrollmentText && (
+                <p className="text-card-2 text-sm font-normal leading-5">
+                  {enrollmentText}
+                </p>
+              )}
+            </div>
+
+            {/* Status card */}
+            {userEnrollment?.status && (
+              <CourseStatusCard
+                status={userEnrollment.status as any}
+                className="w-full"
+                hasCertificate={course.has_certificate}
+              />
+            )}
+
+            {/* Action buttons for approved/pending - above description */}
+            {(userEnrollment?.status === 'approved' ||
+              userEnrollment?.status === 'pending') && (
+              <div className="w-full">{renderActionButton()}</div>
+            )}
+
+            {/* Description */}
+            <div>
+              {course.description ? (
+                <MarkdownRenderer
+                  className="text-sm text-foreground-light"
+                  content={course.description}
+                />
+              ) : (
+                <div className="text-foreground-light text-base leading-4 md:leading-6">
+                  Descrição não disponível
+                </div>
+              )}
+            </div>
+
+            {/* Metadata cards */}
+            <CourseMetadata course={course} />
+
+            {/* Offered by card — 8px gap from metadata */}
+            <div className="-mt-2">
+              <CourseInfo course={course} department={department} />
+            </div>
+
+            {/* Enroll button — below "Curso oferecido por", 32px gap */}
+            {(!isEnrolled ||
+              enrollmentInfo.status === 'certificate_available') && (
+              <div className="w-full mt-4">{renderActionButton()}</div>
+            )}
+
+            {/* Location / schedule selection */}
+            <LocationSelection
+              course={course}
+              selectedLocationId={selectedLocationId}
+              onLocationSelect={handleLocationSelect}
             />
-          ) : (
-            <div className="text-foreground-light text-base leading-4 md:leading-6">
-              Descrição não disponível
+            <OnlineClassSelection
+              course={course}
+              selectedClassId={selectedClassId}
+              onClassSelect={handleClassSelect}
+            />
+
+            {/* Extra content sections */}
+            <div className="mt-8">
+              <CourseContent course={course} />
             </div>
-          )}
-        </div>
-        {(!isEnrolled || enrollmentInfo.status === 'certificate_available') && (
-          <div className="px-4 pb-2 py-8 w-full max-w-4xl">
-            {renderActionButton()}
+
+            {/* Bottom action button */}
+            {userEnrollment?.status !== 'approved' &&
+              userEnrollment?.status !== 'pending' && (
+                <div className="w-full pt-4 pb-4">{renderActionButton()}</div>
+              )}
           </div>
-        )}
-        <LocationSelection
-          course={course}
-          selectedLocationId={selectedLocationId}
-          onLocationSelect={handleLocationSelect}
-        />
-        <OnlineClassSelection
-          course={course}
-          selectedClassId={selectedClassId}
-          onClassSelect={handleClassSelect}
-        />
-        <div className="my-12" />
-        <CourseContent course={course} />
-        {/* Bottom action button - hide for approved/pending users since buttons are shown above description */}
-        {userEnrollment?.status !== 'approved' &&
-          userEnrollment?.status !== 'pending' && (
-            <div className="p-4 w-full max-w-4xl pt-8">
-              {renderActionButton()}
-            </div>
-          )}
+        </div>
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ export const revalidate = 1800
 const SERVICE_WHITELIST = [
   'iptu-2025-94ff5567',
   '5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
-  'cadrio-agendamento-770618f7',
+  'inscricao-e-atualizacao-do-cadastro-unico-8cafda60',
   'b774f0a8-53dd-44d3-850f-50087f9b62c3',
   'd1343d86-eb7d-4e65-85c9-47b975896f2a',
   'licenca-sanitaria-de-funcionamento-ffa3f857',
