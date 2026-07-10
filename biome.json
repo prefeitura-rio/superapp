@@ -57,5 +57,17 @@
       "playwright-report/**",
       "test-results/**"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "include": ["src/http-agent-api/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConfusingVoidType": "off"
+          }
+        }
+      }
+    }
+  ]
 }
