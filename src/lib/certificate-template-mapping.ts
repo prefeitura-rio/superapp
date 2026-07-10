@@ -18,10 +18,11 @@ export interface OrganizationTemplateMapping {
 
 /**
  * Templates com layout v2 (banner lateral + texto alinhado à esquerda).
- * planetario e smac permanecem no layout legado até migração futura.
+ * smac permanece no layout legado até migração futura.
  */
 const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
   'juvrio',
+  'planetario',
   'smpd',
   'cvlsubtd',
   'sesrio',
@@ -33,7 +34,7 @@ const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
  *
  * Templates disponíveis:
  * - juvrio.pdf: Secretaria Especial da Juventude Carioca - JUV-RIO (layout v2)
- * - planetario.pdf: Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO (legado)
+ * - planetario.pdf: Fundação Planetário da Cidade do Rio de Janeiro - PLANETÁRIO (layout v2)
  * - smac.pdf: Secretaria Municipal de Meio Ambiente e Clima - SMAC (legado)
  * - smpd.pdf: Secretaria Municipal da Pessoa com Deficiência - SMPD (layout v2)
  * - cvlsubtd.pdf: CVL / Subsecretaria (layout v2)

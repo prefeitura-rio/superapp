@@ -195,7 +195,7 @@ type InternalTypography = {
 }
 
 /**
- * Layout legado: textos centralizados (planetario, smac).
+ * Layout legado: textos centralizados (smac).
  */
 async function addTextToCertificate(
   page: PDFPage,
@@ -413,7 +413,7 @@ function drawMixedRunLines(
 
 /**
  * Layout v2: título + texto alinhado à esquerda na área branca
- * (juvrio, smpd, cvlsubtd, sesrio, spmrio).
+ * (juvrio, planetario, smpd, cvlsubtd, sesrio, spmrio).
  */
 function addTextLayoutV2(
   page: PDFPage,

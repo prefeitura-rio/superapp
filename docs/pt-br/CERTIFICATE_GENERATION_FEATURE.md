@@ -20,14 +20,14 @@ Mapeia IDs de organizações (orgao_id/cd_ua) para seus templates PDF correspond
 | Template | Órgão | orgao_id | Layout |
 |----------|-------|----------|--------|
 | `juvrio.pdf` | Secretaria Especial da Juventude Carioca - JUV-RIO | `5300` | v2 |
+| `planetario.pdf` | Fundação Planetário da Cidade do Rio de Janeiro | `2641` | v2 |
 | `smpd.pdf` | Secretaria Municipal da Pessoa com Deficiência - SMPD | `4000` | v2 |
 | `cvlsubtd.pdf` | CVL / Subsecretaria | `52451` | v2 |
 | `sesrio.pdf` | SES-RIO | `1900` | v2 |
 | `spmrio.pdf` | Secretaria Especial de Políticas para Mulheres - SPM-RIO | `4700` | v2 |
-| `planetario.pdf` | Fundação Planetário da Cidade do Rio de Janeiro | `2641` | legado |
 | `smac.pdf` | Secretaria Municipal de Meio Ambiente e Clima - SMAC | `2400` | legado |
 
-> **Nota:** `planetario` e `smac` ainda usam o layout legado (texto centralizado). Serão migrados para o layout v2 quando os novos PDFs estiverem disponíveis.
+> **Nota:** `smac` ainda usa o layout legado (texto centralizado). Será migrado para o layout v2 quando o novo PDF estiver disponível.
 
 **Funções Principais:**
 - `getCertificateTemplate(orgao_id)` - Retorna o nome do template baseado no orgao_id ou `null` se não encontrado
@@ -91,7 +91,7 @@ interface CertificateData {
 4. **Se template não encontrado**: Lança erro em vez de usar padrão
 5. Escolhe o layout pelo template (`usesNewCertificateLayout`):
    - **Layout v2:** texto alinhado à esquerda na área branca (banner e assinaturas já estão no PDF)
-   - **Layout legado:** texto centralizado (planetario, smac)
+   - **Layout legado:** texto centralizado (smac)
 6. Retorna bytes do PDF
 
 **Tratamento de Erro:**
@@ -294,7 +294,7 @@ if (userEnrollment?.status === 'approved' && course.has_certificate) {
 
 ## Layout do Conteúdo do Certificado
 
-### Layout v2 (juvrio, smpd, cvlsubtd, sesrio, spmrio)
+### Layout v2 (juvrio, planetario, smpd, cvlsubtd, sesrio, spmrio)
 
 Banner azul e assinaturas já vêm no PDF. O gerador estampa apenas o texto na área branca (alinhado à esquerda):
 
@@ -310,7 +310,7 @@ Banner azul e assinaturas já vêm no PDF. O gerador estampa apenas o texto na �
    - Dinâmico: 16px `#3757be` bold
 5. **Data:** `"Rio de Janeiro, "` (14px `#666666`) + data (16px `#3757be`)
 
-### Layout legado (planetario, smac)
+### Layout legado (smac)
 
 Texto centralizado no PDF:
 
@@ -443,7 +443,7 @@ http://localhost:3000/servicos/cursos/certificados
   - ✅ Templates `cvlsubtd`, `sesrio`, `spmrio` + remapeamento visual de `juvrio`/`smpd`
   - ✅ Layout v2: banner lateral no PDF + tipografia mista alinhada à esquerda
   - ✅ `usesNewCertificateLayout` para rotear entre layout v2 e legado
-  - ✅ `planetario` e `smac` permanecem no layout legado até migração
+  - ✅ `planetario` migrado para layout v2; `smac` permanece no layout legado até migração
 - **v4.1** - Mapeamento por `orgao_id` (cd_ua) em vez de nome
   - ✅ Mapeamento de templates agora usa `orgao_id` diretamente (mais confiável)
   - ✅ Elimina necessidade de buscar nome do órgão para mapear template
