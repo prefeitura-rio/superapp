@@ -1,5 +1,5 @@
 /**
- * Gera PDFs de amostra dos 5 templates de certificado (layout v2).
+ * Gera PDFs de amostra dos templates de certificado (layout v2).
  *
  * Uso:
  *   npm run certificate:samples
@@ -23,6 +23,11 @@ const SAMPLE_ORGS: SampleOrg[] = [
     template: 'juvrio',
     orgao_id: '5300',
     issuingOrganization: 'Secretaria Especial da Juventude Carioca',
+  },
+  {
+    template: 'planetario',
+    orgao_id: '2641',
+    issuingOrganization: 'Fundação Planetário da Cidade do Rio de Janeiro',
   },
   {
     template: 'smpd',
