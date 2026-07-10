@@ -8,14 +8,14 @@ import { describe, expect, it } from 'vitest'
 describe('getCertificateTemplate', () => {
   it('mapeia órgãos para templates v2', () => {
     expect(getCertificateTemplate('5300')).toBe('juvrio')
+    expect(getCertificateTemplate('2641')).toBe('planetario')
     expect(getCertificateTemplate('4000')).toBe('smpd')
     expect(getCertificateTemplate('52451')).toBe('cvlsubtd')
     expect(getCertificateTemplate('1900')).toBe('sesrio')
     expect(getCertificateTemplate('4700')).toBe('spmrio')
   })
 
-  it('mantém planetario e smac no mapeamento legado', () => {
-    expect(getCertificateTemplate('2641')).toBe('planetario')
+  it('mantém smac no mapeamento legado', () => {
     expect(getCertificateTemplate('2400')).toBe('smac')
   })
 
@@ -43,14 +43,14 @@ describe('getTemplateUrl', () => {
 describe('usesNewCertificateLayout', () => {
   it('marca templates novos como layout v2', () => {
     expect(usesNewCertificateLayout('juvrio')).toBe(true)
+    expect(usesNewCertificateLayout('planetario')).toBe(true)
     expect(usesNewCertificateLayout('smpd')).toBe(true)
     expect(usesNewCertificateLayout('cvlsubtd')).toBe(true)
     expect(usesNewCertificateLayout('sesrio')).toBe(true)
     expect(usesNewCertificateLayout('spmrio')).toBe(true)
   })
 
-  it('mantém planetario e smac no layout legado', () => {
-    expect(usesNewCertificateLayout('planetario')).toBe(false)
+  it('mantém smac no layout legado', () => {
     expect(usesNewCertificateLayout('smac')).toBe(false)
   })
 })
