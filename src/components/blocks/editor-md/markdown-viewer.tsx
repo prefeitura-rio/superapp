@@ -27,7 +27,7 @@ export function MarkdownViewer({ content, className }: MarkdownViewerProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: false }),
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
