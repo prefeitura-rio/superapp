@@ -35,7 +35,7 @@ export async function registerPet(data: RegisterPetData): Promise<{
     })
 
     if (response.status === 201) {
-      revalidateTag(`user-info-${userInfo.cpf}`)
+      revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
       return { success: true }
     }
 

@@ -30,7 +30,7 @@ export async function updateUserFamilyIncome(familyIncome: string) {
       throw new Error(errorData?.error || 'Erro ao atualizar renda familiar')
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Renda familiar atualizada com sucesso.' }
   } catch (error: any) {

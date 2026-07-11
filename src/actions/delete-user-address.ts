@@ -34,7 +34,7 @@ export async function deleteUserAddress() {
       throw new Error(errorData?.error || 'Erro ao excluir endereço')
     }
 
-    revalidateTag(`user-info-${userAuthInfo.cpf}`)
+    revalidateTag(`user-info-${userAuthInfo.cpf}`, { expire: 0 })
     console.log('Address deleted successfully:', response.data)
     return { success: true, data: response.data }
   } catch (error: any) {

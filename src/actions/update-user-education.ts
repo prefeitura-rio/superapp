@@ -30,7 +30,7 @@ export async function updateUserEducation(education: string) {
       throw new Error(errorData?.error || 'Erro ao atualizar escolaridade')
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     revalidatePath('/servicos/trabalho/curriculo', 'page')
     return { success: true, message: 'Escolaridade atualizada com sucesso.' }

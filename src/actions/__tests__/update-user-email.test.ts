@@ -21,7 +21,9 @@ describe('updateUserEmail', () => {
         success: true,
         data: { message: 'Success' },
       })
-      expect(revalidateTag).toHaveBeenCalledWith('user-info-12345678901')
+      expect(revalidateTag).toHaveBeenCalledWith('user-info-12345678901', {
+        expire: 0,
+      })
     })
   })
 

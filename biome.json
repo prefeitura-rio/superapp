@@ -50,6 +50,7 @@
       ".next/**",
       "next.config.js",
       "next-env.d.ts",
+      "tsconfig.json",
       "node_modules/**",
       "package-lock.json",
       "**/*.js",

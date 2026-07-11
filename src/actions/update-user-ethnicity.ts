@@ -29,7 +29,7 @@ export async function updateUserEthnicity(race: string) {
       throw new Error(errorData?.error || 'Erro ao atualizar etnia')
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     return { success: true, message: 'Etnia atualizada com sucesso.' }
   } catch (error: any) {
     // If it's an API error response, throw it to be handled by the component

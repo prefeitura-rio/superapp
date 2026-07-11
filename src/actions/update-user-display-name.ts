@@ -32,7 +32,7 @@ export async function updateUserDisplayName(
       }
     }
 
-    revalidateTag(`user-info-${userAuthInfo.cpf}`)
+    revalidateTag(`user-info-${userAuthInfo.cpf}`, { expire: 0 })
     return { success: true, data: response.data }
   } catch (error: any) {
     // If it's an API error response, return it with error

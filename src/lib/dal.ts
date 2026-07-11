@@ -237,7 +237,7 @@ export async function revalidateDalCitizenCpfWallet(cpf: string) {
   // This would be called from a Server Action or API route
   // to invalidate cache when data changes
   // Example: after user updates their profile
-  revalidateTag(`wallet-${cpf}`)
+  revalidateTag(`wallet-${cpf}`, { expire: 0 })
 }
 
 // Helper function to revalidate user info when needed
@@ -245,7 +245,7 @@ export async function revalidateDalCitizenCpf(cpf: string) {
   // This would be called from a Server Action or API route
   // to invalidate cache when user info changes
   // Example: after user updates their profile
-  revalidateTag(`user-info-${cpf}`)
+  revalidateTag(`user-info-${cpf}`, { expire: 0 })
 }
 
 // Helper function to revalidate maintenance requests when needed
@@ -253,7 +253,7 @@ export async function revalidateDalCitizenCpfMaintenanceRequest(cpf: string) {
   // This would be called from a Server Action or API route
   // to invalidate cache when maintenance requests change
   // Example: after user creates a new maintenance request
-  revalidateTag(`maintenance-${cpf}`)
+  revalidateTag(`maintenance-${cpf}`, { expire: 0 })
 }
 
 // Helper function to revalidate first login status when needed
@@ -261,7 +261,7 @@ export async function revalidateDalCitizenCpfFirstlogin(cpf: string) {
   // This would be called from a Server Action or API route
   // to invalidate cache when first login status changes
   // Example: after user completes onboarding
-  revalidateTag(`firstlogin-${cpf}`)
+  revalidateTag(`firstlogin-${cpf}`, { expire: 0 })
 }
 
 // Helper function to revalidate course enrollment when needed
@@ -272,14 +272,14 @@ export async function revalidateDalCourseEnrollment(
   // This would be called from a Server Action or API route
   // to invalidate cache when enrollment status changes
   // Example: after user cancels or enrolls in a course
-  revalidateTag(`course-enrollment-${courseId}-${cpf}`)
+  revalidateTag(`course-enrollment-${courseId}-${cpf}`, { expire: 0 })
 }
 // Helper function to revalidate available avatars when needed
 export async function revalidateDalAvatars() {
   // This would be called from a Server Action or API route
   // to invalidate cache when avatar list changes
   // Example: after admin adds/removes avatars
-  revalidateTag('available-avatars')
+  revalidateTag('available-avatars', { expire: 0 })
 }
 
 // Helper function to revalidate user avatar when needed
@@ -287,7 +287,7 @@ export async function revalidateDalCitizenCpfAvatar(cpf: string) {
   // This would be called from a Server Action or API route
   // to invalidate cache when user avatar changes
   // Example: after user updates their avatar
-  revalidateTag(`user-avatar-${cpf}`)
+  revalidateTag(`user-avatar-${cpf}`, { expire: 0 })
 }
 
 // Categories caching (shared across all users)
@@ -336,7 +336,7 @@ export async function revalidateDalCategorias() {
   // This would be called from a Server Action or API route
   // to invalidate cache when categories change
   // Example: after admin adds/removes/updates categories
-  revalidateTag('course-categories')
+  revalidateTag('course-categories', { expire: 0 })
 }
 
 // Courses search caching (shared across all users, but with different filters)
@@ -384,7 +384,7 @@ export async function revalidateDalCourses() {
   // This would be called from a Server Action or API route
   // to invalidate cache when courses change
   // Example: after admin creates/updates/deletes courses
-  revalidateTag('courses')
+  revalidateTag('courses', { expire: 0 })
 }
 
 // Subcategories caching (shared across all users)
@@ -434,7 +434,7 @@ export async function revalidateDalCategoriesCategorySubcategories(
   // This would be called from a Server Action or API route
   // to invalidate cache when subcategories change
   // Example: after admin adds/removes/updates subcategories
-  revalidateTag(`subcategories-${category}`)
+  revalidateTag(`subcategories-${category}`, { expire: 0 })
 }
 
 // Services by subcategory caching (shared across all users, but with different pagination)
@@ -486,5 +486,5 @@ export async function revalidateDalSubcategoriesSubcategoryServices(
   // This would be called from a Server Action or API route
   // to invalidate cache when services change
   // Example: after admin creates/updates/deletes services
-  revalidateTag(`subcategory-services-${subcategory}`)
+  revalidateTag(`subcategory-services-${subcategory}`, { expire: 0 })
 }

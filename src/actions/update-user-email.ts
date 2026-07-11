@@ -27,7 +27,7 @@ export async function updateUserEmail(emailData: ModelsSelfDeclaredEmailInput) {
       }
     }
 
-    revalidateTag(`user-info-${userAuthInfo.cpf}`)
+    revalidateTag(`user-info-${userAuthInfo.cpf}`, { expire: 0 })
     // Revalidate MEI proposal pages that use citizen contact info
     revalidatePath('/servicos/mei', 'layout')
     return { success: true, data: response.data }

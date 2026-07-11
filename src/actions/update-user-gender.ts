@@ -29,7 +29,7 @@ export async function updateUserGender(gender: string) {
       throw new Error(errorData?.error || 'Erro ao atualizar gênero')
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Gênero atualizado com sucesso.' }
   } catch (error: any) {
