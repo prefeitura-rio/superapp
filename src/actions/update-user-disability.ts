@@ -30,7 +30,7 @@ export async function updateUserDisability(disability: string) {
       throw new Error(errorData?.error || 'Erro ao atualizar deficiência')
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`)
+    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     revalidatePath('/servicos/cursos/confirmar-informacoes', 'page')
     return { success: true, message: 'Deficiência atualizada com sucesso.' }
   } catch (error: any) {

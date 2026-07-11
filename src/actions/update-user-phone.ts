@@ -26,7 +26,7 @@ export async function updateUserPhone(data: ModelsSelfDeclaredPhoneInput) {
       }
     }
 
-    revalidateTag(`user-info-${user.cpf}`)
+    revalidateTag(`user-info-${user.cpf}`, { expire: 0 })
     // Revalidate MEI proposal pages that use citizen contact info
     revalidatePath('/servicos/mei', 'layout')
     return { success: true, data: response.data }

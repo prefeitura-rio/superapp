@@ -22,7 +22,7 @@ export async function updateOptInStatus(optin: boolean) {
       )
     }
 
-    revalidateTag('user-authorizations')
+    revalidateTag('user-authorizations', { expire: 0 })
     return { success: true }
   } catch (error: any) {
     // If it's an API error response, throw it to be handled by the component
