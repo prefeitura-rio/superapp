@@ -3,6 +3,7 @@ import {
   getApiV1EmpregabilidadeCurriculoCpfConquistas,
   getApiV1EmpregabilidadeCurriculoCpfExperiencias,
 } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
+import type { EmpregabilidadeCurriculoCompleto } from '@/http-courses/models'
 import { convertMonthsToYearsAndMonths } from '@/lib/experiencia-utils'
 import type { CurriculoExperienciaFormValues } from './curriculo-experiencia-schema'
 
@@ -44,13 +45,6 @@ function parseConquistasArray(
     titulo: String(item.titulo ?? ''),
     descricao: String(item.descricao ?? ''),
   }))
-}
-
-function parseResumoProfissional(data: unknown): string {
-  if (!data || typeof data !== 'object') return ''
-  const value = (data as { resumo_profissional?: string | null })
-    .resumo_profissional
-  return typeof value === 'string' ? value : ''
 }
 
 const emptyExperienciaValues = (): CurriculoExperienciaFormValues => ({
@@ -96,12 +90,12 @@ export async function getCurriculoExperienciaData(
     conquistasRes.status === 200 && conquistasRes.data
       ? ((conquistasRes.data as { data?: unknown }).data ?? conquistasRes.data)
       : null
-  const curriculoBody =
+  const curriculoBody: EmpregabilidadeCurriculoCompleto | null =
     curriculoRes.status === 200 && curriculoRes.data ? curriculoRes.data : null
 
   const empregos = parseExperienciasArray(experienciasBody)
   const conquistas = parseConquistasArray(conquistasBody)
-  const resumoProfissional = parseResumoProfissional(curriculoBody)
+  const resumoProfissional = curriculoBody?.resumo_profissional ?? ''
 
   return {
     empregos:

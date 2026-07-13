@@ -18,5 +18,6 @@ export interface EmpregabilidadeCurriculoCompleto {
   experiencias?: EmpregabilidadeCurriculoExperiencia[]
   formacoes?: EmpregabilidadeCurriculoFormacao[]
   idiomas?: EmpregabilidadeCurriculoIdioma[]
+  resumo_profissional?: string
   situacao_interesses?: EmpregabilidadeCurriculoSituacaoInteresses
 }

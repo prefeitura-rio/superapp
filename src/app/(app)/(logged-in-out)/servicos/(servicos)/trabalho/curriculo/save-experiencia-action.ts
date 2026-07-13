@@ -64,12 +64,10 @@ export async function saveExperienciaAction(
 ): Promise<{ success: boolean; status?: number; error?: string }> {
   try {
     const normalizedCpf = cpf.replace(/\D/g, '')
-    const payload = {
+    const payload: EmpregabilidadeExperienciaProfissionalAccordionRequest = {
       experiencias: buildExperiencias(formValues.empregos),
       conquistas: buildConquistas(formValues.conquistas),
-      resumo_profissional: formValues.resumoProfissional?.trim() || null,
-    } as EmpregabilidadeExperienciaProfissionalAccordionRequest & {
-      resumo_profissional?: string | null
+      resumo_profissional: formValues.resumoProfissional?.trim() || undefined,
     }
     const response = await putApiV1EmpregabilidadeCurriculoCpfExperiencias(
       normalizedCpf,
