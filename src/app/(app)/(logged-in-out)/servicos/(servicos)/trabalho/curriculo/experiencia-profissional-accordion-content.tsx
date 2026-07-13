@@ -280,6 +280,7 @@ function ExperienciaProfissionalAccordionContentInner({
               <AiImproveTextarea
                 {...register(`empregos.${index}.descricaoAtividades`)}
                 showAiImprove
+                aiContext="experiencia-atividades"
                 minCharsForAi={30}
                 id={`emprego-${index}-descricao`}
                 placeholder="Atividades realizadas"
