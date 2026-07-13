@@ -48,9 +48,9 @@ const iconVariantStyles = {
 } as const
 
 const sizeStyles = {
-  sm: 'h-12 px-3 text-sm',
-  md: 'h-16 px-3',
-  lg: 'h-18 px-4 text-lg',
+  sm: 'h-12 px-5 text-sm',
+  md: 'h-16 px-5',
+  lg: 'h-18 px-5 text-lg',
 } as const
 
 export const ActionDiv = forwardRef<HTMLDivElement, ActionDivProps>(
