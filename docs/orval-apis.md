@@ -136,7 +136,7 @@
       formatter: 'biome',
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.NEXT_PUBLIC_AGENT_API_BASE_URL,
+      baseUrl: process.env.AGENT_API_BASE_URL,
       override: {
         mutator: {
           path: './custom-fetch-agent-api.ts',

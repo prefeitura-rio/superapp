@@ -198,7 +198,7 @@ Cliente Orval gerado a partir do OpenAPI do [superapp-agent-api](https://github.
 | -------- | -------------------------------------------------------- |
 | Endpoint | `POST /chat/message`                                     |
 | Função   | `sendMessage(chatRequest)`                               |
-| Base URL | `NEXT_PUBLIC_AGENT_API_BASE_URL`                         |
+| Base URL | `AGENT_API_BASE_URL` (server-only)                       |
 | Auth     | `Authorization: Bearer <access_token>` (cookie Keycloak) |
 
 
@@ -306,7 +306,7 @@ Opcionalmente, passar `onImprove` para um fluxo customizado sem usar a Server Ac
 
 | Variável                         | Obrigatória | Descrição                                                                |
 | -------------------------------- | ----------- | ------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_AGENT_API_BASE_URL` | Sim         | Base URL da agent-api (ex.: staging/produção ou `http://localhost:8000`) |
+| `AGENT_API_BASE_URL` | Sim         | Base URL da agent-api (server-only; não usar `NEXT_PUBLIC_`). Ex.: staging/produção ou `http://localhost:8000` |
 
 
 Sem essa variável, `customFetchAgentApi` lança erro ao montar a URL.
@@ -314,7 +314,7 @@ Sem essa variável, `customFetchAgentApi` lança erro ao montar a URL.
 ## Checklist de debug
 
 - Botão nunca habilita → conferir contagem sem whitespace (≥ 30) e `showAiImprove` / `aiContext`
-- Toast de erro imediato → `NEXT_PUBLIC_AGENT_API_BASE_URL`, cookie `access_token`, status da agent-api (502/422)
+- Toast de erro imediato → `AGENT_API_BASE_URL`, cookie `access_token`, status da agent-api (502/422)
 - Texto não atualiza no formulário → `syncValue` / `register` do RHF; garantir que o textarea permanece montado no loading
 - Build “Server Actions must be async functions” → não exportar funções/objetos síncronos do arquivo `'use server'` (prompts devem ser internos)
 
