@@ -6,7 +6,6 @@ import { AiImproveTextarea } from '@/components/ui/custom/ai-improve-textarea'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { ChevronDownIcon, Trash2 } from 'lucide-react'
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
@@ -498,8 +497,11 @@ function ExperienciaProfissionalAccordionContentInner({
               >
                 Descrição
               </label>
-              <Textarea
+              <AiImproveTextarea
                 {...register(`conquistas.${index}.descricao`)}
+                showAiImprove
+                aiContext="conquista-descricao"
+                minCharsForAi={30}
                 id={`conquista-${index}-descricao`}
                 placeholder="Escreva a descrição"
                 maxLength={2000}

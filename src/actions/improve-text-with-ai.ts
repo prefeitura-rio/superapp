@@ -2,7 +2,7 @@
 
 import { sendMessage } from '@/http-agent-api/chat/chat'
 
-export type AiImproveContext = 'experiencia-atividades'
+export type AiImproveContext = 'experiencia-atividades' | 'conquista-descricao'
 
 const MIN_NON_WHITESPACE_CHARS = 30
 
@@ -16,6 +16,20 @@ Regras obrigatórias:
 - Corrija problemas de escrita.
 - Evite informações genéricas ou redundantes.
 - Permaneça fiel às informações fornecidas; NÃO invente experiências, atribuições ou competências.
+
+Retorne apenas o texto melhorado, sem prefácios ou explicações.
+
+Texto original:
+${text}`,
+  'conquista-descricao': text =>
+    `Melhore o texto abaixo de descrição de conquista, certificado, curso ou trabalho voluntário de um currículo.
+
+Regras obrigatórias:
+- Priorize clareza e objetividade; use tópicos (bullet points) quando fizer sentido.
+- Destaque competências, aprendizados e reconhecimentos relevantes para recrutadores e sistemas ATS.
+- Corrija problemas de escrita.
+- Evite informações genéricas ou redundantes.
+- Permaneça fiel às informações fornecidas; NÃO invente conquistas, certificados, cursos ou competências.
 
 Retorne apenas o texto melhorado, sem prefácios ou explicações.
 

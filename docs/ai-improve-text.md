@@ -12,6 +12,7 @@ Após a melhoria, o botão passa a **Voltar ao original**, permitindo reverter a
 | Campo                    | Página                               | `aiContext`              |
 | ------------------------ | ------------------------------------ | ------------------------ |
 | Descrição das atividades | Experiência profissional (currículo) | `experiencia-atividades` |
+| Descrição                | Conquista/certificado (currículo)    | `conquista-descricao`    |
 
 
 
@@ -170,7 +171,7 @@ Arquivo: `[src/actions/improve-text-with-ai.ts](../src/actions/improve-text-with
 ```ts
 improveTextWithAiAction({
   text: string
-  context: AiImproveContext  // hoje: 'experiencia-atividades'
+  context: AiImproveContext  // 'experiencia-atividades' | 'conquista-descricao'
 }): Promise<
   | { success: true; text: string }
   | { success: false }
