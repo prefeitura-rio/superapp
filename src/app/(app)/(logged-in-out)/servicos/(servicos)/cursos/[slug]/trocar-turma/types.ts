@@ -7,12 +7,6 @@ export type {
   SlideData,
 } from '../../confirmar-informacoes/types'
 
-// Schema for change schedule form
-export const changeScheduleSchema = z.object({
-  newUnitId: z.string().optional(),
-  newScheduleId: z.string().min(1, 'Selecione uma turma'),
-})
-
 // Dynamic schema that makes newUnitId required when there are multiple units
 export const createChangeScheduleSchema = (hasMultipleUnits: boolean) => {
   return z.object({
@@ -23,7 +17,9 @@ export const createChangeScheduleSchema = (hasMultipleUnits: boolean) => {
   })
 }
 
-export type ChangeScheduleFormData = z.infer<typeof changeScheduleSchema>
+export type ChangeScheduleFormData = z.infer<
+  ReturnType<typeof createChangeScheduleSchema>
+>
 
 // Structure for future API request
 export interface ChangeScheduleRequestData {

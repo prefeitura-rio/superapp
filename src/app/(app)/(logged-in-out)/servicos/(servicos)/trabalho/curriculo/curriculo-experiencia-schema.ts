@@ -20,13 +20,13 @@ const empregoItemSchema = z
       .refine(val => !val || val.length >= 30, 'Mínimo de 30 caracteres')
       .refine(val => !val || val.length <= 2000, 'Máximo de 1500 caracteres'),
     tempoExperienciaAnos: z
-      .number({ invalid_type_error: 'Informe os anos' })
+      .number({ error: 'Informe os anos' })
       .min(0, 'Não pode ser negativo')
       .max(50, 'Máximo de 50 anos')
       .optional()
       .nullable(),
     tempoExperienciaMeses: z
-      .number({ invalid_type_error: 'Informe os meses' })
+      .number({ error: 'Informe os meses' })
       .min(0, 'Não pode ser negativo')
       .max(11, 'Máximo de 11 meses')
       .optional()
