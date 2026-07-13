@@ -296,13 +296,9 @@ function ExperienciaProfissionalAccordionContentInner({
               {!errors.empregos?.[index]?.descricaoAtividades && (
                 <div className={HINT_CLASS}>
                   <p>Exemplo:</p>
-                  <ul className="list-none">
+                  <ul className="list-disc pl-5">
                     <li>Atendimento ao público</li>
                     <li>Organização de estoque</li>
-                    <li>Preparo de alimentos</li>
-                    <li>Limpeza de ambientes</li>
-                    <li>Emissão de notas fiscais</li>
-                    <li>Entre outros</li>
                   </ul>
                 </div>
               )}
