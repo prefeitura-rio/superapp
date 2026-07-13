@@ -2,6 +2,7 @@
 
 import { ActionDiv } from '@/app/components/action-div'
 import { Checkbox } from '@/components/ui/checkbox'
+import { AiImproveTextarea } from '@/components/ui/custom/ai-improve-textarea'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
@@ -276,8 +277,11 @@ function ExperienciaProfissionalAccordionContentInner({
               >
                 Descrição das atividades
               </label>
-              <Textarea
+              <AiImproveTextarea
                 {...register(`empregos.${index}.descricaoAtividades`)}
+                showAiImprove
+                aiContext="experiencia-atividades"
+                minCharsForAi={30}
                 id={`emprego-${index}-descricao`}
                 placeholder="Atividades realizadas"
                 maxLength={2000}
@@ -290,11 +294,17 @@ function ExperienciaProfissionalAccordionContentInner({
                 </p>
               )}
               {!errors.empregos?.[index]?.descricaoAtividades && (
-                <p className={HINT_CLASS}>
-                  Exemplo: atendimento ao público, organização de estoque,
-                  preparo de alimentos, limpeza de ambientes, emissão de notas
-                  fiscais, entre outros
-                </p>
+                <div className={HINT_CLASS}>
+                  <p>Exemplo:</p>
+                  <ul className="list-none">
+                    <li>Atendimento ao público</li>
+                    <li>Organização de estoque</li>
+                    <li>Preparo de alimentos</li>
+                    <li>Limpeza de ambientes</li>
+                    <li>Emissão de notas fiscais</li>
+                    <li>Entre outros</li>
+                  </ul>
+                </div>
               )}
             </div>
 
@@ -433,11 +443,9 @@ function ExperienciaProfissionalAccordionContentInner({
           Adicionar outro emprego
         </CustomButton>
       </div>
-
       <div className="py-1 pt-3">
         <Separator className="h-0.5 bg-border" />
       </div>
-
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">
           Conquistas ou certificados
@@ -538,11 +546,13 @@ function ExperienciaProfissionalAccordionContentInner({
           Adicionar outra conquista ou certificado
         </CustomButton>
       </div>
-
       <div className="py-1">
         <Separator className="h-0.5 bg-border" />
       </div>
-
+      {/* //Novo campo de Resumo profissional */}
+      <div className="py-1">
+        <Separator className="h-0.5 bg-border" />
+      </div>
       <div className="flex gap-3">
         <CustomButton
           type="button"
