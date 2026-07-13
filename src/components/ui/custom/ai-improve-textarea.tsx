@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import {
   type ChangeEvent,
+  type ReactNode,
   forwardRef,
   useCallback,
   useEffect,
@@ -24,7 +25,13 @@ interface AiImproveTextareaProps extends React.ComponentProps<'textarea'> {
   showAiImprove?: boolean
   minCharsForAi?: number
   aiContext?: AiImproveContext
-  onImprove?: (text: string) => Promise<string> | string
+  onImprove?: (text: string) => Promise<string | null> | string | null
+  improveLabel?: string
+  generateLabel?: string
+  canGenerate?: boolean
+  generateBlockedMessage?: string
+  onGenerate?: () => Promise<string | null> | string | null
+  hint?: ReactNode
 }
 
 function countNonWhitespaceChars(text: string): number {
@@ -42,6 +49,12 @@ export const AiImproveTextarea = forwardRef<
     minCharsForAi = 30,
     aiContext,
     onImprove,
+    improveLabel = 'Melhorar com IA',
+    generateLabel,
+    canGenerate = false,
+    generateBlockedMessage,
+    onGenerate,
+    hint,
     onChange,
     value,
     defaultValue,
@@ -71,7 +84,13 @@ export const AiImproveTextarea = forwardRef<
 
   const currentText = value !== undefined ? String(value) : internalValue
   const hasImproved = originalText !== null
-  const isReady = countNonWhitespaceChars(currentText) >= minCharsForAi
+  const hasMinChars = countNonWhitespaceChars(currentText) >= minCharsForAi
+  const supportsGenerate = Boolean(generateLabel)
+  const isGenerateMode = supportsGenerate && !hasMinChars && !hasImproved
+  const isBlocked = supportsGenerate && !canGenerate && !hasImproved
+  const isReady = supportsGenerate
+    ? canGenerate && (isGenerateMode || hasMinChars)
+    : hasMinChars
 
   const syncValue = useCallback(
     (next: string) => {
@@ -99,8 +118,31 @@ export const AiImproveTextarea = forwardRef<
     return result.text
   }
 
-  async function handleImproveClick() {
-    if (!isReady || hasImproved || isImproving || disabled) return
+  async function handleAiClick() {
+    if (hasImproved || isImproving || disabled) return
+
+    if (isGenerateMode) {
+      if (!canGenerate || !onGenerate) return
+
+      setIsImproving(true)
+      try {
+        const generated = await onGenerate()
+        if (!generated) {
+          toast.error('Ops... tente novamente mais tarde.')
+          return
+        }
+        setOriginalText(currentText)
+        syncValue(generated)
+      } catch {
+        toast.error('Ops... tente novamente mais tarde.')
+      } finally {
+        setIsImproving(false)
+      }
+      return
+    }
+
+    if (!hasMinChars) return
+    if (supportsGenerate && !canGenerate) return
     if (!onImprove && !aiContext) return
 
     setIsImproving(true)
@@ -144,58 +186,68 @@ export const AiImproveTextarea = forwardRef<
     )
   }
 
-  return (
-    <div
-      aria-invalid={!!error}
-      className={cn(
-        'flex w-full min-h-16 flex-col gap-2 px-5 py-4 transition-[color,box-shadow,border-color]',
-        className
-      )}
-    >
-      {isImproving && (
-        <div
-          className="flex min-h-24 flex-1 flex-col gap-2"
-          aria-busy
-          aria-label="Melhorando texto com IA"
-        >
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-[90%]" />
-          <Skeleton className="h-4 w-[76%]" />
-          <Skeleton className="h-4 w-[82%]" />
-        </div>
-      )}
-      <Textarea
-        ref={textareaRef}
-        error={error}
-        disabled={disabled || isImproving}
-        value={value}
-        defaultValue={defaultValue}
-        onChange={handleChange}
-        className={cn(
-          'min-h-0 flex-1 resize-none border-0 bg-transparent p-0 text-sm! shadow-none dark:bg-transparent',
-          'placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground!',
-          'focus-visible:border-transparent',
-          isImproving && 'hidden'
-        )}
-        {...props}
-      />
+  const footerMessage = isBlocked ? generateBlockedMessage : hint
 
-      <div className="flex items-center">
-        {hasImproved ? (
-          <AiImproveButton
-            mode="revert"
-            disabled={disabled}
-            onClick={handleRevertClick}
-          />
-        ) : (
-          <AiImproveButton
-            mode="improve"
-            isReady={isReady}
-            disabled={disabled || isImproving}
-            onClick={handleImproveClick}
-          />
+  return (
+    <div className="space-y-2">
+      <div
+        aria-invalid={!!error}
+        className={cn(
+          'flex w-full min-h-16 flex-col gap-2 px-5 py-4 transition-[color,box-shadow,border-color]',
+          className
         )}
+      >
+        {isImproving && (
+          <div
+            className="flex min-h-24 flex-1 flex-col gap-2"
+            aria-busy
+            aria-label="Melhorando texto com IA"
+          >
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-[90%]" />
+            <Skeleton className="h-4 w-[76%]" />
+            <Skeleton className="h-4 w-[82%]" />
+          </div>
+        )}
+        <Textarea
+          ref={textareaRef}
+          error={error}
+          disabled={disabled || isImproving}
+          value={value}
+          defaultValue={defaultValue}
+          onChange={handleChange}
+          className={cn(
+            'min-h-0 flex-1 resize-none border-0 bg-transparent p-0 text-sm! shadow-none dark:bg-transparent',
+            'placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground!',
+            'focus-visible:border-transparent',
+            isImproving && 'hidden'
+          )}
+          {...props}
+        />
+
+        <div className="flex items-center">
+          {hasImproved ? (
+            <AiImproveButton
+              mode="revert"
+              disabled={disabled}
+              onClick={handleRevertClick}
+            />
+          ) : (
+            <AiImproveButton
+              mode="improve"
+              label={isGenerateMode ? generateLabel : improveLabel}
+              isReady={isReady}
+              disabled={disabled || isImproving}
+              onClick={handleAiClick}
+            />
+          )}
+        </div>
       </div>
+      {footerMessage && (
+        <p className="text-muted-foreground text-sm leading-5 font-normal">
+          {footerMessage}
+        </p>
+      )}
     </div>
   )
 })

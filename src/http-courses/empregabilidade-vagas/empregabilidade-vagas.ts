@@ -9,7 +9,9 @@ import type {
   DeleteApiV1EmpregabilidadeVagasId200,
   DeleteApiV1EmpregabilidadeVagasId400,
   DeleteApiV1EmpregabilidadeVagasId500,
+  EmpregabilidadeUpdateIdiomasRequisitoRequest,
   EmpregabilidadeUpdateTiposPCDRequest,
+  EmpregabilidadeUpdateZonasRequest,
   EmpregabilidadeVaga,
   GetApiV1EmpregabilidadeVagas200,
   GetApiV1EmpregabilidadeVagas400,
@@ -34,6 +36,9 @@ import type {
   PutApiV1EmpregabilidadeVagasIdFreeze404,
   PutApiV1EmpregabilidadeVagasIdFreeze409,
   PutApiV1EmpregabilidadeVagasIdFreeze500,
+  PutApiV1EmpregabilidadeVagasIdIdiomasRequisito200,
+  PutApiV1EmpregabilidadeVagasIdIdiomasRequisito400,
+  PutApiV1EmpregabilidadeVagasIdIdiomasRequisito500,
   PutApiV1EmpregabilidadeVagasIdPublish200,
   PutApiV1EmpregabilidadeVagasIdPublish400,
   PutApiV1EmpregabilidadeVagasIdPublish404,
@@ -62,6 +67,9 @@ import type {
   PutApiV1EmpregabilidadeVagasIdUnfreeze404,
   PutApiV1EmpregabilidadeVagasIdUnfreeze409,
   PutApiV1EmpregabilidadeVagasIdUnfreeze500,
+  PutApiV1EmpregabilidadeVagasIdZonas200,
+  PutApiV1EmpregabilidadeVagasIdZonas400,
+  PutApiV1EmpregabilidadeVagasIdZonas500,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch-course'
@@ -473,6 +481,62 @@ export const putApiV1EmpregabilidadeVagasIdFreeze = async (
 }
 
 /**
+ * Atualiza os idiomas e níveis mínimos exigidos como critério de elegibilidade da vaga
+ * @summary Atualizar requisitos de idioma da vaga
+ */
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse200 = {
+  data: PutApiV1EmpregabilidadeVagasIdIdiomasRequisito200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse400 = {
+  data: PutApiV1EmpregabilidadeVagasIdIdiomasRequisito400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse500 = {
+  data: PutApiV1EmpregabilidadeVagasIdIdiomasRequisito500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponseSuccess =
+  putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse200 & {
+    headers: Headers
+  }
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponseError = (
+  | putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse400
+  | putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse500
+) & {
+  headers: Headers
+}
+
+export type putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse =
+  | putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponseSuccess
+  | putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponseError
+
+export const getPutApiV1EmpregabilidadeVagasIdIdiomasRequisitoUrl = (
+  id: string
+) => {
+  return `/api/v1/empregabilidade/vagas/${id}/idiomas-requisito`
+}
+
+export const putApiV1EmpregabilidadeVagasIdIdiomasRequisito = async (
+  id: string,
+  empregabilidadeUpdateIdiomasRequisitoRequest: EmpregabilidadeUpdateIdiomasRequisitoRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse> => {
+  return customFetch<putApiV1EmpregabilidadeVagasIdIdiomasRequisitoResponse>(
+    getPutApiV1EmpregabilidadeVagasIdIdiomasRequisitoUrl(id),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeUpdateIdiomasRequisitoRequest),
+    }
+  )
+}
+
+/**
  * Publica uma vaga em edição
  * @summary Publicar vaga
  */
@@ -839,6 +903,60 @@ export const putApiV1EmpregabilidadeVagasIdUnfreeze = async (
     {
       ...options,
       method: 'PUT',
+    }
+  )
+}
+
+/**
+ * Atualiza as zonas geográficas de elegibilidade da vaga
+ * @summary Atualizar zonas de elegibilidade da vaga
+ */
+export type putApiV1EmpregabilidadeVagasIdZonasResponse200 = {
+  data: PutApiV1EmpregabilidadeVagasIdZonas200
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeVagasIdZonasResponse400 = {
+  data: PutApiV1EmpregabilidadeVagasIdZonas400
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeVagasIdZonasResponse500 = {
+  data: PutApiV1EmpregabilidadeVagasIdZonas500
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeVagasIdZonasResponseSuccess =
+  putApiV1EmpregabilidadeVagasIdZonasResponse200 & {
+    headers: Headers
+  }
+export type putApiV1EmpregabilidadeVagasIdZonasResponseError = (
+  | putApiV1EmpregabilidadeVagasIdZonasResponse400
+  | putApiV1EmpregabilidadeVagasIdZonasResponse500
+) & {
+  headers: Headers
+}
+
+export type putApiV1EmpregabilidadeVagasIdZonasResponse =
+  | putApiV1EmpregabilidadeVagasIdZonasResponseSuccess
+  | putApiV1EmpregabilidadeVagasIdZonasResponseError
+
+export const getPutApiV1EmpregabilidadeVagasIdZonasUrl = (id: string) => {
+  return `/api/v1/empregabilidade/vagas/${id}/zonas`
+}
+
+export const putApiV1EmpregabilidadeVagasIdZonas = async (
+  id: string,
+  empregabilidadeUpdateZonasRequest: EmpregabilidadeUpdateZonasRequest,
+  options?: RequestInit
+): Promise<putApiV1EmpregabilidadeVagasIdZonasResponse> => {
+  return customFetch<putApiV1EmpregabilidadeVagasIdZonasResponse>(
+    getPutApiV1EmpregabilidadeVagasIdZonasUrl(id),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(empregabilidadeUpdateZonasRequest),
     }
   )
 }

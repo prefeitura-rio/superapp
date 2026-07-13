@@ -234,6 +234,7 @@ const defaultExperienciaValues: CurriculoExperienciaFormValues = {
     },
   ],
   conquistas: [{ idTipoConquista: '', titulo: '', descricao: '' }],
+  resumoProfissional: '',
 }
 
 const FORMACAO_FIELD_NAMES = [
@@ -1416,6 +1417,7 @@ export function CurriculoContent({
         (initialExperiencia?.conquistas?.length ?? 0) > 0
           ? initialExperiencia!.conquistas
           : defaultExperienciaValues.conquistas,
+      resumoProfissional: initialExperiencia?.resumoProfissional ?? '',
       ...defaultSituacaoFormValues,
       termosAceitos: initialTermosAceitos ?? false,
     },
@@ -1550,6 +1552,7 @@ export function CurriculoContent({
         ...currentFormValues,
         empregos: valuesToRestore.empregos,
         conquistas: valuesToRestore.conquistas,
+        resumoProfissional: valuesToRestore.resumoProfissional ?? '',
       },
       { keepDefaultValues: false }
     )

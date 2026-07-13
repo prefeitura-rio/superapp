@@ -10,5 +10,6 @@ export interface EmpregabilidadeEscolaridade {
   created_at?: string
   descricao?: string
   id?: string
+  ordem?: number
   updated_at?: string
 }

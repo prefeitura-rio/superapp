@@ -9,9 +9,11 @@ Após a melhoria, o botão passa a **Voltar ao original**, permitindo reverter a
 ### Uso atual
 
 
-| Campo                    | Página                               | `aiContext`              |
-| ------------------------ | ------------------------------------ | ------------------------ |
-| Descrição das atividades | Experiência profissional (currículo) | `experiencia-atividades` |
+| Campo                    | Página                               | Contexto / action                         |
+| ------------------------ | ------------------------------------ | ----------------------------------------- |
+| Descrição das atividades | Experiência profissional (currículo) | `aiContext="experiencia-atividades"`      |
+| Descrição                | Conquista/certificado (currículo)    | `aiContext="conquista-descricao"`         |
+| Resumo profissional      | Experiência profissional (currículo) | `improveResumoProfissionalAction` (gerar/melhorar) |
 
 
 
@@ -126,13 +128,19 @@ Componente client (`'use client'`) que encapsula o textarea, o botão e o ciclo 
 **Props principais:**
 
 
-| Prop            | Default | Descrição                                                                                       |
-| --------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `showAiImprove` | `false` | Se `false`, renderiza um `Textarea` comum                                                       |
-| `aiContext`     | —       | Contexto da Server Action (ex.: `experiencia-atividades`). Necessário se não houver `onImprove` |
-| `minCharsForAi` | `30`    | Mínimo de caracteres **não vazios** (espaços e quebras ignorados)                               |
-| `onImprove`     | —       | Override opcional; se presente, não chama a Server Action padrão                                |
-| `error`         | —       | Mensagem de erro do formulário (ex.: Zod)                                                       |
+| Prop                     | Default              | Descrição                                                                                       |
+| ------------------------ | -------------------- | ----------------------------------------------------------------------------------------------- |
+| `showAiImprove`          | `false`              | Se `false`, renderiza um `Textarea` comum                                                       |
+| `aiContext`              | —                    | Contexto da Server Action (ex.: `experiencia-atividades`). Necessário se não houver `onImprove` |
+| `minCharsForAi`          | `30`                 | Mínimo de caracteres **não vazios** (espaços e quebras ignorados) para modo melhorar            |
+| `onImprove`              | —                    | Override opcional; se presente, não chama a Server Action padrão                                |
+| `improveLabel`           | `Melhorar com IA`    | Label do botão no modo melhorar                                                                 |
+| `generateLabel`          | —                    | Se definido, habilita modo **Gerar** quando o texto tem menos de `minCharsForAi` chars          |
+| `canGenerate`            | `false`              | Gate do modo gerar/melhorar quando `generateLabel` está presente                                |
+| `generateBlockedMessage` | —                    | Mensagem exibida quando `generateLabel` está presente e `canGenerate` é `false`                 |
+| `onGenerate`             | —                    | Callback do modo gerar (ex.: resumo a partir de empregos/conquistas)                            |
+| `hint`                   | —                    | Dica abaixo do campo (substituída pela mensagem de bloqueio quando aplicável)                   |
+| `error`                  | —                    | Mensagem de erro do formulário (ex.: Zod)                                                       |
 
 
 **Exemplo de uso (currículo):**
@@ -155,11 +163,13 @@ Componente client (`'use client'`) que encapsula o textarea, o botão e o ciclo 
 Dois modos:
 
 
-| `mode`    | Label              | Habilitação                         |
-| --------- | ------------------ | ----------------------------------- |
-| `improve` | Melhorar com IA    | `isReady === true` e não `disabled` |
-| `revert`  | Voltar ao original | não `disabled`                      |
+| `mode`    | Label                         | Habilitação                         |
+| --------- | ----------------------------- | ----------------------------------- |
+| `improve` | `label` ou Melhorar com IA    | `isReady === true` e não `disabled` |
+| `revert`  | Voltar ao original            | não `disabled`                      |
 
+
+Prop `label` (opcional) customiza o texto no modo improve (ex.: `"Gerar resumo com IA"`).
 
 No modo `improve` sem `isReady`, o botão fica desabilitado com estilo “idle” (muted, sem fade agressivo).
 
@@ -170,13 +180,40 @@ Arquivo: `[src/actions/improve-text-with-ai.ts](../src/actions/improve-text-with
 ```ts
 improveTextWithAiAction({
   text: string
-  context: AiImproveContext  // hoje: 'experiencia-atividades'
+  context: AiImproveContext  // 'experiencia-atividades' | 'conquista-descricao'
 }): Promise<
   | { success: true; text: string }
   | { success: false }
 >
 ```
 
+### 3b. Server Action — `improveResumoProfissionalAction`
+
+Usada pelo campo Resumo profissional (gerar a partir dos dados da seção ou melhorar texto existente):
+
+```ts
+improveResumoProfissionalAction({
+  mode: 'generate' | 'improve'
+  text?: string
+  source: {
+    empregos: Array<{ cargo?, empresa?, descricaoAtividades?, ... }>
+    conquistas: Array<{ titulo?, descricao? }>
+  }
+}): Promise<
+  | { success: true; text: string }
+  | { success: false }
+>
+```
+
+- **generate:** monta o resumo só com o `source` (exige ao menos um emprego com cargo/empresa/atividades); não exige texto no campo.
+- **improve:** exige ≥ 30 chars no texto + usa o `source` para manter alinhamento; não inventa experiências.
+
+UX do Resumo profissional:
+
+- Sem emprego completo → botão desabilitado + mensagem de bloqueio
+- Texto &lt; 30 chars → CTA **Gerar resumo com IA**
+- Texto ≥ 30 chars → CTA **Melhorar com IA**
+- Após sucesso → **Voltar ao original**
 Comportamento:
 
 1. Faz `trim` do texto e valida ≥ 30 caracteres sem whitespace.

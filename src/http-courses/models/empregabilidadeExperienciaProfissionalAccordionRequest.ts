@@ -11,4 +11,5 @@ import type { EmpregabilidadeCurriculoExperiencia } from './empregabilidadeCurri
 export interface EmpregabilidadeExperienciaProfissionalAccordionRequest {
   conquistas?: EmpregabilidadeCurriculoConquista[]
   experiencias?: EmpregabilidadeCurriculoExperiencia[]
+  resumo_profissional?: string
 }
