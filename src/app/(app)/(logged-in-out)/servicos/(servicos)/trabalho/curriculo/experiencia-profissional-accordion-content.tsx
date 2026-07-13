@@ -1,5 +1,6 @@
 'use client'
 
+import { improveResumoProfissionalAction } from '@/actions/improve-text-with-ai'
 import { ActionDiv } from '@/app/components/action-div'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AiImproveTextarea } from '@/components/ui/custom/ai-improve-textarea'
@@ -26,8 +27,16 @@ import {
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
-const EXPERIENCIA_ERROR_PATHS = ['empregos', 'conquistas'] as const
-const EXPERIENCIA_FIELD_NAMES = ['empregos', 'conquistas'] as const
+const EXPERIENCIA_ERROR_PATHS = [
+  'empregos',
+  'conquistas',
+  'resumoProfissional',
+] as const
+const EXPERIENCIA_FIELD_NAMES = [
+  'empregos',
+  'conquistas',
+  'resumoProfissional',
+] as const
 
 function hasNestedErrors(obj: unknown): boolean {
   if (!obj) return false
@@ -547,7 +556,64 @@ function ExperienciaProfissionalAccordionContentInner({
       <div className="py-1">
         <Separator className="h-0.5 bg-border" />
       </div>
-      {/* //Novo campo de Resumo profissional */}
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="resumo-profissional"
+            className={cn(
+              'text-sm font-normal block',
+              errors.resumoProfissional ? 'text-destructive' : 'text-primary'
+            )}
+          >
+            Resumo profissional
+          </label>
+          <AiImproveTextarea
+            {...register('resumoProfissional')}
+            showAiImprove
+            improveLabel="Melhorar com IA"
+            generateLabel="Gerar resumo com IA"
+            canGenerate={formValues.empregos.some(isEmpregoComplete)}
+            generateBlockedMessage="Adicione pelo menos uma experiência profissional para gerar um resumo com IA"
+            hint="Dica: Use nossa inteligência artificial para escrever seu resumo profissional com base nas informações fornecidas"
+            minCharsForAi={30}
+            id="resumo-profissional"
+            placeholder="Faça um breve resumo, se apresentando e descrevendo sua atuação profissional. "
+            maxLength={2000}
+            error={errors.resumoProfissional?.message}
+            onGenerate={async () => {
+              const values = getValues()
+              const result = await improveResumoProfissionalAction({
+                mode: 'generate',
+                source: {
+                  empregos: values.empregos.filter(isEmpregoComplete),
+                  conquistas: values.conquistas.filter(isConquistaComplete),
+                },
+              })
+              return result.success ? result.text : null
+            }}
+            onImprove={async text => {
+              const values = getValues()
+              const result = await improveResumoProfissionalAction({
+                mode: 'improve',
+                text,
+                source: {
+                  empregos: values.empregos.filter(isEmpregoComplete),
+                  conquistas: values.conquistas.filter(isConquistaComplete),
+                },
+              })
+              return result.success ? result.text : null
+            }}
+            className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
+          />
+          {errors.resumoProfissional?.message && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.resumoProfissional.message}
+            </p>
+          )}
+        </div>
+      </div>
+
       <div className="py-1">
         <Separator className="h-0.5 bg-border" />
       </div>
@@ -697,6 +763,7 @@ export function getExperienciaSnapshot(
   return structuredClone({
     empregos: values.empregos,
     conquistas: values.conquistas,
+    resumoProfissional: values.resumoProfissional ?? '',
   })
 }
 

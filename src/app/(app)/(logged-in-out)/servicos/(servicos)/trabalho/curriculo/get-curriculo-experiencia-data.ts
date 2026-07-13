@@ -1,4 +1,5 @@
 import {
+  getApiV1EmpregabilidadeCurriculoCpf,
   getApiV1EmpregabilidadeCurriculoCpfConquistas,
   getApiV1EmpregabilidadeCurriculoCpfExperiencias,
 } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
@@ -45,6 +46,29 @@ function parseConquistasArray(
   }))
 }
 
+function parseResumoProfissional(data: unknown): string {
+  if (!data || typeof data !== 'object') return ''
+  const value = (data as { resumo_profissional?: string | null })
+    .resumo_profissional
+  return typeof value === 'string' ? value : ''
+}
+
+const emptyExperienciaValues = (): CurriculoExperienciaFormValues => ({
+  empregos: [
+    {
+      cargo: '',
+      meuEmpregoAtual: false,
+      empresa: '',
+      descricaoAtividades: '',
+      tempoExperienciaAnos: undefined,
+      tempoExperienciaMeses: undefined,
+      experienciaComprovadaCarteira: '',
+    },
+  ],
+  conquistas: [{ idTipoConquista: '', titulo: '', descricao: '' }],
+  resumoProfissional: '',
+})
+
 /**
  * Busca experiências e conquistas do currículo por CPF no server.
  * Usar apenas em Server Components.
@@ -54,25 +78,13 @@ export async function getCurriculoExperienciaData(
 ): Promise<CurriculoExperienciaFormValues> {
   const normalizedCpf = cpf.replace(/\D/g, '')
   if (!normalizedCpf) {
-    return {
-      empregos: [
-        {
-          cargo: '',
-          meuEmpregoAtual: false,
-          empresa: '',
-          descricaoAtividades: '',
-          tempoExperienciaAnos: undefined,
-          tempoExperienciaMeses: undefined,
-          experienciaComprovadaCarteira: '',
-        },
-      ],
-      conquistas: [{ idTipoConquista: '', titulo: '', descricao: '' }],
-    }
+    return emptyExperienciaValues()
   }
 
-  const [experienciasRes, conquistasRes] = await Promise.all([
+  const [experienciasRes, conquistasRes, curriculoRes] = await Promise.all([
     getApiV1EmpregabilidadeCurriculoCpfExperiencias(normalizedCpf),
     getApiV1EmpregabilidadeCurriculoCpfConquistas(normalizedCpf),
+    getApiV1EmpregabilidadeCurriculoCpf(normalizedCpf),
   ])
 
   const experienciasBody =
@@ -84,28 +96,18 @@ export async function getCurriculoExperienciaData(
     conquistasRes.status === 200 && conquistasRes.data
       ? ((conquistasRes.data as { data?: unknown }).data ?? conquistasRes.data)
       : null
+  const curriculoBody =
+    curriculoRes.status === 200 && curriculoRes.data ? curriculoRes.data : null
 
   const empregos = parseExperienciasArray(experienciasBody)
   const conquistas = parseConquistasArray(conquistasBody)
+  const resumoProfissional = parseResumoProfissional(curriculoBody)
 
   return {
     empregos:
-      empregos.length > 0
-        ? empregos
-        : [
-            {
-              cargo: '',
-              meuEmpregoAtual: false,
-              empresa: '',
-              descricaoAtividades: '',
-              tempoExperienciaAnos: undefined,
-              tempoExperienciaMeses: undefined,
-              experienciaComprovadaCarteira: '',
-            },
-          ],
+      empregos.length > 0 ? empregos : emptyExperienciaValues().empregos,
     conquistas:
-      conquistas.length > 0
-        ? conquistas
-        : [{ idTipoConquista: '', titulo: '', descricao: '' }],
+      conquistas.length > 0 ? conquistas : emptyExperienciaValues().conquistas,
+    resumoProfissional,
   }
 }

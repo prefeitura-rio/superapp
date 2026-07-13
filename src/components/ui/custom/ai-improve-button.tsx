@@ -16,11 +16,14 @@ interface AiImproveButtonProps
   mode?: AiImproveButtonMode
   /** When mode is "improve", controls idle vs ready styling. */
   isReady?: boolean
+  /** Label when mode is "improve". Defaults to "Melhorar com IA". */
+  label?: string
 }
 
 export function AiImproveButton({
   mode = 'improve',
   isReady = false,
+  label = 'Melhorar com IA',
   className,
   disabled,
   ...props
@@ -52,7 +55,7 @@ export function AiImproveButton({
       ) : (
         <>
           <AiImproveIcon className="size-[15px]" />
-          Melhorar com IA
+          {label}
         </>
       )}
     </Button>
