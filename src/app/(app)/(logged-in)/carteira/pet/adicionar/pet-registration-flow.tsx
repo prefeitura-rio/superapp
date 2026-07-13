@@ -61,10 +61,10 @@ const petFormSchema = z
       .max(20, 'Máximo de 20 caracteres'),
     especie: z.string().min(1, 'Selecione uma espécie'),
     sexo: z.enum(['Macho', 'Fêmea'], {
-      required_error: 'Selecione o sexo',
+      error: 'Selecione o sexo',
     }),
     castrado: z.enum(['Sim', 'Não'], {
-      required_error: 'Selecione uma opção',
+      error: 'Selecione uma opção',
     }),
     birthDay: z.string().optional(),
     birthMonth: z.string().min(1, 'Mês é obrigatório'),

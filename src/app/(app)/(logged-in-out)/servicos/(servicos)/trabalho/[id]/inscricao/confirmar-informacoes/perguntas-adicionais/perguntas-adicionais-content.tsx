@@ -80,8 +80,10 @@ function createDynamicSchema(informacoes: InformacaoComplementar[]) {
 
       case 'resposta_numerica': {
         let schema = z.number({
-          required_error: 'Este campo é obrigatório',
-          invalid_type_error: 'Digite um número válido',
+          error: issue =>
+            issue.input === undefined
+              ? 'Este campo é obrigatório'
+              : 'Digite um número válido',
         })
 
         if (info.valor_minimo !== null) {
@@ -282,6 +284,7 @@ export function PerguntasAdicionaisContent({
                         render={({ field }) => (
                           <CustomInput
                             {...field}
+                            value={(field.value as string) ?? ''}
                             label={info.titulo}
                             placeholder="Escreva aqui"
                             error={error}
@@ -311,7 +314,9 @@ export function PerguntasAdicionaisContent({
                               const value = e.target.value
                               field.onChange(value === '' ? '' : Number(value))
                             }}
-                            value={field.value === '' ? '' : field.value}
+                            value={
+                              field.value === '' ? '' : (field.value as number)
+                            }
                             className="rounded-xl border-2 border-border h-16 bg-transparent text-sm shadow-none placeholder:text-sm placeholder:text-foreground-light dark:placeholder:text-muted-foreground focus:bg-card"
                             containerClassName="space-y-3"
                           />
@@ -333,7 +338,7 @@ export function PerguntasAdicionaisContent({
                               isRequired={info.obrigatorio}
                               content={
                                 hasSelection ? (
-                                  field.value
+                                  (field.value as string)
                                 ) : (
                                   <span className="text-foreground-light dark:text-muted-foreground">
                                     Selecionar
