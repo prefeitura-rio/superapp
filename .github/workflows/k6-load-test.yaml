@@ -71,7 +71,7 @@ jobs:
 
       - name: Configure kubectl for GKE
         run: |
-          gcloud container clusters get-credentials ${{ vars.GKE_CLUSTER_NAME }} \
+          gcloud container clusters get-credentials --dns-endpoint ${{ vars.GKE_CLUSTER_NAME }} \
             --region=${{ vars.GKE_CLUSTER_REGION }} \
             --project="${{ vars.GCP_PROJECT_ID }}"
 
