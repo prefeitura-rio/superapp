@@ -116,7 +116,7 @@ jobs:
           sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
 
       - name: Configure kubectl for GKE (Staging)
-        run: gcloud container clusters get-credentials application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
+        run: gcloud container clusters get-credentials --dns-endpoint application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
 
       - name: Update ArgoCD Application image override
         if: steps.check-k8s-only.outputs.k8s_only != 'true'
