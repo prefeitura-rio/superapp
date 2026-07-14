@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { enviarCandidatura } from '../enviar-candidatura-action'
 
-const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
+const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
 
 const mockGetUserInfoFromToken = vi.mocked(getUserInfoFromToken)
 

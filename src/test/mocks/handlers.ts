@@ -2,8 +2,8 @@ import { http, HttpResponse } from 'msw'
 import { TEST_ENV } from './env'
 
 // API base URLs for handlers
-const RMI_BASE_URL = TEST_ENV.NEXT_PUBLIC_BASE_API_URL_RMI
-const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
+const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
+const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
 
 // Default success responses
 const DEFAULT_SUCCESS_RESPONSE = { message: 'Success' }

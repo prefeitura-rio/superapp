@@ -27,7 +27,7 @@
       formatter: 'biome',
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH,
+      baseUrl: process.env.BASE_API_URL_APP_BUSCA_SEARCH,
       override: {
         mutator: {
           path: './custom-fetch-busca-search.ts',
@@ -54,7 +54,7 @@
       formatter: 'biome',
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.NEXT_PUBLIC_COURSES_BASE_API_URL,
+      baseUrl: process.env.COURSES_BASE_API_URL,
       override: {
         mutator: {
           path: './custom-fetch-course.ts',

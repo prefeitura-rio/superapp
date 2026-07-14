@@ -106,20 +106,12 @@ jobs:
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
-          NEXT_PUBLIC_COURSES_BASE_API_URL: "https://services.staging.app.dados.rio/go"
-          NEXT_PUBLIC_BUSCA_1746_COLLECTION: "1746_v2_llm"
-          NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION: "carioca-digital_v2_llm"
-          NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION: "prefrio_services_base"
           GOOGLE_MAPS_API_KEY: "placeholder"
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
           NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
           API_KEY_SUBPAV_OSA_SMS: "placeholder"
-          NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH: "https://services.staging.app.dados.rio/app-busca-search/"
-          NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API: "https://services.staging.app.dados.rio/subpav-osa-api/"
-          NEXT_PUBLIC_BASE_API_URL_RMI: "https://services.staging.app.dados.rio/rmi/"
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
-          NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO: "https://services.staging.app.dados.rio/catalogo/"
           NEXT_PUBLIC_HAND_TALK_TOKEN: "8d8a8e25175c71b10fcbc9952a7bc09f"
           NEXT_PUBLIC_EQUALWEB_SITEKEY: "f010fd59983a9d10102605f5740d45fd"
           NEXT_PUBLIC_PERTO_DIGITAL_ENABLED: "true"
@@ -130,6 +122,11 @@ jobs:
           CI: "true"
           PORT: "3000"
           E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
+          COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
+          BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
+          BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
+          BASE_API_URL_RMI: 'https://services.staging.app.dados.rio/rmi/'
+          BASE_API_URL_APP_CATALOGO: 'https://services.staging.app.dados.rio/catalogo/'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -160,20 +157,12 @@ jobs:
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
             --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
-            --build-arg NEXT_PUBLIC_COURSES_BASE_API_URL="http://go.go.svc.cluster.local/" \
-            --build-arg NEXT_PUBLIC_BUSCA_1746_COLLECTION=1746_v2_llm \
-            --build-arg NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION=carioca-digital_v2_llm \
-            --build-arg NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION=prefrio_services_base \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
             --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TQZT3J9G" \
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH="http://app-busca-search.busca.svc.cluster.local:8080/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API="http://subpav-osa-api.subpav.svc.cluster.local/" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_RMI="http://rmi.rmi.svc.cluster.local/" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --build-arg NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO="https://services.staging.app.dados.rio/catalogo/" \
             --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="17a931fe38db57f3f3db2f9d8745f29b" \
             --build-arg NEXT_PUBLIC_EQUALWEB_SITEKEY="f010fd59983a9d10102605f5740d45fd" \
             --build-arg NEXT_PUBLIC_PERTO_DIGITAL_ENABLED="true" \

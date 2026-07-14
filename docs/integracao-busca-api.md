@@ -25,7 +25,7 @@ Lista categorias com opções de ordenação e filtragem de serviços por catego
 
 ### Variável de Ambiente
 ```env
-NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH=https://seu-dominio.com/
+BASE_API_URL_APP_BUSCA_SEARCH=https://seu-dominio.com/
 ```
 
 ### Cliente HTTP Customizado
@@ -376,7 +376,7 @@ npm run orval
 ## Troubleshooting
 
 ### Erro: "Environment variable is not set"
-Verifique se `NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH` está configurada no `.env.local`.
+Verifique se `BASE_API_URL_APP_BUSCA_SEARCH` está configurada no `.env.local`.
 
 ### Erro: Tipos não encontrados
 Execute `npm run orval` para gerar os tipos a partir do OpenAPI spec.

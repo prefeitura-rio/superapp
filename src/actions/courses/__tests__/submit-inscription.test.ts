@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, test } from 'vitest'
 import { submitCourseInscription } from '../submit-inscription'
 
-const COURSES_BASE_URL = TEST_ENV.NEXT_PUBLIC_COURSES_BASE_API_URL
+const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
 
 describe('submitCourseInscription', () => {
   const baseUserInfo = {

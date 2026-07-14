@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, test, vi } from 'vitest'
 import { validateUserPhoneToken } from '../validate-user-phone-token'
 
-const RMI_BASE_URL = TEST_ENV.NEXT_PUBLIC_BASE_API_URL_RMI
+const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
 
 describe('validateUserPhoneToken', () => {
   const validTokenData = {
