@@ -50,7 +50,7 @@ const healthUnitFetch = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API
+  const baseUrl = process.env.BASE_API_URL_SUBPAV_OSA_API
 
   const url = `${baseUrl}${endpoint}`
 

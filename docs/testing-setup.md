@@ -122,10 +122,10 @@ Configura as URLs base das APIs para testes:
 
 | Variavel | Valor de Teste |
 |----------|----------------|
-| `NEXT_PUBLIC_BASE_API_URL_RMI` | `http://localhost:3001` |
-| `NEXT_PUBLIC_COURSES_BASE_API_URL` | `http://localhost:3002` |
-| `NEXT_PUBLIC_BASE_API_URL_APP_BUSCA_SEARCH` | `http://localhost:3003` |
-| `NEXT_PUBLIC_BASE_API_URL_SUBPAV_OSA_API` | `http://localhost:3004` |
+| `BASE_API_URL_RMI` | `http://localhost:3001` |
+| `COURSES_BASE_API_URL` | `http://localhost:3002` |
+| `BASE_API_URL_APP_BUSCA_SEARCH` | `http://localhost:3003` |
+| `BASE_API_URL_SUBPAV_OSA_API` | `http://localhost:3004` |
 
 ### 4.3. Mocks do Next.js
 

@@ -6,7 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { describe, expect, test, vi } from 'vitest'
 import { updateUserEmail } from '../update-user-email'
 
-const RMI_BASE_URL = TEST_ENV.NEXT_PUBLIC_BASE_API_URL_RMI
+const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
 
 describe('updateUserEmail', () => {
   const validEmailData = {

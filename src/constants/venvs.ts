@@ -1,10 +1,3 @@
-export const NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION =
-  process.env.NEXT_PUBLIC_BUSCA_CARIOCA_DIGITAL_COLLECTION
-export const NEXT_PUBLIC_BUSCA_1746_COLLECTION =
-  process.env.NEXT_PUBLIC_BUSCA_1746_COLLECTION
-export const NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION =
-  process.env.NEXT_PUBLIC_BUSCA_PREFRIO_COLLECTION
-
 /**
  * Feature flag to enable/disable hardcoded external search links
  * Default: disabled (false)

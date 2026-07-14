@@ -20,10 +20,7 @@ interface LookupListResponse {
   data: LookupItem[]
 }
 
-const BASE_URL = (process.env.NEXT_PUBLIC_COURSES_BASE_API_URL ?? '').replace(
-  /\/$/,
-  ''
-)
+const BASE_URL = (process.env.COURSES_BASE_API_URL ?? '').replace(/\/$/, '')
 
 // Cache de módulo para os lookups (TTL de 10 minutos)
 type LookupCache = { items: LookupItem[]; expiresAt: number }

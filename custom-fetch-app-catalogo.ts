@@ -17,11 +17,11 @@ const getBody = <T>(c: Response | Request): Promise<T> => {
 
 // NOTE: Update just base url
 const getUrl = (contextUrl: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO
+  const baseUrl = process.env.BASE_API_URL_APP_CATALOGO
 
   if (!baseUrl) {
     throw new Error(
-      'NEXT_PUBLIC_BASE_API_URL_APP_CATALOGO environment variable is not set.'
+      'BASE_API_URL_APP_CATALOGO environment variable is not set.'
     )
   }
 
