@@ -86,7 +86,7 @@ jobs:
           version: latest
 
       - name: Configure kubectl for GKE (Production)
-        run: gcloud container clusters get-credentials application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
+        run: gcloud container clusters get-credentials --dns-endpoint application --zone=us-central1 --project="${{ vars.GCP_PROJECT_ID }}"
 
       - name: Update ArgoCD Application image override
         run: |
