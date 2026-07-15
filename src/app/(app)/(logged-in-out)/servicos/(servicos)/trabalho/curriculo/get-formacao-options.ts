@@ -6,7 +6,7 @@ import { sortLanguageLevels } from './utils/language-sorting'
 
 function parseListResponse(data: unknown): FormacaoApiItem[] {
   const body = data as {
-    data?: Array<{ id?: string; descricao?: string }>
+    data?: Array<{ id?: string; descricao?: string; ordem?: number }>
   }
   const arr = Array.isArray(body?.data)
     ? body.data
@@ -17,6 +17,7 @@ function parseListResponse(data: unknown): FormacaoApiItem[] {
     .map(item => ({
       id: item.id ?? '',
       descricao: item.descricao ?? '',
+      ordem: item.ordem,
     }))
     .filter(item => item.id)
 }

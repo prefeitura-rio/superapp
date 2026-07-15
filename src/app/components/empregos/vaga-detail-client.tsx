@@ -21,6 +21,15 @@ async function fetchCandidaturaVaga(vagaId: string) {
   return res.json()
 }
 
+async function fetchBloqueioVaga(vagaId: string) {
+  const res = await fetch(
+    `/api/user/empregos/candidatura-bloqueios?vagaId=${vagaId}`,
+    { cache: 'no-store' }
+  )
+  if (!res.ok) return { isBloqueado: false }
+  return res.json()
+}
+
 interface VagaDetailClientProps {
   vaga: VagaDetail
   vagaAtiva: boolean
@@ -33,15 +42,24 @@ export function VagaDetailClient({ vaga, vagaAtiva }: VagaDetailClientProps) {
     staleTime: 5 * 60 * 1000,
   })
 
+  const isLoggedIn = headerData?.isLoggedIn ?? false
+
   const { data: candidaturaData } = useQuery({
     queryKey: ['candidatura', vaga.id],
     queryFn: () => fetchCandidaturaVaga(vaga.id),
     staleTime: 5 * 60 * 1000,
-    enabled: !!headerData?.isLoggedIn, // só busca quando logado
+    enabled: isLoggedIn,
   })
 
-  const isLoggedIn = headerData?.isLoggedIn ?? false
+  const { data: bloqueioData } = useQuery({
+    queryKey: ['candidatura-bloqueio', vaga.id],
+    queryFn: () => fetchBloqueioVaga(vaga.id),
+    staleTime: 0,
+    enabled: isLoggedIn,
+  })
+
   const hasCandidatura = candidaturaData?.hasCandidatura ?? false
+  const isBloqueado = bloqueioData?.isBloqueado ?? false
 
   const vagaComCandidatura: VagaDetail = hasCandidatura
     ? {
@@ -57,6 +75,7 @@ export function VagaDetailClient({ vaga, vagaAtiva }: VagaDetailClientProps) {
       isLoggedIn={isLoggedIn}
       hasCandidatura={hasCandidatura}
       vagaAtiva={vagaAtiva}
+      isBloqueado={isBloqueado}
     />
   )
 }

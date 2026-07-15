@@ -2,6 +2,7 @@
 export interface FormacaoApiItem {
   id: string
   descricao: string
+  ordem?: number
 }
 
 export interface FormacaoOptions {

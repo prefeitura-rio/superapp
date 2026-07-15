@@ -57,7 +57,7 @@ interface PerguntasAdicionaisContentProps {
   onEnviarCandidatura?: (
     vagaId: string,
     respostas: RespostaInfoComplementarPayload[]
-  ) => Promise<{ success: boolean; error?: string }>
+  ) => Promise<{ success: boolean; error?: string; blocked?: true }>
 }
 
 function createDynamicSchema(informacoes: InformacaoComplementar[]) {
@@ -200,9 +200,11 @@ export function PerguntasAdicionaisContent({
       if (onEnviarCandidatura) {
         const result = await onEnviarCandidatura(vagaId, respostas)
         if (!result.success) {
-          toast.error(
-            result.error ?? 'Erro ao finalizar inscrição. Tente novamente.'
-          )
+          if (!result.blocked) {
+            toast.error(
+              result.error ?? 'Erro ao finalizar inscrição. Tente novamente.'
+            )
+          }
           return
         }
         queryClient.invalidateQueries({ queryKey: ['candidaturas'] })

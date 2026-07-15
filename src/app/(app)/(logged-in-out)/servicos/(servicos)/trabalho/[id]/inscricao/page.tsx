@@ -9,7 +9,6 @@ import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
 } from '@/http/models'
-import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
