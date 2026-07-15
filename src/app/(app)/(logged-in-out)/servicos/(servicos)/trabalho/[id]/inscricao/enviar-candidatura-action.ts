@@ -1,7 +1,7 @@
 'use server'
 
 import { getFormacaoOptions } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
-import { postCandidaturaBloqueio } from '@/http-courses/empregabilidade-candidatura-bloqueios/empregabilidade-candidatura-bloqueios'
+import { postApiV1EmpregabilidadeCandidaturaBloqueios } from '@/http-courses/empregabilidade-candidatura-bloqueios/empregabilidade-candidatura-bloqueios'
 import { postApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
@@ -122,7 +122,7 @@ export async function enviarCandidatura(
           '[enviarCandidatura] Registrando bloqueio:',
           JSON.stringify(bloqueioPayload)
         )
-        postCandidaturaBloqueio(bloqueioPayload)
+        postApiV1EmpregabilidadeCandidaturaBloqueios(bloqueioPayload)
           .then(r =>
             console.log(
               '[enviarCandidatura] Bloqueio registrado, status:',

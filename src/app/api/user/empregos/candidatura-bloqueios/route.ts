@@ -1,4 +1,4 @@
-import { getCandidaturaBloqueios } from '@/http-courses/empregabilidade-candidatura-bloqueios/empregabilidade-candidatura-bloqueios'
+import { getApiV1EmpregabilidadeCandidaturaBloqueios } from '@/http-courses/empregabilidade-candidatura-bloqueios/empregabilidade-candidatura-bloqueios'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const cpfLimpo = userAuthInfo.cpf.replace(/\D/g, '')
-    const res = await getCandidaturaBloqueios({
+    const res = await getApiV1EmpregabilidadeCandidaturaBloqueios({
       cpf: cpfLimpo,
       id_vaga: vagaId,
     })
@@ -48,13 +48,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const isBloqueado = res.data.meta.total > 0
+    const resData = res.data as { meta?: { total?: number } }
+    const isBloqueado = (resData.meta?.total ?? 0) > 0
 
     console.log(
       '[candidatura-bloqueios GET] isBloqueado:',
       isBloqueado,
       'total:',
-      res.data.meta.total
+      resData.meta?.total
     )
 
     return NextResponse.json({ isBloqueado }, { headers: NO_CACHE_HEADERS })
