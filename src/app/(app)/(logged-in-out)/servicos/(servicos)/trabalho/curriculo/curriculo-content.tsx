@@ -1321,7 +1321,7 @@ export interface CurriculoContentProps {
   /** Server action para enviar candidatura (cenário sem perguntas adicionais). */
   onEnviarCandidatura?: (
     vagaId: string
-  ) => Promise<{ success: boolean; error?: string }>
+  ) => Promise<{ success: boolean; error?: string; blocked?: true }>
 }
 
 export function CurriculoContent({
@@ -1661,7 +1661,7 @@ export function CurriculoContent({
               origin: { y: 0.7 },
             })
             setSuccessSheetOpen(true)
-          } else {
+          } else if (!result.blocked) {
             toast.error(
               result.error ?? 'Não foi possível enviar a candidatura.'
             )

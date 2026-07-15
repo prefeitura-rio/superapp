@@ -1,6 +1,8 @@
 'use client'
 
 import { CurriculoSlide } from '@/app/components/empregos/curriculo-slide'
+import { EligibilityBlocker } from '@/app/components/empregos/eligibility-blocker'
+import type { FailedCriterio } from '@/lib/eligibility-utils'
 import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import type { Swiper as SwiperType } from 'swiper'
@@ -53,7 +55,12 @@ interface InscricaoFlowCarouselProps {
   onEnviarCandidatura?: (
     vagaId: string,
     respostas?: RespostaInfoComplementarPayload[]
-  ) => Promise<{ success: boolean; error?: string }>
+  ) => Promise<{
+    success: boolean
+    error?: string
+    failedCriterios?: FailedCriterio[]
+    blocked?: true
+  }>
 }
 
 export function InscricaoFlowCarousel({
@@ -70,6 +77,9 @@ export function InscricaoFlowCarousel({
 }: InscricaoFlowCarouselProps) {
   const router = useRouter()
   const swiperRef = useRef<SwiperType | null>(null)
+  const [blockedCriterios, setBlockedCriterios] = useState<
+    FailedCriterio[] | null
+  >(null)
 
   const steps: InscricaoStep[] = []
   if (showBemVindo) steps.push('bem-vindo')
@@ -108,6 +118,31 @@ export function InscricaoFlowCarousel({
     await revalidateEmpregosPage()
     router.push('/servicos/trabalho')
   }, [router])
+
+  // Intercepta o resultado de onEnviarCandidatura e captura failedCriteria
+  // antes que os slides filhos tentem tratar o erro como genérico.
+  const handleEnviarCandidatura = useCallback(
+    async (id: string, respostas?: RespostaInfoComplementarPayload[]) => {
+      if (!onEnviarCandidatura)
+        return { success: false, error: 'Ação não disponível.' }
+
+      const result = await onEnviarCandidatura(id, respostas)
+
+      if (!result.success && result.failedCriterios?.length) {
+        setBlockedCriterios(result.failedCriterios)
+        // blocked: true sinaliza aos slides filhos para suprimir o toast de erro —
+        // o bloqueio é tratado pela tela de elegibilidade que substitui o carousel.
+        return { success: false, blocked: true as const }
+      }
+
+      return result
+    },
+    [onEnviarCandidatura]
+  )
+
+  if (blockedCriterios !== null) {
+    return <EligibilityBlocker failedCriterios={blockedCriterios} />
+  }
 
   return (
     <>
@@ -151,7 +186,7 @@ export function InscricaoFlowCarousel({
             hasPerguntasAdicionais={hasPerguntasAdicionais}
             onContinuarToNext={handleCurriculoToNext}
             onSuccessClose={handleCurriculoSuccessClose}
-            onEnviarCandidatura={onEnviarCandidatura}
+            onEnviarCandidatura={handleEnviarCandidatura}
           />
         </SwiperSlide>
         {hasPerguntasAdicionais && (
@@ -161,7 +196,7 @@ export function InscricaoFlowCarousel({
               informacoesComplementares={informacoesComplementares}
               onSuccessClose={handlePerguntasSuccessClose}
               backRoute={`/servicos/trabalho/${vagaId}`}
-              onEnviarCandidatura={onEnviarCandidatura}
+              onEnviarCandidatura={handleEnviarCandidatura}
             />
           </SwiperSlide>
         )}
