@@ -35,8 +35,6 @@ interface VagaDetailContentProps {
   hasCandidatura?: boolean
   /** Indica se a vaga está com status publicado_ativo */
   vagaAtiva?: boolean
-  /** Indica se o usuário foi bloqueado por critérios de elegibilidade nesta vaga */
-  isBloqueado?: boolean
 }
 
 function DetailBadgeIcon({ type }: { type: VagaBadge['type'] }) {
@@ -98,7 +96,6 @@ export function VagaDetailContent({
   isLoggedIn,
   hasCandidatura = false,
   vagaAtiva = true,
-  isBloqueado = false,
 }: VagaDetailContentProps) {
   const router = useRouter()
   const hasEtapas = (vaga.etapasProcessoSeletivo?.length ?? 0) > 0
@@ -262,21 +259,6 @@ export function VagaDetailContent({
                 >
                   Inscrições encerradas para esta vaga
                 </Button>
-              </div>
-            ) : isBloqueado ? (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-full cursor-not-allowed">
-                  <Button
-                    type="button"
-                    disabled
-                    className="w-full rounded-full font-normal text-sm border-0 transition-all duration-200 px-6 py-3 h-14 bg-muted text-muted-foreground opacity-100"
-                  >
-                    Candidatar-se à vaga
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  Seus dados não atendem aos critérios exigidos para esta vaga
-                </p>
               </div>
             ) : isLoggedIn ? (
               <Link
