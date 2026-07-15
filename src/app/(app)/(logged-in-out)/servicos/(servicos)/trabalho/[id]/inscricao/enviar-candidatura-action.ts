@@ -1,7 +1,7 @@
 'use server'
 
 import { getFormacaoOptions } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
-import { postApiV1EmpregabilidadeCandidaturaBloqueios } from '@/http-courses/empregabilidade-candidatura-bloqueios/empregabilidade-candidatura-bloqueios'
+
 import { postApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
@@ -110,32 +110,6 @@ export async function enviarCandidatura(
       })
 
       if (!eligibilityResult.passes) {
-        // Fire-and-forget: registra o bloqueio sem bloquear o retorno ao client
-        const bloqueioPayload = {
-          cpf: cpfLimpo,
-          id_vaga: vagaId,
-          criterios_nao_atendidos: eligibilityResult.failedCriterios.map(
-            c => c.slug
-          ),
-        }
-        console.log(
-          '[enviarCandidatura] Registrando bloqueio:',
-          JSON.stringify(bloqueioPayload)
-        )
-        postApiV1EmpregabilidadeCandidaturaBloqueios(bloqueioPayload)
-          .then(r =>
-            console.log(
-              '[enviarCandidatura] Bloqueio registrado, status:',
-              r.status
-            )
-          )
-          .catch(err =>
-            console.error(
-              '[enviarCandidatura] Erro ao registrar bloqueio:',
-              err
-            )
-          )
-
         return {
           success: false,
           failedCriterios: eligibilityResult.failedCriterios,
