@@ -17,7 +17,7 @@ export function IconButton({
     <button
       type="button"
       className={cn(
-        'flex items-center justify-center cursor-pointer',
+        'flex items-center justify-center cursor-pointer h-13 w-13',
         className
       )}
       {...props}
