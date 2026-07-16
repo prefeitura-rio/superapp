@@ -1,11 +1,12 @@
 'use client'
 
+import { improveResumoProfissionalAction } from '@/actions/improve-text-with-ai'
 import { ActionDiv } from '@/app/components/action-div'
 import { Checkbox } from '@/components/ui/checkbox'
+import { AiImproveTextarea } from '@/components/ui/custom/ai-improve-textarea'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { ChevronDownIcon, Trash2 } from 'lucide-react'
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
@@ -26,8 +27,16 @@ import {
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
-const EXPERIENCIA_ERROR_PATHS = ['empregos', 'conquistas'] as const
-const EXPERIENCIA_FIELD_NAMES = ['empregos', 'conquistas'] as const
+const EXPERIENCIA_ERROR_PATHS = [
+  'empregos',
+  'conquistas',
+  'resumoProfissional',
+] as const
+const EXPERIENCIA_FIELD_NAMES = [
+  'empregos',
+  'conquistas',
+  'resumoProfissional',
+] as const
 
 function hasNestedErrors(obj: unknown): boolean {
   if (!obj) return false
@@ -276,8 +285,11 @@ function ExperienciaProfissionalAccordionContentInner({
               >
                 Descrição das atividades
               </label>
-              <Textarea
+              <AiImproveTextarea
                 {...register(`empregos.${index}.descricaoAtividades`)}
+                showAiImprove
+                aiContext="experiencia-atividades"
+                minCharsForAi={30}
                 id={`emprego-${index}-descricao`}
                 placeholder="Atividades realizadas"
                 maxLength={2000}
@@ -290,11 +302,13 @@ function ExperienciaProfissionalAccordionContentInner({
                 </p>
               )}
               {!errors.empregos?.[index]?.descricaoAtividades && (
-                <p className={HINT_CLASS}>
-                  Exemplo: atendimento ao público, organização de estoque,
-                  preparo de alimentos, limpeza de ambientes, emissão de notas
-                  fiscais, entre outros
-                </p>
+                <div className={HINT_CLASS}>
+                  <p>Exemplo:</p>
+                  <ul className="list-disc pl-5">
+                    <li>Atendimento ao público</li>
+                    <li>Organização de estoque</li>
+                  </ul>
+                </div>
               )}
             </div>
 
@@ -433,11 +447,9 @@ function ExperienciaProfissionalAccordionContentInner({
           Adicionar outro emprego
         </CustomButton>
       </div>
-
       <div className="py-1 pt-3">
         <Separator className="h-0.5 bg-border" />
       </div>
-
       <div className="space-y-4">
         <p className="text-sm font-normal text-primary">
           Conquistas ou certificados
@@ -494,8 +506,11 @@ function ExperienciaProfissionalAccordionContentInner({
               >
                 Descrição
               </label>
-              <Textarea
+              <AiImproveTextarea
                 {...register(`conquistas.${index}.descricao`)}
+                showAiImprove
+                aiContext="conquista-descricao"
+                minCharsForAi={30}
                 id={`conquista-${index}-descricao`}
                 placeholder="Escreva a descrição"
                 maxLength={2000}
@@ -538,11 +553,70 @@ function ExperienciaProfissionalAccordionContentInner({
           Adicionar outra conquista ou certificado
         </CustomButton>
       </div>
-
       <div className="py-1">
         <Separator className="h-0.5 bg-border" />
       </div>
 
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="resumo-profissional"
+            className={cn(
+              'text-sm font-normal block',
+              errors.resumoProfissional ? 'text-destructive' : 'text-primary'
+            )}
+          >
+            Resumo profissional
+          </label>
+          <AiImproveTextarea
+            {...register('resumoProfissional')}
+            showAiImprove
+            improveLabel="Melhorar com IA"
+            generateLabel="Gerar resumo com IA"
+            canGenerate={formValues.empregos.some(isEmpregoComplete)}
+            generateBlockedMessage="Adicione pelo menos uma experiência profissional para gerar um resumo com IA"
+            hint="Dica: Use nossa inteligência artificial para escrever seu resumo profissional com base nas informações fornecidas"
+            minCharsForAi={30}
+            id="resumo-profissional"
+            placeholder="Faça um breve resumo, se apresentando e descrevendo sua atuação profissional. "
+            maxLength={2000}
+            error={errors.resumoProfissional?.message}
+            onGenerate={async () => {
+              const values = getValues()
+              const result = await improveResumoProfissionalAction({
+                mode: 'generate',
+                source: {
+                  empregos: values.empregos.filter(isEmpregoComplete),
+                  conquistas: values.conquistas.filter(isConquistaComplete),
+                },
+              })
+              return result.success ? result.text : null
+            }}
+            onImprove={async text => {
+              const values = getValues()
+              const result = await improveResumoProfissionalAction({
+                mode: 'improve',
+                text,
+                source: {
+                  empregos: values.empregos.filter(isEmpregoComplete),
+                  conquistas: values.conquistas.filter(isConquistaComplete),
+                },
+              })
+              return result.success ? result.text : null
+            }}
+            className="rounded-xl border-2 border-border min-h-24 bg-background dark:bg-background text-sm! shadow-none placeholder:text-sm! placeholder:text-foreground-light! dark:placeholder:text-muted-foreground! resize-none"
+          />
+          {errors.resumoProfissional?.message && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.resumoProfissional.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="py-1">
+        <Separator className="h-0.5 bg-border" />
+      </div>
       <div className="flex gap-3">
         <CustomButton
           type="button"
@@ -689,6 +763,7 @@ export function getExperienciaSnapshot(
   return structuredClone({
     empregos: values.empregos,
     conquistas: values.conquistas,
+    resumoProfissional: values.resumoProfissional ?? '',
   })
 }
 

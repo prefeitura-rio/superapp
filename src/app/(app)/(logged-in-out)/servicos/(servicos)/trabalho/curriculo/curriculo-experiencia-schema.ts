@@ -158,6 +158,10 @@ const conquistaItemSchema = z
 export const curriculoExperienciaSchema = z.object({
   empregos: z.array(empregoItemSchema),
   conquistas: z.array(conquistaItemSchema),
+  resumoProfissional: z
+    .string()
+    .optional()
+    .refine(val => !val || val.length <= 2000, 'Máximo de 2000 caracteres'),
 })
 
 export type CurriculoExperienciaFormValues = z.infer<

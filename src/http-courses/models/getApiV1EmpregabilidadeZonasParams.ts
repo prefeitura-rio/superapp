@@ -6,10 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface EmpregabilidadeNivelIdioma {
-  created_at?: string
-  descricao?: string
-  id?: string
-  ordem?: number
-  updated_at?: string
+export type GetApiV1EmpregabilidadeZonasParams = {
+  /**
+   * Número da página
+   */
+  page?: number
+  /**
+   * Tamanho da página
+   */
+  pageSize?: number
 }

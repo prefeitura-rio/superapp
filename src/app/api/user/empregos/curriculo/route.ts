@@ -135,6 +135,10 @@ export async function GET() {
         conquistas.length > 0
           ? conquistas
           : [{ idTipoConquista: '', titulo: '', descricao: '' }],
+      resumoProfissional:
+        typeof curriculo?.resumo_profissional === 'string'
+          ? curriculo.resumo_profissional
+          : '',
     }
 
     const rawSituacao = curriculo?.situacao_interesses as

@@ -67,6 +67,7 @@ export async function saveExperienciaAction(
     const payload: EmpregabilidadeExperienciaProfissionalAccordionRequest = {
       experiencias: buildExperiencias(formValues.empregos),
       conquistas: buildConquistas(formValues.conquistas),
+      resumo_profissional: formValues.resumoProfissional?.trim() || undefined,
     }
     const response = await putApiV1EmpregabilidadeCurriculoCpfExperiencias(
       normalizedCpf,

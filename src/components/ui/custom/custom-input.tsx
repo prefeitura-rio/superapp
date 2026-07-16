@@ -43,9 +43,9 @@ const iconVariantStyles = {
 } as const
 
 const sizeStyles = {
-  sm: 'h-12 px-3 text-sm',
-  md: 'h-16 px-3',
-  lg: 'h-18 px-4 text-lg',
+  sm: 'h-12 px-5 text-sm',
+  md: 'h-16 px-5',
+  lg: 'h-18 px-5 text-lg',
 } as const
 
 export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
@@ -108,7 +108,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
 
                 {showTooltip && (
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
-                    <div className="bg-popover border border-border rounded-md px-3 py-2 shadow-md max-w-xs">
+                    <div className="bg-popover border border-border rounded-md px-5 py-5 shadow-md max-w-xs">
                       <p className="text-sm text-popover-foreground">
                         {tooltip}
                       </p>

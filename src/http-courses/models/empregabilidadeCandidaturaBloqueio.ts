@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface EmpregabilidadeNivelIdioma {
+export interface EmpregabilidadeCandidaturaBloqueio {
+  cpf?: string
   created_at?: string
-  descricao?: string
+  criterios_nao_atendidos?: string[]
   id?: string
-  ordem?: number
-  updated_at?: string
+  id_vaga?: string
 }

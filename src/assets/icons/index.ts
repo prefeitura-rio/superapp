@@ -1,3 +1,4 @@
+import { AiImproveIcon } from './ai-improve-icon'
 import { BriefcaseIcon } from './briefcase-icon'
 import { CalendarIcon } from './calendar-icon'
 import { CheckCircleIcon } from './check-circle-icon'
@@ -39,6 +40,7 @@ import { XCircleIcon } from './x-circle-icon'
 import { XIcon } from './x-icon'
 
 export {
+  AiImproveIcon,
   BriefcaseIcon,
   CalendarIcon,
   CltIcon,
