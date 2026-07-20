@@ -27,7 +27,10 @@ interface EligibilityParams {
     'idade_minima' | 'id_escolaridade_minima' | 'idiomas_requisito'
   >
   nascimentoData: string | undefined
-  melhorEscolaridadeId: string | undefined
+  /** Formações do currículo com id_escolaridade e status. */
+  formacoesCurriculo: Array<{ id_escolaridade: string; status: string }>
+  /** ID da escolaridade do RMI (autodeclarado), já resolvido via resolveEscolaridadeIdByDescricao. */
+  escolaridadeRmiId: string | undefined
   idiomasCurriculo: Array<{ id_idioma: string; id_nivel: string }>
   escolaridades: ReferenceItem[]
   idiomas: ReferenceItem[]
@@ -49,6 +52,17 @@ function calcularIdade(nascimentoData: string): number {
   return idade
 }
 
+export function resolveEscolaridadeIdByDescricao(
+  descricao: string | undefined | null,
+  escolaridades: Array<{ id: string; descricao: string }>
+): string | undefined {
+  if (!descricao) return undefined
+  const normalizado = descricao.trim().toLowerCase()
+  return escolaridades.find(
+    e => e.descricao.trim().toLowerCase() === normalizado
+  )?.id
+}
+
 function getOrdem(items: ReferenceItem[], id: string): number {
   const idx = items.findIndex(item => item.id === id)
   if (idx === -1) return -1
@@ -59,7 +73,8 @@ function getOrdem(items: ReferenceItem[], id: string): number {
 export function checkEligibility({
   vaga,
   nascimentoData,
-  melhorEscolaridadeId,
+  formacoesCurriculo,
+  escolaridadeRmiId,
   idiomasCurriculo,
   escolaridades,
   idiomas,
@@ -92,16 +107,36 @@ export function checkEligibility({
 
   // Critério de escolaridade
   if (vaga.id_escolaridade_minima != null) {
+    const escolaridadeVaga = escolaridades.find(
+      e => e.id === vaga.id_escolaridade_minima
+    )
     const ordemVaga = getOrdem(escolaridades, vaga.id_escolaridade_minima)
-    const ordemCandidato =
-      melhorEscolaridadeId != null
-        ? getOrdem(escolaridades, melhorEscolaridadeId)
-        : -1
+    // Requisito "incompleto": aceita a mesma escolaridade com qualquer status não-vazio,
+    // ou escolaridade de ordem superior com status Completo.
+    const requisiteIsIncompleto =
+      escolaridadeVaga?.descricao.toLowerCase().includes('incompleto') ?? false
 
-    if (ordemVaga === -1 || ordemCandidato < ordemVaga) {
-      const escolaridadeVaga = escolaridades.find(
-        e => e.id === vaga.id_escolaridade_minima
-      )
+    const passou = formacoesCurriculo.some(f => {
+      if (!f.status) return false
+      const ordemFormacao = getOrdem(escolaridades, f.id_escolaridade)
+      if (
+        requisiteIsIncompleto &&
+        f.id_escolaridade === vaga.id_escolaridade_minima
+      ) {
+        // mesma escolaridade incompleta com qualquer status não-vazio → passa
+        return true
+      }
+      // caso geral: precisa de status Completo e ordem >= requisito
+      return f.status === 'Completo' && ordemFormacao >= ordemVaga
+    })
+
+    // Fallback RMI se nenhuma formação passou
+    const passouviaRmi =
+      !passou &&
+      escolaridadeRmiId != null &&
+      getOrdem(escolaridades, escolaridadeRmiId) >= ordemVaga
+
+    if (ordemVaga === -1 || (!passou && !passouviaRmi)) {
       failedCriterios.push({
         slug: 'escolaridade',
         label: `Formação mínima — ${escolaridadeVaga?.descricao ?? 'Escolaridade mínima exigida'}`,
