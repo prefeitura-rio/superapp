@@ -8,7 +8,10 @@ import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilida
 import { EmpregabilidadeStatusCandidatura } from '@/http-courses/models/empregabilidadeStatusCandidatura'
 import type { ModelsCitizen } from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
-import { checkEligibility } from '@/lib/eligibility-utils'
+import {
+  checkEligibility,
+  resolveEscolaridadeIdByDescricao,
+} from '@/lib/eligibility-utils'
 import type { FailedCriterio } from '@/lib/eligibility-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -69,7 +72,10 @@ export async function enviarCandidatura(
       const curriculo = curriculoResponse.data as Record<string, unknown>
 
       const rawFormacoes = Array.isArray(curriculo.formacoes)
-        ? (curriculo.formacoes as Array<{ id_escolaridade?: string }>)
+        ? (curriculo.formacoes as Array<{
+            id_escolaridade?: string
+            status?: string
+          }>)
         : []
 
       const rawIdiomas = Array.isArray(curriculo.idiomas)
@@ -80,29 +86,33 @@ export async function enviarCandidatura(
         : []
 
       const escolaridades = formacaoOptions.escolaridades
-      const melhorEscolaridadeId = rawFormacoes
-        .map(f => f.id_escolaridade ?? '')
-        .filter(Boolean)
-        .reduce<string | undefined>((melhor, id) => {
-          if (!melhor) return id
-          const idxMelhor = escolaridades.findIndex(e => e.id === melhor)
-          const idxAtual = escolaridades.findIndex(e => e.id === id)
-          return idxAtual > idxMelhor ? id : melhor
-        }, undefined)
-
-      const idiomasCurriculo = rawIdiomas
-        .filter(i => i.id_idioma && i.id_nivel)
-        .map(i => ({ id_idioma: i.id_idioma!, id_nivel: i.id_nivel! }))
 
       const cidadao =
         cidadaoResponse.status === 200 && cidadaoResponse.data
           ? (cidadaoResponse.data as ModelsCitizen)
           : null
 
+      const formacoesCurriculo = rawFormacoes
+        .filter(f => f.id_escolaridade)
+        .map(f => ({
+          id_escolaridade: f.id_escolaridade!,
+          status: f.status ?? '',
+        }))
+
+      const escolaridadeRmiId = resolveEscolaridadeIdByDescricao(
+        cidadao?.escolaridade,
+        escolaridades
+      )
+
+      const idiomasCurriculo = rawIdiomas
+        .filter(i => i.id_idioma && i.id_nivel)
+        .map(i => ({ id_idioma: i.id_idioma!, id_nivel: i.id_nivel! }))
+
       const eligibilityResult = checkEligibility({
         vaga,
         nascimentoData: cidadao?.nascimento?.data,
-        melhorEscolaridadeId,
+        formacoesCurriculo,
+        escolaridadeRmiId,
         idiomasCurriculo,
         escolaridades,
         idiomas: formacaoOptions.idiomas,
@@ -128,8 +138,6 @@ export async function enviarCandidatura(
           respostas_info_complementares: respostasInfoComplementares,
         }),
     }
-
-    console.log('[enviarCandidatura] payload:', JSON.stringify(body, null, 2))
 
     const response = await postApiV1EmpregabilidadeCandidaturas(body)
 
