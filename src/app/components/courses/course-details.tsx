@@ -279,16 +279,33 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       : ((course.accessibility as any)?.label ?? null)
     : null
 
+  const items = [
+    { label: 'Carga horária', value: course.workload },
+    { label: 'Modalidade', value: modality },
+    ...(accessibilityLabel
+      ? [{ label: 'Acessibilidade', value: accessibilityLabel }]
+      : []),
+    ...(firstStartDate
+      ? [{ label: 'Data início', value: firstStartDate }]
+      : []),
+  ].filter(item => item.value)
+
+  const isOdd = items.length % 2 !== 0
+
   return (
-    <div className="grid grid-cols-2 min-[320px]:grid-cols-2 gap-2 w-full">
-      <MetaCard label="Carga horária" value={course.workload} />
-      <MetaCard label="Modalidade" value={modality} />
-      {accessibilityLabel && (
-        <MetaCard label="Acessibilidade" value={accessibilityLabel} />
-      )}
-      {firstStartDate && (
-        <MetaCard label="Data início" value={firstStartDate} />
-      )}
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          className={
+            isOdd && index === items.length - 1
+              ? 'col-span-2 sm:col-span-1'
+              : ''
+          }
+        >
+          <MetaCard label={item.label} value={item.value} />
+        </div>
+      ))}
     </div>
   )
 }
