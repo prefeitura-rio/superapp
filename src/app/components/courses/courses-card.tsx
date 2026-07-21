@@ -1,5 +1,7 @@
 'use client'
 
+import type { ModelsCurso } from '@/http-courses/models'
+import { shouldGrayscaleCourseCover } from '@/lib/course-utils'
 import { cn } from '@/lib/utils'
 import type { AccessibilityProps, CourseManagementType } from '@/types/course'
 
@@ -60,6 +62,8 @@ interface CourseCardProps {
   badgesOutside?: boolean
   enrollmentEndDate?: string
   hasBolsa?: boolean
+  /** Full course object — used to grayscale cover when enrollment is unavailable */
+  course?: ModelsCurso
 }
 
 export function CourseCard({
@@ -77,9 +81,13 @@ export function CourseCard({
   variant = 'vertical',
   enrollmentEndDate,
   hasBolsa = false,
+  course,
 }: CourseCardProps) {
   const enrollmentText = getEnrollmentText(enrollmentEndDate)
   const isEnrollmentClosed = enrollmentText === 'Inscrições encerradas'
+  const isCoverGrayscale = course
+    ? shouldGrayscaleCourseCover(course)
+    : isEnrollmentClosed
 
   const badgeHoverClasses =
     'group-hover:bg-terciary group-hover:text-foreground-light'
@@ -100,7 +108,7 @@ export function CourseCard({
               fill
               className={cn(
                 'object-cover transition-transform duration-300 ease-in-out group-hover:scale-105',
-                isEnrollmentClosed && 'grayscale'
+                isCoverGrayscale && 'grayscale'
               )}
             />
           )}
@@ -160,7 +168,7 @@ export function CourseCard({
             src={coverImage}
             alt="Imagem de capa do curso"
             fill
-            className={cn('object-cover', isEnrollmentClosed && 'grayscale')}
+            className={cn('object-cover', isCoverGrayscale && 'grayscale')}
           />
         )}
 

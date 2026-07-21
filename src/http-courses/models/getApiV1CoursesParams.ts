@@ -5,6 +5,7 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
+import type { GetApiV1CoursesSort } from './getApiV1CoursesSort'
 
 export type GetApiV1CoursesParams = {
   /**
@@ -43,4 +44,8 @@ export type GetApiV1CoursesParams = {
    * Filtrar por zona do bairro
    */
   neighborhood_zone?: string
+  /**
+   * Ordenação opcional. 'availability': cursos com inscrição disponível primeiro; os sem inscrição (status final, prazo vencido ou vagas esgotadas — inclusive accepting_enrollments sem vagas) vão para o final. A ordenação é aplicada antes da paginação. Omitido = ordem padrão (id desc).
+   */
+  sort?: GetApiV1CoursesSort
 }

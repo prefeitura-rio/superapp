@@ -6,14 +6,23 @@ import { useUserEnrollments } from '@/hooks/courses/use-user-enrollments'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
+import { useSearchParams } from 'next/navigation'
 import { Suspense, useMemo } from 'react'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
-import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
 import { CategoryFiltersSwipe } from './category-filters-swipe'
-import { CategoryFiltersSwipeSkeleton } from './category-filters-swipe-skeleton'
 import { MyCoursesHome } from './my-courses-home'
 import { RecentlyAddedCoursesSwipeSkeleton } from './recently-added-courses-skeleton'
+
+function RecentlyAddedOnFirstPage({ courses }: { courses: ModelsCurso[] }) {
+  const searchParams = useSearchParams()
+  const pageParam = Number.parseInt(searchParams.get('page') ?? '1', 10)
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
+
+  if (page > 1) return null
+
+  return <RecentlyAddedCourses courses={courses} />
+}
 
 export default function CoursePageClient({
   courses,
@@ -75,7 +84,9 @@ export default function CoursePageClient({
           myCourses.length > 0 && <MyCoursesHome courses={myCourses} />
         )}
 
-        <RecentlyAddedCourses courses={coursesExcludingMine} />
+        <Suspense fallback={null}>
+          <RecentlyAddedOnFirstPage courses={coursesExcludingMine} />
+        </Suspense>
         <Suspense fallback={null}>
           <AllCourses />
         </Suspense>

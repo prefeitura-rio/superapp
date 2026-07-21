@@ -15,10 +15,12 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { oportunidadesCariocasLogoDark } from '@/constants/bucket'
 import { useUserEnrollment } from '@/hooks/courses/use-user-enrollment'
+import type { ModelsCurso } from '@/http-courses/models'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
   normalizeModalityDisplay,
+  shouldGrayscaleCourseCover,
 } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { cn } from '@/lib/utils'
@@ -157,9 +159,7 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
           fill
           className={cn(
             'object-cover',
-            course.enrollment_end_date &&
-              new Date() > new Date(course.enrollment_end_date) &&
-              'grayscale'
+            shouldGrayscaleCourseCover(course as ModelsCurso) && 'grayscale'
           )}
         />
       )}

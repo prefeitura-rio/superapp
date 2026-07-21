@@ -42,6 +42,7 @@ export default function RecentlyAddedCourses({
                 enrollmentEndDate={
                   course.enrollment_end_date ?? course.data_limite_inscricoes
                 }
+                course={course}
               />
             </div>
           ))}
@@ -65,6 +66,7 @@ export default function RecentlyAddedCourses({
               enrollmentEndDate={
                 course.enrollment_end_date ?? course.data_limite_inscricoes
               }
+              course={course}
             />
           ))}
         </div>

@@ -1,4 +1,7 @@
-import type { ModelsCurso } from '@/http-courses/models'
+import {
+  GetApiPublicCoursesSort,
+  type ModelsCurso,
+} from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import {
   getCategoryIdBySlug,
@@ -102,6 +105,7 @@ export async function GET(request: Request) {
       page: page || 1,
       limit: limit || 100,
       status: COURSE_LISTING_STATUS_CSV,
+      sort: GetApiPublicCoursesSort.availability,
       search: q,
       categoria_id: categoriaId,
       modalidade: modalidade,

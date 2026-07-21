@@ -146,6 +146,7 @@ export function AllCourses() {
                 enrollmentEndDate={
                   course.enrollment_end_date ?? course.data_limite_inscricoes
                 }
+                course={course}
                 variant="horizontal"
                 className="py-4"
               />
@@ -171,6 +172,7 @@ export function AllCourses() {
               enrollmentEndDate={
                 course.enrollment_end_date ?? course.data_limite_inscricoes
               }
+              course={course}
             />
           ))}
         </div>

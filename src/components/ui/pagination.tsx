@@ -35,7 +35,7 @@ function PaginationButton({
       aria-label={ariaLabel}
       aria-current={ariaCurrent}
       className={cn(
-        'inline-flex size-11 shrink-0 items-center justify-center rounded-full text-sm leading-5 font-normal transition-colors',
+        'inline-flex size-11 shrink-0 items-center justify-center rounded-full text-sm leading-5 font-normal transition-colors cursor-pointer',
         'disabled:pointer-events-none disabled:opacity-50',
         isActive
           ? 'bg-primary text-primary-foreground'

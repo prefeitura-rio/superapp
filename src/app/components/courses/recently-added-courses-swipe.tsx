@@ -51,6 +51,7 @@ export function RecentlyAddedCoursesSwipe({
                     coverImage={course.cover_image as string}
                     accessibility={course.accessibility as AccessibilityProps}
                     courseManagementType={course.course_management_type}
+                    course={course}
                   />
                 ))}
               </div>

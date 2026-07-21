@@ -401,6 +401,19 @@ export function getCourseEnrollmentInfo(
 }
 
 /**
+ * Whether the course cover should render in grayscale (unavailable for new enrollments).
+ * Aligns with getCourseEnrollmentInfo when the citizen cannot enroll (vacancies, date, or final status).
+ */
+export function shouldGrayscaleCourseCover(course: ModelsCurso): boolean {
+  const { status } = getCourseEnrollmentInfo(course)
+  return (
+    status === 'enrollment_closed' ||
+    status === 'not_available' ||
+    status === 'course_ended'
+  )
+}
+
+/**
  * Filter courses to only show those that should be visible
  */
 export function filterVisibleCourses(courses: ModelsCurso[]): ModelsCurso[] {
