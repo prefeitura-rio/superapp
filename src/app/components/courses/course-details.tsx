@@ -6,6 +6,7 @@ import { CourseStatusCard } from './course-status-card'
 
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { CalendarIcon } from '@/assets/icons'
+import { CheckCircleIcon } from '@/assets/icons/check-circle-icon'
 import { ClockIcon } from '@/assets/icons/clock-icon'
 import { CycleIcon } from '@/assets/icons/cycle-icon'
 import { GroupIcon } from '@/assets/icons/group-icon'
@@ -18,6 +19,8 @@ import { useUserEnrollment } from '@/hooks/courses/use-user-enrollment'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
+  getCourseLatestOpenEnrollmentEnd,
+  isScheduleEnrollmentClosed,
   normalizeModalityDisplay,
 } from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
@@ -279,9 +282,16 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       : ((course.accessibility as any)?.label ?? null)
     : null
 
+  // "Inscrições até" do curso = encerramento mais distante entre as turmas
+  // ABERTAS (com fallback para a data do curso).
+  const enrollmentUntil = getCourseLatestOpenEnrollmentEnd(course as any)
+
   const items = [
     { label: 'Carga horária', value: course.workload },
     { label: 'Modalidade', value: modality },
+    ...(enrollmentUntil
+      ? [{ label: 'Inscrições até', value: formatDate(enrollmentUntil) }]
+      : []),
     ...(accessibilityLabel
       ? [{ label: 'Acessibilidade', value: accessibilityLabel }]
       : []),
@@ -521,6 +531,22 @@ function ScheduleCards({ schedules }: { schedules: any[] }) {
           className="flex flex-col p-5 rounded-xl bg-card gap-2.5"
         >
           <ScheduleRow icon={<GroupIcon />} label="Turma" value={index + 1} />
+          {schedule.enrollment_end_date && (
+            <ScheduleRow
+              icon={<CheckCircleIcon />}
+              label="Inscrições até"
+              value={
+                <span className="flex items-center gap-2">
+                  {formatDate(schedule.enrollment_end_date)}
+                  {isScheduleEnrollmentClosed(schedule) && (
+                    <span className="text-xs font-medium text-destructive">
+                      Inscrições encerradas
+                    </span>
+                  )}
+                </span>
+              }
+            />
+          )}
           {schedule.class_start_date && (
             <ScheduleRow
               icon={<CalendarIcon />}
@@ -577,10 +603,16 @@ function OnlineClassSelection({
   const onlineClasses = course.remote_class.schedules
   const hasMultiple = onlineClasses.length > 1
 
-  const isClassAvailable = (onlineClass: any) =>
-    onlineClass.remaining_vacancies !== undefined &&
-    onlineClass.remaining_vacancies !== null &&
-    onlineClass.remaining_vacancies > 0
+  // A turma só aceita inscrição quando ainda tem vagas E o próprio período de
+  // inscrição não encerrou.
+  const isClassAvailable = (onlineClass: any) => {
+    if (isScheduleEnrollmentClosed(onlineClass)) return false
+    return (
+      onlineClass.remaining_vacancies !== undefined &&
+      onlineClass.remaining_vacancies !== null &&
+      onlineClass.remaining_vacancies > 0
+    )
+  }
 
   if (!hasMultiple) {
     return (
@@ -619,7 +651,9 @@ function OnlineClassSelection({
                 Turma {index + 1}
                 {!isAvailable && (
                   <span className="text-muted-foreground text-xs ml-2">
-                    (Sem vagas)
+                    {isScheduleEnrollmentClosed(onlineClass)
+                      ? '(Inscrições encerradas)'
+                      : '(Sem vagas)'}
                   </span>
                 )}
               </h4>

@@ -271,6 +271,41 @@ function hasNoAvailableInPersonClasses(course: ModelsCurso): boolean {
 /**
  * Get enrollment status and button configuration for a course
  */
+// Returns true when a turma's own enrollment period has already ended.
+export function isScheduleEnrollmentClosed(schedule: {
+  enrollment_end_date?: string | null
+}): boolean {
+  if (!schedule?.enrollment_end_date) return false
+  return new Date() > new Date(schedule.enrollment_end_date)
+}
+
+// Course-level "Inscrições até": the latest enrollment closing date among the
+// turmas that are still OPEN (enrollment_end_date >= now). Falls back to the
+// course-level enrollment_end_date when no open turma dates are available
+// (e.g. list payloads that don't include the schedules).
+export function getCourseLatestOpenEnrollmentEnd(course: {
+  enrollment_end_date?: string | null
+  locations?: Array<{ schedules?: Array<{ enrollment_end_date?: string }> }>
+  remote_class?: { schedules?: Array<{ enrollment_end_date?: string }> } | null
+}): string | undefined {
+  const now = new Date()
+  const openEnds: number[] = []
+  const collect = (schedules?: Array<{ enrollment_end_date?: string }>) => {
+    for (const s of schedules ?? []) {
+      if (s.enrollment_end_date) {
+        const t = new Date(s.enrollment_end_date).getTime()
+        if (new Date(t) >= now) openEnds.push(t)
+      }
+    }
+  }
+  for (const loc of course.locations ?? []) collect(loc.schedules)
+  collect(course.remote_class?.schedules)
+  if (openEnds.length > 0) {
+    return new Date(Math.max(...openEnds)).toISOString()
+  }
+  return course.enrollment_end_date ?? undefined
+}
+
 export function getCourseEnrollmentInfo(
   course: ModelsCurso,
   userEnrollment?: UserEnrollmentExtended | null

@@ -33,6 +33,8 @@ export interface Schedule {
   location_id?: string
   vacancies: number
   remaining_vacancies?: number
+  enrollment_start_date?: string
+  enrollment_end_date?: string
   class_start_date: string
   class_end_date: string
   class_time: string
