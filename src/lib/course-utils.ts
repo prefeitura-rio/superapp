@@ -135,16 +135,20 @@ function getLatestClassEndDate(course: ModelsCurso): Date | null {
   )
 }
 
-const LISTING_STATUSES = new Set([
+export const COURSE_LISTING_STATUSES = [
   'opened',
   'published',
   'scheduled',
   'accepting_enrollments',
   'in_progress',
-])
+] as const
+
+export const COURSE_LISTING_STATUS_CSV = COURSE_LISTING_STATUSES.join(',')
+
+const LISTING_STATUSES = new Set<string>(COURSE_LISTING_STATUSES)
 
 const URL_STATUSES = new Set([
-  ...LISTING_STATUSES,
+  ...COURSE_LISTING_STATUSES,
   'finished',
   'closed',
   'canceled',

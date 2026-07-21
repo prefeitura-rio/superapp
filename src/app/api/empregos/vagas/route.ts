@@ -152,10 +152,16 @@ export async function GET(request: NextRequest) {
 
   // Se havia filtro de regime/modelo mas não resolveu nenhum UUID → sem resultados
   if (regimeDescricoes.length > 0 && regimes.length === 0) {
-    return NextResponse.json({ data: [], meta: { total: 0 } })
+    return NextResponse.json({
+      data: [],
+      meta: { page: base.page, page_size: base.pageSize, total: 0 },
+    })
   }
   if (modeloDescricoes.length > 0 && modelos.length === 0) {
-    return NextResponse.json({ data: [], meta: { total: 0 } })
+    return NextResponse.json({
+      data: [],
+      meta: { page: base.page, page_size: base.pageSize, total: 0 },
+    })
   }
 
   const params: GetApiPublicEmpregabilidadeVagasParams = {
@@ -176,7 +182,14 @@ export async function GET(request: NextRequest) {
       ? body.data
       : []
 
-    return NextResponse.json({ data: vagas, meta: { total: vagas.length } })
+    return NextResponse.json({
+      data: vagas,
+      meta: body?.meta ?? {
+        page: params.page ?? 1,
+        page_size: params.pageSize ?? 100,
+        total: vagas.length,
+      },
+    })
   } catch (error) {
     console.error('Erro ao buscar vagas:', error)
     return NextResponse.json({ data: [], meta: {} }, { status: 500 })

@@ -6,7 +6,7 @@ import { useUserEnrollments } from '@/hooks/courses/use-user-enrollments'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { filterCoursesExcludingMyCourses } from '@/lib/course-utils'
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { AllCourses } from './all-courses'
 import { CategoryFiltersMobile } from './category-filters-mobile'
 import { CategoryFiltersMobileSkeleton } from './category-filters-mobile-skeleton'
@@ -76,7 +76,9 @@ export default function CoursePageClient({
         )}
 
         <RecentlyAddedCourses courses={coursesExcludingMine} />
-        <AllCourses courses={coursesExcludingMine} />
+        <Suspense fallback={null}>
+          <AllCourses />
+        </Suspense>
       </main>
     </div>
   )

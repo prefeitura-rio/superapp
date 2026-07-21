@@ -5,7 +5,7 @@ import {
   transformCategoriesToFilters,
 } from '@/lib/course-category-helpers'
 import {
-  filterVisibleCourses,
+  COURSE_LISTING_STATUS_CSV,
   parseCoursesListPagination,
   parseCoursesListResponse,
 } from '@/lib/course-utils'
@@ -101,6 +101,7 @@ export async function GET(request: Request) {
     const apiParams: Parameters<typeof getDalCourses>[0] = {
       page: page || 1,
       limit: limit || 100,
+      status: COURSE_LISTING_STATUS_CSV,
       search: q,
       categoria_id: categoriaId,
       modalidade: modalidade,
@@ -122,12 +123,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ courses: [] }, { status: 200 })
     }
 
-    // Extract courses array from the API response
-    const allCourses = parseCoursesListResponse(response.data)
-    const visibleCourses = filterVisibleCourses(allCourses)
-
     const result: SearchCoursesResult = {
-      courses: visibleCourses,
+      courses: parseCoursesListResponse(response.data),
       pagination: parseCoursesListPagination(response.data),
     }
 

@@ -1,25 +1,63 @@
 'use client'
 
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
-export function CourseCardSkeleton() {
+interface CourseCardSkeletonProps {
+  variant?: 'vertical' | 'horizontal'
+  className?: string
+}
+
+export function CourseCardSkeleton({
+  variant = 'vertical',
+  className,
+}: CourseCardSkeletonProps) {
+  if (variant === 'horizontal') {
+    return (
+      <div className={cn('w-full flex gap-3', className)}>
+        <div className="relative w-26 h-26 shrink-0 overflow-hidden rounded-xl">
+          <Skeleton className="w-full h-full rounded-none bg-muted" />
+          <div className="absolute top-1 left-1 z-20 w-6.5 h-6.5 rounded-full overflow-hidden border border-[#E2E8F0] bg-white">
+            <Skeleton className="w-full h-full rounded-full bg-muted" />
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center py-2 min-w-0 gap-1">
+          <Skeleton className="h-4 w-full bg-muted" />
+          <Skeleton className="h-4 w-4/5 bg-muted" />
+          <Skeleton className="h-3 w-28 bg-muted" />
+          <div className="flex flex-wrap gap-1">
+            <Skeleton className="h-5 w-16 rounded-full bg-muted" />
+            <Skeleton className="h-5 w-12 rounded-full bg-muted" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-[212px] h-[252px] rounded-2xl overflow-hidden bg-card shrink-0 flex flex-col">
+    <div
+      className={cn(
+        'w-[212px] h-[252px] rounded-2xl overflow-hidden bg-card shrink-0 flex flex-col',
+        className
+      )}
+    >
       <div className="relative w-full h-[100px] overflow-hidden">
-        <Skeleton className="w-full h-full" />
-        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full overflow-hidden">
-          <Skeleton className="w-full h-full rounded-full" />
+        <Skeleton className="w-full h-full rounded-none bg-muted" />
+        <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full overflow-hidden border border-[#E2E8F0] bg-white">
+          <Skeleton className="w-full h-full rounded-full bg-muted" />
         </div>
       </div>
 
       <div className="px-4 py-3 flex flex-col flex-1">
         <div className="space-y-1">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-full bg-muted" />
+          <Skeleton className="h-4 w-3/4 bg-muted" />
         </div>
-        <div className="flex gap-1 mt-auto pt-3">
-          <Skeleton className="h-5 w-16 rounded-full" />
-          <Skeleton className="h-5 w-12 rounded-full" />
+        <Skeleton className="mt-1 h-3 w-28 bg-muted" />
+        <div className="flex flex-wrap gap-1 mt-auto pt-3">
+          <Skeleton className="h-5 w-16 rounded-full bg-muted" />
+          <Skeleton className="h-5 w-12 rounded-full bg-muted" />
         </div>
       </div>
     </div>
