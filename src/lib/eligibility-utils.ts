@@ -146,6 +146,9 @@ export function checkEligibility({
 
   // Critério de idiomas
   for (const requisito of vaga.idiomas_requisito ?? []) {
+    if (requisito.id_idioma == null || requisito.id_nivel_minimo == null)
+      continue
+
     const idiomasCandidato = idiomasCurriculo.filter(
       i => i.id_idioma === requisito.id_idioma
     )
