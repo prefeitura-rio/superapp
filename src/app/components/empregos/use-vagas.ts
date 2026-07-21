@@ -3,9 +3,17 @@ import { useQuery } from '@tanstack/react-query'
 import type { VagaFilterState } from './vaga-filters'
 import { transformVagaToCardData } from './vagas-utils'
 
+export const VAGAS_PAGE_SIZE = 8
+
 interface VagasListResponse {
   data: EmpregabilidadeVaga[]
   meta: { page: number; page_size: number; total: number }
+}
+
+export interface UseVagasResult {
+  vagas: ReturnType<typeof transformVagaToCardData>[]
+  meta: { page: number; page_size: number; total: number }
+  totalPages: number
 }
 
 /**
@@ -15,12 +23,16 @@ interface VagasListResponse {
  * Demais filtros multi-selecionados são passados como params repetidos e o route handler
  * faz requests paralelas + merge/deduplica.
  */
-function buildQueryString(filters: VagaFilterState): string {
+function buildQueryString(
+  filters: VagaFilterState,
+  page: number,
+  pageSize: number
+): string {
   const params = new URLSearchParams()
 
   params.set('status', 'publicado_ativo')
-  params.set('pageSize', '100')
-  params.set('page', '1')
+  params.set('pageSize', String(pageSize))
+  params.set('page', String(page))
 
   const dataPublicacao = filters.data_publicacao
   if (
@@ -63,8 +75,12 @@ function buildQueryString(filters: VagaFilterState): string {
   return params.toString()
 }
 
-async function fetchVagasComFiltros(filters: VagaFilterState) {
-  const qs = buildQueryString(filters)
+async function fetchVagasComFiltros(
+  filters: VagaFilterState,
+  page: number,
+  pageSize: number
+): Promise<UseVagasResult> {
+  const qs = buildQueryString(filters, page, pageSize)
   const res = await fetch(`/api/empregos/vagas?${qs}`)
 
   if (!res.ok) throw new Error('Erro ao buscar vagas')
@@ -74,13 +90,32 @@ async function fetchVagasComFiltros(filters: VagaFilterState) {
     ? body.data
     : []
 
-  return vagas.map(transformVagaToCardData)
+  const meta = body?.meta ?? {
+    page,
+    page_size: pageSize,
+    total: vagas.length,
+  }
+  const resolvedPageSize = meta.page_size > 0 ? meta.page_size : pageSize
+  const totalPages =
+    resolvedPageSize > 0
+      ? Math.max(1, Math.ceil((meta.total ?? 0) / resolvedPageSize))
+      : 1
+
+  return {
+    vagas: vagas.map(transformVagaToCardData),
+    meta: { ...meta, page_size: resolvedPageSize },
+    totalPages,
+  }
 }
 
-export function useVagas(filters: VagaFilterState) {
+export function useVagas(
+  filters: VagaFilterState,
+  page = 1,
+  pageSize = VAGAS_PAGE_SIZE
+) {
   return useQuery({
-    queryKey: ['vagas-filtradas', filters],
-    queryFn: () => fetchVagasComFiltros(filters),
+    queryKey: ['vagas-filtradas', filters, page, pageSize],
+    queryFn: () => fetchVagasComFiltros(filters, page, pageSize),
     staleTime: 2 * 60 * 1000,
   })
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { Suspense } from 'react'
 import { AllVagas } from './all-vagas'
 import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
 import { RecentlyAddedVagas } from './recently-added-vagas'
@@ -35,7 +36,9 @@ export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
         </div>
       )}
       <RecentlyAddedVagas vagas={recentVagas} />
-      <AllVagas />
+      <Suspense fallback={null}>
+        <AllVagas />
+      </Suspense>
     </>
   )
 }
