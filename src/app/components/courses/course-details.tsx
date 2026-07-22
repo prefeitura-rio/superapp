@@ -6,7 +6,7 @@ import { CourseStatusCard } from './course-status-card'
 
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { CalendarIcon } from '@/assets/icons'
-import { CheckCircleIcon } from '@/assets/icons/check-circle-icon'
+import { CircleCheckIcon } from '@/assets/icons/circle-check-icon'
 import { ClockIcon } from '@/assets/icons/clock-icon'
 import { CycleIcon } from '@/assets/icons/cycle-icon'
 import { GroupIcon } from '@/assets/icons/group-icon'
@@ -533,18 +533,9 @@ function ScheduleCards({ schedules }: { schedules: any[] }) {
           <ScheduleRow icon={<GroupIcon />} label="Turma" value={index + 1} />
           {schedule.enrollment_end_date && (
             <ScheduleRow
-              icon={<CheckCircleIcon />}
+              icon={<CircleCheckIcon />}
               label="Inscrições até"
-              value={
-                <span className="flex items-center gap-2">
-                  {formatDate(schedule.enrollment_end_date)}
-                  {isScheduleEnrollmentClosed(schedule) && (
-                    <span className="text-xs font-medium text-destructive">
-                      Inscrições encerradas
-                    </span>
-                  )}
-                </span>
-              }
+              value={formatDate(schedule.enrollment_end_date)}
             />
           )}
           {schedule.class_start_date && (
