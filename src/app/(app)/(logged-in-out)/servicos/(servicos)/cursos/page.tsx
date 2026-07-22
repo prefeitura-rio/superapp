@@ -1,11 +1,13 @@
 import CoursePageClient from '@/app/components/courses/courses-client'
+import { GetApiPublicCoursesSort } from '@/http-courses/models'
 import type { CategoryFilter } from '@/lib/course-category-helpers'
 import { transformCategoriesToFilters } from '@/lib/course-category-helpers'
 import {
-  filterVisibleCourses,
+  COURSE_LISTING_STATUS_CSV,
+  parseCoursesListPagination,
   parseCoursesListResponse,
-  sortCourses,
 } from '@/lib/course-utils'
+import { COURSES_PAGE_SIZE } from '@/lib/courses-list-query'
 import { getDalCategorias, getDalCourses } from '@/lib/dal'
 
 export default async function CoursesPage() {
@@ -28,27 +30,35 @@ export default async function CoursesPage() {
       console.error('Error fetching categories:', categoriesError)
     }
 
-    // Fetch all courses (public data, cached via DAL)
+    // Same params as /api/courses/search so SSR and client share one Data Cache entry
     const response = await getDalCourses({
       page: 1,
-      limit: 100,
+      limit: COURSES_PAGE_SIZE,
+      status: COURSE_LISTING_STATUS_CSV,
+      sort: GetApiPublicCoursesSort.availability,
     })
-    const allCourses = parseCoursesListResponse(
+    const courses = parseCoursesListResponse(
       response.status === 200 ? response.data : null
     )
-    const visibleCourses = filterVisibleCourses(allCourses)
-    const sortedCourses = sortCourses(visibleCourses)
+    const pagination = parseCoursesListPagination(
+      response.status === 200 ? response.data : null
+    )
 
     // User enrollments are fetched client-side via TanStack Query
     // to avoid CDN caching authenticated data
     return (
       <CoursePageClient
-        courses={sortedCourses}
+        initialCoursesPage={{ courses, pagination }}
         categoryFilters={categoriesFilters}
       />
     )
   } catch (error) {
     console.error('Error fetching courses:', error)
-    return <CoursePageClient courses={[]} categoryFilters={[]} />
+    return (
+      <CoursePageClient
+        initialCoursesPage={{ courses: [] }}
+        categoryFilters={[]}
+      />
+    )
   }
 }

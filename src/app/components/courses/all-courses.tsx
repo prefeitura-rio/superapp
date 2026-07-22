@@ -3,38 +3,14 @@
 import { CourseCard } from '@/app/components/courses/courses-card'
 import { CourseCardSkeleton } from '@/app/components/courses/recently-added-courses-skeleton'
 import { Pagination } from '@/components/ui/pagination'
-import type { ModelsCurso } from '@/http-courses/models'
+import { useAllCoursesPage } from '@/hooks/courses/use-all-courses-page'
+import type { CoursesPageResult } from '@/lib/courses-list-query'
+import { COURSES_PAGE_SIZE } from '@/lib/courses-list-query'
 import type { AccessibilityProps } from '@/types/course'
-import { useQuery } from '@tanstack/react-query'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect } from 'react'
 
 const ALL_COURSES_SKELETON_COUNT = 8
-
-const COURSES_PAGE_SIZE = 20
-
-interface CoursesPageResult {
-  courses: ModelsCurso[]
-  pagination?: {
-    limit: number
-    page: number
-    total: number
-    total_pages: number
-  }
-}
-
-async function fetchCoursesPage(
-  page: number,
-  limit: number
-): Promise<CoursesPageResult> {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  })
-  const res = await fetch(`/api/courses/search?${params}`)
-  if (!res.ok) throw new Error('Erro ao buscar cursos')
-  return res.json()
-}
 
 function resolveTotalPages(
   pagination: CoursesPageResult['pagination'],
@@ -49,7 +25,15 @@ function resolveTotalPages(
   return 1
 }
 
-export function AllCourses() {
+interface AllCoursesProps {
+  initialData?: CoursesPageResult
+  initialDataUpdatedAt?: number
+}
+
+export function AllCourses({
+  initialData,
+  initialDataUpdatedAt,
+}: AllCoursesProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -57,10 +41,9 @@ export function AllCourses() {
   const pageParam = Number.parseInt(searchParams.get('page') ?? '1', 10)
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['all-courses', page],
-    queryFn: () => fetchCoursesPage(page, COURSES_PAGE_SIZE),
-    staleTime: 2 * 60 * 1000,
+  const { data, isLoading, isError } = useAllCoursesPage(page, {
+    initialData,
+    initialDataUpdatedAt,
   })
 
   const courses = data?.courses ?? []
