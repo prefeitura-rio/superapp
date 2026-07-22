@@ -455,6 +455,7 @@ export default function CoursesSearchClient({
                       course.id?.toString() || '',
                       course.title || ''
                     )}`}
+                    prefetch={false}
                     onClick={() => handleCourseClick(course)}
                     className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                   >
@@ -504,6 +505,7 @@ export default function CoursesSearchClient({
                       course.id?.toString() || '',
                       course.title || ''
                     )}`}
+                    prefetch={false}
                     onClick={() => handleCourseClick(course)}
                     className="block border-b border-border py-4 last:border-b-0 last:pb-0"
                   >
@@ -560,6 +562,7 @@ export default function CoursesSearchClient({
                         course.id.toString(),
                         course.title
                       )}`}
+                      prefetch={false}
                       onClick={() => handleCourseClick(course as Course)}
                       className="flex gap-3 items-center flex-1 min-w-0"
                     >
@@ -644,6 +647,7 @@ export default function CoursesSearchClient({
                     course.id?.toString() || '',
                     course.title || ''
                   )}`}
+                  prefetch={false}
                   onClick={() => handleCourseClick(course)}
                   className="block"
                 >

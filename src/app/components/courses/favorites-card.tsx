@@ -66,6 +66,7 @@ export function FavoritesCard() {
           <Link
             key={course.id}
             href={`/servicos/cursos/${createCourseSlug(course.id!, course.title!)}`}
+            prefetch={false}
             className="flex rounded-xl bg-background transition overflow-hidden cursor-pointer group"
           >
             <div className="relative w-30 h-30 overflow-hidden rounded-xl">

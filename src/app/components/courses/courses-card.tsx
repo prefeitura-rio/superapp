@@ -97,6 +97,7 @@ export function CourseCard({
     return (
       <Link
         href={`/servicos/cursos/${courseId}`}
+        prefetch={false}
         className={cn('w-full cursor-pointer group flex gap-3', className)}
       >
         {/* Imagem à esquerda */}
@@ -156,6 +157,7 @@ export function CourseCard({
   return (
     <Link
       href={`/servicos/cursos/${courseId}`}
+      prefetch={false}
       className={cn(
         'w-[212px] h-[252px] rounded-2xl overflow-hidden bg-card cursor-pointer group flex flex-col hover:bg-secondary transition-colors duration-200',
         className

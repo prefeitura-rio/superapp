@@ -21,6 +21,7 @@ export function CategoryFiltersMobile({
             <Link
               key={filter.value}
               href={`/servicos/cursos/categoria/${filter.value}`}
+              prefetch={false}
               className="flex flex-col items-center cursor-pointer shrink-0 w-20"
             >
               <div className="flex flex-col items-center justify-center p-2 rounded-2xl aspect-square transition-all h-20 border-2 border-card bg-card hover:bg-card/80 w-20">
