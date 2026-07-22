@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { AllVagas } from './all-vagas'
 import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
@@ -13,6 +14,16 @@ async function fetchCandidaturas() {
   })
   if (!res.ok) return { hasCandidaturas: false }
   return res.json()
+}
+
+function RecentlyAddedVagasOnFirstPage({ vagas }: { vagas: VagaCardData[] }) {
+  const searchParams = useSearchParams()
+  const pageParam = Number.parseInt(searchParams.get('page') ?? '1', 10)
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
+
+  if (page > 1) return null
+
+  return <RecentlyAddedVagas vagas={vagas} />
 }
 
 interface EmpregosPageClientProps {
@@ -35,7 +46,9 @@ export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
           <CandidaturasEnviadasCtaCard />
         </div>
       )}
-      <RecentlyAddedVagas vagas={recentVagas} />
+      <Suspense fallback={null}>
+        <RecentlyAddedVagasOnFirstPage vagas={recentVagas} />
+      </Suspense>
       <Suspense fallback={null}>
         <AllVagas />
       </Suspense>
