@@ -535,16 +535,7 @@ function ScheduleCards({ schedules }: { schedules: any[] }) {
             <ScheduleRow
               icon={<CheckCircleIcon />}
               label="Inscrições até"
-              value={
-                <span className="flex items-center gap-2">
-                  {formatDate(schedule.enrollment_end_date)}
-                  {isScheduleEnrollmentClosed(schedule) && (
-                    <span className="text-xs font-medium text-destructive">
-                      Inscrições encerradas
-                    </span>
-                  )}
-                </span>
-              }
+              value={formatDate(schedule.enrollment_end_date)}
             />
           )}
           {schedule.class_start_date && (
