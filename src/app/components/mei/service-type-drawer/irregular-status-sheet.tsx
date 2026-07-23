@@ -1,6 +1,7 @@
 'use client'
 
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { MEI_LINKS } from '@/constants/mei-links'
 
 interface IrregularStatusSheetProps {
@@ -31,13 +32,14 @@ export function IrregularStatusSheet({
           Empreendedor para pagar débitos pendentes
         </p>
 
-        <button
-          type="button"
+        <CustomButton
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={handleOpenRegularization}
-          className="w-full rounded-full h-[46px] bg-primary text-background font-medium"
         >
           Regularizar situação
-        </button>
+        </CustomButton>
       </div>
     </BottomSheet>
   )

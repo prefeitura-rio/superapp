@@ -52,8 +52,8 @@ export function PetRegisteredDrawer({
           <CustomButton
             size="xl"
             fullWidth
+            variant="primary"
             onClick={handleViewPets}
-            className="rounded-full"
           >
             <span className="text-primary-foreground">
               Ver pets cadastrados

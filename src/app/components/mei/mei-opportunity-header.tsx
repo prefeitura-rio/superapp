@@ -42,7 +42,7 @@ export function MeiOpportunityHeader({
                 variant="secondary"
                 icon={EditIcon}
                 iconPosition="left"
-                className="rounded-full hover:bg-card"
+                className="rounded-full"
                 onClick={onEditClick}
               >
                 Editar

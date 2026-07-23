@@ -29,12 +29,7 @@ export default function NotFound() {
         </p>
         <div className="space-y-4 mb-16">
           <Link href="/">
-            <CustomButton
-              size="xl"
-              className="rounded-full"
-              variant="primary"
-              fullWidth
-            >
+            <CustomButton size="xl" variant="primary" fullWidth>
               Voltar para a tela inicial
             </CustomButton>
           </Link>

@@ -287,41 +287,32 @@ export function MeiProposalClient({
               <div className="flex gap-3">
                 <CustomButton
                   variant="secondary"
+                  size="lg"
+                  className="flex-1"
                   onClick={() => navigateToStep('value')}
                   disabled={isSubmitting}
-                  className="flex-1 rounded-full h-[46px]"
                 >
                   Editar
                 </CustomButton>
-                <button
+                <CustomButton
                   type="button"
+                  variant="primary"
+                  size="lg"
+                  className="flex-1"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className={`flex-1 rounded-full h-[46px] text-sm font-normal transition-all duration-200 ${
-                    !acceptedTerms || isSubmitting
-                      ? 'bg-card text-muted-foreground cursor-not-allowed'
-                      : 'bg-primary text-background hover:bg-primary/90'
-                  } ${isSubmitting ? 'opacity-50' : ''}`}
+                  disabled={!acceptedTerms || isSubmitting}
+                  loading={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
-                      <span>{buttonText}</span>
-                    </div>
-                  ) : (
-                    buttonText
-                  )}
-                </button>
+                  {buttonText}
+                </CustomButton>
               </div>
             ) : (
               <CustomButton
+                variant="primary"
+                size="lg"
+                fullWidth
                 onClick={handleNext}
                 disabled={isButtonDisabled}
-                className={`w-full rounded-full h-[46px] ${
-                  isButtonDisabled
-                    ? 'bg-card text-muted-foreground'
-                    : 'bg-primary text-background'
-                }`}
               >
                 {buttonText}
               </CustomButton>

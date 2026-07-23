@@ -31,7 +31,7 @@ export function DiscardChangesDrawer({
           <CustomButton
             size="lg"
             variant="secondary"
-            className="flex-1 rounded-full whitespace-nowrap"
+            className="flex-1 whitespace-nowrap"
             onClick={onCancel}
           >
             Cancelar
@@ -39,7 +39,8 @@ export function DiscardChangesDrawer({
 
           <CustomButton
             size="lg"
-            className="flex-1 rounded-full"
+            variant="primary"
+            className="flex-1"
             onClick={onDiscard}
           >
             Descartar

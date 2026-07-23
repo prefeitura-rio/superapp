@@ -33,8 +33,10 @@ export function MeiEmptyState({ variant = 'meu-mei' }: MeiEmptyStateProps) {
 
       <div className="pb-safe">
         <CustomButton
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={handleOpenMeiRegistration}
-          className="w-full rounded-full h-[46px] bg-primary text-background"
         >
           Quero ser MEI
         </CustomButton>

@@ -514,7 +514,7 @@ function FormacaoAccordionContent({
           type="button"
           variant="secondary"
           size="lg"
-          className="w-full rounded-full bg-card text-primary"
+          fullWidth
           onClick={() =>
             append(
               {
@@ -552,7 +552,7 @@ function FormacaoAccordionContent({
           type="button"
           variant="secondary"
           size="lg"
-          className="flex-1 rounded-full bg-card text-primary"
+          className="flex-1"
           onClick={onCancel}
         >
           Cancelar
@@ -561,7 +561,7 @@ function FormacaoAccordionContent({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1 rounded-full"
+          className="flex-1"
           onClick={() => handleFormacaoSave()}
           disabled={!canSave}
         >
@@ -638,7 +638,7 @@ function IdiomasFields() {
         type="button"
         variant="secondary"
         size="lg"
-        className="w-full rounded-full bg-card text-primary"
+        fullWidth
         onClick={() => append({ idIdioma: '', idNivel: '' })}
       >
         Adicionar outro idioma
@@ -1253,7 +1253,7 @@ function SituacaoAtualAccordionContent({
           type="button"
           variant="secondary"
           size="lg"
-          className="flex-1 rounded-full bg-card text-primary"
+          className="flex-1"
           onClick={onCancel}
         >
           Cancelar
@@ -1262,7 +1262,7 @@ function SituacaoAtualAccordionContent({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1 rounded-full"
+          className="flex-1"
           onClick={handleSituacaoSave}
           disabled={!canSave}
         >
@@ -1874,7 +1874,6 @@ export function CurriculoContent({
                       fullWidth
                       variant="primary"
                       onClick={handleContinuar}
-                      className="rounded-full"
                       disabled={isEnviandoCandidatura}
                     >
                       {isEnviandoCandidatura ? 'Enviando...' : 'Continuar'}

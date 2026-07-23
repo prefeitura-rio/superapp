@@ -1,6 +1,7 @@
 'use client'
 
 import { Checkbox } from '@/components/ui/checkbox'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -94,21 +95,26 @@ export function TermosUsoAccordionContent({
       </div>
 
       <div className="flex gap-3">
-        <button
+        <CustomButton
           type="button"
+          variant="secondary"
+          size="lg"
+          className="flex-1"
           onClick={handleCancel}
-          className="flex flex-1 items-center justify-center gap-(--button-large-spacing,12px) rounded-(--button-small-radius-pill,999px) bg-(--theme-color-card,#F1F1F4) px-(--button-large-h-padding,24px) py-(--button-large-v-padding,16px) text-sm font-medium text-foreground"
         >
           Cancelar
-        </button>
-        <button
+        </CustomButton>
+        <CustomButton
           type="button"
+          variant="primary"
+          size="lg"
+          className="flex-1"
           onClick={handleSave}
           disabled={isSaving || alreadyAccepted}
-          className="flex flex-1 items-center justify-center gap-(--button-large-spacing,12px) rounded-(--button-small-radius-pill,999px) bg-(--theme-color-primary,#13335A) px-(--button-large-h-padding,24px) py-(--button-large-v-padding,16px) text-sm font-medium text-white disabled:opacity-50"
+          loading={isSaving}
         >
           Salvar
-        </button>
+        </CustomButton>
       </div>
     </div>
   )

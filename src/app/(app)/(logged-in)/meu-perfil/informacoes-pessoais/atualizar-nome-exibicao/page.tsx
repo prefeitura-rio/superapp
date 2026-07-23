@@ -169,8 +169,8 @@ export default function DisplayNameForm() {
             <CustomButton
               size="xl"
               fullWidth
+              variant="primary"
               onClick={handleDrawerClose}
-              className="rounded-full"
             >
               Finalizar
             </CustomButton>

@@ -3,7 +3,7 @@
 import { updateAddress } from '@/actions/update-user-address'
 import { AddressDetailsDrawerContent } from '@/app/components/drawer-contents/address-details-drawer-content'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { Button } from '@/components/ui/button'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import {
@@ -404,9 +404,11 @@ export default function AddressForm() {
               source={VIDEO_SOURCES.updatedAddress}
               containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
-            <Button
+            <CustomButton
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal text-background"
+              fullWidth
+              variant="primary"
+              className="max-w-xs mt-8"
               onClick={() => {
                 setDrawerOpen(false)
                 if (returnUrl) {
@@ -417,7 +419,7 @@ export default function AddressForm() {
               }}
             >
               Finalizar
-            </Button>
+            </CustomButton>
           </div>
         </DrawerContent>
       </Drawer>

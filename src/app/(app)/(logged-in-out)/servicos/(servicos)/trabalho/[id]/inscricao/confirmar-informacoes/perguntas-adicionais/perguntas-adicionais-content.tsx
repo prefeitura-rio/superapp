@@ -433,7 +433,6 @@ export function PerguntasAdicionaisContent({
                 size="lg"
                 fullWidth
                 variant="primary"
-                className="rounded-full"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Finalizando...' : 'Finalizar inscrição'}

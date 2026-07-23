@@ -2,7 +2,6 @@
 import { validateUserPhoneToken } from '@/actions/validate-user-phone-token'
 import PhoneInputTokenForm from '@/app/components/phone-input-token-form'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { Button } from '@/components/ui/button'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import {
@@ -152,13 +151,15 @@ export default function TokenInputForm() {
               source={VIDEO_SOURCES.updatedNumber}
               containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
             />
-            <Button
+            <CustomButton
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal"
+              fullWidth
+              variant="primary"
+              className="max-w-xs mt-8"
               onClick={handleDrawerClose}
             >
               Finalizar
-            </Button>
+            </CustomButton>
           </div>
         </DrawerContent>
       </Drawer>

@@ -31,7 +31,7 @@ export function PetNotFound() {
             </p>
 
             <div className="mt-6">
-              <CustomButton size="xl" fullWidth className="rounded-full">
+              <CustomButton asChild size="xl" fullWidth variant="primary">
                 <Link href="/carteira?pets=true">Voltar para carteira</Link>
               </CustomButton>
             </div>

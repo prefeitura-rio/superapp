@@ -351,9 +351,11 @@ export function ChangeScheduleClient({
           <div className="flex-shrink-0 pb-12">
             <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
               <CustomButton
+                variant="primary"
+                size="lg"
+                fullWidth
                 onClick={handleNext}
                 disabled={isPending}
-                className="bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out w-full flex-grow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {buttonText}
               </CustomButton>

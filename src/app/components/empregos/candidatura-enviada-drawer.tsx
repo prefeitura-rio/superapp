@@ -57,8 +57,8 @@ export function CandidaturaEnviadaDrawer({
           <CustomButton
             size="xl"
             fullWidth
+            variant="primary"
             onClick={() => onOpenChange(false)}
-            className="rounded-full"
           >
             Voltar para a tela inicial
           </CustomButton>

@@ -140,7 +140,6 @@ export function AvatarSelector({
       <div className="mt-10 md:mt-16 xl:mt-20 mb-12">
         <CustomButton
           size="xl"
-          className="rounded-full"
           variant="primary"
           fullWidth
           onClick={handleSaveAvatar}

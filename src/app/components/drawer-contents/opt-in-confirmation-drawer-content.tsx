@@ -54,7 +54,8 @@ export function OptInConfirmationDrawerContent({
         <div className="flex gap-2">
           <CustomButton
             size="lg"
-            className="flex-1 rounded-full"
+            variant="primary"
+            className="flex-1"
             onClick={onConfirm}
             disabled={isPending}
           >
@@ -64,7 +65,7 @@ export function OptInConfirmationDrawerContent({
           <CustomButton
             size="lg"
             variant="secondary"
-            className="flex-1 rounded-full"
+            className="flex-1"
             onClick={onCancel}
             disabled={isPending}
           >

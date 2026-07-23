@@ -91,8 +91,10 @@ export function MeiProposalSuccessClient({
         {/* Footer */}
         <div className="flex-shrink-0 pb-12">
           <CustomButton
+            variant="primary"
+            size="lg"
+            fullWidth
             onClick={handleGoHome}
-            className="w-full rounded-full h-[46px] bg-primary text-background"
           >
             Voltar para a tela inicial
           </CustomButton>

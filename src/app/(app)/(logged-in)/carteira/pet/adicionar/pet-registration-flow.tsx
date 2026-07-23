@@ -592,9 +592,9 @@ export function PetRegistrationFlow({
             onClick={isLastSlide ? handleSubmit : goToNext}
             disabled={!isCurrentSlideValid() || isPending}
             loading={isPending}
-            className="rounded-full"
             size="xl"
             fullWidth
+            variant="primary"
           >
             {isLastSlide ? 'Finalizar cadastro' : 'Continuar'}
           </CustomButton>

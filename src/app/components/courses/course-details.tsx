@@ -891,7 +891,7 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
 
   const renderActionButton = () => {
     if (isLoadingEnrollment) {
-      return <div className="w-full h-12 rounded-full bg-card animate-pulse" />
+      return <div className="w-full h-13 rounded-full bg-card animate-pulse" />
     }
 
     // Don't render button if user concluded course without certificate
@@ -900,31 +900,25 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
     }
 
     const isAvailable = enrollmentInfo.status === 'available'
-    const baseButtonClasses =
-      'block text-sm md:text-base w-full py-3 text-center rounded-full hover:brightness-90 transition outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
-
-    const buttonClasses = isAvailable
-      ? `${baseButtonClasses} bg-primary text-background hover:bg-primary`
-      : `${baseButtonClasses} bg-card text-foreground hover:bg-card`
+    const actionVariant = isAvailable ? 'primary' : 'secondary'
 
     // Handle certificate available status
     if (enrollmentInfo.status === 'certificate_available') {
       return (
-        <Link
-          href={`/servicos/cursos/certificados?courseId=${course.id}`}
-          className={buttonClasses}
-        >
-          {enrollmentInfo.buttonText}
-        </Link>
+        <CustomButton asChild size="lg" fullWidth variant="primary">
+          <Link href={`/servicos/cursos/certificados?courseId=${course.id}`}>
+            {enrollmentInfo.buttonText}
+          </Link>
+        </CustomButton>
       )
     }
 
     // Handle rejected status specifically
     if (userEnrollment?.status === 'rejected') {
       return (
-        <button type="button" disabled className={buttonClasses}>
+        <CustomButton size="lg" fullWidth variant="secondary" disabled>
           Inscrição recusada
-        </button>
+        </CustomButton>
       )
     }
 
@@ -935,42 +929,45 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
     ) {
       return (
         <div className="flex flex-col gap-3">
-          <Link
-            href={`/servicos/cursos/${course.id}/trocar-turma`}
-            className={`${baseButtonClasses} bg-primary text-background hover:bg-primary`}
-          >
-            Trocar turma / horário
-          </Link>
-          <button
+          <CustomButton asChild size="lg" fullWidth variant="primary">
+            <Link href={`/servicos/cursos/${course.id}/trocar-turma`}>
+              Trocar turma / horário
+            </Link>
+          </CustomButton>
+          <CustomButton
             type="button"
+            size="lg"
+            fullWidth
+            variant="secondary"
             onClick={() => setShowConfirmation(true)}
             disabled={isDeleting}
-            className={`${baseButtonClasses} bg-card text-foreground hover:bg-card`}
           >
             Cancelar inscrição
-          </button>
+          </CustomButton>
         </div>
       )
     }
 
     if (isEnrolled) {
       return (
-        <button
+        <CustomButton
           type="button"
+          size="lg"
+          fullWidth
+          variant={actionVariant}
           onClick={() => setShowConfirmation(true)}
           disabled={isDeleting}
-          className={buttonClasses}
         >
           Cancelar inscrição
-        </button>
+        </CustomButton>
       )
     }
 
     if (enrollmentInfo.isDisabled) {
       return (
-        <button type="button" disabled className={buttonClasses}>
+        <CustomButton size="lg" fullWidth variant="secondary" disabled>
           {enrollmentInfo.buttonText}
-        </button>
+        </CustomButton>
       )
     }
 
@@ -980,13 +977,15 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
     ) {
       return (
         <>
-          <button
+          <CustomButton
             type="button"
+            size="lg"
+            fullWidth
+            variant="primary"
             onClick={() => setIsExternalDrawerOpen(true)}
-            className={buttonClasses}
           >
             {enrollmentInfo.buttonText}
-          </button>
+          </CustomButton>
 
           <ExternalPartnerCourseDrawer
             open={isExternalDrawerOpen}
@@ -998,9 +997,11 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
     }
 
     return (
-      <Link href={buildCourseSubscriptionHref()} className={buttonClasses}>
-        {enrollmentInfo.buttonText}
-      </Link>
+      <CustomButton asChild size="lg" fullWidth variant="primary">
+        <Link href={buildCourseSubscriptionHref()}>
+          {enrollmentInfo.buttonText}
+        </Link>
+      </CustomButton>
     )
   }
 
@@ -1026,7 +1027,7 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
             <CustomButton
               variant="primary"
               size="lg"
-              className="py-6 w-full"
+              fullWidth
               onClick={() => setShowConfirmation(false)}
             >
               Cancelar
@@ -1034,7 +1035,7 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
             <CustomButton
               variant="secondary"
               size="lg"
-              className="py-6 w-full"
+              fullWidth
               onClick={handleCancelEnrollment}
               disabled={isDeleting}
             >

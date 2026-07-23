@@ -1,6 +1,7 @@
 'use client'
 
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import { MEI_LINKS } from '@/constants/mei-links'
 
 interface NoMeiSheetProps {
@@ -29,13 +30,14 @@ export function NoMeiSheet({ open, onOpenChange }: NoMeiSheetProps) {
           abaixo.
         </p>
 
-        <button
-          type="button"
+        <CustomButton
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={handleOpenMeiRegistration}
-          className="w-full rounded-full h-[46px] bg-primary text-background font-medium"
         >
           Quero ser MEI
-        </button>
+        </CustomButton>
       </div>
     </BottomSheet>
   )

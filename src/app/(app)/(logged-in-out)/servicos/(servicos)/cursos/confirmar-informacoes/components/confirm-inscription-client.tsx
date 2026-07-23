@@ -886,18 +886,18 @@ export function ConfirmInscriptionClient({
             )}
             <div className="flex justify-center gap-3 w-full transition-all duration-500 ease-out">
               <CustomButton
+                variant="primary"
+                size="lg"
+                fullWidth
                 onClick={isLastSlide ? goToSuccess : handleNext}
                 disabled={
                   isPending || (currentIndex === 0 && !hasAllRequiredFields)
                 }
-                className={`bg-primary py-4 px-6 text-background text-sm font-normal leading-5 rounded-full h-[46px] hover:bg-primary/90 transition-all duration-500 ease-out w-full flex-grow
-        ${
-          !showSuccess
-            ? 'opacity-100 translate-x-0 scale-100'
-            : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
-        }
-        ${currentIndex === 0 && !hasAllRequiredFields && 'bg-card text-muted-foreground cursor-not-allowed hover:bg-card pointer-events-none'}        
-        `}
+                className={
+                  !showSuccess
+                    ? 'opacity-100 translate-x-0 scale-100 transition-all duration-500 ease-out'
+                    : 'opacity-0 translate-x-4 scale-95 pointer-events-none transition-all duration-500 ease-out'
+                }
               >
                 {buttonText}
               </CustomButton>

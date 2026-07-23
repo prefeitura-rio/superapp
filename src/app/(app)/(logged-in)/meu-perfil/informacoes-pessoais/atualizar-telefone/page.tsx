@@ -3,7 +3,6 @@ import { updateUserPhone } from '@/actions/update-user-phone'
 import PhoneInputForm from '@/app/components/phone-input-form'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import welcomeImage from '@/assets/welcome.svg'
-import { Button } from '@/components/ui/button'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import {
   Drawer,
@@ -104,7 +103,6 @@ export default function PhoneNumberForm() {
         <CustomButton
           size="xl"
           onClick={handleSave}
-          className="rounded-full"
           variant="primary"
           fullWidth
           disabled={isPending || !isPhoneValid}
@@ -132,13 +130,15 @@ export default function PhoneNumberForm() {
               style={{ objectFit: 'contain', maxHeight: '320px' }}
               priority
             />
-            <Button
+            <CustomButton
               size="lg"
-              className="w-full max-w-xs mt-8 bg-primary hover:bg-primary/90 rounded-full font-normal"
+              fullWidth
+              variant="primary"
+              className="max-w-xs mt-8"
               onClick={handleDrawerClose}
             >
               Finalizar
-            </Button>
+            </CustomButton>
           </div>
         </DrawerContent>
       </Drawer>

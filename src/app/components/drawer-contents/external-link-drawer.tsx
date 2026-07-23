@@ -40,8 +40,10 @@ export function ExternalLinkDrawer({
         <div>
           <CustomButton
             type="button"
+            variant="primary"
+            size="lg"
+            fullWidth
             onClick={handleConfirm}
-            className="bg-primary text-background w-full rounded-full"
           >
             Confirmar
           </CustomButton>

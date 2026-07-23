@@ -226,7 +226,7 @@ export function AddressDetailsDrawerContent({
           <BottomSheetFooter className="px-0 gap-1.5">
             <CustomButton
               size="lg"
-              className="flex-1 py-2 text-sm font-normal rounded-full"
+              className="flex-1"
               type="submit"
               disabled={isSubmitting}
               loading={isSubmitting}
@@ -235,7 +235,7 @@ export function AddressDetailsDrawerContent({
             </CustomButton>
             <CustomButton
               size="lg"
-              className="flex-1 py-2 text-sm font-normal rounded-full"
+              className="flex-1"
               variant="outline"
               type="button"
               onClick={() => {

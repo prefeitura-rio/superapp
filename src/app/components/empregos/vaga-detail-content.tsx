@@ -16,7 +16,7 @@ import {
   ShareIcon,
   UsersIcon,
 } from '@/assets/icons'
-import { Button } from '@/components/ui/button'
+import { CustomButton } from '@/components/ui/custom/custom-button'
 import {
   oportunidadesCariocasLogo,
   oportunidadesCariocasLogoDark,
@@ -117,7 +117,7 @@ export function VagaDetailContent({
   }
 
   const candidacyButtonClassName =
-    'bg-[#3E5782] hover:bg-[#3E5782]/90 text-white border-0 rounded-full'
+    'bg-[#3E5782] hover:bg-[#3E5782]/90 text-white border-0'
 
   return (
     <div className="max-w-4xl mx-auto text-foreground">
@@ -251,29 +251,33 @@ export function VagaDetailContent({
                 hasCandidatura
               />
             ) : !vagaAtiva ? (
-              <div className="cursor-not-allowed">
-                <Button
-                  type="button"
-                  disabled
-                  className="w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14"
-                >
-                  Inscrições encerradas para esta vaga
-                </Button>
-              </div>
+              <CustomButton size="lg" fullWidth disabled>
+                Inscrições encerradas para esta vaga
+              </CustomButton>
             ) : isLoggedIn ? (
-              <Link
-                href={`/servicos/trabalho/${vaga.id}/inscricao`}
-                className={`inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 ${candidacyButtonClassName}`}
+              <CustomButton
+                asChild
+                size="lg"
+                fullWidth
+                className={candidacyButtonClassName}
               >
-                Candidatar-se à vaga
-              </Link>
+                <Link href={`/servicos/trabalho/${vaga.id}/inscricao`}>
+                  Candidatar-se à vaga
+                </Link>
+              </CustomButton>
             ) : (
-              <Link
-                href={buildAuthUrl(`/servicos/trabalho/${vaga.id}/inscricao`)}
-                className="inline-flex items-center justify-center gap-2 w-full rounded-full font-normal text-sm border transition-all duration-200 px-6 py-3 h-14 bg-[#3E5782] hover:bg-[#3E5782]/90 text-white"
+              <CustomButton
+                asChild
+                size="lg"
+                fullWidth
+                className={candidacyButtonClassName}
               >
-                Fazer login para se candidatar
-              </Link>
+                <Link
+                  href={buildAuthUrl(`/servicos/trabalho/${vaga.id}/inscricao`)}
+                >
+                  Fazer login para se candidatar
+                </Link>
+              </CustomButton>
             )}
           </div>
         )}

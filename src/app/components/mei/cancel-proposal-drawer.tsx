@@ -33,9 +33,11 @@ export function CancelProposalDrawer({
         </p>
 
         <CustomButton
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={onConfirm}
           disabled={isPending}
-          className="w-full rounded-full h-[46px] bg-primary text-background"
         >
           {isPending ? 'Cancelando...' : 'Cancelar proposta'}
         </CustomButton>

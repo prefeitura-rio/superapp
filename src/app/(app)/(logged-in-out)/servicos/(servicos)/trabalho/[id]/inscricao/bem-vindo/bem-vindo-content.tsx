@@ -110,7 +110,6 @@ export function BemVindoContent({
           fullWidth
           variant="primary"
           onClick={handleContinuar}
-          className="rounded-full"
           disabled={isLoading}
         >
           {isLoading ? 'Carregando...' : 'Continuar'}

@@ -477,17 +477,18 @@ export function VagaFilters({ onFiltersChange }: VagaFiltersProps) {
 
           <DrawerFooter className="flex-row gap-2 px-8 pt-6 pb-10 shrink-0">
             <CustomButton
-              variant="outline"
+              variant="secondary"
               onClick={handleClear}
               size="lg"
-              className="flex-1 rounded-full bg-card border-0 text-foreground h-auto py-4 px-6"
+              className="flex-1"
             >
               Limpar
             </CustomButton>
             <CustomButton
+              variant="primary"
               onClick={handleApply}
               size="lg"
-              className="flex-1 rounded-full h-auto py-4 px-6"
+              className="flex-1"
             >
               Aplicar
             </CustomButton>

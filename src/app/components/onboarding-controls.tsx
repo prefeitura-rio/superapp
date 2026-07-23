@@ -23,8 +23,8 @@ export function OnboardingControls({
   return (
     <div className={`${isBelowBreakpoint ? 'pt-7' : 'pt-15'}`}>
       <CustomButton
-        className="w-full text-white px-8 py-3 rounded-full shadow-md bg-primary hover:bg-primary/80 active:bg-primary focus:bg-primary focus:ring-0 focus:outline-none"
         size="lg"
+        fullWidth
         onClick={showFinishButton ? onFinish : onNext}
         variant="primary"
         disabled={disabled}

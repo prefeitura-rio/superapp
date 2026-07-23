@@ -431,7 +431,7 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="secondary"
           size="lg"
-          className="w-full rounded-full bg-card text-primary"
+          fullWidth
           onClick={() =>
             appendEmprego({
               cargo: '',
@@ -541,7 +541,7 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="secondary"
           size="lg"
-          className="w-full rounded-full bg-card text-primary"
+          fullWidth
           onClick={() =>
             appendConquista({
               idTipoConquista: '',
@@ -622,7 +622,7 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="secondary"
           size="lg"
-          className="flex-1 rounded-full bg-card text-primary"
+          className="flex-1"
           onClick={onCancel}
         >
           Cancelar
@@ -631,7 +631,7 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="primary"
           size="lg"
-          className={cn('flex-1 rounded-full', !canSave && 'opacity-50')}
+          className={cn('flex-1', !canSave && 'opacity-50')}
           onClick={() => handleExperienciaSave()}
         >
           Salvar

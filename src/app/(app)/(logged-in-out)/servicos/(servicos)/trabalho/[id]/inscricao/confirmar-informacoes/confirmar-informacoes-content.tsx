@@ -341,7 +341,6 @@ export function ConfirmarInformacoesContent({
             fullWidth
             variant="primary"
             onClick={handleContinuar}
-            className="rounded-full"
             disabled={!hasPhone || !hasEmail}
           >
             Continuar

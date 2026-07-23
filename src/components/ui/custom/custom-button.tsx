@@ -12,11 +12,13 @@ export interface CustomButtonProps
   iconPosition?: 'left' | 'right'
   loading?: boolean
   fullWidth?: boolean
+  asChild?: boolean
   children: React.ReactNode
 }
 
 const variantStyles = {
-  primary: 'bg-primary hover:bg-primary/70 text-background border-0',
+  primary:
+    'bg-primary hover:bg-primary/70 text-background border-0 disabled:bg-primary disabled:text-background disabled:opacity-50',
   secondary: 'bg-card hover:bg-card/70 text-foreground border-0',
   ghost: 'bg-transparent text-foreground hover:bg-foreground/10',
   outline:
@@ -26,8 +28,8 @@ const variantStyles = {
 const sizeStyles = {
   sm: 'px-3 py-1.5 text-sm h-8',
   md: 'px-4 py-2 text-sm h-10',
-  lg: 'px-6 py-3 text-sm h-14',
-  xl: 'px-6 py-4 text-sm h-14',
+  lg: 'px-6 py-4 text-sm leading-5 h-13 rounded-full',
+  xl: 'px-6 py-4 text-sm leading-5 h-13 rounded-full',
 }
 
 export function CustomButton({
@@ -37,6 +39,7 @@ export function CustomButton({
   iconPosition = 'left',
   loading = false,
   fullWidth = false,
+  asChild = false,
   className,
   disabled,
   children,
@@ -46,30 +49,39 @@ export function CustomButton({
 
   return (
     <Button
+      asChild={asChild}
       className={cn(
-        'inline-flexitems-center justify-center gap-2 rounded-2xl font-normal text-sm cursor-pointer',
+        'inline-flex items-center justify-center gap-2 rounded-2xl font-normal text-sm cursor-pointer',
         'border transition-all duration-200 focus:outline-none focus:ring-none!',
-        'disabled:cursor-not-allowed disabled:bg-card disabled:text-muted-foreground',
+        'disabled:cursor-not-allowed',
+        variant !== 'primary' &&
+          'disabled:bg-card disabled:text-muted-foreground',
         variantStyles[variant],
         sizeStyles[size],
         fullWidth && 'w-full',
         className
       )}
-      disabled={isDisabled}
       {...props}
+      disabled={asChild ? undefined : isDisabled}
     >
-      {loading && (
-        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
-      )}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {loading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+          )}
 
-      {Icon && iconPosition === 'left' && !loading && (
-        <Icon className="w-4 h-4" />
-      )}
+          {Icon && iconPosition === 'left' && !loading && (
+            <Icon className="w-4 h-4" />
+          )}
 
-      <span>{children}</span>
+          <span>{children}</span>
 
-      {Icon && iconPosition === 'right' && !loading && (
-        <Icon className="w-4 h-4" />
+          {Icon && iconPosition === 'right' && !loading && (
+            <Icon className="w-4 h-4" />
+          )}
+        </>
       )}
     </Button>
   )
