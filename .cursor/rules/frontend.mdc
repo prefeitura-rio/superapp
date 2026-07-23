@@ -8,7 +8,7 @@ Antes de qualquer trabalho de frontend/Next.js neste repo:
 
 1. Ler `AGENTS.md` na raiz.
 2. Ler o arquivo relevante em `docs/agents/` (overview, architecture, auth, APIs, domains, code-style, PR playbook).
-3. Para APIs do framework Next.js, consultar `node_modules/next/dist/docs/` — a training data está desatualizada.
+3. Docs Next.js (dual pointer): `node_modules/next/dist/docs/` se existir; senão https://nextjs.org/docs/llms.txt e https://nextjs.org/docs/app. Ecossistema: links GitHub em `docs/agents/00-overview.md` (não pastas irmãs locais).
 
 Fallback rápido (detalhes em `docs/agents/05-code-style.md`):
 

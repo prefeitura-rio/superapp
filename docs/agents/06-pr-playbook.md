@@ -4,12 +4,13 @@ Checklist para transformar um pedido de alto nível (ex.: Jira) em um PR seguro 
 
 ## 1. Entender o escopo
 
-- [ ] A feature é **só UI/portal**? Se precisa de endpoint novo, migration, RBAC ou tela admin → outro repo (`app-go-api`, `portal-interno`, Heimdall). Documente a dependência; não invente backend aqui.
+- [ ] A feature é **só UI/portal**? Se precisa de endpoint novo, migration, RBAC ou tela admin → outro GitHub repo ([app-go-api](https://github.com/prefeitura-rio/app-go-api), [portal-interno](https://github.com/prefeitura-rio/portal-interno), [heimdall-frontend](https://github.com/prefeitura-rio/heimdall-frontend)). Documente a dependência com link; não invente backend aqui.
 - [ ] Ler [00-overview.md](00-overview.md) e o domínio em [04-domains.md](04-domains.md).
+- [ ] Não assumir pastas irmãs no disco — no GitHub/Jira só este repo está disponível.
 
 ## 2. Ler a fonte de verdade certa
 
-- [ ] Doc Next.js em `node_modules/next/dist/docs/` para routing, data fetching, caching, etc.
+- [ ] Doc Next.js (dual pointer — ver `AGENTS.md`): `node_modules/next/dist/docs/` **ou**, sem install, [llms.txt](https://nextjs.org/docs/llms.txt) / [docs/app](https://nextjs.org/docs/app).
 - [ ] Temáticos: [01-architecture](01-architecture.md), [02-auth](02-auth.md), [03-apis-orval](03-apis-orval.md), [05-code-style](05-code-style.md).
 - [ ] Docs de domínio existentes em `docs/` (MEI, busca, cursos…).
 

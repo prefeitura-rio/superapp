@@ -70,4 +70,4 @@ Stack alvo: TypeScript, Next.js **16** App Router, React 19, shadcn/ui, Radix, T
 
 ## Next.js
 
-Antes de APIs/padrões de framework, consultar `node_modules/next/dist/docs/` (ver `AGENTS.md`).
+Antes de APIs/padrões de framework, usar o **dual pointer** de `AGENTS.md`: `node_modules/next/dist/docs/` (local) ou [nextjs.org/docs/llms.txt](https://nextjs.org/docs/llms.txt) / [docs/app](https://nextjs.org/docs/app) (remoto, sem `node_modules`).
