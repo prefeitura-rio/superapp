@@ -20,7 +20,6 @@ import type { ModelsCurso } from '@/http-courses/models'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
-  getCourseLatestOpenEnrollmentEnd,
   isScheduleEnrollmentClosed,
   normalizeModalityDisplay,
   shouldGrayscaleCourseCover,
@@ -282,16 +281,9 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       : ((course.accessibility as any)?.label ?? null)
     : null
 
-  // "Inscrições até" do curso = encerramento mais distante entre as turmas
-  // ABERTAS (com fallback para a data do curso).
-  const enrollmentUntil = getCourseLatestOpenEnrollmentEnd(course as any)
-
   const items = [
     { label: 'Carga horária', value: course.workload },
     { label: 'Modalidade', value: modality },
-    ...(enrollmentUntil
-      ? [{ label: 'Inscrições até', value: formatDate(enrollmentUntil) }]
-      : []),
     ...(accessibilityLabel
       ? [{ label: 'Acessibilidade', value: accessibilityLabel }]
       : []),
