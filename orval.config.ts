@@ -2,20 +2,20 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   api: {
-    input: './pref-rio-carta-servicos-api.yaml',
+    input: './pref-rio-cidadao-api.yaml',
     output: {
-      target: './src/http-pref-rio-carta-servicos/api.ts',
-      schemas: './src/http-pref-rio-carta-servicos/models',
+      target: './src/http-pref-rio-cidadao/api.ts',
+      schemas: './src/http-pref-rio-cidadao/models',
       mode: 'tags-split',
       client: 'fetch',
       formatter: 'biome',
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.BASE_API_URL_PREF_RIO_CARTA_SERVICOS,
+      baseUrl: process.env.BASE_API_URL_PREF_RIO_CIDADAO,
       override: {
         mutator: {
-          path: './custom-fetch-pref-rio-carta-servicos.ts',
-          name: 'customFetchPrefRioCartaServicos',
+          path: './custom-fetch-pref-rio-cidadao.ts',
+          name: 'customFetchPrefRioCidadao',
         },
       },
     },
