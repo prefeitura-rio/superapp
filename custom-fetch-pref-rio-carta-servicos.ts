@@ -1,16 +1,38 @@
-// NOTE: Supports cases where `content-type` is other than `json`
-const getBody = <T>(c: Response | Request): Promise<T> => {
-  const contentType = c.headers.get('content-type')
+function parseJsonText<T>(text: string): T | null {
+  const trimmed = text.trim()
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+    return null
+  }
 
-  if (contentType?.includes('application/json')) {
+  try {
+    return JSON.parse(trimmed) as T
+  } catch {
+    return null
+  }
+}
+
+// NOTE: Supports cases where `content-type` is other than `json`
+const getBody = async <T>(c: Response | Request): Promise<T> => {
+  const contentType = c.headers.get('content-type') ?? ''
+
+  if (
+    contentType.includes('application/json') ||
+    contentType.includes('+json')
+  ) {
     return c.json()
   }
 
-  if (contentType?.includes('application/pdf')) {
+  if (contentType.includes('application/pdf')) {
     return c.blob() as Promise<T>
   }
 
-  return c.text() as Promise<T>
+  const text = await c.text()
+  const parsed = parseJsonText<T>(text)
+  if (parsed !== null) {
+    return parsed
+  }
+
+  return text as T
 }
 
 // NOTE: Update just base url

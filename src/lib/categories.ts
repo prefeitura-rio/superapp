@@ -1,9 +1,14 @@
 import serviceIcon from '@/constants/bucket'
+import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import { GetApiV1CategoriesOrder } from '@/http-busca-search/models/getApiV1CategoriesOrder'
 import { GetApiV1CategoriesSortBy } from '@/http-busca-search/models/getApiV1CategoriesSortBy'
+import { fetchCartaServicosCategories } from '@/lib/carta-servicos/fetch'
+import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
+
+export { normalizeCategoryName }
 
 // App Types
 export interface Category {
@@ -13,19 +18,12 @@ export interface Category {
   relevanciaMedia: number
   quantidadeServicos: number
   tag?: string
-}
-
-// Icon mapping based on category name (normalized to lowercase, no accents)
-function normalizeCategoryName(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Mn}/gu, '')
-    .trim()
+  /** Theme slug from Carta de Serviços API (when CARTA_SERVICOS_API_ENABLED). */
+  themeSlug?: string
 }
 
 // Icon mapping based on normalized category name
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, string> = {
   'meio ambiente': serviceIcon.ambienteIcon,
   animais: serviceIcon.animaisIcon,
   'central anticorrupcao': serviceIcon.anticorrupcaoIcon,
@@ -58,12 +56,11 @@ const iconMap: Record<string, any> = {
   transporte: serviceIcon.transporteIcon,
 }
 
-function getIconForCategory(categoryName: string): ReactNode {
+export function getIconForCategory(categoryName: string): ReactNode {
   const normalized = normalizeCategoryName(categoryName)
   const iconSrc = iconMap[normalized]
 
   if (!iconSrc) {
-    // Return null if no mapping found
     return null
   }
 
@@ -76,48 +73,51 @@ function getIconForCategory(categoryName: string): ReactNode {
   })
 }
 
+async function fetchCategoriesFromBuscaSearch(): Promise<Category[]> {
+  const response = await getApiV1Categories(
+    {
+      sort_by: GetApiV1CategoriesSortBy.popularity,
+      order: GetApiV1CategoriesOrder.desc,
+      include_inactive: false,
+      include_empty: false,
+      per_page: 40,
+    },
+    {
+      next: {
+        revalidate: 600,
+        tags: ['categories'],
+      },
+    }
+  )
+
+  if (response.status !== 200 || !response.data.categories) {
+    throw new Error(`Failed to fetch categories: ${response.status}`)
+  }
+
+  return response.data.categories
+    .map((apiCategory): Category => {
+      const normalizedSlug = normalizeCategoryName(apiCategory.name || '')
+      return {
+        name: apiCategory.name || '',
+        icon: getIconForCategory(apiCategory.name || ''),
+        categorySlug: normalizedSlug,
+        relevanciaMedia: apiCategory.popularity_score || 0,
+        quantidadeServicos: apiCategory.count || 0,
+      }
+    })
+    .filter(cat => cat.quantidadeServicos > 0)
+    .sort((a, b) => b.relevanciaMedia - a.relevanciaMedia)
+}
+
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    const response = await getApiV1Categories(
-      {
-        sort_by: GetApiV1CategoriesSortBy.popularity,
-        order: GetApiV1CategoriesOrder.desc,
-        include_inactive: false,
-        include_empty: false,
-        per_page: 40,
-      },
-      {
-        // Cache the response for 10 minutes
-        next: {
-          revalidate: 600,
-          tags: ['categories'],
-        },
-      }
-    )
-
-    if (response.status !== 200 || !response.data.categories) {
-      throw new Error(`Failed to fetch categories: ${response.status}`)
+    if (CARTA_SERVICOS_API_ENABLED) {
+      return await fetchCartaServicosCategories(getIconForCategory)
     }
 
-    // Transform API data to app format
-    const categories = response.data.categories
-      .map((apiCategory): Category => {
-        const normalizedSlug = normalizeCategoryName(apiCategory.name || '')
-        return {
-          name: apiCategory.name || '',
-          icon: getIconForCategory(apiCategory.name || ''),
-          categorySlug: normalizedSlug,
-          relevanciaMedia: apiCategory.popularity_score || 0,
-          quantidadeServicos: apiCategory.count || 0,
-        }
-      })
-      .filter(cat => cat.quantidadeServicos > 0) // Filter out empty categories
-      .sort((a, b) => b.relevanciaMedia - a.relevanciaMedia) // Sort by popularity descending
-
-    return categories
+    return await fetchCategoriesFromBuscaSearch()
   } catch (error) {
     console.error('Error fetching categories:', error)
-    // Return empty array on error
     return []
   }
 }

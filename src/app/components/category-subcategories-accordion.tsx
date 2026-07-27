@@ -9,19 +9,23 @@ import {
 } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
-import type { ModelsSubcategory } from '@/http-busca-search/models/modelsSubcategory'
+import type { AppSubcategory } from '@/lib/carta-servicos/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface CategorySubcategoriesAccordionProps {
   categorySlug: string
   categoryName?: string
-  subcategories: ModelsSubcategory[]
+  subcategories: AppSubcategory[]
 }
 
-interface SubcategoryWithServices extends ModelsSubcategory {
+interface SubcategoryWithServices extends AppSubcategory {
   services?: ModelsServiceDocument[]
   isLoading?: boolean
+}
+
+function getSubcategoryKey(subcategory: AppSubcategory): string {
+  return subcategory.slug ?? subcategory.name ?? ''
 }
 
 export function CategorySubcategoriesAccordion({
@@ -39,13 +43,15 @@ export function CategorySubcategoriesAccordion({
     if (!openItem) return
 
     setSubcategoriesWithServices(prev => {
-      const subcategory = prev.find(sub => sub.name === openItem)
+      const subcategory = prev.find(sub => getSubcategoryKey(sub) === openItem)
 
       // Only fetch if services haven't been loaded yet
       if (subcategory && !subcategory.services && !subcategory.isLoading) {
         // Mark as loading
         const updated = prev.map(sub =>
-          sub.name === openItem ? { ...sub, isLoading: true } : sub
+          getSubcategoryKey(sub) === openItem
+            ? { ...sub, isLoading: true }
+            : sub
         )
 
         // Fetch services
@@ -68,7 +74,7 @@ export function CategorySubcategoriesAccordion({
 
             setSubcategoriesWithServices(current =>
               current.map(sub =>
-                sub.name === openItem
+                getSubcategoryKey(sub) === openItem
                   ? { ...sub, services, isLoading: false }
                   : sub
               )
@@ -77,7 +83,7 @@ export function CategorySubcategoriesAccordion({
             console.error('Error loading services:', error)
             setSubcategoriesWithServices(current =>
               current.map(sub =>
-                sub.name === openItem
+                getSubcategoryKey(sub) === openItem
                   ? { ...sub, services: [], isLoading: false }
                   : sub
               )
@@ -103,7 +109,7 @@ export function CategorySubcategoriesAccordion({
         onValueChange={setOpenItem}
       >
         {subcategoriesWithServices.map(subcategory => {
-          const subcategoryId = subcategory.name || ''
+          const subcategoryId = getSubcategoryKey(subcategory)
           const services = subcategory.services || []
           const isLoading = subcategory.isLoading
 
