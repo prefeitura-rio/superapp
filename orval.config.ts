@@ -2,21 +2,20 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   api: {
-    input:
-      'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.yaml',
+    input: './pref-rio-carta-servicos-api.yaml',
     output: {
-      target: './src/http-courses/api.ts',
-      schemas: './src/http-courses/models',
+      target: './src/http-pref-rio-carta-servicos/api.ts',
+      schemas: './src/http-pref-rio-carta-servicos/models',
       mode: 'tags-split',
       client: 'fetch',
       formatter: 'biome',
       httpClient: 'fetch',
       clean: true,
-      baseUrl: process.env.COURSES_BASE_API_URL,
+      baseUrl: process.env.BASE_API_URL_PREF_RIO_CARTA_SERVICOS,
       override: {
         mutator: {
-          path: './custom-fetch-course.ts',
-          name: 'customFetch',
+          path: './custom-fetch-pref-rio-carta-servicos.ts',
+          name: 'customFetchPrefRioCartaServicos',
         },
       },
     },

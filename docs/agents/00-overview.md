@@ -19,6 +19,7 @@ Repo GitHub: [prefeitura-rio/superapp](https://github.com/prefeitura-rio/superap
 | **app-rmi** | Dados do cidadão / PJ | [prefeitura-rio/app-rmi](https://github.com/prefeitura-rio/app-rmi) | Cliente `src/http/` |
 | **app-busca-search** | Carta de serviços (busca) | [prefeitura-rio/app-busca-search](https://github.com/prefeitura-rio/app-busca-search) | Cliente `src/http-busca-search/` |
 | **superapp-agent-api** | Recursos de agente (ex.: currículo AI) | [prefeitura-rio/superapp-agent-api](https://github.com/prefeitura-rio/superapp-agent-api) | Cliente `src/http-agent-api/` |
+| **Pref.Rio MuleSoft** | Carta de serviços (Salesforce via gateway) | Spec local `pref-rio-carta-servicos-api.yaml` | Cliente `src/http-pref-rio-carta-servicos/` |
 | **heimdall-frontend** | Admin UI + backend RBAC | [prefeitura-rio/heimdall-frontend](https://github.com/prefeitura-rio/heimdall-frontend) | Usado por portal-interno e backends. **Não** pelo superapp |
 
 OpenAPI úteis (branch staging/main conforme o serviço):

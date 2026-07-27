@@ -9,20 +9,22 @@
 | `src/http-busca-search/` | [app-busca-search](https://github.com/prefeitura-rio/app-busca-search) | `custom-fetch-busca-search.ts` | `BASE_API_URL_APP_BUSCA_SEARCH` |
 | `src/http-app-catalogo/` | [app-catalogo](https://github.com/prefeitura-rio/app-catalogo) | `custom-fetch-app-catalogo.ts` | `BASE_API_URL_APP_CATALOGO` |
 | `src/http-agent-api/` | [superapp-agent-api](https://github.com/prefeitura-rio/superapp-agent-api) | `custom-fetch-agent-api.ts` | `AGENT_API_BASE_URL` |
+| `src/http-pref-rio-carta-servicos/` | Spec local `pref-rio-carta-servicos-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-carta-servicos.ts` | `BASE_API_URL_PREF_RIO_CARTA_SERVICOS` |
 
-Os mutators injetam `Authorization: Bearer` a partir dos cookies de sessão.
+A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. **Carta de Serviços (Pref.Rio)** é API pública — sem Bearer do cidadão.
 
 ## Orval — config ativa única
 
 [`orval.config.ts`](../../orval.config.ts) aponta para **um** target por vez (hoje: app-go-api → `src/http-courses/`).
 
-Para regenerar outro client: editar `input` / `target` / `schemas` / `baseUrl` / mutator conforme a receita em [`../orval-apis.md`](../orval-apis.md), rodar Orval, e **não** commititar mudanças de config “trocada” sem combinar com o time.
+Para regenerar outro client: copiar o bloco da API desejada de [`../orval-apis.md`](../orval-apis.md) para o `api:` em `orval.config.ts`, rodar `npx orval`, e **não** commititar mudanças de config “trocada” sem combinar com o time.
 
 ## Regras
 
 - Preferir funções geradas em `src/http*` em vez de `fetch` manual.
 - Não editar arquivos gerados à mão; regenere a partir da OpenAPI.
 - Spec OpenAPI do `app-go-api` vive no repo Go (`docs/swagger.yaml`); mudanças de contrato = PR em [app-go-api](https://github.com/prefeitura-rio/app-go-api), depois regenerar o client aqui.
+- Spec Carta de Serviços Pref.Rio: editar `pref-rio-carta-servicos-api.yaml` na raiz, copiar bloco em `orval-apis.md` para `orval.config.ts` e rodar `npx orval`.
 - Caching server-side: ver `src/lib/dal.ts`.
 - Proxies browser-facing: `src/app/api/`.
 
@@ -31,7 +33,7 @@ Para regenerar outro client: editar `input` / `target` / `schemas` / `baseUrl` /
 No Jira / Claude Code no GitHub, só o `superapp` está clonado. Nesse caso:
 
 1. Use o client Orval e tipos já gerados em `src/http*`.
-2. Se precisar inspecionar a API, abra o repo GitHub correspondente (tabela acima) ou a OpenAPI raw — não invente shape de response.
+2. Se precisar inspecionar a API, abra o repo GitHub correspondente (tabela acima), a OpenAPI raw, ou o YAML local `pref-rio-carta-servicos-api.yaml` — não invente shape de response.
 3. Se faltar endpoint, documente a dependência no PR com link para o outro repo — não invente backend neste repositório.
 
 ## Docs relacionadas
