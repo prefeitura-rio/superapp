@@ -1,4 +1,4 @@
-import { getDalSubcategoriesSubcategoryServices } from '@/lib/dal'
+import { fetchServicesBySubcategory } from '@/lib/services-utils'
 import { NextResponse } from 'next/server'
 
 export async function GET(
@@ -15,24 +15,21 @@ export async function GET(
     const decodedSubcategory = decodeURIComponent(subcategory)
     const decodedCategory = category ? decodeURIComponent(category) : undefined
 
-    const response = await getDalSubcategoriesSubcategoryServices(
+    const data = await fetchServicesBySubcategory(
       decodedSubcategory,
-      {
-        page,
-        per_page: perPage,
-        include_inactive: false,
-        category: decodedCategory,
-      }
+      page,
+      perPage,
+      decodedCategory
     )
 
-    if (response.status !== 200) {
+    if (!data) {
       return NextResponse.json(
         { error: 'Failed to fetch services' },
-        { status: response.status }
+        { status: 502 }
       )
     }
 
-    return NextResponse.json(response.data)
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error fetching services by subcategory:', error)
     return NextResponse.json(

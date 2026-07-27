@@ -1,0 +1,488 @@
+openapi: 3.0.0
+info:
+  title: API Carta de Serviços - Pref.Rio
+  description: API pública para consumo da Carta de Serviços Municipais do Rio de Janeiro, integrada com Salesforce.
+  version: 1.0.1
+servers:
+  - url: /api
+    description: Base path da API
+paths:
+  /themes:
+    get:
+      summary: Lista todos os temas ativos
+      operationId: getThemes
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/IncludeEmptyParam'     # NOVO
+        - $ref: '#/components/parameters/FilterCategoryParam'   # NOVO
+      responses:
+        '200':
+          description: >
+            Sucesso. Quando filter_category é informado, retorna estrutura
+            combinada com os temas filtrados e a lista de serviços do tema.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ThemesResponse'
+                  - $ref: '#/components/schemas/ThemesFilteredResponse'   # NOVO
+  /themes/{slug}/subthemes:
+    get:
+      summary: Retorna subtemas de um tema
+      operationId: getSubthemesByTheme
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subtheme'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /subthemes/{slug}/services:
+    get:
+      summary: Retorna serviços de um subtema
+      operationId: getServicesBySubtheme
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceListItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /services/{slug}:
+    get:
+      summary: Detalhe completo de um serviço
+      operationId: getServiceDetail
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceDetail'
+        '301':                                                   
+          description: Redirecionamento para slug atualizado
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Path relativo do slug correto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'       # NOVO
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Número da página
+      required: false
+      schema:
+        type: integer
+        default: 1
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Itens por página
+      required: false
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+    IncludeEmptyParam:                                       
+      name: include_empty
+      in: query
+      description: Inclui temas sem serviços publicados
+      required: false
+      schema:
+        type: boolean
+    FilterCategoryParam:                                      
+      name: filter_category
+      in: query
+      description: Slug do tema para filtrar e retornar seus serviços
+      required: false
+      schema:
+        type: string
+
+  responses:
+    NotFoundError:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ThemesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Theme'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ThemesFilteredResponse:                                   
+      type: object
+      description: Retornado quando filter_category é informado
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Theme'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFilteredItem'
+
+    RedirectResponse:                                        
+      type: object
+      properties:
+        redirect:
+          type: string
+          description: Slug de destino
+
+    Theme:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        subthemesCount:
+          type: integer
+        publishedServices:
+          type: integer
+
+    Subtheme:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        publishedServices:
+          type: integer
+
+    ServiceListItem:                                         
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        serviceCatalogId:                                        
+          type: string
+        articleId:                                               
+          type: string
+        articleVersion:                                          
+          type: integer
+        articleStatus:                                           
+          type: string
+          enum: [Online, Draft]
+        createdDate:                                             
+          type: string
+          format: date-time
+        lastModifiedDate:                                        
+          type: string
+          format: date-time
+        lastPublishedDate:                                       
+          type: string
+          format: date-time
+        responsibleOrgUnit:                                      
+          type: string
+        responsibleOrgUnitShortName:                             
+          type: string
+        summary:                                                 
+          type: string
+        serviceDeadline:                                         
+          type: string
+        serviceDeadlineNotes:                                    
+          type: string
+          nullable: true
+        cost:                                                    
+          type: string
+          nullable: true
+        costValue:                                               
+          type: number
+          nullable: true
+        costNotes:                                               
+          type: string
+          nullable: true
+        isFree:                                                  
+          type: boolean
+        fixarDestaque:                                           
+          type: boolean
+        allowTicketSubmission:
+          type: boolean
+        allowsAnonymity:
+          type: boolean
+
+    ServiceFilteredItem:                                     
+      type: object
+      description: Versão resumida usada na resposta de /themes?filter_category=
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        summary:
+          type: string
+        serviceCatalogId:
+          type: string
+        articleId:
+          type: string
+        articleVersion:
+          type: integer
+        articleStatus:
+          type: string
+          enum: [Online, Draft]
+        createdDate:
+          type: string
+          format: date-time
+        lastModifiedDate:
+          type: string
+          format: date-time
+        lastPublishedDate:
+          type: string
+          format: date-time
+        responsibleOrgUnit:
+          type: string
+        responsibleOrgUnitShortName:
+          type: string
+        serviceDeadline:
+          type: string
+        cost:
+          type: string
+          nullable: true
+        costValue:
+          type: number
+          nullable: true
+        costNotes:
+          type: string
+          nullable: true
+        isFree:
+          type: boolean
+
+    ServiceDetail:                                           
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        serviceCatalogId:
+          type: string
+        articleId:
+          type: string
+        articleVersion:                                          
+          type: integer
+        articleStatus:                                           
+          type: string
+          enum: [Online, Draft]
+        createdDate:                                             
+          type: string
+          format: date-time
+        lastModifiedDate:                                        
+          type: string
+          format: date-time
+        lastPublishedDate:                                       
+          type: string
+          format: date-time
+        slugHistory:                                             
+          type: array
+          items:
+            type: string
+        themeSlug:
+          type: string
+        themeName:
+          type: string
+        subthemeSlug:
+          type: string
+        subthemeName:
+          type: string
+        responsibleOrgUnit:
+          type: string
+        responsibleOrgUnitShortName:                             
+          type: string
+        flags:
+          type: object
+          properties:
+            allowsAnonymity:
+              type: boolean
+            allowTicketSubmission:
+              type: boolean
+        info:                                                    
+          type: object
+          properties:
+            summary:
+              type: string
+            fullDescription:
+              type: string
+            targetAudience:
+              type: array
+              items:
+                type: string
+            cost:                                                   
+              type: string
+              nullable: true
+            costValue:                                              
+              type: number
+              nullable: true
+            costNotes:                                              
+              type: string
+              nullable: true
+            isFree:                                                 
+              type: boolean
+            serviceDeadline:                                        
+              type: string
+            serviceDeadlineNotes:                                   
+              type: string
+              nullable: true
+        howToRequest:                                            
+          type: object
+          properties:
+            instructions:
+              type: string
+            serviceResult:
+              type: string
+            requiredDocs:                                           
+              type: array
+              items:
+                type: string
+            exclusions:
+              type: string
+              nullable: true
+        channels:                                                   # EXPANDIDO
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+        buttons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Button'
+        legislation:
+          type: array
+          items:
+            $ref: '#/components/schemas/Legislation'
+        servicePoints:
+          type: array
+          items:
+            type: object
+
+    Channel:                                                        # EXPANDIDO
+      type: object
+      properties:
+        order:
+          type: integer
+        type:
+          type: string
+          enum: [Presencial, Digital, Telefone]
+        endereco:
+          type: string
+        titulo:                                                     # NOVO
+          type: string
+        mapUrl:                                                     # NOVO
+          type: string
+          description: Gerado automaticamente para canais Presenciais com endereço
+        value:
+          type: string
+        channelType:
+          type: string
+          enum: [E-mail, WhatsApp, Telefone, Site]
+        whatsappLink:                                               # NOVO
+          type: string
+          description: Gerado automaticamente para canais WhatsApp
+
+    Button:
+      type: object
+      properties:
+        order:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+
+    Legislation:
+      type: object
+      properties:
+        order:
+          type: integer
+        titulo:
+          type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string

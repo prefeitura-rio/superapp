@@ -7,7 +7,7 @@
 - **path**
 - **baseUrl**
 - **name**
-- 
+- Copiar o bloco da API desejada abaixo para o `api:` em `orval.config.ts`, rodar `npx orval`, e **não** commitar a config trocada sem combinar com o time.
 
 > ### app-busca-search
 
@@ -141,6 +141,32 @@
         mutator: {
           path: './custom-fetch-agent-api.ts',
           name: 'customFetchAgentApi',
+        },
+      },
+    },
+  },
+```
+
+> ## API Pref.Rio — Carta de Serviços (MuleSoft)
+
+* Spec local: `./pref-rio-carta-servicos-api.yaml` (raiz do repo)
+
+```
+  api: {
+    input: './pref-rio-carta-servicos-api.yaml',
+    output: {
+      target: './src/http-pref-rio-carta-servicos/api.ts',
+      schemas: './src/http-pref-rio-carta-servicos/models',
+      mode: 'tags-split',
+      client: 'fetch',
+      formatter: 'biome',
+      httpClient: 'fetch',
+      clean: true,
+      baseUrl: process.env.BASE_API_URL_PREF_RIO_CARTA_SERVICOS,
+      override: {
+        mutator: {
+          path: './custom-fetch-pref-rio-carta-servicos.ts',
+          name: 'customFetchPrefRioCartaServicos',
         },
       },
     },

@@ -50,7 +50,7 @@ export default async function CategoryPage({
   let subcategories: any[] = []
   try {
     const subcategoriesResponse =
-      await fetchSubcategoriesByCategory(categoryName)
+      await fetchSubcategoriesByCategory(decodedSlug)
     subcategories = subcategoriesResponse?.subcategories || []
   } catch (error) {
     console.error('Error fetching subcategories:', error)
@@ -63,11 +63,8 @@ export default async function CategoryPage({
   // Map services to the format expected by MostAccessedServiceLink
   // Limit to 4 services for color palette application
   const services = servicesDocuments
-    .filter(
-      (service): service is ModelsServiceDocument =>
-        service.slug !== undefined &&
-        service.title !== undefined &&
-        service.description !== undefined
+    .filter((service): service is ModelsServiceDocument =>
+      Boolean(service.slug && service.title)
     )
     .slice(0, 4)
     .map(service => ({

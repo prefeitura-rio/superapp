@@ -1,3 +1,4 @@
+import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
 import { fetchServiceBySlug, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
@@ -38,9 +39,10 @@ export default async function ServicePage({
     notFound()
   }
 
-  // Check if service status is different from 1 (Published) or awaiting approval
-  // Skip this check if the service ID is in the whitelist
+  // Publication guard for app-busca-search (Typesense status + whitelist).
+  // Carta de Serviços only returns public services — trust the API response.
   if (
+    !CARTA_SERVICOS_API_ENABLED &&
     serviceData.id &&
     !SERVICE_WHITELIST.includes(serviceData.id) &&
     (serviceData.status !== 1 || serviceData.awaiting_approval === true)

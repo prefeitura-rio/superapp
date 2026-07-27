@@ -1,19 +1,25 @@
+import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import { getApiV1SearchId } from '@/http-busca-search/search/search'
 import { getApiV1ServicesSlug } from '@/http-busca-search/services/services'
 import {
+  fetchCartaServicosServiceBySlug,
+  fetchCartaServicosServicesByCategory,
+  fetchCartaServicosServicesBySubcategory,
+  fetchCartaServicosSubcategoriesByCategory,
+} from '@/lib/carta-servicos/fetch'
+import {
   getDalCategoriesCategorySubcategories,
   getDalSubcategoriesSubcategoryServices,
 } from '@/lib/dal'
-import { fetchCategories } from './categories'
+import { fetchCategories, getIconForCategory } from './categories'
 
 export async function getCategoryNameBySlug(
   categorySlug: string
 ): Promise<string> {
   try {
-    // Decode the URL-encoded category slug
     const decodedSlug = decodeURIComponent(categorySlug)
 
     const categories = await fetchCategories()
@@ -23,14 +29,11 @@ export async function getCategoryNameBySlug(
       decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
     )
   } catch (error) {
-    // If there's any error (e.g., decodeURIComponent fails, fetchCategories fails),
-    // return a fallback based on the original slug
     console.error('Error in getCategoryNameBySlug:', error)
     try {
       const decodedSlug = decodeURIComponent(categorySlug)
       return decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1)
     } catch {
-      // If decodeURIComponent also fails, use the original slug as-is
       return categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
     }
   }
@@ -44,19 +47,22 @@ export async function fetchServicesByCategory(
   categorySlug: string
 ): Promise<ServicesByCategoryResponse | null> {
   try {
-    // Decode the URL-encoded category slug with error handling
     let decodedSlug: string
     try {
       decodedSlug = decodeURIComponent(categorySlug)
     } catch {
-      // If decodeURIComponent fails, use the original slug
       decodedSlug = categorySlug
     }
 
-    // First, get the category name from the slug
+    if (CARTA_SERVICOS_API_ENABLED) {
+      return fetchCartaServicosServicesByCategory(
+        decodedSlug,
+        getIconForCategory
+      )
+    }
+
     const categoryName = await getCategoryNameBySlug(decodedSlug)
 
-    // Use the categories endpoint with filter_category parameter
     const response = await getApiV1Categories(
       {
         filter_category: categoryName,
@@ -65,7 +71,6 @@ export async function fetchServicesByCategory(
         include_inactive: false,
       },
       {
-        // Cache the response for 10 minutes
         next: {
           revalidate: 600,
           tags: ['category-services', categorySlug],
@@ -91,7 +96,6 @@ export async function fetchServiceById(
 ): Promise<ModelsPrefRioService | null> {
   try {
     const response = await getApiV1SearchId(id, {
-      // Cache the response for 10 minutes
       next: {
         revalidate: 600,
         tags: ['service', id],
@@ -99,7 +103,6 @@ export async function fetchServiceById(
     })
 
     if (response.status === 404) {
-      // Service not found - return null to trigger notFound()
       return null
     }
 
@@ -111,7 +114,6 @@ export async function fetchServiceById(
       return null
     }
 
-    // Return the API response directly - no mapping needed
     return response.data
   } catch (error) {
     console.error('Error fetching service:', error)
@@ -123,8 +125,11 @@ export async function fetchServiceBySlug(
   slug: string
 ): Promise<ModelsPrefRioService | null> {
   try {
+    if (CARTA_SERVICOS_API_ENABLED) {
+      return fetchCartaServicosServiceBySlug(slug)
+    }
+
     const response = await getApiV1ServicesSlug(slug, {
-      // Cache the response for 10 minutes
       next: {
         revalidate: 600,
         tags: ['service', slug],
@@ -132,13 +137,10 @@ export async function fetchServiceBySlug(
     })
 
     if (response.status === 404) {
-      // Service not found - return null to trigger notFound()
       return null
     }
 
     if (response.status === 301) {
-      // Redirect to new slug - the response should contain the new slug
-      // For now, we'll treat it as not found and let the redirect happen at the API level
       console.warn(`Service slug ${slug} redirected:`, response.data)
       return null
     }
@@ -151,7 +153,6 @@ export async function fetchServiceBySlug(
       return null
     }
 
-    // Return the API response directly - no mapping needed
     return response.data
   } catch (error) {
     console.error('Error fetching service:', error)
@@ -159,13 +160,23 @@ export async function fetchServiceBySlug(
   }
 }
 
-export async function fetchSubcategoriesByCategory(categoryName: string) {
+export async function fetchSubcategoriesByCategory(categorySlugOrName: string) {
   try {
-    const response = await getDalCategoriesCategorySubcategories(categoryName, {
-      sort_by: 'count',
-      order: 'desc',
-      include_empty: false,
-    })
+    if (CARTA_SERVICOS_API_ENABLED) {
+      return fetchCartaServicosSubcategoriesByCategory(
+        categorySlugOrName,
+        getIconForCategory
+      )
+    }
+
+    const response = await getDalCategoriesCategorySubcategories(
+      categorySlugOrName,
+      {
+        sort_by: 'count',
+        order: 'desc',
+        include_empty: false,
+      }
+    )
 
     if (response.status !== 200) {
       console.error(
@@ -183,14 +194,22 @@ export async function fetchSubcategoriesByCategory(categoryName: string) {
 }
 
 export async function fetchServicesBySubcategory(
-  subcategoryName: string,
+  subcategorySlugOrName: string,
   page = 1,
   perPage = 50,
   category?: string
 ) {
   try {
+    if (CARTA_SERVICOS_API_ENABLED) {
+      return fetchCartaServicosServicesBySubcategory(
+        subcategorySlugOrName,
+        page,
+        perPage
+      )
+    }
+
     const response = await getDalSubcategoriesSubcategoryServices(
-      subcategoryName,
+      subcategorySlugOrName,
       {
         page,
         per_page: perPage,
