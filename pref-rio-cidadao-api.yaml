@@ -1,0 +1,899 @@
+openapi: 3.0.0
+info:
+  title: API Cidadão - Pref.Rio (System API)
+  description: API de integração para validação de identidade via Keycloak e sincronização de Person Account no Salesforce.
+  version: 1.0.3
+servers:
+  - url: /api/private
+    description: Base path do gateway MuleSoft
+
+paths:
+  # ========================
+  # Etapas 1-2 — Login e Cadastro
+  # ========================
+
+  /auth/validate:
+    get:
+      summary: Valida a identidade e retorna o cadastro completo.
+      description: Extrai as claims do JWT (Keycloak) e consulta a Person Account no Salesforce. Retorna 404 caso o cidadão não exista, indicando ao front-end a necessidade de registro.
+      operationId: verifyCitizen
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cidadão encontrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenDTO'
+        '404':
+          description: Cidadão não encontrado (necessário realizar POST para cadastro).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cidadao:
+    post:
+      summary: Cria ou atualiza (Upsert) um novo cidadão.
+      description: Endpoint utilizado para o primeiro acesso ou registro de um cidadão, exigindo campos obrigatórios de negócio definidos pelo Salesforce (ex. telefone1).
+      operationId: createCitizen
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitizenCreateRequest'
+      responses:
+        '201':
+          description: Conta criada ou atualizada via Upsert com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResponse'
+        '400':
+          description: Falha de validação de dados (ex. Telefone inválido, CPF ausente).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cidadao/{cpf}:
+    patch:
+      summary: Atualiza parcialmente os dados do cidadão.
+      description: Permite a atualização de campos específicos da Person Account respeitando as regras de picklist e validação de formato do Salesforce.
+      operationId: updateCitizen
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cpf
+          in: path
+          required: true
+          description: CPF do cidadão (11 dígitos, apenas números).
+          schema:
+            type: string
+            pattern: '^\d{11}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitizenUpdateRequest'
+      responses:
+        '200':
+          description: Cidadão atualizado com sucesso. Retorna o DTO atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenDTO'
+        '400':
+          description: Falha de validação nos dados enviados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cidadão não encontrado para atualização.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ========================
+  # Etapa 5 — LGPD: Take-out + Anonimização via Privacy Center
+  # ========================
+
+  /cidadao/{cpf}/exportar:
+    get:
+      summary: Exporta dados pessoais do cidadão (Take-out / DSAR).
+      description: |
+        Retorna os dados pessoais (comuns e sensíveis) e registros relacionados
+        do cidadão, conforme Portability Policy configurada no Salesforce Privacy Center.
+        
+        Processamento síncrono — a resposta contém o snapshot completo dos dados.
+      operationId: exportCitizenData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cpf
+          in: path
+          required: true
+          description: CPF do cidadão (11 dígitos numéricos, sem pontuação).
+          schema:
+            type: string
+            pattern: '^\d{11}$'
+      responses:
+        '200':
+          description: Dados exportados com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TakeoutResponse'
+        '400':
+          description: CPF em formato inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: CPF não encontrado no Salesforce.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cidadao/{cpf}/anonimizar:
+    post:
+      summary: Solicita anonimização do cidadão (Direito ao esquecimento / RTBF).
+      description: |
+        Cria uma solicitação de anonimização dos dados pessoais do cidadão.
+        O processamento é ASSÍNCRONO — a resposta 202 confirma apenas que a
+        solicitação foi registrada (status "enfileirado").
+        
+        O chamador deve fazer polling em /anonimizacao/{numeroSolicitacao}
+        até o status atingir um estado final (concluido, falhou ou cancelado).
+        
+        Se já existir solicitação em aberto para o mesmo CPF, retorna 409.
+        
+        A anonimização é IRREVERSÍVEL após conclusão.
+      operationId: requestAnonymization
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cpf
+          in: path
+          required: true
+          description: CPF do cidadão (11 dígitos numéricos, sem pontuação).
+          schema:
+            type: string
+            pattern: '^\d{11}$'
+      responses:
+        '202':
+          description: Solicitação registrada com sucesso. Aguardando processamento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonimizacaoResponse'
+        '400':
+          description: CPF em formato inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: CPF não encontrado no Salesforce.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Já existe solicitação de anonimização em aberto para este CPF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonimizacaoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /anonimizacao/{numeroSolicitacao}:
+    get:
+      summary: Consulta o status de uma solicitação de anonimização.
+      description: |
+        Retorna o andamento da solicitação identificada pelo número.
+        Deve ser utilizado em polling pelo chamador até que o status
+        seja um estado final (concluido, falhou ou cancelado).
+        
+        Timeout sugerido para polling: 30 tentativas com intervalo de 10 segundos.
+        
+        Evolução prevista: substituir polling por webhook quando a Etapa 3
+        (espelhamento SF → RMI) estiver disponível.
+      operationId: getAnonymizationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: numeroSolicitacao
+          in: path
+          required: true
+          description: Número da solicitação de anonimização (ex. PRIVRTBF-00000002).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status da solicitação recuperado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusAnonimizacaoResponse'
+        '400':
+          description: Número de solicitação ausente ou inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitação não encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  # ========================
+  # Etapa 8 — Consulta Logada de Chamados (Token Exchange JWT → Community User)
+  # ========================
+
+  /chamados:
+    get:
+      summary: Lista os chamados do cidadão logado.
+      description: |
+        Retorna os protocolos (Cases) e ordens de serviço (WorkOrders) vinculados
+        ao Community User autenticado. A resolução do AccountId é feita internamente
+        via UserInfo.getUserId() — não é necessário informar CPF na URL.
+
+        O MuleSoft orquestra 3 chamadas sequenciais ao Salesforce:
+          1. POST /auth/provision — garante que o Community User existe (idempotente)
+          2. POST /services/oauth2/token — JWT Bearer Grant, obtém access_token do Community User
+          3. GET /chamados — consulta os chamados com sharing aplicado
+      operationId: listChamados
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de chamados do cidadão.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadosListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /chamados/{protocolo}:
+    get:
+      summary: Detalhe de um chamado com timeline de andamentos.
+      description: |
+        Retorna o detalhe completo de um protocolo, incluindo ordens de serviço,
+        endereço e andamentos visíveis ao cidadão (WorkOrderUpdate com
+        Allow_Citizen_Visibility = true).
+
+        A resolução do Community User segue o mesmo fluxo de Token Exchange
+        descrito em /chamados.
+      operationId: getChamadoDetail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: protocolo
+          in: path
+          required: true
+          description: Número do protocolo no formato RIO-YYYY-NNNNNNNN.
+          schema:
+            type: string
+            pattern: '^RIO-\d{4}-\d{8}$'
+      responses:
+        '200':
+          description: Detalhe do chamado recuperado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadoDetailResponse'
+        '404':
+          description: Protocolo não encontrado ou sem acesso para o Community User.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT emitido pelo Keycloak (Identidade Carioca). A validação ocorre no API Manager.
+
+  responses:
+    UnauthorizedError:
+      description: Token ausente, com assinatura inválida ou expirado (Interceptado pelo API Manager).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Falha de comunicação interna com o Salesforce.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ========================
+    # Schemas Etapas 1-2 (existentes)
+    # ========================
+
+    CitizenCreateRequest:
+      type: object
+      required:
+        - cpf
+        - nome
+        - email
+      properties:
+        cpf:
+          type: string
+          example: "14202478754"
+        nome:
+          type: string
+          example: "Maria Silva"
+        email:
+          type: string
+          format: email
+          example: "maria@test.com"
+        telefone1:
+          type: string
+          description: "Formato obrigatório: 55+DDD+Número"
+          example: "5521988888888"
+        genero:
+          type: string
+          example: "Mulher cisgenero"
+        raca:
+          type: string
+          example: "Parda"
+
+    CitizenUpdateRequest:
+      type: object
+      description: Objeto de atualização parcial. Todos os campos são opcionais.
+      properties:
+        email:
+          type: string
+          format: email
+        telefone1:
+          type: string
+          nullable: true
+        telefone2:
+          type: string
+        raca:
+          type: string
+        genero:
+          type: string
+        escolaridade:
+          type: string
+        rendaFamiliar:
+          type: string
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+
+    UpsertResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "created"
+        accountId:
+          type: string
+          example: "001be00000ZPNrIAAX"
+
+    CitizenDTO:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: "001be00000XqUOzAAN"
+        cpf:
+          type: string
+          example: "14202478754"
+        nome:
+          type: string
+        nomeSocial:
+          type: string
+          nullable: true
+        nomeExibicao:
+          type: string
+        email:
+          type: string
+        telefonePrincipal:
+          type: string
+        telefone1:
+          type: string
+          nullable: true
+        tipoTelefone1:
+          type: string
+          nullable: true
+        telefone2:
+          type: string
+          nullable: true
+        tipoTelefone2:
+          type: string
+          nullable: true
+        telefone3:
+          type: string
+          nullable: true
+        tipoTelefone3:
+          type: string
+          nullable: true
+        telefoneInternacional:
+          type: string
+          nullable: true
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        complemento:
+          type: string
+          nullable: true
+        dataNascimento:
+          type: string
+          example: "17/01/1991"
+        genero:
+          type: string
+        raca:
+          type: string
+        escolaridade:
+          type: string
+        rendaFamiliar:
+          type: string
+        deficiencia:
+          type: string
+        nacionalidade:
+          type: string
+        idioma:
+          type: array
+          items:
+            type: string
+        isTourist:
+          type: boolean
+        passaporte:
+          type: string
+          nullable: true
+        consentimento:
+          type: string
+          nullable: true
+
+    Endereco:
+      type: object
+      properties:
+        logradouro:
+          type: string
+        cidade:
+          type: string
+        estado:
+          type: string
+        cep:
+          type: string
+        pais:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "DADOS_INVALIDOS"
+              message:
+                type: string
+                example: "O campo Telefone 1 é obrigatório."
+
+    # ========================
+    # Schemas Etapa 5 — LGPD
+    # ========================
+
+    TakeoutResponse:
+      type: object
+      description: Resposta do take-out (exportação de dados pessoais).
+      properties:
+        cpf:
+          type: string
+          description: CPF do cidadão.
+          example: "52998224725"
+        dataExportacao:
+          type: string
+          format: date-time
+          description: Data e hora da exportação (ISO 8601).
+          example: "2026-07-01T19:31:18Z"
+        dadosPessoais:
+          type: object
+          description: Dados pessoais comuns (PII) do cidadão.
+          properties:
+            primeiroNome:
+              type: string
+              description: Primeiro nome do cidadão.
+              example: "TESTE"
+            sobrenome:
+              type: string
+              description: Sobrenome do cidadão.
+              example: "LGPD"
+            email:
+              type: string
+              format: email
+              description: Email de contato do cidadão.
+              example: "cidadao@exemplo.com"
+        relacionados:
+          type: object
+          description: |
+            Registros relacionados ao cidadão. Os arrays são preenchidos
+            conforme os demais objetos forem integrados (protocolos,
+            ligações, ordens de serviço).
+          properties:
+            protocolos:
+              type: array
+              items:
+                type: object
+              example: []
+            ligacoes:
+              type: array
+              items:
+                type: object
+              example: []
+            ordensServico:
+              type: array
+              items:
+                type: object
+              example: []
+
+    AnonimizacaoResponse:
+      type: object
+      description: Resposta da solicitação de anonimização (202 Accepted).
+      properties:
+        numeroSolicitacao:
+          type: string
+          description: Número único da solicitação de anonimização. Usar como chave para polling de status.
+          example: "PRIVRTBF-00000002"
+        cpf:
+          type: string
+          description: CPF do cidadão alvo da solicitação.
+          example: "52998224725"
+        status:
+          type: string
+          description: Status inicial da solicitação (sempre "enfileirado" na criação).
+          enum:
+            - enfileirado
+          example: "enfileirado"
+        dataSolicitacao:
+          type: string
+          format: date-time
+          description: Data e hora de criação da solicitação (ISO 8601).
+          example: "2026-07-01T19:38:17Z"
+
+    StatusAnonimizacaoResponse:
+      type: object
+      description: Resposta da consulta de status de anonimização.
+      properties:
+        numeroSolicitacao:
+          type: string
+          description: Número único da solicitação de anonimização.
+          example: "PRIVRTBF-00000002"
+        status:
+          type: string
+          description: |
+            Status atual da solicitação:
+            - enfileirado: aguardando processamento
+            - concluido: anonimização concluída com sucesso (irreversível)
+            - falhou: falha no processamento
+            - cancelado: solicitação cancelada
+          enum:
+            - enfileirado
+            - concluido
+            - falhou
+            - cancelado
+          example: "concluido"
+        dataSolicitacao:
+          type: string
+          format: date-time
+          description: Data e hora de criação da solicitação (ISO 8601).
+          example: "2026-07-01T19:38:17Z"
+        dataConclusao:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora da conclusão (presente apenas quando status for "concluido").
+          example: "2026-07-01T19:40:05Z"
+
+    # ========================
+    # Schemas Etapa 8 — Consulta de Chamados
+    # ========================
+
+    ChamadosListResponse:
+      type: object
+      description: Lista de protocolos do cidadão com resumo das ordens de serviço.
+      properties:
+        protocolos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocoloResumo'
+
+    ProtocoloResumo:
+      type: object
+      description: Resumo de um protocolo (Case) com suas ordens de serviço.
+      properties:
+        protocolo:
+          type: string
+          description: Número do protocolo.
+          example: "RIO-2026-00011171"
+        categoria:
+          type: string
+          description: Categoria do protocolo (Case.Categoria__c).
+          example: "Atendimento realizado"
+        subcategoria:
+          type: string
+          description: Subcategoria do protocolo (Case.Subcategoria__c).
+          example: "Serviço"
+        dataAbertura:
+          type: string
+          format: date-time
+          description: Data de abertura do protocolo (Case.CreatedDate).
+          example: "2026-05-05T00:37:52Z"
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          example: "2026-05-06T14:30:00Z"
+        status:
+          type: string
+          description: Status do protocolo (derivado das WorkOrders).
+          example: "Em andamento"
+        origem:
+          type: string
+          description: Canal de origem do protocolo (Case.Origin).
+          example: "Aplicativo Web"
+        ordens_de_servico:
+          type: array
+          description: Ordens de serviço vinculadas ao protocolo.
+          items:
+            type: object
+            properties:
+              codigoOs:
+                type: string
+                description: Número da ordem de serviço (WO.WorkOrderNumber).
+                example: "00000109"
+              idCatalogoServico:
+                type: string
+                description: ID do catálogo de serviço (WO.Service__c).
+                example: "a04be000002gZQ5AAM"
+              categoria:
+                type: string
+                description: Categoria do serviço.
+                example: "Solicitação"
+              servico:
+                type: string
+                description: Nome do serviço (WO.Service__r.Service_Name__c).
+                example: "Baixa de matrícula"
+              tema:
+                type: string
+                description: Tema do serviço.
+                example: "Licenças"
+              subtema:
+                type: string
+                description: Subtema do serviço.
+                example: "Alvará"
+              orgaoResponsavel:
+                type: object
+                description: Órgão responsável pela ordem de serviço.
+                properties:
+                  id:
+                    type: string
+                    example: "a03be00000abcde"
+                  nome:
+                    type: string
+                    example: "Conselho de Contribuintes"
+                  sigla:
+                    type: string
+                    example: "CC"
+              bairro:
+                type: string
+                description: Bairro da ocorrência.
+                example: "Centro"
+              dataAbertura:
+                type: string
+                format: date-time
+                example: "2026-05-05T00:37:52Z"
+              status:
+                type: string
+                description: Status da ordem de serviço (WO.Status).
+                example: "Em andamento"
+
+    ChamadoDetailResponse:
+      type: object
+      description: Detalhe completo de um protocolo com timeline de andamentos.
+      properties:
+        protocolo:
+          type: string
+          example: "RIO-2026-00011171"
+        categoria:
+          type: string
+          example: "Atendimento realizado"
+        subcategoria:
+          type: string
+          example: "Serviço"
+        dataAbertura:
+          type: string
+          format: date-time
+          example: "2026-05-05T00:37:52Z"
+        dataFechamento:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data de fechamento (Case.ClosedDate), nulo se em aberto.
+          example: null
+        status:
+          type: string
+          example: "Em andamento"
+        origem:
+          type: string
+          example: "Aplicativo Web"
+        ordens_de_servico:
+          type: array
+          items:
+            type: object
+            properties:
+              codigoOs:
+                type: string
+                example: "00000109"
+              idCatalogoServico:
+                type: string
+                example: "a04be000002gZQ5AAM"
+              categoria:
+                type: string
+                example: "Solicitação"
+              servico:
+                type: string
+                example: "Baixa de matrícula"
+              tema:
+                type: string
+                example: "Licenças"
+              subtema:
+                type: string
+                example: "Alvará"
+              orgaoResponsavel:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  nome:
+                    type: string
+                  sigla:
+                    type: string
+              orgaoResponsavelPai:
+                type: object
+                nullable: true
+                description: Órgão pai (resolveN1).
+                properties:
+                  id:
+                    type: string
+                  nome:
+                    type: string
+                  sigla:
+                    type: string
+              dataAbertura:
+                type: string
+                format: date-time
+              dataTermino:
+                type: string
+                format: date-time
+                nullable: true
+              previsaoSLA:
+                type: string
+                format: date-time
+                nullable: true
+                description: Data prevista de resolução do SLA.
+              prioridade:
+                type: string
+                example: "Alta"
+              descricao:
+                type: string
+                description: Descrição do chamado (pode conter PII — visível apenas ao cidadão).
+              endereco:
+                type: object
+                properties:
+                  logradouro:
+                    type: string
+                    example: "Rua Exemplo"
+                  numero:
+                    type: string
+                    example: "100"
+                  complemento:
+                    type: string
+                    nullable: true
+                    example: "Apto 201"
+                  bairro:
+                    type: string
+                    example: "Centro"
+                  cep:
+                    type: string
+                    example: "20040-000"
+                  coordenadaX:
+                    type: number
+                    format: double
+                    example: -43.176
+                  coordenadaY:
+                    type: number
+                    format: double
+                    example: -22.905
+                  pontoReferencia:
+                    type: string
+                    nullable: true
+                    example: "Próximo ao metrô"
+                  tipoEndereco:
+                    type: string
+                    example: "Residencial"
+              status:
+                type: string
+                example: "Em andamento"
+              andamentos:
+                type: array
+                description: Timeline de andamentos visíveis ao cidadão.
+                items:
+                  $ref: '#/components/schemas/Andamento'
+
+    Andamento:
+      type: object
+      description: Evento da timeline de andamento do chamado.
+      properties:
+        dataInsercao:
+          type: string
+          format: date-time
+          description: Data e hora do andamento.
+          example: "2026-05-05T00:37:52Z"
+        status:
+          type: string
+          description: Status do andamento (ex. "Publicado").
+          example: "Publicado"
+        evento:
+          type: string
+          description: Nome do evento.
+          example: "Solicitação recebida"
+        tipoEvento:
+          type: string
+          description: Classificação do evento (ex. "Partial_Update").
+          example: "Partial_Update"
+        descricao:
+          type: string
+          description: Descrição pública do andamento.
+          example: "Sua solicitação foi registrada com sucesso."
