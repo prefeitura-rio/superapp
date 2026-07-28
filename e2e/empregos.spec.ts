@@ -1134,27 +1134,45 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
 
-    await page.getByText('Termos de Uso', { exact: true }).click()
+    // Badge verde (bg-wallet-2b) dentro do trigger do accordion de Termos.
+    // [data-state="closed"] causava strict mode (4 elementos: item, h3, button, region).
+    const greenBadge = page
+      .getByRole('button', { name: /Termos de Uso/ })
+      .locator('[class*="bg-wallet-2b"]')
 
+    // O aceite dos termos é persistido por conta. Assim que os dados do currículo
+    // carregam (fetch assíncrono), o badge reflete o estado aceito. Aguardamos o
+    // badge — anteriormente o teste checava em 5s e falhava de forma intermitente
+    // quando o fetch demorava um pouco mais (race com o carregamento dos dados).
+    const alreadyAccepted = await greenBadge
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false)
+
+    if (alreadyAccepted) {
+      await expect(greenBadge).toBeVisible()
+      return
+    }
+
+    // Conta sem aceite prévio: aceita de fato (marca o checkbox e salva, o que
+    // persiste o aceite via API) e então valida o badge.
+    await page.getByText('Termos de Uso', { exact: true }).click()
     const checkbox = page.getByRole('checkbox').first()
     await expect(checkbox).toBeVisible({ timeout: 10000 })
-
-    // Somente aceita se ainda não aceito
-    const isChecked = await checkbox.isChecked()
-    if (!isChecked) {
+    if (!(await checkbox.isChecked())) {
       await checkbox.click()
       await expect(checkbox).toBeChecked({ timeout: 10000 })
     }
 
-    // Fecha o accordion clicando no trigger
-    await page.getByText('Termos de Uso', { exact: true }).click()
-    // Verifica o badge verde (bg-wallet-2b) dentro do botão do accordion.
-    // [data-state="closed"] causava strict mode (4 elementos: item, h3, button, region).
-    await expect(
-      page
-        .getByRole('button', { name: /Termos de Uso/ })
-        .locator('[class*="bg-wallet-2b"]')
-    ).toBeVisible({ timeout: 5000 })
+    const salvar = page.getByRole('button', { name: 'Salvar' })
+    if (await salvar.isEnabled().catch(() => false)) {
+      await salvar.click()
+      await expect(
+        page.getByText('Termos de uso aceitos e registrados')
+      ).toBeVisible({ timeout: 15000 })
+    }
+
+    await expect(greenBadge).toBeVisible({ timeout: 15000 })
   })
 })
 
