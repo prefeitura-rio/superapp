@@ -73,7 +73,7 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="8d8a8e25175c71b10fcbc9952a7bc09f" \
+            --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="c84d3e127f66af2cee4bfe289c58537a" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://storage.googleapis.com/rio-queue" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_API_URL="https://rio-queue.dados.rio" \
             --build-arg NEXT_PUBLIC_EQUALWEB_SITEKEY="f010fd59983a9d10102605f5740d45fd" \
