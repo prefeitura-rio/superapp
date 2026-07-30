@@ -13,6 +13,9 @@ const publicRoutes = [
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
   { path: '/ouvidoria/*', whenAuthenticated: 'next' },
+  { path: '/consulta-protocolo', whenAuthenticated: 'next' },
+  { path: '/solicitacoes', whenAuthenticated: 'next' },
+  { path: '/solicitacoes/*', whenAuthenticated: 'next' },
   { path: '/autenticacao-necessaria/carteira', whenAuthenticated: 'redirect' },
   { path: '/manifest.json', whenAuthenticated: 'next' },
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
@@ -158,6 +161,29 @@ export async function middleware(request: NextRequest) {
           )
           return response
         }
+      }
+
+      // Block chamados routes when feature flag is disabled
+      const isChamadosEnabled =
+        process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
+      const chamadosRoutes = [
+        '/minhas-solicitacoes',
+        '/consulta-protocolo',
+        '/solicitacoes',
+      ]
+      const isChamadosRoute = chamadosRoutes.some(
+        r => path === r || path.startsWith(`${r}/`)
+      )
+
+      if (!isChamadosEnabled && isChamadosRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/not-found'
+        const response = NextResponse.rewrite(url)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
       }
 
       // FUTURE: cadastro de pet — rota desativada até a feature entrar no ar
