@@ -2,6 +2,7 @@ import {
   CheckIcon,
   HelpCircleIcon,
   MapPinIcon,
+  PhoneIcon,
   SettingsIcon,
   UserIcon,
 } from '@/assets/icons'
@@ -13,6 +14,8 @@ interface UserProfileMenuItemsData {
   href?: string
   variant?: 'default' | 'danger'
 }
+
+const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
 
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
@@ -33,6 +36,16 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   //   label: 'Trabalho',
   //   href: '/meu-perfil/user-job-info',
   // },
+  ...(isChamadosEnabled
+    ? [
+        {
+          id: 'solicitacoes',
+          icon: <PhoneIcon className="h-5 w-5" />,
+          label: 'Solicitações',
+          href: '/minhas-solicitacoes',
+        } as UserProfileMenuItemsData,
+      ]
+    : []),
   {
     id: 'autorizacoes',
     icon: <CheckIcon className="h-5 w-5" />,
