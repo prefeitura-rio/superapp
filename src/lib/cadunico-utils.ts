@@ -27,7 +27,10 @@ export function formatRecadastramentoDate(dateString?: string): string {
   if (!dateString) return 'Não informado'
 
   try {
-    return new Date(dateString).toLocaleDateString('pt-BR')
+    // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+    })
   } catch {
     return 'Data inválida'
   }

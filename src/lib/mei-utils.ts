@@ -83,6 +83,8 @@ export function formatMeiDate(isoDate?: string): string {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
+      timeZone: 'America/Sao_Paulo',
     })
   } catch {
     return 'Data inválida'
