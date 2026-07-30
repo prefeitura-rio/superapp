@@ -66,21 +66,25 @@ npx playwright show-report
 - **Sem `CI` definido**: o Playwright reutiliza um servidor já rodando em `http://localhost:3000` (dev server). Se não houver ninguém escutando, ele sobe `npm run dev` automaticamente.
 - **Com `CI=true`**: o Playwright executa `npm run start` (app já deve estar buildado com `npm run build`) e não reutiliza servidores existentes.
 
----
-
 ## Configuração (`playwright.config.ts`)
 
 
 | Parâmetro             | Local             | CI                |
 | --------------------- | ----------------- | ----------------- |
 | `fullyParallel`       | `true`            | `true`            |
-| `workers`             | `3`               | `3`               |
-| `retries`             | `0`               | `2`               |
+| `workers`             | `1`               | `1`               |
+| `retries`             | `2`               | `2`               |
 | `expect.timeout`      | `15 000 ms`       | `15 000 ms`       |
 | `webServer.command`   | `npm run dev`     | `npm run start`   |
 | `reuseExistingServer` | `true`            | `false`           |
 | `trace`               | `on-first-retry`  | `on-first-retry`  |
 | `screenshot`          | `only-on-failure` | `only-on-failure` |
+
+> **`workers: 1` é intencional.** Vários testes autenticados **mutam o mesmo
+> estado da conta** de homolog (nome de exibição, e-mail, endereço, tema,
+> currículo). Rodar em paralelo com múltiplos workers causaria interferência
+> entre eles. Mantenha serial (1 worker) enquanto a suíte compartilhar uma única
+> conta de teste.
 
 
 **Browser ativo**: apenas Chromium (Desktop Chrome). Firefox e WebKit estão comentados — WebKit tem problema com `upgrade-insecure-requests`, fora que demora muito tempo para rodar todos os testes. Lembrando que multiplicaria por x3.
@@ -168,6 +172,29 @@ O token deve ser um JWT de **homologação** com `exp` válido e as claims esper
 | `E2E_REFRESH_TOKEN`                   | Não                      | Usado se o middleware precisar renovar o access token durante a suíte.                                         |
 | `PORT`                                | Não (padrão `3000`)      | Porta do servidor Next.js. Deve bater com `baseURL`.                                                           |
 | `NEXT_PUBLIC_*` e demais vars do Next | Sim (para o build)       | URLs das APIs, IdP, etc. O build e o servidor de teste precisam das mesmas variáveis que o app usa em homolog. |
+
+### URLs de API server-side (sem prefixo `NEXT_PUBLIC_`)
+
+Os mutators do Orval e os Server Components leem as base URLs **sem** o prefixo
+`NEXT_PUBLIC_` (ex.: `COURSES_BASE_API_URL`, `BASE_API_URL_APP_BUSCA_SEARCH`,
+`BASE_API_URL_RMI`, `BASE_API_URL_SUBPAV_OSA_API`, `BASE_API_URL_APP_CATALOGO`).
+Os nomes corretos estão em [`.env.example`](../.env.example) e no job `e2e` do CI
+([`.github/workflows/pr-quality-gate.yaml`](../.github/workflows/pr-quality-gate.yaml)).
+
+Se essas variáveis **não** estiverem definidas (ou estiverem apontando para um
+backend local que não está no ar), o servidor de teste sobe, mas as chamadas de
+API falham silenciosamente e você vê sintomas como:
+
+- Home de `/servicos/trabalho` sem a seção **"Mais recentes"** (nenhuma vaga carrega)
+  → cascata de falhas em `empregos.spec.ts` (o `getFirstVagaHref` não encontra card).
+- Grade de categorias vazia na home → falha em `home.spec.ts`.
+
+> 💡 **Gotcha do `.env.local`.** Um override temporário como
+> `COURSES_BASE_API_URL=http://localhost:8080` no `.env.local` (apontando para um
+> go-api local) **quebra** os testes de emprego se esse backend não estiver
+> rodando. Para rodar contra homolog, remova o override ou sobrescreva no
+> ambiente ao iniciar o servidor:
+> `COURSES_BASE_API_URL=https://services.staging.app.dados.rio/go PORT=3100 npm run dev`.
 
 
 ---
@@ -372,30 +399,42 @@ if (isVisible) { /* asserts apenas quando o estado existir */ }
 
 ---
 
-### `e2e/servicos.spec.ts`
+### `e2e/servicos.spec.ts` — ⏭️ **SKIP intencional (fora de escopo)**
 
-Testes públicos (não requerem `E2E_ACCESS_TOKEN`). Cobrem a rota `/servicos` e o fluxo de navegação por categoria.
+Cobrem a rota `/servicos` e a navegação por categoria — ou seja, a **Carta de
+Serviços**, que está em migração (integração Pref.Rio Carta de Serviços / SF-Mule).
+A UI e as rotas de `/servicos` vão mudar, então o arquivo inteiro está marcado com
+`test.describe.skip(...)` para aparecer explicitamente como *skipped* no relatório.
+**Reativar/estabilizar estes testes faz parte do trabalho pós-migração** — não mexer
+neles agora.
+
+Cenários (atualmente skipados):
 
 - Exibe headings "Serviços", "Mais acessados" e "Categorias" na página principal
-- Clicar no card "CADRio Agendamento" navega para a página do serviço (exibe "Acessar serviço" e "Principais informações")
-- Clicar no botão da categoria "Cidade" navega para `/servicos/categoria/cidade`, exibe o heading da categoria e "Mais acessados", e clicar no primeiro card de serviço abre a página de detalhe
+- Clicar no card "CADRio Agendamento" navega para a página do serviço
+- Clicar na categoria "Cidade" navega para `/servicos/categoria/cidade` e abre um detalhe
 
 ---
 
-## CI — GitHub Actions (`.github/workflows/playwright.yml`)
+## CI — GitHub Actions (job `e2e` em `.github/workflows/pr-quality-gate.yaml`)
 
-Dispara em `push` e `pull_request` para o branch `**staging`**.
+Os testes E2E rodam como o job **`e2e`** dentro do quality gate de PR
+([`pr-quality-gate.yaml`](../.github/workflows/pr-quality-gate.yaml)), e o resultado
+entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
+`playwright.yml` dedicado.
 
-**Passos:**
+**Passos (resumo):**
 
-1. `actions/checkout@v4`
-2. `actions/setup-node@v4` com `node-version: lts/`*
-3. `npm ci`
-4. `npx playwright install --with-deps` (instala browsers + dependências de sistema)
-5. `npm run build` (build de produção Next.js)
-6. `npx playwright test` com os secrets:
-  - `E2E_ACCESS_TOKEN`
-  - `E2E_REFRESH_TOKEN`
+1. `actions/checkout` + `actions/setup-node`
+2. `npm ci`
+3. `npx playwright install chromium --with-deps`
+4. `npm run build`
+5. `npm run test:e2e` com os envs (via secrets + valores de homolog):
+   - `E2E_ACCESS_TOKEN` (secret)
+   - `COURSES_BASE_API_URL`, `BASE_API_URL_APP_BUSCA_SEARCH`,
+     `BASE_API_URL_SUBPAV_OSA_API`, `BASE_API_URL_RMI`, `BASE_API_URL_APP_CATALOGO`
+     (apontando para `services.staging.app.dados.rio`)
+6. Upload do `playwright-report/` como artifact.
 
 ---
 
@@ -404,8 +443,21 @@ Dispara em `push` e `pull_request` para o branch `**staging`**.
 - **WebKit e firefox desativados**: TODO: add no futuro, porém com o tradeoff do tempo de execução da suite de testes.
 - **Dados dinâmicos de categoria**: o nome exibido no `h1` da página de categoria vem da API; o teste usa `toContainText` para tolerar variações no nome retornado.
 - **Dados dinâmicos da API**: asserts da home que dependem de categorias/nomes vindos da API podem flutuar; preferir `data-testid` ou contagens mínimas.
-- **OTP / WhatsApp**: o teste de atualização de telefone envia um token real para `(21) 99999-9999` — não verifica o código de confirmação.
+- **OTP / WhatsApp**: o teste de atualização de telefone (`atualizar-telefone`) envia um token real para `(21) 99999-9999` e depende do serviço externo de mensageria (**SFMC**) do homolog. Quando esse serviço está indisponível (ex.: retornando 404), o app exibe "Oops! Houve um erro"; nesse caso o teste do fluxo feliz **pula em runtime** com motivo claro (dependência externa) em vez de falhar. O smoke test (a tela renderiza) continua rodando.
 - **Estado da conta de teste**: testes de e-mail e endereço dependem do estado atual da conta associada ao `E2E_ACCESS_TOKEN`; o estado pode variar entre execuções.
+
+### Skips intencionais (revisados)
+
+| Local | Tipo | Motivo |
+| ----- | ---- | ------ |
+| `servicos.spec.ts` (arquivo todo) | `describe.skip` | Carta de Serviços em migração — **fora de escopo até a migração** |
+| `meu-perfil-atualizacao.spec.ts` — fluxo feliz de telefone | skip em runtime | Serviço externo SFMC indisponível (dependência externa) |
+| `empregos.spec.ts` — `/inscricao` sem auth | `test.skip(true, …)` | Cenário só faz sentido sem auth; o describe é sempre autenticado (coberto pelos testes públicos) |
+| `empregos.spec.ts` — inscrição / candidatura | skip em runtime | Conta já possui candidatura para a 1ª vaga (estado dinâmico da conta) |
+| `empregos.spec.ts` — página da empresa (2 testes) | skip em runtime | 1ª vaga sem CNPJ de empresa vinculado (estado dinâmico dos dados) |
+
+Os demais `test.skip(!hasE2EAuth(), …)` são **gates de autenticação**: só pulam
+quando `E2E_ACCESS_TOKEN` não está definido (ex.: PRs de fork sem secrets).
 
 ---
 

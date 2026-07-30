@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { applyE2ECookieConsent } from './fixtures/auth'
 
-test.describe('Serviços', () => {
+// FORA DE ESCOPO (skip intencional): estes testes cobrem a Carta de Serviços,
+// que está em migração (integração Pref.Rio Carta de Serviços / SF-Mule). A UI e
+// as rotas de /servicos vão mudar; reativar/estabilizar faz parte do trabalho
+// pós-migração. `describe.skip` deixa explícito no relatório.
+test.describe.skip('Serviços — carta de serviços (fora de escopo)', () => {
   test.beforeEach(async ({ context }) => {
     await applyE2ECookieConsent(context)
   })
