@@ -2,6 +2,8 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import RequestsInProgressBanner from '@/app/components/requests-in-progress-banner'
+import RequestsSectionCards from '@/app/components/requests-section-cards'
 import SuggestionCards from '@/app/components/suggestion-cards'
 import {
   SuggestionCardsSwipe,
@@ -13,6 +15,8 @@ import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { fetchCategories } from '@/lib/categories'
 import { AuthStatusProvider } from '@/providers/auth-status-provider'
 
+const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
+
 export default async function Home() {
   const categories = await fetchCategories()
   const categoriesSlice = categories.slice(0, 14)
@@ -23,6 +27,9 @@ export default async function Home() {
       <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
         <HeaderWrapperClient />
 
+        {/* Requests in progress banner — only visible when logged in with recent requests */}
+        {isChamadosEnabled && <RequestsInProgressBanner />}
+
         {/* Suggestion Cards*/}
         <ResponsiveWrapper
           mobileComponent={<SuggestionCards />}
@@ -32,6 +39,9 @@ export default async function Home() {
 
         {/* Home Categories Grid*/}
         <HomeCategoriesGrid categories={allCategories} />
+
+        {/* Requests Section Cards */}
+        {isChamadosEnabled && <RequestsSectionCards />}
 
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards />
