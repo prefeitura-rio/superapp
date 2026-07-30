@@ -39,7 +39,8 @@ export default async function PersonalInfoForm() {
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return ''
     const d = new Date(dateStr)
-    return d.toLocaleDateString('pt-BR')
+    // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
+    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
   }
 
   const showPhoneBadge = userInfo?.telefone?.principal

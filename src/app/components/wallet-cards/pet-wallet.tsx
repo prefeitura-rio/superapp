@@ -35,12 +35,17 @@ export function PetCard({
     petData.especie_nome!.charAt(0).toUpperCase() +
     petData.especie_nome!.slice(1).toLowerCase()
 
+  // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
   const registerDate = petData.registro_data
-    ? new Date(petData.registro_data).toLocaleDateString('pt-BR')
+    ? new Date(petData.registro_data).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+      })
     : undefined
 
   const birthDate = petData.nascimento_data
-    ? new Date(petData.nascimento_data).toLocaleDateString('pt-BR')
+    ? new Date(petData.nascimento_data).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+      })
     : undefined
 
   const frontContent = (

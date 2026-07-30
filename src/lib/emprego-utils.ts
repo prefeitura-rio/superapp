@@ -57,6 +57,8 @@ function formatDateBr(isoDate: string | undefined): string {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
+      timeZone: 'America/Sao_Paulo',
     })
   } catch {
     return isoDate
@@ -70,6 +72,8 @@ function formatDateLong(isoDate: string | undefined): string {
     return d.toLocaleDateString('pt-BR', {
       day: 'numeric',
       month: 'long',
+      // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
+      timeZone: 'America/Sao_Paulo',
     })
   } catch {
     return isoDate
