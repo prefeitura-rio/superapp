@@ -14,12 +14,6 @@ export default async function MyRequestsPage() {
       ? JSON.parse(response.data)
       : response.data
 
-  console.log('[minhas-solicitacoes] status:', response.status)
-  console.log(
-    '[minhas-solicitacoes] rawData:',
-    JSON.stringify(rawData, null, 2)
-  )
-
   const items =
     response.status === 200 && rawData?.protocolos
       ? rawData.protocolos.flatMap((protocolo: any) =>

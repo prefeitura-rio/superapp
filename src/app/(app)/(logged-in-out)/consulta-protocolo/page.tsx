@@ -67,7 +67,11 @@ export default function ConsultaProtocoloPage() {
       }
 
       if (ordens.length === 1) {
-        router.push(`/solicitacoes/${trimmed}`)
+        const codigoOs = ordens[0]?.codigoOs
+        const href = codigoOs
+          ? `/solicitacoes/${trimmed}?os=${codigoOs}`
+          : `/solicitacoes/${trimmed}`
+        router.push(href)
         return
       }
 
@@ -115,8 +119,14 @@ export default function ConsultaProtocoloPage() {
               <button
                 key={item.codigoOs}
                 type="button"
-                onClick={() => router.push(`/solicitacoes/${item.protocolo}`)}
-                className="w-full text-left bg-card rounded-2xl p-4 cursor-pointer active:opacity-80 transition-opacity"
+                onClick={() =>
+                  router.push(
+                    item.codigoOs
+                      ? `/solicitacoes/${item.protocolo}?os=${item.codigoOs}`
+                      : `/solicitacoes/${item.protocolo}`
+                  )
+                }
+                className="w-full text-left bg-card rounded-2xl p-4 cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all"
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <p className="text-xs text-foreground-light">

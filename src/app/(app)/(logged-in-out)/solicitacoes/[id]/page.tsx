@@ -5,80 +5,319 @@ import {
   formatDate,
   normalizeStatus,
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
-import type { RequestHistoryEntry } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
+import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { useParams } from 'next/navigation'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-foreground-light">{label}</span>
-      <span className="text-sm text-card-foreground">{value}</span>
+      <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light">
+        {label}
+      </span>
+      <span className="text-sm font-normal leading-5 tracking-normal text-foreground">
+        {value}
+      </span>
     </div>
   )
 }
 
-function SectionCard({ children }: { children: React.ReactNode }) {
+function SectionCard({
+  children,
+  className,
+}: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="bg-card rounded-2xl p-4 flex flex-col gap-3">
+    <div
+      className={`bg-card rounded-2xl p-4 flex flex-col gap-3 ${className ?? ''}`}
+    >
       {children}
     </div>
   )
 }
 
-function HistoryItem({
-  entry,
-}: {
-  entry: RequestHistoryEntry
-}) {
+interface TimelineItemProps {
+  label: string
+  date: string
+  active: boolean
+  isLast: boolean
+  isPast: boolean
+  description?: string
+}
+
+function TimelineItem({
+  label,
+  date,
+  active,
+  isLast,
+  isPast,
+  description,
+}: TimelineItemProps) {
+  const [open, setOpen] = useState(true)
+
+  const captionStyle: React.CSSProperties = {
+    color: 'var(--foreground-light, #71717B)',
+    fontFamily: 'var(--font-family-sans, "DM Sans")',
+    fontSize: 'var(--font-size-xs, 12px)',
+    fontWeight: 'var(--font-weight-normal, 400)',
+    lineHeight: 'var(--font-leading-4, 16px)',
+    letterSpacing: 'var(--font-tracking-normal, 0)',
+  }
+
+  const titleStyle: React.CSSProperties = {
+    color: active
+      ? 'var(--card-foreground, #020618)'
+      : 'var(--foreground-light, #71717B)',
+    fontFamily: 'var(--font-family-sans, "DM Sans")',
+    fontSize: 'var(--font-size-sm, 14px)',
+    fontWeight: 'var(--font-weight-medium, 500)',
+    lineHeight: 'var(--font-leading-4, 16px)',
+    letterSpacing: 'var(--font-tracking-normal, 0)',
+  }
+
   return (
-    <div className="flex gap-3">
-      <div className="flex flex-col items-center pt-1 self-stretch">
-        <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-foreground-light" />
+    <div className="flex gap-3 relative">
+      {/* Coluna esquerda: bolinha + linha até o próximo item */}
+      <div className="flex flex-col items-center" style={{ width: '12px' }}>
         <div
-          className="mt-1 flex-1 w-px"
+          className="w-3 h-3 rounded-full shrink-0 z-10 relative"
           style={{
-            backgroundImage:
-              'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 4px, transparent 4px, transparent 8px)',
-            opacity: 0.4,
+            marginTop: '2px',
+            background: active
+              ? 'var(--foreground-light, #71717B)'
+              : 'var(--terciary, #D4D4D8)',
           }}
         />
+        {!isLast && (
+          <div
+            className="flex-1"
+            style={{
+              width: '1.5px',
+              marginBottom: '-2px',
+              ...(isPast
+                ? {
+                    background: 'var(--foreground-light, #71717B)',
+                    opacity: 0.4,
+                  }
+                : {
+                    backgroundImage:
+                      'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 3px, transparent 3px, transparent 6px)',
+                    opacity: 0.4,
+                  }),
+            }}
+          />
+        )}
       </div>
-      <div className="flex flex-col gap-0.5 pb-4">
-        <span className="text-sm font-semibold text-card-foreground">
-          {entry.status}
-        </span>
-        <span className="text-xs text-foreground-light">
-          {entry.date}, {entry.time}
-        </span>
-        <span className="text-xs text-foreground-light mt-1">
-          {entry.description}
-        </span>
+      <div className="flex flex-col gap-0.5 flex-1 min-w-0 pb-4">
+        <button
+          type="button"
+          className="flex items-center justify-between w-full text-left gap-2 cursor-pointer"
+          aria-expanded={open}
+          onClick={() => setOpen(o => !o)}
+        >
+          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+            <span style={titleStyle}>{label}</span>
+            <span style={captionStyle}>{date}</span>
+          </div>
+          {description && (
+            <svg
+              className={`w-4 h-4 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--foreground-light, #71717B)' }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          )}
+        </button>
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: open && description ? '200px' : '0px',
+            opacity: open && description ? 1 : 0,
+          }}
+        >
+          <p style={captionStyle} className="pt-0.5 pr-4">
+            {description}
+          </p>
+        </div>
       </div>
     </div>
   )
 }
 
+const CLOSING_STATUS_LABEL: Record<string, string> = {
+  'Fechado com solução': 'Fechado com solução',
+  'Fechado com atendimento': 'Fechado com atendimento',
+  'Problema não encontrado': 'Problema não encontrado',
+  'Serviço inviável': 'Serviço inviável',
+  'Informação fornecida': 'Informação fornecida',
+}
+
+interface Endereco {
+  logradouro: string
+  numero: string
+  complemento: string
+  bairro: string
+  cep: string
+  pontoReferencia: string
+  tipoEndereco: string
+}
+
 interface DetailData {
   protocolo: string
   servico: string
-  status: string
+  macroStatus: RequestStatus
   dataAbertura: string
-  deadline: string
+  dataUltimaAtualizacao: string
+  previsaoSLA: string
+  motivoFechamento: string
   descricao: string
-  endereco: string
+  endereco: Endereco | null
   orgao: string
   categoria: string
   subcategoria: string
   origem: string
-  history: RequestHistoryEntry[]
+  andamentos: { evento: string; dataInsercao: string; descricao: string }[]
   isLoggedIn: boolean
+  // não logado
+  ultimoAndamento?: {
+    evento: string
+    dataInsercao: string
+    descricao: string
+  } | null
+}
+
+function formatDateTime(iso: string | undefined | null): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  const date = d
+    .toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+    .toUpperCase()
+    .replace('.', '')
+  const time = d.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return `${date}, ${time}`
+}
+
+function StatusTimeline({ data }: { data: DetailData }) {
+  const {
+    macroStatus,
+    dataAbertura,
+    dataUltimaAtualizacao,
+    previsaoSLA,
+    motivoFechamento,
+    andamentos,
+  } = data
+
+  const isAberto = macroStatus === 'Aberto'
+  const isEmAndamento = macroStatus === 'Em andamento'
+  const isConcluido = macroStatus === 'Concluído'
+  const isCancelado = macroStatus === 'Cancelado'
+
+  const showEmAndamento = isEmAndamento || isConcluido || isCancelado
+  const showTerceiro = true
+
+  const aberturaAndamento = andamentos[0]
+  const progressoAndamento = andamentos.find(a => a !== aberturaAndamento)
+
+  let terceiroLabel = ''
+  let terceiroDate = ''
+  let terceiroDescription: string | undefined
+
+  if (isAberto || isEmAndamento) {
+    terceiroLabel = 'Prazo Estimado'
+    terceiroDate = previsaoSLA || '—'
+  } else if (isConcluido) {
+    terceiroLabel = CLOSING_STATUS_LABEL[motivoFechamento] ?? 'Concluído'
+    terceiroDate = dataUltimaAtualizacao
+    terceiroDescription = progressoAndamento?.descricao
+  } else if (isCancelado) {
+    terceiroLabel = 'Solicitação cancelada'
+    terceiroDate = dataUltimaAtualizacao
+  }
+
+  const items = [
+    {
+      label: 'Aberto',
+      date: dataAbertura,
+      active: isAberto,
+      description: aberturaAndamento?.descricao,
+    },
+    ...(showEmAndamento
+      ? [
+          {
+            label: 'Em andamento',
+            date: dataUltimaAtualizacao,
+            active: isEmAndamento,
+            description: progressoAndamento?.descricao,
+          },
+        ]
+      : []),
+    ...(showTerceiro
+      ? [
+          {
+            label: terceiroLabel,
+            date: terceiroDate,
+            active: isConcluido || isCancelado,
+            description: terceiroDescription,
+          },
+        ]
+      : []),
+  ]
+
+  const activeIndex = items.findLastIndex(item => item.active)
+
+  return (
+    <div className="flex flex-col">
+      {items.map((item, i) => (
+        <TimelineItem
+          key={item.label}
+          label={item.label}
+          date={item.date}
+          active={item.active}
+          isLast={i === items.length - 1}
+          isPast={i < activeIndex}
+          description={item.description}
+        />
+      ))}
+    </div>
+  )
+}
+
+function OuvidoriaCard() {
+  return (
+    <SectionCard>
+      <p className="text-sm text-foreground-light leading-5">
+        Sua voz é importante para melhorarmos os serviços da cidade. Acesse
+        nossa Ouvidoria e avalie seu atendimento.
+      </p>
+      <button
+        type="button"
+        className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
+      >
+        Ouvidoria
+      </button>
+    </SectionCard>
+  )
 }
 
 function RequestDetail({ data }: { data: DetailData }) {
-  const normalizedStatus = normalizeStatus(data.status)
+  const { macroStatus } = data
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
@@ -89,28 +328,81 @@ function RequestDetail({ data }: { data: DetailData }) {
           {data.servico}
         </h1>
 
-        {/* History card */}
+        {/* Status + timeline */}
         <SectionCard>
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <StatusBadge status={normalizedStatus} />
-            <span className="text-xs text-foreground-light bg-background border border-border rounded-full px-3 py-0.5">
+            <StatusBadge status={macroStatus} />
+            <span
+              style={{
+                display: 'flex',
+                padding:
+                  'var(--button-badge-v-padding, 2px) var(--button-badge-h-padding, 12px)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 'var(--button-badge-spacing, 4px)',
+                borderRadius: 'var(--button-badge-radius-pill, 999px)',
+                background: 'var(--secondary, #E4E4E7)',
+                color: 'var(--zinc-900, #18181B)',
+                fontFamily: 'var(--font-family-sans, "DM Sans")',
+                fontSize: 'var(--font-size-xs, 12px)',
+                fontWeight: 'var(--font-weight-normal, 400)',
+                lineHeight: 'var(--font-leading-4, 16px)',
+                letterSpacing: 'var(--font-tracking-normal, 0)',
+              }}
+            >
               {data.protocolo}
             </span>
           </div>
-          {data.history.map((entry, i) => (
-            <HistoryItem key={i} entry={entry} />
-          ))}
+          {data.isLoggedIn ? (
+            <StatusTimeline data={data} />
+          ) : (
+            /* Não logado: só andamento atual */
+            <div className="flex flex-col gap-0.5 pt-1">
+              <span className="text-sm font-semibold text-card-foreground">
+                {data.ultimoAndamento?.evento ?? macroStatus}
+              </span>
+              <span className="text-xs text-foreground-light">
+                {formatDateTime(data.ultimoAndamento?.dataInsercao ?? null)}
+              </span>
+              {data.ultimoAndamento?.descricao && (
+                <p className="text-xs text-foreground-light mt-1">
+                  {data.ultimoAndamento.descricao}
+                </p>
+              )}
+            </div>
+          )}
         </SectionCard>
 
-        {/* Dates */}
-        <SectionCard>
-          <div className="grid grid-cols-2 gap-4">
-            <InfoBlock label="Data de abertura" value={data.dataAbertura} />
-            {data.deadline && (
-              <InfoBlock label="Prazo limite" value={data.deadline} />
-            )}
+        {/* Dates — só logado, 2 cards side by side */}
+        {data.isLoggedIn && (
+          <div className="flex gap-3">
+            <div
+              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+              style={{ background: 'var(--card, #F1F1F4)' }}
+            >
+              <span className="text-sm font-normal leading-5 text-foreground-light">
+                Data de abertura
+              </span>
+              <span className="text-sm font-normal leading-5 text-foreground">
+                {data.dataAbertura || '—'}
+              </span>
+            </div>
+            <div
+              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+              style={{ background: 'var(--card, #F1F1F4)' }}
+            >
+              <span className="text-sm font-normal leading-5 text-foreground-light">
+                Prazo limite
+              </span>
+              <span className="text-sm font-normal leading-5 text-foreground">
+                {data.previsaoSLA || '—'}
+              </span>
+            </div>
           </div>
-        </SectionCard>
+        )}
+
+        {/* Ouvidoria — só logado e concluído */}
+        {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
@@ -119,16 +411,9 @@ function RequestDetail({ data }: { data: DetailData }) {
           </SectionCard>
         )}
 
-        {/* Address */}
-        {data.endereco && (
-          <SectionCard>
-            <InfoBlock label="Endereço" value={data.endereco} />
-          </SectionCard>
-        )}
-
         {/* General info */}
         <SectionCard>
-          <h2 className="text-base font-semibold text-foreground mb-1">
+          <h2 className="text-base font-medium leading-5 text-foreground">
             Informações Gerais
           </h2>
           <InfoBlock label="Protocolo" value={data.protocolo} />
@@ -138,11 +423,42 @@ function RequestDetail({ data }: { data: DetailData }) {
           {data.subcategoria && (
             <InfoBlock label="Subcategoria" value={data.subcategoria} />
           )}
-          {data.orgao && <InfoBlock label="Órgão" value={data.orgao} />}
+          <InfoBlock label="Órgão" value={data.orgao || '—'} />
           {data.isLoggedIn && data.origem && (
             <InfoBlock label="Origem do chamado" value={data.origem} />
           )}
         </SectionCard>
+
+        {/* Localização — após Informações Gerais */}
+        {data.endereco && (
+          <SectionCard>
+            <h2 className="text-base font-medium leading-5 text-foreground">
+              Localização
+            </h2>
+            <InfoBlock
+              label="Endereço"
+              value={
+                [
+                  data.endereco.logradouro,
+                  data.endereco.numero,
+                  data.endereco.complemento,
+                  data.endereco.bairro,
+                  data.endereco.cep,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || '—'
+              }
+            />
+            <InfoBlock
+              label="Ponto de referência"
+              value={data.endereco.pontoReferencia || '—'}
+            />
+            <InfoBlock
+              label="Tipo de endereço"
+              value={data.endereco.tipoEndereco || '—'}
+            />
+          </SectionCard>
+        )}
       </div>
 
       <FloatNavigationWrapper />
@@ -154,12 +470,21 @@ function LoadingState() {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
       <SecondaryHeader route="/minhas-solicitacoes" />
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-4 animate-pulse">
-        <div className="h-8 bg-card rounded-xl w-3/4" />
-        <div className="bg-card rounded-2xl p-4 h-32" />
-        <div className="bg-card rounded-2xl p-4 h-20" />
-        <div className="bg-card rounded-2xl p-4 h-48" />
+
+      <div className="pt-24 pb-32 px-4 flex flex-col gap-4">
+        <Skeleton className="h-9 w-3/4" />
+
+        <Skeleton className="rounded-2xl h-48" />
+
+        <div className="flex gap-3">
+          <Skeleton className="rounded-2xl h-20 flex-1" />
+          <Skeleton className="rounded-2xl h-20 flex-1" />
+        </div>
+
+        <Skeleton className="rounded-2xl h-40" />
+        <Skeleton className="rounded-2xl h-32" />
       </div>
+
       <FloatNavigationWrapper />
     </div>
   )
@@ -181,7 +506,9 @@ function ErrorState({ protocolo }: { protocolo: string }) {
 
 export default function RequestDetailPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const protocolo = params.id as string
+  const codigoOs = searchParams.get('os')
 
   const [data, setData] = useState<DetailData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -195,54 +522,46 @@ export default function RequestDetailPage() {
         if (res.ok) {
           const json = await res.json()
           if (json.protocolo) {
-            const os = json.ordens_de_servico?.[0]
-            const history: RequestHistoryEntry[] = (os?.andamentos ?? []).map(
-              (a: {
-                evento?: string
-                dataInsercao?: string
-                descricao?: string
-              }) => ({
-                status: a.evento ?? '—',
-                date: formatDate(a.dataInsercao),
-                time: a.dataInsercao
-                  ? new Date(a.dataInsercao).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : '',
-                description: a.descricao ?? '',
-              })
-            )
-            if (history.length === 0) {
-              history.push({
-                status: normalizeStatus(json.status),
-                date: formatDate(json.dataAbertura),
-                time: json.dataAbertura
-                  ? new Date(json.dataAbertura).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : '',
-                description: 'Solicitação registrada.',
-              })
-            }
+            const ordens = json.ordens_de_servico ?? []
+            const os = codigoOs
+              ? (ordens.find(
+                  (o: { codigoOs?: string }) => o.codigoOs === codigoOs
+                ) ?? ordens[0])
+              : ordens[0]
+            const andamentos = (os?.andamentos ?? [])
+              .filter(
+                (a: { tipoEvento?: string }) => a.tipoEvento !== 'Transfer_WO'
+              )
+              .map(
+                (a: {
+                  evento?: string
+                  dataInsercao?: string
+                  descricao?: string
+                }) => ({
+                  evento: a.evento ?? '—',
+                  dataInsercao: a.dataInsercao ?? '',
+                  descricao: a.descricao ?? '',
+                })
+              )
+
             setData({
               protocolo: json.protocolo,
               servico: os?.servico ?? os?.subtema ?? '—',
-              status: os?.status ?? json.status ?? '',
-              dataAbertura: formatDate(json.dataAbertura),
-              deadline: formatDate(os?.previsaoSLA),
+              macroStatus: normalizeStatus(os?.status ?? json.status),
+              dataAbertura: formatDateTime(json.dataAbertura),
+              dataUltimaAtualizacao: formatDateTime(json.dataUltimaAtualizacao),
+              previsaoSLA: formatDate(os?.previsaoSLA),
+              motivoFechamento: os?.motivoFechamento ?? '',
               descricao: os?.descricao ?? '',
-              endereco: os?.endereco
-                ? [os.endereco.logradouro, os.endereco.bairro]
-                    .filter(Boolean)
-                    .join(', ')
-                : '',
-              orgao: os?.orgaoResponsavel ?? os?.orgaoResponsavelPai ?? '',
+              endereco: os?.endereco ?? null,
+              orgao:
+                os?.orgaoResponsavel?.nome ??
+                os?.orgaoResponsavelPai?.nome ??
+                '',
               categoria: os?.subtema ?? '',
               subcategoria: os?.servico ?? '',
               origem: json.origem ?? '',
-              history,
+              andamentos,
               isLoggedIn: true,
             })
             setLoading(false)
@@ -250,7 +569,7 @@ export default function RequestDetailPage() {
           }
         }
       } catch {
-        // não logado ou erro — tenta público
+        // erro de rede — tenta público
       }
 
       // Fallback: consulta pública
@@ -258,48 +577,37 @@ export default function RequestDetailPage() {
         const res = await fetch(`/api/chamados-publico/${protocolo}`)
         if (res.ok) {
           const json = await res.json()
-          const os = json.ordens_de_servico?.[0]
+          const ordens = json.ordens_de_servico ?? []
+          const os = codigoOs
+            ? (ordens.find(
+                (o: { codigoOs?: string }) => o.codigoOs === codigoOs
+              ) ?? ordens[0])
+            : ordens[0]
           const ultimo = os?.ultimoAndamento
-          const history: RequestHistoryEntry[] = ultimo
-            ? [
-                {
-                  status: ultimo.evento ?? normalizeStatus(ultimo.status),
-                  date: formatDate(ultimo.dataInsercao),
-                  time: ultimo.dataInsercao
-                    ? new Date(ultimo.dataInsercao).toLocaleTimeString(
-                        'pt-BR',
-                        { hour: '2-digit', minute: '2-digit' }
-                      )
-                    : '',
-                  description: ultimo.descricao ?? '',
-                },
-              ]
-            : [
-                {
-                  status: normalizeStatus(json.status),
-                  date: formatDate(json.dataAbertura),
-                  time: '',
-                  description: 'Solicitação registrada.',
-                },
-              ]
+            ? {
+                evento: os.ultimoAndamento.evento ?? '',
+                dataInsercao: os.ultimoAndamento.dataInsercao ?? '',
+                descricao: os.ultimoAndamento.descricao ?? '',
+              }
+            : null
+
           setData({
             protocolo: json.protocolo,
             servico: os?.servico ?? '—',
-            status: os?.status ?? json.status ?? '',
-            dataAbertura: formatDate(json.dataAbertura),
-            deadline: '',
+            macroStatus: normalizeStatus(os?.status ?? json.status),
+            dataAbertura: formatDateTime(json.dataAbertura),
+            dataUltimaAtualizacao: '',
+            previsaoSLA: '',
+            motivoFechamento: '',
             descricao: '',
-            endereco: os?.endereco
-              ? [os.endereco.logradouro, os.endereco.bairro]
-                  .filter(Boolean)
-                  .join(', ')
-              : '',
-            orgao: os?.orgaoResponsavel ?? os?.orgaoResponsavelPai ?? '',
+            endereco: os?.endereco ?? null,
+            orgao: os?.orgaoResponsavel?.nome ?? '',
             categoria: os?.subtema ?? '',
             subcategoria: os?.servico ?? '',
             origem: '',
-            history,
+            andamentos: [],
             isLoggedIn: false,
+            ultimoAndamento: ultimo,
           })
         } else {
           setNotFound(true)
@@ -312,7 +620,7 @@ export default function RequestDetailPage() {
     }
 
     load()
-  }, [protocolo])
+  }, [protocolo, codigoOs])
 
   if (loading) return <LoadingState />
   if (notFound || !data) return <ErrorState protocolo={protocolo} />
