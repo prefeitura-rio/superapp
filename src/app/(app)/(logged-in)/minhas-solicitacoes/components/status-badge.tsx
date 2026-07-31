@@ -1,10 +1,19 @@
 import type { RequestStatus } from '../types'
 
-const STATUS_STYLES: Record<RequestStatus, string> = {
-  Aberto: 'bg-blue-500 text-white',
-  'Em andamento': 'bg-orange-500 text-white',
-  Concluído: 'bg-green-600 text-white',
-  Cancelado: 'bg-[var(--gray-300)] text-white',
+const STATUS_BG: Record<RequestStatus, string> = {
+  Aberto: 'var(--card-2, #0084D1)',
+  'Em andamento': 'var(--card-5, #E17100)',
+  Concluído: 'var(--card-3, #096)',
+  Cancelado: 'var(--foreground-light, #71717B)',
+}
+
+const badgeTextStyle: React.CSSProperties = {
+  color: '#F9FAFB',
+  fontFamily: 'var(--font-family-sans, "DM Sans")',
+  fontSize: 'var(--font-size-xs, 12px)',
+  fontWeight: 'var(--font-weight-normal, 400)',
+  lineHeight: 'var(--font-leading-4, 16px)',
+  letterSpacing: 'var(--font-tracking-normal, 0)',
 }
 
 interface StatusBadgeProps {
@@ -15,7 +24,15 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_STYLES[status]} ${className}`}
+      className={`inline-flex items-center justify-center whitespace-nowrap ${className}`}
+      style={{
+        padding:
+          'var(--button-badge-v-padding, 2px) var(--button-badge-h-padding, 12px)',
+        gap: 'var(--button-badge-spacing, 4px)',
+        borderRadius: 'var(--button-badge-radius-pill, 999px)',
+        background: STATUS_BG[status],
+        ...badgeTextStyle,
+      }}
     >
       {status}
     </span>
