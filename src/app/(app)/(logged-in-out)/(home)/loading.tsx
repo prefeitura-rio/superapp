@@ -83,6 +83,19 @@ export default function HomeLoading() {
         </div>
       </div>
 
+      {/* Requests Section Cards Skeleton */}
+      <div className="px-4 pb-4">
+        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card">
+          <Skeleton className="h-5 w-24" />
+          <div className="flex gap-2">
+            <Skeleton className="flex-1 h-22.25 rounded-2xl" />
+            <Skeleton className="flex-1 h-22.25 rounded-2xl" />
+          </div>
+          <Skeleton className="h-12 w-full rounded-2xl" />
+          <Skeleton className="h-12 w-full rounded-2xl" />
+        </div>
+      </div>
+
       {/* Most Accessed Services Skeleton */}
       <>
         {/* Mobile */}

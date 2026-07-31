@@ -1,0 +1,101 @@
+openapi: 3.0.0
+info:
+  title: API Chamados Público - Pref.Rio (Experience API)
+  description: API de integração para consulta pública e básica de chamados via protocolo, sem autenticação de cidadão logado. Utiliza Integration User (Client Credentials) para comunicação com o Salesforce.
+  version: 1.0.0
+servers:
+  - url: /api
+    description: Base path do gateway MuleSoft
+
+paths:
+  /chamados/{protocolo}:
+    get:
+      summary: Consulta básica de chamado por protocolo.
+      description: Retorna apenas dados não sensíveis do chamado (status, prazo e órgão responsável). Não exige JWT do cidadão — autenticação feita via Integration User (Client Credentials) entre a Mule e o Salesforce.
+      operationId: getChamadoPublico
+      security:
+        - clientCredentials: []
+      parameters:
+        - name: protocolo
+          in: path
+          required: true
+          description: Número de protocolo do chamado.
+          schema:
+            type: string
+            example: "2026000123456"
+      responses:
+        '200':
+          description: Chamado encontrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadoPublicoDTO'
+        '404':
+          description: Protocolo não encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    clientCredentials:
+      type: oauth2
+      description: Autenticação machine-to-machine entre a Mule e o Salesforce via Integration User. Validado no nível da integração (PROC layer), não representa um usuário final.
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.salesforce.com/services/oauth2/token
+          scopes:
+            api: Acesso de leitura a dados não sensíveis de chamados.
+
+  responses:
+    UnauthorizedError:
+      description: Credenciais ausentes ou inválidas (Integration User).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Falha de comunicação interna com o Salesforce.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ChamadoPublicoDTO:
+      type: object
+      description: Somente campos não sensíveis do chamado.
+      properties:
+        protocolo:
+          type: string
+          example: "2026000123456"
+        status:
+          type: string
+          example: "Em andamento"
+        prazo:
+          type: string
+          format: date
+          example: "2026-07-20"
+        orgaoResponsavel:
+          type: string
+          example: "Secretaria Municipal de Conservação"
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "PROTOCOLO_NAO_ENCONTRADO"
+              message:
+                type: string
+                example: "Nenhum chamado encontrado para o protocolo informado."

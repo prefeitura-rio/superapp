@@ -10,8 +10,10 @@
 | `src/http-app-catalogo/` | [app-catalogo](https://github.com/prefeitura-rio/app-catalogo) | `custom-fetch-app-catalogo.ts` | `BASE_API_URL_APP_CATALOGO` |
 | `src/http-agent-api/` | [superapp-agent-api](https://github.com/prefeitura-rio/superapp-agent-api) | `custom-fetch-agent-api.ts` | `AGENT_API_BASE_URL` |
 | `src/http-pref-rio-carta-servicos/` | Spec local `pref-rio-carta-servicos-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-carta-servicos.ts` | `BASE_API_URL_PREF_RIO_CARTA_SERVICOS` |
+| `src/http-pref-rio-cidadao/` | Spec local `pref-rio-cidadao-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-cidadao.ts` | `BASE_API_URL_PREF_RIO_CIDADAO` |
+| `src/http-pref-rio-chamados-publico/` | Spec local `pref-rio-chamados-publico-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-chamados-publico.ts` | `BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO` |
 
-A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. **Carta de Serviços (Pref.Rio)** é API pública — sem Bearer do cidadão.
+A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. As exceções são **Carta de Serviços** e **Chamados Público** — APIs públicas sem Bearer do cidadão (auth M2M na camada Mule).
 
 ## Orval — config ativa única
 
@@ -19,12 +21,14 @@ A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de se
 
 Para regenerar outro client: copiar o bloco da API desejada de [`../orval-apis.md`](../orval-apis.md) para o `api:` em `orval.config.ts`, rodar `npx orval`, e **não** commititar mudanças de config “trocada” sem combinar com o time.
 
+Specs Pref.Rio (`pref-rio-carta-servicos-api.yaml`, `pref-rio-cidadao-api.yaml`, `pref-rio-chamados-publico-api.yaml`) ficam na raiz do repo — não há URL GitHub externa.
+
 ## Regras
 
 - Preferir funções geradas em `src/http*` em vez de `fetch` manual.
 - Não editar arquivos gerados à mão; regenere a partir da OpenAPI.
 - Spec OpenAPI do `app-go-api` vive no repo Go (`docs/swagger.yaml`); mudanças de contrato = PR em [app-go-api](https://github.com/prefeitura-rio/app-go-api), depois regenerar o client aqui.
-- Spec Carta de Serviços Pref.Rio: editar `pref-rio-carta-servicos-api.yaml` na raiz, copiar bloco em `orval-apis.md` para `orval.config.ts` e rodar `npx orval`.
+- Specs Pref.Rio: editar o YAML correspondente na raiz (`pref-rio-carta-servicos-api.yaml`, `pref-rio-cidadao-api.yaml` ou `pref-rio-chamados-publico-api.yaml`), copiar o bloco em `orval-apis.md` para `orval.config.ts` e rodar `npx orval`.
 - Caching server-side: ver `src/lib/dal.ts`.
 - Proxies browser-facing: `src/app/api/`.
 
@@ -33,7 +37,7 @@ Para regenerar outro client: copiar o bloco da API desejada de [`../orval-apis.m
 No Jira / Claude Code no GitHub, só o `superapp` está clonado. Nesse caso:
 
 1. Use o client Orval e tipos já gerados em `src/http*`.
-2. Se precisar inspecionar a API, abra o repo GitHub correspondente (tabela acima), a OpenAPI raw, ou o YAML local `pref-rio-carta-servicos-api.yaml` — não invente shape de response.
+2. Se precisar inspecionar a API, abra o repo GitHub correspondente (tabela acima), a OpenAPI raw, ou os YAML locais `pref-rio-*.yaml` — não invente shape de response.
 3. Se faltar endpoint, documente a dependência no PR com link para o outro repo — não invente backend neste repositório.
 
 ## Docs relacionadas

@@ -54,6 +54,7 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="false" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="cursos,empregos" \
+            --build-arg NEXT_PUBLIC_FEATURE_CHAMADOS="false" \
             --tag $IMAGE_NAME:$VERSION \
             --tag $IMAGE_NAME:$VERSION_NO_V \
             --tag $IMAGE_NAME:stable \
