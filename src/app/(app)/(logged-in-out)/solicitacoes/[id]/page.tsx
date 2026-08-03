@@ -10,7 +10,8 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
   return (
@@ -299,6 +300,96 @@ function StatusTimeline({ data }: { data: DetailData }) {
   )
 }
 
+const dottedLineStyle: React.CSSProperties = {
+  width: '1.5px',
+  backgroundImage:
+    'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 3px, transparent 3px, transparent 6px)',
+  opacity: 0.4,
+}
+
+function PublicAndamento({ data }: { data: DetailData }) {
+  const [open, setOpen] = useState(true)
+  const isFinal =
+    data.macroStatus === 'Concluído' || data.macroStatus === 'Cancelado'
+  const hasDescription = !!data.ultimoAndamento?.descricao
+
+  const captionStyle: React.CSSProperties = {
+    color: 'var(--foreground-light, #71717B)',
+    fontFamily: 'var(--font-family-sans, "DM Sans")',
+    fontSize: 'var(--font-size-xs, 12px)',
+    fontWeight: 'var(--font-weight-normal, 400)',
+    lineHeight: 'var(--font-leading-4, 16px)',
+  }
+
+  return (
+    <div className="flex gap-3">
+      <div className="flex flex-col items-center" style={{ width: '12px' }}>
+        {isFinal && <div className="flex-1" style={dottedLineStyle} />}
+        <div
+          className="w-3 h-3 rounded-full shrink-0"
+          style={{
+            marginTop: '2px',
+            background: 'var(--foreground-light, #71717B)',
+          }}
+        />
+        {!isFinal && <div className="flex-1" style={dottedLineStyle} />}
+      </div>
+      <div className="flex flex-col gap-0.5 flex-1 min-w-0 pb-1">
+        <button
+          type="button"
+          className="flex items-center justify-between w-full text-left gap-2 cursor-pointer"
+          aria-expanded={open}
+          onClick={() => hasDescription && setOpen(o => !o)}
+        >
+          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+            <span
+              style={{
+                color: 'var(--card-foreground, #020618)',
+                fontFamily: 'var(--font-family-sans, "DM Sans")',
+                fontSize: 'var(--font-size-sm, 14px)',
+                fontWeight: 'var(--font-weight-medium, 500)',
+                lineHeight: 'var(--font-leading-4, 16px)',
+              }}
+            >
+              {data.ultimoAndamento?.evento ?? data.macroStatus}
+            </span>
+            <span style={captionStyle}>
+              {formatDateTime(data.ultimoAndamento?.dataInsercao ?? null)}
+            </span>
+          </div>
+          {hasDescription && (
+            <svg
+              className={`w-4 h-4 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--foreground-light, #71717B)' }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          )}
+        </button>
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: open && hasDescription ? '200px' : '0px',
+            opacity: open && hasDescription ? 1 : 0,
+          }}
+        >
+          <p style={captionStyle} className="pt-0.5 pr-4">
+            {data.ultimoAndamento?.descricao}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function OuvidoriaCard() {
   return (
     <SectionCard>
@@ -318,6 +409,24 @@ function OuvidoriaCard() {
 
 function RequestDetail({ data }: { data: DetailData }) {
   const { macroStatus } = data
+  const [isCopied, setIsCopied] = useState(false)
+  const resetRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastRef = useRef<string | null>(null)
+
+  const handleCopyProtocolo = async () => {
+    try {
+      await navigator.clipboard.writeText(data.protocolo)
+    } catch {
+      return
+    }
+    // Cancela o timeout anterior — evita reset prematuro ao clicar várias vezes
+    if (resetRef.current) clearTimeout(resetRef.current)
+    setIsCopied(true)
+    // Descarta toast anterior antes de mostrar novo
+    if (toastRef.current) toast.dismiss(toastRef.current)
+    toastRef.current = toast.success('Copiado!') as string
+    resetRef.current = setTimeout(() => setIsCopied(false), 2000)
+  }
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
@@ -332,12 +441,14 @@ function RequestDetail({ data }: { data: DetailData }) {
         <SectionCard>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <StatusBadge status={macroStatus} />
-            <span
+            <button
+              type="button"
+              onClick={handleCopyProtocolo}
+              className="cursor-pointer active:opacity-70 transition-opacity"
               style={{
                 display: 'flex',
                 padding:
                   'var(--button-badge-v-padding, 2px) var(--button-badge-h-padding, 12px)',
-                justifyContent: 'center',
                 alignItems: 'center',
                 gap: 'var(--button-badge-spacing, 4px)',
                 borderRadius: 'var(--button-badge-radius-pill, 999px)',
@@ -351,55 +462,55 @@ function RequestDetail({ data }: { data: DetailData }) {
               }}
             >
               {data.protocolo}
-            </span>
+              {isCopied && (
+                <svg
+                  className="w-3 h-3 text-green-600 animate-in zoom-in-50 duration-200"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </button>
           </div>
           {data.isLoggedIn ? (
             <StatusTimeline data={data} />
           ) : (
-            /* Não logado: só andamento atual */
-            <div className="flex flex-col gap-0.5 pt-1">
-              <span className="text-sm font-semibold text-card-foreground">
-                {data.ultimoAndamento?.evento ?? macroStatus}
-              </span>
-              <span className="text-xs text-foreground-light">
-                {formatDateTime(data.ultimoAndamento?.dataInsercao ?? null)}
-              </span>
-              {data.ultimoAndamento?.descricao && (
-                <p className="text-xs text-foreground-light mt-1">
-                  {data.ultimoAndamento.descricao}
-                </p>
-              )}
-            </div>
+            <PublicAndamento data={data} />
           )}
         </SectionCard>
 
-        {/* Dates — só logado, 2 cards side by side */}
-        {data.isLoggedIn && (
-          <div className="flex gap-3">
-            <div
-              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-              style={{ background: 'var(--card, #F1F1F4)' }}
-            >
-              <span className="text-sm font-normal leading-5 text-foreground-light">
-                Data de abertura
-              </span>
-              <span className="text-sm font-normal leading-5 text-foreground">
-                {data.dataAbertura || '—'}
-              </span>
-            </div>
-            <div
-              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-              style={{ background: 'var(--card, #F1F1F4)' }}
-            >
-              <span className="text-sm font-normal leading-5 text-foreground-light">
-                Prazo limite
-              </span>
-              <span className="text-sm font-normal leading-5 text-foreground">
-                {data.previsaoSLA || '—'}
-              </span>
-            </div>
+        {/* Dates — logado e deslogado, 2 cards side by side */}
+        <div className="flex gap-3">
+          <div
+            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+            style={{ background: 'var(--card, #F1F1F4)' }}
+          >
+            <span className="text-sm font-normal leading-5 text-foreground-light">
+              Data de abertura
+            </span>
+            <span className="text-sm font-normal leading-5 text-foreground">
+              {data.dataAbertura || '—'}
+            </span>
           </div>
-        )}
+          <div
+            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+            style={{ background: 'var(--card, #F1F1F4)' }}
+          >
+            <span className="text-sm font-normal leading-5 text-foreground-light">
+              Prazo limite
+            </span>
+            <span className="text-sm font-normal leading-5 text-foreground">
+              {data.previsaoSLA || '—'}
+            </span>
+          </div>
+        </div>
 
         {/* Ouvidoria — só logado e concluído */}
         {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
@@ -409,6 +520,24 @@ function RequestDetail({ data }: { data: DetailData }) {
           <SectionCard>
             <InfoBlock label="Descrição" value={data.descricao} />
           </SectionCard>
+        )}
+
+        {/* Endereço compacto — só deslogado, acima de Informações Gerais */}
+        {!data.isLoggedIn && data.endereco && (
+          <div className="bg-card rounded-2xl px-4 py-3 flex flex-col gap-0.5">
+            <span className="text-sm font-normal leading-5 text-foreground-light">
+              Endereço
+            </span>
+            <span className="text-sm font-normal leading-5 text-foreground">
+              {[
+                data.endereco.logradouro,
+                data.endereco.numero,
+                data.endereco.bairro,
+              ]
+                .filter(Boolean)
+                .join(', ') || '—'}
+            </span>
+          </div>
         )}
 
         {/* General info */}
@@ -429,8 +558,8 @@ function RequestDetail({ data }: { data: DetailData }) {
           )}
         </SectionCard>
 
-        {/* Localização — após Informações Gerais */}
-        {data.endereco && (
+        {/* Localização completa — só logado */}
+        {data.isLoggedIn && data.endereco && (
           <SectionCard>
             <h2 className="text-base font-medium leading-5 text-foreground">
               Localização

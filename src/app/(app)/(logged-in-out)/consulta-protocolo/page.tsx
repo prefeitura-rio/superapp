@@ -77,8 +77,8 @@ export default function ConsultaProtocoloPage() {
 
       const items: OsItem[] = ordens.map((os: any) => ({
         codigoOs: os.codigoOs ?? '',
-        servico: os.servico ?? '—',
-        categoria: os.categoria ?? 'Serviço',
+        servico: os.servico ?? os.subtema ?? os.tema ?? '—',
+        categoria: os.subtema ?? os.categoria ?? 'Serviço',
         status: os.status ?? '',
         dataAbertura: os.dataAbertura ?? '',
         protocolo: trimmed,
@@ -103,18 +103,18 @@ export default function ConsultaProtocoloPage() {
       <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
         <SecondaryHeader route="/consulta-protocolo" forceRoute />
 
-        <div className="pt-24 pb-32 px-4 flex flex-col gap-3">
+        <div className="pt-24 pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
             <p className="text-sm text-foreground-light leading-5">
               Encontramos{' '}
-              <span className="font-semibold text-foreground">
+              <span className="text-foreground">
                 {results.length} solicitações
               </span>{' '}
               associadas ao número de protocolo {searchedProtocolo}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {results.map(item => (
               <button
                 key={item.codigoOs}
@@ -130,11 +130,11 @@ export default function ConsultaProtocoloPage() {
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <p className="text-xs text-foreground-light">
-                    {formatDate(item.dataAbertura)}
+                    {item.dataAbertura ? formatDate(item.dataAbertura) : ''}
                   </p>
                   <StatusBadge status={normalizeStatus(item.status)} />
                 </div>
-                <h3 className="text-sm font-semibold text-card-foreground leading-snug mb-1">
+                <h3 className="text-base font-medium text-foreground leading-5 tracking-normal mb-1">
                   {item.servico}
                 </h3>
                 <p className="text-xs text-foreground-light">
