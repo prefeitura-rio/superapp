@@ -1,30 +1,33 @@
 'use client'
 
 import { BannerBase } from '@/components/ui/custom/banner-base'
-import { empregabilidadeBannerIcon } from '@/constants/bucket/banners'
+import {
+  empregabilidadeBannerIcon,
+  riomobBannerIcon,
+} from '@/constants/bucket/banners'
 import Image from 'next/image'
 
-interface EmpregabilidadeBannerProps {
+interface RioMobBannerProps {
   onBannerClick?: () => void
   title: string
   subtitle: string
   route: string
 }
 
-export const EmpregabilidadeBanner = ({
+export const RioMobBanner = ({
   onBannerClick,
   title,
   subtitle,
   route,
-}: EmpregabilidadeBannerProps) => {
+}: RioMobBannerProps) => {
   return (
     <BannerBase
       title=""
       subtitle=""
-      color="#4D58CE"
+      color="#007876"
       gradient={{
-        from: '#4D58CE',
-        to: '#6470EC',
+        from: '#007876',
+        to: '#259795',
         direction: 'to right',
       }}
       showBlur={false}
@@ -39,13 +42,13 @@ export const EmpregabilidadeBanner = ({
           </span>
         </div>
       }
-      badge="Ver vagas"
-      badgeClassName="bg-white text-[#0A3870] font-normal text-xs flex justify-center items-center"
+      badge="Cadastrar"
+      badgeClassName="bg-white text-[#198382] font-normal text-xs flex justify-center items-center"
       onBannerClick={onBannerClick}
       image={
         <Image
-          src={empregabilidadeBannerIcon}
-          alt="Encontre seu trabalho no Oportunidades Cariocas."
+          src={riomobBannerIcon}
+          alt="Cadastre seu veículo para habilitar o uso em toda a cidade."
           width={200}
           height={200}
           className="h-30 w-auto absolute bottom-0 right-0 z-20 md:right-0"

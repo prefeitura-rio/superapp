@@ -4,6 +4,7 @@ import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
 import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
+import { RioMobBanner } from '@/app/components/banners/riomob-banner'
 
 type BannerProps = {
   id: string
@@ -23,6 +24,13 @@ const _empregosEnabled =
   _featureFlag === 'false' || _featureFlag.split(',').includes('empregos')
 
 export const suggestedBanners: BannerProps[] = [
+  {
+    id: 'riomob',
+    component: RioMobBanner,
+    title: 'Cadastre seu veículo',
+    subtitle: 'habilite o uso em toda a cidade',
+    route: '/carteira?riomob=true',
+  },
   {
     id: 'empregabilidade',
     component: EmpregabilidadeBanner,
