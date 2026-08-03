@@ -432,8 +432,8 @@ function RequestDetail({ data }: { data: DetailData }) {
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
       <SecondaryHeader route="/minhas-solicitacoes" />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-4">
-        <h1 className="text-3xl font-bold text-foreground leading-tight">
+      <div className="pt-24 pb-32 px-4 flex flex-col gap-2">
+        <h1 className="text-3xl font-bold text-foreground leading-tight mb-4">
           {data.servico}
         </h1>
 
@@ -487,7 +487,7 @@ function RequestDetail({ data }: { data: DetailData }) {
         </SectionCard>
 
         {/* Dates — logado e deslogado, 2 cards side by side */}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <div
             className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
             style={{ background: 'var(--card, #F1F1F4)' }}
