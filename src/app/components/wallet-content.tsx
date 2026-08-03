@@ -25,14 +25,31 @@ export function WalletContent({
   healthUnitRiskData,
 }: WalletContentProps) {
   const searchParams = useSearchParams()
-  const isPetsView = searchParams.get('pets') === 'true'
+  const isRiomobView = searchParams.get('riomob') === 'true'
+  const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
+  const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
 
   return (
     <div className="pt-2">
-      <WalletTabs activeTab={isPetsView ? 'pets' : 'cards'} />
+      <WalletTabs activeTab={activeTab} />
 
       <div className="mt-6">
-        {isPetsView ? (
+        {isRiomobView ? (
+          <div className="max-w-xl mx-auto pb-10 w-full px-4">
+            <h2 className="text-2xl font-medium text-foreground">Veículos</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Nenhum veículo cadastrado ainda.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/carteira/riomob/adicionar-veiculo"
+                className="flex items-center justify-center w-full py-4 px-6 rounded-full bg-primary text-white text-sm"
+              >
+                Cadastrar veículo
+              </Link>
+            </div>
+          </div>
+        ) : isPetsView ? (
           <div className="max-w-xl mx-auto pb-10 w-full">
             <div className="z-50">
               <div className="flex flex-col gap-4 w-full">

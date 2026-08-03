@@ -3,7 +3,7 @@
 import { SliderTabs } from '@/app/components/slider-tabs'
 
 interface WalletTabsProps {
-  activeTab: 'cards' | 'pets'
+  activeTab: 'cards' | 'pets' | 'riomob'
 }
 
 const WALLET_TABS = [
@@ -16,6 +16,11 @@ const WALLET_TABS = [
     id: 'pets',
     label: 'Meus Pets',
     href: '/carteira?pets=true',
+  },
+  {
+    id: 'riomob',
+    label: 'Veículos',
+    href: '/carteira?riomob=true',
   },
 ]
 
