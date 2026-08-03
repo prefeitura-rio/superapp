@@ -1,3 +1,10 @@
+import { buildAuthUrl } from '@/constants/url'
+import { getUserInfoFromToken } from '@/lib/user-info'
+import { redirect } from 'next/navigation'
+import { ConductorInviteFlow } from './conductor-invite-flow'
+
+export const dynamic = 'force-dynamic'
+
 interface AdicionarCondutorPageProps {
   params: Promise<{ vehicleId: string }>
 }
@@ -6,13 +13,11 @@ export default async function AdicionarCondutorPage({
   params,
 }: AdicionarCondutorPageProps) {
   const { vehicleId } = await params
+  const userAuthInfo = await getUserInfoFromToken()
 
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-medium">Adicionar condutor</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Página placeholder — convite de condutor para o veículo {vehicleId}.
-      </p>
-    </div>
-  )
+  if (!userAuthInfo.cpf) {
+    redirect(buildAuthUrl(`/carteira/riomob/${vehicleId}/adicionar-condutor`))
+  }
+
+  return <ConductorInviteFlow vehicleId={vehicleId} />
 }
