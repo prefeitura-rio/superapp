@@ -9,12 +9,12 @@ interface WalletTabsProps {
 const WALLET_TABS = [
   {
     id: 'cards',
-    label: 'Meus Cartões',
+    label: 'Cartões',
     href: '/carteira',
   },
   {
     id: 'pets',
-    label: 'Meus Pets',
+    label: 'Pets',
     href: '/carteira?pets=true',
   },
   {

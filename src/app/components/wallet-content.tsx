@@ -4,6 +4,8 @@ import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import { WalletTabs } from '@/app/components/wallet-tabs'
 import petsEmptyImage from '@/assets/dog-pet.svg'
+import { PlusIcon } from '@/assets/icons'
+import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
 import type { ModelsPet } from '@/http/models'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -35,17 +37,42 @@ export function WalletContent({
 
       <div className="mt-6">
         {isRiomobView ? (
-          <div className="max-w-xl mx-auto pb-10 w-full px-4">
-            <h2 className="text-2xl font-medium text-foreground">Veículos</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Nenhum veículo cadastrado ainda.
-            </p>
-            <div className="mt-6">
+          <div className="pb-10 w-full">
+            <div className="flex flex-col items-center">
+              <div className="bg-card rounded-2xl p-4 w-full">
+                <p className="text-sm font-medium leading-4 text-foreground text-left md:text-center">
+                  Bem vindo ao <span className="text-primary">RioMob</span>, o
+                  Registro de Veículos de Micromobilidade do Rio
+                </p>
+              </div>
+
+              <Image
+                src={riomobEmptyImage}
+                alt="Nenhum veículo cadastrado"
+                width={150}
+                height={200}
+                className="mt-8 object-contain"
+                priority
+              />
+
+              <p className="mt-2 w-full text-sm font-medium text-foreground text-center leading-4">
+                Você ainda não possui
+                <br />
+                veículos registrados
+              </p>
+
               <Link
                 href="/carteira/riomob/adicionar-veiculo"
-                className="flex items-center justify-center w-full py-4 px-6 rounded-full bg-primary text-white text-sm"
+                className="group mt-6 flex flex-col items-center gap-1"
               >
-                Cadastrar veículo
+                <span className="flex size-11.5 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
+                  <PlusIcon className="size-5.5 text-foreground" />
+                </span>
+                <span className="text-sm font-medium text-card-foreground text-center leading-4">
+                  Adicionar
+                  <br />
+                  Veículo
+                </span>
               </Link>
             </div>
           </div>
