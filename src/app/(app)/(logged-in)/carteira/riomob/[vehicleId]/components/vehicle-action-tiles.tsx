@@ -17,6 +17,7 @@ export function VehicleActionTiles({ vehicleId }: VehicleActionTilesProps) {
       primaryLabel: 'Editar',
       secondaryLabel: 'veículo',
       icon: <EditIcon className="size-5 text-foreground" />,
+      href: `/carteira/riomob/${vehicleId}/editar`,
     },
     {
       id: 'add-conductor',

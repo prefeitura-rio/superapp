@@ -19,7 +19,15 @@ export interface WalletVehicle {
 export interface VehicleDocument {
   fileName: string
   fileSizeLabel: string
+  fileSizeBytes: number
+  url: string
   verified: true
+}
+
+export interface VehiclePhoto {
+  url: string
+  fileName: string
+  fileSizeBytes: number
 }
 
 export interface AuthorizedConductor {
@@ -42,9 +50,13 @@ export interface VehicleDetail extends WalletVehicle {
     email: string
   }
   brandModel: string
+  brandId: string
+  modelId: string
+  color: string
   serialNumber: string
   serialNumberDocument: VehicleDocument
   invoiceDocument: VehicleDocument
+  vehiclePhoto: VehiclePhoto
   authorizedConductors: AuthorizedConductor[]
 }
 
@@ -108,17 +120,29 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       phone: '(21) 99876 5432',
       email: 'j.rangel@gmail.com',
     },
-    brandModel: 'Caloi E-Vibe City',
+    brandModel: 'Xiaomi Mi Electric Scooter 4',
+    brandId: 'brand_xiaomi',
+    modelId: 'model_mi_scooter_4',
+    color: 'Preto',
     serialNumber: 'A1F9K73P4826',
     serialNumberDocument: {
       fileName: 'NF0456634.png',
       fileSizeLabel: '2.89MB',
+      fileSizeBytes: 2_890_000,
+      url: 'https://img.olx.com.br/images/71/718601428868369.webp',
       verified: true,
     },
     invoiceDocument: {
       fileName: 'NF0456634.png',
       fileSizeLabel: '2.89MB',
+      fileSizeBytes: 2_890_000,
+      url: 'https://img.olx.com.br/images/71/718601428868369.webp',
       verified: true,
+    },
+    vehiclePhoto: {
+      url: 'https://img.olx.com.br/images/71/718601428868369.webp',
+      fileName: 'NF0456634.png',
+      fileSizeBytes: 2_890_000,
     },
     authorizedConductors: [
       {
@@ -144,16 +168,28 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       email: 'j.rangel@gmail.com',
     },
     brandModel: 'Sense Impulse Evo',
+    brandId: 'brand_sense',
+    modelId: 'model_impulse',
+    color: 'Azul',
     serialNumber: 'B2G8L84Q5937',
     serialNumberDocument: {
       fileName: 'serie-possante.png',
       fileSizeLabel: '1.42MB',
+      fileSizeBytes: 1_420_000,
+      url: 'https://img.olx.com.br/images/49/495633791766824.webp',
       verified: true,
     },
     invoiceDocument: {
       fileName: 'nf-possante.png',
       fileSizeLabel: '3.10MB',
+      fileSizeBytes: 3_100_000,
+      url: 'https://img.olx.com.br/images/49/495633791766824.webp',
       verified: true,
+    },
+    vehiclePhoto: {
+      url: 'https://img.olx.com.br/images/49/495633791766824.webp',
+      fileName: 'possante.png',
+      fileSizeBytes: 1_420_000,
     },
     authorizedConductors: [
       {
@@ -172,17 +208,29 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       phone: '(21) 97654 3210',
       email: 'marcos.costa@email.com',
     },
-    brandModel: 'Shineray XY 50Q',
+    brandModel: 'Segway Ninebot F40',
+    brandId: 'brand_segway',
+    modelId: 'model_ninebot_f40',
+    color: 'Vermelho',
     serialNumber: 'C3H7M95R6048',
     serialNumberDocument: {
       fileName: 'serie-veloz.png',
       fileSizeLabel: '2.05MB',
+      fileSizeBytes: 2_050_000,
+      url: 'https://img.olx.com.br/images/53/530637174492274.webp',
       verified: true,
     },
     invoiceDocument: {
       fileName: 'nf-veloz.png',
       fileSizeLabel: '2.55MB',
+      fileSizeBytes: 2_550_000,
+      url: 'https://img.olx.com.br/images/53/530637174492274.webp',
       verified: true,
+    },
+    vehiclePhoto: {
+      url: 'https://img.olx.com.br/images/53/530637174492274.webp',
+      fileName: 'veloz.png',
+      fileSizeBytes: 2_050_000,
     },
     authorizedConductors: [],
   },
