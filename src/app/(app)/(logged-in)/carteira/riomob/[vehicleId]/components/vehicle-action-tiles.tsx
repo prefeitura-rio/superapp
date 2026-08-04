@@ -8,9 +8,13 @@ import type { ReactNode } from 'react'
 
 interface VehicleActionTilesProps {
   vehicleId: string
+  onDeleteClick: () => void
 }
 
-export function VehicleActionTiles({ vehicleId }: VehicleActionTilesProps) {
+export function VehicleActionTiles({
+  vehicleId,
+  onDeleteClick,
+}: VehicleActionTilesProps) {
   const actionTiles = [
     {
       id: 'edit',
@@ -31,6 +35,7 @@ export function VehicleActionTiles({ vehicleId }: VehicleActionTilesProps) {
       primaryLabel: 'Excluir',
       secondaryLabel: 'veículo',
       icon: <TrashIcon className="size-5 text-foreground" />,
+      onClick: onDeleteClick,
     },
   ] as const
 
@@ -43,6 +48,7 @@ export function VehicleActionTiles({ vehicleId }: VehicleActionTilesProps) {
           secondaryLabel={tile.secondaryLabel}
           icon={tile.icon}
           href={'href' in tile ? tile.href : undefined}
+          onClick={'onClick' in tile ? tile.onClick : undefined}
         />
       ))}
     </div>
@@ -54,6 +60,7 @@ function ActionTile({
   secondaryLabel,
   icon,
   href,
+  onClick,
 }: ActionTileProps) {
   const content = (
     <>
@@ -83,7 +90,7 @@ function ActionTile({
   }
 
   return (
-    <button type="button" className={className}>
+    <button type="button" className={className} onClick={onClick}>
       {content}
     </button>
   )
@@ -94,4 +101,5 @@ interface ActionTileProps {
   secondaryLabel: string
   icon: ReactNode
   href?: string
+  onClick?: () => void
 }

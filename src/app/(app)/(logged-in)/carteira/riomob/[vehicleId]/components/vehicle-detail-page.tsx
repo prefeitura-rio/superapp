@@ -16,27 +16,29 @@ interface VehicleDetailPageProps {
   vehicle: VehicleDetail
 }
 
-async function mockLeaveVehicle() {
+async function mockDeleteVehicle() {
   await new Promise(resolve => setTimeout(resolve, 800))
 }
 
 export function VehicleDetailPage({ vehicle }: VehicleDetailPageProps) {
   const router = useRouter()
   const isConductor = vehicle.category === 'condutor'
-  const [isLeaveDrawerOpen, setIsLeaveDrawerOpen] = useState(false)
-  const [isLeaving, setIsLeaving] = useState(false)
+  const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleLeaveConfirm = async () => {
-    setIsLeaving(true)
+  const openDeleteDrawer = () => setIsDeleteDrawerOpen(true)
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true)
     try {
-      await mockLeaveVehicle()
-      setIsLeaveDrawerOpen(false)
+      await mockDeleteVehicle()
+      setIsDeleteDrawerOpen(false)
       toast.success('Veículo removido')
       router.push('/carteira?riomob=true')
     } catch {
       toast.error('Não foi possível remover')
     } finally {
-      setIsLeaving(false)
+      setIsDeleting(false)
     }
   }
 
@@ -52,31 +54,34 @@ export function VehicleDetailPage({ vehicle }: VehicleDetailPageProps) {
             <IconButton
               icon={TrashIcon}
               aria-label="Excluir veículo"
-              onClick={() => setIsLeaveDrawerOpen(true)}
+              onClick={openDeleteDrawer}
             />
           ) : undefined
         }
       />
       <div className="flex flex-col gap-6 px-4 pt-2">
         <VehicleCard vehicle={vehicle} />
-        {!isConductor && <VehicleActionTiles vehicleId={vehicle.id} />}
+        {!isConductor && (
+          <VehicleActionTiles
+            vehicleId={vehicle.id}
+            onDeleteClick={openDeleteDrawer}
+          />
+        )}
         <VehicleDetailAccordion
           vehicle={vehicle}
           showAuthorizedConductors={!isConductor}
         />
       </div>
 
-      {isConductor && (
-        <LeaveVehicleDrawer
-          displayName={vehicle.displayName}
-          open={isLeaveDrawerOpen}
-          onOpenChange={open => {
-            if (!isLeaving) setIsLeaveDrawerOpen(open)
-          }}
-          onConfirm={handleLeaveConfirm}
-          isPending={isLeaving}
-        />
-      )}
+      <LeaveVehicleDrawer
+        displayName={vehicle.displayName}
+        open={isDeleteDrawerOpen}
+        onOpenChange={open => {
+          if (!isDeleting) setIsDeleteDrawerOpen(open)
+        }}
+        onConfirm={handleDeleteConfirm}
+        isPending={isDeleting}
+      />
     </div>
   )
 }
