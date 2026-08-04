@@ -412,9 +412,9 @@ Cobre o módulo **Cursos** (`/servicos/cursos/**`). **22 testes** em **9 suítes
 >
 > **Gotcha do carrossel:** os itens off-screen do carrossel "Mais recentes" têm largura/altura 0 (ocultos) e vêm antes da grade "Todos os cursos" no DOM. Os seletores de card e de chip de categoria usam `:visible` para não selecionar itens ocultos.
 
-**Público:** home (logo, Login, cursos/vazio, card→detalhe), detalhe (título, CTA de inscrição), busca (redirect `/servicos/cursos/busca` → `/busca?tipo=cursos`, `?q=`), categoria (navegação, ícone de busca), FAQ.
+**Público:** home (logo, Login, cursos/vazio, card→detalhe), detalhe (título, informações/"oferecido por" + meta, CTA de inscrição), busca (redirect `/servicos/cursos/busca` → `/busca?tipo=cursos`, `?q=`), categoria (navegação + título + ícone de busca), FAQ.
 
-**Autenticado (🔐):** header (menu `/opcoes`, perfil), menu de opções, meus cursos, certificados, alertas, detalhe (CTA ou feedback), fluxo de inscrição (`confirmar-informacoes` — steps sem submit destrutivo) e troca de turma (`trocar-turma` — skip se inelegível). O submit final (`Confirmar inscrição` / `Confirmar troca`) **não** é clicado; a lógica de submit é coberta por unit tests com MSW.
+**Autenticado (🔐):** header (menu `/opcoes`, perfil), menu de opções, meus cursos, certificados, alertas, detalhe (CTA ou feedback), fluxo de inscrição (`confirmar-informacoes` — steps sem submit destrutivo) e troca de turma (`trocar-turma`). Os fluxos de inscrição/troca **iteram** os cursos até achar um no estado necessário (só pulam se a conta não tiver nenhum). O submit final (`Confirmar inscrição` / `Confirmar troca`) **não** é clicado; a lógica de submit é coberta por unit tests com MSW.
 
 ---
 

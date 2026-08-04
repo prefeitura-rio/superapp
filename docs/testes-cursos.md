@@ -45,11 +45,12 @@ O módulo cobre as rotas `/servicos/cursos/**` (home, detalhe, busca, categoria,
 | Cursos ou vazio | Heading `Todos os cursos` / card visível ou `Nenhum curso encontrado` |
 | Card → detalhe | Clica no 1º card visível e verifica `h1` na página do curso |
 
-### 3.2 Página do curso — público (2)
+### 3.2 Página do curso — público (3)
 
 | Teste | O que verifica |
 |-------|----------------|
 | Título | `h1` com o título do curso |
+| Informações | Seção "Curso oferecido por" + ao menos um MetaCard (Carga horária / Modalidade / Data início / Acessibilidade) |
 | CTA de inscrição | Link para `confirmar-informacoes` (ou `trocar-turma`) presente quando disponível — tolera curso indisponível |
 
 ### 3.3 Busca — público (2)
@@ -59,12 +60,11 @@ O módulo cobre as rotas `/servicos/cursos/**` (home, detalhe, busca, categoria,
 | Redirect | `/servicos/cursos/busca` → `/busca?tipo=cursos` + input `Do que você precisa?` |
 | `?q=` | `/busca?tipo=cursos&q=curso` exibe `Resultados da Pesquisa` ou mensagem de vazio |
 
-### 3.4 Categoria — público (2)
+### 3.4 Categoria — público (1)
 
 | Teste | O que verifica |
 |-------|----------------|
-| Navegação | Clica no 1º chip de categoria visível → `/servicos/cursos/categoria/[slug]` (h1 ou vazio) |
-| Ícone de busca | Página de categoria exibe link `href="/servicos/cursos/busca"` |
+| Navegação + conteúdo | Clica no 1º chip visível → `/servicos/cursos/categoria/[slug]`; assere `h1` não-vazio (nome real ou fallback "Categoria") + ícone de busca (`href="/servicos/cursos/busca"`). A rota nunca faz `notFound()`, então assere direto (sem skip) |
 
 ### 3.5 FAQ — público (2)
 
