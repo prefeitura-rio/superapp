@@ -100,8 +100,8 @@ O módulo cobre as rotas `/servicos/cursos/**` (home, detalhe, busca, categoria,
 | Teste | O que verifica |
 |-------|----------------|
 | CTA ou feedback | Inscrição OU "Trocar turma / horário" / "Cancelar inscrição" / "Inscrição recusada" |
-| Fluxo de inscrição | Abre `confirmar-informacoes`, valida `back-button` + `Continuar`/`Confirmar inscrição` — **sem submeter**. Skip se já inscrito |
-| Troca de turma | Se elegível, abre `trocar-turma` + valida `back-button` + `Continuar`/`Confirmar troca` — **sem submeter**. Skip se não inscrito |
+| Fluxo de inscrição | **Itera** os cursos até achar um inscrivível, abre `confirmar-informacoes`, valida `back-button` + `Continuar`/`Confirmar inscrição` — **sem submeter**. Só pula se a conta já estiver inscrita em todos |
+| Troca de turma | **Itera** até um curso inscrito (approved/pending), abre `trocar-turma` + valida `back-button` + `Continuar`/`Confirmar troca` — **sem submeter**. Só pula se a conta não estiver inscrita em nenhum |
 
 ---
 
@@ -198,9 +198,9 @@ Legenda: ✅ Coberto · ⚠️ Coberto parcialmente · ❌ Descoberto
 | Header/menu autenticado | ✅ | — | opcoes + perfil |
 | Meus cursos / Certificados / Alertas | ✅ | — | Estados com dados ou vazio |
 | Detalhe autenticado (CTA ou feedback) | ✅ | — | `.or()` tolera ambos estados |
-| Fluxo de inscrição — steps | ⚠️ | ✅ | E2E cobre steps sem submit; submit via `submit-inscription.test.ts` |
+| Fluxo de inscrição — steps | ✅ | ✅ | E2E itera cursos até achar um inscrivível e abre o carousel (sem submit); submit via `submit-inscription.test.ts` |
 | Envio de inscrição (`submitCourseInscription`) | — | ✅ | Pré-existente |
-| Troca de turma (`changeSchedule`) | ⚠️ | ✅ | E2E abre o fluxo (skip se inelegível); action via `change-schedule.test.ts`; client via `change-schedule-client.integration.test.tsx` |
+| Troca de turma (`changeSchedule`) | ✅ | ✅ | E2E itera até um curso inscrito e abre o fluxo (sem submit); action via `change-schedule.test.ts`; client via `change-schedule-client.integration.test.tsx` |
 | Cancelar inscrição (`deleteEnrollment`) | — | ✅ | `delete-enrollment.test.ts` |
 | Leitura de inscrição (`getUserEnrollment`) | — | ✅ | `get-user-enrollment.test.ts` |
 | Histórico de cursos visitados (`course-history`) | — | ✅ | `course-history.test.ts` |

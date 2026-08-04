@@ -51,22 +51,23 @@ async function getFirstCourseHref(page: Page): Promise<string | null> {
 }
 
 /**
- * Abre a home, coleta os chips de categoria visíveis e navega para o primeiro
- * cujo slug RESOLVE (não cai em "Página não encontrada"). Retorna o href aberto
- * ou null se nenhum resolve.
- *
- * Necessário porque a home pode expor chips (ex.: "dados") cujo slug não existe
- * na rota de categoria em homolog, retornando 404 — o critério "se ativa em
- * homolog" do card.
+ * Coleta os hrefs de cards de curso VISÍVEIS da home (dedup, limitado a `max`
+ * para não estourar o tempo). Usado para iterar até encontrar um curso no estado
+ * necessário (inscrivível / já inscrito) em vez de depender só do primeiro card.
  */
-async function gotoFirstResolvingCategory(page: Page): Promise<string | null> {
-  await page.goto('/servicos/cursos')
-  await expect(
-    page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
-  ).toBeVisible({ timeout: 15000 })
+async function collectVisibleCourseHrefs(
+  page: Page,
+  { url = '/servicos/cursos', max = 24 }: { url?: string; max?: number } = {}
+): Promise<string[]> {
+  await page.goto(url)
+  await page
+    .locator(VISIBLE_COURSE_CARD)
+    .first()
+    .isVisible({ timeout: 20000 })
+    .catch(() => false)
 
   const hrefs: string[] = await page
-    .locator('a[href^="/servicos/cursos/categoria/"]:visible')
+    .locator(VISIBLE_COURSE_CARD)
     .evaluateAll(els =>
       Array.from(
         new Set(
@@ -76,23 +77,55 @@ async function gotoFirstResolvingCategory(page: Page): Promise<string | null> {
         )
       )
     )
+  return hrefs.slice(0, max)
+}
 
+/**
+ * Itera cursos (da home por padrão, ou de outra URL de listagem) e retorna o
+ * href do primeiro que satisfaz `isMatch` (avaliado na página do curso, após o
+ * h1 aparecer). Retorna null se nenhum satisfaz — usado para exercer de fato os
+ * fluxos autenticados (inscrição / troca de turma) dependentes do estado da conta.
+ */
+async function findCourseHref(
+  page: Page,
+  isMatch: (page: Page) => Promise<boolean>,
+  opts: { url?: string; max?: number } = {}
+): Promise<string | null> {
+  const hrefs = await collectVisibleCourseHrefs(page, opts)
   for (const href of hrefs) {
     await page.goto(href)
-    const searchBtn = page.locator('a[href="/servicos/cursos/busca"]')
-    const emptyState = page.getByText(
-      'nenhum curso encontrado para esta categoria',
-      { exact: false }
-    )
-    const notFound = page.getByText('Página não encontrada', { exact: false })
-    // Espera a página estabilizar em um dos estados conhecidos
-    await expect(searchBtn.or(emptyState).or(notFound).first()).toBeVisible({
-      timeout: 15000,
-    })
-    const is404 = await notFound.isVisible().catch(() => false)
-    if (!is404) return href
+    await page
+      .locator('h1')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15000 })
+      .catch(() => {})
+    if (await isMatch(page)) return href
   }
   return null
+}
+
+// Localizadores dos estados do botão de ação da página de curso.
+// `:visible` evita pegar duplicatas ocultas; o estado é client-side
+// (useUserEnrollment), então quem consome espera com timeout generoso.
+const enrollCtaLocator = (page: Page) =>
+  page
+    .locator('a[href^="/servicos/cursos/confirmar-informacoes/"]:visible')
+    .first()
+const trocarTurmaLocator = (page: Page) =>
+  page.getByRole('link', { name: 'Trocar turma / horário' }).first()
+
+// Espera o botão de ação (client-side) resolver para o estado procurado.
+// Usa waitFor (que faz polling) — isVisible() é uma checagem imediata e não
+// aguardaria o render assíncrono do botão (useUserEnrollment).
+const isVisibleWithin = async (
+  locator: ReturnType<typeof enrollCtaLocator>
+): Promise<boolean> => {
+  try {
+    await locator.waitFor({ state: 'visible', timeout: 10000 })
+    return true
+  } catch {
+    return false
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -171,6 +204,31 @@ test.describe('Cursos — página do curso (público)', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
   })
 
+  test('exibe informações do curso (oferecido por + campos de meta)', async ({
+    page,
+  }) => {
+    const href = await getFirstCourseHref(page)
+    if (!href) {
+      test.skip(true, 'Home de cursos sem cards no ambiente atual')
+      return
+    }
+    await page.goto(href)
+    await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
+
+    // Seção de provedor — sempre presente
+    await expect(
+      page.getByText(/Curso oferecido (por|e gerido por)/).first()
+    ).toBeVisible({ timeout: 15000 })
+
+    // Ao menos um campo de informação (MetaCard) — quais aparecem depende do curso
+    const metaInfo = page
+      .getByText('Carga horária', { exact: true })
+      .or(page.getByText('Modalidade', { exact: true }))
+      .or(page.getByText('Data início', { exact: true }))
+      .or(page.getByText('Acessibilidade', { exact: true }))
+    await expect(metaInfo.first()).toBeVisible({ timeout: 15000 })
+  })
+
   test('exibe CTA de inscrição (link para confirmar-informacoes) sem autenticação', async ({
     page,
   }) => {
@@ -245,32 +303,30 @@ test.describe('Cursos — categoria (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('categoria ativa exibe título/estado vazio e ícone de busca', async ({
+  test('clicar em categoria abre a página com título e ícone de busca', async ({
     page,
   }) => {
-    const href = await gotoFirstResolvingCategory(page)
-    if (!href) {
-      test.skip(
-        true,
-        'Nenhum chip de categoria da home resolve em homolog (nenhuma categoria ativa)'
-      )
-      return
-    }
+    await page.goto('/servicos/cursos')
+    await expect(
+      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+    ).toBeVisible({ timeout: 15000 })
 
-    // Título da categoria (h1 NÃO-vazio — o h1 do header vem vazio) OU estado vazio
-    const h1 = page.locator('h1').filter({ hasText: /.+/ })
-    const empty = page.getByText(
-      'nenhum curso encontrado para esta categoria',
-      { exact: false }
-    )
-    await expect(h1.first().or(empty.first()).first()).toBeVisible({
-      timeout: 15000,
-    })
+    const categoriaLink = page
+      .locator('a[href^="/servicos/cursos/categoria/"]:visible')
+      .first()
+    await expect(categoriaLink).toBeVisible({ timeout: 15000 })
+    await categoriaLink.click()
+    await page.waitForURL('**/servicos/cursos/categoria/**', { timeout: 15000 })
 
-    // Página de categoria válida expõe o ícone de busca (SecondaryHeader)
+    // A rota de categoria nunca faz notFound(): sempre renderiza um h1 (nome real
+    // da categoria ou fallback "Categoria") e o ícone de busca do SecondaryHeader.
+    // Timeouts generosos absorvem o primeiro compile do dev server.
     await expect(
       page.locator('a[href="/servicos/cursos/busca"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    ).toBeVisible({ timeout: 25000 })
+    await expect(
+      page.locator('h1').filter({ hasText: /.+/ }).first()
+    ).toBeVisible({ timeout: 25000 })
   })
 })
 
@@ -529,29 +585,22 @@ test.describe('Cursos — fluxo de inscrição (autenticado)', () => {
   test('confirmar-informacoes exibe o carousel de steps (sem submeter)', async ({
     page,
   }) => {
-    const href = await getFirstCourseHref(page)
+    test.setTimeout(150000)
+    // Itera os cursos da home até achar um inscrivível (com CTA de inscrição),
+    // em vez de depender só do primeiro card (que pode já estar inscrito).
+    const href = await findCourseHref(page, p =>
+      isVisibleWithin(enrollCtaLocator(p))
+    )
     if (!href) {
-      test.skip(true, 'Home de cursos sem cards no ambiente atual')
-      return
-    }
-    await page.goto(href)
-    await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
-
-    const inscreverCta = page
-      .locator('a[href^="/servicos/cursos/confirmar-informacoes/"]')
-      .first()
-    const hasCta = await inscreverCta
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
-    if (!hasCta) {
       test.skip(
         true,
-        'Curso sem CTA de inscrição (já inscrito ou indisponível) no ambiente atual'
+        'Nenhum curso inscrivível para esta conta (todos já inscritos/indisponíveis)'
       )
       return
     }
 
-    await inscreverCta.click()
+    await page.goto(href)
+    await enrollCtaLocator(page).click()
     await page.waitForURL('**/confirmar-informacoes/**', { timeout: 15000 })
 
     // Botão de voltar do overlay (único data-testid do fluxo) e o botão primário
@@ -582,32 +631,27 @@ test.describe('Cursos — troca de turma (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('acessar trocar-turma exibe o fluxo ou redireciona se não elegível', async ({
+  test('acessar trocar-turma exibe o fluxo (curso já inscrito)', async ({
     page,
   }) => {
-    const href = await getFirstCourseHref(page)
+    // Itera os cursos da home até achar um em que a conta esteja inscrita
+    // (approved/pending → botão "Trocar turma / horário"), em vez de só o 1º card.
+    test.setTimeout(150000)
+    // Itera os cursos até achar um em que a conta esteja inscrita
+    // (approved/pending → botão "Trocar turma / horário").
+    const href = await findCourseHref(page, p =>
+      isVisibleWithin(trocarTurmaLocator(p))
+    )
     if (!href) {
-      test.skip(true, 'Home de cursos sem cards no ambiente atual')
-      return
-    }
-    await page.goto(href)
-    await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
-
-    const trocarTurma = page.getByRole('link', {
-      name: 'Trocar turma / horário',
-    })
-    const isEligible = await trocarTurma
-      .isVisible({ timeout: 8000 })
-      .catch(() => false)
-    if (!isEligible) {
       test.skip(
         true,
-        'Usuário não está inscrito (approved/pending) na primeira vaga; troca de turma indisponível'
+        'Conta não está inscrita (approved/pending) em nenhum curso; troca de turma indisponível'
       )
       return
     }
 
-    await trocarTurma.click()
+    await page.goto(href)
+    await trocarTurmaLocator(page).click()
     await page.waitForURL('**/trocar-turma', { timeout: 15000 })
 
     await expect(page.getByTestId('back-button')).toBeVisible({
