@@ -188,9 +188,24 @@ Se essas variáveis **não** estiverem definidas (ou estiverem apontando para um
 backend local que não está no ar), o servidor de teste sobe, mas as chamadas de
 API falham silenciosamente e você vê sintomas como:
 
-- Home de `/servicos/trabalho` sem a seção **"Mais recentes"** (nenhuma vaga carrega)
-  → cascata de falhas em `empregos.spec.ts` (o `getFirstVagaHref` não encontra card).
+- Home de `/servicos/trabalho` sem a seção **"Mais recentes"** (nenhuma vaga carrega).
+  → Tratado por **skip discriminante** (ver abaixo): os testes dependentes de vaga
+  pulam **com motivo** quando o homolog não tem vaga `publicado_ativo`, mas
+  **falham** se a API tiver vagas e a home não renderizar (bug) ou se a API cair.
 - Grade de categorias vazia na home → falha em `home.spec.ts`.
+
+> ⚖️ **Skip discriminante em empregos (vagas ativas).** A seção "Mais recentes"
+> depende de vagas `publicado_ativo` no homolog — dado volátil (vagas expiram).
+> Em vez de _hard-fail_, `ensureActiveVagasOrSkip(page)` / `getFirstVagaHref`
+> distinguem a causa quando "Mais recentes" não aparece:
+> **0 vagas ativas na API pública → SKIP alto e explícito** (dado do ambiente);
+> **há vagas mas a home não renderizou → FALHA** (bug do app);
+> **API não-2xx / timeout → FALHA** (integração). O skip cobre só ausência de
+> dado — nunca mascara bug. Um **canário** (`home carrega + API responde`) **nunca
+> pula**, garantindo que "tudo pulado" jamais passe silenciosamente no CI.
+> O conserto definitivo (dado determinístico: seed com cleanup / ambiente
+> efêmero) é uma iniciativa de infra à parte — o superapp (portal do cidadão)
+> não cria vaga (só há endpoints públicos de leitura).
 
 > 💡 **Gotcha do `.env.local`.** Um override temporário como
 > `COURSES_BASE_API_URL=http://localhost:8080` no `.env.local` (apontando para um
@@ -483,7 +498,7 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 | ----- | ---- | ------ |
 | `servicos.spec.ts` (arquivo todo) | `describe.skip` | Carta de Serviços em migração — **fora de escopo até a migração** |
 | `meu-perfil-atualizacao.spec.ts` — fluxo feliz de telefone | skip em runtime | Serviço externo SFMC indisponível (dependência externa) |
-| `empregos.spec.ts` — `/inscricao` sem auth | `test.skip(true, …)` | Cenário só faz sentido sem auth; o describe é sempre autenticado (coberto pelos testes públicos) |
+| `empregos.spec.ts` — testes dependentes de vaga ("Mais recentes", página da vaga/empresa) | skip **discriminante** em runtime | Homolog sem vaga `publicado_ativo` (dado do ambiente). **Só pula** se a API confirmar 0 vagas ativas; **falha** se houver vagas e a home não renderizar (bug) ou a API cair. Um **canário** não pula. |
 | `empregos.spec.ts` — inscrição / candidatura | skip em runtime | Conta já possui candidatura para a 1ª vaga (estado dinâmico da conta) |
 | `empregos.spec.ts` — página da empresa (2 testes) | skip em runtime | 1ª vaga sem CNPJ de empresa vinculado (estado dinâmico dos dados) |
 
