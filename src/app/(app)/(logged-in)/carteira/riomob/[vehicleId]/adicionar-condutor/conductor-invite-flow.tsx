@@ -101,7 +101,7 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
                 id="conductor-name"
                 label="Nome"
                 placeholder="Digite o nome completo"
-                className="bg-background focus:bg-background"
+                className="bg-background focus:bg-background shadow-none"
                 error={errors.name?.message}
                 disabled={isPending}
                 {...register('name')}
@@ -116,7 +116,7 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
                     label="CPF"
                     placeholder="000.000.000-00"
                     inputMode="numeric"
-                    className="bg-background focus:bg-background"
+                    className="bg-background focus:bg-background shadow-none"
                     error={errors.cpf?.message}
                     disabled={isPending}
                     value={field.value}
@@ -136,7 +136,7 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
                 type="email"
                 placeholder="nome@email.com"
                 inputMode="email"
-                className="bg-background focus:bg-background"
+                className="bg-background focus:bg-background shadow-none"
                 error={errors.email?.message}
                 disabled={isPending}
                 {...register('email')}
