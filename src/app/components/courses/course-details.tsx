@@ -292,22 +292,31 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       : []),
   ].filter(item => item.value)
 
-  const isOdd = items.length % 2 !== 0
+  const count = items.length
+  // Grid: 2 cols on mobile, 3 cols on sm+.
+  // Last item spans remaining cols when it would be stranded alone in its row.
+  const loneInMobileRow = count % 2 !== 0
+  const loneInDesktopRow = count % 3 !== 0
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
-      {items.map((item, index) => (
-        <div
-          key={item.label}
-          className={
-            isOdd && index === items.length - 1
-              ? 'col-span-2 sm:col-span-1'
-              : ''
-          }
-        >
-          <MetaCard label={item.label} value={item.value} />
-        </div>
-      ))}
+      {items.map((item, index) => {
+        const isLast = index === count - 1
+        const className =
+          isLast && (loneInMobileRow || loneInDesktopRow)
+            ? [
+                loneInMobileRow ? 'col-span-2' : '',
+                loneInDesktopRow ? 'sm:col-span-3' : 'sm:col-span-1',
+              ]
+                .filter(Boolean)
+                .join(' ')
+            : ''
+        return (
+          <div key={item.label} className={className}>
+            <MetaCard label={item.label} value={item.value} />
+          </div>
+        )
+      })}
     </div>
   )
 }
