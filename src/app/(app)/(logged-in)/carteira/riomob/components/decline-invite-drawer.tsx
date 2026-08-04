@@ -3,37 +3,36 @@
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 
-interface LeaveVehicleDrawerProps {
-  displayName: string
+interface DeclineInviteDrawerProps {
+  vehicleDisplayName: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
   isPending: boolean
 }
 
-export function LeaveVehicleDrawer({
-  displayName,
+export function DeclineInviteDrawer({
+  vehicleDisplayName,
   open,
   onOpenChange,
   onConfirm,
   isPending,
-}: LeaveVehicleDrawerProps) {
+}: DeclineInviteDrawerProps) {
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
       showHandle
-      title="Você deseja excluir seu veículo?"
+      title="Recusar veículo?"
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
           <p className="text-base font-medium leading-5 text-card-foreground">
-            Você deseja excluir seu veículo?
+            Recusar veículo?
           </p>
           <p className="text-sm leading-5 text-foreground-light">
-            O cadastro de {displayName} será excluído e esse equipamento não
-            estará mais disponível. Para usá-lo novamente será necessário um
-            novo cadastramento.
+            Você não será cadastrado como condutor de {vehicleDisplayName} e
+            esse equipamento não estará mais disponível.
           </p>
         </div>
 

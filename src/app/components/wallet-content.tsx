@@ -1,5 +1,6 @@
 'use client'
 
+import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
 import { MOCK_VEHICLES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
@@ -40,6 +41,8 @@ export function WalletContent({
       <div className="mt-6">
         {isRiomobView ? (
           <div className="pb-10 w-full">
+            <PendingInviteAccordion className="mb-6" />
+
             {MOCK_VEHICLES.length > 0 ? (
               <div className="flex w-full flex-col items-center gap-6">
                 <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">

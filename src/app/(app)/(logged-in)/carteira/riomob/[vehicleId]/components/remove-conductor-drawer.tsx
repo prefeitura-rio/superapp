@@ -46,7 +46,7 @@ export function RemoveConductorDrawer({
           <div className="flex gap-2">
             <CustomButton
               size="lg"
-              variant="secondary"
+              variant="card"
               className="flex-1"
               onClick={() => onOpenChange(false)}
               disabled={isPending}

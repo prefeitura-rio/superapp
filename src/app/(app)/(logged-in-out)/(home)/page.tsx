@@ -2,6 +2,7 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import { PendingInviteSection } from '@/app/components/pending-invite-section'
 import SuggestionCards from '@/app/components/suggestion-cards'
 import {
   SuggestionCardsSwipe,
@@ -22,6 +23,8 @@ export default async function Home() {
     <AuthStatusProvider>
       <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
         <HeaderWrapperClient />
+
+        <PendingInviteSection />
 
         {/* Suggestion Cards*/}
         <ResponsiveWrapper
