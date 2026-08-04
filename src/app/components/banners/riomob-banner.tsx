@@ -51,7 +51,7 @@ export const RioMobBanner = ({
           alt="Cadastre seu veículo para habilitar o uso em toda a cidade."
           width={200}
           height={200}
-          className="h-30 w-auto absolute bottom-0 right-0 z-20 md:right-0"
+          className="h-30 w-auto rounded-br-xl rounded-tr-xl absolute bottom-0 right-0 z-20 md:right-0"
         />
       }
     />

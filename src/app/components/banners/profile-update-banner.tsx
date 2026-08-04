@@ -48,7 +48,7 @@ export const ProfileUpdateBanner = ({
           alt="Atualize seu cadastro"
           width={200}
           height={200}
-          className="h-32 w-auto absolute bottom-0 -right-8 z-20  md:right-0"
+          className="h-32 rounded-br-xl rounded-tr-xl w-auto absolute bottom-0 -right-8 z-20  md:right-0"
         />
       }
     />
