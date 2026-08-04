@@ -26,6 +26,9 @@ e2e/
   meu-perfil-atualizacao.spec.ts  ← fluxos de atualização de dados (autenticado)
   servicos.spec.ts            ← testes públicos da rota /servicos e categoria
   empregos.spec.ts            ← testes do módulo Oportunidades Cariocas (público + autenticado)
+  cursos.spec.ts              ← testes do módulo Cursos (público + autenticado)
+  carteira.spec.ts            ← smoke da carteira (autenticado)
+  auth-ux.spec.ts             ← telas de UX de autenticação (público)
 ```
 
 ---
@@ -399,6 +402,34 @@ if (isVisible) { /* asserts apenas quando o estado existir */ }
 
 ---
 
+### `e2e/cursos.spec.ts`
+
+Cobre o módulo **Cursos** (`/servicos/cursos/**`). **22 testes** em **9 suítes** (público + autenticado).
+
+> Documentação detalhada (catálogo, unit/integração e tabela de regressão): [`docs/testes-cursos.md`](./testes-cursos.md).
+
+> **Helper local:** `getFirstCourseHref(page)` — abre `/servicos/cursos`, aguarda os cards client-side e retorna o href do primeiro card **visível** de curso (sem hardcode de IDs).
+>
+> **Gotcha do carrossel:** os itens off-screen do carrossel "Mais recentes" têm largura/altura 0 (ocultos) e vêm antes da grade "Todos os cursos" no DOM. Os seletores de card e de chip de categoria usam `:visible` para não selecionar itens ocultos.
+
+**Público:** home (logo, Login, cursos/vazio, card→detalhe), detalhe (título, CTA de inscrição), busca (redirect `/servicos/cursos/busca` → `/busca?tipo=cursos`, `?q=`), categoria (navegação, ícone de busca), FAQ.
+
+**Autenticado (🔐):** header (menu `/opcoes`, perfil), menu de opções, meus cursos, certificados, alertas, detalhe (CTA ou feedback), fluxo de inscrição (`confirmar-informacoes` — steps sem submit destrutivo) e troca de turma (`trocar-turma` — skip se inelegível). O submit final (`Confirmar inscrição` / `Confirmar troca`) **não** é clicado; a lógica de submit é coberta por unit tests com MSW.
+
+---
+
+### `e2e/carteira.spec.ts`
+
+Smoke da carteira (autenticado): heading `Carteira`, card `CLÍNICA DA FAMÍLIA`, abas `Meus Cartões` / `Meus Pets`, estado com cartões ou vazio, aba Pets com pets ou estado vazio. Conteúdo depende de `/api/user/wallet` (timeouts generosos).
+
+---
+
+### `e2e/auth-ux.spec.ts`
+
+Telas de UX de autenticação (público): `/autenticacao-necessaria/carteira` (h1 `Carteira`, CTA gov.br, link `Crie uma conta`) e `/sessao-expirada` (h2 `Sessão Expirada`, CTA gov.br, botão `Continuar sem fazer login`).
+
+---
+
 ### `e2e/servicos.spec.ts` — ⏭️ **SKIP intencional (fora de escopo)**
 
 Cobrem a rota `/servicos` e a navegação por categoria — ou seja, a **Carta de
@@ -465,7 +496,7 @@ quando `E2E_ACCESS_TOKEN` não está definido (ex.: PRs de fork sem secrets).
 
 - Adicionar cobertura para:
   - ~~busca~~ ✅ coberto em `empregos.spec.ts` (grupo "busca (público)")
-  - cursos
+  - ~~cursos~~ ✅ coberto em `cursos.spec.ts` (ver [`testes-cursos.md`](./testes-cursos.md))
   - mei
   - ~~empregabilidade~~ ✅ coberto em `empregos.spec.ts`
 - Incluir cobertura para WebKit/Firefox 

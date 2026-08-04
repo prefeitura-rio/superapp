@@ -429,16 +429,6 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('acessar /inscricao sem auth redireciona para autenticação', async ({
-    page,
-  }) => {
-    // Este teste só funciona sem cookies de auth — verificamos apenas sem auth
-    test.skip(
-      true,
-      'Coberto pelos testes públicos; auth sempre presente neste describe'
-    )
-  })
-
   test('página de inscricao exibe Meu Currículo ou tela de bem-vindo/confirmar', async ({
     page,
   }) => {

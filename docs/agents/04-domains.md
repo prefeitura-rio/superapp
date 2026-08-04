@@ -31,5 +31,6 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - MEI: [`../mei.md`](../mei.md)
 - Busca: [`../search-feature.md`](../search-feature.md)
 - Empregabilidade (testes): [`../testes-empregabilidade.md`](../testes-empregabilidade.md)
+- Cursos (testes): [`../testes-cursos.md`](../testes-cursos.md)
 - Cursos / TanStack: [`../cursos-tanstack-query-migration.md`](../cursos-tanstack-query-migration.md), [`../cursos-home-cache-ssr-tanstack.md`](../cursos-home-cache-ssr-tanstack.md)
 - Carteira pet: [`../pt-br/carteira-pet.md`](../pt-br/carteira-pet.md)
