@@ -65,7 +65,7 @@ export function WalletCardsWrapper({
   const isNormalRiskStatus = riskStatus?.risco === 'Verde'
 
   return (
-    <div className="grid w-full gap-2">
+    <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">
       {/* Health Card - only show if wallet has health data */}
       {hasHealthData && (
         <div>

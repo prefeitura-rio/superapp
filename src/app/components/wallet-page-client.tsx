@@ -37,7 +37,8 @@ export function WalletPageClient() {
           </h2>
           <SearchButton />
         </div>
-        <div className="flex flex-col gap-2 pt-2 mt-6">
+        <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2 pt-2 mt-6">
+          <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
           <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
           <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
           <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
