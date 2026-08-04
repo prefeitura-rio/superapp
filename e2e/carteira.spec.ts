@@ -63,4 +63,37 @@ test.describe('Carteira', () => {
       timeout: 20000,
     })
   })
+
+  test('clicar no cartão CLÍNICA DA FAMÍLIA abre o detalhe (render estável)', async ({
+    page,
+  }) => {
+    await page.goto('/carteira')
+    await expect(page.getByRole('heading', { name: 'Carteira' })).toBeVisible({
+      timeout: 20000,
+    })
+
+    // O cartão é um link (asLink href="/carteira/clinica-da-familia")
+    const cardLink = page
+      .locator('a[href="/carteira/clinica-da-familia"]')
+      .first()
+    const hasCard = await cardLink
+      .waitFor({ state: 'visible', timeout: 25000 })
+      .then(() => true)
+      .catch(() => false)
+    if (!hasCard) {
+      test.skip(true, 'Conta sem cartão Clínica da Família na carteira')
+      return
+    }
+
+    await cardLink.click()
+    await page.waitForURL('**/carteira/clinica-da-familia', { timeout: 15000 })
+
+    // Detalhe renderiza de forma estável: header "Carteira" + título do cartão
+    await expect(page.getByRole('heading', { name: 'Carteira' })).toBeVisible({
+      timeout: 20000,
+    })
+    await expect(page.getByText('CLÍNICA DA FAMÍLIA').first()).toBeVisible({
+      timeout: 20000,
+    })
+  })
 })
