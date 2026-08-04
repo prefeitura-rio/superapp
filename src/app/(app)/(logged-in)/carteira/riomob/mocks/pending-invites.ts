@@ -9,8 +9,14 @@ export interface PendingConductorInvite {
 export const MOCK_PENDING_INVITES: PendingConductorInvite[] = [
   {
     id: 'invite-1',
-    inviterDisplayName: 'Jéssica A.',
-    vehicleDisplayName: 'Bike da Jéssica',
+    inviterDisplayName: 'Jéssica',
+    vehicleDisplayName: 'Bike da Jessy',
     vehicleId: 'vehicle-autopropelido-1',
+  },
+  {
+    id: 'invite-2',
+    inviterDisplayName: 'Lucas',
+    vehicleDisplayName: 'Possante',
+    vehicleId: 'vehicle-bike-1',
   },
 ]
