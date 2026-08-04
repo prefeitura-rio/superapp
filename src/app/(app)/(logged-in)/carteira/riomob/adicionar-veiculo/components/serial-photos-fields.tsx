@@ -115,7 +115,7 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
         />
 
         <FileUploadField
-          label="Fotos do veículo"
+          label="Foto do veículo"
           description="Para realizar o cadastro, é obrigatório o envio de uma foto do veículo. São aceitos os formatos PNG, JPEG e PDF no tamanho máximo de 7mb."
           buttonLabel="Enviar foto"
           fileName={values.vehicle_photo_name}
