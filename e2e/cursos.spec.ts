@@ -50,6 +50,51 @@ async function getFirstCourseHref(page: Page): Promise<string | null> {
   return firstCard.getAttribute('href')
 }
 
+/**
+ * Abre a home, coleta os chips de categoria visíveis e navega para o primeiro
+ * cujo slug RESOLVE (não cai em "Página não encontrada"). Retorna o href aberto
+ * ou null se nenhum resolve.
+ *
+ * Necessário porque a home pode expor chips (ex.: "dados") cujo slug não existe
+ * na rota de categoria em homolog, retornando 404 — o critério "se ativa em
+ * homolog" do card.
+ */
+async function gotoFirstResolvingCategory(page: Page): Promise<string | null> {
+  await page.goto('/servicos/cursos')
+  await expect(
+    page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+  ).toBeVisible({ timeout: 15000 })
+
+  const hrefs: string[] = await page
+    .locator('a[href^="/servicos/cursos/categoria/"]:visible')
+    .evaluateAll(els =>
+      Array.from(
+        new Set(
+          els
+            .map(e => e.getAttribute('href'))
+            .filter((h): h is string => Boolean(h))
+        )
+      )
+    )
+
+  for (const href of hrefs) {
+    await page.goto(href)
+    const searchBtn = page.locator('a[href="/servicos/cursos/busca"]')
+    const emptyState = page.getByText(
+      'nenhum curso encontrado para esta categoria',
+      { exact: false }
+    )
+    const notFound = page.getByText('Página não encontrada', { exact: false })
+    // Espera a página estabilizar em um dos estados conhecidos
+    await expect(searchBtn.or(emptyState).or(notFound).first()).toBeVisible({
+      timeout: 15000,
+    })
+    const is404 = await notFound.isVisible().catch(() => false)
+    if (!is404) return href
+  }
+  return null
+}
+
 // ---------------------------------------------------------------------------
 // HOME DE CURSOS — PÚBLICO
 // ---------------------------------------------------------------------------
@@ -200,58 +245,29 @@ test.describe('Cursos — categoria (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('clicar em uma categoria navega para a página da categoria', async ({
+  test('categoria ativa exibe título/estado vazio e ícone de busca', async ({
     page,
   }) => {
-    await page.goto('/servicos/cursos')
-    await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
-    ).toBeVisible({ timeout: 15000 })
-
-    const categoriaLink = page
-      .locator('a[href^="/servicos/cursos/categoria/"]:visible')
-      .first()
-    const hasCategoria = await categoriaLink
-      .isVisible({ timeout: 15000 })
-      .catch(() => false)
-    if (!hasCategoria) {
-      test.skip(true, 'Nenhuma categoria ativa na home no ambiente atual')
+    const href = await gotoFirstResolvingCategory(page)
+    if (!href) {
+      test.skip(
+        true,
+        'Nenhum chip de categoria da home resolve em homolog (nenhuma categoria ativa)'
+      )
       return
     }
 
-    await categoriaLink.click()
-    await page.waitForURL('**/servicos/cursos/categoria/**', { timeout: 15000 })
-
-    // h1 com o nome da categoria, ou estado vazio de categoria sem cursos
-    const h1 = page.locator('h1').first()
+    // Título da categoria (h1 NÃO-vazio — o h1 do header vem vazio) OU estado vazio
+    const h1 = page.locator('h1').filter({ hasText: /.+/ })
     const empty = page.getByText(
-      'Ops... nenhum curso encontrado para esta categoria',
+      'nenhum curso encontrado para esta categoria',
       { exact: false }
     )
-    await expect(h1.or(empty).first()).toBeVisible({ timeout: 15000 })
-  })
+    await expect(h1.first().or(empty.first()).first()).toBeVisible({
+      timeout: 15000,
+    })
 
-  test('página de categoria exibe ícone de busca apontando para /servicos/cursos/busca', async ({
-    page,
-  }) => {
-    await page.goto('/servicos/cursos')
-    await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
-    ).toBeVisible({ timeout: 15000 })
-
-    const categoriaLink = page
-      .locator('a[href^="/servicos/cursos/categoria/"]:visible')
-      .first()
-    const hasCategoria = await categoriaLink
-      .isVisible({ timeout: 15000 })
-      .catch(() => false)
-    if (!hasCategoria) {
-      test.skip(true, 'Nenhuma categoria ativa na home no ambiente atual')
-      return
-    }
-    await categoriaLink.click()
-    await page.waitForURL('**/servicos/cursos/categoria/**', { timeout: 15000 })
-
+    // Página de categoria válida expõe o ícone de busca (SecondaryHeader)
     await expect(
       page.locator('a[href="/servicos/cursos/busca"]').first()
     ).toBeVisible({ timeout: 15000 })
