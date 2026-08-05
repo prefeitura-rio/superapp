@@ -485,6 +485,9 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
        fallback para o `E2E_ACCESS_TOKEN` estático.
      - **`GOOGLE_MAPS_API_KEY`**: usado em runtime por `/api/address-autocomplete`
        e `/api/cep-lookup` (autocomplete de endereço em `/meu-perfil`).
+     - **`API_KEY_SUBPAV_OSA_SMS`**: usado em runtime por `src/lib/health-unit.ts`
+       (dados de unidade de saúde em `/carteira`). Sem ele, a API responde erro
+       não-JSON e o app loga `SyntaxError` no `response.json()`.
    - **Faltando qualquer credencial num run same-repo** → o passo **falha rápido**
      com uma anotação `::error::` **consolidada** listando o que falta (**antes**
      do build e da suíte, sem stack trace nem retries), em vez de deixar testes
@@ -505,10 +508,12 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 | `IDENTIDADE_CARIOCA_CLIENT_SECRET` | Client secret do Keycloak (`superapp` é client confidencial) — necessário para o mint. |
 | `E2E_ACCESS_TOKEN` | Fallback estático (expira — prefira o refresh token). |
 | `GOOGLE_MAPS_API_KEY` | Google Places (autocomplete de endereço + CEP) do fluxo de `/meu-perfil/endereco`. Sem ele, o run same-repo falha no passo de credenciais. |
+| `API_KEY_SUBPAV_OSA_SMS` | API SUBPAV/OSA (dados de unidade de saúde em `/carteira`). Sem ele, o run same-repo falha no passo de credenciais. |
 
-> Em run same-repo, o passo **Prepare E2E credentials** exige **token de auth** _e_
-> `GOOGLE_MAPS_API_KEY`. Faltando qualquer um, o job falha rápido com um erro
-> claro listando o que provisionar (Settings → Secrets). Forks rodam só o público.
+> Em run same-repo, o passo **Prepare E2E credentials** exige **token de auth**,
+> `GOOGLE_MAPS_API_KEY` _e_ `API_KEY_SUBPAV_OSA_SMS`. Faltando qualquer um, o job
+> falha rápido com um erro claro listando o que provisionar (Settings → Secrets).
+> Forks rodam só o público.
 
 ---
 

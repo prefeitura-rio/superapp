@@ -106,6 +106,7 @@ jobs:
       #      • Token de auth: MINTADO na hora a partir de um refresh_token (não
       #        expira) com fallback ao token estático.
       #      • GOOGLE_MAPS_API_KEY: autocomplete de endereço em /meu-perfil.
+      #      • API_KEY_SUBPAV_OSA_SMS: dados de unidade de saúde em /carteira.
       #    Faltando qualquer uma → falha o passo com ::error:: consolidado.
       - name: Prepare E2E credentials (mint token / detect fork)
         env:
@@ -115,6 +116,7 @@ jobs:
           E2E_REFRESH_TOKEN: ${{ secrets.E2E_REFRESH_TOKEN }}
           E2E_ACCESS_TOKEN_STATIC: ${{ secrets.E2E_ACCESS_TOKEN }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -uo pipefail
@@ -155,6 +157,11 @@ jobs:
             MISSING="$MISSING%0A- GOOGLE_MAPS_API_KEY (autocomplete de endereço em /meu-perfil)"
           fi
 
+          # --- Credencial 3: SUBPAV/OSA (dados de unidade de saúde na carteira) ---
+          if [ -z "${API_KEY_SUBPAV_OSA_SMS:-}" ]; then
+            MISSING="$MISSING%0A- API_KEY_SUBPAV_OSA_SMS (dados de unidade de saúde em /carteira)"
+          fi
+
           # --- Falha limpa e consolidada se faltar alguma credencial ---
           if [ -n "$MISSING" ]; then
             echo "::error title=E2E sem credenciais::Run do próprio repo exige credenciais que não estão nos Secrets do repositório:${MISSING}%0A%0APRs de fork rodam só o público e não caem aqui."
@@ -170,10 +177,10 @@ jobs:
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
-          GOOGLE_MAPS_API_KEY: "placeholder"
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
           NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
-          API_KEY_SUBPAV_OSA_SMS: "placeholder"
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
           NEXT_PUBLIC_HAND_TALK_TOKEN: "c84d3e127f66af2cee4bfe289c58537a"
@@ -186,8 +193,10 @@ jobs:
           CI: "true"
           PORT: "3000"
           # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
-          # Google Maps é lido em runtime por /api/address-autocomplete e /api/cep-lookup.
+          # Lidos em runtime: Google Maps (address-autocomplete/cep-lookup) e
+          # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
           BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
