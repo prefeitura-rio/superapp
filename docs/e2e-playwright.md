@@ -475,12 +475,35 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 2. `npm ci`
 3. `npx playwright install chromium --with-deps`
 4. `npm run build`
-5. `npm run test:e2e` com os envs (via secrets + valores de homolog):
-   - `E2E_ACCESS_TOKEN` (secret)
+5. **Prepare E2E auth** (`Prepare E2E auth`): decide se o run **exige** auth e
+   obtém o token:
+   - **PR de fork** → `E2E_REQUIRE_AUTH=false` (o GitHub não passa secrets a
+     forks; roda só o público, sem falhar).
+   - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e obtém um `access_token`:
+     preferencialmente **mintado na hora** a partir de `E2E_REFRESH_TOKEN`
+     (grant `refresh_token` no Keycloak, usando `IDENTIDADE_CARIOCA_CLIENT_SECRET`)
+     — assim **não expira** entre execuções; fallback para o `E2E_ACCESS_TOKEN`
+     estático. Exporta via `$GITHUB_ENV`.
+6. `npm run test:e2e` com os envs (herda `E2E_ACCESS_TOKEN`/`E2E_REQUIRE_AUTH` do
+   passo anterior + valores de homolog):
    - `COURSES_BASE_API_URL`, `BASE_API_URL_APP_BUSCA_SEARCH`,
      `BASE_API_URL_SUBPAV_OSA_API`, `BASE_API_URL_RMI`, `BASE_API_URL_APP_CATALOGO`
      (apontando para `services.staging.app.dados.rio`)
-6. Upload do `playwright-report/` como artifact.
+7. Upload do `playwright-report/` como artifact.
+
+**Secrets do CI (job `e2e`):**
+
+| Secret | Uso |
+| ------ | --- |
+| `E2E_REFRESH_TOKEN` | **Preferido.** Refresh token de homolog; o CI minta um `access_token` fresco a cada run (não expira). |
+| `IDENTIDADE_CARIOCA_CLIENT_SECRET` | Client secret do Keycloak (`superapp` é client confidencial) — necessário para o mint. |
+| `E2E_ACCESS_TOKEN` | Fallback estático (expira — prefira o refresh token). |
+
+> ⚠️ **Canário de credencial** (`e2e/auth-canary.spec.ts`): em runs que **exigem**
+> auth (`E2E_REQUIRE_AUTH=true`), **falha alto** se nenhum token estiver
+> disponível — em vez de deixar os ~84 testes autenticados sumirem como skip
+> mudo e o CI ficar "verde" testando quase nada. Em fork/PR público, o canário
+> pula explicitamente.
 
 ---
 

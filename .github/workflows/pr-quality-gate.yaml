@@ -116,12 +116,60 @@ jobs:
           NEXT_PUBLIC_EQUALWEB_SITEKEY: "f010fd59983a9d10102605f5740d45fd"
           NEXT_PUBLIC_PERTO_DIGITAL_ENABLED: "true"
 
+      # Prepara a credencial de E2E:
+      #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
+      #    roda só o público, sem falhar).
+      #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e obtém um access_token:
+      #    preferencialmente MINTADO na hora a partir de um refresh_token (não
+      #    expira entre execuções); fallback para o token estático. Se nenhum
+      #    estiver disponível, o canário (auth-canary.spec.ts) falha alto.
+      - name: Prepare E2E auth (mint fresh token / detect fork)
+        env:
+          KC_BASE: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
+          KC_CLIENT_ID: "superapp"
+          KC_CLIENT_SECRET: ${{ secrets.IDENTIDADE_CARIOCA_CLIENT_SECRET }}
+          E2E_REFRESH_TOKEN: ${{ secrets.E2E_REFRESH_TOKEN }}
+          E2E_ACCESS_TOKEN_STATIC: ${{ secrets.E2E_ACCESS_TOKEN }}
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          set -uo pipefail
+          if [ "$IS_FORK" = "true" ]; then
+            echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
+            echo "PR de fork: secrets indisponíveis — E2E roda apenas testes públicos."
+            exit 0
+          fi
+          echo "E2E_REQUIRE_AUTH=true" >> "$GITHUB_ENV"
+
+          TOKEN=""
+          # Preferir mintar um access_token FRESCO a partir do refresh_token.
+          if [ -n "${E2E_REFRESH_TOKEN:-}" ] && [ -n "${KC_CLIENT_SECRET:-}" ]; then
+            TOKEN=$(curl -sf -X POST "$KC_BASE/token" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "client_id=$KC_CLIENT_ID" \
+              --data-urlencode "client_secret=$KC_CLIENT_SECRET" \
+              --data-urlencode "grant_type=refresh_token" \
+              --data-urlencode "refresh_token=$E2E_REFRESH_TOKEN" \
+              | jq -r '.access_token // empty' 2>/dev/null || true)
+            [ -n "$TOKEN" ] && echo "Access token mintado a partir do refresh_token."
+          fi
+          # Fallback: token estático (pode expirar — prefira o refresh_token).
+          if [ -z "$TOKEN" ] && [ -n "${E2E_ACCESS_TOKEN_STATIC:-}" ]; then
+            TOKEN="$E2E_ACCESS_TOKEN_STATIC"
+            echo "Usando E2E_ACCESS_TOKEN estático (fallback)."
+          fi
+          if [ -n "$TOKEN" ]; then
+            echo "::add-mask::$TOKEN"
+            echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Nenhum token E2E disponível num run que EXIGE auth — o canário vai falhar. Configure E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (ou E2E_ACCESS_TOKEN) nos secrets."
+          fi
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: "true"
           PORT: "3000"
-          E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
+          # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
           COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
           BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
