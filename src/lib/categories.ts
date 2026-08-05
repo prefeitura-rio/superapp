@@ -73,7 +73,12 @@ export function getIconForCategory(categoryName: string): ReactNode {
   })
 }
 
-async function fetchCategoriesFromBuscaSearch(): Promise<Category[]> {
+/** Fail fast so RSC pages (home/serviços) don't stay on loading.tsx. */
+const CATEGORIES_FETCH_TIMEOUT_MS = 4_000
+
+async function fetchCategoriesFromBuscaSearch(
+  options?: RequestInit
+): Promise<Category[]> {
   const response = await getApiV1Categories(
     {
       sort_by: GetApiV1CategoriesSortBy.popularity,
@@ -87,6 +92,7 @@ async function fetchCategoriesFromBuscaSearch(): Promise<Category[]> {
         revalidate: 600,
         tags: ['categories'],
       },
+      ...options,
     }
   )
 
@@ -111,13 +117,17 @@ async function fetchCategoriesFromBuscaSearch(): Promise<Category[]> {
 
 export async function fetchCategories(): Promise<Category[]> {
   try {
+    const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
+
     if (CARTA_SERVICOS_API_ENABLED) {
-      return await fetchCartaServicosCategories(getIconForCategory)
+      return await fetchCartaServicosCategories(getIconForCategory, { signal })
     }
 
-    return await fetchCategoriesFromBuscaSearch()
+    return await fetchCategoriesFromBuscaSearch({ signal })
   } catch (error) {
     console.error('Error fetching categories:', error)
+    // Timeout / network / API errors: render page without categories
+    // instead of keeping the user stuck on the route loading UI.
     return []
   }
 }

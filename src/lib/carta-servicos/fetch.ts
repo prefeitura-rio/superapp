@@ -73,11 +73,16 @@ function getThemesFromPayload(payload: unknown): Theme[] {
 }
 
 export async function fetchCartaServicosCategories(
-  getIconForCategory: (name: string) => ReactNode
+  getIconForCategory: (name: string) => ReactNode,
+  options?: RequestInit
 ): Promise<Category[]> {
   const response = await getThemes(
     { include_empty: false, per_page: 100 },
-    { ...CACHE_10MIN, next: { ...CACHE_10MIN.next, tags: ['categories'] } }
+    {
+      ...CACHE_10MIN,
+      next: { ...CACHE_10MIN.next, tags: ['categories'] },
+      ...options,
+    }
   )
 
   if (response.status !== 200 || !response.data) {
