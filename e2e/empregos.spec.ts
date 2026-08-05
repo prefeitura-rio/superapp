@@ -321,8 +321,10 @@ test.describe('Empregos — página da vaga (público)', () => {
     await page.goto(href)
 
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
+    // O texto aparece 2× (layout responsivo mobile+desktop) → .first() evita
+    // strict-mode violation.
     await expect(
-      page.getByText('Inscrições até', { exact: false })
+      page.getByText('Inscrições até', { exact: false }).first()
     ).toBeVisible({ timeout: 15000 })
     await expect(
       page.getByRole('heading', { name: 'Informações gerais' })
@@ -344,7 +346,8 @@ test.describe('Empregos — página da vaga (público)', () => {
       'Local de trabalho',
       'Data limite de inscrição',
     ]) {
-      await expect(page.getByText(label, { exact: true })).toBeVisible()
+      // Labels aparecem 2× (layout responsivo) → .first() evita strict-mode violation.
+      await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
     }
   })
 
