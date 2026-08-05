@@ -1429,21 +1429,21 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const hasCandidaturas = await page
-      .locator('.rounded-3xl')
-      .first()
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
-
-    if (!hasCandidaturas) return
-
-    // Pelo menos um dos status badges deve estar visível
+    // Aguarda um estado DEFINITIVO (client-side): badge de status (há
+    // candidaturas) OU o vazio. Evita o `.isVisible()` imediato (que não espera)
+    // e o wait de 10s no badge, que tornavam o teste flaky em fetch lento.
+    const emptyState = page.getByText(
+      'Você ainda não possui candidaturas enviadas',
+      { exact: false }
+    )
     const statusBadge = page
       .getByText(
         /Em análise|Aprovado|Não selecionado|Vaga encerrada|Vaga descontinuada/
       )
       .first()
-    await expect(statusBadge).toBeVisible({ timeout: 10000 })
+    await expect(emptyState.or(statusBadge).first()).toBeVisible({
+      timeout: 20000,
+    })
   })
 
   test('card com idVaga é um link para a página da vaga', async ({ page }) => {
