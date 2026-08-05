@@ -97,32 +97,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      - name: Build Next.js app
-        run: npm run build
-        env:
-          NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
-          NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID: "superapp"
-          NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
-          NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
-          NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
-          NEXT_PUBLIC_USE_GOVBR_HINT: "false"
-          GOOGLE_MAPS_API_KEY: "placeholder"
-          NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
-          NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
-          API_KEY_SUBPAV_OSA_SMS: "placeholder"
-          NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
-          NEXT_PUBLIC_FEATURE_FLAG: "false"
-          NEXT_PUBLIC_HAND_TALK_TOKEN: "c84d3e127f66af2cee4bfe289c58537a"
-          NEXT_PUBLIC_EQUALWEB_SITEKEY: "f010fd59983a9d10102605f5740d45fd"
-          NEXT_PUBLIC_PERTO_DIGITAL_ENABLED: "true"
-
-      # Prepara a credencial de E2E:
+      # Prepara a credencial de E2E ANTES do build — assim um run same-repo sem
+      # token falha rápido e limpo (uma anotação ::error::), sem gastar o build
+      # nem rodar a suíte, e sem stack trace/retries de um teste.
       #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
       #    roda só o público, sem falhar).
       #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e obtém um access_token:
-      #    preferencialmente MINTADO na hora a partir de um refresh_token (não
-      #    expira entre execuções); fallback para o token estático. Se nenhum
-      #    estiver disponível, o canário (auth-canary.spec.ts) falha alto.
+      #    MINTADO na hora a partir de um refresh_token (não expira) com fallback
+      #    ao token estático. Sem nenhum token → falha o passo com ::error::.
       - name: Prepare E2E auth (mint fresh token / detect fork)
         env:
           KC_BASE: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
@@ -157,12 +139,32 @@ jobs:
             TOKEN="$E2E_ACCESS_TOKEN_STATIC"
             echo "Usando E2E_ACCESS_TOKEN estático (fallback)."
           fi
-          if [ -n "$TOKEN" ]; then
-            echo "::add-mask::$TOKEN"
-            echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-          else
-            echo "::warning::Nenhum token E2E disponível num run que EXIGE auth — o canário vai falhar. Configure E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (ou E2E_ACCESS_TOKEN) nos secrets."
+          # Falha limpa e rápida (antes do build/suíte) se o run exige auth e não há token.
+          if [ -z "$TOKEN" ]; then
+            echo "::error title=E2E sem credencial::Run do próprio repo exige auth, mas nenhum token E2E está configurado. Adicione nos Secrets do repositório: E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (mint automático, recomendado) OU E2E_ACCESS_TOKEN (estático). PRs de fork rodam só o público e não caem aqui."
+            exit 1
           fi
+          echo "::add-mask::$TOKEN"
+          echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID: "superapp"
+          NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
+          NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
+          NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
+          NEXT_PUBLIC_USE_GOVBR_HINT: "false"
+          GOOGLE_MAPS_API_KEY: "placeholder"
+          NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
+          NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
+          API_KEY_SUBPAV_OSA_SMS: "placeholder"
+          NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
+          NEXT_PUBLIC_FEATURE_FLAG: "false"
+          NEXT_PUBLIC_HAND_TALK_TOKEN: "c84d3e127f66af2cee4bfe289c58537a"
+          NEXT_PUBLIC_EQUALWEB_SITEKEY: "f010fd59983a9d10102605f5740d45fd"
+          NEXT_PUBLIC_PERTO_DIGITAL_ENABLED: "true"
 
       - name: Run E2E tests
         run: npm run test:e2e
