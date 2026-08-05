@@ -474,19 +474,21 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 1. `actions/checkout` + `actions/setup-node`
 2. `npm ci`
 3. `npx playwright install chromium --with-deps`
-4. **Prepare E2E auth** (roda **antes do build**): decide se o run **exige** auth e
-   obtém o token:
+4. **Prepare E2E credentials** (roda **antes do build**): decide se o run **exige**
+   auth e valida as credenciais:
    - **PR de fork** → `E2E_REQUIRE_AUTH=false` (o GitHub não passa secrets a
      forks; roda só o público, sem falhar).
-   - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e obtém um `access_token`:
-     preferencialmente **mintado na hora** a partir de `E2E_REFRESH_TOKEN`
-     (grant `refresh_token` no Keycloak, usando `IDENTIDADE_CARIOCA_CLIENT_SECRET`)
-     — assim **não expira** entre execuções; fallback para o `E2E_ACCESS_TOKEN`
-     estático. Exporta via `$GITHUB_ENV`.
-   - **Sem nenhum token num run same-repo** → o passo **falha rápido** com uma
-     anotação `::error::` clara (**antes** do build e da suíte, sem stack trace
-     nem retries), em vez de deixar os ~84 testes autenticados sumirem como skip
-     mudo e o CI ficar "verde" testando quase nada.
+   - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e exige:
+     - **Token de auth**: `access_token` preferencialmente **mintado na hora** a
+       partir de `E2E_REFRESH_TOKEN` (grant `refresh_token` no Keycloak, usando
+       `IDENTIDADE_CARIOCA_CLIENT_SECRET`) — **não expira** entre execuções;
+       fallback para o `E2E_ACCESS_TOKEN` estático.
+     - **`GOOGLE_MAPS_API_KEY`**: usado em runtime por `/api/address-autocomplete`
+       e `/api/cep-lookup` (autocomplete de endereço em `/meu-perfil`).
+   - **Faltando qualquer credencial num run same-repo** → o passo **falha rápido**
+     com uma anotação `::error::` **consolidada** listando o que falta (**antes**
+     do build e da suíte, sem stack trace nem retries), em vez de deixar testes
+     sumirem como skip/falha buried e o CI virar sinal confuso.
 5. `npm run build`
 6. `npm run test:e2e` com os envs (herda `E2E_ACCESS_TOKEN`/`E2E_REQUIRE_AUTH` do
    passo anterior + valores de homolog):
@@ -502,6 +504,11 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 | `E2E_REFRESH_TOKEN` | **Preferido.** Refresh token de homolog; o CI minta um `access_token` fresco a cada run (não expira). |
 | `IDENTIDADE_CARIOCA_CLIENT_SECRET` | Client secret do Keycloak (`superapp` é client confidencial) — necessário para o mint. |
 | `E2E_ACCESS_TOKEN` | Fallback estático (expira — prefira o refresh token). |
+| `GOOGLE_MAPS_API_KEY` | Google Places (autocomplete de endereço + CEP) do fluxo de `/meu-perfil/endereco`. Sem ele, o run same-repo falha no passo de credenciais. |
+
+> Em run same-repo, o passo **Prepare E2E credentials** exige **token de auth** _e_
+> `GOOGLE_MAPS_API_KEY`. Faltando qualquer um, o job falha rápido com um erro
+> claro listando o que provisionar (Settings → Secrets). Forks rodam só o público.
 
 ---
 

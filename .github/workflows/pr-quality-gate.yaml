@@ -97,21 +97,24 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      # Prepara a credencial de E2E ANTES do build — assim um run same-repo sem
-      # token falha rápido e limpo (uma anotação ::error::), sem gastar o build
-      # nem rodar a suíte, e sem stack trace/retries de um teste.
+      # Prepara as CREDENCIAIS de E2E ANTES do build — assim um run same-repo sem
+      # alguma credencial falha rápido e limpo (uma anotação ::error:: listando o
+      # que falta), sem gastar o build nem rodar a suíte, e sem stack trace/retries.
       #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
       #    roda só o público, sem falhar).
-      #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e obtém um access_token:
-      #    MINTADO na hora a partir de um refresh_token (não expira) com fallback
-      #    ao token estático. Sem nenhum token → falha o passo com ::error::.
-      - name: Prepare E2E auth (mint fresh token / detect fork)
+      #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e exige:
+      #      • Token de auth: MINTADO na hora a partir de um refresh_token (não
+      #        expira) com fallback ao token estático.
+      #      • GOOGLE_MAPS_API_KEY: autocomplete de endereço em /meu-perfil.
+      #    Faltando qualquer uma → falha o passo com ::error:: consolidado.
+      - name: Prepare E2E credentials (mint token / detect fork)
         env:
           KC_BASE: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
           KC_CLIENT_ID: "superapp"
           KC_CLIENT_SECRET: ${{ secrets.IDENTIDADE_CARIOCA_CLIENT_SECRET }}
           E2E_REFRESH_TOKEN: ${{ secrets.E2E_REFRESH_TOKEN }}
           E2E_ACCESS_TOKEN_STATIC: ${{ secrets.E2E_ACCESS_TOKEN }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -uo pipefail
@@ -122,8 +125,10 @@ jobs:
           fi
           echo "E2E_REQUIRE_AUTH=true" >> "$GITHUB_ENV"
 
+          MISSING=""
+
+          # --- Credencial 1: token de auth (mint a partir do refresh_token > estático) ---
           TOKEN=""
-          # Preferir mintar um access_token FRESCO a partir do refresh_token.
           if [ -n "${E2E_REFRESH_TOKEN:-}" ] && [ -n "${KC_CLIENT_SECRET:-}" ]; then
             TOKEN=$(curl -sf -X POST "$KC_BASE/token" \
               -H "Content-Type: application/x-www-form-urlencoded" \
@@ -134,18 +139,27 @@ jobs:
               | jq -r '.access_token // empty' 2>/dev/null || true)
             [ -n "$TOKEN" ] && echo "Access token mintado a partir do refresh_token."
           fi
-          # Fallback: token estático (pode expirar — prefira o refresh_token).
           if [ -z "$TOKEN" ] && [ -n "${E2E_ACCESS_TOKEN_STATIC:-}" ]; then
             TOKEN="$E2E_ACCESS_TOKEN_STATIC"
             echo "Usando E2E_ACCESS_TOKEN estático (fallback)."
           fi
-          # Falha limpa e rápida (antes do build/suíte) se o run exige auth e não há token.
           if [ -z "$TOKEN" ]; then
-            echo "::error title=E2E sem credencial::Run do próprio repo exige auth, mas nenhum token E2E está configurado. Adicione nos Secrets do repositório: E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (mint automático, recomendado) OU E2E_ACCESS_TOKEN (estático). PRs de fork rodam só o público e não caem aqui."
+            MISSING="$MISSING%0A- Token de auth: E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (mint, recomendado) OU E2E_ACCESS_TOKEN (estático)"
+          else
+            echo "::add-mask::$TOKEN"
+            echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          fi
+
+          # --- Credencial 2: Google Maps (autocomplete de endereço em /meu-perfil) ---
+          if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            MISSING="$MISSING%0A- GOOGLE_MAPS_API_KEY (autocomplete de endereço em /meu-perfil)"
+          fi
+
+          # --- Falha limpa e consolidada se faltar alguma credencial ---
+          if [ -n "$MISSING" ]; then
+            echo "::error title=E2E sem credenciais::Run do próprio repo exige credenciais que não estão nos Secrets do repositório:${MISSING}%0A%0APRs de fork rodam só o público e não caem aqui."
             exit 1
           fi
-          echo "::add-mask::$TOKEN"
-          echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
       - name: Build Next.js app
         run: npm run build
@@ -172,6 +186,8 @@ jobs:
           CI: "true"
           PORT: "3000"
           # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
+          # Google Maps é lido em runtime por /api/address-autocomplete e /api/cep-lookup.
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
           BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
