@@ -61,7 +61,7 @@
   },
   "overrides": [
     {
-      "include": ["src/http-agent-api/**"],
+      "include": ["src/http/**", "src/http-agent-api/**"],
       "linter": {
         "rules": {
           "suspicious": {
