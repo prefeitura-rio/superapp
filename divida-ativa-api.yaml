@@ -1,0 +1,746 @@
+openapi: 3.0.0
+info:
+  title: API Dívida Ativa Imobiliária - Pref.Rio (CONTRATO PROVISÓRIO)
+  description: |
+    Contrato **provisório** para os serviços de dívida ativa imobiliária do portal do cidadão:
+    cadastro de imóveis, consulta de débitos/CDAs, simulação de parcelamento, abertura de
+    requerimento e acompanhamento.
+
+    ATENÇÃO: este documento **não** foi ratificado pela equipe da API (Quarkus). Foi escrito
+    unilateralmente pelo time de front para permitir desenvolvimento em paralelo ao back-end
+    (decisões D8 e D13 do plano do módulo). Cada campo, formato e código de erro aqui é uma
+    premissa registrada em `docs/divida-ativa.md`, e será reconciliado com o contrato oficial
+    na fase de integração.
+
+    As regras fiscais continuam nos sistemas corporativos (DAM/PGM). Esta API é camada de
+    integração; o front apenas reflete os estados e erros que ela devolve.
+
+    Identidade: o cidadão é derivado do Bearer token (Keycloak) pela própria API. Nenhum
+    endpoint recebe CPF por path, query ou body.
+  version: 0.1.0-provisorio
+servers:
+  - url: /
+    description: Base URL configurada em BASE_API_URL_DIVIDA_ATIVA (server-only)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: imoveis
+    description: Cadastro de imóveis do cidadão ("Meus Imóveis").
+  - name: debitos
+    description: Débitos e Certidões de Dívida Ativa (CDA) de um imóvel.
+  - name: simulacao
+    description: Simulação de condições de parcelamento.
+  - name: requerimentos
+    description: Abertura de requerimento de parcelamento e envio de documentação.
+  - name: acompanhamento
+    description: Consulta, comprovante e cancelamento de requerimentos.
+
+paths:
+  /v1/imoveis:
+    get:
+      summary: Lista os imóveis cadastrados pelo cidadão.
+      description: Retorna os imóveis vinculados ao cidadão autenticado. Lista vazia quando não há cadastro.
+      operationId: getImoveis
+      tags:
+        - imoveis
+      responses:
+        '200':
+          description: Lista de imóveis do cidadão.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImovelListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      summary: Cadastra um imóvel para o cidadão.
+      description: |
+        A validação da inscrição imobiliária (existência e vínculo com o cidadão) é
+        responsabilidade da API — o front valida apenas formato. Ver dependência DEP-4 do plano.
+      operationId: postImovel
+      tags:
+        - imoveis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImovelInput'
+      responses:
+        '201':
+          description: Imóvel cadastrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Imovel'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Imóvel já cadastrado para este cidadão.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/imoveis/{inscricaoImobiliaria}:
+    parameters:
+      - $ref: '#/components/parameters/InscricaoImobiliaria'
+    get:
+      summary: Detalha um imóvel cadastrado.
+      operationId: getImovel
+      tags:
+        - imoveis
+      responses:
+        '200':
+          description: Imóvel encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Imovel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      summary: Remove um imóvel do cadastro do cidadão.
+      description: Remove apenas o vínculo de cadastro no portal. Não altera nada nos sistemas fiscais.
+      operationId: deleteImovel
+      tags:
+        - imoveis
+      responses:
+        '204':
+          description: Imóvel removido.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Imóvel não pode ser removido (por exemplo, possui requerimento em andamento).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/imoveis/{inscricaoImobiliaria}/debitos:
+    parameters:
+      - $ref: '#/components/parameters/InscricaoImobiliaria'
+    get:
+      summary: Lista os débitos em dívida ativa (CDAs) de um imóvel.
+      description: |
+        A elegibilidade de cada CDA para parcelamento vem no campo `parcelavel`, calculado
+        pela API a partir das regras do DAM/PGM. O front nunca recalcula.
+      operationId: getDebitosImovel
+      tags:
+        - debitos
+      parameters:
+        - name: situacao
+          in: query
+          required: false
+          description: Filtra por situação da CDA.
+          schema:
+            $ref: '#/components/schemas/SituacaoCda'
+      responses:
+        '200':
+          description: Débitos do imóvel. Lista vazia quando o imóvel não tem débitos em dívida ativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DebitoListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/parcelamentos/simulacoes:
+    post:
+      summary: Simula condições de parcelamento para as CDAs selecionadas.
+      description: |
+        Devolve as condições possíveis calculadas pelo sistema fiscal. A simulação tem validade
+        (`validaAte`) porque os valores são atualizados por data — o front exibe a validade e
+        refaz a simulação quando expira, nunca recalcula valor.
+      operationId: postSimulacaoParcelamento
+      tags:
+        - simulacao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoInput'
+      responses:
+        '200':
+          description: Condições de parcelamento disponíveis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulacao'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          description: CDAs informadas não são parceláveis nas condições solicitadas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/requerimentos:
+    post:
+      summary: Abre um requerimento de parcelamento.
+      description: |
+        Recebe a condição escolhida na simulação e as referências dos documentos já enviados
+        por `POST /v1/requerimentos/documentos`. Responde com o protocolo.
+      operationId: postRequerimento
+      tags:
+        - requerimentos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequerimentoInput'
+      responses:
+        '201':
+          description: Requerimento protocolado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Requerimento'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Já existe requerimento em andamento para as CDAs informadas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Condição escolhida não é mais válida (simulação expirada ou valores alterados).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      summary: Lista os requerimentos do cidadão.
+      description: Consulta por CPF do plano — o CPF vem do token, nunca do request.
+      operationId: getRequerimentos
+      tags:
+        - acompanhamento
+      parameters:
+        - name: situacao
+          in: query
+          required: false
+          description: Filtra por situação do requerimento.
+          schema:
+            $ref: '#/components/schemas/SituacaoRequerimento'
+      responses:
+        '200':
+          description: Requerimentos do cidadão. Lista vazia quando não há nenhum.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequerimentoListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/requerimentos/documentos:
+    post:
+      summary: Envia um documento digitalizado para instruir um requerimento.
+      description: |
+        PROVISÓRIO — o mecanismo de upload é uma decisão em aberto (DEP-3 do plano). Este
+        endpoint assume multipart com um arquivo por chamada, devolvendo uma referência
+        (`documentoId`) que é citada na criação do requerimento. Se a decisão for upload direto
+        para storage com URL assinada, este endpoint é substituído por um par
+        "gerar URL / confirmar envio" e o schema RequerimentoInput não muda.
+      operationId: postRequerimentoDocumento
+      tags:
+        - requerimentos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - tipo
+                - arquivo
+              properties:
+                tipo:
+                  $ref: '#/components/schemas/TipoDocumento'
+                arquivo:
+                  type: string
+                  format: binary
+                  description: Arquivo digitalizado (PDF ou imagem).
+      responses:
+        '201':
+          description: Documento recebido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentoRecebido'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '413':
+          description: Arquivo excede o tamanho máximo aceito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Formato de arquivo não aceito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/requerimentos/{protocolo}:
+    parameters:
+      - $ref: '#/components/parameters/Protocolo'
+    get:
+      summary: Detalha um requerimento pelo protocolo.
+      description: A API cruza protocolo × cidadão autenticado e devolve 404 quando não há vínculo.
+      operationId: getRequerimento
+      tags:
+        - acompanhamento
+      responses:
+        '200':
+          description: Requerimento encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Requerimento'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/requerimentos/{protocolo}/comprovante:
+    parameters:
+      - $ref: '#/components/parameters/Protocolo'
+    get:
+      summary: Emite o comprovante do requerimento em PDF.
+      operationId: getRequerimentoComprovante
+      tags:
+        - acompanhamento
+      responses:
+        '200':
+          description: Comprovante em PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/requerimentos/{protocolo}/cancelamento:
+    parameters:
+      - $ref: '#/components/parameters/Protocolo'
+    post:
+      summary: Cancela um requerimento.
+      description: A elegibilidade para cancelamento é decidida pela API; o front apenas reflete o erro.
+      operationId: postRequerimentoCancelamento
+      tags:
+        - acompanhamento
+      responses:
+        '200':
+          description: Requerimento cancelado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Requerimento'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Requerimento não está em situação que permita cancelamento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token do cidadão emitido pelo Keycloak (id.rio). Injetado pelo mutator a partir do cookie httpOnly.
+
+  parameters:
+    InscricaoImobiliaria:
+      name: inscricaoImobiliaria
+      in: path
+      required: true
+      description: Inscrição imobiliária do imóvel, somente dígitos.
+      schema:
+        type: string
+        example: "01234567890"
+    Protocolo:
+      name: protocolo
+      in: path
+      required: true
+      description: Número de protocolo do requerimento.
+      schema:
+        type: string
+        example: "2026000123456"
+
+  responses:
+    UnauthorizedError:
+      description: Token ausente, inválido ou expirado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Recurso não encontrado ou sem vínculo com o cidadão autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Dados inválidos na requisição.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Falha interna ou indisponibilidade do sistema de origem (DAM/PGM).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      description: |
+        Envelope de erro. Espelha o formato já usado pelas outras APIs Pref.Rio integradas
+        neste portal, para que o tratamento de erro do front seja um só.
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "IMOVEL_NAO_ENCONTRADO"
+              message:
+                type: string
+                description: Mensagem institucional em pt-BR, exibível ao cidadão.
+                example: "Nenhum imóvel encontrado para a inscrição informada."
+
+    SituacaoCda:
+      type: string
+      description: Situação da Certidão de Dívida Ativa.
+      enum:
+        - EM_ABERTO
+        - AJUIZADA
+        - PARCELADA
+        - QUITADA
+        - SUSPENSA
+        - CANCELADA
+      example: EM_ABERTO
+
+    SituacaoRequerimento:
+      type: string
+      description: Situação do requerimento de parcelamento.
+      enum:
+        - EM_ANALISE
+        - AGUARDANDO_DOCUMENTACAO
+        - DEFERIDO
+        - INDEFERIDO
+        - CANCELADO
+      example: EM_ANALISE
+
+    TipoDocumento:
+      type: string
+      description: Tipo de documento exigido para instruir o requerimento.
+      enum:
+        - DOCUMENTO_IDENTIDADE
+        - CPF
+        - COMPROVANTE_RESIDENCIA
+        - PROCURACAO
+        - CONTRATO_SOCIAL
+        - OUTRO
+      example: DOCUMENTO_IDENTIDADE
+
+    Imovel:
+      type: object
+      required:
+        - inscricaoImobiliaria
+      properties:
+        inscricaoImobiliaria:
+          type: string
+          description: Inscrição imobiliária, somente dígitos.
+          example: "01234567890"
+        endereco:
+          type: string
+          description: Endereço do imóvel como cadastrado no sistema fiscal.
+          example: "RUA DA ASSEMBLEIA 10 - CENTRO"
+        bairro:
+          type: string
+          example: "Centro"
+        possuiDebitos:
+          type: boolean
+          description: Indica se o imóvel tem débitos em dívida ativa, para exibição na lista sem exigir uma segunda chamada.
+          example: true
+        cadastradoEm:
+          type: string
+          format: date-time
+          description: Momento em que o cidadão cadastrou o imóvel no portal.
+          example: "2026-08-04T13:45:00-03:00"
+
+    ImovelInput:
+      type: object
+      required:
+        - inscricaoImobiliaria
+      properties:
+        inscricaoImobiliaria:
+          type: string
+          description: Inscrição imobiliária, somente dígitos.
+          example: "01234567890"
+
+    ImovelListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Imovel'
+
+    Debito:
+      type: object
+      description: Uma Certidão de Dívida Ativa (CDA) do imóvel.
+      required:
+        - numeroCda
+      properties:
+        numeroCda:
+          type: string
+          example: "2023/0012345-6"
+        exercicio:
+          type: integer
+          description: Exercício (ano) a que o débito se refere.
+          example: 2023
+        tributo:
+          type: string
+          description: Tributo de origem do débito.
+          example: "IPTU"
+        situacao:
+          $ref: '#/components/schemas/SituacaoCda'
+        parcelavel:
+          type: boolean
+          description: Elegibilidade para parcelamento, decidida pelo sistema fiscal.
+          example: true
+        dataVencimento:
+          type: string
+          format: date
+          example: "2023-03-10"
+        valorPrincipal:
+          type: number
+          format: double
+          example: 1250.35
+        valorAtualizado:
+          type: number
+          format: double
+          description: Valor consolidado com encargos na data de referência.
+          example: 1890.72
+        dataReferenciaValor:
+          type: string
+          format: date
+          description: Data em que os valores foram calculados.
+          example: "2026-08-04"
+
+    DebitoListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Debito'
+        valorTotalAtualizado:
+          type: number
+          format: double
+          description: Soma dos valores atualizados das CDAs retornadas, calculada pela API.
+          example: 3781.44
+
+    SimulacaoInput:
+      type: object
+      required:
+        - inscricaoImobiliaria
+        - numerosCda
+      properties:
+        inscricaoImobiliaria:
+          type: string
+          example: "01234567890"
+        numerosCda:
+          type: array
+          description: CDAs que o cidadão escolheu parcelar.
+          items:
+            type: string
+          example: ["2023/0012345-6"]
+
+    CondicaoParcelamento:
+      type: object
+      required:
+        - quantidadeParcelas
+      properties:
+        quantidadeParcelas:
+          type: integer
+          example: 12
+        valorEntrada:
+          type: number
+          format: double
+          example: 300.00
+        valorParcela:
+          type: number
+          format: double
+          example: 145.89
+        valorTotal:
+          type: number
+          format: double
+          example: 2050.68
+        percentualDesconto:
+          type: number
+          format: double
+          description: Percentual de desconto aplicado sobre encargos, quando houver.
+          example: 0
+        vencimentoPrimeiraParcela:
+          type: string
+          format: date
+          example: "2026-09-10"
+
+    Simulacao:
+      type: object
+      properties:
+        inscricaoImobiliaria:
+          type: string
+          example: "01234567890"
+        validaAte:
+          type: string
+          format: date-time
+          description: Validade da simulação. Depois disso os valores precisam ser recalculados.
+          example: "2026-08-04T23:59:59-03:00"
+        condicoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CondicaoParcelamento'
+
+    DocumentoRecebido:
+      type: object
+      properties:
+        documentoId:
+          type: string
+          description: Referência do documento, citada na criação do requerimento.
+          example: "doc-8f2c1b90"
+        tipo:
+          $ref: '#/components/schemas/TipoDocumento'
+        nomeArquivo:
+          type: string
+          example: "identidade.pdf"
+
+    RequerimentoInput:
+      type: object
+      required:
+        - inscricaoImobiliaria
+        - numerosCda
+        - quantidadeParcelas
+      properties:
+        inscricaoImobiliaria:
+          type: string
+          example: "01234567890"
+        numerosCda:
+          type: array
+          items:
+            type: string
+          example: ["2023/0012345-6"]
+        quantidadeParcelas:
+          type: integer
+          description: Condição escolhida entre as devolvidas pela simulação.
+          example: 12
+        documentosIds:
+          type: array
+          description: Referências devolvidas por POST /v1/requerimentos/documentos.
+          items:
+            type: string
+          example: ["doc-8f2c1b90"]
+
+    Requerimento:
+      type: object
+      required:
+        - protocolo
+      properties:
+        protocolo:
+          type: string
+          example: "2026000123456"
+        situacao:
+          $ref: '#/components/schemas/SituacaoRequerimento'
+        inscricaoImobiliaria:
+          type: string
+          example: "01234567890"
+        quantidadeParcelas:
+          type: integer
+          example: 12
+        valorTotal:
+          type: number
+          format: double
+          example: 2050.68
+        abertoEm:
+          type: string
+          format: date-time
+          example: "2026-08-04T13:45:00-03:00"
+        atualizadoEm:
+          type: string
+          format: date-time
+          example: "2026-08-05T09:12:00-03:00"
+        motivoIndeferimento:
+          type: string
+          description: Texto institucional devolvido pela API quando a situação é INDEFERIDO.
+          example: "Documentação incompleta."
+
+    RequerimentoListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Requerimento'

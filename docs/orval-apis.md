@@ -224,3 +224,34 @@
     },
   },
 ```
+
+> ## API Dívida Ativa Imobiliária (contrato provisório)
+
+* Spec local: `./divida-ativa-api.yaml` (raiz do repo)
+* Documentação do módulo: [`divida-ativa.md`](./divida-ativa.md)
+
+> ⚠️ Contrato **provisório**, escrito pelo time de front para permitir desenvolvimento em
+> paralelo ao back-end. Não foi ratificado pela equipe da API (Quarkus). As premissas estão
+> registradas em `docs/divida-ativa.md` e serão reconciliadas na fase de integração.
+
+```
+  api: {
+    input: './divida-ativa-api.yaml',
+    output: {
+      target: './src/http-divida-ativa/api.ts',
+      schemas: './src/http-divida-ativa/models',
+      mode: 'tags-split',
+      client: 'fetch',
+      formatter: 'biome',
+      httpClient: 'fetch',
+      clean: true,
+      baseUrl: process.env.BASE_API_URL_DIVIDA_ATIVA,
+      override: {
+        mutator: {
+          path: './custom-fetch-divida-ativa.ts',
+          name: 'customFetchDividaAtiva',
+        },
+      },
+    },
+  },
+```

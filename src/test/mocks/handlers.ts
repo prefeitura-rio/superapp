@@ -4,6 +4,7 @@ import { TEST_ENV } from './env'
 // API base URLs for handlers
 const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
 const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
+const DIVIDA_ATIVA_BASE_URL = TEST_ENV.BASE_API_URL_DIVIDA_ATIVA
 
 // Default success responses
 const DEFAULT_SUCCESS_RESPONSE = { message: 'Success' }
@@ -50,6 +51,55 @@ export const MOCK_VAGA_SEM_CRITERIOS = {
   idade_minima: null,
   id_escolaridade_minima: null,
   idiomas_requisito: [],
+}
+
+// Dívida Ativa — payloads no formato do contrato provisório (`divida-ativa-api.yaml`).
+// As premissas de formato estão em `docs/divida-ativa.md`. Estes mocks são o caminho feliz;
+// estados vazio, de erro e de borda devem ser montados por teste com `server.use()`.
+export const MOCK_IMOVEL_DIVIDA_ATIVA = {
+  inscricaoImobiliaria: '01234567890',
+  endereco: 'RUA DA ASSEMBLEIA 10 - CENTRO',
+  bairro: 'Centro',
+  possuiDebitos: true,
+  cadastradoEm: '2026-08-04T13:45:00-03:00',
+}
+
+export const MOCK_DEBITO_DIVIDA_ATIVA = {
+  numeroCda: '2023/0012345-6',
+  exercicio: 2023,
+  tributo: 'IPTU',
+  situacao: 'EM_ABERTO',
+  parcelavel: true,
+  dataVencimento: '2023-03-10',
+  valorPrincipal: 1250.35,
+  valorAtualizado: 1890.72,
+  dataReferenciaValor: '2026-08-04',
+}
+
+export const MOCK_SIMULACAO_DIVIDA_ATIVA = {
+  inscricaoImobiliaria: '01234567890',
+  validaAte: '2026-08-04T23:59:59-03:00',
+  condicoes: [
+    {
+      quantidadeParcelas: 12,
+      valorEntrada: 300.0,
+      valorParcela: 145.89,
+      valorTotal: 2050.68,
+      percentualDesconto: 0,
+      vencimentoPrimeiraParcela: '2026-09-10',
+    },
+  ],
+}
+
+export const MOCK_REQUERIMENTO_DIVIDA_ATIVA = {
+  protocolo: '2026000123456',
+  situacao: 'EM_ANALISE',
+  inscricaoImobiliaria: '01234567890',
+  quantidadeParcelas: 12,
+  valorTotal: 2050.68,
+  abertoEm: '2026-08-04T13:45:00-03:00',
+  atualizadoEm: '2026-08-05T09:12:00-03:00',
+  // `motivoIndeferimento` é omitido de propósito: só vem quando a situação é INDEFERIDO.
 }
 
 export const handlers = [
@@ -129,4 +179,102 @@ export const handlers = [
   http.post(`${COURSES_BASE_URL}/api/v1/empregabilidade/candidaturas`, () => {
     return HttpResponse.json({ id: 'candidatura-123' }, { status: 201 })
   }),
+
+  // Dívida Ativa - Listar imóveis do cidadão
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/v1/imoveis`, () => {
+    return HttpResponse.json(
+      { data: [MOCK_IMOVEL_DIVIDA_ATIVA] },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Cadastrar imóvel
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/v1/imoveis`, () => {
+    return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 201 })
+  }),
+
+  // Dívida Ativa - Detalhe do imóvel
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/v1/imoveis/:inscricaoImobiliaria`, () => {
+    return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 200 })
+  }),
+
+  // Dívida Ativa - Excluir imóvel
+  http.delete(
+    `${DIVIDA_ATIVA_BASE_URL}/v1/imoveis/:inscricaoImobiliaria`,
+    () => {
+      return new HttpResponse(null, { status: 204 })
+    }
+  ),
+
+  // Dívida Ativa - Débitos (CDAs) do imóvel
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/v1/imoveis/:inscricaoImobiliaria/debitos`,
+    () => {
+      return HttpResponse.json(
+        {
+          data: [MOCK_DEBITO_DIVIDA_ATIVA],
+          // Somado pela API, nunca pelo front (premissa P13).
+          valorTotalAtualizado: 1890.72,
+        },
+        { status: 200 }
+      )
+    }
+  ),
+
+  // Dívida Ativa - Simular parcelamento
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/v1/parcelamentos/simulacoes`, () => {
+    return HttpResponse.json(MOCK_SIMULACAO_DIVIDA_ATIVA, { status: 200 })
+  }),
+
+  // Dívida Ativa - Enviar documento do requerimento
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos/documentos`, () => {
+    return HttpResponse.json(
+      {
+        documentoId: 'doc-8f2c1b90',
+        tipo: 'DOCUMENTO_IDENTIDADE',
+        nomeArquivo: 'identidade.pdf',
+      },
+      { status: 201 }
+    )
+  }),
+
+  // Dívida Ativa - Abrir requerimento
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos`, () => {
+    return HttpResponse.json(MOCK_REQUERIMENTO_DIVIDA_ATIVA, { status: 201 })
+  }),
+
+  // Dívida Ativa - Listar requerimentos do cidadão
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos`, () => {
+    return HttpResponse.json(
+      { data: [MOCK_REQUERIMENTO_DIVIDA_ATIVA] },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Detalhe do requerimento por protocolo
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos/:protocolo`, () => {
+    return HttpResponse.json(MOCK_REQUERIMENTO_DIVIDA_ATIVA, { status: 200 })
+  }),
+
+  // Dívida Ativa - Comprovante em PDF (blob, tratado pelo mutator)
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos/:protocolo/comprovante`,
+    () => {
+      return new HttpResponse(new Blob(['%PDF-1.4 mock']), {
+        status: 200,
+        headers: { 'Content-Type': 'application/pdf' },
+      })
+    }
+  ),
+
+  // Dívida Ativa - Cancelar requerimento
+  http.post(
+    `${DIVIDA_ATIVA_BASE_URL}/v1/requerimentos/:protocolo/cancelamento`,
+    () => {
+      return HttpResponse.json(
+        { ...MOCK_REQUERIMENTO_DIVIDA_ATIVA, situacao: 'CANCELADO' },
+        { status: 200 }
+      )
+    }
+  ),
 ]
