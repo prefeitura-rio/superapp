@@ -26,6 +26,9 @@ e2e/
   meu-perfil-atualizacao.spec.ts  ← fluxos de atualização de dados (autenticado)
   servicos.spec.ts            ← testes públicos da rota /servicos e categoria
   empregos.spec.ts            ← testes do módulo Oportunidades Cariocas (público + autenticado)
+  cursos.spec.ts              ← testes do módulo Cursos (público + autenticado)
+  carteira.spec.ts            ← smoke da carteira (autenticado)
+  auth-ux.spec.ts             ← telas de UX de autenticação (público)
 ```
 
 ---
@@ -185,9 +188,24 @@ Se essas variáveis **não** estiverem definidas (ou estiverem apontando para um
 backend local que não está no ar), o servidor de teste sobe, mas as chamadas de
 API falham silenciosamente e você vê sintomas como:
 
-- Home de `/servicos/trabalho` sem a seção **"Mais recentes"** (nenhuma vaga carrega)
-  → cascata de falhas em `empregos.spec.ts` (o `getFirstVagaHref` não encontra card).
+- Home de `/servicos/trabalho` sem a seção **"Mais recentes"** (nenhuma vaga carrega).
+  → Tratado por **skip discriminante** (ver abaixo): os testes dependentes de vaga
+  pulam **com motivo** quando o homolog não tem vaga `publicado_ativo`, mas
+  **falham** se a API tiver vagas e a home não renderizar (bug) ou se a API cair.
 - Grade de categorias vazia na home → falha em `home.spec.ts`.
+
+> ⚖️ **Skip discriminante em empregos (vagas ativas).** A seção "Mais recentes"
+> depende de vagas `publicado_ativo` no homolog — dado volátil (vagas expiram).
+> Em vez de _hard-fail_, `ensureActiveVagasOrSkip(page)` / `getFirstVagaHref`
+> distinguem a causa quando "Mais recentes" não aparece:
+> **0 vagas ativas na API pública → SKIP alto e explícito** (dado do ambiente);
+> **há vagas mas a home não renderizou → FALHA** (bug do app);
+> **API não-2xx / timeout → FALHA** (integração). O skip cobre só ausência de
+> dado — nunca mascara bug. Um **canário** (`home carrega + API responde`) **nunca
+> pula**, garantindo que "tudo pulado" jamais passe silenciosamente no CI.
+> O conserto definitivo (dado determinístico: seed com cleanup / ambiente
+> efêmero) é uma iniciativa de infra à parte — o superapp (portal do cidadão)
+> não cria vaga (só há endpoints públicos de leitura).
 
 > 💡 **Gotcha do `.env.local`.** Um override temporário como
 > `COURSES_BASE_API_URL=http://localhost:8080` no `.env.local` (apontando para um
@@ -399,6 +417,34 @@ if (isVisible) { /* asserts apenas quando o estado existir */ }
 
 ---
 
+### `e2e/cursos.spec.ts`
+
+Cobre o módulo **Cursos** (`/servicos/cursos/**`). **22 testes** em **9 suítes** (público + autenticado).
+
+> Documentação detalhada (catálogo, unit/integração e tabela de regressão): [`docs/testes-cursos.md`](./testes-cursos.md).
+
+> **Helper local:** `getFirstCourseHref(page)` — abre `/servicos/cursos`, aguarda os cards client-side e retorna o href do primeiro card **visível** de curso (sem hardcode de IDs).
+>
+> **Gotcha do carrossel:** os itens off-screen do carrossel "Mais recentes" têm largura/altura 0 (ocultos) e vêm antes da grade "Todos os cursos" no DOM. Os seletores de card e de chip de categoria usam `:visible` para não selecionar itens ocultos.
+
+**Público:** home (logo, Login, cursos/vazio, card→detalhe), detalhe (título, informações/"oferecido por" + meta, CTA de inscrição), busca (redirect `/servicos/cursos/busca` → `/busca?tipo=cursos`, `?q=`), categoria (navegação + título + ícone de busca), FAQ.
+
+**Autenticado (🔐):** header (menu `/opcoes`, perfil), menu de opções, meus cursos, certificados, alertas, detalhe (CTA ou feedback), fluxo de inscrição (`confirmar-informacoes` — steps sem submit destrutivo) e troca de turma (`trocar-turma`). Os fluxos de inscrição/troca **iteram** os cursos até achar um no estado necessário (só pulam se a conta não tiver nenhum). O submit final (`Confirmar inscrição` / `Confirmar troca`) **não** é clicado; a lógica de submit é coberta por unit tests com MSW.
+
+---
+
+### `e2e/carteira.spec.ts`
+
+Smoke da carteira (autenticado): heading `Carteira`, card `CLÍNICA DA FAMÍLIA`, abas `Meus Cartões` / `Meus Pets`, estado com cartões ou vazio, aba Pets com pets ou estado vazio. Conteúdo depende de `/api/user/wallet` (timeouts generosos).
+
+---
+
+### `e2e/auth-ux.spec.ts`
+
+Telas de UX de autenticação (público): `/autenticacao-necessaria/carteira` (h1 `Carteira`, CTA gov.br, link `Crie uma conta`) e `/sessao-expirada` (h2 `Sessão Expirada`, CTA gov.br, botão `Continuar sem fazer login`).
+
+---
+
 ### `e2e/servicos.spec.ts` — ⏭️ **SKIP intencional (fora de escopo)**
 
 Cobrem a rota `/servicos` e a navegação por categoria — ou seja, a **Carta de
@@ -428,13 +474,46 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 1. `actions/checkout` + `actions/setup-node`
 2. `npm ci`
 3. `npx playwright install chromium --with-deps`
-4. `npm run build`
-5. `npm run test:e2e` com os envs (via secrets + valores de homolog):
-   - `E2E_ACCESS_TOKEN` (secret)
+4. **Prepare E2E credentials** (roda **antes do build**): decide se o run **exige**
+   auth e valida as credenciais:
+   - **PR de fork** → `E2E_REQUIRE_AUTH=false` (o GitHub não passa secrets a
+     forks; roda só o público, sem falhar).
+   - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e exige:
+     - **Token de auth**: `access_token` preferencialmente **mintado na hora** a
+       partir de `E2E_REFRESH_TOKEN` (grant `refresh_token` no Keycloak, usando
+       `IDENTIDADE_CARIOCA_CLIENT_SECRET`) — **não expira** entre execuções;
+       fallback para o `E2E_ACCESS_TOKEN` estático.
+     - **`GOOGLE_MAPS_API_KEY`**: usado em runtime por `/api/address-autocomplete`
+       e `/api/cep-lookup` (autocomplete de endereço em `/meu-perfil`).
+     - **`API_KEY_SUBPAV_OSA_SMS`**: usado em runtime por `src/lib/health-unit.ts`
+       (dados de unidade de saúde em `/carteira`). Sem ele, a API responde erro
+       não-JSON e o app loga `SyntaxError` no `response.json()`.
+   - **Faltando qualquer credencial num run same-repo** → o passo **falha rápido**
+     com uma anotação `::error::` **consolidada** listando o que falta (**antes**
+     do build e da suíte, sem stack trace nem retries), em vez de deixar testes
+     sumirem como skip/falha buried e o CI virar sinal confuso.
+5. `npm run build`
+6. `npm run test:e2e` com os envs (herda `E2E_ACCESS_TOKEN`/`E2E_REQUIRE_AUTH` do
+   passo anterior + valores de homolog):
    - `COURSES_BASE_API_URL`, `BASE_API_URL_APP_BUSCA_SEARCH`,
      `BASE_API_URL_SUBPAV_OSA_API`, `BASE_API_URL_RMI`, `BASE_API_URL_APP_CATALOGO`
      (apontando para `services.staging.app.dados.rio`)
-6. Upload do `playwright-report/` como artifact.
+7. Upload do `playwright-report/` como artifact.
+
+**Secrets do CI (job `e2e`):**
+
+| Secret | Uso |
+| ------ | --- |
+| `E2E_REFRESH_TOKEN` | **Preferido.** Refresh token de homolog; o CI minta um `access_token` fresco a cada run (não expira). |
+| `IDENTIDADE_CARIOCA_CLIENT_SECRET` | Client secret do Keycloak (`superapp` é client confidencial) — necessário para o mint. |
+| `E2E_ACCESS_TOKEN` | Fallback estático (expira — prefira o refresh token). |
+| `GOOGLE_MAPS_API_KEY` | Google Places (autocomplete de endereço + CEP) do fluxo de `/meu-perfil/endereco`. Sem ele, o run same-repo falha no passo de credenciais. |
+| `API_KEY_SUBPAV_OSA_SMS` | API SUBPAV/OSA (dados de unidade de saúde em `/carteira`). Sem ele, o run same-repo falha no passo de credenciais. |
+
+> Em run same-repo, o passo **Prepare E2E credentials** exige **token de auth**,
+> `GOOGLE_MAPS_API_KEY` _e_ `API_KEY_SUBPAV_OSA_SMS`. Faltando qualquer um, o job
+> falha rápido com um erro claro listando o que provisionar (Settings → Secrets).
+> Forks rodam só o público.
 
 ---
 
@@ -452,7 +531,7 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 | ----- | ---- | ------ |
 | `servicos.spec.ts` (arquivo todo) | `describe.skip` | Carta de Serviços em migração — **fora de escopo até a migração** |
 | `meu-perfil-atualizacao.spec.ts` — fluxo feliz de telefone | skip em runtime | Serviço externo SFMC indisponível (dependência externa) |
-| `empregos.spec.ts` — `/inscricao` sem auth | `test.skip(true, …)` | Cenário só faz sentido sem auth; o describe é sempre autenticado (coberto pelos testes públicos) |
+| `empregos.spec.ts` — testes dependentes de vaga ("Mais recentes", página da vaga/empresa) | skip **discriminante** em runtime | Homolog sem vaga `publicado_ativo` (dado do ambiente). **Só pula** se a API confirmar 0 vagas ativas; **falha** se houver vagas e a home não renderizar (bug) ou a API cair. Um **canário** não pula. |
 | `empregos.spec.ts` — inscrição / candidatura | skip em runtime | Conta já possui candidatura para a 1ª vaga (estado dinâmico da conta) |
 | `empregos.spec.ts` — página da empresa (2 testes) | skip em runtime | 1ª vaga sem CNPJ de empresa vinculado (estado dinâmico dos dados) |
 
@@ -465,7 +544,7 @@ quando `E2E_ACCESS_TOKEN` não está definido (ex.: PRs de fork sem secrets).
 
 - Adicionar cobertura para:
   - ~~busca~~ ✅ coberto em `empregos.spec.ts` (grupo "busca (público)")
-  - cursos
+  - ~~cursos~~ ✅ coberto em `cursos.spec.ts` (ver [`testes-cursos.md`](./testes-cursos.md))
   - mei
   - ~~empregabilidade~~ ✅ coberto em `empregos.spec.ts`
 - Incluir cobertura para WebKit/Firefox 

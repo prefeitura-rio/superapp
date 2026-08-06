@@ -18,8 +18,64 @@ async function clickActionDrawer(page: Page, labelText: string) {
 }
 
 /**
+ * Guard DISCRIMINANTE para a seção "Mais recentes" (depende de vagas ATIVAS
+ * `publicado_ativo` no backend de homolog).
+ *
+ * - Se a home renderiza "Mais recentes" → retorna (segue o teste real).
+ * - Se NÃO renderiza, consulta a API pública de vagas para descobrir o porquê:
+ *   • 0 vagas `publicado_ativo`  → SKIP alto e explícito (DADO do ambiente,
+ *     não bug do app — o homolog está sem vaga ativa).
+ *   • há vagas ativas mas a home não renderizou → FALHA (bug real do app).
+ *   • API erra / timeout / não-2xx → FALHA (integração quebrada).
+ *
+ * Ou seja: o skip cobre APENAS ausência de dado; nunca mascara bug de app ou
+ * backend fora do ar. O motivo do skip vai para o log e para o relatório do CI.
+ */
+async function ensureActiveVagasOrSkip(page: Page): Promise<void> {
+  const heading = page.getByRole('heading', { name: 'Mais recentes' })
+  const appeared = await heading
+    .waitFor({ state: 'visible', timeout: 15000 })
+    .then(() => true)
+    .catch(() => false)
+  if (appeared) return
+
+  const base = process.env.COURSES_BASE_API_URL
+  if (!base) {
+    throw new Error(
+      '"Mais recentes" não renderizou e COURSES_BASE_API_URL não está definido — impossível distinguir dado ausente de bug.'
+    )
+  }
+
+  const url = `${base.replace(/\/+$/, '')}/api/public/empregabilidade/vagas?status=publicado_ativo&page=1&pageSize=4`
+  const res = await page.request.get(url, { timeout: 15000 })
+  if (!res.ok()) {
+    throw new Error(
+      `API pública de vagas respondeu ${res.status()} — integração quebrada (NÃO é skip).`
+    )
+  }
+  const body = (await res.json().catch(() => null)) as {
+    data?: unknown[]
+  } | null
+  const count = Array.isArray(body?.data) ? body.data.length : 0
+  if (count > 0) {
+    throw new Error(
+      `Home de empregos não renderizou "Mais recentes" apesar de a API ter ${count} vaga(s) publicado_ativo — BUG do app (NÃO é skip).`
+    )
+  }
+  // Skip barulhento: motivo claro no log e no relatório.
+  console.log(
+    '[empregos] SKIP — homolog sem vaga "publicado_ativo": seção "Mais recentes" vazia por DADO do ambiente, não por bug do app.'
+  )
+  test.skip(
+    true,
+    'Homolog sem vaga publicado_ativo — dado do ambiente (não é bug do app).'
+  )
+}
+
+/**
  * Navega para a home de empregos, aguarda os cards e retorna o href do
- * primeiro card de vaga encontrado na página.
+ * primeiro card de vaga encontrado na página. Usa o guard discriminante acima:
+ * pula (com motivo) se o homolog não tem vaga ativa, mas falha se for bug.
  *
  * Usa o heading "Mais recentes" como âncora XPath para excluir
  * estruturalmente quaisquer links acima dele (ex.: CandidaturasEnviadasCtaCard),
@@ -29,10 +85,10 @@ async function clickActionDrawer(page: Page, labelText: string) {
  */
 async function getFirstVagaHref(page: Page): Promise<string> {
   await page.goto('/servicos/trabalho')
+  await ensureActiveVagasOrSkip(page)
   const vagasHeading = page.getByRole('heading', {
     name: 'Mais recentes',
   })
-  await expect(vagasHeading).toBeVisible({ timeout: 20000 })
   const firstVagaLink = vagasHeading
     .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
     .and(page.getByRole('link'))
@@ -77,10 +133,7 @@ test.describe('Empregos — home (público)', () => {
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-
-    await expect(
-      page.getByRole('heading', { name: 'Mais recentes' })
-    ).toBeVisible({ timeout: 20000 })
+    await ensureActiveVagasOrSkip(page)
 
     const vagasHeading = page.getByRole('heading', {
       name: 'Mais recentes',
@@ -105,8 +158,10 @@ test.describe('Empregos — home (público)', () => {
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+    // Âncora ESTÁTICA (não depende de vaga ativa) para confirmar que a home
+    // carregou — este teste verifica ausência do card, não a seção de vagas.
     await expect(
-      page.getByRole('heading', { name: 'Mais recentes' })
+      page.getByRole('heading', { name: 'Encontre seu trabalho' })
     ).toBeVisible({ timeout: 20000 })
     await expect(page.getByText('Candidaturas enviadas')).toHaveCount(0)
   })
@@ -115,10 +170,10 @@ test.describe('Empregos — home (público)', () => {
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+    await ensureActiveVagasOrSkip(page)
     const vagasHeading = page.getByRole('heading', {
       name: 'Mais recentes',
     })
-    await expect(vagasHeading).toBeVisible({ timeout: 20000 })
     const firstVagaLink = vagasHeading
       .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
       .and(page.getByRole('link'))
@@ -133,6 +188,31 @@ test.describe('Empregos — home (público)', () => {
     // testes 2-5), que aguarda o 'load' event com a resposta completa do servidor.
     await page.reload()
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
+  })
+
+  // Canário: NUNCA pula. Garante que "tudo pulado" nunca passe silenciosamente —
+  // valida o shell estático da home + que a API pública de vagas está no ar.
+  test('canário: home carrega (shell) e API pública de vagas responde', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
+    await expect(
+      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+    ).toBeVisible({ timeout: 15000 })
+    await expect(
+      page.getByRole('heading', { name: 'Encontre seu trabalho' })
+    ).toBeVisible({ timeout: 20000 })
+
+    const base = process.env.COURSES_BASE_API_URL
+    expect(base, 'COURSES_BASE_API_URL deve estar definido').toBeTruthy()
+    const res = await page.request.get(
+      `${(base as string).replace(/\/+$/, '')}/api/public/empregabilidade/vagas?page=1&pageSize=1`,
+      { timeout: 15000 }
+    )
+    expect(
+      res.ok(),
+      `API pública de vagas respondeu ${res.status()}`
+    ).toBeTruthy()
   })
 })
 
@@ -241,8 +321,10 @@ test.describe('Empregos — página da vaga (público)', () => {
     await page.goto(href)
 
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
+    // O texto aparece 2× (layout responsivo mobile+desktop) → .first() evita
+    // strict-mode violation.
     await expect(
-      page.getByText('Inscrições até', { exact: false })
+      page.getByText('Inscrições até', { exact: false }).first()
     ).toBeVisible({ timeout: 15000 })
     await expect(
       page.getByRole('heading', { name: 'Informações gerais' })
@@ -264,7 +346,8 @@ test.describe('Empregos — página da vaga (público)', () => {
       'Local de trabalho',
       'Data limite de inscrição',
     ]) {
-      await expect(page.getByText(label, { exact: true })).toBeVisible()
+      // Labels aparecem 2× (layout responsivo) → .first() evita strict-mode violation.
+      await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
     }
   })
 
@@ -427,16 +510,6 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       'Defina E2E_ACCESS_TOKEN para rodar testes autenticados'
     )
     await applyE2EAuthCookies(context)
-  })
-
-  test('acessar /inscricao sem auth redireciona para autenticação', async ({
-    page,
-  }) => {
-    // Este teste só funciona sem cookies de auth — verificamos apenas sem auth
-    test.skip(
-      true,
-      'Coberto pelos testes públicos; auth sempre presente neste describe'
-    )
   })
 
   test('página de inscricao exibe Meu Currículo ou tela de bem-vindo/confirmar', async ({
@@ -1356,21 +1429,21 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const hasCandidaturas = await page
-      .locator('.rounded-3xl')
-      .first()
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
-
-    if (!hasCandidaturas) return
-
-    // Pelo menos um dos status badges deve estar visível
+    // Aguarda um estado DEFINITIVO (client-side): badge de status (há
+    // candidaturas) OU o vazio. Evita o `.isVisible()` imediato (que não espera)
+    // e o wait de 10s no badge, que tornavam o teste flaky em fetch lento.
+    const emptyState = page.getByText(
+      'Você ainda não possui candidaturas enviadas',
+      { exact: false }
+    )
     const statusBadge = page
       .getByText(
         /Em análise|Aprovado|Não selecionado|Vaga encerrada|Vaga descontinuada/
       )
       .first()
-    await expect(statusBadge).toBeVisible({ timeout: 10000 })
+    await expect(emptyState.or(statusBadge).first()).toBeVisible({
+      timeout: 20000,
+    })
   })
 
   test('card com idVaga é um link para a página da vaga', async ({ page }) => {

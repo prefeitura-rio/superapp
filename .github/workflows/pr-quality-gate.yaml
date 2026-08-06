@@ -97,6 +97,77 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
+      # Prepara as CREDENCIAIS de E2E ANTES do build — assim um run same-repo sem
+      # alguma credencial falha rápido e limpo (uma anotação ::error:: listando o
+      # que falta), sem gastar o build nem rodar a suíte, e sem stack trace/retries.
+      #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
+      #    roda só o público, sem falhar).
+      #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e exige:
+      #      • Token de auth: MINTADO na hora a partir de um refresh_token (não
+      #        expira) com fallback ao token estático.
+      #      • GOOGLE_MAPS_API_KEY: autocomplete de endereço em /meu-perfil.
+      #      • API_KEY_SUBPAV_OSA_SMS: dados de unidade de saúde em /carteira.
+      #    Faltando qualquer uma → falha o passo com ::error:: consolidado.
+      - name: Prepare E2E credentials (mint token / detect fork)
+        env:
+          KC_BASE: "https://auth-idriohom.apps.rio.gov.br/auth/realms/idrio_cidadao/protocol/openid-connect"
+          KC_CLIENT_ID: "superapp"
+          KC_CLIENT_SECRET: ${{ secrets.IDENTIDADE_CARIOCA_CLIENT_SECRET }}
+          E2E_REFRESH_TOKEN: ${{ secrets.E2E_REFRESH_TOKEN }}
+          E2E_ACCESS_TOKEN_STATIC: ${{ secrets.E2E_ACCESS_TOKEN }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          set -uo pipefail
+          if [ "$IS_FORK" = "true" ]; then
+            echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
+            echo "PR de fork: secrets indisponíveis — E2E roda apenas testes públicos."
+            exit 0
+          fi
+          echo "E2E_REQUIRE_AUTH=true" >> "$GITHUB_ENV"
+
+          MISSING=""
+
+          # --- Credencial 1: token de auth (mint a partir do refresh_token > estático) ---
+          TOKEN=""
+          if [ -n "${E2E_REFRESH_TOKEN:-}" ] && [ -n "${KC_CLIENT_SECRET:-}" ]; then
+            TOKEN=$(curl -sf -X POST "$KC_BASE/token" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "client_id=$KC_CLIENT_ID" \
+              --data-urlencode "client_secret=$KC_CLIENT_SECRET" \
+              --data-urlencode "grant_type=refresh_token" \
+              --data-urlencode "refresh_token=$E2E_REFRESH_TOKEN" \
+              | jq -r '.access_token // empty' 2>/dev/null || true)
+            [ -n "$TOKEN" ] && echo "Access token mintado a partir do refresh_token."
+          fi
+          if [ -z "$TOKEN" ] && [ -n "${E2E_ACCESS_TOKEN_STATIC:-}" ]; then
+            TOKEN="$E2E_ACCESS_TOKEN_STATIC"
+            echo "Usando E2E_ACCESS_TOKEN estático (fallback)."
+          fi
+          if [ -z "$TOKEN" ]; then
+            MISSING="$MISSING%0A- Token de auth: E2E_REFRESH_TOKEN + IDENTIDADE_CARIOCA_CLIENT_SECRET (mint, recomendado) OU E2E_ACCESS_TOKEN (estático)"
+          else
+            echo "::add-mask::$TOKEN"
+            echo "E2E_ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          fi
+
+          # --- Credencial 2: Google Maps (autocomplete de endereço em /meu-perfil) ---
+          if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            MISSING="$MISSING%0A- GOOGLE_MAPS_API_KEY (autocomplete de endereço em /meu-perfil)"
+          fi
+
+          # --- Credencial 3: SUBPAV/OSA (dados de unidade de saúde na carteira) ---
+          if [ -z "${API_KEY_SUBPAV_OSA_SMS:-}" ]; then
+            MISSING="$MISSING%0A- API_KEY_SUBPAV_OSA_SMS (dados de unidade de saúde em /carteira)"
+          fi
+
+          # --- Falha limpa e consolidada se faltar alguma credencial ---
+          if [ -n "$MISSING" ]; then
+            echo "::error title=E2E sem credenciais::Run do próprio repo exige credenciais que não estão nos Secrets do repositório:${MISSING}%0A%0APRs de fork rodam só o público e não caem aqui."
+            exit 1
+          fi
+
       - name: Build Next.js app
         run: npm run build
         env:
@@ -106,10 +177,10 @@ jobs:
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
-          GOOGLE_MAPS_API_KEY: "placeholder"
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
           NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: "GTM-TQZT3J9G"
-          API_KEY_SUBPAV_OSA_SMS: "placeholder"
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
           NEXT_PUBLIC_HAND_TALK_TOKEN: "c84d3e127f66af2cee4bfe289c58537a"
@@ -121,7 +192,11 @@ jobs:
         env:
           CI: "true"
           PORT: "3000"
-          E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
+          # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
+          # Lidos em runtime: Google Maps (address-autocomplete/cep-lookup) e
+          # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
           BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'

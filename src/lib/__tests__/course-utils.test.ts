@@ -5,7 +5,9 @@ import {
   filterCoursesExcludingMyCourses,
   filterVisibleCourses,
   getCourseEnrollmentInfo,
+  isScheduleEnrollmentClosed,
   normalizeModalityDisplay,
+  shouldGrayscaleCourseCover,
   shouldShowCourse,
   sortCourses,
 } from '@/lib/course-utils'
@@ -415,5 +417,176 @@ describe('filterCoursesExcludingMyCourses', () => {
     const result = filterCoursesExcludingMyCourses(courses, myCourses)
 
     expect(result).toHaveLength(0)
+  })
+})
+
+// Edge cases derivados de docs/en-us/COURSE_FILTERING_LOGIC.md.
+// Nota: a regra de "30 dias" descrita no doc para shouldShowCourse é legada — o
+// shouldShowCourse atual só filtra por status/is_visible (o corte por data ocorre
+// no backend/DAL). Aqui cobrimos o que a lógica ATUAL de course-utils implementa:
+// prioridade de course_ended, "maior data" entre schedules e "Vagas encerradas".
+describe('getCourseEnrollmentInfo — edge cases (COURSE_FILTERING_LOGIC)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-11T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  // Cenário 2 do doc: class end no passado tem prioridade sobre enrollment end.
+  test('course_ended tem prioridade sobre enrollment_closed quando ambas as datas passaram', () => {
+    const course = createCourse({
+      enrollment_end_date: '2026-01-01T00:00:00Z', // passado
+      locations: [
+        { schedules: [{ class_end_date: '2026-01-05T00:00:00Z' }] }, // passado
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    // course_ended vence — NÃO enrollment_closed
+    expect(result.status).toBe('course_ended')
+    expect(result.buttonText).toBe('Curso encerrado')
+  })
+
+  // Cenários 4/4b/11 do doc: usa a MAIOR data entre schedules; uma futura mantém ativo.
+  test('usa a maior data de término — um schedule futuro mantém o curso available', () => {
+    const course = createCourse({
+      modalidade: 'PRESENCIAL',
+      locations: [
+        {
+          schedules: [
+            { class_end_date: '2026-01-05T00:00:00Z', remaining_vacancies: 1 }, // passado
+            { class_end_date: '2026-02-20T00:00:00Z', remaining_vacancies: 1 }, // futuro
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('available')
+    expect(result.canEnroll).toBe(true)
+  })
+
+  // Cenário 5 do doc: todos os schedules no passado → course_ended.
+  test('todos os schedules no passado → course_ended', () => {
+    const course = createCourse({
+      modalidade: 'PRESENCIAL',
+      locations: [
+        {
+          schedules: [
+            { class_end_date: '2026-01-03T00:00:00Z', remaining_vacancies: 1 }, // passado
+            { class_end_date: '2026-01-08T00:00:00Z', remaining_vacancies: 1 }, // passado (maior)
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('course_ended')
+  })
+
+  test('sem vagas em nenhum schedule presencial → "Vagas encerradas"', () => {
+    const course = createCourse({
+      modalidade: 'PRESENCIAL',
+      locations: [
+        {
+          schedules: [
+            { class_end_date: '2026-02-20T00:00:00Z', remaining_vacancies: 0 }, // futuro, sem vaga
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('enrollment_closed')
+    expect(result.buttonText).toBe('Vagas encerradas')
+  })
+
+  test('sem vagas em nenhuma turma online → "Vagas encerradas"', () => {
+    const course = createCourse({
+      modalidade: 'Online',
+      remote_class: {
+        schedules: [
+          { class_end_date: '2026-02-20T00:00:00Z', remaining_vacancies: 0 }, // futuro, sem vaga
+        ],
+      },
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+
+    expect(result.status).toBe('enrollment_closed')
+    expect(result.buttonText).toBe('Vagas encerradas')
+  })
+})
+
+describe('shouldGrayscaleCourseCover', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-11T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('true quando o curso não pode receber inscrição (course_ended)', () => {
+    const course = createCourse({
+      locations: [
+        { schedules: [{ class_end_date: '2026-01-01T00:00:00Z' }] }, // passado
+      ],
+    } as any)
+
+    expect(shouldGrayscaleCourseCover(course)).toBe(true)
+  })
+
+  test('true para curso não disponível (closed)', () => {
+    expect(shouldGrayscaleCourseCover(createCourse({ status: 'closed' }))).toBe(
+      true
+    )
+  })
+
+  test('false para curso available', () => {
+    expect(
+      shouldGrayscaleCourseCover(
+        createCourse({ modalidade: 'LIVRE_FORMACAO_ONLINE' })
+      )
+    ).toBe(false)
+  })
+})
+
+describe('isScheduleEnrollmentClosed', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-11T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('true quando enrollment_end_date do schedule já passou', () => {
+    expect(
+      isScheduleEnrollmentClosed({
+        enrollment_end_date: '2026-01-01T00:00:00Z',
+      })
+    ).toBe(true)
+  })
+
+  test('false quando enrollment_end_date do schedule é futuro', () => {
+    expect(
+      isScheduleEnrollmentClosed({
+        enrollment_end_date: '2026-02-01T00:00:00Z',
+      })
+    ).toBe(false)
+  })
+
+  test('false quando o schedule não tem enrollment_end_date', () => {
+    expect(isScheduleEnrollmentClosed({})).toBe(false)
   })
 })
