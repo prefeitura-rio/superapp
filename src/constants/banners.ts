@@ -5,6 +5,7 @@ import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
 import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
 import { RioMobBanner } from '@/app/components/banners/riomob-banner'
+import { buildAuthUrl } from '@/constants/url'
 
 type BannerProps = {
   id: string
@@ -81,3 +82,13 @@ export const suggestedBanners: BannerProps[] = [
   //   route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
   // },
 ].filter(banner => banner.id !== 'empregabilidade' || _empregosEnabled)
+
+export function resolveBannerRoute(
+  banner: BannerProps,
+  isLoggedIn: boolean
+): string {
+  if (banner.id === 'riomob' && !isLoggedIn) {
+    return buildAuthUrl('/carteira?riomob=true')
+  }
+  return banner.route
+}
