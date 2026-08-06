@@ -12,6 +12,7 @@ acompanhamento de requerimentos.
 ## Sumário
 
 - [Visão geral](#visão-geral)
+- [A landing e a fronteira do escopo](#a-landing-e-a-fronteira-do-escopo)
 - [Feature flag](#feature-flag)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Estrutura de arquivos](#estrutura-de-arquivos)
@@ -23,7 +24,7 @@ acompanhamento de requerimentos.
 
 ## Visão geral
 
-Três serviços, entregues em fases:
+Três serviços reconstruídos aqui, entregues em fases:
 
 | Serviço | Rota | Fase |
 |---|---|---|
@@ -35,6 +36,42 @@ Front-end e back-end foram desenvolvidos em paralelo e independentes: as telas s
 construídas contra um **contrato OpenAPI provisório escrito por nós**, e a integração com a
 API real é uma fase dedicada no fim. É isso que a [camada de mapeamento](#camada-de-mapeamento)
 protege.
+
+## A landing e a fronteira do escopo
+
+`/servicos/divida-ativa` é pública, estática e não lê dado do cidadão — é só a porta de
+entrada. Ela lista **cinco** serviços, e essa diferença entre cinco e três é deliberada.
+
+| Serviço na landing | Destino |
+|---|---|
+| Emitir guia à vista ou liquidar débitos | **externo** — portal legado |
+| Emitir guia – parcela em atraso (regularização) | **externo** — portal legado |
+| Emitir segunda via de guia de pagamento | **externo** — portal legado |
+| Parcelar débitos | interno, Fase 2 |
+| Acompanhar requerimento de parcelamento | interno, Fase 3 |
+
+Os três primeiros foram **retirados do escopo de modernização pela diretoria**: continuam
+existindo no portal legado e não são reconstruídos aqui. A landing os oferece como link
+externo para não deixar um buraco na jornada do cidadão.
+
+Todo link externo passa por um bottom sheet de confirmação (`ExternalLinkDrawer`), porque o
+design exige aviso explícito sempre que o cidadão sai do ambiente nativo do app — **mesmo
+para um portal oficial da Prefeitura**. As URLs ficam em `src/constants/divida-ativa-links.ts`.
+
+### Divergências entre o design e o escopo
+
+O Figma é a especificação (copy inclusive), mas ele foi desenhado a partir do portal legado e
+não conhece todas as regras de negócio. Duas divergências conhecidas:
+
+- **"Meus Imóveis" não existe no Figma.** O desenho vai direto da landing para uma tela de
+  consulta com três campos livres (nº da inscrição imobiliária, nº da CDA, nº da execução
+  fiscal). O cadastro de imóveis **é requisito de produto** — serve para o cidadão salvar
+  seus imóveis e depois *selecioná-los* na consulta em vez de digitar o identificador. A
+  Fase 1 usa o padrão de UI do Figma aplicado a essas telas. Confirmado com o time em
+  05/08/2026.
+- **A consulta aceita três identificadores**, mas o contrato provisório só modela a inscrição
+  imobiliária. Consulta por nº de CDA e por nº de execução fiscal precisam entrar no contrato
+  antes da Fase 2 — está registrado como premissa P18.
 
 ## Feature flag
 
@@ -170,6 +207,7 @@ proposital — uma situação nova no sistema fiscal não pode derrubar a págin
 | P15 | Upload de documentos | `POST /v1/requerimentos/documentos` devolve um `documentoId`, citado depois na criação do requerimento (upload em duas etapas) | Desacopla o envio do arquivo do envio do formulário e contorna o limite de 1 MB de Server Action | `fluxo` — **é a premissa mais frágil da tabela.** Ver DEP-3: não há precedente de upload neste repo e o mecanismo ainda não foi decidido |
 | P16 | Comprovante em PDF | `GET /v1/requerimentos/{protocolo}/comprovante` devolve `application/pdf` como blob | O mutator já trata `application/pdf` | `mapper` se vier como URL assinada em JSON |
 | P17 | Validade da simulação | `validaAte` é instante; passado ele, é preciso simular de novo | Valor fiscal muda com encargos diários | `mapper + tela` — a tela precisa de um estado "simulação expirada" |
+| P18 | Identificador da consulta | O contrato só modela busca por **inscrição imobiliária** | O contrato foi escrito a partir do plano, antes de o design ser lido | `fluxo` — **lacuna conhecida, não é aposta.** O design pede também nº da CDA e nº da execução fiscal. Precisa entrar no contrato antes da Fase 2 |
 
 ### Premissas que exigem confirmação explícita
 
