@@ -1,6 +1,5 @@
 'use client'
 
-import { MOCK_VEHICLES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type {
   ModelsCitizenWallet,
@@ -13,6 +12,7 @@ import {
   formatHealthOperatingHours,
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
+import { getRiomobWalletVehicles } from '@/lib/riomob/vehicles'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { useQuery } from '@tanstack/react-query'
 import CarteiraSection from './wallet-section'
@@ -64,7 +64,7 @@ export default function WalletSectionClient() {
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests || [])
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
   const petsCount = Array.isArray(pets) ? pets.length : 0
-  const vehicles = MOCK_VEHICLES
+  const vehicles = getRiomobWalletVehicles()
 
   if (!walletInfo.hasData && petsCount === 0 && vehicles.length === 0) {
     return null

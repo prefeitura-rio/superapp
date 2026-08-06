@@ -1,7 +1,7 @@
 'use client'
 
 import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
-import { MOCK_VEHICLES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
+import { MOCK_PENDING_INVITES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/pending-invites'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
@@ -10,9 +10,11 @@ import petsEmptyImage from '@/assets/dog-pet.svg'
 import { PlusIcon } from '@/assets/icons'
 import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
 import type { ModelsPet } from '@/http/models'
+import { getRiomobWalletVehicles } from '@/lib/riomob/vehicles'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useCallback, useState } from 'react'
 
 interface WalletContentProps {
   pets: ModelsPet[]
@@ -33,6 +35,16 @@ export function WalletContent({
   const isRiomobView = searchParams.get('riomob') === 'true'
   const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
   const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
+  const vehicles = getRiomobWalletVehicles()
+  const [pendingInviteCount, setPendingInviteCount] = useState(
+    MOCK_PENDING_INVITES.length
+  )
+  const handleInvitesChange = useCallback((count: number) => {
+    setPendingInviteCount(count)
+  }, [])
+
+  const showWelcomeCard = pendingInviteCount === 0
+  const showEmptyVehicleCopy = pendingInviteCount <= 1
 
   return (
     <div className="pt-2">
@@ -41,12 +53,15 @@ export function WalletContent({
       <div className="mt-6">
         {isRiomobView ? (
           <div className="pb-10 w-full">
-            <PendingInviteAccordion className="mb-6" />
+            <PendingInviteAccordion
+              className="mb-6"
+              onInvitesChange={handleInvitesChange}
+            />
 
-            {MOCK_VEHICLES.length > 0 ? (
+            {vehicles.length > 0 ? (
               <div className="flex w-full flex-col items-center gap-6">
                 <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">
-                  {MOCK_VEHICLES.map(vehicle => (
+                  {vehicles.map(vehicle => (
                     <VehicleCard
                       key={vehicle.id}
                       vehicle={vehicle}
@@ -71,27 +86,37 @@ export function WalletContent({
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="bg-card rounded-2xl p-4 w-full">
-                  <p className="text-sm font-medium leading-4 text-foreground text-left md:text-center">
-                    Bem vindo ao <span className="text-primary">RioMob</span>, o
-                    Registro de Veículos de Micromobilidade do Rio
-                  </p>
-                </div>
+                {showWelcomeCard && (
+                  <div className="bg-card rounded-2xl p-4 w-full">
+                    <p className="text-sm font-medium leading-4 text-foreground text-left md:text-center">
+                      Bem vindo ao <span className="text-primary">RioMob</span>,
+                      o Registro de Veículos de Micromobilidade do Rio
+                    </p>
+                  </div>
+                )}
 
-                <Image
-                  src={riomobEmptyImage}
-                  alt="Nenhum veículo cadastrado"
-                  width={150}
-                  height={200}
-                  className="mt-8 object-contain"
-                  priority
-                />
+                {showEmptyVehicleCopy && (
+                  <>
+                    <Image
+                      src={riomobEmptyImage}
+                      alt="Nenhum veículo cadastrado"
+                      width={150}
+                      height={200}
+                      className={
+                        showWelcomeCard
+                          ? 'mt-8 object-contain'
+                          : 'mt-2 object-contain'
+                      }
+                      priority
+                    />
 
-                <p className="mt-2 w-full text-sm font-medium text-foreground text-center leading-4">
-                  Você ainda não possui
-                  <br />
-                  veículos registrados
-                </p>
+                    <p className="mt-2 w-full text-sm font-medium text-foreground text-center leading-4">
+                      Você ainda não possui
+                      <br />
+                      veículos registrados
+                    </p>
+                  </>
+                )}
 
                 <Link
                   href="/carteira/riomob/adicionar-veiculo"

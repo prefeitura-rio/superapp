@@ -10,7 +10,7 @@ export function PendingInviteSection() {
 
   return (
     <div className="w-full px-4 pt-2">
-      <PendingInviteAccordion />
+      <PendingInviteAccordion maxVisible={1} />
     </div>
   )
 }

@@ -807,6 +807,14 @@ definitions:
       id:
         type: string
     type: object
+  models.InvitationResponseStatus:
+    enum:
+    - accepted
+    - rejected
+    type: string
+    x-enum-varnames:
+    - InvitationResponseAccepted
+    - InvitationResponseRejected
   models.InviteConductorRequest:
     properties:
       cpf:
@@ -815,10 +823,24 @@ definitions:
         type: string
       name:
         type: string
+      phone:
+        type: string
     required:
     - cpf
     - email
     type: object
+  models.InviteEmailStatus:
+    enum:
+    - pending
+    - queued
+    - sent
+    - failed
+    type: string
+    x-enum-varnames:
+    - InviteEmailStatusPending
+    - InviteEmailStatusQueued
+    - InviteEmailStatusSent
+    - InviteEmailStatusFailed
   models.LegalEntity:
     properties:
       _id: {}
@@ -1451,7 +1473,10 @@ definitions:
   models.RespondInvitationRequest:
     properties:
       status:
-        $ref: '#/definitions/models.ConductorStatus'
+        allOf:
+        - $ref: '#/definitions/models.InvitationResponseStatus'
+        description: Status must be accepted or rejected (pending/revoked are rejected
+          with 400).
     required:
     - status
     type: object
@@ -1713,19 +1738,60 @@ definitions:
       valid:
         type: boolean
     type: object
+  models.VehicleBrand:
+    properties:
+      id:
+        example: brand_caloi
+        type: string
+      is_other:
+        example: false
+        type: boolean
+      name:
+        example: Caloi
+        type: string
+    type: object
+  models.VehicleBrandsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.VehicleBrand'
+        type: array
+    type: object
+  models.VehicleColorsResponse:
+    properties:
+      data:
+        example:
+        - Amarelo
+        - Azul
+        - Preto
+        items:
+          type: string
+        type: array
+    type: object
   models.VehicleConductor:
     properties:
       conductor_cpf:
         type: string
       conductor_name:
+        description: Invite snapshot (persisted). For accepted links, GET overlays
+          live RMI contact on these JSON fields.
         type: string
       created_at:
         type: string
+      email_attempted_at:
+        type: string
+      email_status:
+        allOf:
+        - $ref: '#/definitions/models.InviteEmailStatus'
+        description: 'Invite email delivery (handoff: register attempt/status on the
+          link).'
       id:
         type: string
       invited_by_cpf:
         type: string
       notify_email:
+        type: string
+      phone:
         type: string
       responded_at:
         type: string
@@ -1754,6 +1820,7 @@ definitions:
         type: integer
       invoice_photo_url:
         type: string
+        x-nullable: true
       model_id:
         type: string
       model_other:
@@ -1779,6 +1846,7 @@ definitions:
     required:
     - color
     - display_name
+    - has_invoice
     - self_declaration
     - serial_number
     - serial_number_photo_url
@@ -1808,6 +1876,7 @@ definitions:
         type: integer
       invoice_photo_url:
         type: string
+        x-nullable: true
       model_id:
         type: string
       model_other:
@@ -1819,6 +1888,11 @@ definitions:
       owner_name:
         type: string
       owner_phone:
+        type: string
+      registration_number:
+        description: RegistrationNumber is a short wallet identifier generated on
+          create (format RJ-E-XXXXXX). Not accepted in POST/PATCH.
+        example: RJ-E-000001
         type: string
       role:
         $ref: '#/definitions/models.VehicleRole'
@@ -1899,12 +1973,39 @@ definitions:
         type: string
       model_other:
         type: string
+      registration_number:
+        example: RJ-E-000001
+        type: string
       role:
         $ref: '#/definitions/models.VehicleRole'
       vehicle_photo_url:
         type: string
       vehicle_type:
         $ref: '#/definitions/models.VehicleType'
+    type: object
+  models.VehicleModel:
+    properties:
+      brand_id:
+        example: brand_caloi
+        type: string
+      id:
+        example: model_e-vibe
+        type: string
+      is_other:
+        example: false
+        type: boolean
+      name:
+        example: E-Vibe
+        type: string
+      vehicle_type:
+        $ref: '#/definitions/models.VehicleType'
+    type: object
+  models.VehicleModelsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.VehicleModel'
+        type: array
     type: object
   models.VehicleRole:
     enum:
@@ -1942,6 +2043,7 @@ definitions:
         type: integer
       invoice_photo_url:
         type: string
+        x-nullable: true
       model_id:
         type: string
       model_other:
@@ -4517,7 +4619,10 @@ paths:
       - application/json
       description: Cadastra um veículo para o CPF autenticado. Fluxo catálogo (brand_id+model_id)
         ou Outro (brand_other/model_other+vehicle_type). URLs de foto devem ser HTTPS
-        GCS. Se has_invoice=true, invoice_photo_url é obrigatória.
+        GCS. Se has_invoice=true, invoice_photo_url é obrigatória. Contato do dono
+        (nome/telefone/e-mail) é enriquecido ao vivo via RMI a partir do owner_cpf
+        — não enviar owner_* no body. registration_number é gerado pelo backend (formato
+        RJ-E-XXXXXX).
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
@@ -4613,7 +4718,8 @@ paths:
       consumes:
       - application/json
       description: Retorna o detalhe do veículo para proprietário ou condutor aceito
-        (inclui invoice_photo_url e metadados de arquivos).
+        (inclui invoice_photo_url, metadados de arquivos e registration_number). owner_name/owner_phone/owner_email
+        são enriquecidos ao vivo via RMI a partir de owner_cpf.
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
@@ -4719,7 +4825,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: Lista vínculos pending e accepted (somente proprietário).
+      description: Lista vínculos pending e accepted (somente proprietário). Pending
+        devolve snapshot do convite; accepted enriquece nome/e-mail/celular ao vivo
+        via RMI.
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
@@ -4768,7 +4876,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Cria vínculo pending e enfileira e-mail de convite (somente proprietário).
+      description: Cria vínculo pending e enfileira e-mail de convite via notify_email
+        do body (somente proprietário). name/phone são hints opcionais enquanto pending.
         Duplicata pending/accepted retorna 409.
       parameters:
       - description: CPF do cidadão (11 dígitos)
@@ -4783,7 +4892,7 @@ paths:
         name: vehicle_id
         required: true
         type: string
-      - description: Dados do convidado
+      - description: CPF + e-mail do convidado (name/phone opcionais)
         in: body
         name: body
         required: true
@@ -5601,14 +5710,14 @@ paths:
       consumes:
       - application/json
       description: Catálogo de marcas para o formulário de mobilidade (seed Mongo).
+        Sentinel "Outro" usa id estável brand_outro com is_other=true.
       produces:
       - application/json
       responses:
         "200":
-          description: Lista de marcas em data
+          description: Lista tipada de marcas em data
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.VehicleBrandsResponse'
         "401":
           description: Não autenticado
           schema:
@@ -5626,15 +5735,15 @@ paths:
     get:
       consumes:
       - application/json
-      description: Lista fixa de cores permitidas no formulário de mobilidade.
+      description: Lista fixa de cores permitidas no formulário de mobilidade (fora
+        do CSV de marcas/modelos).
       produces:
       - application/json
       responses:
         "200":
-          description: Lista de cores em data
+          description: Lista tipada de cores em data
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.VehicleColorsResponse'
         "401":
           description: Não autenticado
           schema:
@@ -5653,7 +5762,7 @@ paths:
       consumes:
       - application/json
       description: Modelos do catálogo filtrados por brand_id (obrigatório), incluindo
-        vehicle_type.
+        vehicle_type. Sentinel "Outro" usa id estável model_outro com is_other=true.
       parameters:
       - description: ID da marca
         in: query
@@ -5664,10 +5773,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Lista de modelos em data
+          description: Lista tipada de modelos em data
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.VehicleModelsResponse'
         "400":
           description: brand_id ausente
           schema:

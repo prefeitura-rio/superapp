@@ -8,11 +8,12 @@ import {
 } from '@/components/ui/accordion'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import {
   MOCK_PENDING_INVITES,
   type PendingConductorInvite,
+  sortPendingInvitesByMostRecent,
 } from '../mocks/pending-invites'
 import { AcceptInviteDrawer } from './accept-invite-drawer'
 import { DeclineInviteDrawer } from './decline-invite-drawer'
@@ -20,12 +21,19 @@ import { VehicleInviteAcceptedDrawer } from './vehicle-invite-accepted-drawer'
 
 interface PendingInviteAccordionProps {
   className?: string
+  /** When set, only the N most recent invites are shown (e.g. 1 on home). */
+  maxVisible?: number
+  onInvitesChange?: (count: number) => void
 }
 
 export function PendingInviteAccordion({
   className,
+  maxVisible,
+  onInvitesChange,
 }: PendingInviteAccordionProps) {
-  const [invites, setInvites] = useState(MOCK_PENDING_INVITES)
+  const [invites, setInvites] = useState(() =>
+    sortPendingInvitesByMostRecent(MOCK_PENDING_INVITES)
+  )
   const [openItem, setOpenItem] = useState<string>('')
   const [selectedInvite, setSelectedInvite] =
     useState<PendingConductorInvite | null>(null)
@@ -34,6 +42,15 @@ export function PendingInviteAccordion({
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
   const [isAccepting, setIsAccepting] = useState(false)
   const [isDeclining, setIsDeclining] = useState(false)
+
+  const visibleInvites = useMemo(() => {
+    if (maxVisible == null) return invites
+    return invites.slice(0, maxVisible)
+  }, [invites, maxVisible])
+
+  useEffect(() => {
+    onInvitesChange?.(invites.length)
+  }, [invites.length, onInvitesChange])
 
   function removeInvite(inviteId: string) {
     setInvites(current => current.filter(invite => invite.id !== inviteId))
@@ -97,7 +114,7 @@ export function PendingInviteAccordion({
 
   return (
     <>
-      {invites.length > 0 && (
+      {visibleInvites.length > 0 && (
         <Accordion
           type="single"
           collapsible
@@ -105,7 +122,7 @@ export function PendingInviteAccordion({
           onValueChange={setOpenItem}
           className={cn('flex w-full flex-col gap-2', className)}
         >
-          {invites.map(invite => (
+          {visibleInvites.map(invite => (
             <AccordionItem
               key={invite.id}
               value={invite.id}
