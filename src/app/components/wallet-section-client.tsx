@@ -1,5 +1,6 @@
 'use client'
 
+import { MOCK_VEHICLES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import type {
   ModelsCitizenWallet,
@@ -63,8 +64,11 @@ export default function WalletSectionClient() {
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests || [])
   const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
   const petsCount = Array.isArray(pets) ? pets.length : 0
+  const vehicles = MOCK_VEHICLES
 
-  if (!walletInfo.hasData && petsCount === 0) return null
+  if (!walletInfo.hasData && petsCount === 0 && vehicles.length === 0) {
+    return null
+  }
 
   // Derive healthCardData from raw health unit data (used by CarteiraSection/CarteiraSectionSwipe)
   const riskStatus = healthUnitRiskData
@@ -92,6 +96,7 @@ export default function WalletSectionClient() {
           maintenanceRequests={maintenanceRequests}
           healthCardData={healthCardData}
           pets={pets}
+          vehicles={vehicles}
         />
       }
       desktopComponent={
@@ -100,6 +105,7 @@ export default function WalletSectionClient() {
           maintenanceRequests={maintenanceRequests}
           healthCardData={healthCardData}
           pets={pets}
+          vehicles={vehicles}
         />
       }
       desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}
