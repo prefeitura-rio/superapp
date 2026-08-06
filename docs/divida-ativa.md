@@ -103,6 +103,21 @@ Valores por ambiente:
 Ligar em produção é decisão de release do time Pref.Rio, não de um PR de feature. Como
 `NEXT_PUBLIC_*` é congelada no build, mudar o valor exige rebuild.
 
+### A flag também controla o ponto de entrada
+
+O card "Dívida Ativa" da home (`src/constants/most-accessed-services.ts`) troca de destino
+junto com a flag: ligada, leva ao módulo; desligada, segue apontando para a página do
+catálogo, exatamente como antes.
+
+Sem isso o módulo fica **inalcançável pela navegação** quando a flag é ligada para
+homologação — o middleware libera a rota, mas nada no app leva até ela e o testador precisa
+digitar a URL. Apontar o card em definitivo, removendo o condicional, é decisão de release do
+time Pref.Rio.
+
+> O card não aparece em `/servicos`: aquela página renderiza `<MostAccessedServiceCards
+> limit={4} />` e Dívida Ativa é o sexto item da lista. É comportamento anterior a este
+> módulo, independente da flag. A entrada é pela home.
+
 > **Nota:** o time Pref.Rio pretende evoluir o middleware para um mecanismo de allowlist com
 > curinga de path (`/servicos/divida-ativa/*`). Quando isso acontecer, este bloco booleano
 > pode ser substituído — o comportamento esperado (raiz e filhas ocultas por padrão) é o

@@ -7,6 +7,28 @@ import {
   multasIcon,
 } from './bucket'
 
+/**
+ * Página do catálogo para onde o card de Dívida Ativa aponta enquanto o módulo próprio
+ * não está no ar.
+ */
+const DIVIDA_ATIVA_CATALOGO =
+  '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610'
+
+/**
+ * Destino do card de Dívida Ativa.
+ *
+ * Com a flag ligada (homologação), o card leva ao módulo reconstruído no Pref.Rio; com ela
+ * desligada — o caso de staging e produção hoje — segue apontando para o catálogo, exatamente
+ * como antes. Sem isso o módulo fica inalcançável pela navegação quando a flag é ligada para
+ * homologação: o middleware libera a rota, mas nada no app leva até ela.
+ *
+ * Apontar o card em definitivo é decisão de release do time Pref.Rio (ver `docs/divida-ativa.md`).
+ */
+const dividaAtivaHref =
+  process.env.NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA === 'true'
+    ? '/servicos/divida-ativa'
+    : DIVIDA_ATIVA_CATALOGO
+
 export const MOST_ACCESSED_SERVICES = [
   {
     id: 'iptu',
@@ -52,7 +74,7 @@ export const MOST_ACCESSED_SERVICES = [
   // },
   {
     id: 'divida-ativa',
-    href: '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610',
+    href: dividaAtivaHref,
     icon: dividaAtivaIcon,
     title: 'Dívida Ativa: Débitos de IPTU ',
     description: 'Consulta de débitos de IPTU em Dívida Ativa',
