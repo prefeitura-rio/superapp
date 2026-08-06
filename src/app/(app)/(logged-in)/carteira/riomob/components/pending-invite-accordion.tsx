@@ -14,6 +14,7 @@ import {
   MOCK_PENDING_INVITES,
   type PendingConductorInvite,
 } from '../mocks/pending-invites'
+import { AcceptInviteDrawer } from './accept-invite-drawer'
 import { DeclineInviteDrawer } from './decline-invite-drawer'
 import { VehicleInviteAcceptedDrawer } from './vehicle-invite-accepted-drawer'
 
@@ -28,6 +29,7 @@ export function PendingInviteAccordion({
   const [openItem, setOpenItem] = useState<string>('')
   const [selectedInvite, setSelectedInvite] =
     useState<PendingConductorInvite | null>(null)
+  const [isAcceptOpen, setIsAcceptOpen] = useState(false)
   const [isDeclineOpen, setIsDeclineOpen] = useState(false)
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
   const [isAccepting, setIsAccepting] = useState(false)
@@ -38,12 +40,21 @@ export function PendingInviteAccordion({
     setOpenItem('')
   }
 
-  async function handleAccept(invite: PendingConductorInvite) {
+  function handleAcceptClick(invite: PendingConductorInvite) {
+    setSelectedInvite(invite)
+    setIsAcceptOpen(true)
+  }
+
+  async function handleAcceptConfirm() {
+    if (!selectedInvite) return
+
     setIsAccepting(true)
     try {
       // Mock accept — trocar por action/Orval
       await new Promise(resolve => setTimeout(resolve, 600))
-      removeInvite(invite.id)
+      removeInvite(selectedInvite.id)
+      setIsAcceptOpen(false)
+      setSelectedInvite(null)
       setIsSuccessOpen(true)
     } catch {
       toast.error('Não foi possível aceitar o convite. Tente novamente.')
@@ -75,7 +86,14 @@ export function PendingInviteAccordion({
     }
   }
 
-  if (invites.length === 0 && !isSuccessOpen && !isDeclineOpen) return null
+  if (
+    invites.length === 0 &&
+    !isSuccessOpen &&
+    !isDeclineOpen &&
+    !isAcceptOpen
+  ) {
+    return null
+  }
 
   return (
     <>
@@ -113,8 +131,7 @@ export function PendingInviteAccordion({
                     size="xl"
                     fullWidth
                     variant="primary"
-                    onClick={() => handleAccept(invite)}
-                    loading={isAccepting}
+                    onClick={() => handleAcceptClick(invite)}
                     disabled={isAccepting || isDeclining}
                   >
                     Aceitar
@@ -134,6 +151,19 @@ export function PendingInviteAccordion({
           ))}
         </Accordion>
       )}
+
+      <AcceptInviteDrawer
+        vehicleDisplayName={selectedInvite?.vehicleDisplayName ?? ''}
+        open={isAcceptOpen}
+        onOpenChange={open => {
+          if (!isAccepting) {
+            setIsAcceptOpen(open)
+            if (!open) setSelectedInvite(null)
+          }
+        }}
+        onConfirm={handleAcceptConfirm}
+        isPending={isAccepting}
+      />
 
       <DeclineInviteDrawer
         vehicleDisplayName={selectedInvite?.vehicleDisplayName ?? ''}
