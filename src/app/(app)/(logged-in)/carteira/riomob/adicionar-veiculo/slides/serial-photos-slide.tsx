@@ -6,8 +6,14 @@ import type { VehicleFormData } from '../schema'
 
 interface SerialPhotosSlideProps {
   form: UseFormReturn<VehicleFormData>
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
-export function SerialPhotosSlide({ form }: SerialPhotosSlideProps) {
-  return <SerialPhotosFields form={form} />
+export function SerialPhotosSlide({
+  form,
+  onUploadingChange,
+}: SerialPhotosSlideProps) {
+  return (
+    <SerialPhotosFields form={form} onUploadingChange={onUploadingChange} />
+  )
 }

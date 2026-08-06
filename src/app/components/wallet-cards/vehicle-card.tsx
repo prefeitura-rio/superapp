@@ -114,10 +114,11 @@ function VehicleCardField({ label, value }: VehicleCardFieldProps) {
   )
 }
 
+/** Solid fallback + theme gradient (`--background-image-riomob-*` in globals.css). */
 const VEHICLE_CARD_GRADIENTS: Record<VehicleType, string> = {
-  autopropelido: 'bg-[image:var(--riomob-gradient-autopropelido)]',
-  bicicleta_eletrica: 'bg-[image:var(--riomob-gradient-bike)]',
-  ciclomotor: 'bg-[image:var(--riomob-gradient-ciclomotor)]',
+  autopropelido: 'bg-[#193cb8] bg-riomob-autopropelido',
+  bicicleta_eletrica: 'bg-[#007a55] bg-riomob-bike',
+  ciclomotor: 'bg-[#e17100] bg-riomob-ciclomotor',
 }
 
 const VEHICLE_CARD_FIELDS: VehicleCardFieldDef[] = [

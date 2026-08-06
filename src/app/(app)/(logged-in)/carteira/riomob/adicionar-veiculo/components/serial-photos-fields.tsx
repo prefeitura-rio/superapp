@@ -5,7 +5,7 @@ import { ChevronDownIcon } from '@/assets/icons/chevron-down-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 import { SerialNumberInfoDrawer } from '../drawers/serial-number-info-drawer'
@@ -30,6 +30,7 @@ interface SerialPhotosFieldsProps<T extends SerialPhotosFormValues> {
   form: UseFormReturn<T>
   showTitle?: boolean
   showSelfDeclaration?: boolean
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 const HAS_INVOICE_OPTIONS = [
@@ -41,10 +42,28 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
   form,
   showTitle = true,
   showSelfDeclaration = true,
+  onUploadingChange,
 }: SerialPhotosFieldsProps<T>) {
   const { watch, setValue } = form
   const values = watch()
   const [serialInfoOpen, setSerialInfoOpen] = useState(false)
+  const uploadingFieldsRef = useRef({
+    serial: false,
+    vehicle: false,
+    invoice: false,
+  })
+
+  const updateUploading = (
+    field: 'serial' | 'vehicle' | 'invoice',
+    isUploading: boolean
+  ) => {
+    uploadingFieldsRef.current = {
+      ...uploadingFieldsRef.current,
+      [field]: isUploading,
+    }
+    const next = uploadingFieldsRef.current
+    onUploadingChange?.(next.serial || next.vehicle || next.invoice)
+  }
 
   const hasInvoiceSelected = typeof values.has_invoice === 'boolean'
   const hasInvoiceLabel = hasInvoiceSelected
@@ -78,30 +97,29 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
 
         <FileUploadField
           label="Foto do número de série"
+          kind="serial"
           showInfoIcon
           onInfoClick={() => setSerialInfoOpen(true)}
           description="Para realizar o cadastro, é obrigatório o envio de uma foto do número de série. São aceitos os formatos PNG, JPEG e PDF no tamanho máximo de 7mb."
           buttonLabel="Enviar número de série"
           fileName={values.serial_number_photo_name}
           fileSize={values.serial_number_photo_size}
-          onFileSelect={(_file, previewUrl) => {
-            if (values.serial_number_photo_url?.startsWith('blob:')) {
-              URL.revokeObjectURL(values.serial_number_photo_url)
-            }
-            setValue('serial_number_photo_url' as never, previewUrl as never, {
+          fileUrl={values.serial_number_photo_url}
+          onUploadingChange={isUploading =>
+            updateUploading('serial', isUploading)
+          }
+          onFileSelect={(file, objectUrl) => {
+            setValue('serial_number_photo_url' as never, objectUrl as never, {
               shouldValidate: true,
             })
-            setValue('serial_number_photo_name' as never, _file.name as never, {
+            setValue('serial_number_photo_name' as never, file.name as never, {
               shouldValidate: true,
             })
-            setValue('serial_number_photo_size' as never, _file.size as never, {
+            setValue('serial_number_photo_size' as never, file.size as never, {
               shouldValidate: true,
             })
           }}
           onFileRemove={() => {
-            if (values.serial_number_photo_url?.startsWith('blob:')) {
-              URL.revokeObjectURL(values.serial_number_photo_url)
-            }
             setValue('serial_number_photo_url' as never, '' as never, {
               shouldValidate: true,
             })
@@ -116,28 +134,27 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
 
         <FileUploadField
           label="Foto do veículo"
+          kind="vehicle"
           description="Para realizar o cadastro, é obrigatório o envio de uma foto do veículo. São aceitos os formatos PNG, JPEG e PDF no tamanho máximo de 7mb."
           buttonLabel="Enviar foto"
           fileName={values.vehicle_photo_name}
           fileSize={values.vehicle_photo_size}
-          onFileSelect={(_file, previewUrl) => {
-            if (values.vehicle_photo_url?.startsWith('blob:')) {
-              URL.revokeObjectURL(values.vehicle_photo_url)
-            }
-            setValue('vehicle_photo_url' as never, previewUrl as never, {
+          fileUrl={values.vehicle_photo_url}
+          onUploadingChange={isUploading =>
+            updateUploading('vehicle', isUploading)
+          }
+          onFileSelect={(file, objectUrl) => {
+            setValue('vehicle_photo_url' as never, objectUrl as never, {
               shouldValidate: true,
             })
-            setValue('vehicle_photo_name' as never, _file.name as never, {
+            setValue('vehicle_photo_name' as never, file.name as never, {
               shouldValidate: true,
             })
-            setValue('vehicle_photo_size' as never, _file.size as never, {
+            setValue('vehicle_photo_size' as never, file.size as never, {
               shouldValidate: true,
             })
           }}
           onFileRemove={() => {
-            if (values.vehicle_photo_url?.startsWith('blob:')) {
-              URL.revokeObjectURL(values.vehicle_photo_url)
-            }
             setValue('vehicle_photo_url' as never, '' as never, {
               shouldValidate: true,
             })
@@ -177,9 +194,6 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
                   shouldValidate: true,
                 })
                 if (!hasInvoice) {
-                  if (values.invoice_photo_url?.startsWith('blob:')) {
-                    URL.revokeObjectURL(values.invoice_photo_url)
-                  }
                   setValue('invoice_photo_url' as never, '' as never, {
                     shouldValidate: true,
                   })
@@ -198,28 +212,27 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
         {values.has_invoice === true && (
           <FileUploadField
             label="Nota Fiscal"
+            kind="invoice"
             description="Caso possua, envie um arquivo ou foto da Nota Fiscal. São aceitos os formatos PNG, JPEG e PDF no tamanho máximo de 7mb."
             buttonLabel="Enviar Nota Fiscal"
             fileName={values.invoice_photo_name}
             fileSize={values.invoice_photo_size}
-            onFileSelect={(_file, previewUrl) => {
-              if (values.invoice_photo_url?.startsWith('blob:')) {
-                URL.revokeObjectURL(values.invoice_photo_url)
-              }
-              setValue('invoice_photo_url' as never, previewUrl as never, {
+            fileUrl={values.invoice_photo_url}
+            onUploadingChange={isUploading =>
+              updateUploading('invoice', isUploading)
+            }
+            onFileSelect={(file, objectUrl) => {
+              setValue('invoice_photo_url' as never, objectUrl as never, {
                 shouldValidate: true,
               })
-              setValue('invoice_photo_name' as never, _file.name as never, {
+              setValue('invoice_photo_name' as never, file.name as never, {
                 shouldValidate: true,
               })
-              setValue('invoice_photo_size' as never, _file.size as never, {
+              setValue('invoice_photo_size' as never, file.size as never, {
                 shouldValidate: true,
               })
             }}
             onFileRemove={() => {
-              if (values.invoice_photo_url?.startsWith('blob:')) {
-                URL.revokeObjectURL(values.invoice_photo_url)
-              }
               setValue('invoice_photo_url' as never, '' as never, {
                 shouldValidate: true,
               })

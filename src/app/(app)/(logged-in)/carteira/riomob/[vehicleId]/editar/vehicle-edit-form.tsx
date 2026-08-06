@@ -37,6 +37,7 @@ async function mockUpdateVehicle(payload: unknown) {
 export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const detailPath = `/carteira/riomob/${vehicle.id}`
   const returnUrl = `/carteira/riomob/${vehicle.id}/editar`
 
@@ -83,6 +84,7 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
           form={form}
           showTitle={false}
           showSelfDeclaration={false}
+          onUploadingChange={setIsUploadingFiles}
         />
 
         <div className="px-4 pt-4">
@@ -91,7 +93,7 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
             size="lg"
             fullWidth
             loading={isPending}
-            disabled={isPending}
+            disabled={isPending || isUploadingFiles}
           >
             Salvar
           </CustomButton>

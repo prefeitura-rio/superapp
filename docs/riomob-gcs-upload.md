@@ -1,0 +1,118 @@
+# RioMob — Upload de arquivos via GCS (Signed URLs)
+
+## Decisão de privacidade
+
+Objetos RioMob são **privados** (sem `x-goog-acl: public-read`).
+
+Diferente do portal-interno (imagens públicas de curso), fotos de número de série, veículo e nota fiscal são documentos pessoais. A URL estável salva no RMI **não** é acessível com GET direto; preview/download passam pelo BFF que emite signed URL de leitura.
+
+URL persistida no formulário / API:
+
+```
+https://storage.googleapis.com/<bucket>/riomob/<cpf>/<kind>/<uuid>.<ext>
+```
+
+`kind` ∈ `serial` | `vehicle` | `invoice`.
+
+## Fluxo
+
+1. Browser valida MIME (PNG/JPEG/PDF) e tamanho (≤ 7MB).
+2. `POST /api/riomob/files/signed-url` com cookie JWT → `{ signedUrl, objectUrl }`.
+3. Browser faz `PUT` direto no GCS (só header `Content-Type`).
+4. RHF guarda `objectUrl` (nunca `blob:`).
+5. Para abrir / preview remoto: `POST /api/riomob/files/signed-read` com `{ objectUrl }` → `{ signedUrl }` → `window.open`, thumbnail ou PDF dialog.
+
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant FileUploadField
+  participant UploadLib as uploadRiomobFile
+  participant BffWrite as POST_signed_url
+  participant GCS
+  participant RHF
+  participant RMI
+  participant ReadLib as requestRiomobSignedRead
+  participant BffRead as POST_signed_read
+
+  Browser->>FileUploadField: seleciona arquivo
+  FileUploadField->>UploadLib: uploadRiomobFile(file, kind)
+  UploadLib->>BffWrite: JWT cookie + contentType + kind
+  BffWrite->>BffWrite: path riomob/cpf/kind/uuid
+  BffWrite-->>UploadLib: signedUrl + objectUrl
+  UploadLib->>GCS: PUT arquivo (Content-Type)
+  UploadLib-->>FileUploadField: objectUrl
+  FileUploadField->>RHF: setValue(*_photo_url = objectUrl)
+  Note over FileUploadField: preview imediato usa blob: local
+  RHF->>RMI: create/edit com URLs estáveis
+
+  Browser->>FileUploadField: abrir/preview GCS
+  FileUploadField->>ReadLib: requestRiomobSignedRead(objectUrl)
+  ReadLib->>BffRead: JWT cookie + objectUrl
+  BffRead-->>ReadLib: signedUrl TTL 15min
+  ReadLib-->>FileUploadField: signedUrl
+  FileUploadField->>GCS: GET via signed URL
+```
+
+## Mapa UI → lib → API → GCS → RMI
+
+Preview imediato após o pick usa `blob:` só na UI. O valor persistido no form e enviado ao RMI é sempre a `objectUrl` GCS (`https://storage.googleapis.com/...`). O schema Zod rejeita `blob:`.
+
+| Path                                                                                                | Papel                                                                             |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `src/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/file-upload-field.tsx`    | Pick file, upload, preview (`blob:` local / signed URL na edição), PDF dialog |
+| `src/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/serial-photos-fields.tsx` | Liga RHF aos três kinds (`serial` / `vehicle` / `invoice`)                 |
+| `src/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/schema.ts`                           | Rejeita`blob:`; exige URL `storage.googleapis.com`                            |
+| `src/app/(app)/(logged-in)/carteira/riomob/[vehicleId]/components/verified-document-section.tsx`  | Abre documento pós-cadastro via signed-read                                      |
+| `src/lib/riomob/file-types.ts`                                                                    | MIME, kinds, helpers client-safe                                                  |
+| `src/lib/riomob/gcs.ts`                                                                           | Storage SDK, path, parse URL (server)                                             |
+| `src/lib/riomob/upload-file.ts`                                                                   | Cliente de upload                                                                 |
+| `src/lib/riomob/request-signed-read.ts`                                                           | Cliente de signed read                                                            |
+| `src/app/api/riomob/files/signed-url/route.ts`                                                    | BFF write                                                                         |
+| `src/app/api/riomob/files/signed-read/route.ts`                                                   | BFF read                                                                          |
+| RMI                                                                                                 | Persiste URLs estáveis;**não** faz upload                                 |
+
+## Variáveis de ambiente (server-only)
+
+| Variável            | Descrição                                  |
+| -------------------- | -------------------------------------------- |
+| `GCS_BUCKET_NAME`  | Bucket (ex.:`rj-superapp-staging-prefrio`) |
+| `GCS_CLIENT_EMAIL` | Service account                              |
+| `GCS_PRIVATE_KEY`  | Chave RSA com`\n` escapado                 |
+
+IAM necessário: `storage.objects.create`, `storage.objects.get`, `iam.serviceAccounts.signBlob`.
+
+CORS do bucket deve permitir `PUT`/`GET`/`OPTIONS` + `Content-Type` nos origins do superapp (localhost e staging/prod).
+
+Detalhes e checklist de aceite: [`riomob-gcs-infra-request.md`](./riomob-gcs-infra-request.md).
+
+## Threat model / estado atual
+
+| Controle                                          | Garantido hoje?       | Onde                                                        |
+| ------------------------------------------------- | --------------------- | ----------------------------------------------------------- |
+| Objeto privado no GCS (GET sem assinatura → 403) | Sim                   | Upload sem`public-read`; infra                            |
+| SA nunca no browser                               | Sim                   | Envs server-only + BFF assina                               |
+| Write só autenticado; path sob CPF do JWT        | Sim                   | `signed-url/route.ts` + `buildRiomobObjectPath`         |
+| Read exige JWT + URL no bucket/`riomob/`        | Sim                   | `signed-read/route.ts` + `parseRiomobObjectUrl`         |
+| Read só se CPF do path = CPF do JWT              | **Não**        | `cpfDigits` é lido e não comparado ao path              |
+| Membership dono/condutor                          | **Não no BFF** | Depende do RMI devolver URLs só a quem pode ver o veículo |
+| Anti-enumeração                                 | Parcial               | UUID no path;**não** é autorização                |
+
+**Hoje qualquer cidadão autenticado que conheça a `objectUrl` completa pode obter signed-read.** A mitigação operacional é o RMI não expor URLs alheias + UUID no path; autorização fina de membership ainda é TODO.
+
+## TODOs de autorização
+
+1. BFF `signed-read`: comparar CPF do segmento do path com CPF do JWT (bloqueia leitura cross-user de URL “vazada”; quebra condutor se o path for do dono — daí o item 2).
+2. Membership via RMI (dono vs condutor) antes de assinar read, quando a API existir.
+3. Contrato `invoice_photo_url` no RMI (seção abaixo).
+
+## Gap de contrato RMI — Nota Fiscal
+
+O handoff atual expõe `has_invoice: boolean` mas **não** um campo de URL da NF.
+
+**Proposta:** adicionar `invoice_photo_url: string | null` no Vehicle:
+
+- Obrigatório na API quando `has_invoice=true`
+- Presente em `POST` / `PATCH` / `GET` de veículos
+- Condutor: leitura; sem edição
+
+O superapp já envia `invoice_photo_url` no payload de create/edit. Regenerar Orval quando o Swagger do RMI incluir o campo.

@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
@@ -45,6 +46,7 @@ export function VehicleRegistrationFlow({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [createdVehicleId, setCreatedVehicleId] = useState('mock-vehicle-id')
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const form = useForm<VehicleFormData>({
@@ -140,12 +142,14 @@ export function VehicleRegistrationFlow({
 
   const isSlide2Valid = useCallback(() => {
     const hasInvoiceFile =
-      watchedValues.has_invoice !== true || !!watchedValues.invoice_photo_url
+      watchedValues.has_invoice !== true ||
+      (!!watchedValues.invoice_photo_url &&
+        isGcsObjectUrl(watchedValues.invoice_photo_url))
 
     return (
       !!watchedValues.serial_number?.trim() &&
-      !!watchedValues.serial_number_photo_url &&
-      !!watchedValues.vehicle_photo_url &&
+      isGcsObjectUrl(watchedValues.serial_number_photo_url ?? '') &&
+      isGcsObjectUrl(watchedValues.vehicle_photo_url ?? '') &&
       typeof watchedValues.has_invoice === 'boolean' &&
       hasInvoiceFile &&
       watchedValues.self_declaration === true
@@ -210,14 +214,17 @@ export function VehicleRegistrationFlow({
           </SwiperSlide>
 
           <SwiperSlide key="serial-photos" className="h-auto!">
-            <SerialPhotosSlide form={form} />
+            <SerialPhotosSlide
+              form={form}
+              onUploadingChange={setIsUploadingFiles}
+            />
           </SwiperSlide>
         </Swiper>
 
         <div className="mt-8 px-4">
           <CustomButton
             onClick={isLastSlide ? handleSubmit : goToNext}
-            disabled={!isCurrentSlideValid() || isPending}
+            disabled={!isCurrentSlideValid() || isPending || isUploadingFiles}
             loading={isPending}
             size="xl"
             fullWidth

@@ -10,7 +10,7 @@
 | Empregos | `/servicos/trabalho`, `[id]`, currículo, candidaturas, `/servicos/empresas/[cnpj]` | componentes empregos + `http-courses/` |
 | MEI | `/servicos/mei`, proposta, minhas propostas, meu-mei | componentes mei + `http-courses/` |
 | Busca | `/busca` | `http-app-catalogo/` / busca-search |
-| Carteira digital | `/carteira`, pet, cadunico, clínica da família… | `(logged-in)/carteira/` |
+| Carteira digital | `/carteira`, pet, cadunico, clínica da família, RioMob (`/carteira/riomob`)… | `(logged-in)/carteira/` |
 | Perfil | `/meu-perfil`, dados pessoais, endereço, avatar | `src/actions/`, `http/` (RMI) |
 | FAQ / Ouvidoria | `/faq`, `/ouvidoria` | rotas mistas |
 | Auth UX | `/sessao-expirada`, `/autenticacao-necessaria/*` | `(logged-out)/` |
@@ -33,3 +33,4 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - Empregabilidade (testes): [`../testes-empregabilidade.md`](../testes-empregabilidade.md)
 - Cursos / TanStack: [`../cursos-tanstack-query-migration.md`](../cursos-tanstack-query-migration.md), [`../cursos-home-cache-ssr-tanstack.md`](../cursos-home-cache-ssr-tanstack.md)
 - Carteira pet: [`../pt-br/carteira-pet.md`](../pt-br/carteira-pet.md)
+- RioMob GCS upload: [`../riomob-gcs-upload.md`](../riomob-gcs-upload.md)

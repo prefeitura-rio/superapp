@@ -244,6 +244,23 @@ select:-webkit-autofill:focus {
 
   /* custom shadow */
   --shadow-float-navigation: var(--shadow-float-navigation);
+
+  /* RioMob wallet card gradients (bg-riomob-*) */
+  --background-image-riomob-autopropelido: linear-gradient(
+    242.7deg,
+    #0092b8 7.19%,
+    #193cb8 104.16%
+  );
+  --background-image-riomob-bike: linear-gradient(
+    59.8deg,
+    #007a55 0.79%,
+    #0092b8 132.58%
+  );
+  --background-image-riomob-ciclomotor: linear-gradient(
+    59.8deg,
+    #e17100 0%,
+    #ec003f 170.29%
+  );
 }
 
 :root {
