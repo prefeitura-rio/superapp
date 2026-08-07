@@ -68,7 +68,7 @@ export function toUpdateVehiclePayload(
       ? { vehicle_type: data.vehicle_type }
       : {}),
     color: data.color,
-    serial_number: data.serial_number.trim(),
+    serial_number: data.serial_number.trim().toUpperCase(),
     serial_number_photo_url: data.serial_number_photo_url,
     vehicle_photo_url: data.vehicle_photo_url,
     has_invoice: Boolean(data.has_invoice),

@@ -31,6 +31,7 @@ import { SearchIcon } from './search-icon'
 import { ServicesIcon } from './services-icon'
 import { SettingsIcon } from './settings-icon'
 import { ShareIcon } from './share-icon'
+import { SquarePenIcon } from './square-pen-icon'
 import { SunIcon } from './sun-icon'
 import { TrashIcon } from './trash-icon'
 import { UserIcon } from './user-icon'
@@ -74,6 +75,7 @@ export {
   ServicesIcon,
   SettingsIcon,
   ShareIcon,
+  SquarePenIcon,
   SunIcon,
   TrashIcon,
   UserIcon,

@@ -2,7 +2,6 @@
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
@@ -10,12 +9,9 @@ import { useForm } from 'react-hook-form'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import {
-  getModelById,
-  isOtherBrand,
-  isOtherModel,
-} from './mocks/vehicle-catalog'
-import {
   type VehicleFormData,
+  isSerialPhotosSlideValid,
+  isVehicleInfoSlideValid,
   toCreateVehiclePayload,
   vehicleFormSchema,
 } from './schema'
@@ -44,6 +40,7 @@ export function VehicleRegistrationFlow({
   const router = useRouter()
   const swiperRef = useRef<SwiperType | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [swiperReady, setSwiperReady] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [createdVehicleId, setCreatedVehicleId] = useState('mock-vehicle-id')
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
@@ -80,18 +77,24 @@ export function VehicleRegistrationFlow({
   const { watch } = form
   const watchedValues = watch()
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run when slide/content height changes
+  // Recalcula altura do Swiper quando o conteúdo do slide muda (erros, campos condicionais, uploads).
   useEffect(() => {
-    swiperRef.current?.updateAutoHeight?.(0)
-  }, [
-    currentIndex,
-    watchedValues.brand_id,
-    watchedValues.model_id,
-    watchedValues.serial_number_photo_name,
-    watchedValues.vehicle_photo_name,
-    watchedValues.invoice_photo_name,
-    watchedValues.has_invoice,
-  ])
+    const swiper = swiperRef.current
+    if (!swiper || !swiperReady) return
+
+    const slideEl = swiper.slides[currentIndex] as HTMLElement | undefined
+    if (!slideEl || typeof ResizeObserver === 'undefined') {
+      swiper.updateAutoHeight?.(0)
+      return
+    }
+
+    const observer = new ResizeObserver(() => {
+      swiper.updateAutoHeight?.(0)
+    })
+    observer.observe(slideEl)
+
+    return () => observer.disconnect()
+  }, [currentIndex, swiperReady])
 
   const goToNext = useCallback(() => {
     swiperRef.current?.slideNext()
@@ -108,52 +111,11 @@ export function VehicleRegistrationFlow({
   }, [currentIndex, router])
 
   const isSlide1Valid = useCallback(() => {
-    const hasName = !!watchedValues.display_name?.trim()
-    const hasColor = !!watchedValues.color
-    const hasBrand = !!watchedValues.brand_id
-    const hasModel = !!watchedValues.model_id
-    const brandOk =
-      !isOtherBrand(watchedValues.brand_id) ||
-      !!watchedValues.brand_other?.trim()
-    const modelOk =
-      !isOtherModel(watchedValues.model_id) ||
-      !!watchedValues.model_other?.trim()
-
-    const typeResolved = (() => {
-      if (
-        isOtherBrand(watchedValues.brand_id) ||
-        isOtherModel(watchedValues.model_id)
-      ) {
-        return !!watchedValues.vehicle_type
-      }
-      return !!getModelById(watchedValues.model_id)?.vehicle_type
-    })()
-
-    return (
-      hasName &&
-      hasColor &&
-      hasBrand &&
-      hasModel &&
-      brandOk &&
-      modelOk &&
-      typeResolved
-    )
+    return isVehicleInfoSlideValid(watchedValues)
   }, [watchedValues])
 
   const isSlide2Valid = useCallback(() => {
-    const hasInvoiceFile =
-      watchedValues.has_invoice !== true ||
-      (!!watchedValues.invoice_photo_url &&
-        isGcsObjectUrl(watchedValues.invoice_photo_url))
-
-    return (
-      !!watchedValues.serial_number?.trim() &&
-      isGcsObjectUrl(watchedValues.serial_number_photo_url ?? '') &&
-      isGcsObjectUrl(watchedValues.vehicle_photo_url ?? '') &&
-      typeof watchedValues.has_invoice === 'boolean' &&
-      hasInvoiceFile &&
-      watchedValues.self_declaration === true
-    )
+    return isSerialPhotosSlideValid(watchedValues)
   }, [watchedValues])
 
   const isCurrentSlideValid = useCallback(() => {
@@ -199,6 +161,7 @@ export function VehicleRegistrationFlow({
           autoHeight
           onSwiper={swiper => {
             swiperRef.current = swiper
+            setSwiperReady(true)
           }}
           onSlideChange={swiper => setCurrentIndex(swiper.activeIndex)}
           className="w-full"

@@ -140,7 +140,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             readOnly={!isEditable}
             aria-invalid={!!error}
             className={cn(
-              'flex w-full rounded-xl border-2 bg-transparent focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
+              'flex w-full rounded-xl border-2 bg-transparent shadow-none focus:bg-card disabled:bg-card transition-colors text-card-foreground font-normal truncate focus:border-ring',
               error ? 'border-destructive' : 'border-border',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               'placeholder:text-muted-foreground',

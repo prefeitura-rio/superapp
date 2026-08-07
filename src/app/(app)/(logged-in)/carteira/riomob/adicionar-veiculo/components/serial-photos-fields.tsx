@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { cn } from '@/lib/utils'
 import { useRef, useState } from 'react'
-import type { UseFormReturn } from 'react-hook-form'
+import type { FieldErrors, UseFormReturn } from 'react-hook-form'
 import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 import { SerialNumberInfoDrawer } from '../drawers/serial-number-info-drawer'
 import { FileUploadField } from './file-upload-field'
@@ -38,14 +38,22 @@ const HAS_INVOICE_OPTIONS = [
   { label: 'Não', value: 'false' },
 ]
 
+function fieldError(
+  errors: FieldErrors<SerialPhotosFormValues>,
+  name: keyof SerialPhotosFormValues
+) {
+  return errors[name]?.message as string | undefined
+}
+
 export function SerialPhotosFields<T extends SerialPhotosFormValues>({
   form,
   showTitle = true,
   showSelfDeclaration = true,
   onUploadingChange,
 }: SerialPhotosFieldsProps<T>) {
-  const { watch, setValue } = form
+  const { watch, setValue, formState } = form
   const values = watch()
+  const errors = formState.errors as FieldErrors<SerialPhotosFormValues>
   const [serialInfoOpen, setSerialInfoOpen] = useState(false)
   const uploadingFieldsRef = useRef({
     serial: false,
@@ -88,6 +96,8 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
           label="Número de série"
           placeholder="Escreva o número de série"
           value={values.serial_number}
+          maxLength={40}
+          error={fieldError(errors, 'serial_number')}
           onChange={event =>
             setValue('serial_number' as never, event.target.value as never, {
               shouldValidate: true,
@@ -105,6 +115,7 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
           fileName={values.serial_number_photo_name}
           fileSize={values.serial_number_photo_size}
           fileUrl={values.serial_number_photo_url}
+          error={fieldError(errors, 'serial_number_photo_url')}
           onUploadingChange={isUploading =>
             updateUploading('serial', isUploading)
           }
@@ -140,6 +151,7 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
           fileName={values.vehicle_photo_name}
           fileSize={values.vehicle_photo_size}
           fileUrl={values.vehicle_photo_url}
+          error={fieldError(errors, 'vehicle_photo_url')}
           onUploadingChange={isUploading =>
             updateUploading('vehicle', isUploading)
           }
@@ -181,6 +193,7 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
             <ChevronDownIcon className="size-6 text-muted-foreground" />
           }
           drawerTitle="Possui a Nota Fiscal?"
+          error={fieldError(errors, 'has_invoice')}
           drawerContent={
             <SelectOptionDrawerContent
               name="has-invoice"
@@ -218,6 +231,7 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
             fileName={values.invoice_photo_name}
             fileSize={values.invoice_photo_size}
             fileUrl={values.invoice_photo_url}
+            error={fieldError(errors, 'invoice_photo_url')}
             onUploadingChange={isUploading =>
               updateUploading('invoice', isUploading)
             }
@@ -275,6 +289,11 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
                 }
               />
             </div>
+            {fieldError(errors, 'self_declaration') && (
+              <p className="text-sm text-destructive mt-1">
+                {fieldError(errors, 'self_declaration')}
+              </p>
+            )}
           </div>
         )}
       </div>

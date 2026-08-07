@@ -14,6 +14,7 @@ import {
   uploadRiomobFile,
   validateRiomobFile,
 } from '@/lib/riomob/upload-file'
+import { cn } from '@/lib/utils'
 import { FileText, ImageIcon, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -33,6 +34,7 @@ interface FileUploadFieldProps {
   fileSize?: number
   /** Stable GCS object URL — enables preview/open after upload or on edit. */
   fileUrl?: string
+  error?: string
   onFileSelect: (file: File, objectUrl: string) => void
   onFileRemove: () => void
   onUploadingChange?: (isUploading: boolean) => void
@@ -58,6 +60,7 @@ export function FileUploadField({
   fileName,
   fileSize,
   fileUrl,
+  error,
   onFileSelect,
   onFileRemove,
   onUploadingChange,
@@ -269,12 +272,22 @@ export function FileUploadField({
     <div className="bg-card flex flex-col gap-4 rounded-xl p-4 w-full">
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-2">
-          <p className="text-sm text-primary font-normal leading-5">{label}</p>
+          <p
+            className={cn(
+              'text-sm font-normal leading-5',
+              error ? 'text-destructive' : 'text-primary'
+            )}
+          >
+            {label}
+          </p>
           {showInfoIcon && (
             <button
               type="button"
               aria-label="Mais informações"
-              className="shrink-0 text-primary"
+              className={cn(
+                'shrink-0',
+                error ? 'text-destructive' : 'text-primary'
+              )}
               onClick={onInfoClick}
             >
               <InfoIcon className="size-5" />
@@ -354,6 +367,8 @@ export function FileUploadField({
         fileUrl={pdfDialogUrl}
         title={displayName ?? 'Visualizar PDF'}
       />
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   )
 }

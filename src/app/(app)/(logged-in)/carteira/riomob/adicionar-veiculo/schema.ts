@@ -1,6 +1,7 @@
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { z } from 'zod'
 import {
+  VEHICLE_COLORS,
   type VehicleType,
   isOtherBrand,
   isOtherModel,
@@ -11,6 +12,36 @@ const vehicleTypeSchema = z.enum([
   'autopropelido',
   'ciclomotor',
 ])
+
+const vehicleColorSchema = z
+  .string()
+  .min(1, 'Selecione a cor')
+  .refine(value => (VEHICLE_COLORS as readonly string[]).includes(value), {
+    message: 'Selecione a cor',
+  })
+
+/** Letras/números Unicode + espaço/hífen/apóstrofo/ponto/& — sem emoji/URL. */
+const FREE_TEXT_50_RE = /^[\p{L}\p{N}](?:[\p{L}\p{N}\s\-'.&]*[\p{L}\p{N}])?$/u
+const SERIAL_NUMBER_RE = /^[A-Za-z0-9-]+$/
+
+function freeText50(requiredMessage: string) {
+  return z
+    .string()
+    .trim()
+    .min(1, requiredMessage)
+    .max(50, 'Máximo de 50 caracteres')
+    .regex(FREE_TEXT_50_RE, 'Use apenas letras, números e pontuação simples')
+}
+
+function serialNumberSchema() {
+  return z
+    .string()
+    .trim()
+    .min(1, 'Número de série é obrigatório')
+    .min(4, 'Mínimo de 4 caracteres')
+    .max(40, 'Máximo de 40 caracteres')
+    .regex(SERIAL_NUMBER_RE, 'Use apenas letras, números e hífen (sem espaços)')
+}
 
 function isValidRiomobPhotoUrl(url: string): boolean {
   if (!url.trim()) return false
@@ -24,97 +55,148 @@ function gcsPhotoUrlSchema(requiredMessage: string) {
   })
 }
 
-export const vehicleFormSchema = z
-  .object({
-    display_name: z
-      .string()
-      .min(1, 'Nome do veículo é obrigatório')
-      .max(80, 'Máximo de 80 caracteres'),
-    brand_id: z.string().min(1, 'Selecione a marca'),
-    brand_other: z.string().optional(),
-    model_id: z.string().min(1, 'Selecione o modelo'),
-    model_other: z.string().optional(),
-    vehicle_type: vehicleTypeSchema.optional(),
-    color: z.string().min(1, 'Selecione a cor'),
-    serial_number: z.string().min(1, 'Número de série é obrigatório'),
-    serial_number_photo_url: gcsPhotoUrlSchema(
-      'Envie a foto do número de série'
-    ),
-    serial_number_photo_name: z.string().optional(),
-    serial_number_photo_size: z.number().optional(),
-    vehicle_photo_url: gcsPhotoUrlSchema('Envie a foto do veículo'),
-    vehicle_photo_name: z.string().optional(),
-    vehicle_photo_size: z.number().optional(),
-    has_invoice: z.boolean().nullable(),
-    invoice_photo_url: z.string().optional(),
-    invoice_photo_name: z.string().optional(),
-    invoice_photo_size: z.number().optional(),
-    self_declaration: z.boolean(),
+function refineVehicleInfoFields(
+  data: {
+    brand_id: string
+    brand_other?: string
+    model_id: string
+    model_other?: string
+    vehicle_type?: VehicleType
+  },
+  ctx: z.RefinementCtx
+) {
+  if (isOtherBrand(data.brand_id)) {
+    const brandOther = freeText50('Informe a marca do veículo').safeParse(
+      data.brand_other ?? ''
+    )
+    if (!brandOther.success) {
+      for (const issue of brandOther.error.issues) {
+        ctx.addIssue({ ...issue, path: ['brand_other'] })
+      }
+    }
+  }
+
+  if (isOtherModel(data.model_id)) {
+    const modelOther = freeText50('Informe o modelo do veículo').safeParse(
+      data.model_other ?? ''
+    )
+    if (!modelOther.success) {
+      for (const issue of modelOther.error.issues) {
+        ctx.addIssue({ ...issue, path: ['model_other'] })
+      }
+    }
+  }
+
+  if (
+    (isOtherBrand(data.brand_id) || isOtherModel(data.model_id)) &&
+    !data.vehicle_type
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['vehicle_type'],
+      message: 'Selecione o tipo de veículo',
+    })
+  }
+}
+
+function refineSerialPhotosFields(
+  data: {
+    has_invoice: boolean | null
+    invoice_photo_url?: string
+    self_declaration: boolean
+  },
+  ctx: z.RefinementCtx
+) {
+  if (data.has_invoice === null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['has_invoice'],
+      message: 'Informe se possui a nota fiscal',
+    })
+  }
+
+  if (data.has_invoice === true) {
+    if (!data.invoice_photo_url?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['invoice_photo_url'],
+        message: 'Envie a nota fiscal',
+      })
+    } else if (!isValidRiomobPhotoUrl(data.invoice_photo_url)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['invoice_photo_url'],
+        message: 'Envie um arquivo válido (upload para o armazenamento)',
+      })
+    }
+  }
+
+  if (!data.self_declaration) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['self_declaration'],
+      message: 'Confirme a autodeclaração',
+    })
+  }
+}
+
+const vehicleInfoFieldsObject = z.object({
+  display_name: freeText50('Nome do veículo é obrigatório'),
+  brand_id: z.string().min(1, 'Selecione a marca'),
+  brand_other: z.string().optional(),
+  model_id: z.string().min(1, 'Selecione o modelo'),
+  model_other: z.string().optional(),
+  vehicle_type: vehicleTypeSchema.optional(),
+  color: vehicleColorSchema,
+})
+
+const serialPhotosFieldsObject = z.object({
+  serial_number: serialNumberSchema(),
+  serial_number_photo_url: gcsPhotoUrlSchema('Envie a foto do número de série'),
+  serial_number_photo_name: z.string().optional(),
+  serial_number_photo_size: z.number().optional(),
+  vehicle_photo_url: gcsPhotoUrlSchema('Envie a foto do veículo'),
+  vehicle_photo_name: z.string().optional(),
+  vehicle_photo_size: z.number().optional(),
+  has_invoice: z.boolean().nullable(),
+  invoice_photo_url: z.string().optional(),
+  invoice_photo_name: z.string().optional(),
+  invoice_photo_size: z.number().optional(),
+  self_declaration: z.boolean(),
+})
+
+export const vehicleInfoSlideSchema = vehicleInfoFieldsObject.superRefine(
+  refineVehicleInfoFields
+)
+
+export const serialPhotosSlideSchema = serialPhotosFieldsObject.superRefine(
+  refineSerialPhotosFields
+)
+
+export const vehicleFormSchema = vehicleInfoFieldsObject
+  .merge(serialPhotosFieldsObject)
+  .extend({
     owner_phone: z.string().optional(),
     owner_email: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (isOtherBrand(data.brand_id) && !data.brand_other?.trim()) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['brand_other'],
-        message: 'Informe a marca do veículo',
-      })
-    }
-
-    if (isOtherModel(data.model_id) && !data.model_other?.trim()) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['model_other'],
-        message: 'Informe o modelo do veículo',
-      })
-    }
-
-    if (
-      (isOtherBrand(data.brand_id) || isOtherModel(data.model_id)) &&
-      !data.vehicle_type
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['vehicle_type'],
-        message: 'Selecione o tipo de veículo',
-      })
-    }
-
-    if (data.has_invoice === null) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['has_invoice'],
-        message: 'Informe se possui a nota fiscal',
-      })
-    }
-
-    if (data.has_invoice === true) {
-      if (!data.invoice_photo_url?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['invoice_photo_url'],
-          message: 'Envie a nota fiscal',
-        })
-      } else if (!isValidRiomobPhotoUrl(data.invoice_photo_url)) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['invoice_photo_url'],
-          message: 'Envie um arquivo válido (upload para o armazenamento)',
-        })
-      }
-    }
-
-    if (!data.self_declaration) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['self_declaration'],
-        message: 'Confirme a autodeclaração',
-      })
-    }
+    refineVehicleInfoFields(data, ctx)
+    refineSerialPhotosFields(data, ctx)
   })
 
 export type VehicleFormData = z.infer<typeof vehicleFormSchema>
+
+export function isVehicleInfoSlideValid(
+  values: Partial<VehicleFormData>
+): boolean {
+  return vehicleInfoSlideSchema.safeParse(values).success
+}
+
+export function isSerialPhotosSlideValid(
+  values: Partial<VehicleFormData>
+): boolean {
+  return serialPhotosSlideSchema.safeParse(values).success
+}
 
 /** Shape alinhado ao POST /citizen/{cpf}/vehicles (handoff backend + proposta invoice_photo_url). */
 export interface CreateVehiclePayload {
@@ -151,7 +233,7 @@ export function toCreateVehiclePayload(
       ? { vehicle_type: data.vehicle_type }
       : {}),
     color: data.color,
-    serial_number: data.serial_number.trim(),
+    serial_number: data.serial_number.trim().toUpperCase(),
     serial_number_photo_url: data.serial_number_photo_url,
     vehicle_photo_url: data.vehicle_photo_url,
     has_invoice: Boolean(data.has_invoice),

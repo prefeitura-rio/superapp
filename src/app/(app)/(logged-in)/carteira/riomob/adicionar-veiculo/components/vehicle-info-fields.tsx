@@ -2,13 +2,15 @@
 
 import { ActionDiv } from '@/app/components/action-div'
 import { ChevronDownIcon } from '@/assets/icons/chevron-down-icon'
-import { EditIcon } from '@/assets/icons/edit-icon'
+import { SquarePenIcon } from '@/assets/icons/square-pen-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { formatCpf } from '@/lib/format-cpf'
 import { cn, formatTitleCase } from '@/lib/utils'
-import type { UseFormReturn } from 'react-hook-form'
+import type { FieldErrors, UseFormReturn } from 'react-hook-form'
 import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 import {
+  OTHER_BRAND_ID,
+  OTHER_MODEL_ID,
   VEHICLE_BRANDS,
   VEHICLE_COLORS,
   VEHICLE_TYPE_LABELS,
@@ -41,6 +43,13 @@ interface VehicleInfoFieldsProps<T extends VehicleInfoFormValues> {
   showTitle?: boolean
 }
 
+function fieldError(
+  errors: FieldErrors<VehicleInfoFormValues>,
+  name: keyof VehicleInfoFormValues
+) {
+  return errors[name]?.message as string | undefined
+}
+
 export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   form,
   ownerName,
@@ -50,8 +59,9 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   returnUrl,
   showTitle = true,
 }: VehicleInfoFieldsProps<T>) {
-  const { watch, setValue } = form
+  const { watch, setValue, formState } = form
   const values = watch()
+  const errors = formState.errors as FieldErrors<VehicleInfoFormValues>
 
   const brand = getBrandById(values.brand_id)
   const model = getModelById(values.model_id)
@@ -61,12 +71,16 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   const typeIsSelectable = brandIsOther || modelIsOther
 
   const brandHasValue = !!values.brand_id
-  const brandDisplay = brand?.name || 'Selecionar'
+  const brandDisplay = brandIsOther
+    ? values.brand_other?.trim() || brand?.name || 'Selecionar'
+    : brand?.name || 'Selecionar'
 
   const modelHasValue = !!values.model_id
   const modelDisplay = !values.brand_id
     ? 'Selecione a marca primeiro'
-    : model?.name || 'Selecionar'
+    : modelIsOther
+      ? values.model_other?.trim() || model?.name || 'Selecionar'
+      : model?.name || 'Selecionar'
 
   const colorHasValue = !!values.color
   const colorDisplay = values.color || 'Informe qual é a cor do seu veículo'
@@ -86,9 +100,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
 
   const encodedReturnUrl = encodeURIComponent(returnUrl)
 
-  const handleBrandSelect = (brandId: string) => {
-    setValue('brand_id' as never, brandId as never, { shouldValidate: true })
-    setValue('brand_other' as never, '' as never, { shouldValidate: true })
+  const resetModelAndType = () => {
     setValue('model_id' as never, '' as never, { shouldValidate: true })
     setValue('model_other' as never, '' as never, { shouldValidate: true })
     setValue('vehicle_type' as never, undefined as never, {
@@ -96,9 +108,28 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
     })
   }
 
+  const handleBrandSelect = (brandId: string) => {
+    setValue('brand_id' as never, brandId as never, { shouldValidate: true })
+    if (!isOtherBrand(brandId)) {
+      setValue('brand_other' as never, '' as never, { shouldValidate: true })
+    }
+    resetModelAndType()
+  }
+
+  const handleBrandConfirmOther = (text: string) => {
+    const wasOther = isOtherBrand(values.brand_id)
+    setValue('brand_id' as never, OTHER_BRAND_ID as never, {
+      shouldValidate: true,
+    })
+    setValue('brand_other' as never, text as never, { shouldValidate: true })
+    if (!wasOther) resetModelAndType()
+  }
+
   const handleModelSelect = (modelId: string) => {
     setValue('model_id' as never, modelId as never, { shouldValidate: true })
-    setValue('model_other' as never, '' as never, { shouldValidate: true })
+    if (!isOtherModel(modelId)) {
+      setValue('model_other' as never, '' as never, { shouldValidate: true })
+    }
 
     if (isOtherModel(modelId) || isOtherBrand(values.brand_id)) {
       setValue('vehicle_type' as never, undefined as never, {
@@ -115,11 +146,21 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
     }
   }
 
+  const handleModelConfirmOther = (text: string) => {
+    setValue('model_id' as never, OTHER_MODEL_ID as never, {
+      shouldValidate: true,
+    })
+    setValue('model_other' as never, text as never, { shouldValidate: true })
+    setValue('vehicle_type' as never, undefined as never, {
+      shouldValidate: true,
+    })
+  }
+
   return (
     <div className="w-full">
       {showTitle && (
         <div className="px-4 pb-8 text-left">
-          <h2 className="text-3xl font-medium leading-9 tracking-tight text-foreground">
+          <h2 className="text-xl font-medium leading-6 tracking-tight text-foreground">
             Informações do Veículo
           </h2>
         </div>
@@ -145,7 +186,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           label="Celular"
           content={phoneDisplay}
           disabled
-          rightIcon={<EditIcon />}
+          rightIcon={<SquarePenIcon />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-telefone?returnUrl=${encodedReturnUrl}`}
         />
 
@@ -153,7 +194,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           label="Email"
           content={emailDisplay}
           disabled
-          rightIcon={<EditIcon />}
+          rightIcon={<SquarePenIcon />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-email?returnUrl=${encodedReturnUrl}`}
         />
 
@@ -162,6 +203,8 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           label="Nome do Veículo"
           placeholder="Dê um nome ou apelido para seu veículo"
           value={values.display_name}
+          maxLength={50}
+          error={fieldError(errors, 'display_name')}
           onChange={event =>
             setValue('display_name' as never, event.target.value as never, {
               shouldValidate: true,
@@ -175,6 +218,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           disabled
           rightIcon={chevronIcon}
           drawerTitle="Cor do Veículo"
+          error={fieldError(errors, 'color')}
           drawerContent={
             <SelectOptionDrawerContent
               name="vehicle-color"
@@ -195,6 +239,9 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           disabled
           rightIcon={chevronIcon}
           drawerTitle="Marca do Veículo"
+          error={
+            fieldError(errors, 'brand_id') || fieldError(errors, 'brand_other')
+          }
           drawerContent={
             <SelectOptionDrawerContent
               name="vehicle-brand"
@@ -204,23 +251,15 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
               }))}
               value={values.brand_id}
               onSelect={handleBrandSelect}
+              searchPlaceholder="Encontre a marca desejada"
+              emptySearchMessage="Não encontramos nenhuma marca com o nome informado."
+              otherOptionValue={OTHER_BRAND_ID}
+              otherInputPlaceholder="Escreva a marca do veículo"
+              initialOtherText={values.brand_other || ''}
+              onConfirmOther={handleBrandConfirmOther}
             />
           }
         />
-
-        {brandIsOther && (
-          <CustomInput
-            id="brand-other"
-            label="Qual é a marca?"
-            placeholder="Digite a marca do veículo"
-            value={values.brand_other || ''}
-            onChange={event =>
-              setValue('brand_other' as never, event.target.value as never, {
-                shouldValidate: true,
-              })
-            }
-          />
-        )}
 
         {brandHasValue ? (
           <ActionDiv
@@ -229,6 +268,10 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
             disabled
             rightIcon={chevronIcon}
             drawerTitle="Modelo do Veículo"
+            error={
+              fieldError(errors, 'model_id') ||
+              fieldError(errors, 'model_other')
+            }
             drawerContent={
               <SelectOptionDrawerContent
                 name="vehicle-model"
@@ -236,8 +279,24 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
                   label: item.name,
                   value: item.id,
                 }))}
-                value={values.model_id}
+                value={
+                  brandIsOther
+                    ? values.model_id || OTHER_MODEL_ID
+                    : values.model_id
+                }
                 onSelect={handleModelSelect}
+                searchPlaceholder={
+                  brandIsOther ? undefined : 'Encontre o modelo desejado'
+                }
+                emptySearchMessage={
+                  brandIsOther
+                    ? undefined
+                    : 'Não encontramos nenhum modelo com o nome informado.'
+                }
+                otherOptionValue={OTHER_MODEL_ID}
+                otherInputPlaceholder="Escreva o modelo do veículo"
+                initialOtherText={values.model_other || ''}
+                onConfirmOther={handleModelConfirmOther}
               />
             }
           />
@@ -248,20 +307,6 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
             value="Selecione a marca primeiro"
             isEditable={false}
             rightIcon={chevronIcon}
-          />
-        )}
-
-        {modelIsOther && (
-          <CustomInput
-            id="model-other"
-            label="Qual é o modelo?"
-            placeholder="Digite o modelo do veículo"
-            value={values.model_other || ''}
-            onChange={event =>
-              setValue('model_other' as never, event.target.value as never, {
-                shouldValidate: true,
-              })
-            }
           />
         )}
 
@@ -277,6 +322,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
             disabled
             rightIcon={chevronIcon}
             drawerTitle="Tipo de veículo"
+            error={fieldError(errors, 'vehicle_type')}
             drawerContent={
               <SelectOptionDrawerContent
                 name="vehicle-type"
