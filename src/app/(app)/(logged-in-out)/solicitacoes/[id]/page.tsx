@@ -1,10 +1,7 @@
 'use client'
 
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
-import {
-  formatDate,
-  normalizeStatus,
-} from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
+import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -428,9 +425,12 @@ function RequestDetail({ data }: { data: DetailData }) {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-2">
+      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-2">
         <h1 className="text-3xl font-medium text-card-foreground leading-9 tracking-tight mb-4">
           {data.servico}
         </h1>
@@ -601,9 +601,12 @@ function RequestDetail({ data }: { data: DetailData }) {
 function LoadingState() {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-4">
+      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -625,8 +628,11 @@ function LoadingState() {
 function ErrorState({ protocolo }: { protocolo: string }) {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
-      <div className="pt-24 pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
+      <div className="pt-[100px] pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>
@@ -682,7 +688,7 @@ export default function RequestDetailPage() {
               macroStatus: normalizeStatus(os?.status ?? json.status),
               dataAbertura: formatDateTime(json.dataAbertura),
               dataUltimaAtualizacao: formatDateTime(json.dataUltimaAtualizacao),
-              previsaoSLA: formatDate(os?.previsaoSLA),
+              previsaoSLA: formatDateTime(os?.previsaoSLA),
               motivoFechamento: os?.motivoFechamento ?? '',
               descricao: os?.descricao ?? '',
               endereco: os?.endereco ?? null,
