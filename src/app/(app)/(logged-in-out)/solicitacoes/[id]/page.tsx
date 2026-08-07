@@ -226,7 +226,8 @@ function StatusTimeline({ data }: { data: DetailData }) {
   const isCancelado = macroStatus === 'Cancelado'
 
   const showEmAndamento = isEmAndamento || isConcluido || isCancelado
-  const showTerceiro = true
+  const showTerceiro =
+    isConcluido || isCancelado || !!(previsaoSLA && (isAberto || isEmAndamento))
 
   const aberturaAndamento = andamentos[0]
   const progressoAndamento = andamentos.find(a => a !== aberturaAndamento)
@@ -237,7 +238,7 @@ function StatusTimeline({ data }: { data: DetailData }) {
 
   if (isAberto || isEmAndamento) {
     terceiroLabel = 'Prazo Estimado'
-    terceiroDate = previsaoSLA || '—'
+    terceiroDate = previsaoSLA
   } else if (isConcluido) {
     terceiroLabel = CLOSING_STATUS_LABEL[motivoFechamento] ?? 'Concluído'
     terceiroDate = dataUltimaAtualizacao
@@ -688,7 +689,9 @@ export default function RequestDetailPage() {
               macroStatus: normalizeStatus(os?.status ?? json.status),
               dataAbertura: formatDateTime(json.dataAbertura),
               dataUltimaAtualizacao: formatDateTime(json.dataUltimaAtualizacao),
-              previsaoSLA: formatDateTime(os?.previsaoSLA),
+              previsaoSLA: os?.previsaoSLA
+                ? formatDateTime(os.previsaoSLA)
+                : '',
               motivoFechamento: os?.motivoFechamento ?? '',
               descricao: os?.descricao ?? '',
               endereco: os?.endereco ?? null,
