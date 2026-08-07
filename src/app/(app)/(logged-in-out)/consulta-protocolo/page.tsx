@@ -152,14 +152,14 @@ export default function ConsultaProtocoloPage() {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/" />
+      <SecondaryHeader route="/" style={{ paddingTop: '24px', paddingBottom: '24px' }} />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-6">
+      <div className="pt-25 pb-32 px-4 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-foreground leading-tight">
+          <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">
             Consulte seu protocolo
           </h1>
-          <p className="text-sm text-foreground-light leading-5">
+          <p className="text-sm font-normal text-foreground-light leading-5 tracking-normal">
             A consulta neste campo não permite a visualização de todos os
             detalhes da solicitação
           </p>
@@ -169,7 +169,7 @@ export default function ConsultaProtocoloPage() {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="protocolo"
-              className="text-sm font-medium text-primary"
+              className="text-sm font-normal text-primary leading-5 tracking-normal"
             >
               Número de protocolo
             </label>
@@ -179,9 +179,9 @@ export default function ConsultaProtocoloPage() {
               placeholder="Escreva aqui seu número de protocolo"
               value={protocolo}
               onChange={e => setProtocolo(e.target.value)}
-              className="w-full bg-transparent text-foreground placeholder:text-foreground-light text-sm h-16 rounded-xl px-5 border-[1.4px] border-border outline-none focus:border-primary transition-colors"
+              className="w-full bg-transparent text-foreground text-sm font-normal leading-5 tracking-normal placeholder:text-foreground-light placeholder:text-sm placeholder:font-normal placeholder:leading-5 placeholder:tracking-normal h-16 rounded-xl px-5 border-[1.4px] border-border outline-none focus:border-primary transition-colors"
             />
-            <p className="text-xs text-foreground-light">
+            <p className="text-sm font-normal text-muted-foreground leading-5 tracking-normal">
               Escreva no formato: RIO-12345678-9
             </p>
             {pageState === 'error' && (
@@ -192,7 +192,7 @@ export default function ConsultaProtocoloPage() {
           <button
             type="submit"
             disabled={!protocolo.trim() || pageState === 'loading'}
-            className="w-full h-14 bg-primary text-primary-foreground text-sm font-medium rounded-full disabled:opacity-40 transition-opacity flex items-center justify-center gap-2"
+            className="w-full bg-primary text-primary-foreground text-sm font-medium leading-5 tracking-normal rounded-full py-4 px-6 flex items-center justify-center gap-3 transition-colors disabled:bg-card disabled:text-zinc-400 disabled:font-normal disabled:cursor-not-allowed"
           >
             {pageState === 'loading' && (
               <svg

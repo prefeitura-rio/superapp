@@ -56,7 +56,7 @@ function TimelineItem({
   isPast,
   description,
 }: TimelineItemProps) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   const captionStyle: React.CSSProperties = {
     color: 'var(--foreground-light, #71717B)',
@@ -200,19 +200,17 @@ interface DetailData {
 function formatDateTime(iso: string | undefined | null): string {
   if (!iso) return '—'
   const d = new Date(iso)
-  const date = d
-    .toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = d
+    .toLocaleDateString('pt-BR', { month: 'short' })
     .toUpperCase()
     .replace('.', '')
+  const year = d.getFullYear()
   const time = d.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
   })
-  return `${date}, ${time}`
+  return `${day} ${month} ${year}, ${time}`
 }
 
 function StatusTimeline({ data }: { data: DetailData }) {
@@ -255,7 +253,7 @@ function StatusTimeline({ data }: { data: DetailData }) {
   const items = [
     {
       label: 'Aberto',
-      date: dataAbertura,
+      date: dataAbertura || dataUltimaAtualizacao,
       active: isAberto,
       description: aberturaAndamento?.descricao,
     },
@@ -308,7 +306,7 @@ const dottedLineStyle: React.CSSProperties = {
 }
 
 function PublicAndamento({ data }: { data: DetailData }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const isFinal =
     data.macroStatus === 'Concluído' || data.macroStatus === 'Cancelado'
   const hasDescription = !!data.ultimoAndamento?.descricao
@@ -433,7 +431,7 @@ function RequestDetail({ data }: { data: DetailData }) {
       <SecondaryHeader route="/minhas-solicitacoes" />
 
       <div className="pt-24 pb-32 px-4 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-foreground leading-tight mb-4">
+        <h1 className="text-3xl font-medium text-card-foreground leading-9 tracking-tight mb-4">
           {data.servico}
         </h1>
 
@@ -489,8 +487,11 @@ function RequestDetail({ data }: { data: DetailData }) {
         {/* Dates — logado e deslogado, 2 cards side by side */}
         <div className="flex gap-2">
           <div
-            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-            style={{ background: 'var(--card, #F1F1F4)' }}
+            className="flex flex-col gap-0.5 rounded-2xl p-5"
+            style={{
+              background: 'var(--card, #F1F1F4)',
+              flex: data.previsaoSLA ? '1' : '1 1 100%',
+            }}
           >
             <span className="text-sm font-normal leading-5 text-foreground-light">
               Data de abertura
@@ -499,17 +500,19 @@ function RequestDetail({ data }: { data: DetailData }) {
               {data.dataAbertura || '—'}
             </span>
           </div>
-          <div
-            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-            style={{ background: 'var(--card, #F1F1F4)' }}
-          >
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Prazo limite
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {data.previsaoSLA || '—'}
-            </span>
-          </div>
+          {data.previsaoSLA && (
+            <div
+              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+              style={{ background: 'var(--card, #F1F1F4)' }}
+            >
+              <span className="text-sm font-normal leading-5 text-foreground-light">
+                Prazo limite
+              </span>
+              <span className="text-sm font-normal leading-5 text-foreground">
+                {data.previsaoSLA}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Ouvidoria — só logado e concluído */}
