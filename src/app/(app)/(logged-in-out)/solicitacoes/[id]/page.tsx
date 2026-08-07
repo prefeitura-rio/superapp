@@ -1,10 +1,7 @@
 'use client'
 
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
-import {
-  formatDate,
-  normalizeStatus,
-} from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
+import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -56,7 +53,7 @@ function TimelineItem({
   isPast,
   description,
 }: TimelineItemProps) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   const captionStyle: React.CSSProperties = {
     color: 'var(--foreground-light, #71717B)',
@@ -200,19 +197,17 @@ interface DetailData {
 function formatDateTime(iso: string | undefined | null): string {
   if (!iso) return '—'
   const d = new Date(iso)
-  const date = d
-    .toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = d
+    .toLocaleDateString('pt-BR', { month: 'short' })
     .toUpperCase()
     .replace('.', '')
+  const year = d.getFullYear()
   const time = d.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
   })
-  return `${date}, ${time}`
+  return `${day} ${month} ${year}, ${time}`
 }
 
 function StatusTimeline({ data }: { data: DetailData }) {
@@ -231,7 +226,8 @@ function StatusTimeline({ data }: { data: DetailData }) {
   const isCancelado = macroStatus === 'Cancelado'
 
   const showEmAndamento = isEmAndamento || isConcluido || isCancelado
-  const showTerceiro = true
+  const showTerceiro =
+    isConcluido || isCancelado || !!(previsaoSLA && (isAberto || isEmAndamento))
 
   const aberturaAndamento = andamentos[0]
   const progressoAndamento = andamentos.find(a => a !== aberturaAndamento)
@@ -242,7 +238,7 @@ function StatusTimeline({ data }: { data: DetailData }) {
 
   if (isAberto || isEmAndamento) {
     terceiroLabel = 'Prazo Estimado'
-    terceiroDate = previsaoSLA || '—'
+    terceiroDate = previsaoSLA
   } else if (isConcluido) {
     terceiroLabel = CLOSING_STATUS_LABEL[motivoFechamento] ?? 'Concluído'
     terceiroDate = dataUltimaAtualizacao
@@ -255,7 +251,7 @@ function StatusTimeline({ data }: { data: DetailData }) {
   const items = [
     {
       label: 'Aberto',
-      date: dataAbertura,
+      date: dataAbertura || dataUltimaAtualizacao,
       active: isAberto,
       description: aberturaAndamento?.descricao,
     },
@@ -308,7 +304,7 @@ const dottedLineStyle: React.CSSProperties = {
 }
 
 function PublicAndamento({ data }: { data: DetailData }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const isFinal =
     data.macroStatus === 'Concluído' || data.macroStatus === 'Cancelado'
   const hasDescription = !!data.ultimoAndamento?.descricao
@@ -354,7 +350,9 @@ function PublicAndamento({ data }: { data: DetailData }) {
               {data.ultimoAndamento?.evento ?? data.macroStatus}
             </span>
             <span style={captionStyle}>
-              {formatDateTime(data.ultimoAndamento?.dataInsercao ?? null)}
+              {data.ultimoAndamento?.dataInsercao
+                ? formatDateTime(data.ultimoAndamento.dataInsercao)
+                : data.dataAbertura}
             </span>
           </div>
           {hasDescription && (
@@ -430,10 +428,16 @@ function RequestDetail({ data }: { data: DetailData }) {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-foreground leading-tight mb-4">
+      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-2">
+        <h1
+          className="text-3xl font-medium text-card-foreground leading-9 mb-4"
+          style={{ letterSpacing: '-0.4px' }}
+        >
           {data.servico}
         </h1>
 
@@ -487,30 +491,39 @@ function RequestDetail({ data }: { data: DetailData }) {
         </SectionCard>
 
         {/* Dates — logado e deslogado, 2 cards side by side */}
-        <div className="flex gap-2">
-          <div
-            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-            style={{ background: 'var(--card, #F1F1F4)' }}
-          >
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Data de abertura
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {data.dataAbertura || '—'}
-            </span>
+        {(data.dataAbertura || data.previsaoSLA) && (
+          <div className="flex gap-2">
+            {data.dataAbertura && (
+              <div
+                className="flex flex-col gap-0.5 rounded-2xl p-5"
+                style={{
+                  background: 'var(--card, #F1F1F4)',
+                  flex: data.previsaoSLA ? '1' : '1 1 100%',
+                }}
+              >
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Data de abertura
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {data.dataAbertura}
+                </span>
+              </div>
+            )}
+            {data.previsaoSLA && (
+              <div
+                className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+                style={{ background: 'var(--card, #F1F1F4)' }}
+              >
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Prazo limite
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {data.previsaoSLA}
+                </span>
+              </div>
+            )}
           </div>
-          <div
-            className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-            style={{ background: 'var(--card, #F1F1F4)' }}
-          >
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Prazo limite
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {data.previsaoSLA || '—'}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Ouvidoria — só logado e concluído */}
         {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
@@ -523,22 +536,28 @@ function RequestDetail({ data }: { data: DetailData }) {
         )}
 
         {/* Endereço compacto — só deslogado, acima de Informações Gerais */}
-        {!data.isLoggedIn && data.endereco && (
-          <div className="bg-card rounded-2xl px-4 py-3 flex flex-col gap-0.5">
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Endereço
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {[
-                data.endereco.logradouro,
-                data.endereco.numero,
-                data.endereco.bairro,
-              ]
-                .filter(Boolean)
-                .join(', ') || '—'}
-            </span>
-          </div>
-        )}
+        {!data.isLoggedIn &&
+          data.endereco &&
+          (() => {
+            const enderecoStr = [
+              data.endereco.logradouro,
+              data.endereco.numero,
+              data.endereco.bairro,
+            ]
+              .filter(v => v && v !== '—')
+              .join(', ')
+            if (!enderecoStr) return null
+            return (
+              <div className="bg-card rounded-2xl px-4 py-3 flex flex-col gap-0.5">
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Endereço
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {enderecoStr}
+                </span>
+              </div>
+            )
+          })()}
 
         {/* General info */}
         <SectionCard>
@@ -546,48 +565,60 @@ function RequestDetail({ data }: { data: DetailData }) {
             Informações Gerais
           </h2>
           <InfoBlock label="Protocolo" value={data.protocolo} />
-          {data.categoria && (
+          {data.categoria && data.categoria !== '—' && (
             <InfoBlock label="Categoria" value={data.categoria} />
           )}
-          {data.subcategoria && (
+          {data.subcategoria && data.subcategoria !== '—' && (
             <InfoBlock label="Subcategoria" value={data.subcategoria} />
           )}
-          <InfoBlock label="Órgão" value={data.orgao || '—'} />
-          {data.isLoggedIn && data.origem && (
+          {data.orgao && data.orgao !== '—' && (
+            <InfoBlock label="Órgão" value={data.orgao} />
+          )}
+          {data.isLoggedIn && data.origem && data.origem !== '—' && (
             <InfoBlock label="Origem do chamado" value={data.origem} />
           )}
         </SectionCard>
 
         {/* Localização completa — só logado */}
-        {data.isLoggedIn && data.endereco && (
-          <SectionCard>
-            <h2 className="text-base font-medium leading-5 text-foreground">
-              Localização
-            </h2>
-            <InfoBlock
-              label="Endereço"
-              value={
-                [
-                  data.endereco.logradouro,
-                  data.endereco.numero,
-                  data.endereco.complemento,
-                  data.endereco.bairro,
-                  data.endereco.cep,
-                ]
-                  .filter(Boolean)
-                  .join(', ') || '—'
-              }
-            />
-            <InfoBlock
-              label="Ponto de referência"
-              value={data.endereco.pontoReferencia || '—'}
-            />
-            <InfoBlock
-              label="Tipo de endereço"
-              value={data.endereco.tipoEndereco || '—'}
-            />
-          </SectionCard>
-        )}
+        {data.isLoggedIn &&
+          data.endereco &&
+          (() => {
+            const enderecoStr = [
+              data.endereco.logradouro,
+              data.endereco.numero,
+              data.endereco.complemento,
+              data.endereco.bairro,
+              data.endereco.cep,
+            ]
+              .filter(v => v && v !== '—')
+              .join(', ')
+            const pontoRef =
+              data.endereco.pontoReferencia &&
+              data.endereco.pontoReferencia !== '—'
+                ? data.endereco.pontoReferencia
+                : ''
+            const tipoEnd =
+              data.endereco.tipoEndereco && data.endereco.tipoEndereco !== '—'
+                ? data.endereco.tipoEndereco
+                : ''
+            if (!enderecoStr && !pontoRef && !tipoEnd) return null
+            return (
+              <SectionCard>
+                <h2 className="text-base font-medium leading-5 text-foreground">
+                  Localização
+                </h2>
+                {enderecoStr && (
+                  <InfoBlock label="Endereço" value={enderecoStr} />
+                )}
+                {pontoRef && (
+                  <InfoBlock label="Ponto de referência" value={pontoRef} />
+                )}
+                {tipoEnd && (
+                  <InfoBlock label="Tipo de endereço" value={tipoEnd} />
+                )}
+              </SectionCard>
+            )
+          })()}
       </div>
 
       <FloatNavigationWrapper />
@@ -598,9 +629,12 @@ function RequestDetail({ data }: { data: DetailData }) {
 function LoadingState() {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
 
-      <div className="pt-24 pb-32 px-4 flex flex-col gap-4">
+      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -622,8 +656,11 @@ function LoadingState() {
 function ErrorState({ protocolo }: { protocolo: string }) {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/minhas-solicitacoes" />
-      <div className="pt-24 pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
+      <SecondaryHeader
+        route="/minhas-solicitacoes"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
+      <div className="pt-[100px] pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>
@@ -677,9 +714,15 @@ export default function RequestDetailPage() {
               protocolo: json.protocolo,
               servico: os?.servico ?? os?.subtema ?? '—',
               macroStatus: normalizeStatus(os?.status ?? json.status),
-              dataAbertura: formatDateTime(json.dataAbertura),
-              dataUltimaAtualizacao: formatDateTime(json.dataUltimaAtualizacao),
-              previsaoSLA: formatDate(os?.previsaoSLA),
+              dataAbertura: json.dataAbertura
+                ? formatDateTime(json.dataAbertura)
+                : '',
+              dataUltimaAtualizacao: json.dataUltimaAtualizacao
+                ? formatDateTime(json.dataUltimaAtualizacao)
+                : '',
+              previsaoSLA: os?.previsaoSLA
+                ? formatDateTime(os.previsaoSLA)
+                : '',
               motivoFechamento: os?.motivoFechamento ?? '',
               descricao: os?.descricao ?? '',
               endereco: os?.endereco ?? null,
@@ -724,7 +767,9 @@ export default function RequestDetailPage() {
             protocolo: json.protocolo,
             servico: os?.servico ?? '—',
             macroStatus: normalizeStatus(os?.status ?? json.status),
-            dataAbertura: formatDateTime(json.dataAbertura),
+            dataAbertura: json.dataAbertura
+              ? formatDateTime(json.dataAbertura)
+              : '',
             dataUltimaAtualizacao: '',
             previsaoSLA: '',
             motivoFechamento: '',

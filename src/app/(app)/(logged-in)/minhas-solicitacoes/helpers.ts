@@ -19,12 +19,11 @@ export function normalizeStatus(raw: string | undefined | null): RequestStatus {
 export function formatDate(iso: string | undefined | null): string {
   if (!iso) return '—'
   const d = new Date(iso)
-  return d
-    .toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = d
+    .toLocaleDateString('pt-BR', { month: 'short' })
     .toUpperCase()
     .replace('.', '')
+  const year = String(d.getFullYear()).slice(-2)
+  return `${day} ${month} ${year}`
 }

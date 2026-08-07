@@ -30,7 +30,25 @@ export default async function MyRequestsPage() {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader title="Minhas Solicitações" route="/" />
+      <SecondaryHeader
+        route="/"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+        logo={
+          <span
+            style={{
+              color: 'var(--theme-color-foreground, #09090B)',
+              fontFamily: 'var(--font-family-sans, "DM Sans")',
+              fontSize: 'var(--font-size-lg, 18px)',
+              fontWeight: 'var(--font-weight-medium, 500)',
+              lineHeight: 'var(--font-leading-5, 20px)',
+              letterSpacing: 'var(--font-tracking-normal, 0)',
+              textAlign: 'center',
+            }}
+          >
+            Minhas Solicitações
+          </span>
+        }
+      />
       <RequestsList items={items} />
       <FloatNavigationWrapper />
     </div>
