@@ -20,15 +20,18 @@ const FILTER_TABS = ['Todos', 'Serviços', 'Ouvidoria', 'Acesso à informação'
 function RequestCard({ item }: { item: RequestItem }) {
   return (
     <Link href={`/solicitacoes/${item.protocolo}?os=${item.codigoOs}`}>
-      <div className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all h-full">
-        <div className="flex items-start justify-between gap-3 mb-2">
+      <div
+        className="bg-card rounded-2xl cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all flex flex-col items-start gap-2 p-4"
+        style={{ height: '132px' }}
+      >
+        <div className="flex items-start justify-between gap-3 w-full">
           <p className="text-xs text-foreground-light">{item.dataAbertura}</p>
           <StatusBadge status={item.status} />
         </div>
-        <h3 className="text-base font-medium text-foreground leading-5 tracking-normal mb-1">
+        <h3 className="text-base font-medium text-foreground leading-5 tracking-normal line-clamp-2 self-stretch">
           {item.servico}
         </h3>
-        <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal">
+        <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal truncate self-stretch">
           Protocolo {item.protocolo} • {item.categoria}
         </p>
       </div>
