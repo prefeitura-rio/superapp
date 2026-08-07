@@ -126,20 +126,23 @@ export default function ConsultaProtocoloPage() {
                       : `/solicitacoes/${item.protocolo}`
                   )
                 }
-                className="w-full text-left bg-card rounded-2xl p-4 cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all"
+                className="w-full text-left bg-card rounded-2xl p-4 cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all flex flex-col justify-between"
+                style={{ height: '132px' }}
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-start justify-between gap-3 w-full">
                   <p className="text-xs text-foreground-light">
                     {item.dataAbertura ? formatDate(item.dataAbertura) : ''}
                   </p>
                   <StatusBadge status={normalizeStatus(item.status)} />
                 </div>
-                <h3 className="text-base font-medium text-foreground leading-5 tracking-normal mb-1">
-                  {item.servico}
-                </h3>
-                <p className="text-xs text-foreground-light">
-                  Protocolo {item.protocolo} • {item.categoria}
-                </p>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-base font-medium text-foreground leading-5 tracking-normal line-clamp-2">
+                    {item.servico}
+                  </h3>
+                  <p className="text-xs text-foreground-light truncate">
+                    Protocolo {item.protocolo} • {item.categoria}
+                  </p>
+                </div>
               </button>
             ))}
           </div>
@@ -152,7 +155,10 @@ export default function ConsultaProtocoloPage() {
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader route="/" style={{ paddingTop: '24px', paddingBottom: '24px' }} />
+      <SecondaryHeader
+        route="/"
+        style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      />
 
       <div className="pt-25 pb-32 px-4 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
