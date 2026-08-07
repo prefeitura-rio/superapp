@@ -7,6 +7,8 @@ import {
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
+import { IconButton } from '@/components/ui/custom/icon-button'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -101,11 +103,12 @@ export default function ConsultaProtocoloPage() {
   if (pageState === 'results') {
     return (
       <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-        <SecondaryHeader
-          route="/consulta-protocolo"
-          forceRoute
-          style={{ paddingTop: '24px', paddingBottom: '24px' }}
-        />
+        <header
+          className="px-4 fixed w-full max-w-4xl mx-auto z-50 bg-background"
+          style={{ paddingTop: '24px', paddingBottom: '24px', top: 0 }}
+        >
+          <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+        </header>
 
         <div className="pt-23 pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
