@@ -42,6 +42,7 @@ interface TimelineItemProps {
   active: boolean
   isLast: boolean
   isPast: boolean
+  showTrailingLine?: boolean
   description?: string
 }
 
@@ -51,6 +52,7 @@ function TimelineItem({
   active,
   isLast,
   isPast,
+  showTrailingLine = false,
   description,
 }: TimelineItemProps) {
   const [open, setOpen] = useState(false)
@@ -88,7 +90,7 @@ function TimelineItem({
               : 'var(--terciary, #D4D4D8)',
           }}
         />
-        {!isLast && (
+        {(!isLast || showTrailingLine) && (
           <div
             className="flex-1"
             style={{
@@ -279,19 +281,25 @@ function StatusTimeline({ data }: { data: DetailData }) {
 
   const activeIndex = items.findLastIndex(item => item.active)
 
+  const isOpenStatus = isAberto || isEmAndamento
+
   return (
     <div className="flex flex-col">
-      {items.map((item, i) => (
-        <TimelineItem
-          key={item.label}
-          label={item.label}
-          date={item.date}
-          active={item.active}
-          isLast={i === items.length - 1}
-          isPast={i < activeIndex}
-          description={item.description}
-        />
-      ))}
+      {items.map((item, i) => {
+        const last = i === items.length - 1
+        return (
+          <TimelineItem
+            key={item.label}
+            label={item.label}
+            date={item.date}
+            active={item.active}
+            isLast={last}
+            isPast={i < activeIndex}
+            showTrailingLine={last && item.active && isOpenStatus}
+            description={item.description}
+          />
+        )
+      })}
     </div>
   )
 }
