@@ -565,41 +565,45 @@ function RequestDetail({ data }: { data: DetailData }) {
         </SectionCard>
 
         {/* Localização completa — só logado */}
-        {data.isLoggedIn && data.endereco && (
-          <SectionCard>
-            <h2 className="text-base font-medium leading-5 text-foreground">
-              Localização
-            </h2>
-            {(() => {
-              const endereco = [
-                data.endereco.logradouro,
-                data.endereco.numero,
-                data.endereco.complemento,
-                data.endereco.bairro,
-                data.endereco.cep,
-              ]
-                .filter(Boolean)
-                .join(', ')
-              return endereco ? (
-                <InfoBlock label="Endereço" value={endereco} />
-              ) : null
-            })()}
-            {data.endereco.pontoReferencia &&
-              data.endereco.pontoReferencia !== '—' && (
-                <InfoBlock
-                  label="Ponto de referência"
-                  value={data.endereco.pontoReferencia}
-                />
-              )}
-            {data.endereco.tipoEndereco &&
-              data.endereco.tipoEndereco !== '—' && (
-                <InfoBlock
-                  label="Tipo de endereço"
-                  value={data.endereco.tipoEndereco}
-                />
-              )}
-          </SectionCard>
-        )}
+        {data.isLoggedIn &&
+          data.endereco &&
+          (() => {
+            const enderecoStr = [
+              data.endereco.logradouro,
+              data.endereco.numero,
+              data.endereco.complemento,
+              data.endereco.bairro,
+              data.endereco.cep,
+            ]
+              .filter(v => v && v !== '—')
+              .join(', ')
+            const pontoRef =
+              data.endereco.pontoReferencia &&
+              data.endereco.pontoReferencia !== '—'
+                ? data.endereco.pontoReferencia
+                : ''
+            const tipoEnd =
+              data.endereco.tipoEndereco && data.endereco.tipoEndereco !== '—'
+                ? data.endereco.tipoEndereco
+                : ''
+            if (!enderecoStr && !pontoRef && !tipoEnd) return null
+            return (
+              <SectionCard>
+                <h2 className="text-base font-medium leading-5 text-foreground">
+                  Localização
+                </h2>
+                {enderecoStr && (
+                  <InfoBlock label="Endereço" value={enderecoStr} />
+                )}
+                {pontoRef && (
+                  <InfoBlock label="Ponto de referência" value={pontoRef} />
+                )}
+                {tipoEnd && (
+                  <InfoBlock label="Tipo de endereço" value={tipoEnd} />
+                )}
+              </SectionCard>
+            )
+          })()}
       </div>
 
       <FloatNavigationWrapper />
