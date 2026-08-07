@@ -4,24 +4,24 @@ export function PlusIcon(props: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="2 2 18 18"
+      width="22"
+      height="22"
+      viewBox="0 0 22 22"
       fill="none"
       className="text-foreground"
       {...props}
     >
       <path
-        d="M12 5V19"
+        d="M10.8 4.5V17.1"
         stroke="currentColor"
-        strokeWidth="1.4"
+        strokeWidth="1.512"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M5 12H19"
+        d="M4.5 10.8H17.1"
         stroke="currentColor"
-        strokeWidth="1.4"
+        strokeWidth="1.512"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

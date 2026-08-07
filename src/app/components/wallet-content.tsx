@@ -11,6 +11,7 @@ import { PlusIcon } from '@/assets/icons'
 import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
 import type { ModelsPet } from '@/http/models'
 import { getRiomobWalletVehicles } from '@/lib/riomob/vehicles'
+import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -50,7 +51,7 @@ export function WalletContent({
     <div className="pt-2">
       <WalletTabs activeTab={activeTab} />
 
-      <div className="mt-6">
+      <div className="mt-8">
         {isRiomobView ? (
           <div className="pb-10 w-full">
             <PendingInviteAccordion
@@ -74,13 +75,13 @@ export function WalletContent({
                   href="/carteira/riomob/adicionar-veiculo"
                   className="group flex flex-col items-center gap-1"
                 >
-                  <span className="flex size-11.5 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
-                    <PlusIcon className="size-5.5 text-foreground" />
+                  <span className="flex size-11.5 shrink-0 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
+                    <PlusIcon className="size-5.5 shrink-0 text-foreground" />
                   </span>
                   <span className="text-center text-sm font-medium leading-4 text-card-foreground">
                     Adicionar
                     <br />
-                    veículo
+                    Veículo
                   </span>
                 </Link>
               </div>
@@ -120,12 +121,19 @@ export function WalletContent({
 
                 <Link
                   href="/carteira/riomob/adicionar-veiculo"
-                  className="group mt-6 flex flex-col items-center gap-1"
+                  className={cn(
+                    'group flex flex-col items-center gap-1',
+                    pendingInviteCount > 1
+                      ? 'mt-12 sm:mt-16'
+                      : pendingInviteCount === 1
+                        ? 'mt-4'
+                        : 'mt-6'
+                  )}
                 >
-                  <span className="flex size-11.5 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
-                    <PlusIcon className="size-5.5 text-foreground" />
+                  <span className="flex size-11.5 shrink-0 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
+                    <PlusIcon className="size-5.5 shrink-0 text-foreground" />
                   </span>
-                  <span className="text-sm font-medium text-card-foreground text-center leading-4">
+                  <span className="text-center text-sm font-medium leading-4 text-card-foreground">
                     Adicionar
                     <br />
                     Veículo
