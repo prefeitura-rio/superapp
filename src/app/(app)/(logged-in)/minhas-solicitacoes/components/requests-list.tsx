@@ -28,12 +28,14 @@ function RequestCard({ item }: { item: RequestItem }) {
           <p className="text-xs text-foreground-light">{item.dataAbertura}</p>
           <StatusBadge status={item.status} />
         </div>
-        <h3 className="text-base font-medium text-foreground leading-5 tracking-normal line-clamp-2 self-stretch">
-          {item.servico}
-        </h3>
-        <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal truncate self-stretch">
-          Protocolo {item.protocolo} • {item.categoria}
-        </p>
+        <div className="flex flex-col gap-2">
+          <h3 className="text-base font-medium text-foreground leading-5 tracking-normal line-clamp-2">
+            {item.servico}
+          </h3>
+          <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal truncate">
+            Protocolo {item.protocolo} • {item.categoria}
+          </p>
+        </div>
       </div>
     </Link>
   )
