@@ -550,14 +550,16 @@ function RequestDetail({ data }: { data: DetailData }) {
             Informações Gerais
           </h2>
           <InfoBlock label="Protocolo" value={data.protocolo} />
-          {data.categoria && (
+          {data.categoria && data.categoria !== '—' && (
             <InfoBlock label="Categoria" value={data.categoria} />
           )}
-          {data.subcategoria && (
+          {data.subcategoria && data.subcategoria !== '—' && (
             <InfoBlock label="Subcategoria" value={data.subcategoria} />
           )}
-          <InfoBlock label="Órgão" value={data.orgao || '—'} />
-          {data.isLoggedIn && data.origem && (
+          {data.orgao && data.orgao !== '—' && (
+            <InfoBlock label="Órgão" value={data.orgao} />
+          )}
+          {data.isLoggedIn && data.origem && data.origem !== '—' && (
             <InfoBlock label="Origem do chamado" value={data.origem} />
           )}
         </SectionCard>
@@ -568,28 +570,34 @@ function RequestDetail({ data }: { data: DetailData }) {
             <h2 className="text-base font-medium leading-5 text-foreground">
               Localização
             </h2>
-            <InfoBlock
-              label="Endereço"
-              value={
-                [
-                  data.endereco.logradouro,
-                  data.endereco.numero,
-                  data.endereco.complemento,
-                  data.endereco.bairro,
-                  data.endereco.cep,
-                ]
-                  .filter(Boolean)
-                  .join(', ') || '—'
-              }
-            />
-            <InfoBlock
-              label="Ponto de referência"
-              value={data.endereco.pontoReferencia || '—'}
-            />
-            <InfoBlock
-              label="Tipo de endereço"
-              value={data.endereco.tipoEndereco || '—'}
-            />
+            {(() => {
+              const endereco = [
+                data.endereco.logradouro,
+                data.endereco.numero,
+                data.endereco.complemento,
+                data.endereco.bairro,
+                data.endereco.cep,
+              ]
+                .filter(Boolean)
+                .join(', ')
+              return endereco ? (
+                <InfoBlock label="Endereço" value={endereco} />
+              ) : null
+            })()}
+            {data.endereco.pontoReferencia &&
+              data.endereco.pontoReferencia !== '—' && (
+                <InfoBlock
+                  label="Ponto de referência"
+                  value={data.endereco.pontoReferencia}
+                />
+              )}
+            {data.endereco.tipoEndereco &&
+              data.endereco.tipoEndereco !== '—' && (
+                <InfoBlock
+                  label="Tipo de endereço"
+                  value={data.endereco.tipoEndereco}
+                />
+              )}
           </SectionCard>
         )}
       </div>
