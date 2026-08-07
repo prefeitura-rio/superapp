@@ -70,7 +70,7 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
   })
 
   return (
-    <div className="pt-[100px] pb-32 flex flex-col gap-4 px-4">
+    <div className="pt-23 pb-32 flex flex-col gap-4 px-4">
       {/* Filter chips + Search — gap-2 entre eles */}
       <div className="flex flex-col gap-2">
         <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">

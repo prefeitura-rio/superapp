@@ -10,7 +10,5 @@ export async function GET(
 
   const data =
     typeof result.data === 'string' ? JSON.parse(result.data) : result.data
-  // TODO: remover após verificar campos de data
-  console.log('[chamados-publico] raw response:', JSON.stringify(data, null, 2))
   return NextResponse.json(data, { status: result.status })
 }

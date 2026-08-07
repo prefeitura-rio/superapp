@@ -80,7 +80,7 @@ export default function ConsultaProtocoloPage() {
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
         categoria: os.subtema ?? os.categoria ?? 'Serviço',
         status: os.status ?? '',
-        dataAbertura: os.dataAbertura ?? '',
+        dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,
       }))
 
@@ -201,8 +201,12 @@ export default function ConsultaProtocoloPage() {
 
           <button
             type="submit"
-            disabled={!protocolo.trim() || pageState === 'loading'}
-            className="w-full bg-primary text-primary-foreground text-sm font-medium leading-5 tracking-normal rounded-full py-4 px-6 flex items-center justify-center gap-3 transition-colors disabled:bg-card disabled:text-zinc-400 disabled:font-normal disabled:cursor-not-allowed"
+            disabled={!protocolo.trim()}
+            className={`w-full text-sm font-medium leading-5 tracking-normal rounded-full py-4 px-6 flex items-center justify-center gap-3 transition-colors ${
+              pageState === 'loading'
+                ? 'bg-primary text-primary-foreground opacity-70 cursor-not-allowed'
+                : 'bg-primary text-primary-foreground disabled:bg-card disabled:text-zinc-400 disabled:font-normal disabled:cursor-not-allowed'
+            }`}
           >
             {pageState === 'loading' && (
               <svg

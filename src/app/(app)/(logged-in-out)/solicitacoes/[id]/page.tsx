@@ -350,7 +350,9 @@ function PublicAndamento({ data }: { data: DetailData }) {
               {data.ultimoAndamento?.evento ?? data.macroStatus}
             </span>
             <span style={captionStyle}>
-              {formatDateTime(data.ultimoAndamento?.dataInsercao ?? null)}
+              {data.ultimoAndamento?.dataInsercao
+                ? formatDateTime(data.ultimoAndamento.dataInsercao)
+                : data.dataAbertura}
             </span>
           </div>
           {hasDescription && (
@@ -432,7 +434,10 @@ function RequestDetail({ data }: { data: DetailData }) {
       />
 
       <div className="pt-[100px] pb-32 px-4 flex flex-col gap-2">
-        <h1 className="text-3xl font-medium text-card-foreground leading-9 tracking-tight mb-4">
+        <h1
+          className="text-3xl font-medium text-card-foreground leading-9 mb-4"
+          style={{ letterSpacing: '-0.4px' }}
+        >
           {data.servico}
         </h1>
 
@@ -486,35 +491,39 @@ function RequestDetail({ data }: { data: DetailData }) {
         </SectionCard>
 
         {/* Dates — logado e deslogado, 2 cards side by side */}
-        <div className="flex gap-2">
-          <div
-            className="flex flex-col gap-0.5 rounded-2xl p-5"
-            style={{
-              background: 'var(--card, #F1F1F4)',
-              flex: data.previsaoSLA ? '1' : '1 1 100%',
-            }}
-          >
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Data de abertura
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {data.dataAbertura || '—'}
-            </span>
+        {(data.dataAbertura || data.previsaoSLA) && (
+          <div className="flex gap-2">
+            {data.dataAbertura && (
+              <div
+                className="flex flex-col gap-0.5 rounded-2xl p-5"
+                style={{
+                  background: 'var(--card, #F1F1F4)',
+                  flex: data.previsaoSLA ? '1' : '1 1 100%',
+                }}
+              >
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Data de abertura
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {data.dataAbertura}
+                </span>
+              </div>
+            )}
+            {data.previsaoSLA && (
+              <div
+                className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
+                style={{ background: 'var(--card, #F1F1F4)' }}
+              >
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Prazo limite
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {data.previsaoSLA}
+                </span>
+              </div>
+            )}
           </div>
-          {data.previsaoSLA && (
-            <div
-              className="flex flex-col gap-0.5 flex-1 rounded-2xl p-5"
-              style={{ background: 'var(--card, #F1F1F4)' }}
-            >
-              <span className="text-sm font-normal leading-5 text-foreground-light">
-                Prazo limite
-              </span>
-              <span className="text-sm font-normal leading-5 text-foreground">
-                {data.previsaoSLA}
-              </span>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Ouvidoria — só logado e concluído */}
         {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
@@ -527,22 +536,28 @@ function RequestDetail({ data }: { data: DetailData }) {
         )}
 
         {/* Endereço compacto — só deslogado, acima de Informações Gerais */}
-        {!data.isLoggedIn && data.endereco && (
-          <div className="bg-card rounded-2xl px-4 py-3 flex flex-col gap-0.5">
-            <span className="text-sm font-normal leading-5 text-foreground-light">
-              Endereço
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {[
-                data.endereco.logradouro,
-                data.endereco.numero,
-                data.endereco.bairro,
-              ]
-                .filter(Boolean)
-                .join(', ') || '—'}
-            </span>
-          </div>
-        )}
+        {!data.isLoggedIn &&
+          data.endereco &&
+          (() => {
+            const enderecoStr = [
+              data.endereco.logradouro,
+              data.endereco.numero,
+              data.endereco.bairro,
+            ]
+              .filter(v => v && v !== '—')
+              .join(', ')
+            if (!enderecoStr) return null
+            return (
+              <div className="bg-card rounded-2xl px-4 py-3 flex flex-col gap-0.5">
+                <span className="text-sm font-normal leading-5 text-foreground-light">
+                  Endereço
+                </span>
+                <span className="text-sm font-normal leading-5 text-foreground">
+                  {enderecoStr}
+                </span>
+              </div>
+            )
+          })()}
 
         {/* General info */}
         <SectionCard>
@@ -699,8 +714,12 @@ export default function RequestDetailPage() {
               protocolo: json.protocolo,
               servico: os?.servico ?? os?.subtema ?? '—',
               macroStatus: normalizeStatus(os?.status ?? json.status),
-              dataAbertura: formatDateTime(json.dataAbertura),
-              dataUltimaAtualizacao: formatDateTime(json.dataUltimaAtualizacao),
+              dataAbertura: json.dataAbertura
+                ? formatDateTime(json.dataAbertura)
+                : '',
+              dataUltimaAtualizacao: json.dataUltimaAtualizacao
+                ? formatDateTime(json.dataUltimaAtualizacao)
+                : '',
               previsaoSLA: os?.previsaoSLA
                 ? formatDateTime(os.previsaoSLA)
                 : '',
@@ -748,7 +767,9 @@ export default function RequestDetailPage() {
             protocolo: json.protocolo,
             servico: os?.servico ?? '—',
             macroStatus: normalizeStatus(os?.status ?? json.status),
-            dataAbertura: formatDateTime(json.dataAbertura),
+            dataAbertura: json.dataAbertura
+              ? formatDateTime(json.dataAbertura)
+              : '',
             dataUltimaAtualizacao: '',
             previsaoSLA: '',
             motivoFechamento: '',
