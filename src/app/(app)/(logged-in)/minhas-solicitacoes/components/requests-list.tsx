@@ -21,7 +21,7 @@ function RequestCard({ item }: { item: RequestItem }) {
   return (
     <Link href={`/solicitacoes/${item.protocolo}?os=${item.codigoOs}`}>
       <div
-        className="bg-card rounded-2xl cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all flex flex-col items-start gap-2 p-4"
+        className="bg-card rounded-2xl cursor-pointer hover:bg-card/70 active:opacity-80 active:scale-[0.98] md:active:scale-100 transition-all flex flex-col justify-between p-4"
         style={{ height: '132px' }}
       >
         <div className="flex items-start justify-between gap-3 w-full">
