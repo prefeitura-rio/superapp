@@ -41,6 +41,8 @@ interface VehicleInfoFieldsProps<T extends VehicleInfoFormValues> {
   emailDisplay: string
   returnUrl: string
   showTitle?: boolean
+  phoneNeedsUpdate?: boolean
+  emailNeedsUpdate?: boolean
 }
 
 function fieldError(
@@ -58,6 +60,8 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   emailDisplay,
   returnUrl,
   showTitle = true,
+  phoneNeedsUpdate = false,
+  emailNeedsUpdate = false,
 }: VehicleInfoFieldsProps<T>) {
   const { watch, setValue, formState } = form
   const values = watch()
@@ -184,16 +188,38 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
 
         <ActionDiv
           label="Celular"
-          content={phoneDisplay}
-          disabled
+          content={
+            <span
+              className={
+                phoneDisplay.startsWith('Informe')
+                  ? 'text-muted-foreground'
+                  : undefined
+              }
+            >
+              {phoneDisplay}
+            </span>
+          }
+          optionalLabel={phoneNeedsUpdate ? 'Atualizar' : undefined}
+          optionalLabelVariant="destructive"
           rightIcon={<SquarePenIcon />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-telefone?returnUrl=${encodedReturnUrl}`}
         />
 
         <ActionDiv
           label="Email"
-          content={emailDisplay}
-          disabled
+          content={
+            <span
+              className={
+                emailDisplay.startsWith('Informe')
+                  ? 'text-muted-foreground'
+                  : undefined
+              }
+            >
+              {emailDisplay}
+            </span>
+          }
+          optionalLabel={emailNeedsUpdate ? 'Atualizar' : undefined}
+          optionalLabelVariant="destructive"
           rightIcon={<SquarePenIcon />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-email?returnUrl=${encodedReturnUrl}`}
         />

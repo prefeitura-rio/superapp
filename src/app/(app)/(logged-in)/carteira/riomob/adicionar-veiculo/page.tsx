@@ -1,7 +1,16 @@
 import { buildAuthUrl } from '@/constants/url'
-import { getEmailValue } from '@/helpers/email-data-helpers'
-import { normalizePhoneData } from '@/helpers/phone-data-helpers'
+import {
+  getEmailValue,
+  hasValidEmail,
+  normalizeEmailData,
+} from '@/helpers/email-data-helpers'
+import { hasValidPhone, normalizePhoneData } from '@/helpers/phone-data-helpers'
+import type {
+  ModelsEmailPrincipal,
+  ModelsTelefonePrincipal,
+} from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
+import { isUpdatedWithin } from '@/lib/date'
 import { formatPhone } from '@/lib/format-phone'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
@@ -24,7 +33,24 @@ export default async function AdicionarVeiculoPage() {
 
   const userInfo = userInfoResponse.data
   const phone = normalizePhoneData(userInfo.telefone)
-  const phonePrincipal = phone.principal
+  const email = normalizeEmailData(userInfo.email)
+  const phonePrincipal = phone.principal as ModelsTelefonePrincipal | null
+  const emailPrincipal = email.principal as ModelsEmailPrincipal | null
+
+  const phoneOk =
+    hasValidPhone(phone) &&
+    isUpdatedWithin({
+      updatedAt: phonePrincipal?.updated_at || null,
+      months: 6,
+    })
+
+  const emailOk =
+    hasValidEmail(email) &&
+    isUpdatedWithin({
+      updatedAt: emailPrincipal?.updated_at || null,
+      months: 6,
+    })
+
   const emailValue = getEmailValue(userInfo.email)
 
   const phoneDisplay =
@@ -34,7 +60,9 @@ export default async function AdicionarVeiculoPage() {
           phonePrincipal.ddd,
           phonePrincipal.valor
         )
-      : 'Informação indisponível'
+      : 'Informe seu celular'
+
+  const emailDisplay = emailValue || 'Informe seu e-mail'
 
   const ownerPhone =
     phonePrincipal?.ddd && phonePrincipal?.valor
@@ -47,9 +75,11 @@ export default async function AdicionarVeiculoPage() {
         cpf: userInfo.cpf || userAuthInfo.cpf,
         name: userInfo.nome || userAuthInfo.name || '',
         phoneDisplay,
-        emailDisplay: emailValue || 'Informação indisponível',
+        emailDisplay,
         ownerPhone,
         ownerEmail: emailValue,
+        phoneNeedsUpdate: !phoneOk,
+        emailNeedsUpdate: !emailOk,
       }}
     />
   )

@@ -28,6 +28,8 @@ export interface VehicleRegistrationOwnerInfo {
   emailDisplay: string
   ownerPhone?: string
   ownerEmail?: string
+  phoneNeedsUpdate?: boolean
+  emailNeedsUpdate?: boolean
 }
 
 interface VehicleRegistrationFlowProps {
@@ -111,8 +113,9 @@ export function VehicleRegistrationFlow({
   }, [currentIndex, router])
 
   const isSlide1Valid = useCallback(() => {
-    return isVehicleInfoSlideValid(watchedValues)
-  }, [watchedValues])
+    const contactOk = !ownerInfo.phoneNeedsUpdate && !ownerInfo.emailNeedsUpdate
+    return contactOk && isVehicleInfoSlideValid(watchedValues)
+  }, [watchedValues, ownerInfo.phoneNeedsUpdate, ownerInfo.emailNeedsUpdate])
 
   const isSlide2Valid = useCallback(() => {
     return isSerialPhotosSlideValid(watchedValues)
@@ -173,6 +176,8 @@ export function VehicleRegistrationFlow({
               ownerCpf={ownerInfo.cpf}
               phoneDisplay={ownerInfo.phoneDisplay}
               emailDisplay={ownerInfo.emailDisplay}
+              phoneNeedsUpdate={ownerInfo.phoneNeedsUpdate}
+              emailNeedsUpdate={ownerInfo.emailNeedsUpdate}
             />
           </SwiperSlide>
 

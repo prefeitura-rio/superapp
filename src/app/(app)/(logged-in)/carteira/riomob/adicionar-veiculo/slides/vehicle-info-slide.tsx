@@ -12,6 +12,8 @@ interface VehicleInfoSlideProps {
   ownerCpf: string
   phoneDisplay: string
   emailDisplay: string
+  phoneNeedsUpdate?: boolean
+  emailNeedsUpdate?: boolean
 }
 
 export function VehicleInfoSlide({
@@ -20,6 +22,8 @@ export function VehicleInfoSlide({
   ownerCpf,
   phoneDisplay,
   emailDisplay,
+  phoneNeedsUpdate = false,
+  emailNeedsUpdate = false,
 }: VehicleInfoSlideProps) {
   return (
     <VehicleInfoFields
@@ -29,6 +33,8 @@ export function VehicleInfoSlide({
       phoneDisplay={phoneDisplay}
       emailDisplay={emailDisplay}
       returnUrl={RETURN_URL}
+      phoneNeedsUpdate={phoneNeedsUpdate}
+      emailNeedsUpdate={emailNeedsUpdate}
     />
   )
 }

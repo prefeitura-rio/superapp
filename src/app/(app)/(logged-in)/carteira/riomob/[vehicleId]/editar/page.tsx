@@ -1,7 +1,16 @@
 import { buildAuthUrl } from '@/constants/url'
-import { getEmailValue } from '@/helpers/email-data-helpers'
-import { normalizePhoneData } from '@/helpers/phone-data-helpers'
+import {
+  getEmailValue,
+  hasValidEmail,
+  normalizeEmailData,
+} from '@/helpers/email-data-helpers'
+import { hasValidPhone, normalizePhoneData } from '@/helpers/phone-data-helpers'
+import type {
+  ModelsEmailPrincipal,
+  ModelsTelefonePrincipal,
+} from '@/http/models'
 import { getDalCitizenCpf } from '@/lib/dal'
+import { isUpdatedWithin } from '@/lib/date'
 import { formatPhone } from '@/lib/format-phone'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
@@ -34,8 +43,10 @@ export default async function EditarVeiculoPage({
 
   let ownerName = vehicle.owner.name
   let ownerCpf = vehicle.owner.cpf
-  let phoneDisplay = vehicle.owner.phone
-  let emailDisplay = vehicle.owner.email
+  let phoneDisplay = 'Informe seu celular'
+  let emailDisplay = 'Informe seu e-mail'
+  let phoneNeedsUpdate = true
+  let emailNeedsUpdate = true
 
   try {
     const userInfoResponse = await getDalCitizenCpf(userAuthInfo.cpf)
@@ -43,7 +54,24 @@ export default async function EditarVeiculoPage({
     if (userInfoResponse.status === 200 && userInfoResponse.data) {
       const userInfo = userInfoResponse.data
       const phone = normalizePhoneData(userInfo.telefone)
-      const phonePrincipal = phone.principal
+      const email = normalizeEmailData(userInfo.email)
+      const phonePrincipal = phone.principal as ModelsTelefonePrincipal | null
+      const emailPrincipal = email.principal as ModelsEmailPrincipal | null
+
+      const phoneOk =
+        hasValidPhone(phone) &&
+        isUpdatedWithin({
+          updatedAt: phonePrincipal?.updated_at || null,
+          months: 6,
+        })
+
+      const emailOk =
+        hasValidEmail(email) &&
+        isUpdatedWithin({
+          updatedAt: emailPrincipal?.updated_at || null,
+          months: 6,
+        })
+
       const emailValue = getEmailValue(userInfo.email)
 
       ownerName = userInfo.nome || userAuthInfo.name || ownerName
@@ -55,11 +83,13 @@ export default async function EditarVeiculoPage({
               phonePrincipal.ddd,
               phonePrincipal.valor
             )
-          : phoneDisplay
-      emailDisplay = emailValue || emailDisplay
+          : 'Informe seu celular'
+      emailDisplay = emailValue || 'Informe seu e-mail'
+      phoneNeedsUpdate = !phoneOk
+      emailNeedsUpdate = !emailOk
     }
   } catch {
-    // Mantém dados do mock quando o DAL falha em ambiente local.
+    // Mantém placeholders quando o DAL falha em ambiente local.
   }
 
   return (
@@ -70,6 +100,8 @@ export default async function EditarVeiculoPage({
         cpf: ownerCpf,
         phoneDisplay,
         emailDisplay,
+        phoneNeedsUpdate,
+        emailNeedsUpdate,
       }}
     />
   )

@@ -22,6 +22,8 @@ interface OwnerInfo {
   cpf: string
   phoneDisplay: string
   emailDisplay: string
+  phoneNeedsUpdate?: boolean
+  emailNeedsUpdate?: boolean
 }
 
 interface VehicleEditFormProps {
@@ -40,6 +42,7 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const detailPath = `/carteira/riomob/${vehicle.id}`
   const returnUrl = `/carteira/riomob/${vehicle.id}/editar`
+  const contactOk = !ownerInfo.phoneNeedsUpdate && !ownerInfo.emailNeedsUpdate
 
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleEditFormSchema),
@@ -50,6 +53,8 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const { handleSubmit } = form
 
   const onSubmit = handleSubmit(async data => {
+    if (!contactOk) return
+
     setIsPending(true)
     try {
       await mockUpdateVehicle(toUpdateVehiclePayload(data))
@@ -78,6 +83,8 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
           phoneDisplay={ownerInfo.phoneDisplay}
           emailDisplay={ownerInfo.emailDisplay}
           returnUrl={returnUrl}
+          phoneNeedsUpdate={ownerInfo.phoneNeedsUpdate}
+          emailNeedsUpdate={ownerInfo.emailNeedsUpdate}
         />
 
         <SerialPhotosFields
@@ -93,7 +100,7 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
             size="lg"
             fullWidth
             loading={isPending}
-            disabled={isPending || isUploadingFiles}
+            disabled={isPending || isUploadingFiles || !contactOk}
           >
             Salvar
           </CustomButton>
