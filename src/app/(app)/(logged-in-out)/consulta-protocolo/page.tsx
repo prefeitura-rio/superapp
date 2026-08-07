@@ -107,7 +107,7 @@ export default function ConsultaProtocoloPage() {
           style={{ paddingTop: '24px', paddingBottom: '24px' }}
         />
 
-        <div className="pt-29 pb-32 px-4 flex flex-col gap-4">
+        <div className="pt-23 pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
             <p className="text-sm text-foreground-light leading-5">
               Encontramos{' '}
