@@ -61,14 +61,18 @@ export interface VehicleDetail extends WalletVehicle {
 }
 
 /** Mock temporário — substituir por GET de veículos do cidadão. */
+const MOCK_INVOICE_PDF_URL =
+  'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/47562396507/invoice/b7621c93-3744-40f6-819c-573dfa1aa48c.pdf'
+
 export const MOCK_VEHICLES: WalletVehicle[] = [
   {
     id: 'vehicle-autopropelido-1',
-    displayName: 'Bike da Jéssica',
+    displayName: 'Autopropelido da Jéssica',
     vehicleType: 'autopropelido',
     registrationNumber: 'RJ-E-001234',
     category: 'proprietaria',
-    photoUrl: 'https://img.olx.com.br/images/71/718601428868369.webp',
+    photoUrl:
+      'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/47562396507/vehicle/4e1a7e67-5417-4572-8fad-9061b495da03.png',
   },
   {
     id: 'vehicle-bike-1',
@@ -76,7 +80,8 @@ export const MOCK_VEHICLES: WalletVehicle[] = [
     vehicleType: 'bicicleta_eletrica',
     registrationNumber: 'RJ-E-001567',
     category: 'proprietaria',
-    photoUrl: 'https://img.olx.com.br/images/49/495633791766824.webp',
+    photoUrl:
+      'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/47562396507/vehicle/ac6754ea-90b7-4943-90be-f47d8e99d59e.png',
   },
   {
     id: 'vehicle-ciclomotor-1',
@@ -84,7 +89,8 @@ export const MOCK_VEHICLES: WalletVehicle[] = [
     vehicleType: 'ciclomotor',
     registrationNumber: 'RJ-E-001890',
     category: 'condutor',
-    photoUrl: 'https://img.olx.com.br/images/53/530637174492274.webp',
+    photoUrl:
+      'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/47562396507/vehicle/6186e621-f77c-4e4d-9b88-ef6ca70e2c52.png',
   },
 ]
 
@@ -116,7 +122,7 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     ...MOCK_VEHICLES[0],
     owner: {
       name: 'Jéssica Rangel Azevedo',
-      cpf: '398.765.432-60',
+      cpf: '475.623.965-07',
       phone: '(21) 99876 5432',
       email: 'j.rangel@gmail.com',
     },
@@ -126,22 +132,23 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     color: 'Preto',
     serialNumber: 'A1F9K73P4826',
     serialNumberDocument: {
-      fileName: 'NF0456634.png',
+      fileName: 'serie-autopropelido.png',
       fileSizeLabel: '2.89MB',
       fileSizeBytes: 2_890_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/serial/11111111-1111-1111-1111-111111111111.png',
+      // Object URL real (kind vehicle) — signed-read exige path CPF = JWT
+      url: MOCK_VEHICLES[0].photoUrl,
       verified: true,
     },
     invoiceDocument: {
-      fileName: 'NF0456634.png',
+      fileName: 'nf-autopropelido.pdf',
       fileSizeLabel: '2.89MB',
       fileSizeBytes: 2_890_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/invoice/22222222-2222-2222-2222-222222222222.png',
+      url: MOCK_INVOICE_PDF_URL,
       verified: true,
     },
     vehiclePhoto: {
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/vehicle/33333333-3333-3333-3333-333333333333.png',
-      fileName: 'NF0456634.png',
+      url: MOCK_VEHICLES[0].photoUrl,
+      fileName: 'veiculo-autopropelido.png',
       fileSizeBytes: 2_890_000,
     },
     authorizedConductors: [
@@ -163,7 +170,7 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     ...MOCK_VEHICLES[1],
     owner: {
       name: 'Jéssica Rangel Azevedo',
-      cpf: '398.765.432-60',
+      cpf: '475.623.965-07',
       phone: '(21) 99876 5432',
       email: 'j.rangel@gmail.com',
     },
@@ -176,18 +183,18 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       fileName: 'serie-possante.png',
       fileSizeLabel: '1.42MB',
       fileSizeBytes: 1_420_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/serial/44444444-4444-4444-4444-444444444444.png',
+      url: MOCK_VEHICLES[1].photoUrl,
       verified: true,
     },
     invoiceDocument: {
-      fileName: 'nf-possante.png',
+      fileName: 'nf-possante.pdf',
       fileSizeLabel: '3.10MB',
       fileSizeBytes: 3_100_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/invoice/55555555-5555-5555-5555-555555555555.png',
+      url: MOCK_INVOICE_PDF_URL,
       verified: true,
     },
     vehiclePhoto: {
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/39876543260/vehicle/66666666-6666-6666-6666-666666666666.png',
+      url: MOCK_VEHICLES[1].photoUrl,
       fileName: 'possante.png',
       fileSizeBytes: 1_420_000,
     },
@@ -217,18 +224,18 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       fileName: 'serie-veloz.png',
       fileSizeLabel: '2.05MB',
       fileSizeBytes: 2_050_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/22133455678/serial/77777777-7777-7777-7777-777777777777.png',
+      url: MOCK_VEHICLES[2].photoUrl,
       verified: true,
     },
     invoiceDocument: {
-      fileName: 'nf-veloz.png',
+      fileName: 'nf-veloz.pdf',
       fileSizeLabel: '2.55MB',
       fileSizeBytes: 2_550_000,
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/22133455678/invoice/88888888-8888-8888-8888-888888888888.png',
+      url: MOCK_INVOICE_PDF_URL,
       verified: true,
     },
     vehiclePhoto: {
-      url: 'https://storage.googleapis.com/rj-superapp-staging-prefrio/riomob/22133455678/vehicle/99999999-9999-9999-9999-999999999999.png',
+      url: MOCK_VEHICLES[2].photoUrl,
       fileName: 'veloz.png',
       fileSizeBytes: 2_050_000,
     },

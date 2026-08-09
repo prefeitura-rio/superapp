@@ -1,7 +1,18 @@
 import { authorizeRiomobObjectRead } from '@/lib/riomob/authorize-object-read'
-import { RIOMOB_SIGNED_URL_TTL_MS, createGcsStorage } from '@/lib/riomob/gcs'
+import { createGcsStorage } from '@/lib/riomob/gcs'
 import { type NextRequest, NextResponse } from 'next/server'
 
+function contentTypeForPath(objectPath: string): string {
+  const lower = objectPath.toLowerCase()
+  if (lower.endsWith('.pdf')) return 'application/pdf'
+  if (lower.endsWith('.png')) return 'image/png'
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg'
+  return 'application/octet-stream'
+}
+
+/**
+ * Same-origin proxy for RioMob GCS objects (avoids browser CORS with react-pdf).
+ */
 export async function POST(request: NextRequest) {
   let body: { objectUrl?: string; vehicleId?: string }
   try {
@@ -18,7 +29,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Strip query (signed URL) → stable object URL for path parse + authz
   const stableObjectUrl = objectUrl.split('?')[0]
 
   const auth = await authorizeRiomobObjectRead({
@@ -30,20 +40,22 @@ export async function POST(request: NextRequest) {
   const storage = createGcsStorage(auth.value.credentials)
 
   try {
-    const [signedUrl] = await storage
+    const [buffer] = await storage
       .bucket(auth.value.credentials.bucketName)
       .file(auth.value.objectPath)
-      .getSignedUrl({
-        version: 'v4',
-        action: 'read',
-        expires: Date.now() + RIOMOB_SIGNED_URL_TTL_MS,
-      })
+      .download()
 
-    return NextResponse.json({ signedUrl })
+    return new NextResponse(new Uint8Array(buffer), {
+      status: 200,
+      headers: {
+        'Content-Type': contentTypeForPath(auth.value.objectPath),
+        'Cache-Control': 'private, max-age=60',
+      },
+    })
   } catch (err) {
-    console.error('GCS getSignedUrl (read) failed:', err)
+    console.error('GCS download (content proxy) failed:', err)
     return NextResponse.json(
-      { error: 'Não foi possível gerar o link de download' },
+      { error: 'Não foi possível baixar o arquivo' },
       { status: 502 }
     )
   }

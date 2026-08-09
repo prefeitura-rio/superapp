@@ -1,12 +1,14 @@
 'use client'
 
-import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { DocumentFileCard } from '@/app/(app)/(logged-in)/carteira/riomob/components/document-file-card'
+import { PdfPreviewDialog } from '@/app/(app)/(logged-in)/carteira/riomob/components/pdf-preview-dialog'
 import {
-  RiomobSignedReadError,
-  requestRiomobSignedRead,
-} from '@/lib/riomob/request-signed-read'
-import { ImageIcon, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+  useInvalidateRiomobSignedUrl,
+  useRiomobSignedUrl,
+} from '@/hooks/riomob/use-riomob-signed-url'
+import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { FileText, ImageIcon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { VehicleDocument } from '../../mocks/vehicles'
 
@@ -16,12 +18,8 @@ interface VerifiedDocumentSectionProps {
   vehicleId: string
 }
 
-async function resolveOpenableUrl(
-  url: string,
-  vehicleId: string
-): Promise<string> {
-  if (!isGcsObjectUrl(url)) return url
-  return requestRiomobSignedRead(url, { vehicleId })
+function isPdfName(name?: string | null) {
+  return !!name && /\.pdf$/i.test(name)
 }
 
 export function VerifiedDocumentSection({
@@ -29,54 +27,77 @@ export function VerifiedDocumentSection({
   document,
   vehicleId,
 }: VerifiedDocumentSectionProps) {
-  const [isOpening, setIsOpening] = useState(false)
+  const isPdf = isPdfName(document.fileName) || isPdfName(document.url)
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false)
+  const invalidate = useInvalidateRiomobSignedUrl()
+  const invalidatedForKeyRef = useRef<string | null>(null)
+  const invalidateKey = `${document.url}|${vehicleId}`
 
-  const handleOpen = async () => {
-    if (isOpening) return
-    setIsOpening(true)
-    try {
-      const openUrl = await resolveOpenableUrl(document.url, vehicleId)
-      window.open(openUrl, '_blank', 'noopener,noreferrer')
-    } catch (err) {
-      const description =
-        err instanceof RiomobSignedReadError
-          ? err.message
-          : 'Não foi possível abrir o arquivo'
-      toast.error(description)
-    } finally {
-      setIsOpening(false)
-    }
+  const { url: previewUrl, isLoading: isLoadingPreview } = useRiomobSignedUrl(
+    isPdf ? null : document.url,
+    { vehicleId, enabled: !isPdf }
+  )
+
+  const handleOpenPdf = () => {
+    setPdfDialogOpen(true)
   }
+
+  const handleImageUnavailable = () => {
+    toast.error('Não foi possível abrir o arquivo')
+  }
+
+  const handleImageError = () => {
+    if (
+      !isGcsObjectUrl(document.url) ||
+      invalidatedForKeyRef.current === invalidateKey
+    ) {
+      return
+    }
+    invalidatedForKeyRef.current = invalidateKey
+    void invalidate(document.url, vehicleId)
+  }
+
+  const thumbnail = isPdf ? (
+    <FileText className="size-5 stroke-[1.5] text-foreground" />
+  ) : previewUrl ? (
+    <img
+      src={previewUrl}
+      alt=""
+      className="size-full object-cover"
+      onError={handleImageError}
+    />
+  ) : (
+    <ImageIcon className="size-5 stroke-[1.5] text-foreground" />
+  )
+
+  const canOpenImage = !isPdf && !!previewUrl
 
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm leading-5 text-foreground-light">{message}</p>
-      <button
-        type="button"
-        onClick={() => void handleOpen()}
-        disabled={isOpening}
-        className="flex cursor-pointer w-full items-center rounded-xl bg-secondary p-4 text-left transition-opacity disabled:opacity-70"
+      <DocumentFileCard
+        fileName={document.fileName}
+        sizeLabel={document.fileSizeLabel}
+        thumbnail={thumbnail}
+        photoSrc={canOpenImage ? previewUrl : undefined}
+        onClick={
+          isPdf
+            ? handleOpenPdf
+            : !canOpenImage
+              ? handleImageUnavailable
+              : undefined
+        }
+        busy={isLoadingPreview}
+        busyLabel="Carregando..."
         aria-label={`Abrir ${document.fileName}`}
-      >
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-card">
-            {/* Lucide fallback — sem ImageIcon em src/assets/icons */}
-            {isOpening ? (
-              <Loader2 className="size-5 animate-spin text-foreground" />
-            ) : (
-              <ImageIcon className="size-5 stroke-[1.5] text-foreground" />
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col text-sm leading-5">
-            <span className="truncate text-foreground">
-              {document.fileName}
-            </span>
-            <span className="text-foreground-light">
-              {isOpening ? 'Abrindo...' : document.fileSizeLabel}
-            </span>
-          </div>
-        </div>
-      </button>
+      />
+      <PdfPreviewDialog
+        open={pdfDialogOpen}
+        onOpenChange={setPdfDialogOpen}
+        fileUrl={isPdf ? document.url : null}
+        vehicleId={vehicleId}
+        title={document.fileName}
+      />
     </div>
   )
 }

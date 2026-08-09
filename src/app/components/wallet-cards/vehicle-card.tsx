@@ -1,3 +1,5 @@
+'use client'
+
 import {
   VEHICLE_TYPE_LABELS,
   type VehicleType,
@@ -6,9 +8,15 @@ import {
   VEHICLE_CATEGORY_LABELS,
   type WalletVehicle,
 } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
+import {
+  useInvalidateRiomobSignedUrl,
+  useRiomobSignedUrl,
+} from '@/hooks/riomob/use-riomob-signed-url'
+import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 
 export function VehicleCard({ vehicle, href, className }: VehicleCardProps) {
   const card = (
@@ -25,6 +33,7 @@ export function VehicleCard({ vehicle, href, className }: VehicleCardProps) {
         <VehicleCardThumbnail
           photoUrl={vehicle.photoUrl}
           displayName={vehicle.displayName}
+          vehicleId={vehicle.id}
         />
         <VehicleCardFields vehicle={vehicle} />
       </div>
@@ -73,16 +82,35 @@ function VehicleCardHeader() {
 function VehicleCardThumbnail({
   photoUrl,
   displayName,
+  vehicleId,
 }: VehicleCardThumbnailProps) {
+  const { url: resolvedUrl } = useRiomobSignedUrl(photoUrl, { vehicleId })
+  const invalidate = useInvalidateRiomobSignedUrl()
+  const invalidatedForKeyRef = useRef<string | null>(null)
+  const invalidateKey = `${photoUrl ?? ''}|${vehicleId}`
+
   return (
     <div className="flex h-17.5 w-15 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/20 bg-white/15">
-      <Image
-        src={photoUrl}
-        alt={`Foto de ${displayName}`}
-        width={60}
-        height={70}
-        className="size-full object-cover"
-      />
+      {resolvedUrl ? (
+        <Image
+          src={resolvedUrl}
+          alt={`Foto de ${displayName}`}
+          width={60}
+          height={70}
+          unoptimized
+          className="size-full object-cover"
+          onError={() => {
+            if (
+              !isGcsObjectUrl(photoUrl) ||
+              invalidatedForKeyRef.current === invalidateKey
+            ) {
+              return
+            }
+            invalidatedForKeyRef.current = invalidateKey
+            void invalidate(photoUrl, vehicleId)
+          }}
+        />
+      ) : null}
     </div>
   )
 }
@@ -149,6 +177,7 @@ interface VehicleCardProps {
 interface VehicleCardThumbnailProps {
   photoUrl: string
   displayName: string
+  vehicleId: string
 }
 
 interface VehicleCardFieldsProps {
