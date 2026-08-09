@@ -18,6 +18,8 @@ interface SecondaryHeaderProps {
   style?: React.CSSProperties
   fixed?: boolean
   forceRoute?: boolean
+  onBack?: () => void
+  disabled?: boolean
 }
 
 /**
@@ -138,6 +140,8 @@ export function SecondaryHeader({
   style,
   fixed = true,
   forceRoute = false,
+  onBack,
+  disabled,
 }: SecondaryHeaderProps) {
   const router = useRouter()
 
@@ -169,7 +173,11 @@ export function SecondaryHeader({
         style={fixed ? { top: 0, ...style } : style}
       >
         <div className="relative flex items-center justify-between">
-          <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
+          <IconButton
+            icon={ChevronLeftIcon}
+            onClick={onBack ?? handleBack}
+            disabled={disabled}
+          />
 
           {/* Center - absolutely positioned so it never competes with side buttons */}
           <div className="absolute inset-x-0 flex justify-center pointer-events-none">

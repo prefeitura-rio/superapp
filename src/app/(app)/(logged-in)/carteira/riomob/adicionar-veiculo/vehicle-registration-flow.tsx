@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeftIcon } from '@/assets/icons'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -147,17 +147,13 @@ export function VehicleRegistrationFlow({
 
   return (
     <div className="min-h-screen w-full bg-background">
-      <div className="w-full max-w-4xl mx-auto pt-8 pb-12">
-        <div className="relative px-4 h-11 mb-6 flex items-center">
-          <CustomButton
-            variant="secondary"
-            className="bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 disabled:opacity-100"
-            onClick={goToPrev}
-            disabled={isPending}
-          >
-            <ChevronLeftIcon className="text-foreground" />
-          </CustomButton>
-        </div>
+      <div className="w-full max-w-4xl mx-auto pb-12">
+        <SecondaryHeader
+          fixed={false}
+          onBack={goToPrev}
+          disabled={isPending}
+          className="max-w-4xl mb-2 md:mb-0"
+        />
 
         <Swiper
           allowTouchMove={false}
