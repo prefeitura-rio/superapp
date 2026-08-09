@@ -2,10 +2,12 @@
 
 import {
   actionErrorMessage,
+  parseActionPayload,
   revalidateRiomobPaths,
 } from '@/actions/riomob/utils'
 import type { InviteConductorPayload } from '@/app/(app)/(logged-in)/carteira/riomob/[vehicleId]/adicionar-condutor/schema'
 import { postCitizenCpfVehiclesVehicleIdConductors } from '@/http/mobilidade/mobilidade'
+import { inviteConductorPayloadSchema } from '@/lib/riomob/action-schemas'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -18,23 +20,30 @@ export async function inviteConductor(
       return { success: false, error: 'Usuário não autenticado' }
     }
 
+    const validated = parseActionPayload(
+      inviteConductorPayloadSchema,
+      payload,
+      'Dados do convite inválidos'
+    )
+    if (!validated.success) return validated
+
     if (isRiomobMocksEnabled()) {
-      revalidateRiomobPaths(payload.vehicle_id)
+      revalidateRiomobPaths(validated.data.vehicle_id)
       return { success: true }
     }
 
     const response = await postCitizenCpfVehiclesVehicleIdConductors(
       user.cpf,
-      payload.vehicle_id,
+      validated.data.vehicle_id,
       {
-        cpf: payload.cpf,
-        email: payload.email,
-        name: payload.name,
+        cpf: validated.data.cpf,
+        email: validated.data.email,
+        name: validated.data.name,
       }
     )
 
     if (response.status === 201) {
-      revalidateRiomobPaths(payload.vehicle_id)
+      revalidateRiomobPaths(validated.data.vehicle_id)
       return { success: true }
     }
 

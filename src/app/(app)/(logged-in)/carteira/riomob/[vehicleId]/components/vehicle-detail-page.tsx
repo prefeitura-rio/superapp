@@ -1,10 +1,9 @@
 'use client'
 
-import { deleteVehicle, leaveVehicle } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useDeleteOrLeaveVehicleMutation } from '@/hooks/riomob/use-riomob-mutations'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicle } from '@/hooks/riomob/use-riomob-vehicle'
 import type { VehicleDetail } from '@/lib/riomob/types'
@@ -24,7 +23,7 @@ export function VehicleDetailPage({
   vehicle: initialVehicle,
 }: VehicleDetailPageProps) {
   const router = useRouter()
-  const invalidate = useInvalidateRiomobQueries()
+  const deleteOrLeave = useDeleteOrLeaveVehicleMutation()
   const {
     data: vehicle = initialVehicle,
     isError,
@@ -38,30 +37,26 @@ export function VehicleDetailPage({
   )
   const isConductor = vehicle.category === 'condutor'
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const openDeleteDrawer = () => setIsDeleteDrawerOpen(true)
 
   const handleDeleteConfirm = async () => {
-    setIsDeleting(true)
     try {
-      const result = isConductor
-        ? await leaveVehicle(vehicle.id)
-        : await deleteVehicle(vehicle.id)
+      const result = await deleteOrLeave.mutateAsync({
+        vehicleId: vehicle.id,
+        isConductor,
+      })
 
       if (!result.success) {
         toast.error(result.error || 'Não foi possível remover')
         return
       }
 
-      await invalidate.afterDelete(vehicle.id)
       setIsDeleteDrawerOpen(false)
       toast.success('Veículo removido')
       router.push('/carteira?riomob=true')
     } catch {
       toast.error('Não foi possível remover')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -100,10 +95,10 @@ export function VehicleDetailPage({
         displayName={vehicle.displayName}
         open={isDeleteDrawerOpen}
         onOpenChange={open => {
-          if (!isDeleting) setIsDeleteDrawerOpen(open)
+          if (!deleteOrLeave.isPending) setIsDeleteDrawerOpen(open)
         }}
         onConfirm={handleDeleteConfirm}
-        isPending={isDeleting}
+        isPending={deleteOrLeave.isPending}
       />
     </div>
   )

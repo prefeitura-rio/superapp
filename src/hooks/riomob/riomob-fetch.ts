@@ -1,6 +1,7 @@
 import {
   RIOMOB_CATALOG_STALE_MS,
   RIOMOB_INVITATIONS_STALE_MS,
+  RIOMOB_QUERY_RETRY,
   RIOMOB_VEHICLES_STALE_MS,
   riomobCatalogBrandsQueryKey,
   riomobCatalogColorsQueryKey,
@@ -16,6 +17,7 @@ import type {
   VehicleModelOption,
   WalletVehicle,
 } from '@/lib/riomob/types'
+import { queryOptions } from '@tanstack/react-query'
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url, {
@@ -75,6 +77,61 @@ export async function fetchRiomobColors(): Promise<string[]> {
     '/api/riomob/catalog/colors'
   )
   return data.colors
+}
+
+/** Shared options for SSR prefetch / client hooks (P11). */
+export function riomobVehiclesQueryOptions() {
+  return queryOptions({
+    queryKey: riomobVehiclesQueryKey(),
+    queryFn: fetchRiomobVehicles,
+    staleTime: RIOMOB_VEHICLES_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
+}
+
+export function riomobVehicleQueryOptions(vehicleId: string) {
+  return queryOptions({
+    queryKey: riomobVehicleQueryKey(vehicleId),
+    queryFn: () => fetchRiomobVehicle(vehicleId),
+    staleTime: RIOMOB_VEHICLES_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
+}
+
+export function riomobInvitationsQueryOptions() {
+  return queryOptions({
+    queryKey: riomobInvitationsQueryKey(),
+    queryFn: fetchRiomobInvitations,
+    staleTime: RIOMOB_INVITATIONS_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
+}
+
+export function riomobCatalogBrandsQueryOptions() {
+  return queryOptions({
+    queryKey: riomobCatalogBrandsQueryKey(),
+    queryFn: fetchRiomobBrands,
+    staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
+}
+
+export function riomobCatalogModelsQueryOptions(brandId: string) {
+  return queryOptions({
+    queryKey: riomobCatalogModelsQueryKey(brandId),
+    queryFn: () => fetchRiomobModels(brandId),
+    staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
+}
+
+export function riomobCatalogColorsQueryOptions() {
+  return queryOptions({
+    queryKey: riomobCatalogColorsQueryKey(),
+    queryFn: fetchRiomobColors,
+    staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
+  })
 }
 
 export {

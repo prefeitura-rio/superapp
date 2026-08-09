@@ -3,51 +3,48 @@
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
-import type {
-  ModelsCitizenWallet,
-  ModelsMaintenanceRequest,
-  ModelsPet,
-} from '@/http/models'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import {
   formatHealthOperatingHours,
   getHealthOperatingStatus,
 } from '@/lib/operating-status'
+import type { WalletApiResponse } from '@/lib/wallet-api-types'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
+import { useAuthStatus } from '@/providers/auth-status-provider'
 import { useQuery } from '@tanstack/react-query'
 import CarteiraSection from './wallet-section'
 import CarteiraSectionSwipe, {
   CarteiraSectionSwipeSkeleton,
 } from './wallet-section-swipe'
 
-type ApiWalletData = {
-  walletData?: ModelsCitizenWallet
-  maintenanceRequests?: ModelsMaintenanceRequest[]
-  pets?: ModelsPet[]
-  healthUnitData?: any
-  healthUnitRiskData?: any
-}
-
-async function fetchWalletData(): Promise<ApiWalletData> {
+async function fetchWalletData(): Promise<WalletApiResponse> {
   const res = await fetch('/api/user/wallet', { cache: 'no-store' })
   if (!res.ok) throw new Error('Failed to fetch wallet data')
   return res.json()
 }
 
 export default function WalletSectionClient() {
+  const { isLoggedIn, isLoading: isAuthLoading } = useAuthStatus()
+  const isAuthenticated = Boolean(isLoggedIn && !isAuthLoading)
+
   const { data, isLoading } = useQuery({
     queryKey: ['wallet'],
     queryFn: fetchWalletData,
     staleTime: 5 * 60 * 1000,
+    enabled: isAuthenticated,
   })
-  const { data: vehicles = [], isError: isVehiclesError } = useRiomobVehicles()
+  const { data: vehicles = [], isError: isVehiclesError } = useRiomobVehicles({
+    enabled: isAuthenticated,
+  })
 
   useRiomobQueryErrorToast(
     isVehiclesError,
     'Não foi possível carregar os veículos',
     'riomob-vehicles-error'
   )
+
+  if (isAuthLoading || !isLoggedIn) return null
 
   if (isLoading) {
     return (
@@ -70,14 +67,16 @@ export default function WalletSectionClient() {
   } = data
 
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests || [])
-  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+  const walletInfo = getWalletDataInfo(
+    walletData ?? undefined,
+    maintenanceStats.total
+  )
   const petsCount = Array.isArray(pets) ? pets.length : 0
 
   if (!walletInfo.hasData && petsCount === 0 && vehicles.length === 0) {
     return null
   }
 
-  // Derive healthCardData from raw health unit data (used by CarteiraSection/CarteiraSectionSwipe)
   const riskStatus = healthUnitRiskData
     ? getHealthUnitRiskStatus(healthUnitRiskData)
     : null
@@ -99,8 +98,8 @@ export default function WalletSectionClient() {
     <ResponsiveWrapper
       mobileComponent={
         <CarteiraSection
-          walletData={walletData}
-          maintenanceRequests={maintenanceRequests}
+          walletData={walletData ?? undefined}
+          maintenanceRequests={maintenanceRequests ?? undefined}
           healthCardData={healthCardData}
           pets={pets}
           vehicles={vehicles}
@@ -108,8 +107,8 @@ export default function WalletSectionClient() {
       }
       desktopComponent={
         <CarteiraSectionSwipe
-          walletData={walletData}
-          maintenanceRequests={maintenanceRequests}
+          walletData={walletData ?? undefined}
+          maintenanceRequests={maintenanceRequests ?? undefined}
           healthCardData={healthCardData}
           pets={pets}
           vehicles={vehicles}

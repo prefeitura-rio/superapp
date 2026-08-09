@@ -2,10 +2,16 @@
 
 import {
   actionErrorMessage,
+  parseActionPayload,
   revalidateRiomobPaths,
 } from '@/actions/riomob/utils'
 import { patchCitizenCpfVehicleInvitationsConductorId } from '@/http/mobilidade/mobilidade'
 import type { ModelsInvitationResponseStatus } from '@/http/models/modelsInvitationResponseStatus'
+import {
+  conductorIdSchema,
+  invitationResponseStatusSchema,
+  vehicleIdSchema,
+} from '@/lib/riomob/action-schemas'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -20,19 +26,35 @@ export async function respondInvitation(
       return { success: false, error: 'Usuário não autenticado' }
     }
 
+    const conductorIdResult = parseActionPayload(conductorIdSchema, conductorId)
+    if (!conductorIdResult.success) return conductorIdResult
+
+    const statusResult = parseActionPayload(
+      invitationResponseStatusSchema,
+      status
+    )
+    if (!statusResult.success) return statusResult
+
+    let resolvedVehicleId = vehicleId
+    if (vehicleId !== undefined) {
+      const vehicleIdResult = parseActionPayload(vehicleIdSchema, vehicleId)
+      if (!vehicleIdResult.success) return vehicleIdResult
+      resolvedVehicleId = vehicleIdResult.data
+    }
+
     if (isRiomobMocksEnabled()) {
-      revalidateRiomobPaths(vehicleId)
+      revalidateRiomobPaths(resolvedVehicleId)
       return { success: true }
     }
 
     const response = await patchCitizenCpfVehicleInvitationsConductorId(
       user.cpf,
-      conductorId,
-      { status }
+      conductorIdResult.data,
+      { status: statusResult.data }
     )
 
     if (response.status === 200) {
-      revalidateRiomobPaths(vehicleId ?? response.data.vehicle_id)
+      revalidateRiomobPaths(resolvedVehicleId ?? response.data.vehicle_id)
       return { success: true }
     }
 

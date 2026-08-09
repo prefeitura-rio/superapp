@@ -1,4 +1,5 @@
 import { revalidatePath } from 'next/cache'
+import type { ZodType } from 'zod'
 
 export function revalidateRiomobPaths(vehicleId?: string) {
   revalidatePath('/carteira')
@@ -18,4 +19,17 @@ export function actionErrorMessage(
     if (typeof message === 'string' && message.trim()) return message
   }
   return fallback
+}
+
+export function parseActionPayload<T>(
+  schema: ZodType<T>,
+  payload: unknown,
+  fallbackError = 'Dados inválidos'
+): { success: true; data: T } | { success: false; error: string } {
+  const parsed = schema.safeParse(payload)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]?.message
+    return { success: false, error: first || fallbackError }
+  }
+  return { success: true, data: parsed.data }
 }

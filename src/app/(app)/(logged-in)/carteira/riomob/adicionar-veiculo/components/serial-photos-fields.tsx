@@ -7,6 +7,7 @@ import { CustomInput } from '@/components/ui/custom/custom-input'
 import { cn } from '@/lib/utils'
 import { useRef, useState } from 'react'
 import type { FieldErrors, UseFormReturn } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 import { SerialNumberInfoDrawer } from '../drawers/serial-number-info-drawer'
 import { FileUploadField } from './file-upload-field'
@@ -51,8 +52,8 @@ export function SerialPhotosFields<T extends SerialPhotosFormValues>({
   showSelfDeclaration = true,
   onUploadingChange,
 }: SerialPhotosFieldsProps<T>) {
-  const { watch, setValue, formState } = form
-  const values = watch()
+  const { setValue, formState, control } = form
+  const values = useWatch({ control }) as SerialPhotosFormValues
   const errors = formState.errors as FieldErrors<SerialPhotosFormValues>
   const [serialInfoOpen, setSerialInfoOpen] = useState(false)
   const uploadingFieldsRef = useRef({

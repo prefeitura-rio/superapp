@@ -1,7 +1,7 @@
 'use client'
 
-import { DocumentFileCard } from '@/app/(app)/(logged-in)/carteira/riomob/components/document-file-card'
-import { PdfPreviewDialog } from '@/app/(app)/(logged-in)/carteira/riomob/components/pdf-preview-dialog'
+import { DocumentFileCard } from '@/app/components/riomob/document-file-card'
+import { PdfPreviewDialog } from '@/app/components/riomob/pdf-preview-dialog'
 import { InfoIcon } from '@/assets/icons/info-icon'
 import { XIcon } from '@/assets/icons/x-icon'
 import { CustomButton } from '@/components/ui/custom/custom-button'
@@ -10,6 +10,7 @@ import {
   useRiomobSignedUrl,
 } from '@/hooks/riomob/use-riomob-signed-url'
 import { type RiomobFileKind, isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { formatFileSizeLabel, isPdfName } from '@/lib/riomob/file-utils'
 import {
   RiomobUploadError,
   uploadRiomobFile,
@@ -37,16 +38,6 @@ interface FileUploadFieldProps {
   onFileSelect: (file: File, objectUrl: string) => void
   onFileRemove: () => void
   onUploadingChange?: (isUploading: boolean) => void
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes}B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)}KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)}MB`
-}
-
-function isPdfName(name?: string | null) {
-  return !!name && /\.pdf$/i.test(name)
 }
 
 export function FileUploadField({
@@ -209,7 +200,7 @@ export function FileUploadField({
         ? 'Enviando...'
         : hasError
           ? 'Falha no envio'
-          : formatFileSize(displaySize)
+          : formatFileSizeLabel(displaySize)
       : ''
 
   const thumbnail = (

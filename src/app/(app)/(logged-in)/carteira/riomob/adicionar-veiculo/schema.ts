@@ -1,10 +1,10 @@
-import { isGcsObjectUrl } from '@/lib/riomob/file-types'
-import { z } from 'zod'
 import {
   type VehicleType,
   isOtherBrand,
   isOtherModel,
-} from './mocks/vehicle-catalog'
+} from '@/lib/riomob/catalog-constants'
+import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { z } from 'zod'
 
 const vehicleTypeSchema = z.enum([
   'bicicleta_eletrica',
@@ -209,6 +209,12 @@ export interface CreateVehiclePayload {
   self_declaration: true
   owner_phone?: string
   owner_email?: string
+  serial_number_photo_file_name?: string
+  serial_number_photo_file_size?: number
+  vehicle_photo_file_name?: string
+  vehicle_photo_file_size?: number
+  invoice_photo_file_name?: string
+  invoice_photo_file_size?: number
 }
 
 export function toCreateVehiclePayload(
@@ -232,10 +238,30 @@ export function toCreateVehiclePayload(
     vehicle_photo_url: data.vehicle_photo_url,
     has_invoice: Boolean(data.has_invoice),
     ...(data.has_invoice === true && data.invoice_photo_url
-      ? { invoice_photo_url: data.invoice_photo_url }
+      ? {
+          invoice_photo_url: data.invoice_photo_url,
+          ...(data.invoice_photo_name
+            ? { invoice_photo_file_name: data.invoice_photo_name }
+            : {}),
+          ...(data.invoice_photo_size != null
+            ? { invoice_photo_file_size: data.invoice_photo_size }
+            : {}),
+        }
       : {}),
     self_declaration: true,
     owner_phone: data.owner_phone,
     owner_email: data.owner_email,
+    ...(data.serial_number_photo_name
+      ? { serial_number_photo_file_name: data.serial_number_photo_name }
+      : {}),
+    ...(data.serial_number_photo_size != null
+      ? { serial_number_photo_file_size: data.serial_number_photo_size }
+      : {}),
+    ...(data.vehicle_photo_name
+      ? { vehicle_photo_file_name: data.vehicle_photo_name }
+      : {}),
+    ...(data.vehicle_photo_size != null
+      ? { vehicle_photo_file_size: data.vehicle_photo_size }
+      : {}),
   }
 }

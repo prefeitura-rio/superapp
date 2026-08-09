@@ -2,10 +2,12 @@
 
 import {
   actionErrorMessage,
+  parseActionPayload,
   revalidateRiomobPaths,
 } from '@/actions/riomob/utils'
 import type { CreateVehiclePayload } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/schema'
 import { postCitizenCpfVehicles } from '@/http/mobilidade/mobilidade'
+import { createVehiclePayloadSchema } from '@/lib/riomob/action-schemas'
 import { toApiCreateBody } from '@/lib/riomob/mappers'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -21,6 +23,13 @@ export async function createVehicle(payload: CreateVehiclePayload): Promise<{
       return { success: false, error: 'Usuário não autenticado' }
     }
 
+    const validated = parseActionPayload(
+      createVehiclePayloadSchema,
+      payload,
+      'Dados do veículo inválidos'
+    )
+    if (!validated.success) return validated
+
     if (isRiomobMocksEnabled()) {
       const id = `mock-vehicle-${Date.now()}`
       revalidateRiomobPaths(id)
@@ -28,7 +37,7 @@ export async function createVehicle(payload: CreateVehiclePayload): Promise<{
     }
 
     const body = toApiCreateBody({
-      ...payload,
+      ...validated.data,
       self_declaration: true,
     })
 

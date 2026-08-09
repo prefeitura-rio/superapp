@@ -1,6 +1,6 @@
 'use client'
 
-import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
+import { PendingInviteAccordion } from '@/app/components/riomob/pending-invite-accordion'
 import { useRiomobInvitations } from '@/hooks/riomob/use-riomob-invitations'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useAuthStatus } from '@/providers/auth-status-provider'

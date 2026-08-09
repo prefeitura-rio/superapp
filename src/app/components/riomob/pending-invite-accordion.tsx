@@ -1,6 +1,8 @@
 'use client'
 
-import { respondInvitation } from '@/actions/riomob'
+import { AcceptInviteDrawer } from '@/app/components/riomob/accept-invite-drawer'
+import { DeclineInviteDrawer } from '@/app/components/riomob/decline-invite-drawer'
+import { VehicleInviteAcceptedDrawer } from '@/app/components/riomob/vehicle-invite-accepted-drawer'
 import {
   Accordion,
   AccordionContent,
@@ -8,14 +10,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useRespondInvitationMutation } from '@/hooks/riomob/use-riomob-mutations'
 import type { PendingConductorInvite } from '@/lib/riomob/types'
 import { cn } from '@/lib/utils'
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { AcceptInviteDrawer } from './accept-invite-drawer'
-import { DeclineInviteDrawer } from './decline-invite-drawer'
-import { VehicleInviteAcceptedDrawer } from './vehicle-invite-accepted-drawer'
 
 interface PendingInviteAccordionProps {
   className?: string
@@ -31,15 +30,20 @@ export function PendingInviteAccordion({
   invitations = [],
   onInvitesChange,
 }: PendingInviteAccordionProps) {
-  const invalidate = useInvalidateRiomobQueries()
+  const respondMutation = useRespondInvitationMutation()
   const [openItem, setOpenItem] = useState<string>('')
   const [selectedInvite, setSelectedInvite] =
     useState<PendingConductorInvite | null>(null)
   const [isAcceptOpen, setIsAcceptOpen] = useState(false)
   const [isDeclineOpen, setIsDeclineOpen] = useState(false)
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
-  const [isAccepting, setIsAccepting] = useState(false)
-  const [isDeclining, setIsDeclining] = useState(false)
+
+  const isAccepting =
+    respondMutation.isPending &&
+    respondMutation.variables?.status === 'accepted'
+  const isDeclining =
+    respondMutation.isPending &&
+    respondMutation.variables?.status === 'rejected'
 
   const visibleInvites = useMemo(() => {
     if (maxVisible == null) return invitations
@@ -58,25 +62,21 @@ export function PendingInviteAccordion({
   async function handleAcceptConfirm() {
     if (!selectedInvite) return
 
-    setIsAccepting(true)
     try {
-      const result = await respondInvitation(
-        selectedInvite.id,
-        'accepted',
-        selectedInvite.vehicleId
-      )
+      const result = await respondMutation.mutateAsync({
+        conductorId: selectedInvite.id,
+        status: 'accepted',
+        vehicleId: selectedInvite.vehicleId,
+      })
       if (!result.success) {
         toast.error(result.error || 'Não foi possível aceitar o convite.')
         return
       }
-      await invalidate.afterAcceptInvitation()
       setIsAcceptOpen(false)
       setSelectedInvite(null)
       setIsSuccessOpen(true)
     } catch {
       toast.error('Não foi possível aceitar o convite. Tente novamente.')
-    } finally {
-      setIsAccepting(false)
     }
   }
 
@@ -88,25 +88,21 @@ export function PendingInviteAccordion({
   async function handleDeclineConfirm() {
     if (!selectedInvite) return
 
-    setIsDeclining(true)
     try {
-      const result = await respondInvitation(
-        selectedInvite.id,
-        'rejected',
-        selectedInvite.vehicleId
-      )
+      const result = await respondMutation.mutateAsync({
+        conductorId: selectedInvite.id,
+        status: 'rejected',
+        vehicleId: selectedInvite.vehicleId,
+      })
       if (!result.success) {
         toast.error(result.error || 'Não foi possível recusar o convite.')
         return
       }
-      await invalidate.afterRejectInvitation()
       setIsDeclineOpen(false)
       setSelectedInvite(null)
       toast.success('Convite recusado')
     } catch {
       toast.error('Não foi possível recusar o convite. Tente novamente.')
-    } finally {
-      setIsDeclining(false)
     }
   }
 
@@ -156,7 +152,7 @@ export function PendingInviteAccordion({
                     fullWidth
                     variant="primary"
                     onClick={() => handleAcceptClick(invite)}
-                    disabled={isAccepting || isDeclining}
+                    disabled={respondMutation.isPending}
                   >
                     Aceitar
                   </CustomButton>
@@ -165,7 +161,7 @@ export function PendingInviteAccordion({
                     fullWidth
                     variant="secondary"
                     onClick={() => handleDeclineClick(invite)}
-                    disabled={isAccepting || isDeclining}
+                    disabled={respondMutation.isPending}
                   >
                     Recusar
                   </CustomButton>

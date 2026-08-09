@@ -1,9 +1,9 @@
-import type { VehicleDetail } from '@/lib/riomob/types'
 import {
   type VehicleType,
   isOtherBrand,
   isOtherModel,
-} from '../../adicionar-veiculo/mocks/vehicle-catalog'
+} from '@/lib/riomob/catalog-constants'
+import type { VehicleDetail } from '@/lib/riomob/types'
 import {
   type VehicleFormData,
   vehicleFormSchema,
@@ -13,6 +13,8 @@ export { vehicleFormSchema as vehicleEditFormSchema }
 export type { VehicleFormData as VehicleEditFormData }
 
 export function toEditFormDefaults(vehicle: VehicleDetail): VehicleFormData {
+  const hasInvoice = Boolean(vehicle.invoiceDocument.url?.trim())
+
   return {
     display_name: vehicle.displayName,
     brand_id: vehicle.brandId,
@@ -28,10 +30,12 @@ export function toEditFormDefaults(vehicle: VehicleDetail): VehicleFormData {
     vehicle_photo_url: vehicle.vehiclePhoto.url,
     vehicle_photo_name: vehicle.vehiclePhoto.fileName,
     vehicle_photo_size: vehicle.vehiclePhoto.fileSizeBytes,
-    has_invoice: true,
-    invoice_photo_url: vehicle.invoiceDocument.url,
-    invoice_photo_name: vehicle.invoiceDocument.fileName,
-    invoice_photo_size: vehicle.invoiceDocument.fileSizeBytes,
+    has_invoice: hasInvoice,
+    invoice_photo_url: hasInvoice ? vehicle.invoiceDocument.url : '',
+    invoice_photo_name: hasInvoice ? vehicle.invoiceDocument.fileName : '',
+    invoice_photo_size: hasInvoice
+      ? vehicle.invoiceDocument.fileSizeBytes
+      : undefined,
     self_declaration: true,
   }
 }
@@ -50,6 +54,12 @@ export interface UpdateVehiclePayload {
   vehicle_photo_url: string
   has_invoice: boolean
   invoice_photo_url?: string
+  serial_number_photo_file_name?: string
+  serial_number_photo_file_size?: number
+  vehicle_photo_file_name?: string
+  vehicle_photo_file_size?: number
+  invoice_photo_file_name?: string
+  invoice_photo_file_size?: number
 }
 
 export function toUpdateVehiclePayload(
@@ -73,7 +83,27 @@ export function toUpdateVehiclePayload(
     vehicle_photo_url: data.vehicle_photo_url,
     has_invoice: Boolean(data.has_invoice),
     ...(data.has_invoice === true && data.invoice_photo_url
-      ? { invoice_photo_url: data.invoice_photo_url }
+      ? {
+          invoice_photo_url: data.invoice_photo_url,
+          ...(data.invoice_photo_name
+            ? { invoice_photo_file_name: data.invoice_photo_name }
+            : {}),
+          ...(data.invoice_photo_size != null
+            ? { invoice_photo_file_size: data.invoice_photo_size }
+            : {}),
+        }
+      : {}),
+    ...(data.serial_number_photo_name
+      ? { serial_number_photo_file_name: data.serial_number_photo_name }
+      : {}),
+    ...(data.serial_number_photo_size != null
+      ? { serial_number_photo_file_size: data.serial_number_photo_size }
+      : {}),
+    ...(data.vehicle_photo_name
+      ? { vehicle_photo_file_name: data.vehicle_photo_name }
+      : {}),
+    ...(data.vehicle_photo_size != null
+      ? { vehicle_photo_file_size: data.vehicle_photo_size }
       : {}),
   }
 }

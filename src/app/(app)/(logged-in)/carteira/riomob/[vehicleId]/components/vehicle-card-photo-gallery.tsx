@@ -2,20 +2,13 @@
 
 import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
 import { useRiomobSignedUrl } from '@/hooks/riomob/use-riomob-signed-url'
+import { isImageAsset } from '@/lib/riomob/file-utils'
+import type { VehicleDetail } from '@/lib/riomob/types'
 import { PhotoProvider, PhotoView } from 'react-photo-view'
 import 'react-photo-view/dist/react-photo-view.css'
-import type { VehicleDetail } from '@/lib/riomob/types'
 
 interface VehicleCardPhotoGalleryProps {
   vehicle: VehicleDetail
-}
-
-function isPdfName(name?: string | null) {
-  return !!name && /\.pdf$/i.test(name)
-}
-
-function isImageAsset(fileName: string, url: string) {
-  return !isPdfName(fileName) && !isPdfName(url)
 }
 
 export function VehicleCardPhotoGallery({

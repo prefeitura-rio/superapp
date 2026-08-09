@@ -3,33 +3,39 @@
 import { SearchButton } from '@/app/components/search-button'
 import { WalletContent } from '@/app/components/wallet-content'
 import { WalletContentLoadingSkeleton } from '@/app/components/wallet-page-loading-skeleton'
+import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
+import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
+import type { WalletApiResponse } from '@/lib/wallet-api-types'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { useQuery } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import EmptyWallet from './empty-wallet'
 
-type WalletData = {
-  walletData: any
-  maintenanceRequests: any[] | null
-  healthUnitData: any
-  healthUnitRiskData: any
-  pets: any[]
-}
-
-async function fetchWalletData(): Promise<WalletData> {
+async function fetchWalletData(): Promise<WalletApiResponse> {
   const res = await fetch('/api/user/wallet', { cache: 'no-store' })
   if (!res.ok) throw new Error('Failed to fetch wallet data')
   return res.json()
 }
 
 export function WalletPageClient() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading: isLoadingWallet } = useQuery({
     queryKey: ['wallet'],
     queryFn: fetchWalletData,
-    staleTime: 5 * 60 * 1000, // 5 minutes — won't refetch on route change while fresh
+    staleTime: 5 * 60 * 1000,
   })
+  const {
+    data: vehicles = [],
+    isLoading: isLoadingVehicles,
+    isError: isVehiclesError,
+  } = useRiomobVehicles()
 
-  if (isLoading) {
+  useRiomobQueryErrorToast(
+    isVehiclesError,
+    'Não foi possível carregar os veículos',
+    'riomob-vehicles-error'
+  )
+
+  if (isLoadingWallet || isLoadingVehicles) {
     return (
       <section className="pb-30 relative h-full px-4">
         <div className="flex items-center justify-between pt-6 pb-4">
@@ -57,12 +63,13 @@ export function WalletPageClient() {
     pets: [],
   }
 
+  const petsList = pets ?? []
   const walletInfo = getWalletDataInfo(
-    walletData,
+    walletData ?? undefined,
     maintenanceRequests?.length ?? 0
   )
 
-  if (!walletInfo?.hasData && pets.length === 0) {
+  if (!walletInfo?.hasData && petsList.length === 0 && vehicles.length === 0) {
     return <EmptyWallet />
   }
 
@@ -77,11 +84,11 @@ export function WalletPageClient() {
 
       <Suspense>
         <WalletContent
-          pets={pets}
-          walletData={walletData}
+          pets={petsList}
+          walletData={walletData ?? undefined}
           maintenanceRequests={maintenanceRequests ?? undefined}
-          healthUnitData={healthUnitData}
-          healthUnitRiskData={healthUnitRiskData}
+          healthUnitData={healthUnitData ?? undefined}
+          healthUnitRiskData={healthUnitRiskData ?? undefined}
         />
       </Suspense>
     </section>

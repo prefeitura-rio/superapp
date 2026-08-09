@@ -11,9 +11,6 @@ import {
 } from '@/hooks/riomob/use-riomob-catalog'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { formatCpf } from '@/lib/format-cpf'
-import { cn, formatTitleCase } from '@/lib/utils'
-import type { FieldErrors, UseFormReturn } from 'react-hook-form'
-import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 import {
   OTHER_BRAND_ID,
   OTHER_MODEL_ID,
@@ -22,7 +19,11 @@ import {
   type VehicleType,
   isOtherBrand,
   isOtherModel,
-} from '../mocks/vehicle-catalog'
+} from '@/lib/riomob/catalog-constants'
+import { cn, formatTitleCase } from '@/lib/utils'
+import type { FieldErrors, Path, UseFormReturn } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
+import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-content'
 
 export interface VehicleInfoFormValues {
   display_name: string
@@ -64,13 +65,18 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   phoneNeedsUpdate = false,
   emailNeedsUpdate = false,
 }: VehicleInfoFieldsProps<T>) {
-  const { watch, setValue, formState } = form
-  const values = watch()
+  const { setValue, formState, control } = form
+  const values = useWatch({ control }) as VehicleInfoFormValues
   const errors = formState.errors as FieldErrors<VehicleInfoFormValues>
+
+  const brandId = useWatch({
+    control,
+    name: 'brand_id' as Path<T>,
+  }) as string
 
   const { data: brandsData, isError: isBrandsError } = useRiomobVehicleBrands()
   const { data: modelsData, isError: isModelsError } = useRiomobVehicleModels(
-    values.brand_id || null
+    brandId || null
   )
   const { data: colorsData, isError: isColorsError } = useRiomobVehicleColors()
 

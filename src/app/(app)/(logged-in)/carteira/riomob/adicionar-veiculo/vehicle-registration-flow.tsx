@@ -1,13 +1,12 @@
 'use client'
 
-import { createVehicle } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useCreateVehicleMutation } from '@/hooks/riomob/use-riomob-mutations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -49,8 +48,7 @@ export function VehicleRegistrationFlow({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [createdVehicleId, setCreatedVehicleId] = useState('')
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const invalidate = useInvalidateRiomobQueries()
+  const createMutation = useCreateVehicleMutation()
 
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleFormSchema),
@@ -80,8 +78,7 @@ export function VehicleRegistrationFlow({
     },
   })
 
-  const { watch } = form
-  const watchedValues = watch()
+  const watchedValues = useWatch({ control: form.control })
 
   // Recalcula altura do Swiper quando o conteúdo do slide muda (erros, campos condicionais, uploads).
   useEffect(() => {
@@ -130,26 +127,28 @@ export function VehicleRegistrationFlow({
   }, [currentIndex, isSlide1Valid, isSlide2Valid])
 
   const isLastSlide = currentIndex === 1
+  const isPending = createMutation.isPending
 
-  const handleSubmit = useCallback(() => {
-    startTransition(async () => {
-      const isValid = await form.trigger()
-      if (!isValid) return
+  const handleSubmit = useCallback(async () => {
+    const isValid = await form.trigger()
+    if (!isValid) return
 
-      const data = form.getValues()
-      const payload = toCreateVehiclePayload(data)
+    const data = form.getValues()
+    const payload = toCreateVehiclePayload(data)
 
-      const result = await createVehicle(payload)
+    try {
+      const result = await createMutation.mutateAsync(payload)
       if (!result.success || !result.data?.id) {
         toast.error(result.error || 'Não foi possível cadastrar o veículo')
         return
       }
 
-      await invalidate.afterCreate()
       setCreatedVehicleId(result.data.id)
       setDrawerOpen(true)
-    })
-  }, [form, invalidate])
+    } catch {
+      toast.error('Não foi possível cadastrar o veículo')
+    }
+  }, [form, createMutation])
 
   return (
     <div className="min-h-screen w-full bg-background">

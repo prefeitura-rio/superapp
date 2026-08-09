@@ -2,10 +2,15 @@
 
 import {
   actionErrorMessage,
+  parseActionPayload,
   revalidateRiomobPaths,
 } from '@/actions/riomob/utils'
 import type { UpdateVehiclePayload } from '@/app/(app)/(logged-in)/carteira/riomob/[vehicleId]/editar/schema'
 import { patchCitizenCpfVehiclesVehicleId } from '@/http/mobilidade/mobilidade'
+import {
+  updateVehiclePayloadSchema,
+  vehicleIdSchema,
+} from '@/lib/riomob/action-schemas'
 import { toApiUpdateBody } from '@/lib/riomob/mappers'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -20,21 +25,31 @@ export async function updateVehicle(
       return { success: false, error: 'Usuário não autenticado' }
     }
 
+    const idResult = parseActionPayload(vehicleIdSchema, vehicleId)
+    if (!idResult.success) return idResult
+
+    const validated = parseActionPayload(
+      updateVehiclePayloadSchema,
+      payload,
+      'Dados do veículo inválidos'
+    )
+    if (!validated.success) return validated
+
     if (isRiomobMocksEnabled()) {
-      revalidateRiomobPaths(vehicleId)
+      revalidateRiomobPaths(idResult.data)
       return { success: true }
     }
 
-    const body = toApiUpdateBody(payload)
+    const body = toApiUpdateBody(validated.data)
 
     const response = await patchCitizenCpfVehiclesVehicleId(
       user.cpf,
-      vehicleId,
+      idResult.data,
       body
     )
 
     if (response.status === 200) {
-      revalidateRiomobPaths(vehicleId)
+      revalidateRiomobPaths(idResult.data)
       return { success: true }
     }
 

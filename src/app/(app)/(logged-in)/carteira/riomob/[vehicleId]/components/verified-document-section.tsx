@@ -1,25 +1,22 @@
 'use client'
 
-import { DocumentFileCard } from '@/app/(app)/(logged-in)/carteira/riomob/components/document-file-card'
-import { PdfPreviewDialog } from '@/app/(app)/(logged-in)/carteira/riomob/components/pdf-preview-dialog'
+import { DocumentFileCard } from '@/app/components/riomob/document-file-card'
+import { PdfPreviewDialog } from '@/app/components/riomob/pdf-preview-dialog'
 import {
   useInvalidateRiomobSignedUrl,
   useRiomobSignedUrl,
 } from '@/hooks/riomob/use-riomob-signed-url'
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { isPdfName } from '@/lib/riomob/file-utils'
 import type { VehicleDocument } from '@/lib/riomob/types'
 import { FileText, ImageIcon } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
 interface VerifiedDocumentSectionProps {
   message: string
   document: VehicleDocument
   vehicleId: string
-}
-
-function isPdfName(name?: string | null) {
-  return !!name && /\.pdf$/i.test(name)
 }
 
 export function VerifiedDocumentSection({

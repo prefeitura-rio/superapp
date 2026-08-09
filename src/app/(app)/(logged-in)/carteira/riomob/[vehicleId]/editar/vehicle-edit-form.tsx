@@ -1,12 +1,11 @@
 'use client'
 
-import { updateVehicle } from '@/actions/riomob'
 import { SerialPhotosFields } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/serial-photos-fields'
 import { VehicleInfoFields } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/vehicle-info-fields'
 import type { VehicleFormData } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/schema'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useUpdateVehicleMutation } from '@/hooks/riomob/use-riomob-mutations'
 import type { VehicleDetail } from '@/lib/riomob/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -35,8 +34,7 @@ interface VehicleEditFormProps {
 
 export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const router = useRouter()
-  const invalidate = useInvalidateRiomobQueries()
-  const [isPending, setIsPending] = useState(false)
+  const updateMutation = useUpdateVehicleMutation(vehicle.id)
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const detailPath = `/carteira/riomob/${vehicle.id}`
   const returnUrl = `/carteira/riomob/${vehicle.id}/editar`
@@ -53,23 +51,18 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const onSubmit = handleSubmit(async data => {
     if (!contactOk) return
 
-    setIsPending(true)
     try {
-      const result = await updateVehicle(
-        vehicle.id,
+      const result = await updateMutation.mutateAsync(
         toUpdateVehiclePayload(data)
       )
       if (!result.success) {
         toast.error(result.error || 'Não foi possível salvar')
         return
       }
-      await invalidate.afterUpdate(vehicle.id)
       toast.success('Veículo atualizado')
       router.push(detailPath)
     } catch {
       toast.error('Não foi possível salvar')
-    } finally {
-      setIsPending(false)
     }
   })
 
@@ -105,8 +98,10 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
             type="submit"
             size="lg"
             fullWidth
-            loading={isPending}
-            disabled={isPending || isUploadingFiles || !contactOk}
+            loading={updateMutation.isPending}
+            disabled={
+              updateMutation.isPending || isUploadingFiles || !contactOk
+            }
           >
             Salvar
           </CustomButton>

@@ -1,14 +1,14 @@
 'use client'
 
-import {
-  VEHICLE_TYPE_LABELS,
-  type VehicleType,
-} from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/mocks/vehicle-catalog'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   useInvalidateRiomobSignedUrl,
   useRiomobSignedUrl,
 } from '@/hooks/riomob/use-riomob-signed-url'
+import {
+  VEHICLE_TYPE_LABELS,
+  type VehicleType,
+} from '@/lib/riomob/catalog-constants'
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { VEHICLE_CATEGORY_LABELS, type WalletVehicle } from '@/lib/riomob/types'
 import { cn } from '@/lib/utils'

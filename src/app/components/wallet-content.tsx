@@ -1,6 +1,6 @@
 'use client'
 
-import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
+import { PendingInviteAccordion } from '@/app/components/riomob/pending-invite-accordion'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import {
@@ -14,7 +14,12 @@ import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
 import { useRiomobInvitations } from '@/hooks/riomob/use-riomob-invitations'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
-import type { ModelsPet } from '@/http/models'
+import type {
+  ModelsCitizenWallet,
+  ModelsMaintenanceRequest,
+  ModelsPet,
+} from '@/http/models'
+import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -23,10 +28,10 @@ import { useCallback, useState } from 'react'
 
 interface WalletContentProps {
   pets: ModelsPet[]
-  walletData: any
-  maintenanceRequests: any[] | undefined
-  healthUnitData: any
-  healthUnitRiskData: any
+  walletData?: ModelsCitizenWallet
+  maintenanceRequests?: ModelsMaintenanceRequest[]
+  healthUnitData?: HealthUnitInfo
+  healthUnitRiskData?: HealthUnitRisk
 }
 
 export function WalletContent({

@@ -1,7 +1,11 @@
 'use client'
 
-import type { ModelsCitizenWallet } from '@/http/models'
+import type {
+  ModelsCitizenWallet,
+  ModelsMaintenanceRequest,
+} from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
+import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
   formatMaintenanceRequestsCount,
@@ -25,9 +29,9 @@ import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
 
 interface WalletCardsWrapperProps {
   walletData?: ModelsCitizenWallet
-  maintenanceRequests?: any[]
-  healthUnitData?: any
-  healthUnitRiskData?: any
+  maintenanceRequests?: ModelsMaintenanceRequest[]
+  healthUnitData?: HealthUnitInfo
+  healthUnitRiskData?: HealthUnitRisk
 }
 
 export function WalletCardsWrapper({

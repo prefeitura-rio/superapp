@@ -1,10 +1,9 @@
 'use client'
 
-import { removeConductor } from '@/actions/riomob'
 import { TrashIcon } from '@/assets/icons/trash-icon'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useRemoveConductorMutation } from '@/hooks/riomob/use-riomob-mutations'
 import type { AuthorizedConductor } from '@/lib/riomob/types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { RemoveConductorDrawer } from './remove-conductor-drawer'
 
@@ -15,41 +14,29 @@ interface AuthorizedConductorsSectionProps {
 
 export function AuthorizedConductorsSection({
   vehicleId,
-  conductors: initialConductors,
+  conductors,
 }: AuthorizedConductorsSectionProps) {
-  const invalidate = useInvalidateRiomobQueries()
-  const [conductors, setConductors] = useState(initialConductors)
+  const removeMutation = useRemoveConductorMutation(vehicleId)
   const [selected, setSelected] = useState<AuthorizedConductor | null>(null)
-  const [isPending, setIsPending] = useState(false)
-
-  useEffect(() => {
-    setConductors(initialConductors)
-  }, [initialConductors])
 
   const handleOpenChange = (open: boolean) => {
-    if (!open && !isPending) setSelected(null)
+    if (!open && !removeMutation.isPending) setSelected(null)
   }
 
   const handleConfirm = async () => {
     if (!selected) return
 
-    setIsPending(true)
     try {
-      const result = await removeConductor(vehicleId, selected.id)
+      const result = await removeMutation.mutateAsync(selected.id)
       if (!result.success) {
         toast.error(result.error || 'Não foi possível remover o condutor')
         return
       }
 
-      await invalidate.afterConductorChange(vehicleId)
-      const removedId = selected.id
-      setConductors(current => current.filter(c => c.id !== removedId))
       setSelected(null)
       toast.success('Condutor removido')
     } catch {
       toast.error('Não foi possível remover o condutor')
-    } finally {
-      setIsPending(false)
     }
   }
 
@@ -101,7 +88,7 @@ export function AuthorizedConductorsSection({
         open={selected !== null}
         onOpenChange={handleOpenChange}
         onConfirm={handleConfirm}
-        isPending={isPending}
+        isPending={removeMutation.isPending}
       />
     </>
   )

@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/copy-pdfjs-worker.mjs",
     "build": "next build",
     "start": "next start",
+    "postinstall": "node scripts/copy-pdfjs-worker.mjs",
     "prepare": "lefthook install",
     "lint": "biome check . --files-ignore-unknown=true --no-errors-on-unmatched",
     "format": "biome check --write . --files-ignore-unknown=true --no-errors-on-unmatched",

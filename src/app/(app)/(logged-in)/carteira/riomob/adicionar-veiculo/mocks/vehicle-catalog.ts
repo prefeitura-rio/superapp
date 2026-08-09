@@ -1,43 +1,19 @@
-export type VehicleType = 'bicicleta_eletrica' | 'autopropelido' | 'ciclomotor'
+import {
+  OTHER_BRAND_ID,
+  OTHER_MODEL_ID,
+  type VehicleType,
+} from '@/lib/riomob/catalog-constants'
 
-export const OTHER_BRAND_ID = 'brand_outro'
-export const OTHER_MODEL_ID = 'model_outro'
-
-export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
-  bicicleta_eletrica: 'Bicicleta elétrica',
-  autopropelido: 'Autopropelido',
-  ciclomotor: 'Ciclomotor',
-}
-
-export const VEHICLE_TYPE_OPTIONS = (
-  Object.entries(VEHICLE_TYPE_LABELS) as [VehicleType, string][]
-).map(([value, label]) => ({ value, label }))
-
-export const VEHICLE_COLORS = [
-  'Amarelo',
-  'Azul',
-  'Azul Claro',
-  'Azul Escuro',
-  'Bege',
-  'Branco',
-  'Bronze',
-  'Cereja',
-  'Cinza',
-  'Creme',
-  'Dourado',
-  'Laranja',
-  'Lilás',
-  'Marrom',
-  'Preto',
-  'Prata',
-  'Rosa',
-  'Roxo',
-  'Verde',
-  'Verde Claro',
-  'Verde Escuro',
-  'Vermelho',
-  'Vinho',
-] as const
+export type { VehicleType }
+export {
+  OTHER_BRAND_ID,
+  OTHER_MODEL_ID,
+  VEHICLE_COLORS,
+  VEHICLE_TYPE_LABELS,
+  VEHICLE_TYPE_OPTIONS,
+  isOtherBrand,
+  isOtherModel,
+} from '@/lib/riomob/catalog-constants'
 
 export interface VehicleBrand {
   id: string
@@ -51,7 +27,7 @@ export interface VehicleModel {
   vehicle_type: VehicleType
 }
 
-/** Catálogo mock — substituir por GET /riomob/vehicle-brands e /vehicle-models. */
+/** Catálogo mock — usado quando NEXT_PUBLIC_RIOMOB_USE_MOCKS ≠ false. */
 export const VEHICLE_BRANDS: VehicleBrand[] = [
   { id: 'brand_caloi', name: 'Caloi' },
   { id: 'brand_oggi', name: 'Oggi' },
@@ -124,12 +100,4 @@ export function getBrandById(brandId: string | null | undefined) {
 export function getModelById(modelId: string | null | undefined) {
   if (!modelId) return undefined
   return VEHICLE_MODELS.find(model => model.id === modelId)
-}
-
-export function isOtherBrand(brandId: string | null | undefined) {
-  return brandId === OTHER_BRAND_ID
-}
-
-export function isOtherModel(modelId: string | null | undefined) {
-  return modelId === OTHER_MODEL_ID
 }

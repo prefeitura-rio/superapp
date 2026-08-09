@@ -1,13 +1,12 @@
 'use client'
 
-import { inviteConductor } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
-import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useInviteConductorMutation } from '@/hooks/riomob/use-riomob-mutations'
 import { applyMask } from '@/lib/input-mask'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCallback, useState, useTransition } from 'react'
+import { useCallback, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { ConductorInvitedDrawer } from './conductor-invited-drawer'
@@ -23,10 +22,9 @@ interface ConductorInviteFlowProps {
 
 export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
   const detailPath = `/carteira/riomob/${vehicleId}`
-  const invalidate = useInvalidateRiomobQueries()
+  const inviteMutation = useInviteConductorMutation(vehicleId)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [invitedName, setInvitedName] = useState('')
-  const [isPending, startTransition] = useTransition()
 
   const form = useForm<ConductorInviteFormData>({
     resolver: zodResolver(conductorInviteFormSchema),
@@ -46,25 +44,28 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
     reset,
   } = form
 
-  const handleSubmit = useCallback(() => {
-    startTransition(async () => {
-      const isFormValid = await form.trigger()
-      if (!isFormValid) return
+  const isPending = inviteMutation.isPending
 
-      const data = getValues()
-      const payload = toInviteConductorPayload(data, vehicleId)
+  const handleSubmit = useCallback(async () => {
+    const isFormValid = await form.trigger()
+    if (!isFormValid) return
 
-      const result = await inviteConductor(payload)
+    const data = getValues()
+    const payload = toInviteConductorPayload(data, vehicleId)
+
+    try {
+      const result = await inviteMutation.mutateAsync(payload)
       if (!result.success) {
         toast.error(result.error || 'Não foi possível enviar o convite')
         return
       }
 
-      await invalidate.afterConductorChange(vehicleId)
       setInvitedName(data.name.trim())
       setDrawerOpen(true)
-    })
-  }, [form, getValues, invalidate, vehicleId])
+    } catch {
+      toast.error('Não foi possível enviar o convite')
+    }
+  }, [form, getValues, inviteMutation, vehicleId])
 
   const handleAddAnother = useCallback(() => {
     reset({

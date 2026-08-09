@@ -14,8 +14,8 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-// CDN worker avoids Turbopack/Next bundling issues with pdfjs-dist.
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+// Served from /public (copied from pdfjs-dist on postinstall/prebuild) to avoid Turbopack bundling the worker.
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 interface PdfPreviewDialogProps {
   open: boolean

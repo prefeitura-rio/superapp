@@ -2,9 +2,11 @@
 
 import {
   actionErrorMessage,
+  parseActionPayload,
   revalidateRiomobPaths,
 } from '@/actions/riomob/utils'
 import { deleteCitizenCpfVehiclesVehicleIdConductorsConductorId } from '@/http/mobilidade/mobilidade'
+import { conductorIdSchema, vehicleIdSchema } from '@/lib/riomob/action-schemas'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -18,20 +20,26 @@ export async function removeConductor(
       return { success: false, error: 'Usuário não autenticado' }
     }
 
+    const vehicleIdResult = parseActionPayload(vehicleIdSchema, vehicleId)
+    if (!vehicleIdResult.success) return vehicleIdResult
+
+    const conductorIdResult = parseActionPayload(conductorIdSchema, conductorId)
+    if (!conductorIdResult.success) return conductorIdResult
+
     if (isRiomobMocksEnabled()) {
-      revalidateRiomobPaths(vehicleId)
+      revalidateRiomobPaths(vehicleIdResult.data)
       return { success: true }
     }
 
     const response =
       await deleteCitizenCpfVehiclesVehicleIdConductorsConductorId(
         user.cpf,
-        vehicleId,
-        conductorId
+        vehicleIdResult.data,
+        conductorIdResult.data
       )
 
     if (response.status === 204) {
-      revalidateRiomobPaths(vehicleId)
+      revalidateRiomobPaths(vehicleIdResult.data)
       return { success: true }
     }
 
