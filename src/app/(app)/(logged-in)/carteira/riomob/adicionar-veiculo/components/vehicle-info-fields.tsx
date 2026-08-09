@@ -201,7 +201,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           }
           optionalLabel={phoneNeedsUpdate ? 'Atualizar' : undefined}
           optionalLabelVariant="destructive"
-          rightIcon={<SquarePenIcon />}
+          rightIcon={<SquarePenIcon className="text-foreground-light" />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-telefone?returnUrl=${encodedReturnUrl}`}
         />
 
@@ -220,7 +220,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           }
           optionalLabel={emailNeedsUpdate ? 'Atualizar' : undefined}
           optionalLabelVariant="destructive"
-          rightIcon={<SquarePenIcon />}
+          rightIcon={<SquarePenIcon className="text-foreground-light" />}
           redirectLink={`/meu-perfil/informacoes-pessoais/atualizar-email?returnUrl=${encodedReturnUrl}`}
         />
 
