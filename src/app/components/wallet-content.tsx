@@ -3,7 +3,10 @@
 import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
-import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
+import {
+  VehicleCard,
+  VehicleCardsLoadingSkeleton,
+} from '@/app/components/wallet-cards/vehicle-card'
 import { WalletTabs } from '@/app/components/wallet-tabs'
 import petsEmptyImage from '@/assets/dog-pet.svg'
 import { PlusIcon } from '@/assets/icons'
@@ -81,9 +84,7 @@ export function WalletContent({
             />
 
             {isLoadingVehicles ? (
-              <div className="flex w-full justify-center py-10 text-sm text-muted-foreground">
-                Carregando veículos…
-              </div>
+              <VehicleCardsLoadingSkeleton />
             ) : vehicles.length > 0 ? (
               <div className="flex w-full flex-col items-center gap-6">
                 <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">

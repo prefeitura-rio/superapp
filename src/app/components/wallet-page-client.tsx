@@ -2,6 +2,7 @@
 
 import { SearchButton } from '@/app/components/search-button'
 import { WalletContent } from '@/app/components/wallet-content'
+import { WalletContentLoadingSkeleton } from '@/app/components/wallet-page-loading-skeleton'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { useQuery } from '@tanstack/react-query'
 import { Suspense } from 'react'
@@ -30,19 +31,14 @@ export function WalletPageClient() {
 
   if (isLoading) {
     return (
-      <section className="pb-30 px-4 relative h-full">
+      <section className="pb-30 relative h-full px-4">
         <div className="flex items-center justify-between pt-6 pb-4">
-          <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+          <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
             Carteira
           </h2>
           <SearchButton />
         </div>
-        <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2 pt-2 mt-6">
-          <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
-          <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
-          <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
-          <div className="h-48 rounded-2xl bg-secondary animate-pulse" />
-        </div>
+        <WalletContentLoadingSkeleton />
       </section>
     )
   }
@@ -71,9 +67,9 @@ export function WalletPageClient() {
   }
 
   return (
-    <section className="pb-30 px-4 relative h-full">
+    <section className="pb-30 relative h-full px-4">
       <div className="flex items-center justify-between pt-6 pb-4">
-        <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
+        <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
           Carteira
         </h2>
         <SearchButton />

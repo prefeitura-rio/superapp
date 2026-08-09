@@ -4,6 +4,7 @@ import {
   VEHICLE_TYPE_LABELS,
   type VehicleType,
 } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/mocks/vehicle-catalog'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   useInvalidateRiomobSignedUrl,
   useRiomobSignedUrl,
@@ -13,7 +14,7 @@ import { VEHICLE_CATEGORY_LABELS, type WalletVehicle } from '@/lib/riomob/types'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 
 export function VehicleCard({ vehicle, href, className }: VehicleCardProps) {
   const card = (
@@ -46,6 +47,50 @@ export function VehicleCard({ vehicle, href, className }: VehicleCardProps) {
   }
 
   return card
+}
+
+/** Mimics [`VehicleCard`] layout for the RioMob wallet loading state. */
+export function VehicleCardSkeleton({ className }: { className?: string }) {
+  return (
+    <article
+      className={cn(
+        'relative flex h-45 w-full flex-col justify-between overflow-hidden rounded-2xl bg-muted p-6',
+        className
+      )}
+      aria-hidden
+    >
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-3 w-28 bg-background/70" />
+          <Skeleton className="h-3 w-24 bg-background/70" />
+        </div>
+        <Skeleton className="h-4 w-14 bg-background/70" />
+      </div>
+      <div className="flex w-full items-start gap-4">
+        <Skeleton className="h-17.5 w-15 shrink-0 rounded-lg bg-background/70" />
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
+          <Skeleton className="h-3 w-3/4 bg-background/70" />
+          <Skeleton className="h-3 w-1/2 bg-background/70" />
+          <Skeleton className="h-3 w-2/3 bg-background/70" />
+          <Skeleton className="h-3 w-1/2 bg-background/70" />
+        </div>
+      </div>
+    </article>
+  )
+}
+
+export function VehicleCardsLoadingSkeleton() {
+  return (
+    <div
+      className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2"
+      aria-busy="true"
+      aria-label="Carregando veículos"
+    >
+      {Array.from({ length: 3 }, (_, i) => (
+        <VehicleCardSkeleton key={i} />
+      ))}
+    </div>
+  )
 }
 
 function VehicleCardDecoration() {
