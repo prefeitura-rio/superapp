@@ -1,7 +1,6 @@
 'use client'
 
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { useRouter } from 'next/navigation'
@@ -10,6 +9,7 @@ import toast from 'react-hot-toast'
 import type { VehicleDetail } from '../../mocks/vehicles'
 import { LeaveVehicleDrawer } from './leave-vehicle-drawer'
 import { VehicleActionTiles } from './vehicle-action-tiles'
+import { VehicleCardPhotoGallery } from './vehicle-card-photo-gallery'
 import { VehicleDetailAccordion } from './vehicle-detail-accordion'
 
 interface VehicleDetailPageProps {
@@ -60,7 +60,7 @@ export function VehicleDetailPage({ vehicle }: VehicleDetailPageProps) {
         }
       />
       <div className="flex flex-col gap-6 px-4 pt-2">
-        <VehicleCard vehicle={vehicle} />
+        <VehicleCardPhotoGallery vehicle={vehicle} />
         {!isConductor && (
           <VehicleActionTiles
             vehicleId={vehicle.id}
