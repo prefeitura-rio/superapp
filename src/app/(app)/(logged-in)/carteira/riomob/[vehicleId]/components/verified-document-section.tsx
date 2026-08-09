@@ -55,7 +55,7 @@ export function VerifiedDocumentSection({
         type="button"
         onClick={() => void handleOpen()}
         disabled={isOpening}
-        className="flex w-full items-center rounded-xl bg-secondary p-4 text-left transition-opacity disabled:opacity-70"
+        className="flex cursor-pointer w-full items-center rounded-xl bg-secondary p-4 text-left transition-opacity disabled:opacity-70"
         aria-label={`Abrir ${document.fileName}`}
       >
         <div className="flex min-w-0 items-center gap-4">

@@ -1,5 +1,6 @@
 'use client'
 
+import { SquarePenIcon } from '@/assets/icons'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { UsersIcon } from '@/assets/icons/users-icon'
@@ -20,7 +21,7 @@ export function VehicleActionTiles({
       id: 'edit',
       primaryLabel: 'Editar',
       secondaryLabel: 'veículo',
-      icon: <EditIcon className="size-5 text-foreground" />,
+      icon: <SquarePenIcon className="size-5 text-foreground" />,
       href: `/carteira/riomob/${vehicleId}/editar`,
     },
     {
@@ -64,7 +65,7 @@ function ActionTile({
 }: ActionTileProps) {
   const content = (
     <>
-      <div className="flex h-16 w-full items-center justify-center rounded-2xl bg-card transition-colors group-hover:bg-secondary">
+      <div className="flex stroke-[0.8] h-16 w-full items-center justify-center rounded-2xl bg-card transition-colors group-hover:bg-secondary">
         {icon}
       </div>
       <div className="flex w-full flex-col items-center">
