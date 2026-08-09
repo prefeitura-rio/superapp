@@ -9,6 +9,7 @@ import petsEmptyImage from '@/assets/dog-pet.svg'
 import { PlusIcon } from '@/assets/icons'
 import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
 import { useRiomobInvitations } from '@/hooks/riomob/use-riomob-invitations'
+import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
 import type { ModelsPet } from '@/http/models'
 import { cn } from '@/lib/utils'
@@ -37,11 +38,26 @@ export function WalletContent({
   const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
   const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
 
-  const { data: vehicles = [], isLoading: isLoadingVehicles } =
-    useRiomobVehicles({ enabled: isRiomobView })
-  const { data: invitations = [] } = useRiomobInvitations({
-    enabled: isRiomobView,
-  })
+  const {
+    data: vehicles = [],
+    isLoading: isLoadingVehicles,
+    isError: isVehiclesError,
+  } = useRiomobVehicles({ enabled: isRiomobView })
+  const { data: invitations = [], isError: isInvitationsError } =
+    useRiomobInvitations({
+      enabled: isRiomobView,
+    })
+
+  useRiomobQueryErrorToast(
+    isVehiclesError,
+    'Não foi possível carregar os veículos',
+    'riomob-vehicles-error'
+  )
+  useRiomobQueryErrorToast(
+    isInvitationsError,
+    'Não foi possível carregar os convites',
+    'riomob-invitations-error'
+  )
 
   const [pendingInviteCount, setPendingInviteCount] = useState(0)
   const handleInvitesChange = useCallback((count: number) => {

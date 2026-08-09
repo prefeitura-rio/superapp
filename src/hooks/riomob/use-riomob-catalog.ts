@@ -9,6 +9,7 @@ import {
   riomobCatalogColorsQueryKey,
   riomobCatalogModelsQueryKey,
 } from '@/hooks/riomob/riomob-fetch'
+import { RIOMOB_QUERY_RETRY } from '@/lib/riomob/query-keys'
 import { useQuery } from '@tanstack/react-query'
 
 export function useRiomobVehicleBrands() {
@@ -16,6 +17,7 @@ export function useRiomobVehicleBrands() {
     queryKey: riomobCatalogBrandsQueryKey(),
     queryFn: fetchRiomobBrands,
     staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
   })
 }
 
@@ -24,6 +26,7 @@ export function useRiomobVehicleModels(brandId: string | null | undefined) {
     queryKey: riomobCatalogModelsQueryKey(brandId ?? ''),
     queryFn: () => fetchRiomobModels(brandId as string),
     staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
     enabled: Boolean(brandId),
   })
 }
@@ -33,5 +36,6 @@ export function useRiomobVehicleColors() {
     queryKey: riomobCatalogColorsQueryKey(),
     queryFn: fetchRiomobColors,
     staleTime: RIOMOB_CATALOG_STALE_MS,
+    retry: RIOMOB_QUERY_RETRY,
   })
 }

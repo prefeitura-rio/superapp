@@ -9,6 +9,7 @@ import {
   useRiomobVehicleColors,
   useRiomobVehicleModels,
 } from '@/hooks/riomob/use-riomob-catalog'
+import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { formatCpf } from '@/lib/format-cpf'
 import { cn, formatTitleCase } from '@/lib/utils'
 import type { FieldErrors, UseFormReturn } from 'react-hook-form'
@@ -16,9 +17,6 @@ import { SelectOptionDrawerContent } from '../drawers/select-option-drawer-conte
 import {
   OTHER_BRAND_ID,
   OTHER_MODEL_ID,
-  VEHICLE_BRANDS,
-  VEHICLE_COLORS,
-  VEHICLE_MODELS,
   VEHICLE_TYPE_LABELS,
   VEHICLE_TYPE_OPTIONS,
   type VehicleType,
@@ -70,15 +68,41 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   const values = watch()
   const errors = formState.errors as FieldErrors<VehicleInfoFormValues>
 
-  const { data: brandsData } = useRiomobVehicleBrands()
-  const { data: modelsData } = useRiomobVehicleModels(values.brand_id || null)
-  const { data: colorsData } = useRiomobVehicleColors()
+  const { data: brandsData, isError: isBrandsError } = useRiomobVehicleBrands()
+  const { data: modelsData, isError: isModelsError } = useRiomobVehicleModels(
+    values.brand_id || null
+  )
+  const { data: colorsData, isError: isColorsError } = useRiomobVehicleColors()
 
-  const brands = brandsData?.length ? brandsData : VEHICLE_BRANDS
-  const models = modelsData?.length
-    ? modelsData
-    : VEHICLE_MODELS.filter(model => model.brand_id === values.brand_id)
-  const colors = colorsData?.length ? colorsData : [...VEHICLE_COLORS]
+  useRiomobQueryErrorToast(
+    isBrandsError,
+    'Não foi possível carregar as marcas',
+    'riomob-catalog-brands-error'
+  )
+  useRiomobQueryErrorToast(
+    isModelsError,
+    'Não foi possível carregar os modelos',
+    'riomob-catalog-models-error'
+  )
+  useRiomobQueryErrorToast(
+    isColorsError,
+    'Não foi possível carregar as cores',
+    'riomob-catalog-colors-error'
+  )
+
+  const brands = brandsData ?? []
+  const models = modelsData ?? []
+  const colors = colorsData ?? []
+
+  const brandsErrorMessage = isBrandsError
+    ? 'Não foi possível carregar as marcas.'
+    : undefined
+  const modelsErrorMessage = isModelsError
+    ? 'Não foi possível carregar os modelos.'
+    : undefined
+  const colorsErrorMessage = isColorsError
+    ? 'Não foi possível carregar as cores.'
+    : undefined
 
   const brand = brands.find(item => item.id === values.brand_id)
   const model = models.find(item => item.id === values.model_id)
@@ -266,6 +290,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
               name="vehicle-color"
               options={colors}
               value={values.color}
+              errorMessage={colorsErrorMessage}
               onSelect={color =>
                 setValue('color' as never, color as never, {
                   shouldValidate: true,
@@ -292,6 +317,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
                 value: item.id,
               }))}
               value={values.brand_id}
+              errorMessage={brandsErrorMessage}
               onSelect={handleBrandSelect}
               searchPlaceholder="Encontre a marca desejada"
               emptySearchMessage="Não encontramos nenhuma marca com o nome informado."
@@ -326,6 +352,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
                     ? values.model_id || OTHER_MODEL_ID
                     : values.model_id
                 }
+                errorMessage={modelsErrorMessage}
                 onSelect={handleModelSelect}
                 searchPlaceholder={
                   brandIsOther ? undefined : 'Encontre o modelo desejado'

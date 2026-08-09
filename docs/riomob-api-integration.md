@@ -21,6 +21,8 @@ Upload GCS continua em `/api/riomob/files/*` (sem mudança).
 
 Gate único: [`src/lib/riomob/mocks-gate.ts`](../src/lib/riomob/mocks-gate.ts).
 
+Com mocks OFF, falha de GET **não** cai em fixture no client: a UI dispara toast de erro; no catálogo (marcas/modelos/cores) o bottomsheet mostra “Não foi possível carregar…”.
+
 ## Cache após mutation
 
 1. **Server Action** chama `revalidatePath('/carteira')` e paths do veículo.

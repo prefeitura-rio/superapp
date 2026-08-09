@@ -5,6 +5,7 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicle } from '@/hooks/riomob/use-riomob-vehicle'
 import type { VehicleDetail } from '@/lib/riomob/types'
 import { useRouter } from 'next/navigation'
@@ -24,9 +25,16 @@ export function VehicleDetailPage({
 }: VehicleDetailPageProps) {
   const router = useRouter()
   const invalidate = useInvalidateRiomobQueries()
-  const { data: vehicle = initialVehicle } = useRiomobVehicle(
-    initialVehicle.id,
-    { initialData: initialVehicle }
+  const {
+    data: vehicle = initialVehicle,
+    isError,
+    isFetchedAfterMount,
+  } = useRiomobVehicle(initialVehicle.id, { initialData: initialVehicle })
+
+  useRiomobQueryErrorToast(
+    isError && isFetchedAfterMount,
+    'Não foi possível atualizar os dados do veículo',
+    `riomob-vehicle-error-${initialVehicle.id}`
   )
   const isConductor = vehicle.category === 'condutor'
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false)

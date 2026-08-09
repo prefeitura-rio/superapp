@@ -22,6 +22,8 @@ interface SelectOptionDrawerContentProps {
   searchPlaceholder?: string
   /** Shown when search has no matches (Outro still listed below). */
   emptySearchMessage?: string
+  /** When set (e.g. API load failure), shows this instead of the option list. */
+  errorMessage?: string
   /** Value of the "Outro" option — selecting it keeps the drawer open for free text. */
   otherOptionValue?: string
   otherInputPlaceholder?: string
@@ -53,6 +55,7 @@ export function SelectOptionDrawerContent({
   name = 'select-option',
   searchPlaceholder,
   emptySearchMessage,
+  errorMessage,
   otherOptionValue,
   otherInputPlaceholder = 'Escreva aqui',
   initialOtherText = '',
@@ -128,6 +131,16 @@ export function SelectOptionDrawerContent({
     if (!otherOptionValue || !canSubmitOther) return
     onConfirmOther?.(otherText.trim())
     onClose?.()
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="flex w-full flex-col py-2">
+        <p className="text-center text-sm font-normal leading-5 text-muted-foreground">
+          {errorMessage}
+        </p>
+      </div>
+    )
   }
 
   return (

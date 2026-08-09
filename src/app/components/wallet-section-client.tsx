@@ -1,6 +1,7 @@
 'use client'
 
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
+import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
 import type {
   ModelsCitizenWallet,
@@ -40,7 +41,13 @@ export default function WalletSectionClient() {
     queryFn: fetchWalletData,
     staleTime: 5 * 60 * 1000,
   })
-  const { data: vehicles = [] } = useRiomobVehicles()
+  const { data: vehicles = [], isError: isVehiclesError } = useRiomobVehicles()
+
+  useRiomobQueryErrorToast(
+    isVehiclesError,
+    'Não foi possível carregar os veículos',
+    'riomob-vehicles-error'
+  )
 
   if (isLoading) {
     return (
