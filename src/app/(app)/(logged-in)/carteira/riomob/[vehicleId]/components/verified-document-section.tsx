@@ -7,10 +7,10 @@ import {
   useRiomobSignedUrl,
 } from '@/hooks/riomob/use-riomob-signed-url'
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import type { VehicleDocument } from '@/lib/riomob/types'
 import { FileText, ImageIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { VehicleDocument } from '../../mocks/vehicles'
 
 interface VerifiedDocumentSectionProps {
   message: string

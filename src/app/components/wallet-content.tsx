@@ -1,7 +1,6 @@
 'use client'
 
 import { PendingInviteAccordion } from '@/app/(app)/(logged-in)/carteira/riomob/components/pending-invite-accordion'
-import { MOCK_PENDING_INVITES } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/pending-invites'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
@@ -9,8 +8,9 @@ import { WalletTabs } from '@/app/components/wallet-tabs'
 import petsEmptyImage from '@/assets/dog-pet.svg'
 import { PlusIcon } from '@/assets/icons'
 import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
+import { useRiomobInvitations } from '@/hooks/riomob/use-riomob-invitations'
+import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
 import type { ModelsPet } from '@/http/models'
-import { getRiomobWalletVehicles } from '@/lib/riomob/vehicles'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -36,10 +36,14 @@ export function WalletContent({
   const isRiomobView = searchParams.get('riomob') === 'true'
   const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
   const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
-  const vehicles = getRiomobWalletVehicles()
-  const [pendingInviteCount, setPendingInviteCount] = useState(
-    MOCK_PENDING_INVITES.length
-  )
+
+  const { data: vehicles = [], isLoading: isLoadingVehicles } =
+    useRiomobVehicles({ enabled: isRiomobView })
+  const { data: invitations = [] } = useRiomobInvitations({
+    enabled: isRiomobView,
+  })
+
+  const [pendingInviteCount, setPendingInviteCount] = useState(0)
   const handleInvitesChange = useCallback((count: number) => {
     setPendingInviteCount(count)
   }, [])
@@ -56,10 +60,15 @@ export function WalletContent({
           <div className="pb-10 w-full">
             <PendingInviteAccordion
               className="mb-6"
+              invitations={invitations}
               onInvitesChange={handleInvitesChange}
             />
 
-            {vehicles.length > 0 ? (
+            {isLoadingVehicles ? (
+              <div className="flex w-full justify-center py-10 text-sm text-muted-foreground">
+                Carregando veículos…
+              </div>
+            ) : vehicles.length > 0 ? (
               <div className="flex w-full flex-col items-center gap-6">
                 <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">
                   {vehicles.map(vehicle => (
@@ -173,10 +182,6 @@ export function WalletContent({
                   <h2 className="text-3xl font-medium text-foreground leading-9">
                     Você ainda não tem um animal cadastrado
                   </h2>
-                  {/* <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
-                        Adicione as informações do seu bichinho para visualizar
-                        a carteira dele.
-                      </p> */}
                   <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
                     Conheça o{' '}
                     <Link
@@ -188,15 +193,6 @@ export function WalletContent({
                     </Link>
                   </p>
                 </div>
-
-                {/* <div className="mt-6 px-4 w-full">
-                      <Link
-                        href="/carteira/pet/adicionar"
-                        className="flex items-center justify-center w-full py-4 px-6 rounded-full bg-primary text-white text-sm"
-                      >
-                        Adicionar animal
-                      </Link>
-                    </div> */}
               </div>
             )}
           </div>

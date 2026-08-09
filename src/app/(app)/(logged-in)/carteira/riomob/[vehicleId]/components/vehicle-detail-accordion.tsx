@@ -7,8 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import type { VehicleDetail } from '@/lib/riomob/types'
 import type { ReactNode } from 'react'
-import type { VehicleDetail } from '../../mocks/vehicles'
 import { AuthorizedConductorsSection } from './authorized-conductors-section'
 import { CirculationRulesSection } from './circulation-rules-section'
 import { GeneralInfoSection } from './general-info-section'
@@ -59,6 +59,7 @@ export function VehicleDetailAccordion({
           title="Condutores autorizados"
         >
           <AuthorizedConductorsSection
+            vehicleId={vehicle.id}
             conductors={vehicle.authorizedConductors}
           />
         </DetailAccordionItem>

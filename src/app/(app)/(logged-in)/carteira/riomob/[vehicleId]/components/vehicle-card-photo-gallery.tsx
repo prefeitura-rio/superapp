@@ -4,7 +4,7 @@ import { VehicleCard } from '@/app/components/wallet-cards/vehicle-card'
 import { useRiomobSignedUrl } from '@/hooks/riomob/use-riomob-signed-url'
 import { PhotoProvider, PhotoView } from 'react-photo-view'
 import 'react-photo-view/dist/react-photo-view.css'
-import type { VehicleDetail } from '../../mocks/vehicles'
+import type { VehicleDetail } from '@/lib/riomob/types'
 
 interface VehicleCardPhotoGalleryProps {
   vehicle: VehicleDetail

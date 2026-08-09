@@ -127,7 +127,7 @@ function PdfDocumentViewer({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg bg-secondary p-2">
+      <div className="min-h-0 flex-1 overflow-auto rounded-lg  p-2">
         <Document
           file={fileSource}
           loading={

@@ -1,5 +1,6 @@
 'use client'
 
+import { respondInvitation } from '@/actions/riomob'
 import {
   Accordion,
   AccordionContent,
@@ -7,14 +8,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import type { PendingConductorInvite } from '@/lib/riomob/types'
 import { cn } from '@/lib/utils'
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import {
-  MOCK_PENDING_INVITES,
-  type PendingConductorInvite,
-  sortPendingInvitesByMostRecent,
-} from '../mocks/pending-invites'
 import { AcceptInviteDrawer } from './accept-invite-drawer'
 import { DeclineInviteDrawer } from './decline-invite-drawer'
 import { VehicleInviteAcceptedDrawer } from './vehicle-invite-accepted-drawer'
@@ -23,17 +21,17 @@ interface PendingInviteAccordionProps {
   className?: string
   /** When set, only the N most recent invites are shown (e.g. 1 on home). */
   maxVisible?: number
+  invitations?: PendingConductorInvite[]
   onInvitesChange?: (count: number) => void
 }
 
 export function PendingInviteAccordion({
   className,
   maxVisible,
+  invitations = [],
   onInvitesChange,
 }: PendingInviteAccordionProps) {
-  const [invites, setInvites] = useState(() =>
-    sortPendingInvitesByMostRecent(MOCK_PENDING_INVITES)
-  )
+  const invalidate = useInvalidateRiomobQueries()
   const [openItem, setOpenItem] = useState<string>('')
   const [selectedInvite, setSelectedInvite] =
     useState<PendingConductorInvite | null>(null)
@@ -44,18 +42,13 @@ export function PendingInviteAccordion({
   const [isDeclining, setIsDeclining] = useState(false)
 
   const visibleInvites = useMemo(() => {
-    if (maxVisible == null) return invites
-    return invites.slice(0, maxVisible)
-  }, [invites, maxVisible])
+    if (maxVisible == null) return invitations
+    return invitations.slice(0, maxVisible)
+  }, [invitations, maxVisible])
 
   useEffect(() => {
-    onInvitesChange?.(invites.length)
-  }, [invites.length, onInvitesChange])
-
-  function removeInvite(inviteId: string) {
-    setInvites(current => current.filter(invite => invite.id !== inviteId))
-    setOpenItem('')
-  }
+    onInvitesChange?.(invitations.length)
+  }, [invitations.length, onInvitesChange])
 
   function handleAcceptClick(invite: PendingConductorInvite) {
     setSelectedInvite(invite)
@@ -67,9 +60,16 @@ export function PendingInviteAccordion({
 
     setIsAccepting(true)
     try {
-      // Mock accept — trocar por action/Orval
-      await new Promise(resolve => setTimeout(resolve, 600))
-      removeInvite(selectedInvite.id)
+      const result = await respondInvitation(
+        selectedInvite.id,
+        'accepted',
+        selectedInvite.vehicleId
+      )
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível aceitar o convite.')
+        return
+      }
+      await invalidate.afterAcceptInvitation()
       setIsAcceptOpen(false)
       setSelectedInvite(null)
       setIsSuccessOpen(true)
@@ -90,9 +90,16 @@ export function PendingInviteAccordion({
 
     setIsDeclining(true)
     try {
-      // Mock decline — trocar por action/Orval
-      await new Promise(resolve => setTimeout(resolve, 600))
-      removeInvite(selectedInvite.id)
+      const result = await respondInvitation(
+        selectedInvite.id,
+        'rejected',
+        selectedInvite.vehicleId
+      )
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível recusar o convite.')
+        return
+      }
+      await invalidate.afterRejectInvitation()
       setIsDeclineOpen(false)
       setSelectedInvite(null)
       toast.success('Convite recusado')
@@ -104,7 +111,7 @@ export function PendingInviteAccordion({
   }
 
   if (
-    invites.length === 0 &&
+    invitations.length === 0 &&
     !isSuccessOpen &&
     !isDeclineOpen &&
     !isAcceptOpen

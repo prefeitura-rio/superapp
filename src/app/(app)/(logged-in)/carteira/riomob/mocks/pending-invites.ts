@@ -1,11 +1,6 @@
-export interface PendingConductorInvite {
-  id: string
-  inviterDisplayName: string
-  vehicleDisplayName: string
-  vehicleId: string
-  /** ISO timestamp — used to pick the most recent invite. */
-  invitedAt: string
-}
+import type { PendingConductorInvite } from '@/lib/riomob/types'
+
+export type { PendingConductorInvite }
 
 /** Mock temporário — substituir por GET de convites pendentes do cidadão. */
 export const MOCK_PENDING_INVITES: PendingConductorInvite[] = [

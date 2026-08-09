@@ -1,3 +1,4 @@
+import type { VehicleDetail } from '@/lib/riomob/types'
 import {
   type VehicleType,
   isOtherBrand,
@@ -7,7 +8,6 @@ import {
   type VehicleFormData,
   vehicleFormSchema,
 } from '../../adicionar-veiculo/schema'
-import type { VehicleDetail } from '../../mocks/vehicles'
 
 export { vehicleFormSchema as vehicleEditFormSchema }
 export type { VehicleFormData as VehicleEditFormData }

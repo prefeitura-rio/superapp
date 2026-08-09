@@ -4,6 +4,11 @@ import { ActionDiv } from '@/app/components/action-div'
 import { ChevronDownIcon } from '@/assets/icons/chevron-down-icon'
 import { SquarePenIcon } from '@/assets/icons/square-pen-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
+import {
+  useRiomobVehicleBrands,
+  useRiomobVehicleColors,
+  useRiomobVehicleModels,
+} from '@/hooks/riomob/use-riomob-catalog'
 import { formatCpf } from '@/lib/format-cpf'
 import { cn, formatTitleCase } from '@/lib/utils'
 import type { FieldErrors, UseFormReturn } from 'react-hook-form'
@@ -13,12 +18,10 @@ import {
   OTHER_MODEL_ID,
   VEHICLE_BRANDS,
   VEHICLE_COLORS,
+  VEHICLE_MODELS,
   VEHICLE_TYPE_LABELS,
   VEHICLE_TYPE_OPTIONS,
   type VehicleType,
-  getBrandById,
-  getModelById,
-  getModelsByBrandId,
   isOtherBrand,
   isOtherModel,
 } from '../mocks/vehicle-catalog'
@@ -67,11 +70,24 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   const values = watch()
   const errors = formState.errors as FieldErrors<VehicleInfoFormValues>
 
-  const brand = getBrandById(values.brand_id)
-  const model = getModelById(values.model_id)
-  const brandIsOther = isOtherBrand(values.brand_id)
-  const modelIsOther = isOtherModel(values.model_id)
-  const models = values.brand_id ? getModelsByBrandId(values.brand_id) : []
+  const { data: brandsData } = useRiomobVehicleBrands()
+  const { data: modelsData } = useRiomobVehicleModels(values.brand_id || null)
+  const { data: colorsData } = useRiomobVehicleColors()
+
+  const brands = brandsData?.length ? brandsData : VEHICLE_BRANDS
+  const models = modelsData?.length
+    ? modelsData
+    : VEHICLE_MODELS.filter(model => model.brand_id === values.brand_id)
+  const colors = colorsData?.length ? colorsData : [...VEHICLE_COLORS]
+
+  const brand = brands.find(item => item.id === values.brand_id)
+  const model = models.find(item => item.id === values.model_id)
+  const brandIsOther =
+    isOtherBrand(values.brand_id) ||
+    Boolean(brand && 'isOther' in brand && brand.isOther)
+  const modelIsOther =
+    isOtherModel(values.model_id) ||
+    Boolean(model && 'isOther' in model && model.isOther)
   const typeIsSelectable = brandIsOther || modelIsOther
 
   const brandHasValue = !!values.brand_id
@@ -142,7 +158,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
       return
     }
 
-    const selectedModel = getModelById(modelId)
+    const selectedModel = models.find(item => item.id === modelId)
     if (selectedModel) {
       setValue('vehicle_type' as never, selectedModel.vehicle_type as never, {
         shouldValidate: true,
@@ -248,7 +264,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           drawerContent={
             <SelectOptionDrawerContent
               name="vehicle-color"
-              options={[...VEHICLE_COLORS]}
+              options={colors}
               value={values.color}
               onSelect={color =>
                 setValue('color' as never, color as never, {
@@ -271,7 +287,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
           drawerContent={
             <SelectOptionDrawerContent
               name="vehicle-brand"
-              options={VEHICLE_BRANDS.map(item => ({
+              options={brands.map(item => ({
                 label: item.name,
                 value: item.id,
               }))}

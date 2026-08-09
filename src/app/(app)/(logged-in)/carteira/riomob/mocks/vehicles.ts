@@ -1,64 +1,20 @@
-import type { VehicleType } from '../adicionar-veiculo/mocks/vehicle-catalog'
+import type {
+  VehicleDetail,
+  VehicleType,
+  WalletVehicle,
+} from '@/lib/riomob/types'
 
-export type VehicleCategory = 'proprietaria' | 'condutor'
-
-export const VEHICLE_CATEGORY_LABELS: Record<VehicleCategory, string> = {
-  proprietaria: 'Proprietária',
-  condutor: 'Condutor',
-}
-
-export interface WalletVehicle {
-  id: string
-  displayName: string
-  vehicleType: VehicleType
-  registrationNumber: string
-  category: VehicleCategory
-  photoUrl: string
-}
-
-export interface VehicleDocument {
-  fileName: string
-  fileSizeLabel: string
-  fileSizeBytes: number
-  url: string
-  verified: true
-}
-
-export interface VehiclePhoto {
-  url: string
-  fileName: string
-  fileSizeBytes: number
-}
-
-export interface AuthorizedConductor {
-  id: string
-  name: string
-  cpf: string
-  phone: string
-}
-
-export interface CirculationRule {
-  title: string
-  description: string
-}
-
-export interface VehicleDetail extends WalletVehicle {
-  owner: {
-    name: string
-    cpf: string
-    phone: string
-    email: string
-  }
-  brandModel: string
-  brandId: string
-  modelId: string
-  color: string
-  serialNumber: string
-  serialNumberDocument: VehicleDocument
-  invoiceDocument: VehicleDocument
-  vehiclePhoto: VehiclePhoto
-  authorizedConductors: AuthorizedConductor[]
-}
+export type { VehicleType }
+export type {
+  VehicleCategory,
+  WalletVehicle,
+  VehicleDocument,
+  VehiclePhoto,
+  AuthorizedConductor,
+  CirculationRule,
+  VehicleDetail,
+} from '@/lib/riomob/types'
+export { VEHICLE_CATEGORY_LABELS } from '@/lib/riomob/types'
 
 /** Mock temporário — substituir por GET de veículos do cidadão. */
 const MOCK_INVOICE_PDF_URL =
@@ -94,7 +50,7 @@ export const MOCK_VEHICLES: WalletVehicle[] = [
   },
 ]
 
-export const CIRCULATION_RULES: CirculationRule[] = [
+export const CIRCULATION_RULES = [
   {
     title: 'Calçadas',
     description:
@@ -115,7 +71,7 @@ export const CIRCULATION_RULES: CirculationRule[] = [
     description:
       'É proibida a circulação de ciclomotores, exceto se houver acostamento. Autopropelidos e bicicletas elétricas nunca podem circular nestas vias.',
   },
-]
+] as const
 
 const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
   'vehicle-autopropelido-1': {
@@ -135,7 +91,6 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
       fileName: 'serie-autopropelido.png',
       fileSizeLabel: '2.89MB',
       fileSizeBytes: 2_890_000,
-      // Object URL real (kind vehicle) — signed-read exige path CPF = JWT
       url: MOCK_VEHICLES[0].photoUrl,
       verified: true,
     },

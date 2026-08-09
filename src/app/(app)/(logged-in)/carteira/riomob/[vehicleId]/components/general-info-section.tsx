@@ -1,4 +1,4 @@
-import type { VehicleDetail } from '../../mocks/vehicles'
+import type { VehicleDetail } from '@/lib/riomob/types'
 
 interface GeneralInfoSectionProps {
   vehicle: VehicleDetail

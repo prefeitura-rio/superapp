@@ -2,7 +2,7 @@
 
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import type { AuthorizedConductor } from '../../mocks/vehicles'
+import type { AuthorizedConductor } from '@/lib/riomob/types'
 
 interface RemoveConductorDrawerProps {
   conductor: AuthorizedConductor | null

@@ -1,12 +1,15 @@
 'use client'
 
+import { inviteConductor } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
 import { applyMask } from '@/lib/input-mask'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useState, useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import { ConductorInvitedDrawer } from './conductor-invited-drawer'
 import {
   type ConductorInviteFormData,
@@ -20,6 +23,7 @@ interface ConductorInviteFlowProps {
 
 export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
   const detailPath = `/carteira/riomob/${vehicleId}`
+  const invalidate = useInvalidateRiomobQueries()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [invitedName, setInvitedName] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -50,14 +54,17 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
       const data = getValues()
       const payload = toInviteConductorPayload(data, vehicleId)
 
-      // Mock invite — trocar por action/Orval POST …/conductors
-      await new Promise(resolve => setTimeout(resolve, 600))
-      console.info('[riomob] mock invite conductor payload', payload)
+      const result = await inviteConductor(payload)
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível enviar o convite')
+        return
+      }
 
+      await invalidate.afterConductorChange(vehicleId)
       setInvitedName(data.name.trim())
       setDrawerOpen(true)
     })
-  }, [form, getValues, vehicleId])
+  }, [form, getValues, invalidate, vehicleId])
 
   const handleAddAnother = useCallback(() => {
     reset({

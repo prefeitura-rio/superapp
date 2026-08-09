@@ -5,14 +5,11 @@ import {
   type VehicleType,
 } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/mocks/vehicle-catalog'
 import {
-  VEHICLE_CATEGORY_LABELS,
-  type WalletVehicle,
-} from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
-import {
   useInvalidateRiomobSignedUrl,
   useRiomobSignedUrl,
 } from '@/hooks/riomob/use-riomob-signed-url'
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
+import { VEHICLE_CATEGORY_LABELS, type WalletVehicle } from '@/lib/riomob/types'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'

@@ -1,21 +1,30 @@
 'use client'
 
+import { removeConductor } from '@/actions/riomob'
 import { TrashIcon } from '@/assets/icons/trash-icon'
-import { useState } from 'react'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import type { AuthorizedConductor } from '@/lib/riomob/types'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { AuthorizedConductor } from '../../mocks/vehicles'
 import { RemoveConductorDrawer } from './remove-conductor-drawer'
 
 interface AuthorizedConductorsSectionProps {
+  vehicleId: string
   conductors: AuthorizedConductor[]
 }
 
 export function AuthorizedConductorsSection({
+  vehicleId,
   conductors: initialConductors,
 }: AuthorizedConductorsSectionProps) {
+  const invalidate = useInvalidateRiomobQueries()
   const [conductors, setConductors] = useState(initialConductors)
   const [selected, setSelected] = useState<AuthorizedConductor | null>(null)
   const [isPending, setIsPending] = useState(false)
+
+  useEffect(() => {
+    setConductors(initialConductors)
+  }, [initialConductors])
 
   const handleOpenChange = (open: boolean) => {
     if (!open && !isPending) setSelected(null)
@@ -25,13 +34,23 @@ export function AuthorizedConductorsSection({
     if (!selected) return
 
     setIsPending(true)
-    await new Promise(resolve => setTimeout(resolve, 800))
+    try {
+      const result = await removeConductor(vehicleId, selected.id)
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível remover o condutor')
+        return
+      }
 
-    const removedId = selected.id
-    setConductors(current => current.filter(c => c.id !== removedId))
-    setSelected(null)
-    setIsPending(false)
-    toast.success('Condutor removido')
+      await invalidate.afterConductorChange(vehicleId)
+      const removedId = selected.id
+      setConductors(current => current.filter(c => c.id !== removedId))
+      setSelected(null)
+      toast.success('Condutor removido')
+    } catch {
+      toast.error('Não foi possível remover o condutor')
+    } finally {
+      setIsPending(false)
+    }
   }
 
   if (conductors.length === 0) {

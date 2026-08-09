@@ -1,4 +1,5 @@
-import { CIRCULATION_RULES, type CirculationRule } from '../../mocks/vehicles'
+import type { CirculationRule } from '@/lib/riomob/types'
+import { CIRCULATION_RULES } from '../../mocks/vehicles'
 
 export function CirculationRulesSection() {
   return (

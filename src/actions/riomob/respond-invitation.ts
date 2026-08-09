@@ -1,0 +1,51 @@
+'use server'
+
+import {
+  actionErrorMessage,
+  revalidateRiomobPaths,
+} from '@/actions/riomob/utils'
+import { patchCitizenCpfVehicleInvitationsConductorId } from '@/http/mobilidade/mobilidade'
+import type { ModelsInvitationResponseStatus } from '@/http/models/modelsInvitationResponseStatus'
+import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
+import { getUserInfoFromToken } from '@/lib/user-info'
+
+export async function respondInvitation(
+  conductorId: string,
+  status: ModelsInvitationResponseStatus,
+  vehicleId?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getUserInfoFromToken()
+    if (!user.cpf) {
+      return { success: false, error: 'Usuário não autenticado' }
+    }
+
+    if (isRiomobMocksEnabled()) {
+      revalidateRiomobPaths(vehicleId)
+      return { success: true }
+    }
+
+    const response = await patchCitizenCpfVehicleInvitationsConductorId(
+      user.cpf,
+      conductorId,
+      { status }
+    )
+
+    if (response.status === 200) {
+      revalidateRiomobPaths(vehicleId ?? response.data.vehicle_id)
+      return { success: true }
+    }
+
+    return {
+      success: false,
+      error: actionErrorMessage(response, 'Erro ao responder convite'),
+    }
+  } catch (error) {
+    console.error('[riomob] respondInvitation', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Erro ao responder convite',
+    }
+  }
+}

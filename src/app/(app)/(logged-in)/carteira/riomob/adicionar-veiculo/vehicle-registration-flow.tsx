@@ -1,11 +1,14 @@
 'use client'
 
+import { createVehicle } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import type { Swiper as SwiperType } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import {
@@ -44,9 +47,10 @@ export function VehicleRegistrationFlow({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [swiperReady, setSwiperReady] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [createdVehicleId, setCreatedVehicleId] = useState('mock-vehicle-id')
+  const [createdVehicleId, setCreatedVehicleId] = useState('')
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const invalidate = useInvalidateRiomobQueries()
 
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleFormSchema),
@@ -135,15 +139,17 @@ export function VehicleRegistrationFlow({
       const data = form.getValues()
       const payload = toCreateVehiclePayload(data)
 
-      // Mock create — trocar por action/Orval POST /citizen/{cpf}/vehicles
-      await new Promise(resolve => setTimeout(resolve, 600))
-      console.info('[riomob] mock create vehicle payload', payload)
+      const result = await createVehicle(payload)
+      if (!result.success || !result.data?.id) {
+        toast.error(result.error || 'Não foi possível cadastrar o veículo')
+        return
+      }
 
-      const mockId = `mock-vehicle-${Date.now()}`
-      setCreatedVehicleId(mockId)
+      await invalidate.afterCreate()
+      setCreatedVehicleId(result.data.id)
       setDrawerOpen(true)
     })
-  }, [form])
+  }, [form, invalidate])
 
   return (
     <div className="min-h-screen w-full bg-background">

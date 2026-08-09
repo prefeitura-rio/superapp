@@ -1,12 +1,15 @@
 'use client'
 
+import { deleteVehicle, leaveVehicle } from '@/actions/riomob'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import { useRiomobVehicle } from '@/hooks/riomob/use-riomob-vehicle'
+import type { VehicleDetail } from '@/lib/riomob/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import type { VehicleDetail } from '../../mocks/vehicles'
 import { LeaveVehicleDrawer } from './leave-vehicle-drawer'
 import { VehicleActionTiles } from './vehicle-action-tiles'
 import { VehicleCardPhotoGallery } from './vehicle-card-photo-gallery'
@@ -16,12 +19,15 @@ interface VehicleDetailPageProps {
   vehicle: VehicleDetail
 }
 
-async function mockDeleteVehicle() {
-  await new Promise(resolve => setTimeout(resolve, 800))
-}
-
-export function VehicleDetailPage({ vehicle }: VehicleDetailPageProps) {
+export function VehicleDetailPage({
+  vehicle: initialVehicle,
+}: VehicleDetailPageProps) {
   const router = useRouter()
+  const invalidate = useInvalidateRiomobQueries()
+  const { data: vehicle = initialVehicle } = useRiomobVehicle(
+    initialVehicle.id,
+    { initialData: initialVehicle }
+  )
   const isConductor = vehicle.category === 'condutor'
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -31,7 +37,16 @@ export function VehicleDetailPage({ vehicle }: VehicleDetailPageProps) {
   const handleDeleteConfirm = async () => {
     setIsDeleting(true)
     try {
-      await mockDeleteVehicle()
+      const result = isConductor
+        ? await leaveVehicle(vehicle.id)
+        : await deleteVehicle(vehicle.id)
+
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível remover')
+        return
+      }
+
+      await invalidate.afterDelete(vehicle.id)
       setIsDeleteDrawerOpen(false)
       toast.success('Veículo removido')
       router.push('/carteira?riomob=true')

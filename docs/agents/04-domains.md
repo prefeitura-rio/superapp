@@ -23,6 +23,7 @@ Controladas principalmente em `src/middleware.ts` e banners (`src/constants/bann
 
 - `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
+- `NEXT_PUBLIC_RIOMOB_USE_MOCKS` — RioMob: unset/`true` usa fixtures nos services; `false` chama Orval (`src/http/mobilidade`). Ver [`../riomob-api-integration.md`](../riomob-api-integration.md).
 
 Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos banners.
 
@@ -34,3 +35,4 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - Cursos / TanStack: [`../cursos-tanstack-query-migration.md`](../cursos-tanstack-query-migration.md), [`../cursos-home-cache-ssr-tanstack.md`](../cursos-home-cache-ssr-tanstack.md)
 - Carteira pet: [`../pt-br/carteira-pet.md`](../pt-br/carteira-pet.md)
 - RioMob GCS upload: [`../riomob-gcs-upload.md`](../riomob-gcs-upload.md)
+- RioMob API / mocks: [`../riomob-api-integration.md`](../riomob-api-integration.md)

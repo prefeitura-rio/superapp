@@ -1,7 +1,6 @@
 import { isGcsObjectUrl } from '@/lib/riomob/file-types'
 import { z } from 'zod'
 import {
-  VEHICLE_COLORS,
   type VehicleType,
   isOtherBrand,
   isOtherModel,
@@ -13,12 +12,7 @@ const vehicleTypeSchema = z.enum([
   'ciclomotor',
 ])
 
-const vehicleColorSchema = z
-  .string()
-  .min(1, 'Selecione a cor')
-  .refine(value => (VEHICLE_COLORS as readonly string[]).includes(value), {
-    message: 'Selecione a cor',
-  })
+const vehicleColorSchema = z.string().min(1, 'Selecione a cor')
 
 /** Letras/números Unicode + espaço/hífen/apóstrofo/ponto/& — sem emoji/URL. */
 const FREE_TEXT_50_RE = /^[\p{L}\p{N}](?:[\p{L}\p{N}\s\-'.&]*[\p{L}\p{N}])?$/u

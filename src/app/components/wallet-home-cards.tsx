@@ -1,6 +1,5 @@
 'use client'
 
-import type { WalletVehicle } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
@@ -15,6 +14,7 @@ import {
   formatEducationOperatingHours,
   getOperatingStatus,
 } from '@/lib/operating-status'
+import type { WalletVehicle } from '@/lib/riomob/types'
 import {
   WALLET_CARD_TYPES,
   getCardPosition,

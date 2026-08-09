@@ -1,6 +1,5 @@
 'use client'
 
-import type { WalletVehicle } from '@/app/(app)/(logged-in)/carteira/riomob/mocks/vehicles'
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import type {
@@ -8,6 +7,7 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
+import type { WalletVehicle } from '@/lib/riomob/types'
 import { useEffect, useState } from 'react'
 import {
   type HomeWalletHealthCardData,

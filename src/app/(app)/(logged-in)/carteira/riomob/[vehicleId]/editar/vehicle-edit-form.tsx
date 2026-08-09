@@ -1,16 +1,18 @@
 'use client'
 
+import { updateVehicle } from '@/actions/riomob'
 import { SerialPhotosFields } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/serial-photos-fields'
 import { VehicleInfoFields } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/components/vehicle-info-fields'
 import type { VehicleFormData } from '@/app/(app)/(logged-in)/carteira/riomob/adicionar-veiculo/schema'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { useInvalidateRiomobQueries } from '@/hooks/riomob/use-invalidate-riomob-queries'
+import type { VehicleDetail } from '@/lib/riomob/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import type { VehicleDetail } from '../../mocks/vehicles'
 import {
   toEditFormDefaults,
   toUpdateVehiclePayload,
@@ -31,13 +33,9 @@ interface VehicleEditFormProps {
   ownerInfo: OwnerInfo
 }
 
-async function mockUpdateVehicle(payload: unknown) {
-  await new Promise(resolve => setTimeout(resolve, 800))
-  console.info('[riomob] mock PATCH vehicle', payload)
-}
-
 export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   const router = useRouter()
+  const invalidate = useInvalidateRiomobQueries()
   const [isPending, setIsPending] = useState(false)
   const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const detailPath = `/carteira/riomob/${vehicle.id}`
@@ -57,7 +55,15 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
 
     setIsPending(true)
     try {
-      await mockUpdateVehicle(toUpdateVehiclePayload(data))
+      const result = await updateVehicle(
+        vehicle.id,
+        toUpdateVehiclePayload(data)
+      )
+      if (!result.success) {
+        toast.error(result.error || 'Não foi possível salvar')
+        return
+      }
+      await invalidate.afterUpdate(vehicle.id)
       toast.success('Veículo atualizado')
       router.push(detailPath)
     } catch {

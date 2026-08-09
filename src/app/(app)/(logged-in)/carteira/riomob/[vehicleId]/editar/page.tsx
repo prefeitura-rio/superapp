@@ -12,9 +12,9 @@ import type {
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { formatPhone } from '@/lib/format-phone'
+import { getRiomobVehicle } from '@/lib/riomob/vehicle-service'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { notFound, redirect } from 'next/navigation'
-import { getMockVehicleDetail } from '../../mocks/vehicles'
 import { VehicleEditForm } from './vehicle-edit-form'
 
 export const dynamic = 'force-dynamic'
@@ -27,18 +27,18 @@ export default async function EditarVeiculoPage({
   params,
 }: EditarVeiculoPageProps) {
   const { vehicleId } = await params
-  const vehicle = getMockVehicleDetail(vehicleId)
+  const userAuthInfo = await getUserInfoFromToken()
+
+  if (!userAuthInfo.cpf) {
+    redirect(buildAuthUrl(`/carteira/riomob/${vehicleId}/editar`))
+  }
+
+  const vehicle = await getRiomobVehicle(userAuthInfo.cpf, vehicleId)
 
   if (!vehicle) notFound()
 
   if (vehicle.category === 'condutor') {
     redirect(`/carteira/riomob/${vehicleId}`)
-  }
-
-  const userAuthInfo = await getUserInfoFromToken()
-
-  if (!userAuthInfo.cpf) {
-    redirect(buildAuthUrl(`/carteira/riomob/${vehicleId}/editar`))
   }
 
   let ownerName = vehicle.owner.name
