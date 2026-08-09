@@ -50,18 +50,38 @@ export function VehicleCardPhotoGallery({
     { vehicleId, enabled: includeInvoice }
   )
 
-  const signedUrls = [vehiclePhotoUrl, serialPhotoUrl, invoicePhotoUrl].filter(
-    (url): url is string => !!url
+  // Stable keys by document role — signed URLs are not unique when two
+  // documents share the same GCS object (or resolve to the same signed URL).
+  const galleryItems = [
+    vehiclePhotoUrl
+      ? { id: 'vehicle-photo' as const, src: vehiclePhotoUrl }
+      : null,
+    serialPhotoUrl
+      ? { id: 'serial-number' as const, src: serialPhotoUrl }
+      : null,
+    invoicePhotoUrl ? { id: 'invoice' as const, src: invoicePhotoUrl } : null,
+  ].filter(
+    (
+      item
+    ): item is {
+      id: 'vehicle-photo' | 'serial-number' | 'invoice'
+      src: string
+    } => !!item
   )
 
-  if (signedUrls.length === 0) {
+  const uniqueGalleryItems = galleryItems.filter(
+    (item, index, items) =>
+      items.findIndex(candidate => candidate.src === item.src) === index
+  )
+
+  if (uniqueGalleryItems.length === 0) {
     return <VehicleCard vehicle={vehicle} />
   }
 
   return (
     <PhotoProvider>
-      {signedUrls.map((src, index) => (
-        <PhotoView key={src} src={src}>
+      {uniqueGalleryItems.map((item, index) => (
+        <PhotoView key={item.id} src={item.src}>
           {index === 0 ? (
             <button
               type="button"
