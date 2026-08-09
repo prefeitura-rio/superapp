@@ -13,16 +13,21 @@ import type { VehicleDocument } from '../../mocks/vehicles'
 interface VerifiedDocumentSectionProps {
   message: string
   document: VehicleDocument
+  vehicleId: string
 }
 
-async function resolveOpenableUrl(url: string): Promise<string> {
+async function resolveOpenableUrl(
+  url: string,
+  vehicleId: string
+): Promise<string> {
   if (!isGcsObjectUrl(url)) return url
-  return requestRiomobSignedRead(url)
+  return requestRiomobSignedRead(url, { vehicleId })
 }
 
 export function VerifiedDocumentSection({
   message,
   document,
+  vehicleId,
 }: VerifiedDocumentSectionProps) {
   const [isOpening, setIsOpening] = useState(false)
 
@@ -30,7 +35,7 @@ export function VerifiedDocumentSection({
     if (isOpening) return
     setIsOpening(true)
     try {
-      const openUrl = await resolveOpenableUrl(document.url)
+      const openUrl = await resolveOpenableUrl(document.url, vehicleId)
       window.open(openUrl, '_blank', 'noopener,noreferrer')
     } catch (err) {
       const description =

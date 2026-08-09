@@ -20,7 +20,7 @@ https://storage.googleapis.com/<bucket>/riomob/<cpf>/<kind>/<uuid>.<ext>
 2. `POST /api/riomob/files/signed-url` com cookie JWT → `{ signedUrl, objectUrl }`.
 3. Browser faz `PUT` direto no GCS (só header `Content-Type`).
 4. RHF guarda `objectUrl` (nunca `blob:`).
-5. Para abrir / preview remoto: `POST /api/riomob/files/signed-read` com `{ objectUrl }` → `{ signedUrl }` → `window.open`, thumbnail ou PDF dialog.
+5. Para abrir / preview remoto: `POST /api/riomob/files/signed-read` com `{ objectUrl, vehicleId? }` → `{ signedUrl }` → `window.open`, thumbnail ou PDF dialog. `vehicleId` é obrigatório quando o CPF do path ≠ CPF do JWT (condutor).
 
 ```mermaid
 sequenceDiagram
@@ -46,8 +46,9 @@ sequenceDiagram
   RHF->>RMI: create/edit com URLs estáveis
 
   Browser->>FileUploadField: abrir/preview GCS
-  FileUploadField->>ReadLib: requestRiomobSignedRead(objectUrl)
-  ReadLib->>BffRead: JWT cookie + objectUrl
+  FileUploadField->>ReadLib: requestRiomobSignedRead(objectUrl[, vehicleId])
+  ReadLib->>BffRead: JWT cookie + objectUrl + vehicleId?
+  BffRead->>BffRead: CPF path==JWT ou GET RMI membership
   BffRead-->>ReadLib: signedUrl TTL 15min
   ReadLib-->>FileUploadField: signedUrl
   FileUploadField->>GCS: GET via signed URL
@@ -87,23 +88,21 @@ Detalhes e checklist de aceite: [`riomob-gcs-infra-request.md`](./riomob-gcs-inf
 
 ## Threat model / estado atual
 
-| Controle                                          | Garantido hoje?       | Onde                                                        |
-| ------------------------------------------------- | --------------------- | ----------------------------------------------------------- |
-| Objeto privado no GCS (GET sem assinatura → 403) | Sim                   | Upload sem`public-read`; infra                            |
-| SA nunca no browser                               | Sim                   | Envs server-only + BFF assina                               |
-| Write só autenticado; path sob CPF do JWT        | Sim                   | `signed-url/route.ts` + `buildRiomobObjectPath`         |
-| Read exige JWT + URL no bucket/`riomob/`        | Sim                   | `signed-read/route.ts` + `parseRiomobObjectUrl`         |
-| Read só se CPF do path = CPF do JWT              | **Não**        | `cpfDigits` é lido e não comparado ao path              |
-| Membership dono/condutor                          | **Não no BFF** | Depende do RMI devolver URLs só a quem pode ver o veículo |
-| Anti-enumeração                                 | Parcial               | UUID no path;**não** é autorização                |
+| Controle                                          | Garantido hoje? | Onde                                                                 |
+| ------------------------------------------------- | --------------- | -------------------------------------------------------------------- |
+| Objeto privado no GCS (GET sem assinatura → 403) | Sim             | Upload sem`public-read`; infra                                     |
+| SA nunca no browser                               | Sim             | Envs server-only + BFF assina                                        |
+| Write só autenticado; path sob CPF do JWT        | Sim             | `signed-url/route.ts` + `buildRiomobObjectPath`                  |
+| Read exige JWT + URL no bucket/`riomob/`        | Sim             | `signed-read/route.ts` + `parseRiomobObjectUrl`                  |
+| Read só se CPF do path = CPF do JWT              | Sim             | `canSignedReadObjectUrl` (match direto)                            |
+| Membership dono/condutor                          | Sim             | Fallback: `vehicleId` + GET RMI detalhe; URL deve pertencer ao veículo |
+| Anti-enumeração                                 | Parcial         | UUID no path;**não** é autorização sozinha                       |
 
-**Hoje qualquer cidadão autenticado que conheça a `objectUrl` completa pode obter signed-read.** A mitigação operacional é o RMI não expor URLs alheias + UUID no path; autorização fina de membership ainda é TODO.
+**Autorização de leitura:** o BFF assina read se (1) o CPF do path for o do JWT, ou (2) o cliente enviar `vehicleId` e o GET `/citizen/{cpf}/vehicles/{vehicleId}` (dono ou condutor aceito) devolver a `objectUrl` entre as fotos do veículo. URL “vazada” sem membership → 403.
 
-## TODOs de autorização
+## TODOs restantes
 
-1. BFF `signed-read`: comparar CPF do segmento do path com CPF do JWT (bloqueia leitura cross-user de URL “vazada”; quebra condutor se o path for do dono — daí o item 2).
-2. Membership via RMI (dono vs condutor) antes de assinar read, quando a API existir.
-3. Contrato `invoice_photo_url` no RMI (seção abaixo).
+1. Contrato `invoice_photo_url` no RMI (seção abaixo) — Orval já tipa o campo; validar handoff/Swagger.
 
 ## Gap de contrato RMI — Nota Fiscal
 

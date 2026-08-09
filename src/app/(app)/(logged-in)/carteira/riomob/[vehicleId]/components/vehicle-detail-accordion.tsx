@@ -37,6 +37,7 @@ export function VehicleDetailAccordion({
         <VerifiedDocumentSection
           message="O número de série foi verificado com sucesso."
           document={vehicle.serialNumberDocument}
+          vehicleId={vehicle.id}
         />
       </DetailAccordionItem>
 
@@ -44,6 +45,7 @@ export function VehicleDetailAccordion({
         <VerifiedDocumentSection
           message="A Nota Fiscal foi verificada com sucesso."
           document={vehicle.invoiceDocument}
+          vehicleId={vehicle.id}
         />
       </DetailAccordionItem>
 

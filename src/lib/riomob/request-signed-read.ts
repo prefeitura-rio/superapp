@@ -5,13 +5,22 @@ export class RiomobSignedReadError extends Error {
   }
 }
 
+export interface RequestRiomobSignedReadOptions {
+  /** Required when the object path CPF is not the caller's (e.g. accepted conductor). */
+  vehicleId?: string
+}
+
 export async function requestRiomobSignedRead(
-  objectUrl: string
+  objectUrl: string,
+  options?: RequestRiomobSignedReadOptions
 ): Promise<string> {
   const res = await fetch('/api/riomob/files/signed-read', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ objectUrl }),
+    body: JSON.stringify({
+      objectUrl,
+      ...(options?.vehicleId ? { vehicleId: options.vehicleId } : {}),
+    }),
   })
 
   if (!res.ok) {

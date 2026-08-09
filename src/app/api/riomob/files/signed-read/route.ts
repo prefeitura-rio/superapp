@@ -1,6 +1,8 @@
+import { getCitizenCpfVehiclesVehicleId } from '@/http/mobilidade/mobilidade'
 import { isJwtExpired } from '@/lib/jwt-utils'
 import {
   RIOMOB_SIGNED_URL_TTL_MS,
+  canSignedReadObjectUrl,
   createGcsStorage,
   getCpfDigitsFromAccessToken,
   getGcsCredentials,
@@ -34,14 +36,14 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let body: { objectUrl?: string }
+  let body: { objectUrl?: string; vehicleId?: string }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   }
 
-  const { objectUrl } = body
+  const { objectUrl, vehicleId } = body
   if (!objectUrl || typeof objectUrl !== 'string') {
     return NextResponse.json(
       { error: 'URL do arquivo é obrigatória' },
@@ -59,8 +61,43 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Auth + bucket/prefix validation. Vehicle membership (conductor ≠ owner CPF)
-  // will be enforced via RMI when that API exists.
+  let vehiclePhotoUrls = null
+  if (parsed.cpfDigits !== cpfDigits) {
+    if (!vehicleId || typeof vehicleId !== 'string') {
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar este arquivo' },
+        { status: 403 }
+      )
+    }
+
+    const vehicleRes = await getCitizenCpfVehiclesVehicleId(
+      cpfDigits,
+      vehicleId
+    )
+    if (vehicleRes.status !== 200) {
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar este arquivo' },
+        { status: 403 }
+      )
+    }
+
+    vehiclePhotoUrls = vehicleRes.data
+  }
+
+  if (
+    !canSignedReadObjectUrl({
+      jwtCpfDigits: cpfDigits,
+      pathCpfDigits: parsed.cpfDigits,
+      objectUrl,
+      vehiclePhotoUrls,
+    })
+  ) {
+    return NextResponse.json(
+      { error: 'Sem permissão para acessar este arquivo' },
+      { status: 403 }
+    )
+  }
+
   const storage = createGcsStorage(credentials)
 
   try {

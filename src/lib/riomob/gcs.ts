@@ -80,7 +80,7 @@ export function buildObjectUrl(bucketName: string, objectPath: string): string {
 export function parseRiomobObjectUrl(
   objectUrl: string,
   bucketName: string
-): { objectPath: string } | null {
+): { objectPath: string; cpfDigits: string } | null {
   let parsed: URL
   try {
     parsed = new URL(objectUrl)
@@ -106,5 +106,39 @@ export function parseRiomobObjectUrl(
   if (!isRiomobFileKind(segments[2])) return null
   if (!/^[0-9a-f-]{36}\.(png|jpg|pdf)$/i.test(segments[3])) return null
 
-  return { objectPath }
+  return { objectPath, cpfDigits: segments[1] }
+}
+
+/** Photo URL fields persisted on a vehicle detail (owner or accepted conductor). */
+export interface VehiclePhotoUrls {
+  serial_number_photo_url?: string | null
+  vehicle_photo_url?: string | null
+  invoice_photo_url?: string | null
+}
+
+export function objectUrlBelongsToVehicle(
+  objectUrl: string,
+  detail: VehiclePhotoUrls
+): boolean {
+  const urls = [
+    detail.serial_number_photo_url,
+    detail.vehicle_photo_url,
+    detail.invoice_photo_url,
+  ]
+  return urls.some(url => typeof url === 'string' && url === objectUrl)
+}
+
+/**
+ * Own-path CPF match, or membership via vehicle photo URLs from RMI.
+ * Callers that need the membership branch must supply `vehiclePhotoUrls`.
+ */
+export function canSignedReadObjectUrl(params: {
+  jwtCpfDigits: string
+  pathCpfDigits: string
+  objectUrl: string
+  vehiclePhotoUrls?: VehiclePhotoUrls | null
+}): boolean {
+  if (params.pathCpfDigits === params.jwtCpfDigits) return true
+  if (!params.vehiclePhotoUrls) return false
+  return objectUrlBelongsToVehicle(params.objectUrl, params.vehiclePhotoUrls)
 }
