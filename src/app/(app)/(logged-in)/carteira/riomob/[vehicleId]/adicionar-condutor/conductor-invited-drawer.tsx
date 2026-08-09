@@ -61,7 +61,7 @@ export function ConductorInvitedDrawer({
       <DrawerContent className="max-w-none mx-auto rounded-t-none min-h-screen 3xl:justify-center flex flex-col">
         <div className="flex flex-col min-h-screen 3xl:min-h-[70vh] justify-between bg-background px-4 pt-4 pb-8 max-w-4xl mx-auto w-full">
           <div className="flex flex-col">
-            <div className="relative h-11 mb-4 flex items-center">
+            <div className="relative h-11 mb-8 flex items-center">
               <CustomButton
                 variant="secondary"
                 className="bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0"
