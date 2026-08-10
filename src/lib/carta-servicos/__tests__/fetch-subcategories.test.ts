@@ -92,7 +92,7 @@ describe('fetchCartaServicosSubcategoriesByCategory', () => {
         status: 502,
         data: 'Bad Gateway',
         headers: new Headers(),
-      } as Awaited<ReturnType<typeof getSubthemesByTheme>>)
+      } as unknown as Awaited<ReturnType<typeof getSubthemesByTheme>>)
       .mockResolvedValueOnce({
         status: 200,
         data: {
