@@ -38,13 +38,13 @@ const SERVICOS: DividaAtivaServico[] = [
     id: 'parcelar-debitos',
     label: 'Parcelar débitos',
     tipo: 'interno',
-    href: '/servicos/divida-ativa/parcelamento',
+    href: '/divida-ativa/parcelamento',
   },
   {
     id: 'acompanhar-requerimento',
     label: 'Acompanhar requerimento de parcelamento',
     tipo: 'interno',
-    href: '/servicos/divida-ativa/acompanhamento',
+    href: '/divida-ativa/acompanhamento',
   },
 ]
 

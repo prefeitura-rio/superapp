@@ -46,12 +46,12 @@ describe('DividaAtivaServiceList', () => {
 
     expect(
       screen.getByRole('link', { name: 'Parcelar débitos' })
-    ).toHaveAttribute('href', '/servicos/divida-ativa/parcelamento')
+    ).toHaveAttribute('href', '/divida-ativa/parcelamento')
     expect(
       screen.getByRole('link', {
         name: 'Acompanhar requerimento de parcelamento',
       })
-    ).toHaveAttribute('href', '/servicos/divida-ativa/acompanhamento')
+    ).toHaveAttribute('href', '/divida-ativa/acompanhamento')
   })
 
   test('serviço externo pede confirmação antes de sair do app', async () => {

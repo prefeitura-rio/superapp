@@ -26,7 +26,7 @@ describe('MOST_ACCESSED_SERVICES — card de Dívida Ativa', () => {
   test('leva ao módulo do Pref.Rio quando a flag está ligada', async () => {
     const card = await cardDividaAtiva('true')
 
-    expect(card?.href).toBe('/servicos/divida-ativa')
+    expect(card?.href).toBe('/divida-ativa')
   })
 
   test('segue apontando para o catálogo quando a flag está desligada', async () => {

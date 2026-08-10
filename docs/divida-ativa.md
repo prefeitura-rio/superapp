@@ -4,10 +4,16 @@ Módulo do portal do cidadão para os serviços de dívida ativa imobiliária qu
 portlets Liferay 6.2 da Prefeitura: cadastro de imóveis, parcelamento de débitos e
 acompanhamento de requerimentos.
 
-> **Estado atual: Fase 0 (fundação).** Existe a fundação — gating, contrato provisório,
-> client gerado e camada de mapeamento. **Não existe UI de produto ainda.** As regras
-> fiscais continuam nos sistemas corporativos (DAM/PGM); este módulo é camada de
-> apresentação sobre uma API de integração em Quarkus que está sendo escrita fora deste repo.
+> **Estado atual: Fase 1 (fundação), parcialmente entregue.** Existem gating, contrato
+> provisório, client gerado, camada de mapeamento e a landing. **Faltam** as sub-rotas dos
+> serviços, as funções de leitura no `src/lib/dal.ts` e as Server Actions — e **não existe UI
+> de produto ainda**. As regras fiscais continuam nos sistemas corporativos (DAM/PGM); este
+> módulo é camada de apresentação sobre uma API de integração em Quarkus que está sendo
+> escrita fora deste repo.
+>
+> Os dois links internos da landing (parcelamento e acompanhamento) apontam para rotas que
+> ainda não existem. Só é visível com a flag ligada, mas quem testar em homologação vai bater
+> em 404 até a Fase 3.
 
 ## Sumário
 
@@ -26,29 +32,53 @@ acompanhamento de requerimentos.
 
 Três serviços reconstruídos aqui, entregues em fases:
 
-| Serviço | Rota | Fase |
-|---|---|---|
-| Cadastro de Imóveis ("Meus Imóveis") | `/servicos/divida-ativa/imoveis` | 1 |
-| Parcelamento de débitos | `/servicos/divida-ativa/parcelamento` | 2 |
-| Acompanhamento de requerimento | `/servicos/divida-ativa/acompanhamento` | 3 |
+| Serviço | Rota | Fase | Marco |
+|---|---|---|---|
+| Cadastro de Imóveis ("Meus Imóveis") | `/divida-ativa/imoveis` | 2 | Marco 2 — 18/09/2026 |
+| Parcelamento de débitos | `/divida-ativa/parcelamento` | 3 | Marco 3 — 23/10/2026 |
+| Acompanhamento de requerimento | `/divida-ativa/acompanhamento` | 3 | Marco 3 — 23/10/2026 |
+
+A numeração acompanha o plano de implementação: **Fase 1 é a fundação** (o que já existe —
+gating, contrato, client, mappers, landing), e por isso nenhum serviço aparece nela. Cite
+sempre o marco junto da fase — parcelamento e acompanhamento dividem a mesma fase.
 
 Front-end e back-end foram desenvolvidos em paralelo e independentes: as telas são
 construídas contra um **contrato OpenAPI provisório escrito por nós**, e a integração com a
 API real é uma fase dedicada no fim. É isso que a [camada de mapeamento](#camada-de-mapeamento)
 protege.
 
+## Login obrigatório
+
+O módulo inteiro exige sessão id.rio. A proteção **não vem do nome do grupo de rotas**
+`(logged-in)` — nome de pasta não tem efeito nenhum no middleware. Ela vem de `/divida-ativa`
+estar **fora** da allowlist `publicRoutes` de `src/middleware.ts`: rota que não casa com a
+allowlist e não tem `access_token` é redirecionada para o login, com a URL de origem
+preservada para o retorno.
+
+Consequência prática: **o módulo não pode morar sob `/servicos/*`**. Aquele prefixo está na
+allowlist com curinga, então qualquer rota abaixo dele é pública, independente da pasta em que
+o arquivo esteja. Foi por isso que a landing saiu de `/servicos/divida-ativa` para
+`/divida-ativa`. `src/__tests__/middleware.test.ts` trava esse comportamento.
+
+CPF sempre de `getUserInfoFromToken()`, nunca de parâmetro de rota ou query.
+
 ## A landing e a fronteira do escopo
 
-`/servicos/divida-ativa` é pública, estática e não lê dado do cidadão — é só a porta de
-entrada. Ela lista **cinco** serviços, e essa diferença entre cinco e três é deliberada.
+`/divida-ativa` não lê dado do cidadão — é só a porta de entrada (exige login como todo o
+resto do módulo). Ela lista **cinco** serviços, e essa diferença entre cinco e três é
+deliberada.
+
+> Nenhuma página deste repo é prerenderizada: o root layout lê `headers()` para o nonce da
+> CSP, então tudo é renderizado sob demanda. `export const dynamic = 'force-static'` seria
+> inerte aqui — não use.
 
 | Serviço na landing | Destino |
 |---|---|
 | Emitir guia à vista ou liquidar débitos | **externo** — portal legado |
 | Emitir guia – parcela em atraso (regularização) | **externo** — portal legado |
 | Emitir segunda via de guia de pagamento | **externo** — portal legado |
-| Parcelar débitos | interno, Fase 2 |
-| Acompanhar requerimento de parcelamento | interno, Fase 3 |
+| Parcelar débitos | interno, Fase 3 (Marco 3) |
+| Acompanhar requerimento de parcelamento | interno, Fase 3 (Marco 3) |
 
 Os três primeiros foram **retirados do escopo de modernização pela diretoria**: continuam
 existindo no portal legado e não são reconstruídos aqui. A landing os oferece como link
@@ -63,15 +93,22 @@ para um portal oficial da Prefeitura**. As URLs ficam em `src/constants/divida-a
 O Figma é a especificação (copy inclusive), mas ele foi desenhado a partir do portal legado e
 não conhece todas as regras de negócio. Duas divergências conhecidas:
 
-- **"Meus Imóveis" não existe no Figma.** O desenho vai direto da landing para uma tela de
-  consulta com três campos livres (nº da inscrição imobiliária, nº da CDA, nº da execução
-  fiscal). O cadastro de imóveis **é requisito de produto** — serve para o cidadão salvar
-  seus imóveis e depois *selecioná-los* na consulta em vez de digitar o identificador. A
-  Fase 1 usa o padrão de UI do Figma aplicado a essas telas. Confirmado com o time em
-  05/08/2026.
+- **"Meus Imóveis" não existe no Figma, mas é requisito de projeto.** O desenho vai direto da
+  landing para uma tela de consulta com três campos livres (nº da inscrição imobiliária, nº da
+  CDA, nº da execução fiscal). O cadastro de imóveis é **requisito de produto confirmado** e
+  entra na Fase 2 (Marco 2 — 18/09).
+
+  O papel dele é preciso: **no modo de busca por inscrição imobiliária**, o cidadão escolhe um
+  imóvel já salvo em vez de digitar o número. Não é um fluxo paralelo à consulta nem uma porta
+  de entrada concorrente — é conveniência **dentro de um dos três modos**. Os outros dois
+  modos (CDA e execução fiscal) não passam por "Meus Imóveis".
+
+  Consequência para o design: falta desenhar a lista de imóveis, a inclusão, a exclusão e o
+  seletor de imóvel salvo dentro do campo de inscrição imobiliária. Levantado com o time em
+  05/08/2026; **o Figma ainda não cobre** — é dependência de design aberta para a Fase 2.
 - **A consulta aceita três identificadores**, mas o contrato provisório só modela a inscrição
   imobiliária. Consulta por nº de CDA e por nº de execução fiscal precisam entrar no contrato
-  antes da Fase 2 — está registrado como premissa P18.
+  antes da Fase 3 (Marco 3 — 23/10) — está registrado como premissa P18.
 
 ## Feature flag
 
@@ -82,7 +119,7 @@ raiz quanto qualquer rota filha.
 ```ts
 const isDividaAtivaEnabled = process.env.NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA === 'true'
 const isDividaAtivaRoute =
-  path === '/servicos/divida-ativa' || path.startsWith('/servicos/divida-ativa/')
+  path === '/divida-ativa' || path.startsWith('/divida-ativa/')
 ```
 
 **Por que um booleano e não a allowlist `NEXT_PUBLIC_FEATURE_FLAG`:** a semântica da
@@ -119,7 +156,7 @@ time Pref.Rio.
 > módulo, independente da flag. A entrada é pela home.
 
 > **Nota:** o time Pref.Rio pretende evoluir o middleware para um mecanismo de allowlist com
-> curinga de path (`/servicos/divida-ativa/*`). Quando isso acontecer, este bloco booleano
+> curinga de path (`/divida-ativa/*`). Quando isso acontecer, este bloco booleano
 > pode ser substituído — o comportamento esperado (raiz e filhas ocultas por padrão) é o
 > mesmo, e `src/__tests__/middleware.test.ts` cobre esse contrato.
 
@@ -142,6 +179,8 @@ exercitam o mutator.
 ```
 divida-ativa-api.yaml                 # contrato provisório (raiz)
 custom-fetch-divida-ativa.ts          # mutator do Orval (raiz)
+src/app/(app)/(logged-in)/divida-ativa/   # rotas — fora de /servicos/*, exigem login
+src/app/components/divida-ativa/      # componentes do módulo
 src/http-divida-ativa/                # GERADO pelo Orval — não editar à mão
 src/types/divida-ativa.ts             # tipos de visão (linguagem do produto)
 src/lib/divida-ativa-mappers.ts       # camada anti-corrupção
@@ -171,15 +210,19 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado:
 | `imoveis` | `GET/POST /v1/imoveis`, `GET/DELETE /v1/imoveis/{inscricaoImobiliaria}` |
 | `debitos` | `GET /v1/imoveis/{inscricaoImobiliaria}/debitos` |
 | `simulacao` | `POST /v1/parcelamentos/simulacoes` |
-| `requerimentos` | `POST/GET /v1/requerimentos`, `POST /v1/requerimentos/documentos`, `GET /v1/requerimentos/{protocolo}`, `GET .../comprovante`, `POST .../cancelamento` |
-| `acompanhamento` | consulta de requerimentos por protocolo |
+| `requerimentos` | **abertura:** `POST /v1/requerimentos`, `POST /v1/requerimentos/documentos` |
+| `acompanhamento` | **pós-abertura:** `GET /v1/requerimentos`, `GET /v1/requerimentos/{protocolo}`, `GET .../comprovante`, `POST .../cancelamento` |
+
+O corte entre `requerimentos` e `acompanhamento` é **abrir** × **acompanhar depois de aberto**,
+não leitura × escrita — o cancelamento é `POST` e está em `acompanhamento`. A tag decide a pasta
+gerada, então é ela que diz de onde importar.
 
 **Identidade:** o cidadão é derivado do Bearer token (Keycloak) pela própria API. Nenhum
 endpoint recebe CPF por path, query ou body — nem deve passar a receber.
 
 ## Tabela de premissas do contrato
 
-Esta é a dívida técnica declarada da Fase 0. Cada linha é uma decisão que tomamos no lugar da
+Esta é a dívida técnica declarada da Fase 1. Cada linha é uma decisão que tomamos no lugar da
 equipe da API, para que a revisão dela seja uma sentada de conferência em vez de arqueologia.
 
 **Como ler a coluna "Impacto se vier diferente":** `mapper` significa que a divergência se
@@ -204,7 +247,7 @@ impacto de cronograma e precisa ser escalado antes de implementar.
 |---|---|---|---|
 | P7 | `SituacaoCda` | `EM_ABERTO`, `AJUIZADA`, `PARCELADA`, `QUITADA`, `SUSPENSA`, `CANCELADA` | `mapper` para renomear; **`mapper + tela`** para um valor novo, que precisa de rótulo e cor no design |
 | P8 | `SituacaoRequerimento` | `EM_ANALISE`, `AGUARDANDO_DOCUMENTACAO`, `DEFERIDO`, `INDEFERIDO`, `CANCELADO` | idem P7 |
-| P9 | `TipoDocumento` | `DOCUMENTO_IDENTIDADE`, `CPF`, `COMPROVANTE_RESIDENCIA`, `PROCURACAO`, `CONTRATO_SOCIAL`, `OUTRO` | `mapper + tela` — a lista vira opções do formulário da Fase 2 |
+| P9 | `TipoDocumento` | `DOCUMENTO_IDENTIDADE`, `CPF`, `COMPROVANTE_RESIDENCIA`, `PROCURACAO`, `CONTRATO_SOCIAL`, `OUTRO` | `mapper + tela` — a lista vira opções do formulário de requerimento (Fase 3) |
 
 Valor de enum desconhecido **não quebra a tela**: os mappers devolvem `'desconhecida'`. Isso é
 proposital — uma situação nova no sistema fiscal não pode derrubar a página do cidadão. Mas
@@ -219,10 +262,10 @@ proposital — uma situação nova no sistema fiscal não pode derrubar a págin
 | P12 | `possuiDebitos` no `Imovel` | A API devolve o booleano junto da lista | Evita N+1 chamadas para montar a lista de imóveis | `mapper + tela` — sem ele, ou a lista perde o indicador, ou vira uma chamada por imóvel |
 | P13 | `valorTotalAtualizado` | Calculado **pela API**, não somado no front | Soma de valor fiscal é regra de negócio; o front nunca recalcula | `mapper + tela` — se a API não devolver, é preciso decidir com a diretoria se o front pode somar |
 | P14 | `parcelavel` por CDA | Elegibilidade decidida pela API, por CDA | O front nunca infere elegibilidade de parcelamento | `fluxo` se a elegibilidade for do conjunto e não da CDA — muda a seleção na tela de débitos |
-| P15 | Upload de documentos | `POST /v1/requerimentos/documentos` devolve um `documentoId`, citado depois na criação do requerimento (upload em duas etapas) | Desacopla o envio do arquivo do envio do formulário e contorna o limite de 1 MB de Server Action | `fluxo` — **é a premissa mais frágil da tabela.** Ver DEP-3: não há precedente de upload neste repo e o mecanismo ainda não foi decidido |
+| P15 | Upload de documentos | `POST /v1/requerimentos/documentos` devolve um `documentoId`, citado depois na criação do requerimento (upload em duas etapas) | Desacopla o envio do arquivo do envio do formulário e contorna o limite de 1 MB de Server Action | `fluxo` — **é a premissa mais frágil da tabela.** Não há precedente de upload neste repo e o mecanismo (limite de Server Action × route handler multipart × upload direto) ainda não foi decidido com Vladimir/Lucas |
 | P16 | Comprovante em PDF | `GET /v1/requerimentos/{protocolo}/comprovante` devolve `application/pdf` como blob | O mutator já trata `application/pdf` | `mapper` se vier como URL assinada em JSON |
 | P17 | Validade da simulação | `validaAte` é instante; passado ele, é preciso simular de novo | Valor fiscal muda com encargos diários | `mapper + tela` — a tela precisa de um estado "simulação expirada" |
-| P18 | Identificador da consulta | O contrato só modela busca por **inscrição imobiliária** | O contrato foi escrito a partir do plano, antes de o design ser lido | `fluxo` — **lacuna conhecida, não é aposta.** O design pede também nº da CDA e nº da execução fiscal. Precisa entrar no contrato antes da Fase 2 |
+| P18 | Identificador da consulta | O contrato só modela busca por **inscrição imobiliária** | O contrato foi escrito a partir do plano, antes de o design ser lido | `fluxo` — **lacuna conhecida, não é aposta.** O design pede também nº da CDA e nº da execução fiscal, e não existe endpoint que aceite nenhum dos dois. Precisa entrar no contrato antes da Fase 3 (Marco 3 — 23/10). Ver detalhamento abaixo |
 
 ### Premissas que exigem confirmação explícita
 
@@ -232,6 +275,38 @@ Estas não quebram nada visivelmente, e por isso são as mais perigosas:
 - **P10** (`message` de erro é exibível ao cidadão) — se não for, estaríamos mostrando texto
   técnico interno para o cidadão.
 - **P15** (upload em duas etapas) — depende de decisão de arquitetura que ainda não existe.
+
+### P18 em detalhe — os três modos de busca
+
+Os três identificadores do design **não são sinônimos**: são níveis diferentes.
+
+| Identificador | Identifica | Onde o cidadão vê | Cardinalidade |
+|---|---|---|---|
+| Inscrição imobiliária | o **imóvel** | carnê de IPTU | 1 imóvel → N CDAs |
+| Número da CDA | uma **dívida** inscrita | carta de cobrança da PGM | 1 CDA → 1 imóvel |
+| Nº da execução fiscal | um **processo judicial** | citação da Justiça | 1 execução → N CDAs |
+
+Hoje **todo** o contrato é indexado por inscrição imobiliária — inclusive o cadastro de imóvel,
+cujo único campo obrigatório é ela. Não existe caminho para quem só tem a carta de cobrança ou
+a citação na mão.
+
+Por que isso é `fluxo` e não `mapper`: não é divergência de formato, é **capacidade
+inexistente**. Nenhum mapper responde "de qual imóvel é a CDA 2023/0012345-6?" se a API não
+sabe responder. E a navegação que o módulo assume é `imóvel → débitos → simulação →
+requerimento`; entrar por CDA é entrar no meio dela, e entrar por execução fiscal pode trazer
+várias CDAs de uma vez.
+
+**Já decidido:** "Meus Imóveis" alimenta **apenas** o modo inscrição imobiliária (seleção em
+vez de digitação). Os modos CDA e execução fiscal não passam por ele.
+
+**Em aberto com Vladimir + produto, antes da Fase 3:**
+
+1. A API ganha busca por CDA e por execução fiscal?
+2. Elas devolvem o **imóvel** (e o cidadão cai no fluxo normal) ou a **lista de dívidas** direto?
+3. Uma execução fiscal pode abranger mais de um imóvel? Se puder, a tela precisa de um passo de
+   desambiguação.
+4. Entrando por CDA ou execução, o imóvel precisa estar cadastrado em "Meus Imóveis" para
+   seguir com o parcelamento?
 
 ## Camada de mapeamento
 

@@ -26,7 +26,7 @@ const DIVIDA_ATIVA_CATALOGO =
  */
 const dividaAtivaHref =
   process.env.NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA === 'true'
-    ? '/servicos/divida-ativa'
+    ? '/divida-ativa'
     : DIVIDA_ATIVA_CATALOGO
 
 export const MOST_ACCESSED_SERVICES = [
