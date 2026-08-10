@@ -21,7 +21,7 @@ Redirect legado: `/oportunidadescariocas*` → trabalho (middleware).
 
 Controladas principalmente em `src/middleware.ts` e banners (`src/constants/banners.ts`):
 
-- `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`.
+- `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `riomob`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`riomob` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/riomob`.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
 - `NEXT_PUBLIC_RIOMOB_USE_MOCKS` — RioMob: unset/`true` usa fixtures nos services; `false` chama Orval (`src/http/mobilidade`). Ver [`../riomob-api-integration.md`](../riomob-api-integration.md).
 

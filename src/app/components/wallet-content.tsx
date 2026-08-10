@@ -19,6 +19,7 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -42,7 +43,8 @@ export function WalletContent({
   healthUnitRiskData,
 }: WalletContentProps) {
   const searchParams = useSearchParams()
-  const isRiomobView = searchParams.get('riomob') === 'true'
+  const riomobEnabled = isFeatureEnabled('riomob')
+  const isRiomobView = riomobEnabled && searchParams.get('riomob') === 'true'
   const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
   const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
 

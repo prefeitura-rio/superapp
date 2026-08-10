@@ -2,6 +2,7 @@
 
 import { VehicleCardsLoadingSkeleton } from '@/app/components/wallet-cards/vehicle-card'
 import { WalletTabs } from '@/app/components/wallet-tabs'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -22,7 +23,8 @@ function WalletContentLoadingBody({
 
 function WalletContentLoadingSkeletonWithParams() {
   const searchParams = useSearchParams()
-  const isRiomobView = searchParams.get('riomob') === 'true'
+  const riomobEnabled = isFeatureEnabled('riomob')
+  const isRiomobView = riomobEnabled && searchParams.get('riomob') === 'true'
   const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
   const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
 

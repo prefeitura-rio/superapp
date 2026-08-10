@@ -3,6 +3,7 @@
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
 import {
@@ -27,6 +28,7 @@ async function fetchWalletData(): Promise<WalletApiResponse> {
 export default function WalletSectionClient() {
   const { isLoggedIn, isLoading: isAuthLoading } = useAuthStatus()
   const isAuthenticated = Boolean(isLoggedIn && !isAuthLoading)
+  const riomobEnabled = isFeatureEnabled('riomob')
 
   const { data, isLoading } = useQuery({
     queryKey: ['wallet'],
@@ -35,7 +37,7 @@ export default function WalletSectionClient() {
     enabled: isAuthenticated,
   })
   const { data: vehicles = [], isError: isVehiclesError } = useRiomobVehicles({
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && riomobEnabled,
   })
 
   useRiomobQueryErrorToast(
@@ -72,8 +74,9 @@ export default function WalletSectionClient() {
     maintenanceStats.total
   )
   const petsCount = Array.isArray(pets) ? pets.length : 0
+  const walletVehicles = riomobEnabled ? vehicles : []
 
-  if (!walletInfo.hasData && petsCount === 0 && vehicles.length === 0) {
+  if (!walletInfo.hasData && petsCount === 0 && walletVehicles.length === 0) {
     return null
   }
 
@@ -102,7 +105,7 @@ export default function WalletSectionClient() {
           maintenanceRequests={maintenanceRequests ?? undefined}
           healthCardData={healthCardData}
           pets={pets}
-          vehicles={vehicles}
+          vehicles={walletVehicles}
         />
       }
       desktopComponent={
@@ -111,7 +114,7 @@ export default function WalletSectionClient() {
           maintenanceRequests={maintenanceRequests ?? undefined}
           healthCardData={healthCardData}
           pets={pets}
-          vehicles={vehicles}
+          vehicles={walletVehicles}
         />
       }
       desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}

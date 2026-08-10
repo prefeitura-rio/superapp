@@ -1,6 +1,7 @@
 'use client'
 
 import { SliderTabs } from '@/app/components/slider-tabs'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 
 interface WalletTabsProps {
   activeTab: 'cards' | 'pets' | 'riomob'
@@ -25,5 +26,9 @@ const WALLET_TABS = [
 ]
 
 export function WalletTabs({ activeTab }: WalletTabsProps) {
-  return <SliderTabs tabs={WALLET_TABS} activeTabId={activeTab} />
+  const tabs = isFeatureEnabled('riomob')
+    ? WALLET_TABS
+    : WALLET_TABS.filter(tab => tab.id !== 'riomob')
+
+  return <SliderTabs tabs={tabs} activeTabId={activeTab} />
 }

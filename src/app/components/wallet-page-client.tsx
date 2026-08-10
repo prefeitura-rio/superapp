@@ -5,6 +5,7 @@ import { WalletContent } from '@/app/components/wallet-content'
 import { WalletContentLoadingSkeleton } from '@/app/components/wallet-page-loading-skeleton'
 import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
 import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import type { WalletApiResponse } from '@/lib/wallet-api-types'
 import { getWalletDataInfo } from '@/lib/wallet-utils'
 import { useQuery } from '@tanstack/react-query'
@@ -18,6 +19,7 @@ async function fetchWalletData(): Promise<WalletApiResponse> {
 }
 
 export function WalletPageClient() {
+  const riomobEnabled = isFeatureEnabled('riomob')
   const { data, isLoading: isLoadingWallet } = useQuery({
     queryKey: ['wallet'],
     queryFn: fetchWalletData,
@@ -27,7 +29,7 @@ export function WalletPageClient() {
     data: vehicles = [],
     isLoading: isLoadingVehicles,
     isError: isVehiclesError,
-  } = useRiomobVehicles()
+  } = useRiomobVehicles({ enabled: riomobEnabled })
 
   useRiomobQueryErrorToast(
     isVehiclesError,
@@ -35,7 +37,7 @@ export function WalletPageClient() {
     'riomob-vehicles-error'
   )
 
-  if (isLoadingWallet || isLoadingVehicles) {
+  if (isLoadingWallet || (riomobEnabled && isLoadingVehicles)) {
     return (
       <section className="pb-30 relative h-full px-4">
         <div className="flex items-center justify-between pt-6 pb-4">
@@ -64,12 +66,17 @@ export function WalletPageClient() {
   }
 
   const petsList = pets ?? []
+  const walletVehicles = riomobEnabled ? vehicles : []
   const walletInfo = getWalletDataInfo(
     walletData ?? undefined,
     maintenanceRequests?.length ?? 0
   )
 
-  if (!walletInfo?.hasData && petsList.length === 0 && vehicles.length === 0) {
+  if (
+    !walletInfo?.hasData &&
+    petsList.length === 0 &&
+    walletVehicles.length === 0
+  ) {
     return <EmptyWallet />
   }
 
