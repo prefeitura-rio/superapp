@@ -22,10 +22,15 @@ import {
   getCardPosition,
   sendWalletCardGAEvent,
 } from '@/lib/wallet-tracking-utils'
+import Image from 'next/image'
+import Link from 'next/link'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
 import { EducationCard } from './wallet-cards/education-card'
 import { HealthCard } from './wallet-cards/health-card'
 import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
+
+const emptyCardsImage =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/carteira/carteira-deslogada.png'
 
 interface WalletCardsWrapperProps {
   walletData?: ModelsCitizenWallet
@@ -48,6 +53,18 @@ export function WalletCardsWrapper({
     walletData?.saude?.clinica_familia &&
     walletData?.saude?.clinica_familia?.indicador === true
 
+  const hasEducationData = Boolean(walletData?.educacao?.aluno?.indicador)
+  const hasSocialAssistanceData = Boolean(
+    walletData?.assistencia_social?.cadunico?.indicador
+  )
+  const hasCaretakerData = maintenanceStats.total > 0
+
+  const hasAnyCard =
+    hasHealthData ||
+    hasEducationData ||
+    hasSocialAssistanceData ||
+    hasCaretakerData
+
   // Only use health unit API for operating hours and risk status
   let healthStatusValue = 'Não informado'
   let healthOperatingHours = 'Não informado'
@@ -67,6 +84,34 @@ export function WalletCardsWrapper({
   }
 
   const isNormalRiskStatus = riskStatus?.risco === 'Verde'
+
+  if (!hasAnyCard) {
+    return (
+      <div className="flex flex-col items-center pt-6 pb-10">
+        <Image
+          src={emptyCardsImage}
+          alt="Nenhum cartão disponível"
+          width={600}
+          height={160}
+          className="object-contain"
+          priority
+        />
+
+        <div className="mt-4 px-4 text-left w-full">
+          <h2 className="text-3xl font-medium text-foreground leading-9">
+            Você ainda não tem informação para exibir
+          </h2>
+          <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
+            Atualize as informações no seu{' '}
+            <Link href="/meu-perfil" className="text-primary">
+              perfil
+            </Link>{' '}
+            para visualizar suas carteiras
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid w-full grid-cols-1 gap-2 min-[896px]:grid-cols-2">
@@ -108,7 +153,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 2: Educação */}
-      {walletData?.educacao?.aluno?.indicador && (
+      {hasEducationData && (
         <div>
           <EducationCard
             title="ESCOLA DE JOVENS E ADULTOS"
@@ -144,7 +189,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 3: Assistência social */}
-      {walletData?.assistencia_social?.cadunico?.indicador && (
+      {hasSocialAssistanceData && (
         <div>
           <SocialAssistanceCard
             title="CADÚNICO"
@@ -179,7 +224,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 4: Cuidados com a Cidade (1746) */}
-      {maintenanceStats.total > 0 && (
+      {hasCaretakerData && (
         <div>
           <CaretakerCard
             title="CUIDADOS COM A CIDADE"
