@@ -5,6 +5,7 @@ import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPref
 import { getApiV1SearchId } from '@/http-busca-search/search/search'
 import { getApiV1ServicesSlug } from '@/http-busca-search/services/services'
 import {
+  type SubcategoriesFetchResult,
   fetchCartaServicosServiceBySlug,
   fetchCartaServicosServicesByCategory,
   fetchCartaServicosServicesBySubcategory,
@@ -160,7 +161,9 @@ export async function fetchServiceBySlug(
   }
 }
 
-export async function fetchSubcategoriesByCategory(categorySlugOrName: string) {
+export async function fetchSubcategoriesByCategory(
+  categorySlugOrName: string
+): Promise<SubcategoriesFetchResult> {
   try {
     if (CARTA_SERVICOS_API_ENABLED) {
       return fetchCartaServicosSubcategoriesByCategory(
@@ -183,13 +186,16 @@ export async function fetchSubcategoriesByCategory(categorySlugOrName: string) {
         `Failed to fetch subcategories: ${response.status}`,
         response.data
       )
-      return null
+      return { ok: false, error: `status_${response.status}` }
     }
 
-    return response.data
+    return { ok: true, data: response.data }
   } catch (error) {
     console.error('Error fetching subcategories:', error)
-    return null
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : 'unknown',
+    }
   }
 }
 

@@ -6,6 +6,7 @@ import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { getCardColorForCategory } from '@/constants/category-color-palettes'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
+import type { AppSubcategory } from '@/lib/carta-servicos/types'
 import {
   fetchServicesByCategory,
   fetchSubcategoriesByCategory,
@@ -46,15 +47,28 @@ export default async function CategoryPage({
     // Continue with null - will show empty state
   }
 
-  // Safely fetch subcategories data from API with error handling
-  let subcategories: any[] = []
+  // Safely fetch subcategories — distinguish failure from genuine empty list
+  // so ISR does not permanently cache a page without accordion after a blip.
+  let subcategories: AppSubcategory[] = []
+  let shouldRefetchSubcategories = false
   try {
-    const subcategoriesResponse =
-      await fetchSubcategoriesByCategory(decodedSlug)
-    subcategories = subcategoriesResponse?.subcategories || []
+    const subcategoriesResult = await fetchSubcategoriesByCategory(decodedSlug)
+    if (subcategoriesResult.ok) {
+      subcategories =
+        (subcategoriesResult.data.subcategories as AppSubcategory[]) || []
+    } else {
+      console.error(
+        JSON.stringify({
+          scope: 'category-page.subcategories',
+          categorySlug: decodedSlug,
+          error: subcategoriesResult.error,
+        })
+      )
+      shouldRefetchSubcategories = true
+    }
   } catch (error) {
     console.error('Error fetching subcategories:', error)
-    // Continue with empty array
+    shouldRefetchSubcategories = true
   }
 
   // Extract services from the response
@@ -145,12 +159,13 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Subcategories Accordion */}
-        {subcategories.length > 0 && (
+        {/* Subcategories Accordion — also mount on SSR failure so client can recover */}
+        {(subcategories.length > 0 || shouldRefetchSubcategories) && (
           <CategorySubcategoriesAccordion
             categorySlug={decodedSlug}
             categoryName={categoryName}
             subcategories={subcategories}
+            shouldRefetch={shouldRefetchSubcategories}
           />
         )}
       </div>

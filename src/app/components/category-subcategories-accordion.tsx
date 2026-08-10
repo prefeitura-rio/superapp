@@ -17,6 +17,8 @@ interface CategorySubcategoriesAccordionProps {
   categorySlug: string
   categoryName?: string
   subcategories: AppSubcategory[]
+  /** When SSR failed to load subcategories, refetch on the client. */
+  shouldRefetch?: boolean
 }
 
 interface SubcategoryWithServices extends AppSubcategory {
@@ -32,11 +34,54 @@ export function CategorySubcategoriesAccordion({
   categorySlug,
   categoryName,
   subcategories,
+  shouldRefetch = false,
 }: CategorySubcategoriesAccordionProps) {
   const [openItem, setOpenItem] = useState<string>('')
+  const [isRefetchingList, setIsRefetchingList] = useState(shouldRefetch)
   const [subcategoriesWithServices, setSubcategoriesWithServices] = useState<
     SubcategoryWithServices[]
   >(subcategories.map(sub => ({ ...sub })))
+
+  // Recover from intermittent SSR failures without waiting for ISR
+  useEffect(() => {
+    if (!shouldRefetch) return
+
+    let cancelled = false
+
+    const refetchSubcategories = async () => {
+      setIsRefetchingList(true)
+      try {
+        const response = await fetch(
+          `/api/categories/${encodeURIComponent(categorySlug)}/subcategories`
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to refetch subcategories: ${response.status}`)
+        }
+
+        const data = await response.json()
+        const nextSubcategories: AppSubcategory[] = data?.subcategories || []
+
+        if (!cancelled) {
+          setSubcategoriesWithServices(
+            nextSubcategories.map(sub => ({ ...sub }))
+          )
+        }
+      } catch (error) {
+        console.error('Error refetching subcategories:', error)
+      } finally {
+        if (!cancelled) {
+          setIsRefetchingList(false)
+        }
+      }
+    }
+
+    refetchSubcategories()
+
+    return () => {
+      cancelled = true
+    }
+  }, [shouldRefetch, categorySlug])
 
   // Fetch services when a subcategory is opened
   useEffect(() => {
@@ -98,6 +143,20 @@ export function CategorySubcategoriesAccordion({
       return prev
     })
   }, [openItem, categoryName])
+
+  if (isRefetchingList && subcategoriesWithServices.length === 0) {
+    return (
+      <div className="px-4 mt-6 pb-20 space-y-2">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Skeleton key={index} className="rounded-2xl h-14 w-full bg-card" />
+        ))}
+      </div>
+    )
+  }
+
+  if (subcategoriesWithServices.length === 0) {
+    return null
+  }
 
   return (
     <div className="px-4 mt-6 pb-20">

@@ -25,6 +25,7 @@ import {
   type CartaServicosThemesWithFilterResponse,
   getFilteredCategoryServices,
 } from '@/lib/carta-servicos/themes-filter-response'
+import type { AppSubcategory } from '@/lib/carta-servicos/types'
 import type { Category } from '@/lib/categories'
 import type { ReactNode } from 'react'
 
@@ -32,7 +33,21 @@ const CACHE_10MIN = {
   next: { revalidate: 600 },
 } as const
 
-function parseCartaServicosPayload<T>(payload: unknown): T | null {
+const SUBCATEGORIES_MAX_ATTEMPTS = 3
+const SUBCATEGORIES_RETRY_BASE_MS = 50
+
+export type SubcategoriesFetchResult =
+  | {
+      ok: true
+      data: ModelsSubcategoryResponse
+    }
+  | {
+      ok: false
+      error: string
+    }
+
+/** Exported for tests — parses MuleSoft payloads that may arrive as objects or JSON strings. */
+export function parseCartaServicosPayload<T>(payload: unknown): T | null {
   if (payload === null || payload === undefined) {
     return null
   }
@@ -57,6 +72,16 @@ function parseCartaServicosPayload<T>(payload: unknown): T | null {
   return null
 }
 
+/**
+ * Keep subcategories unless the API explicitly reports zero published services.
+ * Missing `count`/`publishedServices` must not drop the whole list.
+ */
+export function keepNonEmptySubcategories<T extends { count?: number }>(
+  subcategories: T[]
+): T[] {
+  return subcategories.filter(sub => sub.count === undefined || sub.count > 0)
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -70,6 +95,41 @@ function getThemesFromPayload(payload: unknown): Theme[] {
   }
 
   return body.data
+}
+
+function payloadPreview(payload: unknown): string {
+  if (payload === null || payload === undefined) return String(payload)
+  if (typeof payload === 'string') return payload.slice(0, 200)
+  try {
+    return JSON.stringify(payload).slice(0, 200)
+  } catch {
+    return Object.prototype.toString.call(payload)
+  }
+}
+
+function logSubthemesFailure(details: {
+  themeSlug: string
+  status?: number
+  attempt: number
+  reason: string
+  data?: unknown
+}) {
+  console.error(
+    JSON.stringify({
+      scope: 'carta-servicos.subthemes',
+      themeSlug: details.themeSlug,
+      status: details.status,
+      attempt: details.attempt,
+      reason: details.reason,
+      dataType: details.data === undefined ? undefined : typeof details.data,
+      dataPreview:
+        details.data === undefined ? undefined : payloadPreview(details.data),
+    })
+  )
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export async function fetchCartaServicosCategories(
@@ -165,36 +225,126 @@ export async function fetchCartaServicosServicesByCategory(
   }
 }
 
-export async function fetchCartaServicosSubcategoriesByCategory(
+async function fetchSubthemesOnce(
+  themeSlug: string,
+  categoryName: string,
   categorySlugOrName: string,
-  getIconForCategory: (name: string) => ReactNode
-): Promise<ModelsSubcategoryResponse | null> {
-  const resolved = await resolveThemeSlug(
-    categorySlugOrName,
-    getIconForCategory
+  attempt: number
+): Promise<ModelsSubcategoryResponse> {
+  const response = await getSubthemesByTheme(
+    themeSlug,
+    { per_page: 100 },
+    {
+      ...CACHE_10MIN,
+      next: {
+        ...CACHE_10MIN.next,
+        tags: ['category-subcategories', categorySlugOrName],
+      },
+    }
   )
-  if (!resolved) return null
 
-  const response = await getSubthemesByTheme(resolved.themeSlug, {
-    per_page: 100,
-  })
-
-  if (response.status !== 200) return null
+  if (response.status !== 200) {
+    logSubthemesFailure({
+      themeSlug,
+      status: response.status,
+      attempt,
+      reason: 'non_200',
+      data: response.data,
+    })
+    throw new Error(`subthemes_status_${response.status}`)
+  }
 
   const subthemesBody = parseCartaServicosPayload<{ data?: Subtheme[] }>(
     response.data
   )
-  const subthemes = subthemesBody?.data ?? []
-  const subcategories = subthemes
-    .map(subtheme => mapSubthemeToSubcategory(subtheme, resolved.categoryName))
-    .filter(sub => (sub.count ?? 0) > 0)
-    .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+
+  if (subthemesBody === null) {
+    logSubthemesFailure({
+      themeSlug,
+      status: response.status,
+      attempt,
+      reason: 'parse_failed',
+      data: response.data,
+    })
+    throw new Error('subthemes_parse_failed')
+  }
+
+  if (subthemesBody.data !== undefined && !Array.isArray(subthemesBody.data)) {
+    logSubthemesFailure({
+      themeSlug,
+      status: response.status,
+      attempt,
+      reason: 'invalid_data_shape',
+      data: response.data,
+    })
+    throw new Error('subthemes_invalid_data_shape')
+  }
+
+  const subthemes = subthemesBody.data ?? []
+  const subcategories = keepNonEmptySubcategories(
+    subthemes.map(subtheme =>
+      mapSubthemeToSubcategory(subtheme, categoryName)
+    ) as AppSubcategory[]
+  ).sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
 
   return {
-    category: resolved.categoryName,
+    category: categoryName,
     subcategories,
     total_subcategories: subcategories.length,
   }
+}
+
+export async function fetchCartaServicosSubcategoriesByCategory(
+  categorySlugOrName: string,
+  getIconForCategory: (name: string) => ReactNode
+): Promise<SubcategoriesFetchResult> {
+  let resolved: { themeSlug: string; categoryName: string } | null
+
+  try {
+    resolved = await resolveThemeSlug(categorySlugOrName, getIconForCategory)
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        scope: 'carta-servicos.subthemes',
+        reason: 'resolve_theme_failed',
+        categorySlugOrName,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    )
+    return { ok: false, error: 'resolve_theme_failed' }
+  }
+
+  if (!resolved) {
+    return {
+      ok: true,
+      data: {
+        category: categorySlugOrName,
+        subcategories: [],
+        total_subcategories: 0,
+      },
+    }
+  }
+
+  let lastError = 'unknown'
+
+  for (let attempt = 1; attempt <= SUBCATEGORIES_MAX_ATTEMPTS; attempt++) {
+    try {
+      const data = await fetchSubthemesOnce(
+        resolved.themeSlug,
+        resolved.categoryName,
+        categorySlugOrName,
+        attempt
+      )
+      return { ok: true, data }
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error)
+      if (attempt < SUBCATEGORIES_MAX_ATTEMPTS) {
+        await delay(SUBCATEGORIES_RETRY_BASE_MS * attempt)
+      }
+    }
+  }
+
+  return { ok: false, error: lastError }
 }
 
 export async function fetchCartaServicosServicesBySubcategory(
@@ -202,10 +352,20 @@ export async function fetchCartaServicosServicesBySubcategory(
   page = 1,
   perPage = 50
 ): Promise<ModelsSubcategoryServicesResponse | null> {
-  const response = await getServicesBySubtheme(subcategorySlug, {
-    page,
-    per_page: perPage,
-  })
+  const response = await getServicesBySubtheme(
+    subcategorySlug,
+    {
+      page,
+      per_page: perPage,
+    },
+    {
+      ...CACHE_10MIN,
+      next: {
+        ...CACHE_10MIN.next,
+        tags: ['subcategory-services', subcategorySlug],
+      },
+    }
+  )
 
   if (response.status !== 200) return null
 
