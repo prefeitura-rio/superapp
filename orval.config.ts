@@ -2,7 +2,8 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   api: {
-    input: './rmi_swagger.yaml',
+    input:
+      'https://raw.githubusercontent.com/prefeitura-rio/app-rmi/refs/heads/main/docs/swagger.yaml',
     output: {
       target: './src/http/api.ts',
       schemas: './src/http/models',

@@ -7,6 +7,7 @@
  */
 
 export interface ModelsInviteConductorRequest {
+  /** CPF must be exactly 11 digits (no punctuation), matching RMI/JWT form. */
   cpf: string
   email: string
   name?: string
