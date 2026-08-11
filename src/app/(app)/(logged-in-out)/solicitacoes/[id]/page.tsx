@@ -213,75 +213,25 @@ function formatDateTime(iso: string | undefined | null): string {
 }
 
 function StatusTimeline({ data }: { data: DetailData }) {
-  const {
-    macroStatus,
-    dataAbertura,
-    dataUltimaAtualizacao,
-    previsaoSLA,
-    motivoFechamento,
-    andamentos,
-  } = data
+  const { macroStatus, dataAbertura, andamentos } = data
 
-  const isAberto = macroStatus === 'Aberto'
-  const isEmAndamento = macroStatus === 'Em andamento'
-  const isConcluido = macroStatus === 'Concluído'
-  const isCancelado = macroStatus === 'Cancelado'
+  const isFinal = macroStatus === 'Concluído' || macroStatus === 'Cancelado'
 
-  const showEmAndamento = isEmAndamento || isConcluido || isCancelado
-  const showTerceiro =
-    isConcluido || isCancelado || !!(previsaoSLA && (isAberto || isEmAndamento))
-
-  const aberturaAndamento = andamentos[0]
-  const progressoAndamento = andamentos.find(a => a !== aberturaAndamento)
-
-  let terceiroLabel = ''
-  let terceiroDate = ''
-  let terceiroDescription: string | undefined
-
-  if (isAberto || isEmAndamento) {
-    terceiroLabel = 'Prazo Estimado'
-    terceiroDate = previsaoSLA
-  } else if (isConcluido) {
-    terceiroLabel = CLOSING_STATUS_LABEL[motivoFechamento] ?? 'Concluído'
-    terceiroDate = dataUltimaAtualizacao
-    terceiroDescription = progressoAndamento?.descricao
-  } else if (isCancelado) {
-    terceiroLabel = 'Solicitação cancelada'
-    terceiroDate = dataUltimaAtualizacao
-  }
-
-  const items = [
-    {
-      label: 'Aberto',
-      date: dataAbertura || dataUltimaAtualizacao,
-      active: isAberto,
-      description: aberturaAndamento?.descricao,
-    },
-    ...(showEmAndamento
-      ? [
+  // Se não há andamentos, mostra pelo menos o slot de abertura
+  const items =
+    andamentos.length > 0
+      ? andamentos.map(a => ({
+          label: a.evento,
+          date: a.dataInsercao ? formatDateTime(a.dataInsercao) : dataAbertura,
+          description: a.descricao || undefined,
+        }))
+      : [
           {
-            label: 'Em andamento',
-            date: dataUltimaAtualizacao,
-            active: isEmAndamento,
-            description: progressoAndamento?.descricao,
+            label: macroStatus,
+            date: dataAbertura,
+            description: undefined,
           },
         ]
-      : []),
-    ...(showTerceiro
-      ? [
-          {
-            label: terceiroLabel,
-            date: terceiroDate,
-            active: isConcluido || isCancelado,
-            description: terceiroDescription,
-          },
-        ]
-      : []),
-  ]
-
-  const activeIndex = items.findLastIndex(item => item.active)
-
-  const isOpenStatus = isAberto || isEmAndamento
 
   return (
     <div className="flex flex-col">
@@ -289,13 +239,13 @@ function StatusTimeline({ data }: { data: DetailData }) {
         const last = i === items.length - 1
         return (
           <TimelineItem
-            key={item.label}
+            key={`${item.label}-${i}`}
             label={item.label}
             date={item.date}
-            active={item.active}
+            active={last}
             isLast={last}
-            isPast={i < activeIndex}
-            showTrailingLine={last && item.active && isOpenStatus}
+            isPast={!last}
+            showTrailingLine={last && !isFinal}
             description={item.description}
           />
         )

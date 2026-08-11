@@ -80,7 +80,8 @@ export default function ConsultaProtocoloPage() {
       const items: OsItem[] = ordens.map((os: any) => ({
         codigoOs: os.codigoOs ?? '',
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
-        categoria: os.subtema ?? os.categoria ?? 'Serviço',
+        // TODO: remover fallback 'Serviço' quando API retornar subcategoria corretamente para Ouvidoria e LAI
+        categoria: data.subcategoria ?? 'Serviço',
         status: os.status ?? '',
         dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,
