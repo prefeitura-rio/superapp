@@ -24,6 +24,8 @@ interface SelectOptionDrawerContentProps {
   emptySearchMessage?: string
   /** When set (e.g. API load failure), shows this instead of the option list. */
   errorMessage?: string
+  /** Shown when there are no options (e.g. API returned an empty list). */
+  emptyMessage?: string
   /** Value of the "Outro" option — selecting it keeps the drawer open for free text. */
   otherOptionValue?: string
   otherInputPlaceholder?: string
@@ -56,6 +58,7 @@ export function SelectOptionDrawerContent({
   searchPlaceholder,
   emptySearchMessage,
   errorMessage,
+  emptyMessage,
   otherOptionValue,
   otherInputPlaceholder = 'Escreva aqui',
   initialOtherText = '',
@@ -74,13 +77,16 @@ export function SelectOptionDrawerContent({
     [options]
   )
 
-  const otherOption = useMemo(
-    () =>
-      otherOptionValue
-        ? normalizedOptions.find(option => option.value === otherOptionValue)
-        : undefined,
-    [normalizedOptions, otherOptionValue]
-  )
+  // Always expose "Outro" when requested, even if the API omitted it or returned [].
+  const otherOption = useMemo(() => {
+    if (!otherOptionValue) return undefined
+    return (
+      normalizedOptions.find(option => option.value === otherOptionValue) ?? {
+        label: 'Outro',
+        value: otherOptionValue,
+      }
+    )
+  }, [normalizedOptions, otherOptionValue])
 
   const filteredOptions = useMemo(() => {
     const mainOptions = otherOptionValue
@@ -109,8 +115,11 @@ export function SelectOptionDrawerContent({
   const mainMatchCount = otherOptionValue
     ? filteredOptions.filter(option => option.value !== otherOptionValue).length
     : filteredOptions.length
+  const catalogIsEmpty = mainMatchCount === 0
   const showEmptySearchMessage =
-    hasActiveSearch && mainMatchCount === 0 && !!emptySearchMessage
+    hasActiveSearch && catalogIsEmpty && !!emptySearchMessage
+  const showEmptyCatalogMessage =
+    !hasActiveSearch && catalogIsEmpty && !!emptyMessage
 
   const isOtherSelected = !!otherOptionValue && draftValue === otherOptionValue
   const canSubmitOther = otherText.trim().length > 0
@@ -143,6 +152,22 @@ export function SelectOptionDrawerContent({
     )
   }
 
+  // Loading / no data yet: avoid flashing empty or a lone "Outro".
+  if (options.length === 0 && !emptyMessage) {
+    return null
+  }
+
+  // Empty catalog without an "Outro" escape hatch (e.g. colors).
+  if (options.length === 0 && !otherOptionValue) {
+    return (
+      <div className="flex w-full flex-col py-2">
+        <p className="text-center text-sm font-normal leading-5 text-muted-foreground">
+          {emptyMessage}
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="flex w-full flex-col gap-8">
       {searchPlaceholder && (
@@ -154,9 +179,9 @@ export function SelectOptionDrawerContent({
       )}
 
       <div className="flex w-full flex-col gap-4">
-        {showEmptySearchMessage && (
+        {(showEmptySearchMessage || showEmptyCatalogMessage) && (
           <p className="text-sm font-normal leading-5 text-foreground">
-            {emptySearchMessage}
+            {showEmptySearchMessage ? emptySearchMessage : emptyMessage}
           </p>
         )}
 

@@ -8,7 +8,6 @@ export type { VehicleType }
 export {
   OTHER_BRAND_ID,
   OTHER_MODEL_ID,
-  VEHICLE_COLORS,
   VEHICLE_TYPE_LABELS,
   VEHICLE_TYPE_OPTIONS,
   isOtherBrand,

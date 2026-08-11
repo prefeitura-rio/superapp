@@ -74,11 +74,21 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
     name: 'brand_id' as Path<T>,
   }) as string
 
-  const { data: brandsData, isError: isBrandsError } = useRiomobVehicleBrands()
-  const { data: modelsData, isError: isModelsError } = useRiomobVehicleModels(
-    brandId || null
-  )
-  const { data: colorsData, isError: isColorsError } = useRiomobVehicleColors()
+  const {
+    data: brandsData,
+    isError: isBrandsError,
+    isPending: isBrandsPending,
+  } = useRiomobVehicleBrands()
+  const {
+    data: modelsData,
+    isError: isModelsError,
+    isPending: isModelsPending,
+  } = useRiomobVehicleModels(brandId || null)
+  const {
+    data: colorsData,
+    isError: isColorsError,
+    isPending: isColorsPending,
+  } = useRiomobVehicleColors()
 
   useRiomobQueryErrorToast(
     isBrandsError,
@@ -100,15 +110,27 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
   const models = modelsData ?? []
   const colors = colorsData ?? []
 
-  const brandsErrorMessage = isBrandsError
-    ? 'Não foi possível carregar as marcas.'
-    : undefined
-  const modelsErrorMessage = isModelsError
-    ? 'Não foi possível carregar os modelos.'
-    : undefined
-  const colorsErrorMessage = isColorsError
-    ? 'Não foi possível carregar as cores.'
-    : undefined
+  const catalogEmptyMessage = 'Nenhum resultado encontrado.'
+
+  const brandsErrorMessage =
+    !isBrandsPending && isBrandsError
+      ? 'Não foi possível carregar as marcas.'
+      : undefined
+  const modelsErrorMessage =
+    !isModelsPending && isModelsError
+      ? 'Não foi possível carregar os modelos.'
+      : undefined
+  const colorsErrorMessage =
+    !isColorsPending && isColorsError
+      ? 'Não foi possível carregar as cores.'
+      : undefined
+
+  const brandsEmptyMessage =
+    !isBrandsPending && !isBrandsError ? catalogEmptyMessage : undefined
+  const modelsEmptyMessage =
+    !isModelsPending && !isModelsError ? catalogEmptyMessage : undefined
+  const colorsEmptyMessage =
+    !isColorsPending && !isColorsError ? catalogEmptyMessage : undefined
 
   const brand = brands.find(item => item.id === values.brand_id)
   const model = models.find(item => item.id === values.model_id)
@@ -297,6 +319,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
               options={colors}
               value={values.color}
               errorMessage={colorsErrorMessage}
+              emptyMessage={colorsEmptyMessage}
               onSelect={color =>
                 setValue('color' as never, color as never, {
                   shouldValidate: true,
@@ -324,6 +347,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
               }))}
               value={values.brand_id}
               errorMessage={brandsErrorMessage}
+              emptyMessage={brandsEmptyMessage}
               onSelect={handleBrandSelect}
               searchPlaceholder="Encontre a marca desejada"
               emptySearchMessage="Não encontramos nenhuma marca com o nome informado."
@@ -359,6 +383,7 @@ export function VehicleInfoFields<T extends VehicleInfoFormValues>({
                     : values.model_id
                 }
                 errorMessage={modelsErrorMessage}
+                emptyMessage={modelsEmptyMessage}
                 onSelect={handleModelSelect}
                 searchPlaceholder={
                   brandIsOther ? undefined : 'Encontre o modelo desejado'
