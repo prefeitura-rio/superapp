@@ -835,12 +835,14 @@ definitions:
     - queued
     - sent
     - failed
+    - skipped
     type: string
     x-enum-varnames:
     - InviteEmailStatusPending
     - InviteEmailStatusQueued
     - InviteEmailStatusSent
     - InviteEmailStatusFailed
+    - InviteEmailStatusSkipped
   models.LegalEntity:
     properties:
       _id: {}

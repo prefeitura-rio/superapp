@@ -14,4 +14,5 @@ export const ModelsInviteEmailStatus = {
   InviteEmailStatusQueued: 'queued',
   InviteEmailStatusSent: 'sent',
   InviteEmailStatusFailed: 'failed',
+  InviteEmailStatusSkipped: 'skipped',
 } as const
