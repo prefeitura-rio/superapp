@@ -5,6 +5,7 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
+import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
   formatMaintenanceRequestsCount,
@@ -14,7 +15,6 @@ import {
   formatEducationOperatingHours,
   getOperatingStatus,
 } from '@/lib/operating-status'
-import type { WalletVehicle } from '@/lib/riomob/types'
 import {
   WALLET_CARD_TYPES,
   getCardPosition,
@@ -230,7 +230,7 @@ export function buildHomeWalletCards({
       <VehicleCard
         key={vehicle.id}
         vehicle={vehicle}
-        href={`/carteira/riomob/${vehicle.id}`}
+        href={`/carteira/cadmicro/${vehicle.id}`}
       />
     )
   }

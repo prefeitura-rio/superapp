@@ -2,15 +2,18 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  useInvalidateRiomobSignedUrl,
-  useRiomobSignedUrl,
-} from '@/hooks/riomob/use-riomob-signed-url'
+  useCadmicroSignedUrl,
+  useInvalidateCadmicroSignedUrl,
+} from '@/hooks/cadmicro/use-cadmicro-signed-url'
 import {
   VEHICLE_TYPE_LABELS,
   type VehicleType,
-} from '@/lib/riomob/catalog-constants'
-import { isGcsObjectUrl } from '@/lib/riomob/file-types'
-import { VEHICLE_CATEGORY_LABELS, type WalletVehicle } from '@/lib/riomob/types'
+} from '@/lib/cadmicro/catalog-constants'
+import { isGcsObjectUrl } from '@/lib/cadmicro/file-types'
+import {
+  VEHICLE_CATEGORY_LABELS,
+  type WalletVehicle,
+} from '@/lib/cadmicro/types'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -49,7 +52,7 @@ export function VehicleCard({ vehicle, href, className }: VehicleCardProps) {
   return card
 }
 
-/** Mimics [`VehicleCard`] layout for the RioMob wallet loading state. */
+/** Mimics [`VehicleCard`] layout for the CadMicro wallet loading state. */
 export function VehicleCardSkeleton({ className }: { className?: string }) {
   return (
     <article
@@ -115,7 +118,7 @@ function VehicleCardHeader() {
         de micromobilidade
       </p>
       <span className="shrink-0 font-montserrat text-base font-extrabold leading-5 text-white">
-        RioMob
+        CadMicro
       </span>
     </div>
   )
@@ -126,8 +129,8 @@ function VehicleCardThumbnail({
   displayName,
   vehicleId,
 }: VehicleCardThumbnailProps) {
-  const { url: resolvedUrl } = useRiomobSignedUrl(photoUrl, { vehicleId })
-  const invalidate = useInvalidateRiomobSignedUrl()
+  const { url: resolvedUrl } = useCadmicroSignedUrl(photoUrl, { vehicleId })
+  const invalidate = useInvalidateCadmicroSignedUrl()
   const invalidatedForKeyRef = useRef<string | null>(null)
   const invalidateKey = `${photoUrl ?? ''}|${vehicleId}`
 
@@ -184,11 +187,11 @@ function VehicleCardField({ label, value }: VehicleCardFieldProps) {
   )
 }
 
-/** Solid fallback + theme gradient (`--background-image-riomob-*` in globals.css). */
+/** Solid fallback + theme gradient (`--background-image-cadmicro-*` in globals.css). */
 const VEHICLE_CARD_GRADIENTS: Record<VehicleType, string> = {
-  autopropelido: 'bg-[#193cb8] bg-riomob-autopropelido',
-  bicicleta_eletrica: 'bg-[#007a55] bg-riomob-bike',
-  ciclomotor: 'bg-[#e17100] bg-riomob-ciclomotor',
+  autopropelido: 'bg-[#193cb8] bg-cadmicro-autopropelido',
+  bicicleta_eletrica: 'bg-[#007a55] bg-cadmicro-bike',
+  ciclomotor: 'bg-[#e17100] bg-cadmicro-ciclomotor',
 }
 
 const VEHICLE_CARD_FIELDS: VehicleCardFieldDef[] = [

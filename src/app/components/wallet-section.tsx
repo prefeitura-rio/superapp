@@ -6,7 +6,7 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
-import type { WalletVehicle } from '@/lib/riomob/types'
+import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { useEffect, useState } from 'react'
 import {
   type HomeWalletHealthCardData,

@@ -4,7 +4,7 @@ import { SliderTabs } from '@/app/components/slider-tabs'
 import { isFeatureEnabled } from '@/lib/feature-flags'
 
 interface WalletTabsProps {
-  activeTab: 'cards' | 'pets' | 'riomob'
+  activeTab: 'cards' | 'pets' | 'cadmicro'
 }
 
 const WALLET_TABS = [
@@ -19,16 +19,16 @@ const WALLET_TABS = [
     href: '/carteira?pets=true',
   },
   {
-    id: 'riomob',
+    id: 'cadmicro',
     label: 'Veículos',
-    href: '/carteira?riomob=true',
+    href: '/carteira?cadmicro=true',
   },
 ]
 
 export function WalletTabs({ activeTab }: WalletTabsProps) {
-  const tabs = isFeatureEnabled('riomob')
+  const tabs = isFeatureEnabled('cadmicro')
     ? WALLET_TABS
-    : WALLET_TABS.filter(tab => tab.id !== 'riomob')
+    : WALLET_TABS.filter(tab => tab.id !== 'cadmicro')
 
   return <SliderTabs tabs={tabs} activeTabId={activeTab} />
 }

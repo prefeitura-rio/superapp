@@ -1,10 +1,10 @@
+import { CadMicroBanner } from '@/app/components/banners/cadmicro-banner'
 import { CursosBanner } from '@/app/components/banners/cursos-banner'
 import { EmpregabilidadeBanner } from '@/app/components/banners/empregabilidade-banner'
 import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
 import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
-import { RioMobBanner } from '@/app/components/banners/riomob-banner'
 import { buildAuthUrl } from '@/constants/url'
 import { isFeatureEnabled } from '@/lib/feature-flags'
 
@@ -22,15 +22,15 @@ type BannerProps = {
 }
 
 const _empregosEnabled = isFeatureEnabled('empregos')
-const _riomobEnabled = isFeatureEnabled('riomob')
+const _cadmicroEnabled = isFeatureEnabled('cadmicro')
 
 export const suggestedBanners: BannerProps[] = [
   {
-    id: 'riomob',
-    component: RioMobBanner,
+    id: 'cadmicro',
+    component: CadMicroBanner,
     title: 'Cadastre seu veículo',
     subtitle: 'habilite o uso em toda a cidade',
-    route: '/carteira?riomob=true',
+    route: '/carteira?cadmicro=true',
   },
   {
     id: 'empregabilidade',
@@ -84,15 +84,15 @@ export const suggestedBanners: BannerProps[] = [
 ].filter(
   banner =>
     (banner.id !== 'empregabilidade' || _empregosEnabled) &&
-    (banner.id !== 'riomob' || _riomobEnabled)
+    (banner.id !== 'cadmicro' || _cadmicroEnabled)
 )
 
 export function resolveBannerRoute(
   banner: BannerProps,
   isLoggedIn: boolean
 ): string {
-  if (banner.id === 'riomob' && !isLoggedIn) {
-    return buildAuthUrl('/carteira?riomob=true')
+  if (banner.id === 'cadmicro' && !isLoggedIn) {
+    return buildAuthUrl('/carteira?cadmicro=true')
   }
   return banner.route
 }

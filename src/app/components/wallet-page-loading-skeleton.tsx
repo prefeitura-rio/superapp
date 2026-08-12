@@ -9,7 +9,7 @@ import { Suspense } from 'react'
 function WalletContentLoadingBody({
   activeTab,
 }: {
-  activeTab: 'cards' | 'pets' | 'riomob'
+  activeTab: 'cards' | 'pets' | 'cadmicro'
 }) {
   return (
     <div className="pt-2">
@@ -23,10 +23,11 @@ function WalletContentLoadingBody({
 
 function WalletContentLoadingSkeletonWithParams() {
   const searchParams = useSearchParams()
-  const riomobEnabled = isFeatureEnabled('riomob')
-  const isRiomobView = riomobEnabled && searchParams.get('riomob') === 'true'
-  const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
-  const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
+  const cadmicroEnabled = isFeatureEnabled('cadmicro')
+  const isCadmicroView =
+    cadmicroEnabled && searchParams.get('cadmicro') === 'true'
+  const isPetsView = !isCadmicroView && searchParams.get('pets') === 'true'
+  const activeTab = isCadmicroView ? 'cadmicro' : isPetsView ? 'pets' : 'cards'
 
   return <WalletContentLoadingBody activeTab={activeTab} />
 }

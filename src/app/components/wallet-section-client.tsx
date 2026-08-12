@@ -1,8 +1,8 @@
 'use client'
 
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
-import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
-import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
+import { useCadmicroQueryErrorToast } from '@/hooks/cadmicro/use-cadmicro-query-error-toast'
+import { useCadmicroVehicles } from '@/hooks/cadmicro/use-cadmicro-vehicles'
 import { isFeatureEnabled } from '@/lib/feature-flags'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import { getMaintenanceRequestStats } from '@/lib/maintenance-requests-utils'
@@ -28,7 +28,7 @@ async function fetchWalletData(): Promise<WalletApiResponse> {
 export default function WalletSectionClient() {
   const { isLoggedIn, isLoading: isAuthLoading } = useAuthStatus()
   const isAuthenticated = Boolean(isLoggedIn && !isAuthLoading)
-  const riomobEnabled = isFeatureEnabled('riomob')
+  const cadmicroEnabled = isFeatureEnabled('cadmicro')
 
   const { data, isLoading } = useQuery({
     queryKey: ['wallet'],
@@ -36,14 +36,16 @@ export default function WalletSectionClient() {
     staleTime: 5 * 60 * 1000,
     enabled: isAuthenticated,
   })
-  const { data: vehicles = [], isError: isVehiclesError } = useRiomobVehicles({
-    enabled: isAuthenticated && riomobEnabled,
-  })
+  const { data: vehicles = [], isError: isVehiclesError } = useCadmicroVehicles(
+    {
+      enabled: isAuthenticated && cadmicroEnabled,
+    }
+  )
 
-  useRiomobQueryErrorToast(
+  useCadmicroQueryErrorToast(
     isVehiclesError,
     'Não foi possível carregar os veículos',
-    'riomob-vehicles-error'
+    'cadmicro-vehicles-error'
   )
 
   if (isAuthLoading || !isLoggedIn) return null
@@ -74,7 +76,7 @@ export default function WalletSectionClient() {
     maintenanceStats.total
   )
   const petsCount = Array.isArray(pets) ? pets.length : 0
-  const walletVehicles = riomobEnabled ? vehicles : []
+  const walletVehicles = cadmicroEnabled ? vehicles : []
 
   if (!walletInfo.hasData && petsCount === 0 && walletVehicles.length === 0) {
     return null

@@ -1,6 +1,6 @@
 'use client'
 
-import { PendingInviteAccordion } from '@/app/components/riomob/pending-invite-accordion'
+import { PendingInviteAccordion } from '@/app/components/cadmicro/pending-invite-accordion'
 import { WalletCardsWrapper } from '@/app/components/wallet-cards-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import {
@@ -8,12 +8,12 @@ import {
   VehicleCardsLoadingSkeleton,
 } from '@/app/components/wallet-cards/vehicle-card'
 import { WalletTabs } from '@/app/components/wallet-tabs'
+import cadmicroEmptyImage from '@/assets/cadmicro-empty-vehicle.svg'
 import petsEmptyImage from '@/assets/dog-pet.svg'
 import { PlusIcon } from '@/assets/icons'
-import riomobEmptyImage from '@/assets/riomob-empty-vehicle.svg'
-import { useRiomobInvitations } from '@/hooks/riomob/use-riomob-invitations'
-import { useRiomobQueryErrorToast } from '@/hooks/riomob/use-riomob-query-error-toast'
-import { useRiomobVehicles } from '@/hooks/riomob/use-riomob-vehicles'
+import { useCadmicroInvitations } from '@/hooks/cadmicro/use-cadmicro-invitations'
+import { useCadmicroQueryErrorToast } from '@/hooks/cadmicro/use-cadmicro-query-error-toast'
+import { useCadmicroVehicles } from '@/hooks/cadmicro/use-cadmicro-vehicles'
 import type {
   ModelsCitizenWallet,
   ModelsMaintenanceRequest,
@@ -43,30 +43,31 @@ export function WalletContent({
   healthUnitRiskData,
 }: WalletContentProps) {
   const searchParams = useSearchParams()
-  const riomobEnabled = isFeatureEnabled('riomob')
-  const isRiomobView = riomobEnabled && searchParams.get('riomob') === 'true'
-  const isPetsView = !isRiomobView && searchParams.get('pets') === 'true'
-  const activeTab = isRiomobView ? 'riomob' : isPetsView ? 'pets' : 'cards'
+  const cadmicroEnabled = isFeatureEnabled('cadmicro')
+  const isCadmicroView =
+    cadmicroEnabled && searchParams.get('cadmicro') === 'true'
+  const isPetsView = !isCadmicroView && searchParams.get('pets') === 'true'
+  const activeTab = isCadmicroView ? 'cadmicro' : isPetsView ? 'pets' : 'cards'
 
   const {
     data: vehicles = [],
     isLoading: isLoadingVehicles,
     isError: isVehiclesError,
-  } = useRiomobVehicles({ enabled: isRiomobView })
+  } = useCadmicroVehicles({ enabled: isCadmicroView })
   const { data: invitations = [], isError: isInvitationsError } =
-    useRiomobInvitations({
-      enabled: isRiomobView,
+    useCadmicroInvitations({
+      enabled: isCadmicroView,
     })
 
-  useRiomobQueryErrorToast(
+  useCadmicroQueryErrorToast(
     isVehiclesError,
     'Não foi possível carregar os veículos',
-    'riomob-vehicles-error'
+    'cadmicro-vehicles-error'
   )
-  useRiomobQueryErrorToast(
+  useCadmicroQueryErrorToast(
     isInvitationsError,
     'Não foi possível carregar os convites',
-    'riomob-invitations-error'
+    'cadmicro-invitations-error'
   )
 
   const [pendingInviteCount, setPendingInviteCount] = useState(0)
@@ -82,7 +83,7 @@ export function WalletContent({
       <WalletTabs activeTab={activeTab} />
 
       <div className="mt-8">
-        {isRiomobView ? (
+        {isCadmicroView ? (
           <div className="pb-10 w-full">
             <PendingInviteAccordion
               className="mb-6"
@@ -99,13 +100,13 @@ export function WalletContent({
                     <VehicleCard
                       key={vehicle.id}
                       vehicle={vehicle}
-                      href={`/carteira/riomob/${vehicle.id}`}
+                      href={`/carteira/cadmicro/${vehicle.id}`}
                     />
                   ))}
                 </div>
 
                 <Link
-                  href="/carteira/riomob/adicionar-veiculo"
+                  href="/carteira/cadmicro/adicionar-veiculo"
                   className="group flex flex-col items-center gap-1"
                 >
                   <span className="flex size-11.5 shrink-0 items-center justify-center rounded-full bg-card transition-colors group-hover:bg-secondary">
@@ -123,8 +124,9 @@ export function WalletContent({
                 {showWelcomeCard && (
                   <div className="bg-card rounded-2xl p-4 w-full">
                     <p className="text-sm font-medium leading-4 text-foreground text-left md:text-center">
-                      Bem vindo ao <span className="text-primary">RioMob</span>,
-                      o Registro de Veículos de Micromobilidade do Rio
+                      Bem vindo ao{' '}
+                      <span className="text-primary">CadMicro</span>, o Registro
+                      de Veículos de Micromobilidade do Rio
                     </p>
                   </div>
                 )}
@@ -132,7 +134,7 @@ export function WalletContent({
                 {showEmptyVehicleCopy && (
                   <>
                     <Image
-                      src={riomobEmptyImage}
+                      src={cadmicroEmptyImage}
                       alt="Nenhum veículo cadastrado"
                       width={150}
                       height={200}
@@ -153,7 +155,7 @@ export function WalletContent({
                 )}
 
                 <Link
-                  href="/carteira/riomob/adicionar-veiculo"
+                  href="/carteira/cadmicro/adicionar-veiculo"
                   className={cn(
                     'group flex flex-col items-center gap-1',
                     pendingInviteCount > 1

@@ -10,7 +10,7 @@
 | Empregos | `/servicos/trabalho`, `[id]`, currículo, candidaturas, `/servicos/empresas/[cnpj]` | componentes empregos + `http-courses/` |
 | MEI | `/servicos/mei`, proposta, minhas propostas, meu-mei | componentes mei + `http-courses/` |
 | Busca | `/busca` | `http-app-catalogo/` / busca-search |
-| Carteira digital | `/carteira`, pet, cadunico, clínica da família, RioMob (`/carteira/riomob`)… | `(logged-in)/carteira/` |
+| Carteira digital | `/carteira`, pet, cadunico, clínica da família, CadMicro (`/carteira/cadmicro`)… | `(logged-in)/carteira/` |
 | Perfil | `/meu-perfil`, dados pessoais, endereço, avatar | `src/actions/`, `http/` (RMI) |
 | FAQ / Ouvidoria | `/faq`, `/ouvidoria` | rotas mistas |
 | Auth UX | `/sessao-expirada`, `/autenticacao-necessaria/*` | `(logged-out)/` |
@@ -21,9 +21,9 @@ Redirect legado: `/oportunidadescariocas*` → trabalho (middleware).
 
 Controladas principalmente em `src/middleware.ts` e banners (`src/constants/banners.ts`):
 
-- `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `riomob`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`riomob` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/riomob`.
+- `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `cadmicro`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`cadmicro` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/cadmicro`.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
-- `NEXT_PUBLIC_RIOMOB_USE_MOCKS` — RioMob: unset/`true` usa fixtures nos services; `false` chama Orval (`src/http/mobilidade`). Ver [`../riomob-api-integration.md`](../riomob-api-integration.md).
+- `NEXT_PUBLIC_CADMICRO_USE_MOCKS` — CadMicro: unset/`true` usa fixtures nos services; `false` chama Orval (`src/http/mobilidade`). Ver [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md).
 
 Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos banners.
 
@@ -34,5 +34,5 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - Empregabilidade (testes): [`../testes-empregabilidade.md`](../testes-empregabilidade.md)
 - Cursos / TanStack: [`../cursos-tanstack-query-migration.md`](../cursos-tanstack-query-migration.md), [`../cursos-home-cache-ssr-tanstack.md`](../cursos-home-cache-ssr-tanstack.md)
 - Carteira pet: [`../pt-br/carteira-pet.md`](../pt-br/carteira-pet.md)
-- RioMob GCS upload: [`../riomob-gcs-upload.md`](../riomob-gcs-upload.md)
-- RioMob API / mocks: [`../riomob-api-integration.md`](../riomob-api-integration.md)
+- CadMicro GCS upload: [`../cadmicro-gcs-upload.md`](../cadmicro-gcs-upload.md)
+- CadMicro API / mocks: [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md)
