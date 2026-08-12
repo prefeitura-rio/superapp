@@ -9,6 +9,7 @@ import type { ModelsVehicleType } from './modelsVehicleType'
 
 export interface ModelsVehicleModel {
   brand_id?: string
+  deleted_at?: string
   id?: string
   is_other?: boolean
   name?: string

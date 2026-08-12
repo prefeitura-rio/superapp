@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetAdminMobilidadeVehicleModelsParams,
   GetCitizenCpfVehiclesParams,
   GetMobilidadeVehicleModelsParams,
   HandlersErrorResponse,
@@ -13,17 +14,612 @@ import type {
   ModelsInviteConductorRequest,
   ModelsPaginatedVehicles,
   ModelsRespondInvitationRequest,
+  ModelsVehicleBrand,
+  ModelsVehicleBrandCreateRequest,
+  ModelsVehicleBrandUpdateRequest,
   ModelsVehicleBrandsResponse,
   ModelsVehicleColorsResponse,
   ModelsVehicleConductor,
   ModelsVehicleCreateRequest,
   ModelsVehicleDetail,
   ModelsVehicleInvitationsResponse,
+  ModelsVehicleModel,
+  ModelsVehicleModelCreateRequest,
+  ModelsVehicleModelUpdateRequest,
   ModelsVehicleModelsResponse,
   ModelsVehicleUpdateRequest,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch'
+
+export type getAdminMobilidadeVehicleBrandsResponse200 = {
+  data: ModelsVehicleBrandsResponse
+  status: 200
+}
+
+export type getAdminMobilidadeVehicleBrandsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getAdminMobilidadeVehicleBrandsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getAdminMobilidadeVehicleBrandsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getAdminMobilidadeVehicleBrandsResponseSuccess =
+  getAdminMobilidadeVehicleBrandsResponse200 & {
+    headers: Headers
+  }
+export type getAdminMobilidadeVehicleBrandsResponseError = (
+  | getAdminMobilidadeVehicleBrandsResponse401
+  | getAdminMobilidadeVehicleBrandsResponse403
+  | getAdminMobilidadeVehicleBrandsResponse500
+) & {
+  headers: Headers
+}
+
+export type getAdminMobilidadeVehicleBrandsResponse =
+  | getAdminMobilidadeVehicleBrandsResponseSuccess
+  | getAdminMobilidadeVehicleBrandsResponseError
+
+export const getGetAdminMobilidadeVehicleBrandsUrl = () => {
+  return `/admin/mobilidade/vehicle-brands`
+}
+
+/**
+ * Lista completa de marcas do catálogo, incluindo soft-deleted (admin).
+ * @summary Listar marcas (admin)
+ */
+export const getAdminMobilidadeVehicleBrands = async (
+  options?: RequestInit
+): Promise<getAdminMobilidadeVehicleBrandsResponse> => {
+  return customFetch<getAdminMobilidadeVehicleBrandsResponse>(
+    getGetAdminMobilidadeVehicleBrandsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse201 = {
+  data: ModelsVehicleBrand
+  status: 201
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type postAdminMobilidadeVehicleBrandsResponseSuccess =
+  postAdminMobilidadeVehicleBrandsResponse201 & {
+    headers: Headers
+  }
+export type postAdminMobilidadeVehicleBrandsResponseError = (
+  | postAdminMobilidadeVehicleBrandsResponse400
+  | postAdminMobilidadeVehicleBrandsResponse401
+  | postAdminMobilidadeVehicleBrandsResponse403
+  | postAdminMobilidadeVehicleBrandsResponse409
+  | postAdminMobilidadeVehicleBrandsResponse500
+) & {
+  headers: Headers
+}
+
+export type postAdminMobilidadeVehicleBrandsResponse =
+  | postAdminMobilidadeVehicleBrandsResponseSuccess
+  | postAdminMobilidadeVehicleBrandsResponseError
+
+export const getPostAdminMobilidadeVehicleBrandsUrl = () => {
+  return `/admin/mobilidade/vehicle-brands`
+}
+
+/**
+ * Cadastra uma marca no catálogo. ID gerado no backend (brand_&lt;slug&gt;); is_other=false.
+ * @summary Criar marca (admin)
+ */
+export const postAdminMobilidadeVehicleBrands = async (
+  modelsVehicleBrandCreateRequest: ModelsVehicleBrandCreateRequest,
+  options?: RequestInit
+): Promise<postAdminMobilidadeVehicleBrandsResponse> => {
+  return customFetch<postAdminMobilidadeVehicleBrandsResponse>(
+    getPostAdminMobilidadeVehicleBrandsUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsVehicleBrandCreateRequest),
+    }
+  )
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponseSuccess =
+  deleteAdminMobilidadeVehicleBrandsBrandIdResponse204 & {
+    headers: Headers
+  }
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponseError = (
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse400
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse401
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse403
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse404
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse409
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponse500
+) & {
+  headers: Headers
+}
+
+export type deleteAdminMobilidadeVehicleBrandsBrandIdResponse =
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponseSuccess
+  | deleteAdminMobilidadeVehicleBrandsBrandIdResponseError
+
+export const getDeleteAdminMobilidadeVehicleBrandsBrandIdUrl = (
+  brandId: string
+) => {
+  return `/admin/mobilidade/vehicle-brands/${brandId}`
+}
+
+/**
+ * Soft-delete de marca. 409 se houver modelos ativos ou veículos referenciando. Sentinel brand_outro não pode ser excluída.
+ * @summary Excluir marca (admin, soft-delete)
+ */
+export const deleteAdminMobilidadeVehicleBrandsBrandId = async (
+  brandId: string,
+  options?: RequestInit
+): Promise<deleteAdminMobilidadeVehicleBrandsBrandIdResponse> => {
+  return customFetch<deleteAdminMobilidadeVehicleBrandsBrandIdResponse>(
+    getDeleteAdminMobilidadeVehicleBrandsBrandIdUrl(brandId),
+    {
+      ...options,
+      method: 'DELETE',
+    }
+  )
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse200 = {
+  data: ModelsVehicleBrand
+  status: 200
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponseSuccess =
+  patchAdminMobilidadeVehicleBrandsBrandIdResponse200 & {
+    headers: Headers
+  }
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponseError = (
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse400
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse401
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse403
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse404
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse409
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponse500
+) & {
+  headers: Headers
+}
+
+export type patchAdminMobilidadeVehicleBrandsBrandIdResponse =
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponseSuccess
+  | patchAdminMobilidadeVehicleBrandsBrandIdResponseError
+
+export const getPatchAdminMobilidadeVehicleBrandsBrandIdUrl = (
+  brandId: string
+) => {
+  return `/admin/mobilidade/vehicle-brands/${brandId}`
+}
+
+/**
+ * Atualiza o nome de uma marca ativa. Sentinel brand_outro não pode ser alterada. 409 se referenciada por veículo.
+ * @summary Atualizar marca (admin)
+ */
+export const patchAdminMobilidadeVehicleBrandsBrandId = async (
+  brandId: string,
+  modelsVehicleBrandUpdateRequest: ModelsVehicleBrandUpdateRequest,
+  options?: RequestInit
+): Promise<patchAdminMobilidadeVehicleBrandsBrandIdResponse> => {
+  return customFetch<patchAdminMobilidadeVehicleBrandsBrandIdResponse>(
+    getPatchAdminMobilidadeVehicleBrandsBrandIdUrl(brandId),
+    {
+      ...options,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsVehicleBrandUpdateRequest),
+    }
+  )
+}
+
+export type getAdminMobilidadeVehicleModelsResponse200 = {
+  data: ModelsVehicleModelsResponse
+  status: 200
+}
+
+export type getAdminMobilidadeVehicleModelsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getAdminMobilidadeVehicleModelsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getAdminMobilidadeVehicleModelsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getAdminMobilidadeVehicleModelsResponseSuccess =
+  getAdminMobilidadeVehicleModelsResponse200 & {
+    headers: Headers
+  }
+export type getAdminMobilidadeVehicleModelsResponseError = (
+  | getAdminMobilidadeVehicleModelsResponse401
+  | getAdminMobilidadeVehicleModelsResponse403
+  | getAdminMobilidadeVehicleModelsResponse500
+) & {
+  headers: Headers
+}
+
+export type getAdminMobilidadeVehicleModelsResponse =
+  | getAdminMobilidadeVehicleModelsResponseSuccess
+  | getAdminMobilidadeVehicleModelsResponseError
+
+export const getGetAdminMobilidadeVehicleModelsUrl = (
+  params?: GetAdminMobilidadeVehicleModelsParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/admin/mobilidade/vehicle-models?${stringifiedParams}`
+    : `/admin/mobilidade/vehicle-models`
+}
+
+/**
+ * Lista completa de modelos, incluindo soft-deleted. Filtro opcional por brand_id.
+ * @summary Listar modelos (admin)
+ */
+export const getAdminMobilidadeVehicleModels = async (
+  params?: GetAdminMobilidadeVehicleModelsParams,
+  options?: RequestInit
+): Promise<getAdminMobilidadeVehicleModelsResponse> => {
+  return customFetch<getAdminMobilidadeVehicleModelsResponse>(
+    getGetAdminMobilidadeVehicleModelsUrl(params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type postAdminMobilidadeVehicleModelsResponse201 = {
+  data: ModelsVehicleModel
+  status: 201
+}
+
+export type postAdminMobilidadeVehicleModelsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type postAdminMobilidadeVehicleModelsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type postAdminMobilidadeVehicleModelsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type postAdminMobilidadeVehicleModelsResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type postAdminMobilidadeVehicleModelsResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type postAdminMobilidadeVehicleModelsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type postAdminMobilidadeVehicleModelsResponseSuccess =
+  postAdminMobilidadeVehicleModelsResponse201 & {
+    headers: Headers
+  }
+export type postAdminMobilidadeVehicleModelsResponseError = (
+  | postAdminMobilidadeVehicleModelsResponse400
+  | postAdminMobilidadeVehicleModelsResponse401
+  | postAdminMobilidadeVehicleModelsResponse403
+  | postAdminMobilidadeVehicleModelsResponse404
+  | postAdminMobilidadeVehicleModelsResponse409
+  | postAdminMobilidadeVehicleModelsResponse500
+) & {
+  headers: Headers
+}
+
+export type postAdminMobilidadeVehicleModelsResponse =
+  | postAdminMobilidadeVehicleModelsResponseSuccess
+  | postAdminMobilidadeVehicleModelsResponseError
+
+export const getPostAdminMobilidadeVehicleModelsUrl = () => {
+  return `/admin/mobilidade/vehicle-models`
+}
+
+/**
+ * Cadastra um modelo vinculado a brand_id com vehicle_type. ID gerado no backend; is_other=false.
+ * @summary Criar modelo (admin)
+ */
+export const postAdminMobilidadeVehicleModels = async (
+  modelsVehicleModelCreateRequest: ModelsVehicleModelCreateRequest,
+  options?: RequestInit
+): Promise<postAdminMobilidadeVehicleModelsResponse> => {
+  return customFetch<postAdminMobilidadeVehicleModelsResponse>(
+    getPostAdminMobilidadeVehicleModelsUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsVehicleModelCreateRequest),
+    }
+  )
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponseSuccess =
+  deleteAdminMobilidadeVehicleModelsModelIdResponse204 & {
+    headers: Headers
+  }
+export type deleteAdminMobilidadeVehicleModelsModelIdResponseError = (
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse400
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse401
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse403
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse404
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse409
+  | deleteAdminMobilidadeVehicleModelsModelIdResponse500
+) & {
+  headers: Headers
+}
+
+export type deleteAdminMobilidadeVehicleModelsModelIdResponse =
+  | deleteAdminMobilidadeVehicleModelsModelIdResponseSuccess
+  | deleteAdminMobilidadeVehicleModelsModelIdResponseError
+
+export const getDeleteAdminMobilidadeVehicleModelsModelIdUrl = (
+  modelId: string
+) => {
+  return `/admin/mobilidade/vehicle-models/${modelId}`
+}
+
+/**
+ * Soft-delete de modelo. 409 se veículos referenciarem. Sentinel model_outro não pode ser excluído.
+ * @summary Excluir modelo (admin, soft-delete)
+ */
+export const deleteAdminMobilidadeVehicleModelsModelId = async (
+  modelId: string,
+  options?: RequestInit
+): Promise<deleteAdminMobilidadeVehicleModelsModelIdResponse> => {
+  return customFetch<deleteAdminMobilidadeVehicleModelsModelIdResponse>(
+    getDeleteAdminMobilidadeVehicleModelsModelIdUrl(modelId),
+    {
+      ...options,
+      method: 'DELETE',
+    }
+  )
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse200 = {
+  data: ModelsVehicleModel
+  status: 200
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse404 = {
+  data: HandlersErrorResponse
+  status: 404
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse409 = {
+  data: HandlersErrorResponse
+  status: 409
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponseSuccess =
+  patchAdminMobilidadeVehicleModelsModelIdResponse200 & {
+    headers: Headers
+  }
+export type patchAdminMobilidadeVehicleModelsModelIdResponseError = (
+  | patchAdminMobilidadeVehicleModelsModelIdResponse400
+  | patchAdminMobilidadeVehicleModelsModelIdResponse401
+  | patchAdminMobilidadeVehicleModelsModelIdResponse403
+  | patchAdminMobilidadeVehicleModelsModelIdResponse404
+  | patchAdminMobilidadeVehicleModelsModelIdResponse409
+  | patchAdminMobilidadeVehicleModelsModelIdResponse500
+) & {
+  headers: Headers
+}
+
+export type patchAdminMobilidadeVehicleModelsModelIdResponse =
+  | patchAdminMobilidadeVehicleModelsModelIdResponseSuccess
+  | patchAdminMobilidadeVehicleModelsModelIdResponseError
+
+export const getPatchAdminMobilidadeVehicleModelsModelIdUrl = (
+  modelId: string
+) => {
+  return `/admin/mobilidade/vehicle-models/${modelId}`
+}
+
+/**
+ * Atualiza nome, vehicle_type e/ou brand_id de um modelo ativo. Sentinel model_outro não pode ser alterado. 409 se referenciado por veículo.
+ * @summary Atualizar modelo (admin)
+ */
+export const patchAdminMobilidadeVehicleModelsModelId = async (
+  modelId: string,
+  modelsVehicleModelUpdateRequest: ModelsVehicleModelUpdateRequest,
+  options?: RequestInit
+): Promise<patchAdminMobilidadeVehicleModelsModelIdResponse> => {
+  return customFetch<patchAdminMobilidadeVehicleModelsModelIdResponse>(
+    getPatchAdminMobilidadeVehicleModelsModelIdUrl(modelId),
+    {
+      ...options,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsVehicleModelUpdateRequest),
+    }
+  )
+}
 
 export type getCitizenCpfVehicleInvitationsResponse200 = {
   data: ModelsVehicleInvitationsResponse
@@ -226,7 +822,7 @@ export const getGetCitizenCpfVehiclesUrl = (
 }
 
 /**
- * Retorna veículos em que o CPF é proprietário ou condutor aceito, com role em cada item.
+ * Retorna veículos em que o CPF é proprietário ou condutor aceito, com role em cada item. Quando role=conductor, inclui conductor_id (id do vínculo aceito).
  * @summary Listar veículos da carteira (mobilidade)
  */
 export const getCitizenCpfVehicles = async (
@@ -438,7 +1034,7 @@ export const getGetCitizenCpfVehiclesVehicleIdUrl = (
 }
 
 /**
- * Retorna o detalhe do veículo para proprietário ou condutor aceito (inclui invoice_photo_url, metadados de arquivos e registration_number). owner_name/owner_phone/owner_email são enriquecidos ao vivo via RMI a partir de owner_cpf.
+ * Retorna o detalhe do veículo para proprietário ou condutor aceito (inclui invoice_photo_url, metadados de arquivos e registration_number). Quando role=conductor, inclui conductor_id (id do vínculo aceito). owner_name/owner_phone/owner_email são enriquecidos ao vivo via RMI a partir de owner_cpf.
  * @summary Obter detalhe do veículo
  */
 export const getCitizenCpfVehiclesVehicleId = async (

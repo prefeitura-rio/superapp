@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsVehicleBrand {
-  deleted_at?: string
-  id?: string
-  is_other?: boolean
-  name?: string
+export type GetAdminMobilidadeVehicleModelsParams = {
+  /**
+   * Filtrar por ID da marca
+   */
+  brand_id?: string
 }

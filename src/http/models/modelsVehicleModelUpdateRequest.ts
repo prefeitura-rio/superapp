@@ -5,10 +5,10 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ModelsVehicleType } from './modelsVehicleType'
 
-export interface ModelsVehicleBrand {
-  deleted_at?: string
-  id?: string
-  is_other?: boolean
+export interface ModelsVehicleModelUpdateRequest {
+  brand_id?: string
   name?: string
+  vehicle_type?: ModelsVehicleType
 }

@@ -6,9 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsVehicleBrand {
-  deleted_at?: string
-  id?: string
-  is_other?: boolean
-  name?: string
+export interface ModelsVehicleBrandUpdateRequest {
+  name: string
 }

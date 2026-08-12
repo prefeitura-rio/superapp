@@ -12,6 +12,8 @@ export interface ModelsVehicleDetail {
   brand_id?: string
   brand_other?: string
   color?: string
+  /** ConductorID is the accepted VehicleConductor link id when Role is conductor (same id used in DELETE/PATCH paths). */
+  conductor_id?: string
   created_at?: string
   deleted_at?: string
   display_name?: string
