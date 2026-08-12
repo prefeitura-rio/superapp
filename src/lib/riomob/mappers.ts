@@ -91,13 +91,18 @@ export function mapVehicleListItemToWalletVehicle(
 ): WalletVehicle | null {
   if (!item.id) return null
 
+  const category = mapRoleToCategory(item.role)
+
   return {
     id: item.id,
     displayName: item.display_name?.trim() || 'Veículo',
     vehicleType: mapVehicleType(item.vehicle_type),
     registrationNumber: item.registration_number?.trim() || '—',
-    category: mapRoleToCategory(item.role),
+    category,
     photoUrl: item.vehicle_photo_url ?? '',
+    ...(category === 'condutor' && item.conductor_id
+      ? { conductorId: item.conductor_id }
+      : {}),
   }
 }
 
@@ -125,13 +130,18 @@ export function mapVehicleDetailToUi(
     .map(mapVehicleConductorToAuthorized)
     .filter((c): c is AuthorizedConductor => c !== null)
 
+  const category = mapRoleToCategory(detail.role)
+
   return {
     id: detail.id,
     displayName: detail.display_name?.trim() || 'Veículo',
     vehicleType: mapVehicleType(detail.vehicle_type),
     registrationNumber: detail.registration_number?.trim() || '—',
-    category: mapRoleToCategory(detail.role),
+    category,
     photoUrl: detail.vehicle_photo_url ?? '',
+    ...(category === 'condutor' && detail.conductor_id
+      ? { conductorId: detail.conductor_id }
+      : {}),
     owner: {
       name: detail.owner_name?.trim() || '',
       cpf: detail.owner_cpf?.trim() || '',

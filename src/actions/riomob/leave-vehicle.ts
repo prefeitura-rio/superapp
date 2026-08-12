@@ -7,7 +7,7 @@ import {
 } from '@/actions/riomob/utils'
 import {
   deleteCitizenCpfVehiclesVehicleIdConductorsConductorId,
-  getCitizenCpfVehiclesVehicleIdConductors,
+  getCitizenCpfVehiclesVehicleId,
 } from '@/http/mobilidade/mobilidade'
 import { vehicleIdSchema } from '@/lib/riomob/action-schemas'
 import { isRiomobMocksEnabled } from '@/lib/riomob/mocks-gate'
@@ -16,6 +16,8 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 /**
  * Condutor sai do veículo: remove o próprio vínculo em
  * DELETE …/conductors/{conductorId} (não apaga o cadastro do dono).
+ * O conductor_id vem do GET do veículo (role=conductor); o GET de
+ * conductors é somente proprietário e não pode ser usado no self-leave.
  */
 export async function leaveVehicle(
   vehicleId: string
@@ -34,28 +36,31 @@ export async function leaveVehicle(
       return { success: true }
     }
 
-    const conductorsResponse = await getCitizenCpfVehiclesVehicleIdConductors(
+    const detailResponse = await getCitizenCpfVehiclesVehicleId(
       user.cpf,
       idResult.data
     )
 
-    if (conductorsResponse.status !== 200) {
+    if (detailResponse.status !== 200) {
       return {
         success: false,
         error: actionErrorMessage(
-          conductorsResponse,
+          detailResponse,
           'Erro ao localizar vínculo de condutor'
         ),
       }
     }
 
-    const self = (conductorsResponse.data.data ?? []).find(
-      conductor =>
-        conductor.conductor_cpf?.replace(/\D/g, '') ===
-          user.cpf.replace(/\D/g, '') && conductor.status === 'accepted'
-    )
+    const { role, conductor_id: conductorId } = detailResponse.data
 
-    if (!self?.id) {
+    if (role !== 'conductor') {
+      return {
+        success: false,
+        error: 'Apenas condutores podem sair deste veículo',
+      }
+    }
+
+    if (!conductorId) {
       return {
         success: false,
         error: 'Vínculo de condutor não encontrado neste veículo',
@@ -66,7 +71,7 @@ export async function leaveVehicle(
       await deleteCitizenCpfVehiclesVehicleIdConductorsConductorId(
         user.cpf,
         idResult.data,
-        self.id
+        conductorId
       )
 
     if (response.status === 204) {

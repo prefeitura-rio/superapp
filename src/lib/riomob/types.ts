@@ -14,6 +14,8 @@ export interface WalletVehicle {
   registrationNumber: string
   category: VehicleCategory
   photoUrl: string
+  /** Accepted VehicleConductor link id when category is condutor. */
+  conductorId?: string
 }
 
 export interface VehicleDocument {

@@ -55,6 +55,24 @@ describe('mapVehicleListItemToWalletVehicle', () => {
       category: 'proprietaria',
       registrationNumber: 'RM-1',
     })
+    expect(mapped?.conductorId).toBeUndefined()
+  })
+
+  it('maps conductor_id when role is conductor', () => {
+    const mapped = mapVehicleListItemToWalletVehicle({
+      id: 'v2',
+      display_name: 'Bike do Dono',
+      vehicle_type: 'autopropelido',
+      registration_number: 'RM-2',
+      role: 'conductor',
+      conductor_id: 'link-abc',
+      vehicle_photo_url: 'https://storage.googleapis.com/b/b.png',
+    })
+    expect(mapped).toMatchObject({
+      id: 'v2',
+      category: 'condutor',
+      conductorId: 'link-abc',
+    })
   })
 })
 
