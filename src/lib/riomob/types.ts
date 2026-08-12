@@ -35,6 +35,7 @@ export interface AuthorizedConductor {
   name: string
   cpf: string
   phone: string
+  email: string
 }
 
 export interface CirculationRule {

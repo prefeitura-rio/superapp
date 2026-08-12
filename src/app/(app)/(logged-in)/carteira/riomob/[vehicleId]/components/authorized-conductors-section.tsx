@@ -74,10 +74,18 @@ export function AuthorizedConductorsSection({
                 <span>CPF</span>
                 <span>{conductor.cpf}</span>
               </div>
-              <div className="flex gap-2">
-                <span>Telefone</span>
-                <span>{conductor.phone}</span>
-              </div>
+              {conductor.email && (
+                <div className="flex gap-2">
+                  <span>Email</span>
+                  <span>{conductor.email}</span>
+                </div>
+              )}
+              {conductor.phone && (
+                <div className="flex gap-2">
+                  <span>Telefone</span>
+                  <span>{conductor.phone}</span>
+                </div>
+              )}
             </div>
           </div>
         ))}

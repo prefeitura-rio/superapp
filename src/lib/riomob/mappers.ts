@@ -111,6 +111,7 @@ export function mapVehicleConductorToAuthorized(
     name: conductor.conductor_name?.trim() || 'Condutor',
     cpf: conductor.conductor_cpf?.trim() || '',
     phone: conductor.phone?.trim() || '',
+    email: conductor.notify_email?.trim() || '',
   }
 }
 
