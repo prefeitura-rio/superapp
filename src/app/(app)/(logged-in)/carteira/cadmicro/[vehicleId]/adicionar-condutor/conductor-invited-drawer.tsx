@@ -43,7 +43,7 @@ export function ConductorInvitedDrawer({
 
   const handleFinish = () => {
     onOpenChange(false)
-    router.push('/carteira?cadmicro=true')
+    router.push('/carteira?mobilidade=true')
   }
 
   const handleAddAnother = () => {

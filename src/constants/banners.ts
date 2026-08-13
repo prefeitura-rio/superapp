@@ -30,7 +30,7 @@ export const suggestedBanners: BannerProps[] = [
     component: CadMicroBanner,
     title: 'Cadastre seu veículo',
     subtitle: 'habilite o uso em toda a cidade',
-    route: '/carteira?cadmicro=true',
+    route: '/carteira?mobilidade=true',
   },
   {
     id: 'empregabilidade',
@@ -92,7 +92,7 @@ export function resolveBannerRoute(
   isLoggedIn: boolean
 ): string {
   if (banner.id === 'cadmicro' && !isLoggedIn) {
-    return buildAuthUrl('/carteira?cadmicro=true')
+    return buildAuthUrl('/carteira?mobilidade=true')
   }
   return banner.route
 }

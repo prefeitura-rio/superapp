@@ -54,7 +54,7 @@ export function VehicleDetailPage({
 
       setIsDeleteDrawerOpen(false)
       toast.success('Veículo removido')
-      router.push('/carteira?cadmicro=true')
+      router.push('/carteira?mobilidade=true')
     } catch {
       toast.error('Não foi possível remover')
     }
@@ -64,7 +64,7 @@ export function VehicleDetailPage({
     <div className="mx-auto min-h-lvh w-full max-w-[896px] bg-background pb-10">
       <SecondaryHeader
         title={vehicle.displayName}
-        route="/carteira?cadmicro=true"
+        route="/carteira?mobilidade=true"
         className="max-w-[896px]"
         fixed={false}
         rightSlot={

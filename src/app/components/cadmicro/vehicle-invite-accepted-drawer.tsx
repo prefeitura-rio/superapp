@@ -40,7 +40,7 @@ export function VehicleInviteAcceptedDrawer({
 
   const handleViewWallet = () => {
     onOpenChange(false)
-    router.push('/carteira?cadmicro=true')
+    router.push('/carteira?mobilidade=true')
   }
 
   return (

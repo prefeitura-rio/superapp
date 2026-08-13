@@ -45,7 +45,7 @@ export function WalletContent({
   const searchParams = useSearchParams()
   const cadmicroEnabled = isFeatureEnabled('cadmicro')
   const isCadmicroView =
-    cadmicroEnabled && searchParams.get('cadmicro') === 'true'
+    cadmicroEnabled && searchParams.get('mobilidade') === 'true'
   const isPetsView = !isCadmicroView && searchParams.get('pets') === 'true'
   const activeTab = isCadmicroView ? 'cadmicro' : isPetsView ? 'pets' : 'cards'
 

@@ -42,7 +42,7 @@ export function VehicleRegisteredDrawer({
 
   const handleViewWallet = () => {
     onOpenChange(false)
-    router.push('/carteira?cadmicro=true')
+    router.push('/carteira?mobilidade=true')
   }
 
   const handleAddConductor = () => {

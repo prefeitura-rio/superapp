@@ -21,7 +21,7 @@ const WALLET_TABS = [
   {
     id: 'cadmicro',
     label: 'Veículos',
-    href: '/carteira?cadmicro=true',
+    href: '/carteira?mobilidade=true',
   },
 ]
 
