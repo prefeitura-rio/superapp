@@ -1,5 +1,5 @@
+import { CIRCULATION_RULES } from '@/lib/cadmicro/circulation-rules'
 import type { CirculationRule } from '@/lib/cadmicro/types'
-import { CIRCULATION_RULES } from '../../mocks/vehicles'
 
 export function CirculationRulesSection() {
   return (

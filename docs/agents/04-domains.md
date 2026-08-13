@@ -23,7 +23,6 @@ Controladas principalmente em `src/middleware.ts` e banners (`src/constants/bann
 
 - `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `cadmicro`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`cadmicro` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/cadmicro`.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
-- `NEXT_PUBLIC_CADMICRO_USE_MOCKS` — CadMicro: unset/`true` usa fixtures nos services; `false` chama Orval (`src/http/mobilidade`). Ver [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md).
 
 Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos banners.
 
@@ -35,4 +34,4 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - Cursos / TanStack: [`../cursos-tanstack-query-migration.md`](../cursos-tanstack-query-migration.md), [`../cursos-home-cache-ssr-tanstack.md`](../cursos-home-cache-ssr-tanstack.md)
 - Carteira pet: [`../pt-br/carteira-pet.md`](../pt-br/carteira-pet.md)
 - CadMicro GCS upload: [`../cadmicro-gcs-upload.md`](../cadmicro-gcs-upload.md)
-- CadMicro API / mocks: [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md)
+- CadMicro API: [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md)

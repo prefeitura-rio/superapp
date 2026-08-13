@@ -8,7 +8,6 @@ import {
 import type { InviteConductorPayload } from '@/app/(app)/(logged-in)/carteira/cadmicro/[vehicleId]/adicionar-condutor/schema'
 import { postCitizenCpfVehiclesVehicleIdConductors } from '@/http/mobilidade/mobilidade'
 import { inviteConductorPayloadSchema } from '@/lib/cadmicro/action-schemas'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function inviteConductor(
@@ -26,11 +25,6 @@ export async function inviteConductor(
       'Dados do convite inválidos'
     )
     if (!validated.success) return validated
-
-    if (isCadmicroMocksEnabled()) {
-      revalidateCadmicroPaths(validated.data.vehicle_id)
-      return { success: true }
-    }
 
     const response = await postCitizenCpfVehiclesVehicleIdConductors(
       user.cpf,

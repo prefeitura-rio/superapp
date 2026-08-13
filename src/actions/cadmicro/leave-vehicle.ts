@@ -10,7 +10,6 @@ import {
   getCitizenCpfVehiclesVehicleId,
 } from '@/http/mobilidade/mobilidade'
 import { vehicleIdSchema } from '@/lib/cadmicro/action-schemas'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 /**
@@ -30,11 +29,6 @@ export async function leaveVehicle(
 
     const idResult = parseActionPayload(vehicleIdSchema, vehicleId)
     if (!idResult.success) return idResult
-
-    if (isCadmicroMocksEnabled()) {
-      revalidateCadmicroPaths(idResult.data)
-      return { success: true }
-    }
 
     const detailResponse = await getCitizenCpfVehiclesVehicleId(
       user.cpf,

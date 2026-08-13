@@ -13,7 +13,6 @@ import {
   vehicleIdSchema,
 } from '@/lib/cadmicro/action-schemas'
 import { toApiUpdateBody } from '@/lib/cadmicro/mappers'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function updateVehicle(
@@ -35,11 +34,6 @@ export async function updateVehicle(
       'Dados do veículo inválidos'
     )
     if (!validated.success) return validated
-
-    if (isCadmicroMocksEnabled()) {
-      revalidateCadmicroPaths(idResult.data)
-      return { success: true }
-    }
 
     const body = toApiUpdateBody(validated.data)
 

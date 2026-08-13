@@ -1,8 +1,4 @@
 import {
-  MOCK_VEHICLES,
-  getMockVehicleDetail,
-} from '@/app/(app)/(logged-in)/carteira/cadmicro/mocks/vehicles'
-import {
   getCitizenCpfVehicles,
   getCitizenCpfVehiclesVehicleId,
   getCitizenCpfVehiclesVehicleIdConductors,
@@ -11,20 +7,11 @@ import {
   mapVehicleDetailToUi,
   mapVehicleListItemToWalletVehicle,
 } from '@/lib/cadmicro/mappers'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import type { VehicleDetail, WalletVehicle } from '@/lib/cadmicro/types'
-
-export function getCadmicroWalletVehicles(): WalletVehicle[] {
-  return isCadmicroMocksEnabled() ? MOCK_VEHICLES : []
-}
 
 export async function listCadmicroVehicles(
   cpf: string
 ): Promise<WalletVehicle[]> {
-  if (isCadmicroMocksEnabled()) {
-    return MOCK_VEHICLES
-  }
-
   const response = await getCitizenCpfVehicles(cpf, {
     page: 1,
     per_page: 100,
@@ -44,10 +31,6 @@ export async function getCadmicroVehicle(
   cpf: string,
   vehicleId: string
 ): Promise<VehicleDetail | null> {
-  if (isCadmicroMocksEnabled()) {
-    return getMockVehicleDetail(vehicleId) ?? null
-  }
-
   const [detailResponse, conductorsResponse] = await Promise.all([
     getCitizenCpfVehiclesVehicleId(cpf, vehicleId),
     getCitizenCpfVehiclesVehicleIdConductors(cpf, vehicleId),

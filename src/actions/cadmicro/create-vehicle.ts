@@ -10,7 +10,6 @@ import { postCitizenCpfVehicles } from '@/http/mobilidade/mobilidade'
 import type { ModelsVehicleCreateRequest } from '@/http/models/modelsVehicleCreateRequest'
 import { createVehiclePayloadSchema } from '@/lib/cadmicro/action-schemas'
 import { toApiCreateBody } from '@/lib/cadmicro/mappers'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function createVehicle(payload: CreateVehiclePayload): Promise<{
@@ -30,12 +29,6 @@ export async function createVehicle(payload: CreateVehiclePayload): Promise<{
       'Dados do veículo inválidos'
     )
     if (!validated.success) return validated
-
-    if (isCadmicroMocksEnabled()) {
-      const id = `mock-vehicle-${Date.now()}`
-      revalidateCadmicroPaths(id)
-      return { success: true, data: { id } }
-    }
 
     const body = toApiCreateBody({
       ...validated.data,

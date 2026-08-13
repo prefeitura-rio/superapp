@@ -10,7 +10,6 @@ import {
   conductorIdSchema,
   vehicleIdSchema,
 } from '@/lib/cadmicro/action-schemas'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function removeConductor(
@@ -28,11 +27,6 @@ export async function removeConductor(
 
     const conductorIdResult = parseActionPayload(conductorIdSchema, conductorId)
     if (!conductorIdResult.success) return conductorIdResult
-
-    if (isCadmicroMocksEnabled()) {
-      revalidateCadmicroPaths(vehicleIdResult.data)
-      return { success: true }
-    }
 
     const response =
       await deleteCitizenCpfVehiclesVehicleIdConductorsConductorId(

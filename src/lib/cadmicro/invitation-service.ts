@@ -1,19 +1,19 @@
-import {
-  MOCK_PENDING_INVITES,
-  sortPendingInvitesByMostRecent,
-} from '@/app/(app)/(logged-in)/carteira/cadmicro/mocks/pending-invites'
 import { getCitizenCpfVehicleInvitations } from '@/http/mobilidade/mobilidade'
 import { mapInvitationItemToPending } from '@/lib/cadmicro/mappers'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import type { PendingConductorInvite } from '@/lib/cadmicro/types'
+
+/** Newest first. */
+function sortPendingInvitesByMostRecent(
+  invites: PendingConductorInvite[]
+): PendingConductorInvite[] {
+  return [...invites].sort(
+    (a, b) => new Date(b.invitedAt).getTime() - new Date(a.invitedAt).getTime()
+  )
+}
 
 export async function listCadmicroInvitations(
   cpf: string
 ): Promise<PendingConductorInvite[]> {
-  if (isCadmicroMocksEnabled()) {
-    return sortPendingInvitesByMostRecent(MOCK_PENDING_INVITES)
-  }
-
   const response = await getCitizenCpfVehicleInvitations(cpf)
   if (response.status !== 200) {
     throw new Error('Falha ao listar convites')

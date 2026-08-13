@@ -12,7 +12,6 @@ import {
   invitationResponseStatusSchema,
   vehicleIdSchema,
 } from '@/lib/cadmicro/action-schemas'
-import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export async function respondInvitation(
@@ -40,11 +39,6 @@ export async function respondInvitation(
       const vehicleIdResult = parseActionPayload(vehicleIdSchema, vehicleId)
       if (!vehicleIdResult.success) return vehicleIdResult
       resolvedVehicleId = vehicleIdResult.data
-    }
-
-    if (isCadmicroMocksEnabled()) {
-      revalidateCadmicroPaths(resolvedVehicleId)
-      return { success: true }
     }
 
     const response = await patchCitizenCpfVehicleInvitationsConductorId(
