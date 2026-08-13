@@ -10,13 +10,14 @@ import type { ModelsVehicleType } from './modelsVehicleType'
 
 export interface ModelsVehicleListItem {
   brand_id?: string
+  brand_name?: string
   brand_other?: string
   color?: string
-  /** ConductorID is the accepted VehicleConductor link id when Role is conductor (same id used in DELETE/PATCH paths). */
   conductor_id?: string
   display_name?: string
   id?: string
   model_id?: string
+  model_name?: string
   model_other?: string
   registration_number?: string
   role?: ModelsVehicleRole

@@ -822,7 +822,7 @@ export const getGetCitizenCpfVehiclesUrl = (
 }
 
 /**
- * Retorna veículos em que o CPF é proprietário ou condutor aceito, com role em cada item. Quando role=conductor, inclui conductor_id (id do vínculo aceito).
+ * Retorna veículos em que o CPF é proprietário ou condutor aceito, com role em cada item. Quando role=conductor, inclui conductor_id (id do vínculo aceito). brand_name/model_name são resolvidos do catálogo quando há brand_id/model_id e não há brand_other/model_other.
  * @summary Listar veículos da carteira (mobilidade)
  */
 export const getCitizenCpfVehicles = async (
@@ -1034,7 +1034,7 @@ export const getGetCitizenCpfVehiclesVehicleIdUrl = (
 }
 
 /**
- * Retorna o detalhe do veículo para proprietário ou condutor aceito (inclui invoice_photo_url, metadados de arquivos e registration_number). Quando role=conductor, inclui conductor_id (id do vínculo aceito). owner_name/owner_phone/owner_email são enriquecidos ao vivo via RMI a partir de owner_cpf.
+ * Retorna o detalhe do veículo para proprietário ou condutor aceito (inclui invoice_photo_url, metadados de arquivos e registration_number). Quando role=conductor, inclui conductor_id (id do vínculo aceito). owner_name/owner_phone/owner_email são enriquecidos ao vivo via RMI a partir de owner_cpf. brand_name/model_name vêm do catálogo quando há brand_id/model_id e não há texto livre (*_other).
  * @summary Obter detalhe do veículo
  */
 export const getCitizenCpfVehiclesVehicleId = async (
@@ -1107,7 +1107,7 @@ export const getPatchCitizenCpfVehiclesVehicleIdUrl = (
 }
 
 /**
- * Atualiza campos do veículo (somente proprietário). Em mudança de marca/modelo do catálogo, vehicle_type é rederivado do modelo.
+ * Atualiza campos do veículo (somente proprietário). Em mudança de marca/modelo do catálogo, vehicle_type é rederivado do modelo. Para trocar para fluxo Outro (texto livre), envie brand_id/model_id como null (ou "") junto com brand_other/model_other e vehicle_type; campo omitido não altera o valor atual.
  * @summary Atualizar veículo
  */
 export const patchCitizenCpfVehiclesVehicleId = async (

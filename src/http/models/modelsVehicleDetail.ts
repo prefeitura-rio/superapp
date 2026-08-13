@@ -10,9 +10,10 @@ import type { ModelsVehicleType } from './modelsVehicleType'
 
 export interface ModelsVehicleDetail {
   brand_id?: string
+  /** BrandName is response-only: catalog brand name when brand_id is set and brand_other is empty. */
+  brand_name?: string
   brand_other?: string
   color?: string
-  /** ConductorID is the accepted VehicleConductor link id when Role is conductor (same id used in DELETE/PATCH paths). */
   conductor_id?: string
   created_at?: string
   deleted_at?: string
@@ -23,6 +24,8 @@ export interface ModelsVehicleDetail {
   invoice_photo_file_size?: number
   invoice_photo_url?: string
   model_id?: string
+  /** ModelName is response-only: catalog model name when model_id is set and model_other is empty. */
+  model_name?: string
   model_other?: string
   owner_cpf?: string
   owner_email?: string

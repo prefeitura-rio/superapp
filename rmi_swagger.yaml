@@ -818,6 +818,9 @@ definitions:
   models.InviteConductorRequest:
     properties:
       cpf:
+        description: CPF must be exactly 11 digits (no punctuation), matching RMI/JWT
+          form.
+        example: "11144477735"
         type: string
       email:
         type: string
@@ -1742,6 +1745,8 @@ definitions:
     type: object
   models.VehicleBrand:
     properties:
+      deleted_at:
+        type: string
       id:
         example: brand_caloi
         type: string
@@ -1751,6 +1756,22 @@ definitions:
       name:
         example: Caloi
         type: string
+    type: object
+  models.VehicleBrandCreateRequest:
+    properties:
+      name:
+        example: Caloi
+        type: string
+    required:
+    - name
+    type: object
+  models.VehicleBrandUpdateRequest:
+    properties:
+      name:
+        example: Caloi
+        type: string
+    required:
+    - name
     type: object
   models.VehicleBrandsResponse:
     properties:
@@ -1858,9 +1879,15 @@ definitions:
     properties:
       brand_id:
         type: string
+      brand_name:
+        description: 'BrandName is response-only: catalog brand name when brand_id
+          is set and brand_other is empty.'
+        type: string
       brand_other:
         type: string
       color:
+        type: string
+      conductor_id:
         type: string
       created_at:
         type: string
@@ -1880,6 +1907,10 @@ definitions:
         type: string
         x-nullable: true
       model_id:
+        type: string
+      model_name:
+        description: 'ModelName is response-only: catalog model name when model_id
+          is set and model_other is empty.'
         type: string
       model_other:
         type: string
@@ -1963,15 +1994,21 @@ definitions:
     properties:
       brand_id:
         type: string
+      brand_name:
+        type: string
       brand_other:
         type: string
       color:
+        type: string
+      conductor_id:
         type: string
       display_name:
         type: string
       id:
         type: string
       model_id:
+        type: string
+      model_name:
         type: string
       model_other:
         type: string
@@ -1990,6 +2027,8 @@ definitions:
       brand_id:
         example: brand_caloi
         type: string
+      deleted_at:
+        type: string
       id:
         example: model_e-vibe
         type: string
@@ -1998,6 +2037,32 @@ definitions:
         type: boolean
       name:
         example: E-Vibe
+        type: string
+      vehicle_type:
+        $ref: '#/definitions/models.VehicleType'
+    type: object
+  models.VehicleModelCreateRequest:
+    properties:
+      brand_id:
+        example: brand_caloi
+        type: string
+      name:
+        example: E-Vibe
+        type: string
+      vehicle_type:
+        allOf:
+        - $ref: '#/definitions/models.VehicleType'
+        example: bicicleta_eletrica
+    required:
+    - brand_id
+    - name
+    - vehicle_type
+    type: object
+  models.VehicleModelUpdateRequest:
+    properties:
+      brand_id:
+        type: string
+      name:
         type: string
       vehicle_type:
         $ref: '#/definitions/models.VehicleType'
@@ -2782,6 +2847,360 @@ paths:
       tags:
       - admin
       - cpf-secretaria
+  /admin/mobilidade/vehicle-brands:
+    get:
+      consumes:
+      - application/json
+      description: Lista completa de marcas do catálogo, incluindo soft-deleted (admin).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista tipada de marcas em data
+          schema:
+            $ref: '#/definitions/models.VehicleBrandsResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar marcas (admin)
+      tags:
+      - mobilidade
+    post:
+      consumes:
+      - application/json
+      description: Cadastra uma marca no catálogo. ID gerado no backend (brand_&lt;slug&gt;);
+        is_other=false.
+      parameters:
+      - description: Nome da marca
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.VehicleBrandCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Marca criada
+          schema:
+            $ref: '#/definitions/models.VehicleBrand'
+        "400":
+          description: Validação inválida
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Nome ou ID já existente
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar marca (admin)
+      tags:
+      - mobilidade
+  /admin/mobilidade/vehicle-brands/{brand_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft-delete de marca. 409 se houver modelos ativos ou veículos
+        referenciando. Sentinel brand_outro não pode ser excluída.
+      parameters:
+      - description: ID da marca
+        in: path
+        name: brand_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Marca excluída
+        "400":
+          description: Sentinel ou validação
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Marca não encontrada
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Modelos ativos ou veículos referenciando
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Excluir marca (admin, soft-delete)
+      tags:
+      - mobilidade
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza o nome de uma marca ativa. Sentinel brand_outro não pode
+        ser alterada. 409 se referenciada por veículo.
+      parameters:
+      - description: ID da marca
+        in: path
+        name: brand_id
+        required: true
+        type: string
+      - description: Campos a atualizar
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.VehicleBrandUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Marca atualizada
+          schema:
+            $ref: '#/definitions/models.VehicleBrand'
+        "400":
+          description: Validação inválida ou sentinel
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Marca não encontrada
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflito (nome duplicado ou veículo referenciando)
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar marca (admin)
+      tags:
+      - mobilidade
+  /admin/mobilidade/vehicle-models:
+    get:
+      consumes:
+      - application/json
+      description: Lista completa de modelos, incluindo soft-deleted. Filtro opcional
+        por brand_id.
+      parameters:
+      - description: Filtrar por ID da marca
+        in: query
+        name: brand_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista tipada de modelos em data
+          schema:
+            $ref: '#/definitions/models.VehicleModelsResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar modelos (admin)
+      tags:
+      - mobilidade
+    post:
+      consumes:
+      - application/json
+      description: Cadastra um modelo vinculado a brand_id com vehicle_type. ID gerado
+        no backend; is_other=false.
+      parameters:
+      - description: Dados do modelo
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.VehicleModelCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Modelo criado
+          schema:
+            $ref: '#/definitions/models.VehicleModel'
+        "400":
+          description: Validação inválida
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Marca não encontrada
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Nome ou ID já existente
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar modelo (admin)
+      tags:
+      - mobilidade
+  /admin/mobilidade/vehicle-models/{model_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft-delete de modelo. 409 se veículos referenciarem. Sentinel
+        model_outro não pode ser excluído.
+      parameters:
+      - description: ID do modelo
+        in: path
+        name: model_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Modelo excluído
+        "400":
+          description: Sentinel ou validação
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Modelo não encontrado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Veículos referenciando
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Excluir modelo (admin, soft-delete)
+      tags:
+      - mobilidade
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza nome, vehicle_type e/ou brand_id de um modelo ativo. Sentinel
+        model_outro não pode ser alterado. 409 se referenciado por veículo.
+      parameters:
+      - description: ID do modelo
+        in: path
+        name: model_id
+        required: true
+        type: string
+      - description: Campos a atualizar
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.VehicleModelUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Modelo atualizado
+          schema:
+            $ref: '#/definitions/models.VehicleModel'
+        "400":
+          description: Validação inválida ou sentinel
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Não autenticado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Acesso negado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Modelo ou marca não encontrado
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflito (nome duplicado ou veículo referenciando)
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Erro interno
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar modelo (admin)
+      tags:
+      - mobilidade
   /admin/notification-categories:
     post:
       consumes:
@@ -4568,7 +4987,9 @@ paths:
       consumes:
       - application/json
       description: Retorna veículos em que o CPF é proprietário ou condutor aceito,
-        com role em cada item.
+        com role em cada item. Quando role=conductor, inclui conductor_id (id do vínculo
+        aceito). brand_name/model_name são resolvidos do catálogo quando há brand_id/model_id
+        e não há brand_other/model_other.
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
@@ -4720,8 +5141,10 @@ paths:
       consumes:
       - application/json
       description: Retorna o detalhe do veículo para proprietário ou condutor aceito
-        (inclui invoice_photo_url, metadados de arquivos e registration_number). owner_name/owner_phone/owner_email
-        são enriquecidos ao vivo via RMI a partir de owner_cpf.
+        (inclui invoice_photo_url, metadados de arquivos e registration_number). Quando
+        role=conductor, inclui conductor_id (id do vínculo aceito). owner_name/owner_phone/owner_email
+        são enriquecidos ao vivo via RMI a partir de owner_cpf. brand_name/model_name
+        vêm do catálogo quando há brand_id/model_id e não há texto livre (*_other).
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
@@ -4771,7 +5194,10 @@ paths:
       consumes:
       - application/json
       description: Atualiza campos do veículo (somente proprietário). Em mudança de
-        marca/modelo do catálogo, vehicle_type é rederivado do modelo.
+        marca/modelo do catálogo, vehicle_type é rederivado do modelo. Para trocar
+        para fluxo Outro (texto livre), envie brand_id/model_id como null (ou "")
+        junto com brand_other/model_other e vehicle_type; campo omitido não altera
+        o valor atual.
       parameters:
       - description: CPF do cidadão (11 dígitos)
         in: path
