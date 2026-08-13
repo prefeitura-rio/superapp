@@ -49,12 +49,12 @@ function mapRoleToCategory(
 
 function buildBrandModelLabel(item: {
   brand_other?: string
+  brand_name?: string
   model_other?: string
-  brand_id?: string
-  model_id?: string
+  model_name?: string
 }): string {
-  const brand = item.brand_other?.trim() || item.brand_id?.trim() || ''
-  const model = item.model_other?.trim() || item.model_id?.trim() || ''
+  const brand = item.brand_other?.trim() || item.brand_name?.trim() || ''
+  const model = item.model_other?.trim() || item.model_name?.trim() || ''
   if (brand && model) return `${brand} ${model}`
   return brand || model || '—'
 }

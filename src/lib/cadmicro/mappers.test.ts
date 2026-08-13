@@ -4,6 +4,7 @@ import { isImageAsset, isPdfName } from '@/lib/cadmicro/file-utils'
 import {
   formatFileSizeLabel,
   mapInvitationItemToPending,
+  mapVehicleDetailToUi,
   mapVehicleListItemToWalletVehicle,
 } from '@/lib/cadmicro/mappers'
 import { describe, expect, it } from 'vitest'
@@ -73,6 +74,41 @@ describe('mapVehicleListItemToWalletVehicle', () => {
       category: 'condutor',
       conductorId: 'link-abc',
     })
+  })
+})
+
+describe('mapVehicleDetailToUi', () => {
+  it('uses brand_name and model_name for Marca / Modelo', () => {
+    const mapped = mapVehicleDetailToUi({
+      id: 'v1',
+      brand_id: 'brand_caloi',
+      brand_name: 'Caloi',
+      model_id: 'model_e_vibe',
+      model_name: 'E-Vibe',
+    })
+    expect(mapped?.brandModel).toBe('Caloi E-Vibe')
+  })
+
+  it('prefers brand_other and model_other over catalog names', () => {
+    const mapped = mapVehicleDetailToUi({
+      id: 'v1',
+      brand_id: 'brand_outro',
+      brand_name: 'Caloi',
+      brand_other: 'Marca Custom',
+      model_id: 'model_outro',
+      model_name: 'E-Vibe',
+      model_other: 'Modelo Custom',
+    })
+    expect(mapped?.brandModel).toBe('Marca Custom Modelo Custom')
+  })
+
+  it('does not fall back to brand_id or model_id', () => {
+    const mapped = mapVehicleDetailToUi({
+      id: 'v1',
+      brand_id: 'brand_caloi',
+      model_id: 'model_e_vibe',
+    })
+    expect(mapped?.brandModel).toBe('—')
   })
 })
 
