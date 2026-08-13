@@ -54,7 +54,9 @@ export interface VehicleDetail extends WalletVehicle {
   }
   brandModel: string
   brandId: string
+  brandOther: string
   modelId: string
+  modelOther: string
   color: string
   serialNumber: string
   serialNumberDocument: VehicleDocument

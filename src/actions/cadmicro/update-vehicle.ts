@@ -7,6 +7,7 @@ import {
 } from '@/actions/cadmicro/utils'
 import type { UpdateVehiclePayload } from '@/app/(app)/(logged-in)/carteira/cadmicro/[vehicleId]/editar/schema'
 import { patchCitizenCpfVehiclesVehicleId } from '@/http/mobilidade/mobilidade'
+import type { ModelsVehicleUpdateRequest } from '@/http/models/modelsVehicleUpdateRequest'
 import {
   updateVehiclePayloadSchema,
   vehicleIdSchema,
@@ -42,10 +43,11 @@ export async function updateVehicle(
 
     const body = toApiUpdateBody(validated.data)
 
+    // Orval types omit `null`; API accepts null to clear catalog ids (hybrid/Outro).
     const response = await patchCitizenCpfVehiclesVehicleId(
       user.cpf,
       idResult.data,
-      body
+      body as ModelsVehicleUpdateRequest
     )
 
     if (response.status === 200) {

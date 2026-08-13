@@ -150,7 +150,9 @@ export function mapVehicleDetailToUi(
     },
     brandModel: buildBrandModelLabel(detail),
     brandId: detail.brand_id ?? '',
+    brandOther: detail.brand_other?.trim() || '',
     modelId: detail.model_id ?? '',
+    modelOther: detail.model_other?.trim() || '',
     color: detail.color?.trim() || '',
     serialNumber: detail.serial_number?.trim() || '',
     serialNumberDocument: toDocument(
@@ -279,6 +281,14 @@ export function toApiUpdateBody(payload: {
   }
 }
 
+/** Brand/model fields: include `null` so PATCH clears catalog ids (omit = no change). */
+export type VehicleApiBrandModelFields = {
+  brand_id?: string | null
+  brand_other?: string | null
+  model_id?: string | null
+  model_other?: string | null
+}
+
 function optionalVehicleFields(payload: {
   brand_id: string | null
   brand_other: string | null
@@ -292,12 +302,25 @@ function optionalVehicleFields(payload: {
   vehicle_photo_file_size?: number
   invoice_photo_file_name?: string
   invoice_photo_file_size?: number
-}) {
+}): VehicleApiBrandModelFields & {
+  vehicle_type?: VehicleType
+  invoice_photo_url?: string
+  serial_number_photo_file_name?: string
+  serial_number_photo_file_size?: number
+  vehicle_photo_file_name?: string
+  vehicle_photo_file_size?: number
+  invoice_photo_file_name?: string
+  invoice_photo_file_size?: number
+} {
   return {
-    ...(payload.brand_id ? { brand_id: payload.brand_id } : {}),
-    ...(payload.brand_other ? { brand_other: payload.brand_other } : {}),
-    ...(payload.model_id ? { model_id: payload.model_id } : {}),
-    ...(payload.model_other ? { model_other: payload.model_other } : {}),
+    ...(payload.brand_id !== undefined ? { brand_id: payload.brand_id } : {}),
+    ...(payload.brand_other !== undefined
+      ? { brand_other: payload.brand_other }
+      : {}),
+    ...(payload.model_id !== undefined ? { model_id: payload.model_id } : {}),
+    ...(payload.model_other !== undefined
+      ? { model_other: payload.model_other }
+      : {}),
     ...(payload.vehicle_type ? { vehicle_type: payload.vehicle_type } : {}),
     ...(payload.invoice_photo_url
       ? { invoice_photo_url: payload.invoice_photo_url }

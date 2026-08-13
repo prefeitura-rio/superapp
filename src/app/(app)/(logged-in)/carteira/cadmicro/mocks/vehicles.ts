@@ -84,7 +84,9 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     },
     brandModel: 'Xiaomi Mi Electric Scooter 4',
     brandId: 'brand_xiaomi',
+    brandOther: '',
     modelId: 'model_mi_scooter_4',
+    modelOther: '',
     color: 'Preto',
     serialNumber: 'A1F9K73P4826',
     serialNumberDocument: {
@@ -133,7 +135,9 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     },
     brandModel: 'Sense Impulse Evo',
     brandId: 'brand_sense',
+    brandOther: '',
     modelId: 'model_impulse',
+    modelOther: '',
     color: 'Azul',
     serialNumber: 'B2G8L84Q5937',
     serialNumberDocument: {
@@ -175,7 +179,9 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     },
     brandModel: 'Segway Ninebot F40',
     brandId: 'brand_segway',
+    brandOther: '',
     modelId: 'model_ninebot_f40',
+    modelOther: '',
     color: 'Vermelho',
     serialNumber: 'C3H7M95R6048',
     serialNumberDocument: {

@@ -7,6 +7,7 @@ import {
 } from '@/actions/cadmicro/utils'
 import type { CreateVehiclePayload } from '@/app/(app)/(logged-in)/carteira/cadmicro/adicionar-veiculo/schema'
 import { postCitizenCpfVehicles } from '@/http/mobilidade/mobilidade'
+import type { ModelsVehicleCreateRequest } from '@/http/models/modelsVehicleCreateRequest'
 import { createVehiclePayloadSchema } from '@/lib/cadmicro/action-schemas'
 import { toApiCreateBody } from '@/lib/cadmicro/mappers'
 import { isCadmicroMocksEnabled } from '@/lib/cadmicro/mocks-gate'
@@ -41,7 +42,11 @@ export async function createVehicle(payload: CreateVehiclePayload): Promise<{
       self_declaration: true,
     })
 
-    const response = await postCitizenCpfVehicles(user.cpf, body)
+    // Orval types omit `null`; API accepts null to clear catalog ids (hybrid/Outro).
+    const response = await postCitizenCpfVehicles(
+      user.cpf,
+      body as ModelsVehicleCreateRequest
+    )
     if (response.status === 201 && response.data.id) {
       revalidateCadmicroPaths(response.data.id)
       return { success: true, data: { id: response.data.id } }

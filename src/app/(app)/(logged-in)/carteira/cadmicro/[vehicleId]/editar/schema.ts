@@ -1,4 +1,6 @@
 import {
+  OTHER_BRAND_ID,
+  OTHER_MODEL_ID,
   type VehicleType,
   isOtherBrand,
   isOtherModel,
@@ -14,13 +16,19 @@ export type { VehicleFormData as VehicleEditFormData }
 
 export function toEditFormDefaults(vehicle: VehicleDetail): VehicleFormData {
   const hasInvoice = Boolean(vehicle.invoiceDocument.url?.trim())
+  const brandOther = vehicle.brandOther.trim()
+  const modelOther = vehicle.modelOther.trim()
+  const brandId =
+    vehicle.brandId || (brandOther ? OTHER_BRAND_ID : vehicle.brandId)
+  const modelId =
+    vehicle.modelId || (modelOther ? OTHER_MODEL_ID : vehicle.modelId)
 
   return {
     display_name: vehicle.displayName,
-    brand_id: vehicle.brandId,
-    brand_other: '',
-    model_id: vehicle.modelId,
-    model_other: '',
+    brand_id: brandId,
+    brand_other: brandOther,
+    model_id: modelId,
+    model_other: modelOther,
     vehicle_type: vehicle.vehicleType,
     color: vehicle.color,
     serial_number: vehicle.serialNumber,

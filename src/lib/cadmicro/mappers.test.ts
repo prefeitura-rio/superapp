@@ -6,6 +6,8 @@ import {
   mapInvitationItemToPending,
   mapVehicleDetailToUi,
   mapVehicleListItemToWalletVehicle,
+  toApiCreateBody,
+  toApiUpdateBody,
 } from '@/lib/cadmicro/mappers'
 import { describe, expect, it } from 'vitest'
 
@@ -100,6 +102,21 @@ describe('mapVehicleDetailToUi', () => {
       model_other: 'Modelo Custom',
     })
     expect(mapped?.brandModel).toBe('Marca Custom Modelo Custom')
+    expect(mapped?.brandOther).toBe('Marca Custom')
+    expect(mapped?.modelOther).toBe('Modelo Custom')
+  })
+
+  it('maps hybrid free-text model while keeping catalog brand id', () => {
+    const mapped = mapVehicleDetailToUi({
+      id: 'v1',
+      brand_id: 'brand_caloi',
+      brand_name: 'Caloi',
+      model_other: 'Custom Frame',
+    })
+    expect(mapped?.brandId).toBe('brand_caloi')
+    expect(mapped?.modelId).toBe('')
+    expect(mapped?.modelOther).toBe('Custom Frame')
+    expect(mapped?.brandModel).toBe('Caloi Custom Frame')
   })
 
   it('does not fall back to brand_id or model_id', () => {
@@ -109,6 +126,61 @@ describe('mapVehicleDetailToUi', () => {
       model_id: 'model_e_vibe',
     })
     expect(mapped?.brandModel).toBe('—')
+    expect(mapped?.brandOther).toBe('')
+    expect(mapped?.modelOther).toBe('')
+  })
+})
+
+describe('toApiCreateBody / toApiUpdateBody hybrid', () => {
+  const photos = {
+    color: 'Preto',
+    serial_number: 'ABC123',
+    serial_number_photo_url:
+      'https://storage.googleapis.com/bucket/mobilidade/1/serial/a.png',
+    vehicle_photo_url:
+      'https://storage.googleapis.com/bucket/mobilidade/1/vehicle/b.png',
+    has_invoice: false,
+  }
+
+  it('keeps catalog brand_id and sends model_id null with model_other', () => {
+    const body = toApiCreateBody({
+      display_name: 'Bike',
+      brand_id: 'brand_caloi',
+      brand_other: null,
+      model_id: null,
+      model_other: 'Quadro Custom',
+      vehicle_type: 'bicicleta_eletrica',
+      ...photos,
+      self_declaration: true,
+    })
+
+    expect(body).toMatchObject({
+      brand_id: 'brand_caloi',
+      brand_other: null,
+      model_id: null,
+      model_other: 'Quadro Custom',
+      vehicle_type: 'bicicleta_eletrica',
+    })
+  })
+
+  it('sends explicit nulls for full Outro on update', () => {
+    const body = toApiUpdateBody({
+      display_name: 'Bike',
+      brand_id: null,
+      brand_other: 'Marca X',
+      model_id: null,
+      model_other: 'Modelo Y',
+      vehicle_type: 'ciclomotor',
+      ...photos,
+    })
+
+    expect(body).toMatchObject({
+      brand_id: null,
+      brand_other: 'Marca X',
+      model_id: null,
+      model_other: 'Modelo Y',
+      vehicle_type: 'ciclomotor',
+    })
   })
 })
 
@@ -178,6 +250,47 @@ describe('createVehiclePayloadSchema', () => {
     const result = createVehiclePayloadSchema.safeParse({
       ...base,
       has_invoice: true,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts hybrid catalog brand + model_other + vehicle_type', () => {
+    const result = createVehiclePayloadSchema.safeParse({
+      ...base,
+      model_id: null,
+      model_other: 'Quadro Custom',
+      vehicle_type: 'bicicleta_eletrica',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects hybrid without model_other', () => {
+    const result = createVehiclePayloadSchema.safeParse({
+      ...base,
+      model_id: null,
+      model_other: null,
+      vehicle_type: 'bicicleta_eletrica',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects hybrid without vehicle_type', () => {
+    const result = createVehiclePayloadSchema.safeParse({
+      ...base,
+      model_id: null,
+      model_other: 'Quadro Custom',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects brand Outro without brand_other', () => {
+    const result = createVehiclePayloadSchema.safeParse({
+      ...base,
+      brand_id: null,
+      brand_other: null,
+      model_id: null,
+      model_other: 'Modelo X',
+      vehicle_type: 'autopropelido',
     })
     expect(result.success).toBe(false)
   })
