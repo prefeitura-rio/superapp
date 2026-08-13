@@ -3,10 +3,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function WalletHealthLoading() {
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-2 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" fixed={false} />
+    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
+      <SecondaryHeader
+        title="Carteira"
+        className="max-w-[896px]"
+        fixed={false}
+      />
       <div className="z-50">
-        <div className="px-4">
+        <div className="px-4 pt-2">
           {/* Wallet Health Card Skeleton */}
           <div className="sticky top-36">
             <Skeleton className="w-full h-[190px] rounded-3xl" />

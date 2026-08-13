@@ -23,6 +23,14 @@ type BannerBaseProps = {
   showBlur?: boolean
 }
 
+function navigateToRoute(route: string, router: ReturnType<typeof useRouter>) {
+  if (route.startsWith('http://') || route.startsWith('https://')) {
+    window.location.assign(route)
+    return
+  }
+  router.push(route)
+}
+
 export const BannerBase: React.FC<BannerBaseProps> = ({
   title,
   subtitle,
@@ -42,7 +50,7 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
     if (onBannerClick) {
       onBannerClick()
     }
-    if (route) router.push(route)
+    if (route) navigateToRoute(route, router)
   }
 
   const backgroundStyle = gradient
@@ -57,7 +65,7 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
       onKeyDown={e => {
         if ((e.key === 'Enter' || e.key === ' ') && route) {
           e.preventDefault()
-          router.push(route)
+          navigateToRoute(route, router)
         }
       }}
       role={route ? 'button' : undefined}

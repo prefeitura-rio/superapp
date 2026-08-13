@@ -98,7 +98,7 @@ export const ActionDiv = forwardRef<HTMLDivElement, ActionDivProps>(
         aria-invalid={!!error}
         role={drawerContent ? 'button' : undefined}
         className={cn(
-          'relative group cursor-pointer border-2 rounded-xl text-card-foreground font-normal truncate transition-colors',
+          'relative group cursor-pointer border-2 rounded-xl text-card-foreground font-normal transition-colors',
           error ? 'border-destructive' : 'border-border',
           disabled
             ? 'bg-transparent hover:bg-accent/40'

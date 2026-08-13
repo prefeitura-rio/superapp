@@ -54,6 +54,7 @@
       "node_modules/**",
       "package-lock.json",
       "**/*.js",
+      "public/pdf.worker.min.mjs",
       "coverage/**",
       "playwright-report/**",
       "test-results/**"
@@ -61,7 +62,7 @@
   },
   "overrides": [
     {
-      "include": ["src/http-agent-api/**"],
+      "include": ["src/http/**", "src/http-agent-api/**"],
       "linter": {
         "rules": {
           "suspicious": {

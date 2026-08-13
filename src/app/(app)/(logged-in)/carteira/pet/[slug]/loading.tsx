@@ -3,14 +3,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function PetPageLoading() {
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pb-10">
+    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
       <SecondaryHeader
         title="Carteira"
         route="/carteira"
-        className="max-w-xl mt-2"
+        className="max-w-[896px]"
+        fixed={false}
       />
 
-      <div className="pt-21 md:pt-25">
+      <div className="pt-2">
         <div className="px-4 flex flex-col gap-4">
           <Skeleton className="w-full h-[185px] rounded-2xl" />
           <div className="flex justify-center gap-1">

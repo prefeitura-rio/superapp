@@ -3,6 +3,7 @@ import { BriefcaseIcon } from './briefcase-icon'
 import { CalendarIcon } from './calendar-icon'
 import { CheckCircleIcon } from './check-circle-icon'
 import { CheckIcon } from './check-icon'
+import { ChevronDownIcon } from './chevron-down-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
 import { ChevronRightIcon } from './chevron-right-icon'
 import { CltIcon } from './clt-icon'
@@ -30,6 +31,7 @@ import { SearchIcon } from './search-icon'
 import { ServicesIcon } from './services-icon'
 import { SettingsIcon } from './settings-icon'
 import { ShareIcon } from './share-icon'
+import { SquarePenIcon } from './square-pen-icon'
 import { SunIcon } from './sun-icon'
 import { TrashIcon } from './trash-icon'
 import { UserIcon } from './user-icon'
@@ -46,6 +48,7 @@ export {
   CltIcon,
   CheckCircleIcon,
   CheckIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DoctorIcon,
@@ -72,6 +75,7 @@ export {
   ServicesIcon,
   SettingsIcon,
   ShareIcon,
+  SquarePenIcon,
   SunIcon,
   TrashIcon,
   UserIcon,
