@@ -4,11 +4,23 @@ Módulo do portal do cidadão para os serviços de dívida ativa imobiliária qu
 portlets Liferay 6.2 da Prefeitura: cadastro de imóveis, parcelamento de débitos e
 acompanhamento de requerimentos.
 
-> **Estado atual: Fase 1 concluída e Fase 2 ("Meus Imóveis") entregue.** Existem gating,
-> contrato provisório, client gerado, camada de mapeamento, landing, DAL, Server Actions e o
-> cadastro de imóveis completo (lista, inclusão em três telas e exclusão). As regras fiscais
-> continuam nos sistemas corporativos (DAM/PGM); este módulo é camada de apresentação sobre
-> uma API de integração em Quarkus que está sendo escrita fora deste repo.
+> **Estado atual: Fase 1 concluída, Fase 2 ("Meus Imóveis") entregue e integrada à API real.**
+> Existem gating, contrato real, client gerado, camada de mapeamento, landing, DAL, Server
+> Actions e o cadastro de imóveis (lista, inclusão, exclusão). As regras fiscais continuam nos
+> sistemas corporativos (DAM/PGM); este módulo é camada de apresentação sobre a API de
+> integração em Quarkus (`api-imoveis`), escrita fora deste repo.
+>
+> **O contrato provisório foi substituído pelo real em 17/08/2026**, colhido de
+> `http://10.5.225.173:8080/swagger` e conferido por chamada ao vivo contra a instância de
+> homologação. A [tabela de premissas](#tabela-de-premissas-do-contrato) traz o veredito de
+> cada uma.
+>
+> ⚠️ **Duas coisas ficaram quebradas de propósito, esperando decisão de produto:**
+>
+> - **`/divida-ativa/imoveis/novo/confirmar` não funciona para imóvel novo.** A API não tem
+>   consulta sem cadastro — ver [P20](#p20-em-detalhe--a-tela-de-confirmação-perdeu-a-fonte-de-dados).
+> - **Nada da Fase 3 foi integrado.** A API não liga schema de resposta às operações de dívida
+>   ativa, então os oito endpoints que a fase precisa chegam sem tipo.
 >
 > Parcelamento e acompanhamento (Fase 3) já têm rota, com um estado provisório explicando que
 > o serviço está sendo construído — a landing linka para eles desde o primeiro PR e um 404
@@ -234,87 +246,188 @@ só a linguagem de `src/types/divida-ativa.ts` (`imovel.inscricao`, `debito.situ
 de telas. Se um dia o typecheck acusar erro de contrato dentro de um componente, a fronteira
 vazou: conserte a fronteira, não só o erro.
 
-## Contrato provisório
+## Contrato real (`api-imoveis`)
 
-`divida-ativa-api.yaml` é uma **proposta escrita unilateralmente pelo time de front**, não
-ratificada pela equipe da API. Ele existe para destravar o desenvolvimento das telas em
-paralelo ao back-end.
+`divida-ativa-api.yaml` é uma **cópia fiel** do documento OpenAPI que a API do Vladimir serve
+em `/swagger`. Não editamos o arquivo: a procedência fica no commit e aqui. Quando a API dele
+virar repo no GitHub, migrar o `input` do Orval para a URL — um notebook alcançável só pela
+rede interna não serve de fonte para o CI.
 
-Recursos, agrupados pelas tags que viram as pastas do client gerado:
+> O Quarkus dele **não** expõe `/q/openapi` (dá 404). O path é `/swagger`, e
+> `/swagger?format=json` funciona.
 
-| Tag | Operações |
-|---|---|
-| `imoveis` | `GET/POST /v1/imoveis`, `GET /v1/imoveis/consulta/{inscricaoImobiliaria}`, `GET/DELETE /v1/imoveis/{inscricaoImobiliaria}` |
-| `debitos` | `GET /v1/imoveis/{inscricaoImobiliaria}/debitos` |
-| `simulacao` | `POST /v1/parcelamentos/simulacoes` |
-| `requerimentos` | **abertura:** `POST /v1/requerimentos`, `POST /v1/requerimentos/documentos` |
-| `acompanhamento` | **pós-abertura:** `GET /v1/requerimentos`, `GET /v1/requerimentos/{protocolo}`, `GET .../comprovante`, `POST .../cancelamento` |
+Recursos, agrupados pelas tags que viram as pastas do client gerado. Note que **não há prefixo
+`/v1`**:
 
-O corte entre `requerimentos` e `acompanhamento` é **abrir** × **acompanhar depois de aberto**,
-não leitura × escrita — o cancelamento é `POST` e está em `acompanhamento`. A tag decide a pasta
-gerada, então é ela que diz de onde importar.
+| Tag → pasta | Operações que usamos | Situação |
+|---|---|---|
+| `Imoveis` → `imoveis/` | `GET/POST /imoveis`, `DELETE /imoveis/{id}`, `GET /imoveis/{inscricao}/consulta` | **integradas** |
+| `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/parcelamentos`, `.../segunda-via` | fora do escopo 2026 |
+| `Divida Ativa` → `divida-ativa/` | consulta principal, `consultar`, `datas-vencimento`, `parcelamentos/simular`, `requerimentos` | Fase 3, **sem tipo** |
+| `Divida Ativa` → `divida-ativa/` | `emitir/*`, `simular/*`, `guias/*`, `certidoes/*` | fora do escopo 2026 |
+| `Divida Ativa - Requerimentos` → `divida-ativa-requerimentos/` | `GET /divida-ativa/requerimentos`, `.../cancelar`, `.../comprovante`, `validar-senha` | Fase 3, **sem tipo** |
+| `Infra` → `infra/` | `heartbeat`, `versao` | não usadas |
 
-**Identidade:** o cidadão é derivado do Bearer token (Keycloak) pela própria API. Nenhum
-endpoint recebe CPF por path, query ou body — nem deve passar a receber.
+O client é gerado inteiro, inclusive para os fluxos fora do escopo — o Orval não sabe recortar
+e não vamos editar o spec de outra equipe. **Gerado não é implementado:** os endpoints fora do
+escopo simplesmente não têm chamador.
+
+### O que "sem tipo" significa
+
+**25 das 31 operações não declaram schema de resposta** — só `"200": description: OK`. Os
+schemas existem e são bons (`DividaAtivaConsultaResponse`, `CdaResponse`, `GuiaDamResponse`,
+`OpcaoDividaAtivaResponse`), mas não estão referenciados por resposta nenhuma, então o Orval
+gera `data: void`. Ligar os `@APIResponse` é o pedido de maior alavancagem que temos com o
+Vladimir: é o que decide se a Fase 3 nasce tipada.
+
+**Identidade:** o cidadão é derivado do Bearer token pela própria API, que extrai o CPF da
+claim `preferred_username` do realm `idrio_cidadao`. Nenhum endpoint recebe CPF por path,
+query ou body — nem deve passar a receber. A resposta de imóvel **devolve** o `cpf`, e o
+mapper o descarta de propósito.
+
+> **Risco latente de identidade.** O token do superapp não tem claim `cpf` (verificado em
+> 17/08/2026), então `getUserInfoFromToken()` cai no `preferred_username` — o mesmo valor que a
+> API usa. As duas pontas coincidem **por acidente**. Se alguém adicionar uma claim `cpf` ao
+> realm, o nosso lado passa a usá-la e o dele não, e o vínculo imóvel↔cidadão sai errado sem
+> nenhum sinal de erro.
 
 ## Tabela de premissas do contrato
 
-Esta é a dívida técnica declarada da Fase 1. Cada linha é uma decisão que tomamos no lugar da
-equipe da API, para que a revisão dela seja uma sentada de conferência em vez de arqueologia.
+Estas eram as decisões que tomamos no lugar da equipe da API enquanto o contrato era nosso.
+**Reconciliadas em 17/08/2026** contra o contrato real e contra 13 chamadas à instância de
+homologação.
 
-**Como ler a coluna "Impacto se vier diferente":** `mapper` significa que a divergência se
-resolve em `src/lib/divida-ativa-mappers.ts` sozinho; `mapper + tela` significa que a tela
-ganha ou perde um estado (precisa de design); `fluxo` significa mudança de navegação, que é
-impacto de cronograma e precisa ser escalado antes de implementar.
+Placar: **3 confirmadas, 6 resolvidas no mapper, 10 dependendo de decisão de produto, 2 sem
+resposta possível** — o spec não diz e o dado de teste não permitiu inferir.
+
+**Como ler a coluna "Veredito":**
+
+| Veredito | Significa |
+|---|---|
+| ✅ confirmada | veio como assumimos; nada a fazer |
+| 🔧 mapper | divergiu, e o ajuste morreu em `divida-ativa-mappers.ts` / DAL / actions. **Já feito** |
+| 🎨 produto | o dado não existe ou tem outra semântica; precisa de decisão de produto ou design |
+| ❓ sem resposta | o spec não declara e o dado de homologação não permitiu verificar |
 
 ### Formatos e tipos
 
-| # | Campo / assunto | Formato assumido | Por quê | Impacto se vier diferente |
+| # | Campo / assunto | Assumido | Veredito | O que a API real faz |
 |---|---|---|---|---|
-| P1 | Valores monetários (`valorPrincipal`, `valorAtualizado`, `valorTotal`, `valorParcela`, `valorEntrada`) | `number` (double), reais com centavos | É o que o OpenAPI expressa naturalmente e evita erro de arredondamento na exibição | `mapper` — `parseValorMonetario()` já aceita string decimal e string pt-BR (`"1.234,56"`, com ou sem `R$`) |
-| P2 | Datas sem hora (`dataVencimento`, `dataReferenciaValor`, `vencimentoPrimeiraParcela`) | ISO `YYYY-MM-DD` | Padrão OpenAPI `format: date` | `mapper` — `parseDataApi()` já aceita também `DD/MM/YYYY`, formato comum no legado |
-| P3 | Datas com hora (`cadastradoEm`, `abertoEm`, `atualizadoEm`, `validaAte`) | ISO 8601 com offset (`2026-08-04T13:45:00-03:00`) | Preserva o fuso do Rio sem depender do servidor | `mapper` — a parte de data é extraída antes do `T` |
-| P4 | `inscricaoImobiliaria` | string **somente dígitos** | A máscara de exibição é decisão de design, não de transporte | `mapper` — `apenasDigitos()` normaliza na entrada. Se a API passar a exigir máscara no *envio*, muda também a Server Action |
-| P5 | `numeroCda` | string livre, formato `AAAA/NNNNNNN-D` | É como o portlet legado exibe | `mapper` |
-| P6 | `percentualDesconto` | `number`, percentual (`10` = 10%) e não fração (`0.1`) | Ambiguidade real; assumimos o que o legado exibe | `mapper + tela` — se vier fração, o número na tela fica 100× errado **sem quebrar nada**. Confirmar explicitamente |
+| P1 | Valores monetários | `number` (double) | ❓ | **String** em todos os campos, mas qual convenção segue desconhecido: todos os valores voltaram `null` no imóvel de teste, que não tem CDA em aberto. `parseValorMonetario()` aceita as duas formas, então provavelmente não haverá trabalho — mas isso é aposta |
+| P2 | Datas sem hora | ISO `YYYY-MM-DD` | 🔧 | `dd/MM/yyyy` (`"24/04/2026"`), não ISO. `parseDataApi()` já aceitava — a tolerância deliberada dos mappers pagou aqui. **Na saída** a API exige `dd/MM/yyyy` (`GuiaOperacaoRequest`), e não existe serializador nessa direção; será preciso na Fase 3 |
+| P3 | Datas com hora | ISO 8601 com offset | 🔧 | `LocalDateTime` **sem fuso**, com centésimos: `2026-06-22T15:40:46.477`. `parseDataApi()` corta no `T` e resolve. Registre que não há fuso no dado |
+| P4 | Inscrição imobiliária | string somente dígitos | ✅ | Confirmada: "a API considera apenas digitos e normaliza para 8 posicoes". Aceita máscara e aceita sem zeros à esquerda |
+| P5 | `numeroCda` | campo `numeroCda`, `AAAA/NNNNNNN-D` | 🔧 | Chama-se `cdaId` na resposta e `numCda` nos filtros. Formato não documentado — confirmar antes da Fase 3 |
+| P6 | `percentualDesconto` | percentual e não fração | 🎨 | **Não existe percentual em lugar nenhum do spec.** Só valores absolutos em string (`descontoPrincipal`, `valorTotalDesconto`). O risco de erro de 100× evaporou; em troca, o "%" do Figma não tem fonte |
 
 ### Enums
 
-| # | Campo | Valores assumidos | Impacto se vier diferente |
-|---|---|---|---|
-| P7 | `SituacaoCda` | `EM_ABERTO`, `AJUIZADA`, `PARCELADA`, `QUITADA`, `SUSPENSA`, `CANCELADA` | `mapper` para renomear; **`mapper + tela`** para um valor novo, que precisa de rótulo e cor no design |
-| P8 | `SituacaoRequerimento` | `EM_ANALISE`, `AGUARDANDO_DOCUMENTACAO`, `DEFERIDO`, `INDEFERIDO`, `CANCELADO` | idem P7 |
-| P9 | `TipoDocumento` | `DOCUMENTO_IDENTIDADE`, `CPF`, `COMPROVANTE_RESIDENCIA`, `PROCURACAO`, `CONTRATO_SOCIAL`, `OUTRO` | `mapper + tela` — a lista vira opções do formulário de requerimento (Fase 3) |
+| # | Campo | Valores assumidos | Veredito | O que a API real faz |
+|---|---|---|---|---|
+| P7 | `SituacaoCda` | 6 valores em SCREAMING_CASE | 🎨 | **Não há enum, e não há um eixo só.** `situacaoPrincipal` (texto livre do DAM, ex.: `"Concedido"`) + `codSituacaoCda` (int), mais um par paralelo `situacaoHonorarios`/`codSituacaoHonorarios`, mais um terceiro eixo `faseCobranca`/`faseCobrancaId`. Nosso tipo de visão tem **uma** `situacao` |
+| P8 | `SituacaoRequerimento` | 5 valores | ❓ | `GET /divida-ativa/requerimentos` não declara schema e devolveu `[]` (array cru) para o CPF de teste. Não há como confirmar nem refutar |
+| P9 | `TipoDocumento` | 6 valores | 🎨 | Não existe tipo **por documento**: `documentos: [{ nomeArquivo, conteudoBase64 }]`. Existe um `tipoDoc` solto no requerimento, aparentemente do correspondente |
 
-Valor de enum desconhecido **não quebra a tela**: os mappers devolvem `'desconhecida'`. Isso é
-proposital — uma situação nova no sistema fiscal não pode derrubar a página do cidadão. Mas
-`'desconhecida'` precisa ter um tratamento visual definido no design.
+Nenhum dos três está em uso hoje: os mappers de Fase 3 foram removidos na integração, porque
+traduziam de valores que a API não emite. Os **tipos de visão** (`'em_aberto'`, `'em_analise'`)
+ficaram em `src/types/divida-ativa.ts` como vocabulário de produto para a Fase 3.
+
+Quando voltarem, mantenha a regra: valor desconhecido **não quebra a tela**, cai em
+`'desconhecida'`. Uma situação nova no sistema fiscal não pode derrubar a página do cidadão —
+mas `'desconhecida'` precisa de tratamento visual definido no design. E prefira mapear pelo
+**código numérico** a mapear pela string de exibição do DAM, que é rótulo, não contrato.
 
 ### Decisões de modelagem
 
-| # | Assunto | Decisão assumida | Por quê | Impacto se vier diferente |
+| # | Assunto | Decisão assumida | Veredito | O que a API real faz |
 |---|---|---|---|---|
-| P10 | Envelope de erro | `{ errors: [{ code, message }] }`, com `message` institucional em pt-BR exibível ao cidadão | Espelha o formato das outras APIs Pref.Rio, para o front ter um tratamento de erro só | `mapper` — mas se `message` **não** for exibível ao cidadão, cada estado de erro precisa de copy do design (`mapper + tela`) |
-| P11 | Listagens | Envelope `{ data: [...] }`, **sem paginação** | O cidadão tem poucos imóveis e poucas CDAs por imóvel | `fluxo` se vier paginado — a lista ganha paginação, que é tela nova |
-| P12 | `possuiDebitos` no `Imovel` | A API devolve o booleano junto da lista | Evita N+1 chamadas para montar a lista de imóveis | `mapper + tela` — sem ele, ou a lista perde o indicador, ou vira uma chamada por imóvel |
-| P13 | `valorTotalAtualizado` | Calculado **pela API**, não somado no front | Soma de valor fiscal é regra de negócio; o front nunca recalcula | `mapper + tela` — se a API não devolver, é preciso decidir com a diretoria se o front pode somar |
-| P14 | `parcelavel` por CDA | Elegibilidade decidida pela API, por CDA | O front nunca infere elegibilidade de parcelamento | `fluxo` se a elegibilidade for do conjunto e não da CDA — muda a seleção na tela de débitos |
-| P15 | Upload de documentos | `POST /v1/requerimentos/documentos` devolve um `documentoId`, citado depois na criação do requerimento (upload em duas etapas) | Desacopla o envio do arquivo do envio do formulário e contorna o limite de 1 MB de Server Action | `fluxo` — **é a premissa mais frágil da tabela.** Não há precedente de upload neste repo e o mecanismo (limite de Server Action × route handler multipart × upload direto) ainda não foi decidido com Vladimir/Lucas |
-| P16 | Comprovante em PDF | `GET /v1/requerimentos/{protocolo}/comprovante` devolve `application/pdf` como blob | O mutator já trata `application/pdf` | `mapper` se vier como URL assinada em JSON |
-| P17 | Validade da simulação | `validaAte` é instante; passado ele, é preciso simular de novo | Valor fiscal muda com encargos diários | `mapper + tela` — a tela precisa de um estado "simulação expirada" |
-| P19 | `proprietario` no `Imovel` | A API devolve o nome do proprietário como consta no sistema fiscal | O design exibe o campo na lista de imóveis e na tela de confirmação do cadastro; o contrato original não tinha o campo | `mapper + tela` — sem ele, os dois cards perdem uma linha |
-| P20 | Consulta × cadastro | São **dois** endpoints: `GET /v1/imoveis/consulta/{inscricao}` só consulta o sistema fiscal e `POST /v1/imoveis` grava | No portal legado a consulta já gravava o imóvel automaticamente. A separação foi acordada com o Vladimir em 17/08/2026: a consulta responde à tela "Confirme sua inscrição" e o cadastro só acontece no "Confirmar" do cidadão | `fluxo` — se a API mantiver o comportamento do legado, o imóvel entra na lista antes de o cidadão confirmar, e a tela de confirmação perde o sentido |
-| P21 | Tamanho da inscrição imobiliária | 7 **ou** 8 dígitos, incluindo o verificador | Levantado pelo time em 17/08/2026 contra o legado; o contrato antes exemplificava 11 dígitos | `mapper` para o transporte; `mapper + tela` se o intervalo mudar, porque a máscara e a validação de formato do front assumem esse intervalo |
-| P18 | Identificador da consulta | O contrato só modela busca por **inscrição imobiliária** | O contrato foi escrito a partir do plano, antes de o design ser lido | `fluxo` — **lacuna conhecida, não é aposta.** O design pede também nº da CDA e nº da execução fiscal, e não existe endpoint que aceite nenhum dos dois. Precisa entrar no contrato antes da Fase 3 (Marco 3 — 23/10). Ver detalhamento abaixo |
+| P10 | Envelope de erro | `{ errors: [{ code, message }] }`, `message` exibível | 🔧🎨 | `{ error: string }` singular, **sem `code`**. A exibibilidade depende do status: 400 traz mensagem de negócio em português; 401 traz `"HTTP 401 Unauthorized"`; 404 vem **sem corpo**; 502 vaza `"WS Fazenda IPTU"`. Sem `code`, o status é o único discriminador — `mapApiToMensagemErro(data, status)` só exibe 400. Duas mensagens vêm **sem acento** |
+| P11 | Listagens | Envelope `{ data: [...] }`, sem paginação | 🔧 | Sem paginação ✅, mas **sem envelope**: array cru. O spec tipava objeto singular (anotação errada), e o DAL fazia `result.data?.data` — devolveria lista vazia **em silêncio**. Absorvido por `normalizarListaImoveis()`, que aceita as três formas |
+| P12 | `possuiDebitos` no imóvel | A API devolve o booleano junto da lista | 🎨 | Ausente, e por decisão de arquitetura: `GET /imoveis` "consulta somente o banco local. Nao chama WS Fazenda nem ePortal". Mapeado para `null` = "não sabemos". A alternativa N+1 é inviável: as chamadas ao ePortal levam 15 s cada |
+| P13 | `valorTotalAtualizado` | Calculado pela API | 🎨 | `totalDebitos` é **contagem** (`int32`), não soma. Não há total monetário agregado. Com principal e honorários separados e valores em string, somar no front é pior do que era quando escrevemos isto |
+| P14 | `parcelavel` por CDA | Elegibilidade decidida pela API, por CDA | ✅ | Confirmada e mais rica: `selecionavelParcelamento` por CDA, mais `habilitadaAvistaPrincipal`, `habilitadaLiquidacaoHonorarios` e pares equivalentes por fluxo. Cuidado com `emissaoGuiaHabilitada`, cuja polaridade é ambígua |
+| P15 | Upload em duas etapas | `POST .../documentos` devolve `documentoId` | 🎨 | Não são duas etapas: `conteudoBase64` **inline** no mesmo POST do requerimento. Sem `documentoId`, sem multipart. Caiu justamente a solução que existia para o limite de 1 MB de Server Action (`experimental.serverActions.bodySizeLimit`), e base64 infla ~33% |
+| P16 | Comprovante em PDF | `application/pdf` como blob | 🔧 | **URL**, o ramo alternativo que a premissa previu. Também `urlPdf` nas guias. Atenção: `/guias/{n}/pdf` é descrito como "URL **publica** de PDF" — guia de dívida acessível por quem tiver o link |
+| P17 | Validade da simulação | `validaAte` é instante | ❓🎨 | Campo não existe. **E o fluxo é outro:** `GET /datas-vencimento?tipo=PARCELAMENTO` devolveu dez datas permitidas, não consecutivas, e `simular` recebe a escolhida. O cidadão **escolhe a data** antes de simular — passo de tela que o Figma não tem |
+| P19 | `proprietario` no imóvel | A API devolve o nome do proprietário | 🎨 | Ausente de `ImovelResponse`, que traz só `id`, `cpf`, `dataInclusao`, `endereco`, `numInscricao`. O nome existe como `nomeContribuinte`, mas na CDA, só após a consulta de dívida ativa. Mapeado para `null`: a linha desaparece da lista e da confirmação |
+| P20 | Consulta × cadastro | Dois endpoints, um que só consulta | 🎨 | **A premissa caiu.** Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-perdeu-a-fonte-de-dados) |
+| P21 | Tamanho da inscrição | 7 **ou** 8 dígitos | ✅ | Confirmada no transporte. Duas ressalvas: a API aceita **menos** de 7 dígitos e a nossa validação não, o que impede testar manualmente com o dado `18` da instância dele; e a resposta vem sempre com 8, então a máscara ganha um `0.` à esquerda que o carnê não tem |
+| P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA SANTO AFONSO, 216 / LOJA A - TIJUCA"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
+| P18 | Identificador da consulta | Só inscrição imobiliária | 🎨 | **Meia vitória.** `POST /imoveis/{inscricao}/divida-ativa/consultar` aceita quatro critérios — `numInscricao`, `numCda`, `numExecucaoFiscal` e um que não esperávamos, `numGuiaPagamento` (RN-001/RN-002, critério único). Mas a inscrição continua **no path**, e a tag diz "autorizacao por imovel cadastrado": quem só tem a carta de cobrança ainda não entra. Ver detalhamento abaixo |
 
-### Premissas que exigem confirmação explícita
+### Achados novos, fora da tabela
 
-Estas não quebram nada visivelmente, e por isso são as mais perigosas:
+A reconciliação levantou coisas que nenhuma premissa previa:
 
-- **P6** (`percentualDesconto` percentual vs. fração) — erro silencioso de 100×.
-- **P10** (`message` de erro é exibível ao cidadão) — se não for, estaríamos mostrando texto
-  técnico interno para o cidadão.
-- **P15** (upload em duas etapas) — depende de decisão de arquitetura que ainda não existe.
+- **As chamadas ao ePortal levam 10 a 16 segundos.** Medido: `/consulta` 16,0 s,
+  `/parcelamentos` 15,4 s, a consulta principal 10,7 s na primeira chamada. Os endpoints que só
+  leem o banco local respondem em menos de 100 ms. Um Server Component que aguarda 16 s
+  renderiza página em branco por 16 s — a tela de consulta da Fase 3 precisa de `Suspense` com
+  streaming e um estado de carregamento que o Figma não tem.
+- **`emissaoGuiaHabilitada` tem polaridade ambígua.** O nome diz "habilitada"; a descrição diz
+  "Flag bruta do DAM `isCdaBlqueadaEmissaoGuia==1` (legado habilita)". Erro silencioso da mesma
+  classe que o P6 original: ofereceria ou esconderia emissão de guia para a CDA errada.
+- **O spec declara `scheme: basic`** em `securitySchemes`, enquanto todas as descrições falam de
+  JWT no Keycloak e o teste ao vivo confirma comportamento de Bearer. Bug de documentação.
+- **Nenhuma operação tem `operationId`**, e as tags têm espaço e hífen — é isso que define os
+  nomes de pasta e de função do client gerado (`getImoveisInscricaoDividaAtivaDatasVencimento`).
+- **502 não está documentado.** `POST /imoveis` com inscrição inexistente devolve 502; o spec
+  prevê 400/401/503. Ganho: a falha **não deixa registro gravado** — verificado.
+- **A API cobre todo o escopo que a diretoria retirou** (guia à vista, liquidação,
+  regularização, 2ª via, certidões), além de dois serviços que a nossa landing não tem
+  (`ADIANTAMENTO` e `FAQ`, com `urlExterna` para o DAM Internet).
+- **A consulta principal devolve o menu pronto.** `opcoes` traz sete serviços com `disponivel`,
+  `mensagem` e `urlExterna`, em português correto e acentuado. Na Fase 3 isso substitui lógica
+  que íamos escrever à mão. Não serve para a landing, que é por cidadão e não por inscrição.
+- **`protocoloRequerimentoAberto` por CDA** permite a tela dizer "já existe requerimento aberto
+  para esta dívida" em vez de deixar o cidadão abrir um segundo e ser indeferido.
+
+### As duas premissas mais perigosas hoje
+
+- **P1** (formato dos valores monetários) — não foi possível verificar: todos os campos de valor
+  voltaram `null`, porque o imóvel de teste não tem CDA em aberto. É a única premissa de formato
+  que segue sendo aposta, e ela chega à tela como dinheiro.
+- **P15** (upload) — o mecanismo mudou para base64 inline e o limite de 1 MB de Server Action
+  volta a ser problema, sem a solução em duas etapas que existia no papel.
+
+### O passo de senha — decisão que muda o desenho da Fase 3
+
+Não estava em premissa nenhuma porque o contrato provisório não imaginava reautenticação.
+
+A senha aparece em **dois** lugares: existe `POST /divida-ativa/validar-senha` (INT-24 /
+RN-036) e um campo `senha` dentro de `RequerimentoParcelamentoRequest`, ao lado de
+`tipoAutenticacao` e `declaracaoAceita`. O resumo do endpoint de requerimento diz "docs base64 +
+**reauth senha** + declaracao".
+
+Se `senha` for obrigatória no corpo, o requerimento **não pode ser enviado** sem um passo que o
+Figma não tem — e `tipoAutenticacao` sugere que existe mais de um caminho aceito.
+
+O agravante é de segurança, não de escopo: o cidadão já está autenticado por Keycloak. Pedir a
+senha do id.rio num formulário nosso reintroduz credencial fora do IdP, e passaria a trafegar
+senha em texto claro pelo nosso servidor. Se a regra exigir reauth, o caminho aceitável é o
+Keycloak (step-up via `acr_values`; o token atual vem com `acr: 0`), não um campo nosso.
+
+> **Não testamos `validar-senha` de propósito.** Chamar com senha errada arriscaria acionar a
+> detecção de força bruta do Keycloak e bloquear uma conta real.
+
+### P20 em detalhe — a tela de confirmação perdeu a fonte de dados
+
+A premissa dizia que havia dois endpoints. Não há.
+
+- `GET /imoveis/{inscricao}/consulta` exige o imóvel **já cadastrado** (404 se não estiver) e a
+  própria descrição avisa: "Nao chama o WSFazenda_Iptu neste endpoint".
+- `POST /imoveis` é quem consulta a Fazenda — e **grava no mesmo passo**, como o legado.
+
+Não existe como mostrar o endereço antes de cadastrar. `/divida-ativa/imoveis/novo/confirmar`
+está no repositório, compila e é coberto por testes, mas **cai sempre no estado "não
+encontrado"** para um imóvel novo. Fica assim, atrás da feature flag, até a decisão. Três
+saídas:
+
+| | Saída | Custo |
+|---|---|---|
+| **A** | Pedir ao Vladimir um modo consulta (`?persistir=false` ou endpoint de preview) | Preserva o Figma inteiro. Do lado dele é pular o insert — provavelmente a mudança mais barata da lista. **É o que pedir primeiro** |
+| **B** | Inverter: gravar no "Adicionar" e a tela passa a confirmar o que já foi salvo, com `DELETE` como desfazer | Mantém as três telas, muda a semântica e exige copy nova. Um imóvel rejeitado esteve cadastrado por alguns segundos — mas verificamos que falha não deixa lixo gravado |
+| **C** | Assumir o legado: campo → sucesso, com o endereço na tela de sucesso | Mais barato de implementar, some uma tela do Figma |
 
 ### P18 em detalhe — os três modos de busca
 
@@ -326,33 +439,51 @@ Os três identificadores do design **não são sinônimos**: são níveis difere
 | Número da CDA | uma **dívida** inscrita | carta de cobrança da PGM | 1 CDA → 1 imóvel |
 | Nº da execução fiscal | um **processo judicial** | citação da Justiça | 1 execução → N CDAs |
 
-Hoje **todo** o contrato é indexado por inscrição imobiliária — inclusive o cadastro de imóvel,
-cujo único campo obrigatório é ela. Não existe caminho para quem só tem a carta de cobrança ou
-a citação na mão.
+A capacidade **existe** no contrato real: `POST /imoveis/{inscricao}/divida-ativa/consultar`
+recebe `ConsultaFiltroRequest` com `numInscricao`, `numCda`, `numExecucaoFiscal` e
+`numGuiaPagamento`, em critério único (RN-001/RN-002). A resposta é a mesma
+`DividaAtivaConsultaResponse` da consulta principal, então quem entra por CDA **cai no fluxo
+normal** — responde a pergunta 2.
 
-Por que isso é `fluxo` e não `mapper`: não é divergência de formato, é **capacidade
-inexistente**. Nenhum mapper responde "de qual imóvel é a CDA 2023/0012345-6?" se a API não
-sabe responder. E a navegação que o módulo assume é `imóvel → débitos → simulação →
-requerimento`; entrar por CDA é entrar no meio dela, e entrar por execução fiscal pode trazer
-várias CDAs de uma vez.
+O problema é que **a inscrição continua no path**. Para buscar pela CDA é preciso já saber a
+inscrição, e a tag reforça: "autorizacao por imovel cadastrado". Quem chega só com a carta de
+cobrança na mão continua sem caminho — a capacidade está lá, o ponto de entrada não.
 
 **Já decidido:** "Meus Imóveis" alimenta **apenas** o modo inscrição imobiliária (seleção em
 vez de digitação). Os modos CDA e execução fiscal não passam por ele.
 
-**Em aberto com Vladimir + produto, antes da Fase 3:**
+**Estado das quatro perguntas, depois da reconciliação:**
 
-1. A API ganha busca por CDA e por execução fiscal?
-2. Elas devolvem o **imóvel** (e o cidadão cai no fluxo normal) ou a **lista de dívidas** direto?
-3. Uma execução fiscal pode abranger mais de um imóvel? Se puder, a tela precisa de um passo de
-   desambiguação.
-4. Entrando por CDA ou execução, o imóvel precisa estar cadastrado em "Meus Imóveis" para
-   seguir com o parcelamento?
+1. ~~A API ganha busca por CDA e por execução fiscal?~~ **Sim**, já tem — inclusive por número
+   de guia de pagamento, que não esperávamos.
+2. ~~Devolvem o imóvel ou a lista de dívidas?~~ **O imóvel**, junto das CDAs e do menu: é a
+   mesma resposta da consulta principal.
+3. **Em aberto:** uma execução fiscal pode abranger mais de um imóvel? Se puder, a tela precisa
+   de um passo de desambiguação — e a resposta atual, indexada por uma inscrição só, não o
+   suporta.
+4. **Respondida na prática — e é o problema:** sim, o imóvel precisa estar cadastrado. Isso
+   torna "Meus Imóveis" pré-requisito dos três modos, não conveniência de um, e contradiz a
+   decisão de produto acima. **Precisa de conversa com o Vladimir e com produto.**
 
 ## Camada de mapeamento
 
 `src/lib/divida-ativa-mappers.ts` converte o tipo gerado no tipo de visão. Os mappers são
-deliberadamente **tolerantes**: aceitam o formato que assumimos e também os formatos que o
-legado costuma devolver.
+deliberadamente **tolerantes**: aceitam a forma que a API devolve hoje e também as formas que
+ela pode passar a devolver.
+
+**A tolerância se pagou na integração.** `parseDataApi()` já aceitava `dd/MM/yyyy` "porque o
+legado costuma devolver assim" — e é exatamente o que a API real devolve. Custo da troca de
+contrato nas datas: zero.
+
+**`normalizarListaImoveis()` é o mapper mais importante do arquivo.** Ele existe porque o tipo
+gerado *mente*: o spec tipa `GET /imoveis` como objeto singular e a API devolve array cru. Sem
+ele o DAL fazia `result.data?.data`, que num array resolve para `undefined` e cai no `[]` — o
+cidadão com imóvel veria "nenhum imóvel cadastrado", **sem erro e sem log**. Foi o bug mais
+concreto que a reconciliação encontrou, e há teste travando os dois lados.
+
+`mapApiToMensagemErro(data, status)` recebe o status de propósito: sem campo `code` no envelope
+de erro, o status é o único jeito de separar a mensagem que serve ao cidadão (400) da que vaza
+nome de sistema interno (5xx). Ver P10.
 
 Duas garantias que os testes travam (`src/lib/__tests__/divida-ativa-mappers.test.ts`):
 
@@ -361,8 +492,16 @@ Duas garantias que os testes travam (`src/lib/__tests__/divida-ativa-mappers.tes
 - **Nunca data inválida.** `parseDataApi()` rejeita datas que o `Date` "corrige" sozinho
   (`2023-02-31` viraria 03/03).
 
-Booleanos de consequência fiscal usam comparação estrita (`api.parcelavel === true`): na
-dúvida é `false`. **Nunca oferecer parcelamento por conta própria.**
+Booleanos de consequência fiscal usam comparação estrita (`=== true`): na dúvida é `false`.
+**Nunca oferecer parcelamento por conta própria.** Cuidado especial com
+`emissaoGuiaHabilitada`, cuja polaridade o próprio spec deixa ambígua.
+
+**Ausência de dado é `null`, não `false`.** `possuiDebitos` é `boolean | null` justamente por
+isso: a API não sabe dizer se há débito na listagem, e `false` ali seria uma afirmação que
+ninguém fez. Não troque por `false` para simplificar um `if`.
+
+O mapper **descarta** o `cpf` que a resposta traz. Identidade vem do token; CPF não atravessa a
+fronteira para o tipo de visão (LGPD). Há teste travando isso.
 
 ## Desenvolvendo sem a API
 
@@ -380,7 +519,9 @@ nem dependência nova.
 Nos **testes**, o caminho é MSW no limite de rede — handlers default em
 `src/test/mocks/handlers.ts`, sobrescritos por teste com `server.use()`. Nunca stub de `fetch`.
 
-> Este mock de dev some na fase de integração, junto com o contrato provisório.
+> O Prism continua útil depois da integração: ele monta o mock a partir do spec **real**, então
+> serve para desenvolver quando a máquina do Vladimir está desligada. O que ele não reproduz é o
+> que só o dado real mostrou — os 15 s das chamadas ao ePortal e os valores em `null`.
 
 ## Regenerar o client
 
@@ -417,40 +558,43 @@ api: {
 
 **Nunca editar `src/http-divida-ativa/` à mão.**
 
-## Próximo passo — trocar o contrato provisório pelo real
+## A integração — o que foi feito e o que ficou
 
-A API em Quarkus do Vladimir já roda na máquina dele, alcançável pela rede interna. A troca do
-contrato é o começo da fase de integração. O roteiro, na ordem:
+A troca do contrato aconteceu em 17/08/2026. O que está pronto:
 
-1. **Obter o documento OpenAPI.** Quarkus expõe em `/q/openapi` (YAML), `/q/openapi?format=json`
-   e o Swagger UI em `/q/swagger-ui`. Precisa do `http://<ip>:<porta>` da máquina dele.
-2. **Commitar como `divida-ativa-api.yaml`**, substituindo o provisório, e anotar no commit de
-   onde e quando veio. **Não** apontar o `input` do Orval direto para a máquina dele: o
-   precedente de URL neste repo (app-go-api, app-busca-search) são specs hospedadas no GitHub,
-   alcançáveis pelo CI e por qualquer dev. Um notebook não é isso. Quando a API dele virar repo
-   no GitHub, aí sim migrar para a URL.
-3. **Regenerar o client** pelo fluxo da seção anterior e deixar o `npm run typecheck` apontar as
-   divergências. A fronteira anti-corrupção faz a quebra se concentrar em
-   `divida-ativa-mappers.ts`, no DAL e nas Server Actions — os componentes só conhecem
-   `src/types/divida-ativa.ts` e não devem precisar mudar. Se um componente quebrar, a fronteira
-   vazou: conserte a fronteira.
-4. **Atualizar os handlers MSW** para as formas reais. Sem isso a suíte continua validando o
-   contrato que nós inventamos.
-5. **Reconciliar a tabela de premissas** acima, marcando cada uma como confirmada ou divergente.
-   Três não se resolvem no mapper e precisam de decisão de produto: **P20** (se a API consultar e
-   já cadastrar num passo só, como o legado, a tela "Confirme sua inscrição" perde o sentido),
-   **P19** (sem `proprietario`, a lista e a confirmação perdem uma linha cada) e **P21** (se a
-   inscrição não for de 7–8 dígitos, mudam a máscara e a validação de formato do formulário).
+- Spec real commitado como `divida-ativa-api.yaml`, client regenerado, `orval.config.ts`
+  revertido.
+- Mappers, DAL e Server Actions adaptados: array cru, envelope de erro `{ error }` exibível só
+  em 400, exclusão pelo id local, `cpf` descartado.
+- Handlers MSW nos paths reais (sem `/v1`) e com payloads da forma real. Os antigos apontavam
+  para endpoints que não existem — a suíte validava ficção.
+- Mappers de Fase 3 **removidos** (`mapApiToDebito`, `mapApiToListaDebitos`, `mapApiToSimulacao`,
+  `mapApiToRequerimento`, `mapSituacao*`) junto dos testes deles. Traduziam de valores que a API
+  não emite; manter era manter teste verde sobre contrato refutado.
+- Tabela de premissas reconciliada acima.
 
-Dois cuidados:
+### O que ficou pendente, e de quem depende
+
+| Pendência | Depende de |
+|---|---|
+| Tela `confirmar` funcional (P20) | decisão de produto entre A, B e C |
+| Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
+| Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
+| Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |
+| Linha de proprietário na lista (P19) | Vladimir incluir, ou produto tirar do Figma |
+| Indicador de débito na lista (P12) | produto confirmar que a tela fica de pé sem ele |
+| Estado de carregamento para as chamadas de 15 s | design |
+| Serializador `dd/MM/yyyy` na saída | nada — é só escrever, mas só a Fase 3 usa (YAGNI) |
+
+### Dois cuidados que continuam valendo
 
 - **A máquina dele não pode virar dependência de teste.** O MSW continua sendo o limite de rede
-  da suíte; a API real serve para verificação manual e para reconciliar o contrato. Teste
-  amarrado ao IP dele quebra toda vez que ele fechar o notebook.
-- **CORS não é problema**, mas **auth pode ser**: as chamadas saem do servidor Next para a
-  máquina dele, não do browser. O mutator sempre manda `Authorization: Bearer` com o
-  `access_token` do cookie — vale confirmar antes contra qual realm Keycloak a instância local
-  valida, ou se valida.
+  da suíte; a API real serve para verificação manual. Teste amarrado ao IP dele quebra toda vez
+  que ele fechar o notebook.
+- **Auth está confirmada.** As chamadas saem do servidor Next, e o mutator manda
+  `Authorization: Bearer` com o `access_token` do cookie. A instância valida contra o realm
+  `idrio_cidadao` de homologação — o mesmo do `.env` do superapp. Ver a ressalva sobre a claim
+  `cpf` na seção do contrato.
 
 Para desenvolver sem depender dele, o mock por Prism descrito em
 [Desenvolvendo sem a API](#desenvolvendo-sem-a-api) continua valendo.

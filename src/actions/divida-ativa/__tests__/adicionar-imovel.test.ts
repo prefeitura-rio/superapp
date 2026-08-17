@@ -8,14 +8,14 @@ import { describe, expect, test, vi } from 'vitest'
 const DIVIDA_ATIVA = TEST_ENV.BASE_API_URL_DIVIDA_ATIVA
 
 describe('adicionarImovel', () => {
-  test('envia somente os dígitos da inscrição, sem a máscara de exibição', async () => {
+  test('envia somente os dígitos da inscrição no campo numInscricao', async () => {
     let bodyRecebido: unknown
 
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, async ({ request }) => {
+      http.post(`${DIVIDA_ATIVA}/imoveis`, async ({ request }) => {
         bodyRecebido = await request.json()
         return HttpResponse.json(
-          { inscricaoImobiliaria: '05217663' },
+          { id: 32, numInscricao: '00000018' },
           { status: 201 }
         )
       })
@@ -23,83 +23,87 @@ describe('adicionarImovel', () => {
 
     await adicionarImovel('0.521.766-3')
 
-    expect(bodyRecebido).toEqual({ inscricaoImobiliaria: '05217663' })
+    expect(bodyRecebido).toEqual({ numInscricao: '05217663' })
   })
 
   test('devolve o imóvel cadastrado na linguagem do produto', async () => {
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () =>
         HttpResponse.json(
           {
-            inscricaoImobiliaria: '05217663',
-            endereco: 'Rua Barata Ribeiro, 586 - A 501',
-            bairro: 'Copacabana',
-            proprietario: 'Bruno Rocha Menezes',
+            id: 32,
+            cpf: '16232350731',
+            dataInclusao: '2026-06-22T15:40:46.477',
+            endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+            numInscricao: '00000018',
           },
           { status: 201 }
         )
       )
     )
 
-    const resultado = await adicionarImovel('05217663')
+    const resultado = await adicionarImovel('00000018')
 
     expect(resultado).toEqual({
       success: true,
       data: {
-        inscricao: '05217663',
-        endereco: 'Rua Barata Ribeiro, 586 - A 501',
-        bairro: 'Copacabana',
-        proprietario: 'Bruno Rocha Menezes',
-        possuiDebitos: false,
-        cadastradoEm: null,
+        id: 32,
+        inscricao: '00000018',
+        endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+        bairro: null,
+        proprietario: null,
+        possuiDebitos: null,
+        cadastradoEm: '2026-06-22',
       },
     })
   })
 
-  test('reflete a mensagem da API quando o imóvel já está cadastrado (409)', async () => {
+  // Mensagem real da API, verificada em 17/08/2026. Vem em 400 e é exibível.
+  test('exibe a mensagem da API quando o imóvel já está cadastrado (400)', async () => {
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () =>
         HttpResponse.json(
-          {
-            errors: [
-              {
-                code: 'IMOVEL_JA_CADASTRADO',
-                message: 'Este imóvel já está na sua lista.',
-              },
-            ],
-          },
-          { status: 409 }
+          { error: 'Este imovel ja esta cadastrado para o usuario.' },
+          { status: 400 }
         )
       )
     )
 
-    const resultado = await adicionarImovel('05217663')
+    const resultado = await adicionarImovel('00000018')
 
     expect(resultado).toEqual({
       success: false,
-      error: 'Este imóvel já está na sua lista.',
-      status: 409,
+      error: 'Este imovel ja esta cadastrado para o usuario.',
+      status: 400,
     })
   })
 
-  test('não inventa motivo quando a API falha sem mensagem exibível (500)', async () => {
+  // O 502 real diz "Falha ao consultar imovel no WS Fazenda IPTU." — nome de sistema
+  // interno não vai para a tela do cidadão.
+  test('não repassa a mensagem de um 502, que vaza sistema interno', async () => {
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
-        HttpResponse.json({}, { status: 500 })
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar imovel no WS Fazenda IPTU.' },
+          { status: 502 }
+        )
       )
     )
 
-    const resultado = await adicionarImovel('05217663')
+    const resultado = await adicionarImovel('99999999')
 
-    expect(resultado.success).toBe(false)
-    expect(resultado).toMatchObject({ status: 500 })
+    expect(resultado).toEqual({
+      success: false,
+      error: 'Não foi possível adicionar o imóvel. Tente novamente mais tarde.',
+      status: 502,
+    })
   })
 
   test('recusa uma inscrição fora do formato sem chamar a API', async () => {
     let chamou = false
 
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, () => {
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () => {
         chamou = true
         return HttpResponse.json({}, { status: 201 })
       })
@@ -113,12 +117,12 @@ describe('adicionarImovel', () => {
 
   test('revalida a lista e a landing depois de cadastrar', async () => {
     server.use(
-      http.post(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
-        HttpResponse.json({ inscricaoImobiliaria: '05217663' }, { status: 201 })
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () =>
+        HttpResponse.json({ id: 32, numInscricao: '00000018' }, { status: 201 })
       )
     )
 
-    await adicionarImovel('05217663')
+    await adicionarImovel('00000018')
 
     expect(vi.mocked(revalidatePath)).toHaveBeenCalledWith(
       '/divida-ativa/imoveis'

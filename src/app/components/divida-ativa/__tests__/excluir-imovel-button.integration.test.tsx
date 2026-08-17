@@ -27,7 +27,7 @@ vi.mock('react-hot-toast', () => ({
 }))
 
 const PROPS = {
-  inscricao: '05217663',
+  id: 32,
   descricao: 'Rua Barata Ribeiro, 586 - A 501',
 }
 
@@ -76,7 +76,7 @@ describe('ExcluirImovelButton', () => {
     expect(vi.mocked(excluirImovel)).not.toHaveBeenCalled()
   })
 
-  test('confirmar exclui o imóvel pela inscrição', async () => {
+  test('confirmar exclui o imóvel pelo id local', async () => {
     const user = userEvent.setup()
     render(<ExcluirImovelButton {...PROPS} />)
 
@@ -90,7 +90,7 @@ describe('ExcluirImovelButton', () => {
     )
 
     await waitFor(() =>
-      expect(vi.mocked(excluirImovel)).toHaveBeenCalledWith('05217663')
+      expect(vi.mocked(excluirImovel)).toHaveBeenCalledWith(32)
     )
   })
 

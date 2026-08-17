@@ -1,9 +1,7 @@
 import {
-  mapApiToDebito,
   mapApiToImovel,
-  mapApiToListaDebitos,
-  mapApiToRequerimento,
-  mapApiToSimulacao,
+  mapApiToMensagemErro,
+  normalizarListaImoveis,
   parseDataApi,
   parseValorMonetario,
 } from '@/lib/divida-ativa-mappers'
@@ -44,12 +42,14 @@ describe('parseDataApi', () => {
     expect(parseDataApi('2023-03-10')).toBe('2023-03-10')
   })
 
+  // A API real devolve dd/MM/yyyy nos campos vindos do DAM (verificado em 17/08/2026).
   test('converte data no formato brasileiro para ISO', () => {
-    expect(parseDataApi('10/03/2023')).toBe('2023-03-10')
+    expect(parseDataApi('24/04/2026')).toBe('2026-04-24')
   })
 
-  test('reduz um date-time ISO para a data', () => {
-    expect(parseDataApi('2026-08-04T13:45:00-03:00')).toBe('2026-08-04')
+  // `dataInclusao` vem como LocalDateTime sem fuso, com centésimos.
+  test('reduz um date-time sem fuso para a data', () => {
+    expect(parseDataApi('2026-06-22T15:40:46.477')).toBe('2026-06-22')
   })
 
   test('devolve null para ausente', () => {
@@ -62,223 +62,150 @@ describe('parseDataApi', () => {
 })
 
 describe('mapApiToImovel', () => {
-  test('normaliza a inscrição imobiliária removendo formatação', () => {
-    const imovel = mapApiToImovel({ inscricaoImobiliaria: '0.123.456-7' })
-
-    expect(imovel.inscricao).toBe('01234567')
-  })
-
-  test('mapeia os campos de exibição', () => {
+  test('mapeia a resposta real da API para o tipo de visão', () => {
     const imovel = mapApiToImovel({
-      inscricaoImobiliaria: '05217663',
-      endereco: 'Rua Barata Ribeiro, 586 - A 501',
-      bairro: 'Copacabana',
-      proprietario: 'Bruno Rocha Menezes',
-      possuiDebitos: true,
-      cadastradoEm: '2026-08-04T13:45:00-03:00',
+      id: 32,
+      cpf: '16232350731',
+      dataInclusao: '2026-06-22T15:40:46.477',
+      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+      numInscricao: '00000018',
     })
 
     expect(imovel).toEqual({
-      inscricao: '05217663',
-      endereco: 'Rua Barata Ribeiro, 586 - A 501',
-      bairro: 'Copacabana',
-      proprietario: 'Bruno Rocha Menezes',
-      possuiDebitos: true,
-      cadastradoEm: '2026-08-04',
+      id: 32,
+      inscricao: '00000018',
+      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+      bairro: null,
+      proprietario: null,
+      possuiDebitos: null,
+      cadastradoEm: '2026-06-22',
     })
   })
 
-  test('campos opcionais ausentes viram null sem quebrar', () => {
-    const imovel = mapApiToImovel({ inscricaoImobiliaria: '01234567890' })
+  // O CPF vem no corpo da resposta, mas identidade é sempre derivada do token —
+  // nada de CPF atravessa a fronteira para o tipo de visão (LGPD).
+  test('não propaga o CPF devolvido pela API', () => {
+    const imovel = mapApiToImovel({
+      numInscricao: '00000018',
+      cpf: '16232350731',
+    })
 
-    expect(imovel.endereco).toBeNull()
-    expect(imovel.bairro).toBeNull()
+    expect(Object.keys(imovel)).not.toContain('cpf')
+  })
+
+  test('normaliza a inscrição removendo máscara', () => {
+    expect(mapApiToImovel({ numInscricao: '0.521.766-3' }).inscricao).toBe(
+      '05217663'
+    )
+  })
+
+  // P19: `ImovelResponse` não tem proprietário. P12: `GET /imoveis` não consulta a
+  // Fazenda, então não há como saber se existe débito.
+  test('deixa proprietário e débitos indefinidos porque a API não os devolve', () => {
+    const imovel = mapApiToImovel({ numInscricao: '00000018' })
+
     expect(imovel.proprietario).toBeNull()
-    expect(imovel.cadastradoEm).toBeNull()
+    expect(imovel.possuiDebitos).toBeNull()
   })
 
-  test('assume que não há débitos quando a API omite a informação', () => {
-    const imovel = mapApiToImovel({ inscricaoImobiliaria: '01234567890' })
+  // O bairro vem embutido na string de endereço ("... - TIJUCA") e fatiar por " - " é
+  // frágil: endereço com hífen no nome quebraria. Fica null até haver decisão.
+  test('não tenta extrair o bairro do endereço', () => {
+    const imovel = mapApiToImovel({
+      numInscricao: '00000018',
+      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+    })
 
-    expect(imovel.possuiDebitos).toBe(false)
+    expect(imovel.bairro).toBeNull()
+  })
+
+  test('campos ausentes viram null sem quebrar', () => {
+    const imovel = mapApiToImovel({})
+
+    expect(imovel).toEqual({
+      id: null,
+      inscricao: '',
+      endereco: null,
+      bairro: null,
+      proprietario: null,
+      possuiDebitos: null,
+      cadastradoEm: null,
+    })
   })
 })
 
-describe('mapApiToDebito', () => {
-  test('mapeia uma CDA completa para o tipo de visão', () => {
-    const debito = mapApiToDebito({
-      numeroCda: '2023/0012345-6',
-      exercicio: 2023,
-      tributo: 'IPTU',
-      situacao: 'EM_ABERTO',
-      parcelavel: true,
-      dataVencimento: '2023-03-10',
-      valorPrincipal: 1250.35,
-      valorAtualizado: 1890.72,
-      dataReferenciaValor: '2026-08-04',
-    })
+describe('normalizarListaImoveis', () => {
+  // A API real devolve array cru; o spec do Quarkus tipa objeto singular, então o tipo
+  // gerado mente. O normalizador aceita as duas formas para a correção do spec não virar
+  // uma quebra em produção.
+  test('aceita o array cru que a API devolve', () => {
+    const lista = normalizarListaImoveis([
+      { id: 32, numInscricao: '00000018' },
+      { id: 33, numInscricao: '00000019' },
+    ])
 
-    expect(debito).toEqual({
-      numeroCda: '2023/0012345-6',
-      exercicio: 2023,
-      tributo: 'IPTU',
-      situacao: 'em_aberto',
-      parcelavel: true,
-      vencimento: '2023-03-10',
-      valorPrincipal: 1250.35,
-      valorAtualizado: 1890.72,
-      valorReferenciaEm: '2026-08-04',
-    })
+    expect(lista).toHaveLength(2)
+    expect(lista[0].id).toBe(32)
   })
 
-  test('traduz cada situação conhecida da API', () => {
-    const situacoes = [
-      ['EM_ABERTO', 'em_aberto'],
-      ['AJUIZADA', 'ajuizada'],
-      ['PARCELADA', 'parcelada'],
-      ['QUITADA', 'quitada'],
-      ['SUSPENSA', 'suspensa'],
-      ['CANCELADA', 'cancelada'],
-    ] as const
+  test('aceita um objeto único, como o spec declara hoje', () => {
+    expect(
+      normalizarListaImoveis({ id: 32, numInscricao: '00000018' })
+    ).toEqual([{ id: 32, numInscricao: '00000018' }])
+  })
 
-    for (const [api, esperado] of situacoes) {
-      expect(mapApiToDebito({ numeroCda: 'x', situacao: api }).situacao).toBe(
-        esperado
+  test('aceita o envelope { data: [...] } caso a API passe a usá-lo', () => {
+    const lista = normalizarListaImoveis({
+      data: [{ id: 32, numInscricao: '00000018' }],
+    })
+
+    expect(lista).toEqual([{ id: 32, numInscricao: '00000018' }])
+  })
+
+  test('devolve lista vazia para ausente, nulo ou tipo inesperado', () => {
+    expect(normalizarListaImoveis(undefined)).toEqual([])
+    expect(normalizarListaImoveis(null)).toEqual([])
+    expect(normalizarListaImoveis('erro')).toEqual([])
+  })
+})
+
+describe('mapApiToMensagemErro', () => {
+  // P10 revista com a API real: envelope é `{ error: string }` sem `code`, e a
+  // exibibilidade depende do status. Em 400 a mensagem é de negócio, em português.
+  test('exibe a mensagem de negócio de um 400', () => {
+    expect(
+      mapApiToMensagemErro(
+        { error: 'Este imovel ja esta cadastrado para o usuario.' },
+        400
       )
-    }
+    ).toBe('Este imovel ja esta cadastrado para o usuario.')
   })
 
-  test('situação desconhecida cai em fallback em vez de vazar o valor cru', () => {
-    const debito = mapApiToDebito({
-      numeroCda: '2023/0012345-6',
-      situacao: 'INSCRITA_EM_2A_INSTANCIA' as never,
-    })
-
-    expect(debito.situacao).toBe('desconhecida')
+  test('não exibe o texto técnico de um 401', () => {
+    expect(
+      mapApiToMensagemErro({ error: 'HTTP 401 Unauthorized' }, 401)
+    ).toBeNull()
   })
 
-  test('situação ausente cai em fallback', () => {
-    expect(mapApiToDebito({ numeroCda: 'x' }).situacao).toBe('desconhecida')
+  // O 502 vaza nome de sistema interno ("WS Fazenda IPTU") — nunca vai para a tela.
+  test('não exibe a mensagem de um 502, que vaza sistema interno', () => {
+    expect(
+      mapApiToMensagemErro(
+        { error: 'Falha ao consultar imovel no WS Fazenda IPTU.' },
+        502
+      )
+    ).toBeNull()
   })
 
-  test('não oferece parcelamento quando a API omite a elegibilidade', () => {
-    expect(mapApiToDebito({ numeroCda: 'x' }).parcelavel).toBe(false)
+  test('devolve null quando o 404 vem sem corpo', () => {
+    expect(mapApiToMensagemErro(undefined, 404)).toBeNull()
   })
 
-  test('aceita valores monetários em string, como o legado pode devolver', () => {
-    const debito = mapApiToDebito({
-      numeroCda: 'x',
-      valorAtualizado: '1.890,72' as never,
-    })
-
-    expect(debito.valorAtualizado).toBe(1890.72)
-  })
-})
-
-describe('mapApiToListaDebitos', () => {
-  test('mapeia a lista e o total devolvidos pela API', () => {
-    const lista = mapApiToListaDebitos({
-      data: [{ numeroCda: 'a' }, { numeroCda: 'b' }],
-      valorTotalAtualizado: 3781.44,
-    })
-
-    expect(lista.debitos).toHaveLength(2)
-    expect(lista.valorTotalAtualizado).toBe(3781.44)
+  test('devolve null para corpo sem a chave error', () => {
+    expect(mapApiToMensagemErro({ mensagem: 'outra forma' }, 400)).toBeNull()
   })
 
-  test('resposta sem dados vira lista vazia em vez de undefined', () => {
-    const lista = mapApiToListaDebitos({})
-
-    expect(lista.debitos).toEqual([])
-    expect(lista.valorTotalAtualizado).toBeNull()
-  })
-})
-
-describe('mapApiToSimulacao', () => {
-  test('mapeia as condições de parcelamento', () => {
-    const simulacao = mapApiToSimulacao({
-      inscricaoImobiliaria: '01234567890',
-      validaAte: '2026-08-04T23:59:59-03:00',
-      condicoes: [
-        {
-          quantidadeParcelas: 12,
-          valorEntrada: 300,
-          valorParcela: 145.89,
-          valorTotal: 2050.68,
-          percentualDesconto: 0,
-          vencimentoPrimeiraParcela: '2026-09-10',
-        },
-      ],
-    })
-
-    expect(simulacao.inscricao).toBe('01234567890')
-    expect(simulacao.condicoes).toHaveLength(1)
-    expect(simulacao.condicoes[0].quantidadeParcelas).toBe(12)
-    expect(simulacao.condicoes[0].valorParcela).toBe(145.89)
-    expect(simulacao.condicoes[0].percentualDesconto).toBe(0)
-  })
-
-  test('simulação sem condições vira lista vazia', () => {
-    expect(mapApiToSimulacao({}).condicoes).toEqual([])
-  })
-})
-
-describe('mapApiToRequerimento', () => {
-  test('mapeia um requerimento completo', () => {
-    const requerimento = mapApiToRequerimento({
-      protocolo: '2026000123456',
-      situacao: 'EM_ANALISE',
-      inscricaoImobiliaria: '01234567890',
-      quantidadeParcelas: 12,
-      valorTotal: 2050.68,
-      abertoEm: '2026-08-04T13:45:00-03:00',
-      atualizadoEm: '2026-08-05T09:12:00-03:00',
-    })
-
-    expect(requerimento).toEqual({
-      protocolo: '2026000123456',
-      situacao: 'em_analise',
-      inscricao: '01234567890',
-      quantidadeParcelas: 12,
-      valorTotal: 2050.68,
-      abertoEm: '2026-08-04',
-      atualizadoEm: '2026-08-05',
-      motivoIndeferimento: null,
-    })
-  })
-
-  test('traduz cada situação conhecida de requerimento', () => {
-    const situacoes = [
-      ['EM_ANALISE', 'em_analise'],
-      ['AGUARDANDO_DOCUMENTACAO', 'aguardando_documentacao'],
-      ['DEFERIDO', 'deferido'],
-      ['INDEFERIDO', 'indeferido'],
-      ['CANCELADO', 'cancelado'],
-    ] as const
-
-    for (const [api, esperado] of situacoes) {
-      expect(
-        mapApiToRequerimento({ protocolo: 'x', situacao: api }).situacao
-      ).toBe(esperado)
-    }
-  })
-
-  test('situação desconhecida cai em fallback', () => {
-    const requerimento = mapApiToRequerimento({
-      protocolo: 'x',
-      situacao: 'EM_EXIGENCIA' as never,
-    })
-
-    expect(requerimento.situacao).toBe('desconhecida')
-  })
-
-  test('preserva o motivo de indeferimento devolvido pela API', () => {
-    const requerimento = mapApiToRequerimento({
-      protocolo: 'x',
-      situacao: 'INDEFERIDO',
-      motivoIndeferimento: 'Documentação incompleta.',
-    })
-
-    expect(requerimento.motivoIndeferimento).toBe('Documentação incompleta.')
+  test('devolve null para error vazio', () => {
+    expect(mapApiToMensagemErro({ error: '' }, 400)).toBeNull()
   })
 })

@@ -5,9 +5,10 @@
  * UI conhecem apenas estes tipos; o que vem de `src/http-divida-ativa/` só é visto pelo DAL,
  * pelas Server Actions e por `src/lib/divida-ativa-mappers.ts`.
  *
- * O contrato da API ainda é provisório (ver `docs/divida-ativa.md`). Quando o contrato oficial
- * chegar, a correção deve se concentrar nos mappers — se precisar mudar um destes tipos, a
- * mudança é de produto, não de integração.
+ * O contrato real (`api-imoveis`) substituiu o provisório em 17/08/2026. `ImovelDividaAtiva`
+ * já reflete a API real; os tipos de Fase 3 abaixo **ainda não**, porque a API não liga
+ * schema de resposta às operações de dívida ativa e as premissas P7/P8 seguem abertas.
+ * Eles ficam aqui como vocabulário de produto para a Fase 3 — não há mapper para eles hoje.
  */
 
 export type SituacaoDebito =
@@ -28,13 +29,31 @@ export type SituacaoRequerimento =
   | 'desconhecida'
 
 export interface ImovelDividaAtiva {
+  /**
+   * Id do cadastro local do imóvel (`dbo.tbNC_Imovel`). É por ele que a exclusão
+   * acontece — a API não remove pela inscrição. `null` quando a API o omite, e nesse
+   * caso o imóvel não pode ser excluído.
+   */
+  id: number | null
   /** Inscrição imobiliária somente com dígitos. A máscara de exibição é decisão de design. */
   inscricao: string
   endereco: string | null
+  /**
+   * A API não separa o bairro: ele vem dentro de `endereco`. Sempre `null` hoje —
+   * ver premissa P22 em `docs/divida-ativa.md`.
+   */
   bairro: string | null
-  /** Nome como consta no sistema fiscal. Exibido na lista e na confirmação do cadastro. */
+  /**
+   * Nome como consta no sistema fiscal. Sempre `null` hoje: `ImovelResponse` não traz
+   * proprietário (premissa P19, divergente).
+   */
   proprietario: string | null
-  possuiDebitos: boolean
+  /**
+   * `null` significa "não sabemos". `GET /imoveis` lê só o banco local e não consulta a
+   * Fazenda nem o ePortal, então não há indicador de débito na lista (premissa P12,
+   * divergente). Nunca inferir `false` como "não tem débito".
+   */
+  possuiDebitos: boolean | null
   /** Data ISO (YYYY-MM-DD) em que o cidadão cadastrou o imóvel. */
   cadastradoEm: string | null
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { postImovel } from '@/http-divida-ativa/imoveis/imoveis'
+import { postImoveis } from '@/http-divida-ativa/imoveis/imoveis'
 import {
   mapApiToImovel,
   mapApiToMensagemErro,
@@ -15,9 +15,13 @@ import { revalidatePath } from 'next/cache'
 import type { ResultadoAcaoDividaAtiva } from './resultado'
 
 /**
- * Cadastra o imóvel no portal — é o "Confirmar" da tela de confirmação, e **só ele grava**.
- * A consulta que preenche aquela tela é uma leitura à parte (`getDalDividaAtivaConsultaInscricao`);
- * no portal legado os dois passos eram um só.
+ * Cadastra o imóvel no portal.
+ *
+ * ⚠️ **Este endpoint consulta e grava no mesmo passo.** `POST /imoveis` chama o
+ * `WSFazenda_Iptu` para descobrir o endereço da inscrição e grava o registro local — não
+ * existe um modo "só consultar". É o comportamento do portal legado, e é a razão pela
+ * qual a premissa P20 está em aberto: a tela "Confirme sua inscrição" pressupunha uma
+ * consulta prévia que a API não oferece. Ver `docs/divida-ativa.md`.
  *
  * O vínculo com o cidadão é feito pela API a partir do Bearer token: nada de CPF no corpo.
  */
@@ -38,15 +42,15 @@ export async function adicionarImovel(
     }
   }
 
-  const response = await postImovel({
-    inscricaoImobiliaria: somenteDigitos(inscricao),
+  const response = await postImoveis({
+    numInscricao: somenteDigitos(inscricao),
   })
 
   if (response.status !== 201) {
     return {
       success: false,
       error:
-        mapApiToMensagemErro(response.data) ??
+        mapApiToMensagemErro(response.data, response.status) ??
         'Não foi possível adicionar o imóvel. Tente novamente mais tarde.',
       status: response.status,
     }

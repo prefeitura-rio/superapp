@@ -11,21 +11,25 @@ const DIVIDA_ATIVA = TEST_ENV.BASE_API_URL_DIVIDA_ATIVA
 const CPF = '12345678901'
 
 describe('getDalDividaAtivaImoveis', () => {
-  test('devolve os imóveis do cidadão já na linguagem do produto', async () => {
+  /**
+   * A trava mais importante deste arquivo. A API devolve **array cru** e o spec do Quarkus
+   * tipa objeto singular; o DAL fazia `result.data?.data`, que num array resolve para
+   * `undefined` e cairia no `[]` — o cidadão com imóvel veria "nenhum imóvel cadastrado",
+   * sem erro nem log. Se alguém reintroduzir o acesso ao envelope, este teste cai.
+   */
+  test('devolve os imóveis do cidadão a partir do array cru da API', async () => {
     server.use(
-      http.get(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
+      http.get(`${DIVIDA_ATIVA}/imoveis`, () =>
         HttpResponse.json(
-          {
-            data: [
-              {
-                inscricaoImobiliaria: '05217663',
-                endereco: 'Rua Barata Ribeiro, 586 - A 501',
-                bairro: 'Copacabana',
-                proprietario: 'Bruno Rocha Menezes',
-                possuiDebitos: true,
-              },
-            ],
-          },
+          [
+            {
+              id: 32,
+              cpf: '16232350731',
+              dataInclusao: '2026-06-22T15:40:46.477',
+              endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+              numInscricao: '00000018',
+            },
+          ],
           { status: 200 }
         )
       )
@@ -35,20 +39,32 @@ describe('getDalDividaAtivaImoveis', () => {
 
     expect(imoveis).toEqual([
       {
-        inscricao: '05217663',
-        endereco: 'Rua Barata Ribeiro, 586 - A 501',
-        bairro: 'Copacabana',
-        proprietario: 'Bruno Rocha Menezes',
-        possuiDebitos: true,
-        cadastradoEm: null,
+        id: 32,
+        inscricao: '00000018',
+        endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+        bairro: null,
+        proprietario: null,
+        possuiDebitos: null,
+        cadastradoEm: '2026-06-22',
       },
     ])
   })
 
   test('devolve lista vazia quando o cidadão não tem imóvel cadastrado', async () => {
     server.use(
-      http.get(`${DIVIDA_ATIVA}/v1/imoveis`, () =>
-        HttpResponse.json({ data: [] }, { status: 200 })
+      http.get(`${DIVIDA_ATIVA}/imoveis`, () =>
+        HttpResponse.json([], { status: 200 })
+      )
+    )
+
+    await expect(getDalDividaAtivaImoveis(CPF)).resolves.toEqual([])
+  })
+
+  // A landing não pode cair por causa do contador de imóveis.
+  test('devolve lista vazia quando a API falha, em vez de propagar o erro', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis`, () =>
+        HttpResponse.json({ error: 'HTTP 401 Unauthorized' }, { status: 401 })
       )
     )
 
@@ -59,9 +75,9 @@ describe('getDalDividaAtivaImoveis', () => {
     let chamadas = 0
 
     server.use(
-      http.get(`${DIVIDA_ATIVA}/v1/imoveis`, () => {
+      http.get(`${DIVIDA_ATIVA}/imoveis`, () => {
         chamadas += 1
-        return HttpResponse.json({ data: [] }, { status: 200 })
+        return HttpResponse.json([], { status: 200 })
       })
     )
 
@@ -72,46 +88,64 @@ describe('getDalDividaAtivaImoveis', () => {
   })
 })
 
+/**
+ * ⚠️ Este endpoint consulta um imóvel **já cadastrado** — não é a consulta prévia que a
+ * tela "Confirme sua inscrição" precisaria. A premissa P20 está em aberto por causa disso;
+ * ver `docs/divida-ativa.md`. Os testes abaixo cobrem o comportamento real da API, não o
+ * comportamento que o desenho pressupõe.
+ */
 describe('getDalDividaAtivaConsultaInscricao', () => {
   beforeEach(() => {
     server.use(
-      http.get(
-        `${DIVIDA_ATIVA}/v1/imoveis/consulta/:inscricao`,
-        ({ params }) =>
-          params.inscricao === '05217663'
-            ? HttpResponse.json(
-                {
-                  inscricaoImobiliaria: '05217663',
-                  endereco: 'Rua Barata Ribeiro, 586 - A 501',
-                  bairro: 'Copacabana',
-                  proprietario: 'Bruno Rocha Menezes',
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/consulta`, ({ params }) =>
+        params.inscricao === '00000018'
+          ? HttpResponse.json(
+              {
+                imovel: {
+                  id: 32,
+                  dataInclusao: '2026-06-22T15:40:46.477',
+                  endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+                  numInscricao: '00000018',
                 },
-                { status: 200 }
-              )
-            : HttpResponse.json(
-                { errors: [{ code: 'NAO_ENCONTRADO', message: 'não existe' }] },
-                { status: 404 }
-              )
+                opcoes: [],
+              },
+              { status: 200 }
+            )
+          : // A API real devolve 404 com corpo vazio para inscrição não cadastrada.
+            new HttpResponse(null, { status: 404 })
       )
     )
   })
 
-  test('consulta a inscrição no sistema fiscal sem cadastrar nada', async () => {
-    const imovel = await getDalDividaAtivaConsultaInscricao('05217663', CPF)
+  test('devolve o imóvel cadastrado na linguagem do produto', async () => {
+    const imovel = await getDalDividaAtivaConsultaInscricao('00000018', CPF)
 
-    expect(imovel?.endereco).toBe('Rua Barata Ribeiro, 586 - A 501')
-    expect(imovel?.proprietario).toBe('Bruno Rocha Menezes')
+    expect(imovel?.id).toBe(32)
+    expect(imovel?.endereco).toBe('RUA SANTO AFONSO, 216 / LOJA A - TIJUCA')
   })
 
-  test('devolve null quando a inscrição não existe, sem lançar', async () => {
+  test('devolve null quando a inscrição não está cadastrada, sem lançar', async () => {
     await expect(
       getDalDividaAtivaConsultaInscricao('99999999', CPF)
     ).resolves.toBeNull()
   })
 
-  test('normaliza a máscara antes de consultar', async () => {
-    const imovel = await getDalDividaAtivaConsultaInscricao('0.521.766-3', CPF)
+  // A resposta é `{ imovel, opcoes }`: um 200 sem `imovel` não pode virar um objeto vazio.
+  test('devolve null quando o 200 vem sem o imóvel', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/consulta`, () =>
+        HttpResponse.json({ opcoes: [] }, { status: 200 })
+      )
+    )
 
-    expect(imovel?.inscricao).toBe('05217663')
+    await expect(
+      getDalDividaAtivaConsultaInscricao('00000018', CPF)
+    ).resolves.toBeNull()
+  })
+
+  test('normaliza a máscara antes de consultar', async () => {
+    const imovel = await getDalDividaAtivaConsultaInscricao('0.000.001-8', CPF)
+
+    expect(imovel?.inscricao).toBe('00000018')
   })
 })

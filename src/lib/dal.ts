@@ -12,8 +12,8 @@ import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import {
-  consultarInscricaoImobiliaria,
   getImoveis,
+  getImoveisInscricaoConsulta,
 } from '@/http-divida-ativa/imoveis/imoveis'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
@@ -22,7 +22,10 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
-import { mapApiToImovel } from '@/lib/divida-ativa-mappers'
+import {
+  mapApiToImovel,
+  normalizarListaImoveis,
+} from '@/lib/divida-ativa-mappers'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
@@ -513,8 +516,12 @@ export async function getDalDividaAtivaImoveis(
 
     const result = await getImoveis({ cache: 'no-store' })
 
+    // `normalizarListaImoveis` em vez de `.map()` direto: a API devolve array cru, mas o
+    // spec tipa objeto singular, então o tipo gerado não corresponde à realidade.
     const imoveis =
-      result.status === 200 ? (result.data?.data ?? []).map(mapApiToImovel) : []
+      result.status === 200
+        ? normalizarListaImoveis(result.data).map(mapApiToImovel)
+        : []
 
     addSpanEvent('divida-ativa.imoveis.fetched', {
       'imoveis.count': imoveis.length,
@@ -525,9 +532,23 @@ export async function getDalDividaAtivaImoveis(
 }
 
 /**
- * Consulta uma inscrição no sistema fiscal **sem cadastrar** — é o passo que alimenta a tela
- * "Confirme sua inscrição imobiliária". Devolve `null` quando a inscrição não existe, para a
- * tela mostrar um estado em vez de estourar o error boundary da rota.
+ * Consulta um imóvel **já cadastrado** do cidadão.
+ *
+ * ⚠️ **Não serve à tela "Confirme sua inscrição" e a premissa P20 está em aberto por
+ * causa disso.** O contrato provisório supunha dois endpoints — um que consultasse a
+ * Fazenda sem gravar e outro que gravasse. A API real não tem o primeiro:
+ * `GET /imoveis/{inscricao}/consulta` exige que o imóvel já esteja cadastrado (404 se
+ * não estiver) e a própria descrição diz que não chama o `WSFazenda_Iptu`. Quem busca
+ * endereço na Fazenda é o `POST /imoveis`, que consulta e grava no mesmo passo, como o
+ * portal legado.
+ *
+ * Consequência: `/divida-ativa/imoveis/novo/confirmar` **não funciona** para um imóvel
+ * novo — vai sempre cair no estado de "não encontrado". A rota fica assim, atrás da
+ * feature flag, até a decisão de produto sobre a P20. Não conserte isto aqui: o conserto
+ * é escolher entre pedir um modo de consulta ao Vladimir, inverter a tela ou removê-la.
+ *
+ * Devolve `null` quando a inscrição não está cadastrada, para a tela mostrar um estado em
+ * vez de estourar o error boundary da rota.
  */
 export async function getDalDividaAtivaConsultaInscricao(
   inscricao: string,
@@ -537,8 +558,10 @@ export async function getDalDividaAtivaConsultaInscricao(
     span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
     span.setAttribute('cache.strategy', 'no-store')
 
-    const result = await consultarInscricaoImobiliaria(
+    // O segundo parâmetro é o `exercicio` da query string, que não usamos aqui.
+    const result = await getImoveisInscricaoConsulta(
       somenteDigitos(inscricao),
+      undefined,
       { cache: 'no-store' }
     )
 
@@ -546,6 +569,8 @@ export async function getDalDividaAtivaConsultaInscricao(
       'consulta.status': result.status,
     })
 
-    return result.status === 200 ? mapApiToImovel(result.data) : null
+    if (result.status !== 200 || !result.data?.imovel) return null
+
+    return mapApiToImovel(result.data.imovel)
   })
 }

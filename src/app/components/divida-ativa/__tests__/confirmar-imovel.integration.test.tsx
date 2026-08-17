@@ -27,12 +27,16 @@ vi.mock('react-hot-toast', () => ({
   },
 }))
 
+// O componente continua sabendo exibir bairro e proprietário, então a fixture mantém os
+// dois para cobrir esse caminho. A API real não os devolve hoje (P22 e P19) — o que a
+// lista faz sem eles está coberto em `imoveis-lista.integration.test.tsx`.
 const IMOVEL: ImovelDividaAtiva = {
+  id: 32,
   inscricao: '05217663',
   endereco: 'Rua Barata Ribeiro, 586 - A 501',
   bairro: 'Copacabana',
   proprietario: 'Bruno Rocha Menezes',
-  possuiDebitos: false,
+  possuiDebitos: null,
   cadastradoEm: null,
 }
 

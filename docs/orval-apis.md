@@ -230,9 +230,14 @@
 * Spec local: `./divida-ativa-api.yaml` (raiz do repo)
 * Documentação do módulo: [`divida-ativa.md`](./divida-ativa.md)
 
-> ⚠️ Contrato **provisório**, escrito pelo time de front para permitir desenvolvimento em
-> paralelo ao back-end. Não foi ratificado pela equipe da API (Quarkus). As premissas estão
-> registradas em `docs/divida-ativa.md` e serão reconciliadas na fase de integração.
+> Contrato **real** (`api-imoveis`, Quarkus), cópia fiel do documento servido em
+> `http://10.5.225.173:8080/swagger`. Substituiu o contrato provisório em 17/08/2026; as
+> premissas estão reconciliadas em `docs/divida-ativa.md`. Não editar o arquivo à mão — ele é
+> de outra equipe. Quando a API virar repo no GitHub, migrar o `input` para a URL.
+>
+> Cuidados conhecidos do spec: 25 das 31 operações não declaram schema de resposta (o Orval
+> gera `data: void`), nenhuma tem `operationId` (os nomes das funções saem do path) e
+> `GET /imoveis` está tipado como objeto singular quando devolve array.
 
 ```
   api: {

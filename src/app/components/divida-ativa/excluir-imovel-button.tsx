@@ -8,7 +8,8 @@ import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
 
 interface ExcluirImovelButtonProps {
-  inscricao: string
+  /** Id local do cadastro. A API remove por ele, não pela inscrição imobiliária. */
+  id: number
   /** Como o imóvel aparece na lista — endereço, ou a inscrição mascarada se não houver. */
   descricao: string
 }
@@ -18,7 +19,7 @@ interface ExcluirImovelButtonProps {
  * e só o botão de lá chama a Server Action.
  */
 export function ExcluirImovelButton({
-  inscricao,
+  id,
   descricao,
 }: ExcluirImovelButtonProps) {
   const [aberto, setAberto] = useState(false)
@@ -26,7 +27,7 @@ export function ExcluirImovelButton({
 
   function confirmarExclusao() {
     startTransition(async () => {
-      const resultado = await excluirImovel(inscricao)
+      const resultado = await excluirImovel(id)
 
       if (!resultado.success) {
         toast.error(resultado.error)

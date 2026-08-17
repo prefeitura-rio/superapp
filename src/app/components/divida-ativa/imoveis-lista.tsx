@@ -17,7 +17,7 @@ export function ImoveisLista({ imoveis }: ImoveisListaProps) {
     <div className="flex flex-col gap-2">
       <ul className="flex flex-col gap-2">
         {imoveis.map(imovel => (
-          <li key={imovel.inscricao}>
+          <li key={imovel.id ?? imovel.inscricao}>
             <ImovelCard imovel={imovel} />
           </li>
         ))}
@@ -59,7 +59,11 @@ function ImovelCard({ imovel }: { imovel: ImovelDividaAtiva }) {
         )}
       </div>
 
-      <ExcluirImovelButton inscricao={imovel.inscricao} descricao={descricao} />
+      {/* Sem id local não há como pedir a exclusão à API — a lixeira não aparece em vez
+          de aparecer e falhar. A API sempre devolve o id; isto é rede de segurança. */}
+      {imovel.id !== null && (
+        <ExcluirImovelButton id={imovel.id} descricao={descricao} />
+      )}
     </article>
   )
 }
