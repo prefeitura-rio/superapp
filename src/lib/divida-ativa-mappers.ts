@@ -138,6 +138,45 @@ export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {
 }
 
 /**
+ * Copy própria para as mensagens de negócio que conhecemos.
+ *
+ * A API devolve texto em tom de sistema e **sem acento** ("Este imovel ja esta cadastrado
+ * para o usuario."). Exibir isso cru numa tela oficial parece defeito, então os casos
+ * conhecidos ganham a copy do produto e o resto cai no texto da API — que ainda é melhor
+ * que uma mensagem genérica.
+ *
+ * A comparação é feita sobre a forma normalizada (sem acento, minúscula, pontuação
+ * colapsada), o que torna o casamento imune a duas mudanças prováveis do lado da API:
+ * acentuar as mensagens e mexer na pontuação.
+ *
+ * ⚠️ Casar por texto é frágil por natureza — uma reescrita da frase do lado dele passa
+ * despercebida. A solução de verdade é um campo `code` no envelope, pedido em aberto com o
+ * Vladimir; quando existir, troque a chave desta tabela pelo código.
+ */
+const COPY_POR_MENSAGEM_API: ReadonlyArray<{
+  readonly quando: string
+  readonly exibir: string
+}> = [
+  {
+    quando: 'este imovel ja esta cadastrado para o usuario',
+    exibir: 'Este imóvel já está na sua lista.',
+  },
+]
+
+function normalizarMensagem(valor: string): string {
+  return (
+    valor
+      .normalize('NFD')
+      // `\p{Mn}` (Mark, nonspacing) é o conjunto dos acentos que o NFD separa da letra.
+      // Escrever isso como classe de caracteres dispara `noMisleadingCharacterClass`.
+      .replace(/\p{Mn}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+  )
+}
+
+/**
  * Mensagem de erro **exibível ao cidadão**, extraída do envelope da API.
  *
  * A API devolve `{ error: string }` sem campo `code`, e a exibibilidade depende do
@@ -153,6 +192,9 @@ export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {
  * Sem `code`, o status é o único discriminador disponível, então só o 400 passa. Devolve
  * `null` em todo o resto — quem chama escolhe a copy, em vez de a tela mostrar texto
  * técnico ao cidadão. Ver premissa P10 em `docs/divida-ativa.md`.
+ *
+ * Passando no filtro do 400, a mensagem conhecida é trocada pela copy do produto
+ * (`COPY_POR_MENSAGEM_API`); a desconhecida sai como a API mandou.
  */
 export function mapApiToMensagemErro(
   data: unknown,
@@ -164,5 +206,12 @@ export function mapApiToMensagemErro(
 
   const mensagem = (data as { error?: unknown }).error
 
-  return typeof mensagem === 'string' && mensagem !== '' ? mensagem : null
+  if (typeof mensagem !== 'string' || mensagem === '') return null
+
+  const normalizada = normalizarMensagem(mensagem)
+  const conhecida = COPY_POR_MENSAGEM_API.find(
+    item => item.quando === normalizada
+  )
+
+  return conhecida ? conhecida.exibir : mensagem
 }

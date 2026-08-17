@@ -30,14 +30,16 @@ acompanhamento de requerimentos.
 
 - [Visão geral](#visão-geral)
 - [A landing e a fronteira do escopo](#a-landing-e-a-fronteira-do-escopo)
+- [Decisões de design fechadas](#decisões-de-design-fechadas-17082026)
 - [Feature flag](#feature-flag)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Estrutura de arquivos](#estrutura-de-arquivos)
-- [Contrato provisório](#contrato-provisório)
+- [Contrato real (`api-imoveis`)](#contrato-real-api-imoveis)
 - [Tabela de premissas do contrato](#tabela-de-premissas-do-contrato)
 - [Camada de mapeamento](#camada-de-mapeamento)
 - [Desenvolvendo sem a API](#desenvolvendo-sem-a-api)
 - [Regenerar o client](#regenerar-o-client)
+- [A integração — o que foi feito e o que ficou](#a-integração--o-que-foi-feito-e-o-que-ficou)
 
 ## Visão geral
 
@@ -129,9 +131,43 @@ não conhece todas as regras de negócio. Duas divergências conhecidas:
   - O campo da inscrição aparece no Figma em duas variantes (campo aberto e dígitos separados
     estilo OTP). Como a inscrição pode ter **7 ou 8** dígitos, o formato de posições fixas foi
     descartado: é campo aberto com máscara aplicada a cada tecla.
-- **A consulta aceita três identificadores**, mas o contrato provisório só modela a inscrição
-  imobiliária. Consulta por nº de CDA e por nº de execução fiscal precisam entrar no contrato
-  antes da Fase 3 (Marco 3 — 23/10) — está registrado como premissa P18.
+- **A consulta aceita três identificadores.** O contrato real cobre os três (e mais um, nº de
+  guia de pagamento), mas exige a inscrição no path — então quem chega só com a carta de
+  cobrança continua sem porta de entrada. Ver premissa P18.
+
+### Decisões de design fechadas (17/08/2026)
+
+Tomadas na reconciliação do contrato, depois de ver o que a API real devolve. As que dependiam
+de padrão do repositório foram resolvidas olhando o repositório, não opinando.
+
+| # | Assunto | Decisão | Onde vale |
+|---|---|---|---|
+| D1 | Estado de carregamento | Usar o padrão do repo: `loading.tsx` + `Skeleton` fiel ao layout (53 arquivos usam). **Já aplicado** em todas as rotas do módulo | feito |
+| D2 | Mensagens de erro da API | Mapear os casos conhecidos para copy do produto; os desconhecidos saem como a API mandou. Ver `COPY_POR_MENSAGEM_API` | feito |
+| D3 | Falha de mutação | `toast.error`, que é o padrão inequívoco do repo (28 arquivos; o formulário canônico `atualizar-endereco` faz exatamente isso). Sem tela dedicada | feito |
+| D4 | Desconto | Exibir valor absoluto em reais — a API não tem percentual (P6) | Fase 3 |
+| D5 | Honorários | **Exibir principal e honorários separados**, para o cidadão identificar o que é o quê. **Não há escolha a fazer:** o parcelamento seleciona só `cdas` | Fase 3 |
+| D6 | Escolha da data de vencimento | O Figma **tem** a tela (lista de datas, seleção única, "Continuar"). Casa com `dataVencimento` único | Fase 3 |
+| D7 | Máscara da inscrição | Exibir como a API devolve — 8 dígitos, com o zero à esquerda que o carnê não tem | feito |
+| D8 | Validação de formato | Manter fechado em 7–8 dígitos no front, para evitar chamada à toa. A API aceita menos, mas não vamos acompanhar | feito |
+| D9 | Requerimento já aberto | **Quem decide é o DAM.** Se `selecionavelParcelamento` vier `true`, permitir — mesmo havendo protocolo aberto. Exibir o número e um link para o acompanhamento, **sem bloquear** | Fase 3 |
+
+**D5 em detalhe — por que não há escolha.** O array separado `honorarios` existe apenas no
+`GuiaOperacaoRequest`, que serve guia à vista, liquidação e regularização — os fluxos que a
+diretoria retirou do escopo. `ParcelamentoSimularRequest` e `RequerimentoParcelamentoRequest`
+recebem **só `cdas`**. A confirmação mais limpa está no próprio `CdaResponse`: as flags de
+elegibilidade vêm em par para os fluxos fora do escopo (`habilitadaAvistaPrincipal` /
+`habilitadaAvistaHonorarios`), mas a do parcelamento é única — `selecionavelParcelamento`, sem
+contraparte para honorários. O cidadão escolhe a CDA e leva principal e honorários juntos; a
+quebra (`saldoPrincipal`, `descontoPrincipal`, `saldoHonorarios`, `descontoHonorarios`, que a
+simulação devolve por CDA) é **exibição**, não seleção.
+
+**D9 em detalhe — o front não inventa bloqueio.** São dois campos com papéis distintos:
+`selecionavelParcelamento` diz **se pode**; `protocoloRequerimentoAberto` diz **por que não** e
+**para onde ir**. A decisão do time é não derivar um do outro: se o DAM disser que pode, pode —
+ainda que exista protocolo aberto. Um protocolo preenchido rende informação e um caminho para o
+acompanhamento, nunca um impedimento inventado aqui. É a regra de ouro nº 9 do plano aplicada:
+elegibilidade e vínculo requerimento×CPF são regra de negócio da API.
 
 ## Feature flag
 
@@ -200,7 +236,7 @@ exercitam o mutator.
 ## Estrutura de arquivos
 
 ```
-divida-ativa-api.yaml                 # contrato provisório (raiz)
+divida-ativa-api.yaml                 # contrato real da api-imoveis (raiz) — cópia fiel
 custom-fetch-divida-ativa.ts          # mutator do Orval (raiz)
 src/app/(app)/(logged-in)/divida-ativa/   # rotas — fora de /servicos/*, exigem login
 src/app/components/divida-ativa/      # componentes do módulo

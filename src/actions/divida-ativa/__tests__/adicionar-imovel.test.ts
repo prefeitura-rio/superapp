@@ -58,8 +58,9 @@ describe('adicionarImovel', () => {
     })
   })
 
-  // Mensagem real da API, verificada em 17/08/2026. Vem em 400 e é exibível.
-  test('exibe a mensagem da API quando o imóvel já está cadastrado (400)', async () => {
+  // Mensagem real da API, verificada em 17/08/2026: vem em 400, sem acento e em tom de
+  // sistema. A tela mostra a copy do produto no lugar.
+  test('mostra a copy do produto quando o imóvel já está cadastrado (400)', async () => {
     server.use(
       http.post(`${DIVIDA_ATIVA}/imoveis`, () =>
         HttpResponse.json(
@@ -73,7 +74,7 @@ describe('adicionarImovel', () => {
 
     expect(resultado).toEqual({
       success: false,
-      error: 'Este imovel ja esta cadastrado para o usuario.',
+      error: 'Este imóvel já está na sua lista.',
       status: 400,
     })
   })

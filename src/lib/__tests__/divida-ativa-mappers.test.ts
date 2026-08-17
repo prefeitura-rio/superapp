@@ -172,13 +172,36 @@ describe('normalizarListaImoveis', () => {
 describe('mapApiToMensagemErro', () => {
   // P10 revista com a API real: envelope é `{ error: string }` sem `code`, e a
   // exibibilidade depende do status. Em 400 a mensagem é de negócio, em português.
-  test('exibe a mensagem de negócio de um 400', () => {
+  // Caso conhecido: a API manda em tom de sistema e sem acento; a tela mostra a copy do
+  // produto.
+  test('troca a mensagem conhecida pela copy do produto', () => {
     expect(
       mapApiToMensagemErro(
         { error: 'Este imovel ja esta cadastrado para o usuario.' },
         400
       )
-    ).toBe('Este imovel ja esta cadastrado para o usuario.')
+    ).toBe('Este imóvel já está na sua lista.')
+  })
+
+  // O casamento é feito sobre a forma normalizada, então continua valendo se o Vladimir
+  // acentuar as mensagens ou mexer na pontuação.
+  test('reconhece a mensagem conhecida mesmo acentuada ou repontuada', () => {
+    expect(
+      mapApiToMensagemErro(
+        { error: 'Este imóvel já está cadastrado para o usuário!' },
+        400
+      )
+    ).toBe('Este imóvel já está na sua lista.')
+  })
+
+  // Mensagem de negócio que ainda não mapeamos é melhor que uma genérica.
+  test('deixa passar a mensagem de negócio que ainda não tem copy própria', () => {
+    expect(
+      mapApiToMensagemErro(
+        { error: 'Informe ao menos uma CDA para simular o parcelamento.' },
+        400
+      )
+    ).toBe('Informe ao menos uma CDA para simular o parcelamento.')
   })
 
   test('não exibe o texto técnico de um 401', () => {
