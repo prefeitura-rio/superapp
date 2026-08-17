@@ -4,16 +4,15 @@ Módulo do portal do cidadão para os serviços de dívida ativa imobiliária qu
 portlets Liferay 6.2 da Prefeitura: cadastro de imóveis, parcelamento de débitos e
 acompanhamento de requerimentos.
 
-> **Estado atual: Fase 1 (fundação), parcialmente entregue.** Existem gating, contrato
-> provisório, client gerado, camada de mapeamento e a landing. **Faltam** as sub-rotas dos
-> serviços, as funções de leitura no `src/lib/dal.ts` e as Server Actions — e **não existe UI
-> de produto ainda**. As regras fiscais continuam nos sistemas corporativos (DAM/PGM); este
-> módulo é camada de apresentação sobre uma API de integração em Quarkus que está sendo
-> escrita fora deste repo.
+> **Estado atual: Fase 1 concluída e Fase 2 ("Meus Imóveis") entregue.** Existem gating,
+> contrato provisório, client gerado, camada de mapeamento, landing, DAL, Server Actions e o
+> cadastro de imóveis completo (lista, inclusão em três telas e exclusão). As regras fiscais
+> continuam nos sistemas corporativos (DAM/PGM); este módulo é camada de apresentação sobre
+> uma API de integração em Quarkus que está sendo escrita fora deste repo.
 >
-> Os dois links internos da landing (parcelamento e acompanhamento) apontam para rotas que
-> ainda não existem. Só é visível com a flag ligada, mas quem testar em homologação vai bater
-> em 404 até a Fase 3.
+> Parcelamento e acompanhamento (Fase 3) já têm rota, com um estado provisório explicando que
+> o serviço está sendo construído — a landing linka para eles desde o primeiro PR e um 404
+> seria pior do que uma explicação.
 
 ## Sumário
 
@@ -64,9 +63,12 @@ CPF sempre de `getUserInfoFromToken()`, nunca de parâmetro de rota ou query.
 
 ## A landing e a fronteira do escopo
 
-`/divida-ativa` não lê dado do cidadão — é só a porta de entrada (exige login como todo o
-resto do módulo). Ela lista **cinco** serviços, e essa diferença entre cinco e três é
-deliberada.
+`/divida-ativa` lê **uma** informação do cidadão: quantos imóveis ele cadastrou, para o
+contador do card "Meus imóveis". A leitura é feita pelo DAL com `no-store` e, se falhar, o
+card fica sem o número em vez de derrubar a página — a lista de serviços não pode cair por
+causa de um contador. Fora isso, a landing continua sendo só a porta de entrada.
+
+Ela lista **cinco** serviços, e essa diferença entre cinco e três é deliberada.
 
 > Nenhuma página deste repo é prerenderizada: o root layout lê `headers()` para o nonce da
 > CSP, então tudo é renderizado sob demanda. `export const dynamic = 'force-static'` seria
@@ -103,9 +105,18 @@ não conhece todas as regras de negócio. Duas divergências conhecidas:
   de entrada concorrente — é conveniência **dentro de um dos três modos**. Os outros dois
   modos (CDA e execução fiscal) não passam por "Meus Imóveis".
 
-  Consequência para o design: falta desenhar a lista de imóveis, a inclusão, a exclusão e o
-  seletor de imóvel salvo dentro do campo de inscrição imobiliária. Levantado com o time em
-  05/08/2026; **o Figma ainda não cobre** — é dependência de design aberta para a Fase 2.
+  **Resolvido em 17/08/2026:** o Figma novo cobre a lista, a inclusão em três telas e o aviso
+  de exclusão, e a landing ganhou o card "Meus imóveis" com contador. Continua **em aberto** o
+  seletor de imóvel salvo dentro do campo de inscrição imobiliária da tela de consulta — ele
+  pertence à Fase 3, junto com a própria tela de consulta.
+
+  Duas decisões do time sobre esse Figma, tomadas em 17/08/2026:
+
+  - O protótipo novo desenhou os itens de serviço **sem** o chevron que o desenho anterior
+    tinha. Tratado como esquecimento: o chevron foi mantido.
+  - O campo da inscrição aparece no Figma em duas variantes (campo aberto e dígitos separados
+    estilo OTP). Como a inscrição pode ter **7 ou 8** dígitos, o formato de posições fixas foi
+    descartado: é campo aberto com máscara aplicada a cada tecla.
 - **A consulta aceita três identificadores**, mas o contrato provisório só modela a inscrição
   imobiliária. Consulta por nº de CDA e por nº de execução fiscal precisam entrar no contrato
   antes da Fase 3 (Marco 3 — 23/10) — está registrado como premissa P18.
@@ -181,11 +192,37 @@ divida-ativa-api.yaml                 # contrato provisório (raiz)
 custom-fetch-divida-ativa.ts          # mutator do Orval (raiz)
 src/app/(app)/(logged-in)/divida-ativa/   # rotas — fora de /servicos/*, exigem login
 src/app/components/divida-ativa/      # componentes do módulo
+src/actions/divida-ativa/             # Server Actions (mutações)
 src/http-divida-ativa/                # GERADO pelo Orval — não editar à mão
 src/types/divida-ativa.ts             # tipos de visão (linguagem do produto)
 src/lib/divida-ativa-mappers.ts       # camada anti-corrupção
+src/lib/divida-ativa-utils.ts         # máscara e normalização da inscrição (client-safe)
+src/lib/dal.ts                        # leituras do módulo (no-store)
 src/middleware.ts                     # bloco de gating
 ```
+
+### Rotas
+
+| Rota | O que faz |
+|---|---|
+| `/divida-ativa` | Landing: card "Meus imóveis" com contador + cinco serviços |
+| `/divida-ativa/imoveis` | Lista dos imóveis do cidadão, com exclusão por imóvel |
+| `/divida-ativa/imoveis/novo` | Campo da inscrição imobiliária, com máscara |
+| `/divida-ativa/imoveis/novo/confirmar?inscricao=` | Consulta ao sistema fiscal e confirmação |
+| `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
+| `/divida-ativa/parcelamento` · `/acompanhamento` | Estado provisório até a Fase 3 |
+
+### O cadastro de um imóvel são três telas e duas chamadas
+
+A tela do campo **não** chama a API: ela valida o formato e leva os dígitos para a URL da
+confirmação. Quem consulta é o Server Component de `confirmar`, e quem grava é a Server Action
+disparada pelo botão "Confirmar". Essa separação é a premissa P20 — no legado, consultar já
+cadastrava.
+
+A inscrição trafega **somente com dígitos** em toda a pilha (URL, action e API). A máscara
+(`0.521.766-3`) é aplicada só na exibição, por `formatarInscricaoImobiliaria`. Abaixo de sete
+dígitos a função não mascara: como a inscrição pode ter 7 ou 8, não há como saber onde cai o
+verificador antes disso.
 
 ### A fronteira que precisa ser respeitada
 
@@ -207,7 +244,7 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado:
 
 | Tag | Operações |
 |---|---|
-| `imoveis` | `GET/POST /v1/imoveis`, `GET/DELETE /v1/imoveis/{inscricaoImobiliaria}` |
+| `imoveis` | `GET/POST /v1/imoveis`, `GET /v1/imoveis/consulta/{inscricaoImobiliaria}`, `GET/DELETE /v1/imoveis/{inscricaoImobiliaria}` |
 | `debitos` | `GET /v1/imoveis/{inscricaoImobiliaria}/debitos` |
 | `simulacao` | `POST /v1/parcelamentos/simulacoes` |
 | `requerimentos` | **abertura:** `POST /v1/requerimentos`, `POST /v1/requerimentos/documentos` |
@@ -265,6 +302,9 @@ proposital — uma situação nova no sistema fiscal não pode derrubar a págin
 | P15 | Upload de documentos | `POST /v1/requerimentos/documentos` devolve um `documentoId`, citado depois na criação do requerimento (upload em duas etapas) | Desacopla o envio do arquivo do envio do formulário e contorna o limite de 1 MB de Server Action | `fluxo` — **é a premissa mais frágil da tabela.** Não há precedente de upload neste repo e o mecanismo (limite de Server Action × route handler multipart × upload direto) ainda não foi decidido com Vladimir/Lucas |
 | P16 | Comprovante em PDF | `GET /v1/requerimentos/{protocolo}/comprovante` devolve `application/pdf` como blob | O mutator já trata `application/pdf` | `mapper` se vier como URL assinada em JSON |
 | P17 | Validade da simulação | `validaAte` é instante; passado ele, é preciso simular de novo | Valor fiscal muda com encargos diários | `mapper + tela` — a tela precisa de um estado "simulação expirada" |
+| P19 | `proprietario` no `Imovel` | A API devolve o nome do proprietário como consta no sistema fiscal | O design exibe o campo na lista de imóveis e na tela de confirmação do cadastro; o contrato original não tinha o campo | `mapper + tela` — sem ele, os dois cards perdem uma linha |
+| P20 | Consulta × cadastro | São **dois** endpoints: `GET /v1/imoveis/consulta/{inscricao}` só consulta o sistema fiscal e `POST /v1/imoveis` grava | No portal legado a consulta já gravava o imóvel automaticamente. A separação foi acordada com o Vladimir em 17/08/2026: a consulta responde à tela "Confirme sua inscrição" e o cadastro só acontece no "Confirmar" do cidadão | `fluxo` — se a API mantiver o comportamento do legado, o imóvel entra na lista antes de o cidadão confirmar, e a tela de confirmação perde o sentido |
+| P21 | Tamanho da inscrição imobiliária | 7 **ou** 8 dígitos, incluindo o verificador | Levantado pelo time em 17/08/2026 contra o legado; o contrato antes exemplificava 11 dígitos | `mapper` para o transporte; `mapper + tela` se o intervalo mudar, porque a máscara e a validação de formato do front assumem esse intervalo |
 | P18 | Identificador da consulta | O contrato só modela busca por **inscrição imobiliária** | O contrato foi escrito a partir do plano, antes de o design ser lido | `fluxo` — **lacuna conhecida, não é aposta.** O design pede também nº da CDA e nº da execução fiscal, e não existe endpoint que aceite nenhum dos dois. Precisa entrar no contrato antes da Fase 3 (Marco 3 — 23/10). Ver detalhamento abaixo |
 
 ### Premissas que exigem confirmação explícita
@@ -376,3 +416,41 @@ api: {
 `http-agent-api` — código gerado não segue as mesmas regras.
 
 **Nunca editar `src/http-divida-ativa/` à mão.**
+
+## Próximo passo — trocar o contrato provisório pelo real
+
+A API em Quarkus do Vladimir já roda na máquina dele, alcançável pela rede interna. A troca do
+contrato é o começo da fase de integração. O roteiro, na ordem:
+
+1. **Obter o documento OpenAPI.** Quarkus expõe em `/q/openapi` (YAML), `/q/openapi?format=json`
+   e o Swagger UI em `/q/swagger-ui`. Precisa do `http://<ip>:<porta>` da máquina dele.
+2. **Commitar como `divida-ativa-api.yaml`**, substituindo o provisório, e anotar no commit de
+   onde e quando veio. **Não** apontar o `input` do Orval direto para a máquina dele: o
+   precedente de URL neste repo (app-go-api, app-busca-search) são specs hospedadas no GitHub,
+   alcançáveis pelo CI e por qualquer dev. Um notebook não é isso. Quando a API dele virar repo
+   no GitHub, aí sim migrar para a URL.
+3. **Regenerar o client** pelo fluxo da seção anterior e deixar o `npm run typecheck` apontar as
+   divergências. A fronteira anti-corrupção faz a quebra se concentrar em
+   `divida-ativa-mappers.ts`, no DAL e nas Server Actions — os componentes só conhecem
+   `src/types/divida-ativa.ts` e não devem precisar mudar. Se um componente quebrar, a fronteira
+   vazou: conserte a fronteira.
+4. **Atualizar os handlers MSW** para as formas reais. Sem isso a suíte continua validando o
+   contrato que nós inventamos.
+5. **Reconciliar a tabela de premissas** acima, marcando cada uma como confirmada ou divergente.
+   Três não se resolvem no mapper e precisam de decisão de produto: **P20** (se a API consultar e
+   já cadastrar num passo só, como o legado, a tela "Confirme sua inscrição" perde o sentido),
+   **P19** (sem `proprietario`, a lista e a confirmação perdem uma linha cada) e **P21** (se a
+   inscrição não for de 7–8 dígitos, mudam a máscara e a validação de formato do formulário).
+
+Dois cuidados:
+
+- **A máquina dele não pode virar dependência de teste.** O MSW continua sendo o limite de rede
+  da suíte; a API real serve para verificação manual e para reconciliar o contrato. Teste
+  amarrado ao IP dele quebra toda vez que ele fechar o notebook.
+- **CORS não é problema**, mas **auth pode ser**: as chamadas saem do servidor Next para a
+  máquina dele, não do browser. O mutator sempre manda `Authorization: Bearer` com o
+  `access_token` do cookie — vale confirmar antes contra qual realm Keycloak a instância local
+  valida, ou se valida.
+
+Para desenvolver sem depender dele, o mock por Prism descrito em
+[Desenvolvendo sem a API](#desenvolvendo-sem-a-api) continua valendo.

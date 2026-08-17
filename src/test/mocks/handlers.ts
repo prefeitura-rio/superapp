@@ -57,9 +57,10 @@ export const MOCK_VAGA_SEM_CRITERIOS = {
 // As premissas de formato estão em `docs/divida-ativa.md`. Estes mocks são o caminho feliz;
 // estados vazio, de erro e de borda devem ser montados por teste com `server.use()`.
 export const MOCK_IMOVEL_DIVIDA_ATIVA = {
-  inscricaoImobiliaria: '01234567890',
-  endereco: 'RUA DA ASSEMBLEIA 10 - CENTRO',
-  bairro: 'Centro',
+  inscricaoImobiliaria: '05217663',
+  endereco: 'Rua Barata Ribeiro, 586 - A 501',
+  bairro: 'Copacabana',
+  proprietario: 'Bruno Rocha Menezes',
   possuiDebitos: true,
   cadastradoEm: '2026-08-04T13:45:00-03:00',
 }
@@ -192,6 +193,14 @@ export const handlers = [
   http.post(`${DIVIDA_ATIVA_BASE_URL}/v1/imoveis`, () => {
     return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 201 })
   }),
+
+  // Dívida Ativa - Consulta prévia da inscrição no sistema fiscal (não cadastra)
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/v1/imoveis/consulta/:inscricaoImobiliaria`,
+    () => {
+      return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 200 })
+    }
+  ),
 
   // Dívida Ativa - Detalhe do imóvel
   http.get(`${DIVIDA_ATIVA_BASE_URL}/v1/imoveis/:inscricaoImobiliaria`, () => {

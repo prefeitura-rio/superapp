@@ -1,5 +1,7 @@
-import { DividaAtivaServiceList } from '@/app/components/divida-ativa/divida-ativa-service-list'
+import { DividaAtivaLanding } from '@/app/components/divida-ativa/divida-ativa-landing'
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import { getDalDividaAtivaImoveis } from '@/lib/dal'
+import { getUserInfoFromToken } from '@/lib/user-info'
 
 /**
  * Landing do módulo de Dívida Ativa Imobiliária.
@@ -9,8 +11,10 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
  * URL, não do nome do grupo de rotas `(logged-in)`. Por isso o módulo **não** pode voltar
  * para `/servicos/*`, que é público por allowlist.
  *
- * A página não lê dado do cidadão — é só a porta de entrada. Quem lê dado pessoal são as
- * telas internas (débitos, requerimentos), que pegam o CPF do token.
+ * A página lê **uma** informação do cidadão: quantos imóveis ele cadastrou, para o contador
+ * do card "Meus imóveis". É dado patrimonial, então vem pelo DAL com `no-store` e CPF
+ * mascarado no span. Se essa leitura falhar, a landing continua de pé sem o número — a lista
+ * de serviços não pode cair por causa de um contador.
  *
  * Sem `export const dynamic = 'force-static'` de propósito: o root layout lê `headers()` para
  * o nonce da CSP, o que torna toda página do app renderizada sob demanda. A diretiva não teria
@@ -19,18 +23,25 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
  * O módulo inteiro está atrás de `NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA` — ver `docs/divida-ativa.md`.
  */
 
-export default function DividaAtivaPage() {
+export default async function DividaAtivaPage() {
+  const { cpf } = await getUserInfoFromToken()
+
+  let quantidadeImoveis: number | null = null
+
+  if (cpf) {
+    try {
+      const imoveis = await getDalDividaAtivaImoveis(cpf)
+      quantidadeImoveis = imoveis.length
+    } catch {
+      quantidadeImoveis = null
+    }
+  }
+
   return (
     <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
       <SecondaryHeader title="" className="max-w-xl" />
 
-      <h1 className="px-4 pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
-        Serviços relacionados à dívida ativa
-      </h1>
-
-      <div className="px-4">
-        <DividaAtivaServiceList />
-      </div>
+      <DividaAtivaLanding quantidadeImoveis={quantidadeImoveis} />
     </div>
   )
 }

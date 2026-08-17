@@ -90,6 +90,38 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /v1/imoveis/consulta/{inscricaoImobiliaria}:
+    parameters:
+      - $ref: '#/components/parameters/InscricaoImobiliaria'
+    get:
+      summary: Consulta uma inscrição imobiliária no sistema fiscal, sem cadastrar.
+      description: |
+        Passo de pré-visualização do cadastro: devolve endereço, bairro e proprietário para o
+        cidadão conferir antes de confirmar. **Não grava nada** — o cadastro só acontece no
+        `POST /v1/imoveis`, disparado pelo botão "Confirmar".
+
+        Difere de `getImovel`, que detalha um imóvel **já cadastrado** pelo cidadão e devolveria
+        404 aqui. No portal legado a consulta e a gravação eram um passo só; a separação é
+        deliberada (premissa P20 de `docs/divida-ativa.md`).
+      operationId: consultarInscricaoImobiliaria
+      tags:
+        - imoveis
+      responses:
+        '200':
+          description: Inscrição encontrada no sistema fiscal.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Imovel'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /v1/imoveis/{inscricaoImobiliaria}:
     parameters:
       - $ref: '#/components/parameters/InscricaoImobiliaria'
@@ -410,10 +442,11 @@ components:
       name: inscricaoImobiliaria
       in: path
       required: true
-      description: Inscrição imobiliária do imóvel, somente dígitos.
+      description: Inscrição imobiliária do imóvel, somente dígitos (7 ou 8, com o dígito verificador).
       schema:
         type: string
-        example: "01234567890"
+        pattern: '^\d{7,8}$'
+        example: "05217663"
     Protocolo:
       name: protocolo
       in: path
@@ -511,15 +544,22 @@ components:
       properties:
         inscricaoImobiliaria:
           type: string
-          description: Inscrição imobiliária, somente dígitos.
-          example: "01234567890"
+          description: Inscrição imobiliária, somente dígitos (7 ou 8, incluindo o dígito verificador).
+          pattern: '^\d{7,8}$'
+          example: "05217663"
         endereco:
           type: string
           description: Endereço do imóvel como cadastrado no sistema fiscal.
-          example: "RUA DA ASSEMBLEIA 10 - CENTRO"
+          example: "Rua Barata Ribeiro, 586 - A 501"
         bairro:
           type: string
-          example: "Centro"
+          example: "Copacabana"
+        proprietario:
+          type: string
+          description: |
+            Nome do proprietário como consta no sistema fiscal. O design exibe na lista de
+            imóveis e na tela de confirmação do cadastro (premissa P19 de `docs/divida-ativa.md`).
+          example: "Bruno Rocha Menezes"
         possuiDebitos:
           type: boolean
           description: Indica se o imóvel tem débitos em dívida ativa, para exibição na lista sem exigir uma segunda chamada.
@@ -537,8 +577,11 @@ components:
       properties:
         inscricaoImobiliaria:
           type: string
-          description: Inscrição imobiliária, somente dígitos.
-          example: "01234567890"
+          description: |
+            Inscrição imobiliária, somente dígitos (7 ou 8, incluindo o dígito verificador).
+            O front remove a máscara de exibição antes de enviar (premissa P21).
+          pattern: '^\d{7,8}$'
+          example: "05217663"
 
     ImovelListResponse:
       type: object

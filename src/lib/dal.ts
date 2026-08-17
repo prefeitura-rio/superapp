@@ -11,6 +11,10 @@ import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
+import {
+  consultarInscricaoImobiliaria,
+  getImoveis,
+} from '@/http-divida-ativa/imoveis/imoveis'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -18,8 +22,11 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
+import { mapApiToImovel } from '@/lib/divida-ativa-mappers'
+import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
+import type { ImovelDividaAtiva } from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
 // Recommended caching strategy for high traffic (500K+ users/month)
@@ -487,4 +494,58 @@ export async function revalidateDalSubcategoriesSubcategoryServices(
   // to invalidate cache when services change
   // Example: after admin creates/updates/deletes services
   revalidateTag(`subcategory-services-${subcategory}`, { expire: 0 })
+}
+
+// ---------------------------------------------------------------------------
+// Dívida Ativa
+//
+// Dado patrimonial do cidadão: `cache: 'no-store'` sempre, sem tag e sem revalidate.
+// O `cpf` entra apenas para mascarar o span (LGPD) — a API deriva a identidade do Bearer
+// token e nenhum endpoint do módulo recebe CPF por path, query ou body.
+// ---------------------------------------------------------------------------
+
+export async function getDalDividaAtivaImoveis(
+  cpf: string
+): Promise<ImovelDividaAtiva[]> {
+  return withSpan('dal.getDividaAtivaImoveis', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveis({ cache: 'no-store' })
+
+    const imoveis =
+      result.status === 200 ? (result.data?.data ?? []).map(mapApiToImovel) : []
+
+    addSpanEvent('divida-ativa.imoveis.fetched', {
+      'imoveis.count': imoveis.length,
+    })
+
+    return imoveis
+  })
+}
+
+/**
+ * Consulta uma inscrição no sistema fiscal **sem cadastrar** — é o passo que alimenta a tela
+ * "Confirme sua inscrição imobiliária". Devolve `null` quando a inscrição não existe, para a
+ * tela mostrar um estado em vez de estourar o error boundary da rota.
+ */
+export async function getDalDividaAtivaConsultaInscricao(
+  inscricao: string,
+  cpf: string
+): Promise<ImovelDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaConsultaInscricao', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await consultarInscricaoImobiliaria(
+      somenteDigitos(inscricao),
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.consulta-inscricao.fetched', {
+      'consulta.status': result.status,
+    })
+
+    return result.status === 200 ? mapApiToImovel(result.data) : null
+  })
 }

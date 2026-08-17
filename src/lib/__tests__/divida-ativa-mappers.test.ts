@@ -70,17 +70,19 @@ describe('mapApiToImovel', () => {
 
   test('mapeia os campos de exibição', () => {
     const imovel = mapApiToImovel({
-      inscricaoImobiliaria: '01234567890',
-      endereco: 'RUA DA ASSEMBLEIA 10 - CENTRO',
-      bairro: 'Centro',
+      inscricaoImobiliaria: '05217663',
+      endereco: 'Rua Barata Ribeiro, 586 - A 501',
+      bairro: 'Copacabana',
+      proprietario: 'Bruno Rocha Menezes',
       possuiDebitos: true,
       cadastradoEm: '2026-08-04T13:45:00-03:00',
     })
 
     expect(imovel).toEqual({
-      inscricao: '01234567890',
-      endereco: 'RUA DA ASSEMBLEIA 10 - CENTRO',
-      bairro: 'Centro',
+      inscricao: '05217663',
+      endereco: 'Rua Barata Ribeiro, 586 - A 501',
+      bairro: 'Copacabana',
+      proprietario: 'Bruno Rocha Menezes',
       possuiDebitos: true,
       cadastradoEm: '2026-08-04',
     })
@@ -91,6 +93,7 @@ describe('mapApiToImovel', () => {
 
     expect(imovel.endereco).toBeNull()
     expect(imovel.bairro).toBeNull()
+    expect(imovel.proprietario).toBeNull()
     expect(imovel.cadastradoEm).toBeNull()
   })
 

@@ -43,8 +43,9 @@ describe('Dívida Ativa — fiação do contrato provisório', () => {
     const imoveis = (data.data ?? []).map(mapApiToImovel)
 
     expect(imoveis).toHaveLength(1)
-    expect(imoveis[0].inscricao).toBe('01234567890')
-    expect(imoveis[0].bairro).toBe('Centro')
+    expect(imoveis[0].inscricao).toBe('05217663')
+    expect(imoveis[0].bairro).toBe('Copacabana')
+    expect(imoveis[0].proprietario).toBe('Bruno Rocha Menezes')
     expect(imoveis[0].possuiDebitos).toBe(true)
     // date-time da API vira data ISO simples no tipo de visão (premissa P3)
     expect(imoveis[0].cadastradoEm).toBe('2026-08-04')

@@ -32,6 +32,8 @@ export interface ImovelDividaAtiva {
   inscricao: string
   endereco: string | null
   bairro: string | null
+  /** Nome como consta no sistema fiscal. Exibido na lista e na confirmação do cadastro. */
+  proprietario: string | null
   possuiDebitos: boolean
   /** Data ISO (YYYY-MM-DD) em que o cidadão cadastrou o imóvel. */
   cadastradoEm: string | null

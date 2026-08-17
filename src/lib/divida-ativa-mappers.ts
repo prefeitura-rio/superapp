@@ -6,6 +6,7 @@ import type {
   Requerimento,
   Simulacao,
 } from '@/http-divida-ativa/models'
+import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import type {
   CondicaoParcelamento,
   DebitoDividaAtiva,
@@ -91,10 +92,6 @@ function validarDataIso(iso: string): string | null {
   return data.toISOString().slice(0, 10) === iso ? iso : null
 }
 
-function apenasDigitos(valor: string): string {
-  return valor.replace(/\D/g, '')
-}
-
 function textoOuNull(valor: string | undefined): string | null {
   return valor && valor !== '' ? valor : null
 }
@@ -134,12 +131,33 @@ export function mapSituacaoRequerimento(
 
 export function mapApiToImovel(api: Imovel): ImovelDividaAtiva {
   return {
-    inscricao: apenasDigitos(api.inscricaoImobiliaria ?? ''),
+    inscricao: somenteDigitos(api.inscricaoImobiliaria ?? ''),
     endereco: textoOuNull(api.endereco),
     bairro: textoOuNull(api.bairro),
+    proprietario: textoOuNull(api.proprietario),
     possuiDebitos: api.possuiDebitos === true,
     cadastradoEm: parseDataApi(api.cadastradoEm),
   }
+}
+
+/**
+ * Extrai a mensagem institucional do envelope de erro (premissa P10). Devolve `null` quando a
+ * API não mandou nada exibível — nesse caso quem chama escolhe a copy, em vez de a tela
+ * mostrar texto técnico ao cidadão.
+ */
+export function mapApiToMensagemErro(data: unknown): string | null {
+  if (typeof data !== 'object' || data === null) return null
+
+  const errors = (data as { errors?: unknown }).errors
+
+  if (!Array.isArray(errors)) return null
+
+  for (const erro of errors) {
+    const mensagem = (erro as { message?: unknown })?.message
+    if (typeof mensagem === 'string' && mensagem !== '') return mensagem
+  }
+
+  return null
 }
 
 export function mapApiToDebito(api: Debito): DebitoDividaAtiva {
@@ -179,7 +197,7 @@ export function mapApiToCondicaoParcelamento(
 export function mapApiToSimulacao(api: Simulacao): SimulacaoParcelamento {
   return {
     inscricao: api.inscricaoImobiliaria
-      ? apenasDigitos(api.inscricaoImobiliaria)
+      ? somenteDigitos(api.inscricaoImobiliaria)
       : null,
     validaAte: textoOuNull(api.validaAte),
     condicoes: (api.condicoes ?? []).map(mapApiToCondicaoParcelamento),
@@ -193,7 +211,7 @@ export function mapApiToRequerimento(
     protocolo: api.protocolo ?? '',
     situacao: mapSituacaoRequerimento(api.situacao),
     inscricao: api.inscricaoImobiliaria
-      ? apenasDigitos(api.inscricaoImobiliaria)
+      ? somenteDigitos(api.inscricaoImobiliaria)
       : null,
     quantidadeParcelas: numeroOuNull(api.quantidadeParcelas),
     valorTotal: parseValorMonetario(api.valorTotal),
