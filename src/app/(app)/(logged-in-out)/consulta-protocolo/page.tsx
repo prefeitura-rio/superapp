@@ -3,6 +3,7 @@
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
 import {
   formatDate,
+  mapCategoria,
   normalizeStatus,
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
@@ -80,7 +81,7 @@ export default function ConsultaProtocoloPage() {
       const items: OsItem[] = ordens.map((os: any) => ({
         codigoOs: os.codigoOs ?? '',
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
-        categoria: os.subtema ?? os.categoria ?? 'Serviço',
+        categoria: mapCategoria(os.categoria),
         status: os.status ?? '',
         dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,

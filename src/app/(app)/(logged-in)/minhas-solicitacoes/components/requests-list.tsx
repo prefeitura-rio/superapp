@@ -59,7 +59,8 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
 
   const filtered = items.filter(r => {
     const matchesFilter =
-      activeFilter === 'Todos' || r.categoria === activeFilter
+      activeFilter === 'Todos' ||
+      r.categoria?.toLowerCase() === activeFilter.toLowerCase()
 
     const matchesSearch =
       search.length < 2 ||

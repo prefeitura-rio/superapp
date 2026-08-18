@@ -11,6 +11,19 @@ const STATUS_MAP: Record<string, RequestStatus> = {
   Cancelado: 'Cancelado',
 }
 
+const CATEGORIA_MAP: Record<string, string> = {
+  Solicitação: 'Serviços',
+  Informação: 'Serviços',
+  Elogio: 'Ouvidoria',
+  Sugestão: 'Ouvidoria',
+  Reclamação: 'Ouvidoria',
+}
+
+export function mapCategoria(raw: string | undefined | null): string {
+  if (!raw) return 'Serviços'
+  return CATEGORIA_MAP[raw] ?? raw
+}
+
 export function normalizeStatus(raw: string | undefined | null): RequestStatus {
   if (!raw) return 'Aberto'
   return STATUS_MAP[raw] ?? 'Aberto'
