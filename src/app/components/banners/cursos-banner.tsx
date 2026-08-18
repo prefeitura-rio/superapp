@@ -34,7 +34,7 @@ export const CursosBanner = ({
           <span className="text-white font-medium text-base leading-5">
             Cursos da Prefeitura
           </span>
-          <span className="text-white text-sm leading-4">
+          <span className="text-white text-xs md:text-sm leading-4">
             gratuito e com certificado
           </span>
         </div>
@@ -48,7 +48,7 @@ export const CursosBanner = ({
           alt="Pessoa sentada com livros estudando."
           width={200}
           height={200}
-          className="h-30 w-auto absolute bottom-0 right-0 z-20  md:right-0"
+          className="h-30 rounded-br-xl rounded-tr-xl w-auto absolute bottom-0 right-0 z-20  md:right-0"
         />
       }
     />

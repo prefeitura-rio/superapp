@@ -101,7 +101,7 @@ export async function middleware(request: NextRequest) {
       // Parse the feature flag as a comma-separated list of enabled services.
       // When the flag is 'false' (or absent), all services are visible (staging/dev).
       // In production, only services listed in the flag are enabled.
-      // Examples: 'cursos' | 'cursos,empregos' | 'cursos,empregos,mei'
+      // Examples: 'cursos' | 'cursos,empregos' | 'cursos,empregos,mei,cadmicro'
       const _featureFlag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
       const _isProduction = _featureFlag !== 'false'
 
@@ -133,6 +133,27 @@ export async function middleware(request: NextRequest) {
         )
 
         if (hasEmpregosSegment) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/not-found'
+
+          const response = NextResponse.rewrite(url)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          return response
+        }
+      }
+
+      // Block access to "cadmicro" routes when CadMicro is not in the enabled services list
+      // Only block routes where "cadmicro" is a complete path segment (e.g., /carteira/cadmicro)
+      if (_isProduction && !_featureFlag.split(',').includes('cadmicro')) {
+        const pathSegments = path.split('/').filter(Boolean)
+        const hasCadmicroSegment = pathSegments.some(
+          segment => segment === 'cadmicro'
+        )
+
+        if (hasCadmicroSegment) {
           const url = request.nextUrl.clone()
           url.pathname = '/not-found'
 

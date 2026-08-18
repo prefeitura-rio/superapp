@@ -34,7 +34,9 @@ export const EmpregabilidadeBanner = ({
           <span className="text-white font-medium text-base leading-5">
             {title}
           </span>
-          <span className="text-white text-sm leading-4">{subtitle}</span>
+          <span className="text-white text-xs md:text-sm leading-4">
+            {subtitle}
+          </span>
         </div>
       }
       badge="Ver vagas"
@@ -46,7 +48,7 @@ export const EmpregabilidadeBanner = ({
           alt="Encontre seu trabalho no Oportunidades Cariocas."
           width={200}
           height={200}
-          className="h-30 w-auto absolute bottom-0 right-0 z-20 md:right-0"
+          className="h-30 w-auto rounded-br-xl rounded-tr-xl absolute bottom-0 right-0 z-20 md:right-0"
         />
       }
     />

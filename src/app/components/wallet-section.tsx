@@ -6,46 +6,19 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
-import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
-import {
-  formatMaintenanceRequestsCount,
-  getMaintenanceRequestStats,
-} from '@/lib/maintenance-requests-utils'
-import {
-  formatEducationOperatingHours,
-  getOperatingStatus,
-} from '@/lib/operating-status'
-import {
-  WALLET_CARD_TYPES,
-  getCardPosition,
-  sendWalletCardGAEvent,
-} from '@/lib/wallet-tracking-utils'
-import { getWalletDataInfo } from '@/lib/wallet-utils'
-import type { RiskStatusProps } from '@/types/health'
+import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { useEffect, useState } from 'react'
-import { CaretakerCard } from './wallet-cards/caretaker-card'
-import { EducationCard } from './wallet-cards/education-card'
-import { HealthCard } from './wallet-cards/health-card'
-import { PetCard } from './wallet-cards/pet-wallet'
-import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
+import {
+  type HomeWalletHealthCardData,
+  buildHomeWalletCards,
+} from './wallet-home-cards'
 
 interface CartereiraSectionProps {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
   pets?: ModelsPet[]
-  healthCardData?: {
-    href: string
-    title: string
-    name?: string
-    statusLabel: string
-    statusValue: string
-    extraLabel: string
-    extraValue: string
-    address?: string
-    phone?: string
-    email?: string
-    risco?: RiskStatusProps
-  }
+  vehicles?: WalletVehicle[]
+  healthCardData?: HomeWalletHealthCardData
 }
 
 export function CarteiraSectionSkeleton() {
@@ -73,20 +46,21 @@ export default function CarteiraSection({
   walletData,
   maintenanceRequests,
   healthCardData,
-  pets,
+  pets = [],
+  vehicles = [],
 }: CartereiraSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  // Calculate maintenance requests statistics
-  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
-
-  // Get wallet data info (count and hasData)
-  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+  const walletCards = buildHomeWalletCards({
+    walletData,
+    maintenanceRequests,
+    healthCardData,
+    pets,
+    vehicles,
+  })
 
   useEffect(() => {
     setIsLoaded(true)
   }, [])
-
-  const isNormalRiskStatus = healthCardData?.risco === 'Verde'
 
   if (!isLoaded) {
     return <CarteiraSectionSkeleton />
@@ -98,172 +72,14 @@ export default function CarteiraSection({
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
       </div>
 
-      {walletInfo.hasData || (pets?.length ?? 0) > 0 ? (
+      {walletCards.length > 0 ? (
         <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
           <div className="flex px-4 gap-2 w-max">
-            {/* Health Card - only show if wallet has health data */}
-            {walletData?.saude?.clinica_familia?.indicador && (
-              <div className="min-w-[300px]">
-                <HealthCard
-                  href="/carteira/clinica-da-familia"
-                  title="CLÍNICA DA FAMÍLIA"
-                  name={
-                    walletData.saude.clinica_familia.nome ||
-                    'Nome não disponível'
-                  }
-                  primaryLabel="Status"
-                  primaryValue={healthCardData?.statusValue || 'Não informado'}
-                  secondaryLabel="Horário de Atendimento"
-                  secondaryValue={healthCardData?.extraValue || 'Não informado'}
-                  address={walletData.saude.clinica_familia.endereco}
-                  phone={walletData.saude.clinica_familia.telefone}
-                  email={walletData.saude.clinica_familia.email}
-                  riskStatus={
-                    !isNormalRiskStatus ? healthCardData?.risco : undefined
-                  }
-                  enableFlip={false}
-                  origin={walletData.saude?.clinica_familia?.fonte}
-                  showInitialShine={false}
-                  asLink
-                  onClick={() =>
-                    sendWalletCardGAEvent(
-                      'CLÍNICA DA FAMÍLIA',
-                      walletData?.saude?.clinica_familia?.nome ||
-                        'Nome não disponível',
-                      getCardPosition(
-                        WALLET_CARD_TYPES.HEALTH,
-                        walletData,
-                        maintenanceStats
-                      )
-                    )
-                  }
-                />
+            {walletCards.map(card => (
+              <div key={card.key} className="min-w-[300px]">
+                {card}
               </div>
-            )}
-
-            {/* Card 2: Educação */}
-            {walletData?.educacao?.aluno?.indicador && (
-              <div className="min-w-[300px]">
-                <EducationCard
-                  href="/carteira/escola-de-jovens-e-adultos"
-                  title="ESCOLA DE JOVENS E ADULTOS"
-                  name={walletData?.educacao?.escola?.nome || 'Não disponível'}
-                  primaryLabel="Status"
-                  primaryValue={getOperatingStatus(
-                    walletData?.educacao?.escola?.horario_funcionamento
-                  )}
-                  secondaryLabel="Horário de Atendimento"
-                  secondaryValue={formatEducationOperatingHours(
-                    walletData?.educacao?.escola?.horario_funcionamento
-                  )}
-                  address={walletData?.educacao?.escola?.endereco}
-                  phone={walletData?.educacao?.escola?.telefone}
-                  email={walletData?.educacao?.escola?.email}
-                  enableFlip={false}
-                  showInitialShine={false}
-                  asLink
-                  onClick={() =>
-                    sendWalletCardGAEvent(
-                      'ESCOLA DE JOVENS E ADULTOS',
-                      walletData?.educacao?.escola?.nome || 'Não disponível',
-                      getCardPosition(
-                        WALLET_CARD_TYPES.EDUCATION,
-                        walletData,
-                        maintenanceStats
-                      )
-                    )
-                  }
-                />
-              </div>
-            )}
-
-            {/* Card 3: Assistência social */}
-            {walletData?.assistencia_social?.cadunico?.indicador && (
-              <div className="min-w-[300px]">
-                <SocialAssistanceCard
-                  href="/carteira/cadunico"
-                  title="CADÚNICO"
-                  number={
-                    walletData?.assistencia_social?.cras?.nome ||
-                    'Não disponível'
-                  }
-                  primaryLabel="Data de recadastramento"
-                  primaryValue={formatRecadastramentoDate(
-                    walletData?.assistencia_social?.cadunico
-                      ?.data_limite_cadastro_atual
-                  )}
-                  unitName={walletData?.assistencia_social?.cras?.nome}
-                  address={walletData?.assistencia_social?.cras?.endereco}
-                  phone={walletData?.assistencia_social?.cras?.telefone}
-                  showInitialShine={false}
-                  enableFlip={false}
-                  asLink
-                  onClick={() =>
-                    sendWalletCardGAEvent(
-                      'CADÚNICO',
-                      walletData?.assistencia_social?.cras?.nome ||
-                        'Não disponível',
-                      getCardPosition(
-                        WALLET_CARD_TYPES.SOCIAL,
-                        walletData,
-                        maintenanceStats
-                      )
-                    )
-                  }
-                />
-              </div>
-            )}
-
-            {/* Card 4: Cuidados com a Cidade (1746) */}
-            {maintenanceStats.total > 0 && (
-              <div className="min-w-[300px]">
-                <CaretakerCard
-                  href="/carteira/cuidados-com-a-cidade"
-                  title="CUIDADOS COM A CIDADE"
-                  name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
-                  primaryLabel="Total de chamados"
-                  primaryValue={maintenanceStats.total.toString()}
-                  secondaryLabel="Fechados"
-                  secondaryValue={maintenanceStats.fechados.toString()}
-                  showInitialShine={false}
-                  enableFlip={false}
-                  asLink
-                  onClick={() =>
-                    sendWalletCardGAEvent(
-                      'CUIDADOS COM A CIDADE',
-                      formatMaintenanceRequestsCount(maintenanceStats.aberto),
-                      getCardPosition(
-                        WALLET_CARD_TYPES.CARETAKER,
-                        walletData,
-                        maintenanceStats
-                      )
-                    )
-                  }
-                />
-              </div>
-            )}
-
-            {/* Pet cards */}
-            {(pets || [])
-              .filter(
-                pet =>
-                  pet.id_animal &&
-                  pet.animal_nome &&
-                  pet.especie_nome &&
-                  pet.sexo_sigla &&
-                  pet.raca_nome
-              )
-              .map(pet => (
-                <div key={pet.id_animal} className="min-w-[300px]">
-                  <PetCard
-                    petData={pet}
-                    enableFlip={false}
-                    asLink
-                    showInitialShine={false}
-                    href={`/carteira/pet/${pet.id_animal}`}
-                  />
-                </div>
-              ))}
+            ))}
           </div>
         </div>
       ) : (

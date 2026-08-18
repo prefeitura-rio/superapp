@@ -7,47 +7,19 @@ import type {
   ModelsMaintenanceRequest,
   ModelsPet,
 } from '@/http/models'
-import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
-import {
-  formatMaintenanceRequestsCount,
-  getMaintenanceRequestStats,
-} from '@/lib/maintenance-requests-utils'
-import {
-  formatEducationOperatingHours,
-  getOperatingStatus,
-} from '@/lib/operating-status'
-import {
-  WALLET_CARD_TYPES,
-  getCardPosition,
-  sendWalletCardGAEvent,
-} from '@/lib/wallet-tracking-utils'
-import { getWalletDataInfo } from '@/lib/wallet-utils'
-import type { RiskStatusProps } from '@/types/health'
-import type { JSX } from 'react'
+import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { useEffect, useState } from 'react'
-import { CaretakerCard } from './wallet-cards/caretaker-card'
-import { EducationCard } from './wallet-cards/education-card'
-import { HealthCard } from './wallet-cards/health-card'
-import { PetCard } from './wallet-cards/pet-wallet'
-import { SocialAssistanceCard } from './wallet-cards/social-assistance-card'
+import {
+  type HomeWalletHealthCardData,
+  buildHomeWalletCards,
+} from './wallet-home-cards'
 
 interface CartereiraSectionSwipeProps {
   walletData?: ModelsCitizenWallet
   maintenanceRequests?: ModelsMaintenanceRequest[]
   pets?: ModelsPet[]
-  healthCardData?: {
-    href: string
-    title: string
-    name?: string
-    statusLabel: string
-    statusValue: string
-    extraLabel: string
-    extraValue: string
-    address?: string
-    phone?: string
-    email?: string
-    risco?: RiskStatusProps
-  }
+  vehicles?: WalletVehicle[]
+  healthCardData?: HomeWalletHealthCardData
 }
 
 export function CarteiraSectionSwipeSkeleton() {
@@ -100,15 +72,17 @@ export default function CarteiraSectionSwipe({
   walletData,
   maintenanceRequests,
   healthCardData,
-  pets,
+  pets = [],
+  vehicles = [],
 }: CartereiraSectionSwipeProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-
-  // Calculate maintenance requests statistics
-  const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
-
-  // Get wallet data info (count and hasData)
-  const walletInfo = getWalletDataInfo(walletData, maintenanceStats.total)
+  const walletCards = buildHomeWalletCards({
+    walletData,
+    maintenanceRequests,
+    healthCardData,
+    pets,
+    vehicles,
+  })
 
   useEffect(() => {
     setIsLoaded(true)
@@ -118,180 +92,13 @@ export default function CarteiraSectionSwipe({
     return <CarteiraSectionSwipeSkeleton />
   }
 
-  // Prepare wallet cards array
-  const walletCards: JSX.Element[] = []
-
-  const petsToShow = (pets || []).filter(
-    pet =>
-      pet.id_animal &&
-      pet.animal_nome &&
-      pet.especie_nome &&
-      pet.sexo_sigla &&
-      pet.raca_nome
-  )
-
-  if (
-    walletData?.saude?.clinica_familia &&
-    walletData?.saude?.clinica_familia?.indicador === true
-  ) {
-    const position = getCardPosition(
-      WALLET_CARD_TYPES.HEALTH,
-      walletData,
-      maintenanceStats
-    )
-
-    const isNormalRiskStatus = healthCardData?.risco === 'Verde'
-
-    walletCards.push(
-      <HealthCard
-        key="health"
-        href="/carteira/clinica-da-familia"
-        title="CLÍNICA DA FAMÍLIA"
-        name={walletData.saude.clinica_familia.nome || 'Nome não disponível'}
-        primaryLabel="Status"
-        primaryValue={healthCardData?.statusValue || 'Não informado'}
-        secondaryLabel="Horário de Atendimento"
-        secondaryValue={healthCardData?.extraValue || 'Não informado'}
-        address={walletData.saude.clinica_familia.endereco}
-        phone={walletData.saude.clinica_familia.telefone}
-        email={walletData.saude.clinica_familia.email}
-        origin={walletData.saude?.clinica_familia?.fonte}
-        riskStatus={!isNormalRiskStatus ? healthCardData?.risco : undefined}
-        enableFlip={false}
-        showInitialShine={false}
-        asLink
-        onClick={() =>
-          sendWalletCardGAEvent(
-            'CLÍNICA DA FAMÍLIA',
-            walletData?.saude?.clinica_familia?.nome || 'Nome não disponível',
-            position
-          )
-        }
-      />
-    )
-  }
-
-  if (walletData?.educacao?.aluno?.indicador) {
-    const position = getCardPosition(
-      WALLET_CARD_TYPES.EDUCATION,
-      walletData,
-      maintenanceStats
-    )
-    walletCards.push(
-      <EducationCard
-        key="education"
-        href="/carteira/escola-de-jovens-e-adultos"
-        title="ESCOLA DE JOVENS E ADULTOS"
-        name={walletData?.educacao?.escola?.nome || 'Não disponível'}
-        primaryLabel="Status"
-        primaryValue={getOperatingStatus(
-          walletData?.educacao?.escola?.horario_funcionamento
-        )}
-        secondaryLabel="Horário de Atendimento"
-        secondaryValue={formatEducationOperatingHours(
-          walletData?.educacao?.escola?.horario_funcionamento
-        )}
-        address={walletData?.educacao?.escola?.endereco}
-        phone={walletData?.educacao?.escola?.telefone}
-        email={walletData?.educacao?.escola?.email}
-        enableFlip={false}
-        showInitialShine={false}
-        asLink
-        onClick={() =>
-          sendWalletCardGAEvent(
-            'ESCOLA DE JOVENS E ADULTOS',
-            walletData?.educacao?.escola?.nome || 'Não disponível',
-            position
-          )
-        }
-      />
-    )
-  }
-
-  if (walletData?.assistencia_social?.cadunico?.indicador) {
-    const position = getCardPosition(
-      WALLET_CARD_TYPES.SOCIAL,
-      walletData,
-      maintenanceStats
-    )
-    walletCards.push(
-      <SocialAssistanceCard
-        key="social"
-        href="/carteira/cadunico"
-        title="CADÚNICO"
-        number={walletData?.assistencia_social?.cras?.nome || 'Não disponível'}
-        primaryLabel="Data de recadastramento"
-        primaryValue={formatRecadastramentoDate(
-          walletData?.assistencia_social?.cadunico?.data_limite_cadastro_atual
-        )}
-        unitName={walletData?.assistencia_social?.cras?.nome}
-        address={walletData?.assistencia_social?.cras?.endereco}
-        phone={walletData?.assistencia_social?.cras?.telefone}
-        showInitialShine={false}
-        enableFlip={false}
-        asLink
-        onClick={() =>
-          sendWalletCardGAEvent(
-            'CADÚNICO',
-            walletData?.assistencia_social?.cras?.nome || 'Não disponível',
-            position
-          )
-        }
-      />
-    )
-  }
-
-  if (maintenanceStats.total > 0) {
-    const position = getCardPosition(
-      WALLET_CARD_TYPES.CARETAKER,
-      walletData,
-      maintenanceStats
-    )
-    walletCards.push(
-      <CaretakerCard
-        key="caretaker"
-        href="/carteira/cuidados-com-a-cidade"
-        title="CUIDADOS COM A CIDADE"
-        name={formatMaintenanceRequestsCount(maintenanceStats.aberto)}
-        primaryLabel="Total de chamados"
-        primaryValue={maintenanceStats.total.toString()}
-        secondaryLabel="Fechados"
-        secondaryValue={maintenanceStats.fechados.toString()}
-        enableFlip={false}
-        showInitialShine={false}
-        asLink
-        onClick={() =>
-          sendWalletCardGAEvent(
-            'CUIDADOS COM A CIDADE',
-            formatMaintenanceRequestsCount(maintenanceStats.aberto),
-            position
-          )
-        }
-      />
-    )
-  }
-
-  // Pets cards (render after the other carteira cards)
-  for (const pet of petsToShow) {
-    walletCards.push(
-      <PetCard
-        key={pet.id_animal}
-        petData={pet}
-        enableFlip={false}
-        asLink
-        showInitialShine={false}
-        href={`/carteira/pet/${pet.id_animal}`}
-      />
-    )
-  }
-
   return (
     <section className="mt-6 w-full overflow-x-auto">
       <div className="flex items-center px-4 justify-between mb-4">
         <h2 className="text-md font-medium text-foreground">Carteira</h2>
       </div>
 
-      {walletInfo.hasData || petsToShow.length > 0 ? (
+      {walletCards.length > 0 ? (
         <div className="hidden sm:block px-4 pb-4  overflow-hidden">
           <SwiperWrapper
             showArrows={true}
@@ -311,7 +118,7 @@ export default function CarteiraSectionSwipe({
                   >
                     {slideCards.map((card, cardIndex) => (
                       <div
-                        key={`card-${startIndex + cardIndex}`}
+                        key={card.key ?? `card-${startIndex + cardIndex}`}
                         className="w-full"
                       >
                         {card}
