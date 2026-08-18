@@ -61,7 +61,7 @@
   },
   "overrides": [
     {
-      "include": ["src/http-agent-api/**"],
+      "include": ["src/http-agent-api/**", "src/http-divida-ativa/**"],
       "linter": {
         "rules": {
           "suspicious": {

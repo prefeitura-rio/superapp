@@ -4,6 +4,7 @@ import { TEST_ENV } from './env'
 // API base URLs for handlers
 const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
 const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
+const DIVIDA_ATIVA_BASE_URL = TEST_ENV.BASE_API_URL_DIVIDA_ATIVA
 
 // Default success responses
 const DEFAULT_SUCCESS_RESPONSE = { message: 'Success' }
@@ -51,6 +52,35 @@ export const MOCK_VAGA_SEM_CRITERIOS = {
   id_escolaridade_minima: null,
   idiomas_requisito: [],
 }
+
+// Dívida Ativa — payloads na forma real da API `api-imoveis`, verificada por chamada ao
+// vivo contra a instância de homologação em 17/08/2026. As divergências contra o antigo
+// contrato provisório estão em `docs/divida-ativa.md`. Estes mocks são o caminho feliz;
+// estados vazio, de erro e de borda são montados por teste com `server.use()`.
+//
+// Note o que a API **não** devolve: proprietário, bairro separado e indicador de débito.
+// Não acrescente esses campos aqui — são premissas em aberto (P19, P22, P12), e um mock
+// mais generoso que a API faria a suíte validar ficção.
+export const MOCK_IMOVEL_DIVIDA_ATIVA = {
+  id: 32,
+  cpf: '16232350731',
+  dataInclusao: '2026-06-22T15:40:46.477',
+  endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+  numInscricao: '00000018',
+}
+
+// Opções do ePortal que acompanham a consulta de um imóvel já cadastrado. No dado real de
+// homologação as duas vêm indisponíveis, com `url: null`.
+export const MOCK_OPCOES_IPTU_DIVIDA_ATIVA = [
+  {
+    tipo: 'PARCELAMENTO',
+    titulo: 'Parcelamento',
+    descricao: 'Requerimento de parcelamento de debitos de IPTU.',
+    url: null,
+    disponivel: false,
+    mensagem: 'Parcelamento indisponivel para esta inscricao.',
+  },
+]
 
 export const handlers = [
   // RMI - Citizen profile
@@ -128,5 +158,34 @@ export const handlers = [
   // Empregabilidade - Criar candidatura
   http.post(`${COURSES_BASE_URL}/api/v1/empregabilidade/candidaturas`, () => {
     return HttpResponse.json({ id: 'candidatura-123' }, { status: 201 })
+  }),
+
+  // Dívida Ativa - Listar imóveis do cidadão.
+  // Array cru, sem envelope: é o que a API devolve de verdade. O spec do Quarkus tipa
+  // objeto singular, e é essa divergência que `normalizarListaImoveis` absorve.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis`, () => {
+    return HttpResponse.json([MOCK_IMOVEL_DIVIDA_ATIVA], { status: 200 })
+  }),
+
+  // Dívida Ativa - Cadastrar imóvel (consulta a Fazenda e grava no mesmo passo)
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/imoveis`, () => {
+    return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 201 })
+  }),
+
+  // Dívida Ativa - Excluir imóvel pelo id local do cadastro
+  http.delete(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:id`, () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // Dívida Ativa - Consulta de um imóvel já cadastrado + opções do ePortal.
+  // Não é consulta prévia à Fazenda: a API exige que o imóvel já exista (404 se não).
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/consulta`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        opcoes: MOCK_OPCOES_IPTU_DIVIDA_ATIVA,
+      },
+      { status: 200 }
+    )
   }),
 ]
