@@ -57,18 +57,10 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
   const [activeFilter, setActiveFilter] = useState('Todos')
   const [search, setSearch] = useState('')
 
-  const FILTER_MAP: Record<string, string[]> = {
-    Serviços: ['Serviço', 'Serviços'],
-    Ouvidoria: ['Ouvidoria'],
-    'Acesso à informação': ['Acesso à informação', 'Acesso a informação'],
-  }
-
   const filtered = items.filter(r => {
     const matchesFilter =
       activeFilter === 'Todos' ||
-      (FILTER_MAP[activeFilter] ?? [activeFilter]).some(
-        v => r.categoria?.toLowerCase() === v.toLowerCase()
-      )
+      r.categoria?.toLowerCase() === activeFilter.toLowerCase()
 
     const matchesSearch =
       search.length < 2 ||

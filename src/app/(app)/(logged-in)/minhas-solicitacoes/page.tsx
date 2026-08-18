@@ -3,33 +3,32 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { RequestsList } from './components/requests-list'
-import { formatDate, normalizeStatus } from './helpers'
+import { formatDate, mapCategoria, normalizeStatus } from './helpers'
 
 export const revalidate = 0
 
 export default async function MyRequestsPage() {
-  const rawData = IS_MOCK_ENABLED
-    ? MOCK_LIST
-    : await (async () => {
-        const response = await listChamados()
-        return typeof response.data === 'string'
-          ? JSON.parse(response.data)
-          : response.data
-      })()
+  const response = await listChamados()
+  const apiData =
+    typeof response.data === 'string'
+      ? JSON.parse(response.data)
+      : response.data
 
-  const items = rawData?.protocolos
-    ? rawData.protocolos.flatMap((protocolo: any) =>
-        (protocolo.ordens_de_servico ?? []).map((os: any) => ({
-          protocolo: protocolo.protocolo ?? '',
-          codigoOs: os.codigoOs ?? '',
-          servico: os.servico ?? os.subtema ?? '—',
-          // TODO: remover fallback 'Serviço' quando API retornar subcategoria corretamente para Ouvidoria e LAI
-          categoria: protocolo.subcategoria ?? 'Serviço',
-          status: normalizeStatus(os.status ?? protocolo.status),
-          dataAbertura: formatDate(os.dataAbertura ?? protocolo.dataAbertura),
-        }))
-      )
-    : []
+  const protocolos = [
+    ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
+    ...(IS_MOCK_ENABLED ? MOCK_LIST.protocolos : []),
+  ]
+
+  const items = protocolos.flatMap((protocolo: any) =>
+    (protocolo.ordens_de_servico ?? []).map((os: any) => ({
+      protocolo: protocolo.protocolo ?? '',
+      codigoOs: os.codigoOs ?? '',
+      servico: os.servico ?? os.subtema ?? '—',
+      categoria: mapCategoria(os.categoria),
+      status: normalizeStatus(os.status ?? protocolo.status),
+      dataAbertura: formatDate(os.dataAbertura ?? protocolo.dataAbertura),
+    }))
+  )
 
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground">

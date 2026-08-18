@@ -6,6 +6,7 @@ import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { decodeHtmlEntities } from '@/lib/html-entities'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -145,8 +146,11 @@ function TimelineItem({
             opacity: open && description ? 1 : 0,
           }}
         >
-          <p style={captionStyle} className="pt-0.5 pr-4">
-            {description}
+          <p
+            style={{ ...captionStyle, whiteSpace: 'pre-wrap' }}
+            className="pt-0.5 pr-4"
+          >
+            {decodeHtmlEntities(description ?? '')}
           </p>
         </div>
       </div>
@@ -337,8 +341,11 @@ function PublicAndamento({ data }: { data: DetailData }) {
             opacity: open && hasDescription ? 1 : 0,
           }}
         >
-          <p style={captionStyle} className="pt-0.5 pr-4">
-            {data.ultimoAndamento?.descricao}
+          <p
+            style={{ ...captionStyle, whiteSpace: 'pre-wrap' }}
+            className="pt-0.5 pr-4"
+          >
+            {decodeHtmlEntities(data.ultimoAndamento?.descricao ?? '')}
           </p>
         </div>
       </div>
@@ -391,7 +398,7 @@ function RequestDetail({ data }: { data: DetailData }) {
         style={{ paddingTop: '24px', paddingBottom: '24px' }}
       />
 
-      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-2">
+      <div className="pt-25 pb-32 px-4 flex flex-col gap-2">
         <h1
           className="text-3xl font-medium text-card-foreground leading-9 mb-4"
           style={{ letterSpacing: '-0.4px' }}
@@ -489,7 +496,17 @@ function RequestDetail({ data }: { data: DetailData }) {
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
           <SectionCard>
-            <InfoBlock label="Descrição" value={data.descricao} />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light">
+                Descrição
+              </span>
+              <p
+                className="text-sm font-normal leading-5 tracking-normal text-foreground"
+                style={{ whiteSpace: 'pre-wrap' }}
+              >
+                {decodeHtmlEntities(data.descricao)}
+              </p>
+            </div>
           </SectionCard>
         )}
 
@@ -592,7 +609,7 @@ function LoadingState() {
         style={{ paddingTop: '24px', paddingBottom: '24px' }}
       />
 
-      <div className="pt-[100px] pb-32 px-4 flex flex-col gap-4">
+      <div className="pt-25 pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -618,7 +635,7 @@ function ErrorState({ protocolo }: { protocolo: string }) {
         route="/minhas-solicitacoes"
         style={{ paddingTop: '24px', paddingBottom: '24px' }}
       />
-      <div className="pt-[100px] pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
+      <div className="pt-25 pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>
@@ -664,7 +681,7 @@ export default function RequestDetailPage() {
                 }) => ({
                   evento: a.evento ?? '—',
                   dataInsercao: a.dataInsercao ?? '',
-                  descricao: a.descricao ?? '',
+                  descricao: decodeHtmlEntities(a.descricao ?? ''),
                 })
               )
 
@@ -688,7 +705,7 @@ export default function RequestDetailPage() {
                 os?.orgaoResponsavel?.nome ??
                 os?.orgaoResponsavelPai?.nome ??
                 '',
-              categoria: os?.subtema ?? '',
+              categoria: os?.subtema ?? os?.categoria ?? 'Serviço',
               subcategoria: os?.servico ?? '',
               origem: json.origem ?? '',
               andamentos,
@@ -717,7 +734,9 @@ export default function RequestDetailPage() {
             ? {
                 evento: os.ultimoAndamento.evento ?? '',
                 dataInsercao: os.ultimoAndamento.dataInsercao ?? '',
-                descricao: os.ultimoAndamento.descricao ?? '',
+                descricao: decodeHtmlEntities(
+                  os.ultimoAndamento.descricao ?? ''
+                ),
               }
             : null
 
