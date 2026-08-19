@@ -50,6 +50,7 @@ describe('adicionarImovel', () => {
         id: 32,
         inscricao: '00000018',
         endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+        nome: null,
         bairro: null,
         proprietario: null,
         possuiDebitos: null,

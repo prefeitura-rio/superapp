@@ -72,7 +72,7 @@ describe('InscricaoImobiliariaForm', () => {
     expect(push).not.toHaveBeenCalled()
   })
 
-  test('leva à confirmação carregando só os dígitos na URL', async () => {
+  test('leva ao passo do nome carregando só os dígitos na URL', async () => {
     const user = userEvent.setup()
     render(<InscricaoImobiliariaForm />)
 
@@ -81,7 +81,7 @@ describe('InscricaoImobiliariaForm', () => {
 
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith(
-        '/divida-ativa/imoveis/novo/confirmar?inscricao=05217663'
+        '/divida-ativa/imoveis/novo/nome?inscricao=05217663'
       )
     )
   })

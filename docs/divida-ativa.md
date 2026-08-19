@@ -353,6 +353,7 @@ mas `'desconhecida'` precisa de tratamento visual definido no design. E prefira 
 | P20 | Consulta × cadastro | Dois endpoints, um que só consulta | 🎨 | **A premissa caiu.** Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-perdeu-a-fonte-de-dados) |
 | P21 | Tamanho da inscrição | 7 **ou** 8 dígitos | ✅ | Confirmada no transporte. Duas ressalvas: a API aceita **menos** de 7 dígitos e a nossa validação não, o que impede testar manualmente com o dado `18` da instância dele; e a resposta vem sempre com 8, então a máscara ganha um `0.` à esquerda que o carnê não tem |
 | P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA SANTO AFONSO, 216 / LOJA A - TIJUCA"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
+| P23 | Nome/apelido do imóvel | *(premissa nova, descoberta no Figma do fluxo de cadastro, 19/08/2026)* | 🎨 | O Figma tem um passo "Escreva um nome para esse imóvel" ("Minha Casa", "Casa de praia"), mas `ImovelRequest` só aceita `numInscricao` e `ImovelResponse` não devolve nome — não há onde gravar. O front já implementou o passo e transporta o valor até a Server Action, que o **descarta** na fronteira da API (`adicionar-imovel.ts`). Combinado em 19/08: Vladimir adiciona o campo ao contrato; aí é incluir no corpo do `POST /imoveis` e exibir na lista |
 | P18 | Identificador da consulta | Só inscrição imobiliária | 🎨 | **Meia vitória.** `POST /imoveis/{inscricao}/divida-ativa/consultar` aceita quatro critérios — `numInscricao`, `numCda`, `numExecucaoFiscal` e um que não esperávamos, `numGuiaPagamento` (RN-001/RN-002, critério único). Mas a inscrição continua **no path**, e a tag diz "autorizacao por imovel cadastrado": quem só tem a carta de cobrança ainda não entra. Ver detalhamento abaixo |
 
 ### Achados novos, fora da tabela
@@ -578,6 +579,7 @@ A troca do contrato aconteceu em 17/08/2026. O que está pronto:
 | Pendência | Depende de |
 |---|---|
 | Tela `confirmar` funcional (P20) | decisão de produto entre A, B e C |
+| Persistir o nome do imóvel (P23) | Vladimir adicionar o campo a `ImovelRequest`/`ImovelResponse`; o fluxo do front já transporta o valor |
 | Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
 | Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
 | Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |

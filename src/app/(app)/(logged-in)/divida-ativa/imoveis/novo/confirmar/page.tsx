@@ -21,31 +21,30 @@ import { redirect } from 'next/navigation'
 export default async function ConfirmarImovelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ inscricao?: string }>
+  searchParams: Promise<{ inscricao?: string; nome?: string }>
 }) {
-  const { inscricao } = await searchParams
+  const { inscricao, nome } = await searchParams
 
   // Sem um número plausível não há o que confirmar: volta para o campo em vez de consultar.
   if (!inscricao || !isInscricaoImobiliariaValida(inscricao)) {
     redirect('/divida-ativa/imoveis/novo')
   }
 
+  const inscricaoLimpa = somenteDigitos(inscricao)
   const { cpf } = await getUserInfoFromToken()
-  const imovel = await getDalDividaAtivaConsultaInscricao(
-    somenteDigitos(inscricao),
-    cpf
-  )
+  const imovel = await getDalDividaAtivaConsultaInscricao(inscricaoLimpa, cpf)
+
+  // Voltar preserva o nome digitado: quem revisa não perde o que escreveu no passo anterior.
+  const voltarParams = new URLSearchParams({ inscricao: inscricaoLimpa })
+  if (nome) voltarParams.set('nome', nome)
+  const voltarHref = `/divida-ativa/imoveis/novo/nome?${voltarParams.toString()}`
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader
-        title=""
-        className="max-w-xl"
-        route="/divida-ativa/imoveis/novo"
-      />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
+      <SecondaryHeader title="" className="max-w-4xl" route={voltarHref} />
 
       {imovel ? (
-        <ConfirmarImovel imovel={imovel} />
+        <ConfirmarImovel imovel={imovel} nome={nome} voltarHref={voltarHref} />
       ) : (
         <InscricaoNaoEncontrada />
       )}

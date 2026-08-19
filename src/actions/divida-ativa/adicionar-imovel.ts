@@ -1,5 +1,6 @@
 'use server'
 
+import { NOME_IMOVEL_TAMANHO_MAXIMO } from '@/app/components/divida-ativa/nome-imovel-schema'
 import { postImoveis } from '@/http-divida-ativa/imoveis/imoveis'
 import {
   mapApiToImovel,
@@ -26,7 +27,8 @@ import type { ResultadoAcaoDividaAtiva } from './resultado'
  * O vínculo com o cidadão é feito pela API a partir do Bearer token: nada de CPF no corpo.
  */
 export async function adicionarImovel(
-  inscricao: string
+  inscricao: string,
+  nome?: string
 ): Promise<ResultadoAcaoDividaAtiva<ImovelDividaAtiva>> {
   const { cpf } = await getUserInfoFromToken()
 
@@ -42,6 +44,17 @@ export async function adicionarImovel(
     }
   }
 
+  if (nome && nome.trim().length > NOME_IMOVEL_TAMANHO_MAXIMO) {
+    return {
+      success: false,
+      error: `O nome pode ter no máximo ${NOME_IMOVEL_TAMANHO_MAXIMO} caracteres.`,
+      status: 400,
+    }
+  }
+
+  // ⚠️ O `nome` chega até aqui e é descartado: `ImovelRequest` só aceita `numInscricao`
+  // (premissa P23 em `docs/divida-ativa.md`). Quando o contrato ganhar o campo, inclua-o
+  // no corpo abaixo — o resto do fluxo já o transporta.
   const response = await postImoveis({
     numInscricao: somenteDigitos(inscricao),
   })

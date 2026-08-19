@@ -125,9 +125,11 @@ export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {
     id: numeroOuNull(api.id),
     inscricao: somenteDigitos(api.numInscricao ?? ''),
     endereco: textoOuNull(api.endereco),
-    // A API não separa bairro nem devolve proprietário, e `GET /imoveis` não consulta a
-    // Fazenda para saber de débitos. Estes três são `null` por ausência de dado, não por
-    // omissão nossa — premissas P22, P19 e P12 em `docs/divida-ativa.md`.
+    // A API não separa bairro, não devolve proprietário nem o nome dado pelo cidadão, e
+    // `GET /imoveis` não consulta a Fazenda para saber de débitos. Estes são `null` por
+    // ausência de dado, não por omissão nossa — premissas P22, P19, P23 e P12 em
+    // `docs/divida-ativa.md`.
+    nome: null,
     bairro: null,
     proprietario: null,
     possuiDebitos: null,

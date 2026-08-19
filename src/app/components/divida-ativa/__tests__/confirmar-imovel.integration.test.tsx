@@ -34,11 +34,14 @@ const IMOVEL: ImovelDividaAtiva = {
   id: 32,
   inscricao: '05217663',
   endereco: 'Rua Barata Ribeiro, 586 - A 501',
+  nome: null,
   bairro: 'Copacabana',
   proprietario: 'Bruno Rocha Menezes',
   possuiDebitos: null,
   cadastradoEm: null,
 }
+
+const VOLTAR_HREF = '/divida-ativa/imoveis/novo/nome?inscricao=05217663'
 
 describe('ConfirmarImovel', () => {
   beforeEach(() => {
@@ -51,7 +54,7 @@ describe('ConfirmarImovel', () => {
   })
 
   test('mostra o que a consulta trouxe para o cidadão conferir', () => {
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+    render(<ConfirmarImovel imovel={IMOVEL} voltarHref={VOLTAR_HREF} />)
 
     expect(
       screen.getByRole('heading', {
@@ -61,27 +64,67 @@ describe('ConfirmarImovel', () => {
     expect(
       screen.getByText('Rua Barata Ribeiro, 586 - A 501')
     ).toBeInTheDocument()
+    expect(screen.getByText('Endereço')).toBeInTheDocument()
     expect(screen.getByText('Copacabana')).toBeInTheDocument()
     expect(screen.getByText('0.521.766-3')).toBeInTheDocument()
     expect(screen.getByText('Bruno Rocha Menezes')).toBeInTheDocument()
   })
 
+  /** O card é o mesmo da lista: o nome escolhido no passo anterior aparece como título. */
+  test('mostra o nome escolhido como título do card', () => {
+    render(
+      <ConfirmarImovel
+        imovel={IMOVEL}
+        nome="Casa Família"
+        voltarHref={VOLTAR_HREF}
+      />
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Casa Família' })
+    ).toBeInTheDocument()
+  })
+
   test('só cadastra o imóvel quando o cidadão confirma', async () => {
     const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+    render(<ConfirmarImovel imovel={IMOVEL} voltarHref={VOLTAR_HREF} />)
 
     expect(vi.mocked(adicionarImovel)).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole('button', { name: 'Confirmar' }))
 
     await waitFor(() =>
-      expect(vi.mocked(adicionarImovel)).toHaveBeenCalledWith('05217663')
+      expect(vi.mocked(adicionarImovel)).toHaveBeenCalledWith(
+        '05217663',
+        undefined
+      )
+    )
+  })
+
+  /** O nome do passo anterior segue para a action (premissa P23: a API ainda o descarta). */
+  test('encaminha o nome dado pelo cidadão para a action', async () => {
+    const user = userEvent.setup()
+    render(
+      <ConfirmarImovel
+        imovel={IMOVEL}
+        nome="Casa de praia"
+        voltarHref={VOLTAR_HREF}
+      />
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    await waitFor(() =>
+      expect(vi.mocked(adicionarImovel)).toHaveBeenCalledWith(
+        '05217663',
+        'Casa de praia'
+      )
     )
   })
 
   test('cadastrado com sucesso, leva à tela de confirmação', async () => {
     const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+    render(<ConfirmarImovel imovel={IMOVEL} voltarHref={VOLTAR_HREF} />)
 
     await user.click(screen.getByRole('button', { name: 'Confirmar' }))
 
@@ -98,7 +141,7 @@ describe('ConfirmarImovel', () => {
     })
 
     const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+    render(<ConfirmarImovel imovel={IMOVEL} voltarHref={VOLTAR_HREF} />)
 
     await user.click(screen.getByRole('button', { name: 'Confirmar' }))
 
@@ -110,12 +153,12 @@ describe('ConfirmarImovel', () => {
     expect(push).not.toHaveBeenCalled()
   })
 
-  test('voltar leva de novo ao campo da inscrição', () => {
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+  test('voltar leva ao passo do nome preservando a inscrição', () => {
+    render(<ConfirmarImovel imovel={IMOVEL} voltarHref={VOLTAR_HREF} />)
 
     expect(screen.getByRole('link', { name: 'Voltar' })).toHaveAttribute(
       'href',
-      '/divida-ativa/imoveis/novo'
+      VOLTAR_HREF
     )
   })
 })
