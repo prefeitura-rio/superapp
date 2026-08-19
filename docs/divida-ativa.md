@@ -224,12 +224,14 @@ src/middleware.ts                     # bloco de gating
 | `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
 | `/divida-ativa/parcelamento` · `/acompanhamento` | Estado provisório até a Fase 3 |
 
-### O cadastro de um imóvel são três telas e duas chamadas
+### O cadastro de um imóvel são quatro telas e duas chamadas
 
-A tela do campo **não** chama a API: ela valida o formato e leva os dígitos para a URL da
-confirmação. Quem consulta é o Server Component de `confirmar`, e quem grava é a Server Action
-disparada pelo botão "Confirmar". Essa separação é a premissa P20 — no legado, consultar já
-cadastrava.
+O fluxo é `novo` (campo da inscrição) → `confirmar` (o cidadão confere o imóvel) → `nome`
+(escolhe um nome, opcional) → `sucesso`. A tela do campo **não** chama a API: ela valida o
+formato e leva os dígitos para a URL da confirmação. Quem consulta é o Server Component de
+`confirmar`, e quem grava é a Server Action disparada pelo "Continuar" do passo do **nome**
+— a ordem confirmação-antes-do-nome é decisão de produto (19/08/2026). Essa separação entre
+consultar e gravar é a premissa P20 — no legado, consultar já cadastrava.
 
 A inscrição trafega **somente com dígitos** em toda a pilha (URL, action e API). A máscara
 (`0.521.766-3`) é aplicada só na exibição, por `formatarInscricaoImobiliaria`. Abaixo de sete

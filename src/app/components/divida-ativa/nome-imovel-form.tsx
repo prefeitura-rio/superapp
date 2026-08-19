@@ -1,5 +1,6 @@
 'use client'
 
+import { adicionarImovel } from '@/actions/divida-ativa/adicionar-imovel'
 import {
   type NomeImovelSchema,
   nomeImovelSchema,
@@ -8,43 +9,48 @@ import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 
 interface NomeImovelFormProps {
-  /** Inscrição validada no passo anterior — só transita, nada é gravado aqui. */
+  /** Inscrição confirmada no passo anterior — é ela que a action grava. */
   inscricao: string
-  /** Nome já digitado, para quem volta da confirmação sem perder o que escreveu. */
-  nomeInicial?: string
 }
 
 /**
- * Passo intermediário do cadastro: um nome para o imóvel ("Minha Casa", "Casa de praia").
+ * Último passo do cadastro: um nome para o imóvel ("Minha Casa", "Casa de praia"). O
+ * "Continuar" daqui é quem grava — a confirmação anterior só consultou.
  *
- * ⚠️ O contrato ainda não tem onde gravar este valor (premissa P23 em
- * `docs/divida-ativa.md`) — ele viaja pela URL até a Server Action, que o descarta na
- * fronteira da API. A tela existe desde já porque é parte do fluxo do Figma; a persistência
- * chega com o campo no contrato.
+ * ⚠️ O contrato ainda não tem onde gravar o nome (premissa P23 em
+ * `docs/divida-ativa.md`) — ele chega à Server Action, que o descarta na fronteira da
+ * API. A tela existe desde já porque é parte do fluxo do Figma; a persistência chega com
+ * o campo no contrato.
  */
-export function NomeImovelForm({
-  inscricao,
-  nomeInicial,
-}: NomeImovelFormProps) {
+export function NomeImovelForm({ inscricao }: NomeImovelFormProps) {
   const router = useRouter()
+  const [enviando, startTransition] = useTransition()
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<NomeImovelSchema>({
     resolver: zodResolver(nomeImovelSchema),
-    defaultValues: { nome: nomeInicial ?? '' },
+    defaultValues: { nome: '' },
   })
 
   function onSubmit(data: NomeImovelSchema) {
-    const params = new URLSearchParams({ inscricao })
-    if (data.nome) params.set('nome', data.nome)
+    startTransition(async () => {
+      const resultado = await adicionarImovel(inscricao, data.nome || undefined)
 
-    router.push(`/divida-ativa/imoveis/novo/confirmar?${params.toString()}`)
+      if (!resultado.success) {
+        toast.error(resultado.error)
+        return
+      }
+
+      router.push('/divida-ativa/imoveis/novo/sucesso')
+    })
   }
 
   return (
@@ -72,7 +78,7 @@ export function NomeImovelForm({
         variant="primary"
         size="lg"
         fullWidth
-        disabled={isSubmitting}
+        disabled={enviando}
         className="mt-4"
       >
         Continuar

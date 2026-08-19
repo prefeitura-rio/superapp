@@ -12,8 +12,9 @@ import { redirect } from 'next/navigation'
 
 /**
  * Segundo passo do cadastro: consulta a inscrição no sistema fiscal e mostra o que veio para
- * o cidadão conferir. **Ainda não grava** — quem grava é o "Confirmar", que dispara a Server
- * Action. No portal legado a consulta já cadastrava; a separação é deliberada (premissa P20).
+ * o cidadão conferir. **Ainda não grava** — quem grava é o "Continuar" do passo seguinte (o
+ * nome do imóvel). No portal legado a consulta já cadastrava; a separação é deliberada
+ * (premissa P20).
  *
  * A inscrição vem por query param porque é estado compartilhável de UI, e a consulta acontece
  * aqui no servidor: assim o token não precisa chegar ao browser.
@@ -21,9 +22,9 @@ import { redirect } from 'next/navigation'
 export default async function ConfirmarImovelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ inscricao?: string; nome?: string }>
+  searchParams: Promise<{ inscricao?: string }>
 }) {
-  const { inscricao, nome } = await searchParams
+  const { inscricao } = await searchParams
 
   // Sem um número plausível não há o que confirmar: volta para o campo em vez de consultar.
   if (!inscricao || !isInscricaoImobiliariaValida(inscricao)) {
@@ -34,17 +35,19 @@ export default async function ConfirmarImovelPage({
   const { cpf } = await getUserInfoFromToken()
   const imovel = await getDalDividaAtivaConsultaInscricao(inscricaoLimpa, cpf)
 
-  // Voltar preserva o nome digitado: quem revisa não perde o que escreveu no passo anterior.
-  const voltarParams = new URLSearchParams({ inscricao: inscricaoLimpa })
-  if (nome) voltarParams.set('nome', nome)
-  const voltarHref = `/divida-ativa/imoveis/novo/nome?${voltarParams.toString()}`
-
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-4xl" route={voltarHref} />
+      <SecondaryHeader
+        title=""
+        className="max-w-4xl"
+        route="/divida-ativa/imoveis/novo"
+      />
 
       {imovel ? (
-        <ConfirmarImovel imovel={imovel} nome={nome} voltarHref={voltarHref} />
+        <ConfirmarImovel
+          imovel={imovel}
+          continuarHref={`/divida-ativa/imoveis/novo/nome?inscricao=${inscricaoLimpa}`}
+        />
       ) : (
         <InscricaoNaoEncontrada />
       )}

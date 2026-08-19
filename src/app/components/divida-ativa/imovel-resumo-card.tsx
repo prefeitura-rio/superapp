@@ -3,11 +3,6 @@ import type { ImovelDividaAtiva } from '@/types/divida-ativa'
 
 interface ImovelResumoCardProps {
   imovel: ImovelDividaAtiva
-  /**
-   * Nome a exibir no lugar do `imovel.nome` — a confirmação usa o que o cidadão acabou de
-   * digitar, que ainda não existe no imóvel consultado (premissa P23).
-   */
-  nome?: string | null
   /** Ação alinhada à linha da inscrição (ex.: o botão de excluir da lista). */
   acao?: React.ReactNode
 }
@@ -20,18 +15,12 @@ interface ImovelResumoCardProps {
  * Nome, bairro e proprietário somem quando não há dado (premissas P23, P22 e P19): a API
  * ainda não os devolve, e linha vazia é pior que linha ausente.
  */
-export function ImovelResumoCard({
-  imovel,
-  nome,
-  acao,
-}: ImovelResumoCardProps) {
-  const nomeExibido = nome ?? imovel.nome
-
+export function ImovelResumoCard({ imovel, acao }: ImovelResumoCardProps) {
   return (
     <article className="flex flex-col gap-4 rounded-2xl bg-card p-4">
-      {nomeExibido && (
+      {imovel.nome && (
         <h2 className="text-xl font-semibold leading-7 text-foreground">
-          {nomeExibido}
+          {imovel.nome}
         </h2>
       )}
 

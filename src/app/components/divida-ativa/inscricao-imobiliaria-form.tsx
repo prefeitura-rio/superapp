@@ -41,7 +41,7 @@ export function InscricaoImobiliariaForm() {
 
   function onSubmit(data: InscricaoImobiliariaSchema) {
     router.push(
-      `/divida-ativa/imoveis/novo/nome?inscricao=${somenteDigitos(data.inscricao)}`
+      `/divida-ativa/imoveis/novo/confirmar?inscricao=${somenteDigitos(data.inscricao)}`
     )
   }
 

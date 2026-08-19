@@ -5,7 +5,8 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
  * Primeiro passo do cadastro: o cidadão digita a inscrição imobiliária.
  *
  * Nada é gravado aqui nem no passo seguinte — o formulário só leva o número para a tela de
- * confirmação, que consulta o sistema fiscal. A gravação acontece no "Confirmar" de lá.
+ * confirmação, que consulta o sistema fiscal. A gravação acontece no fim do fluxo, no
+ * "Continuar" do passo do nome.
  */
 export default function NovoImovelPage() {
   return (
