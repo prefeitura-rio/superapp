@@ -47,7 +47,7 @@ export function ExcluirImovelButton({
         type="button"
         aria-label={`Excluir imóvel ${descricao}`}
         onClick={() => setAberto(true)}
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/70"
+        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/70 active:bg-secondary/70"
       >
         <TrashIcon className="size-5" />
       </button>

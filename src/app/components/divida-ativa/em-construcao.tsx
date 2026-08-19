@@ -15,8 +15,8 @@ interface EmConstrucaoProps {
  */
 export function EmConstrucao({ titulo, descricao }: EmConstrucaoProps) {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-xl" route="/divida-ativa" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
+      <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
 
       <div className="flex flex-1 flex-col px-4">
         <h1 className="pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
@@ -44,8 +44,8 @@ export function EmConstrucao({ titulo, descricao }: EmConstrucaoProps) {
 /** Skeleton fiel ao layout do estado provisório: título, parágrafo e botão. */
 export function EmConstrucaoLoading() {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-xl" route="/divida-ativa" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
+      <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
 
       <div className="flex flex-1 flex-col px-4">
         <div className="pt-2 pb-6">

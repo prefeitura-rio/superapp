@@ -4,10 +4,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 /** Skeleton fiel ao layout real: título em duas linhas, campo, texto de ajuda e botão. */
 export default function NovoImovelLoading() {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
       <SecondaryHeader
         title=""
-        className="max-w-xl"
+        className="max-w-4xl"
         route="/divida-ativa/imoveis"
       />
 
