@@ -22,15 +22,17 @@ test.describe('Carteira', () => {
     })
   })
 
-  test('exibe abas "Meus Cartões" e "Meus Pets"', async ({ page }) => {
+  test('exibe abas "Cartões", "Pets" e "Veículos"', async ({ page }) => {
     await page.goto('/carteira')
     await expect(page.getByRole('heading', { name: 'Carteira' })).toBeVisible({
       timeout: 20000,
     })
-    await expect(page.getByText('Meus Cartões', { exact: true })).toBeVisible({
+    // Rótulos definidos em src/app/components/wallet-tabs.tsx
+    await expect(page.getByText('Cartões', { exact: true })).toBeVisible({
       timeout: 15000,
     })
-    await expect(page.getByText('Meus Pets', { exact: true })).toBeVisible()
+    await expect(page.getByText('Pets', { exact: true })).toBeVisible()
+    await expect(page.getByText('Veículos', { exact: true })).toBeVisible()
   })
 
   test('exibe cartões ou estado vazio da carteira', async ({ page }) => {
