@@ -612,9 +612,24 @@ test.describe('Cursos — página do curso (autenticado)', () => {
     })
     const cancelar = page.getByRole('button', { name: 'Cancelar inscrição' })
     const recusada = page.getByRole('button', { name: 'Inscrição recusada' })
+    // Curso concluído com certificado também é "feedback de já inscrito":
+    // `certificate_available` vira link e `certificate_pending` vira botão
+    // desabilitado — ver getCourseEnrollmentInfo em src/lib/course-utils.ts.
+    const acessarCertificado = page.getByRole('link', {
+      name: 'Acessar certificado',
+    })
+    const aguardandoCertificado = page.getByRole('button', {
+      name: 'Aguardando certificado',
+    })
 
     await expect(
-      inscreverCta.or(trocarTurma).or(cancelar).or(recusada).first()
+      inscreverCta
+        .or(trocarTurma)
+        .or(cancelar)
+        .or(recusada)
+        .or(acessarCertificado)
+        .or(aguardandoCertificado)
+        .first()
     ).toBeVisible({ timeout: 20000 })
   })
 })
