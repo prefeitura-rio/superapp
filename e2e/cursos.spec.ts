@@ -511,6 +511,56 @@ test.describe('Cursos — certificados (autenticado)', () => {
   })
 })
 
+/**
+ * Templates de certificado são PDFs lidos do disco em runtime pela rota
+ * `/api/templates/[template]`, e não módulos importados — então o bundler não
+ * garante nada sobre eles. Este teste exercita a rota servida por HTTP pelo
+ * servidor real (dev ou `next start`), cobrindo status, content-type e o 400.
+ *
+ * ATENÇÃO: isto NÃO cobre o artefato `output: 'standalone'` usado no Docker.
+ * Tanto `next dev` quanto `next start` rodam a partir da raiz do repo, onde
+ * `src/lib/templates/` existe em disco de qualquer forma — o teste passaria
+ * mesmo se o file tracing não copiasse a pasta. Para validar o standalone é
+ * preciso rodar `node server.js` de dentro de `.next/standalone`.
+ */
+test.describe('Cursos — templates de certificado', () => {
+  const TEMPLATES = [
+    'juvrio',
+    'planetario',
+    'smac',
+    'smpd',
+    'cvlsubtd',
+    'sesrio',
+    'spmrio',
+    'smte',
+  ] as const
+
+  for (const template of TEMPLATES) {
+    test(`serve o template ${template} como PDF`, async ({ page }) => {
+      const res = await page.request.get(`/api/templates/${template}`, {
+        timeout: 15000,
+      })
+
+      if (!res.ok()) {
+        throw new Error(
+          `/api/templates/${template} respondeu ${res.status()} — o PDF não chegou ao build (NÃO é skip).`
+        )
+      }
+
+      expect(res.headers()['content-type']).toContain('application/pdf')
+
+      const body = await res.body()
+      expect(body.byteLength).toBeGreaterThan(1000)
+      expect(body.subarray(0, 4).toString('latin1')).toBe('%PDF')
+    })
+  }
+
+  test('rejeita template inexistente com 400', async ({ page }) => {
+    const res = await page.request.get('/api/templates/secretaria-inexistente')
+    expect(res.status()).toBe(400)
+  })
+})
+
 test.describe('Cursos — alertas (autenticado)', () => {
   test.beforeEach(async ({ context }) => {
     test.skip(
