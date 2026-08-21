@@ -9,6 +9,7 @@ export const TEST_ENV = {
   BASE_API_URL_PREF_RIO_CARTA_SERVICOS: 'http://localhost:3008/api/',
   BASE_API_URL_PREF_RIO_CIDADAO: 'http://localhost:3006/api/private/',
   BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO: 'http://localhost:3007/api/',
+  BASE_API_URL_DIVIDA_ATIVA: 'http://localhost:3009',
   NODE_ENV: 'test',
 } as const
 
