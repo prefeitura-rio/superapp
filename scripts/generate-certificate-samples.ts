@@ -50,6 +50,11 @@ const SAMPLE_ORGS: SampleOrg[] = [
     issuingOrganization:
       'Secretaria Especial de Políticas para Mulheres e Cuidados',
   },
+  {
+    template: 'smte',
+    orgao_id: '2600',
+    issuingOrganization: 'Secretaria Municipal de Trabalho e Renda',
+  },
 ]
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'lib', 'templates')
