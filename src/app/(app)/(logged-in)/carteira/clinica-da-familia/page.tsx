@@ -82,7 +82,7 @@ export default async function HealthCardDetail() {
     return (
       <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
         <SecondaryHeader
-          title="Carteira"
+          title="Documentos"
           className="max-w-[896px]"
           fixed={false}
         />
@@ -137,7 +137,7 @@ export default async function HealthCardDetail() {
   return (
     <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
       <SecondaryHeader
-        title="Carteira"
+        title="Documentos"
         className="max-w-[896px]"
         fixed={false}
       />

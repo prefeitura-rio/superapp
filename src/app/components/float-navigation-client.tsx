@@ -26,7 +26,7 @@ export function FloatNavigationClient({
   const navItems: NavItem[] = [
     { href: '/', icon: Home2Icon, label: 'Home' },
     { href: '/servicos', icon: ServicesIcon, label: 'Serviços' },
-    { href: walletUrl, icon: WalletIcon, label: 'Carteira' },
+    { href: walletUrl, icon: WalletIcon, label: 'Documentos' },
   ]
 
   return (
@@ -37,7 +37,7 @@ export function FloatNavigationClient({
             // Special case: wallet button should be active on both wallet routes
             const isActive =
               pathname === item.href ||
-              (item.label === 'Carteira' &&
+              (item.label === 'Documentos' &&
                 (pathname === '/carteira' ||
                   pathname === '/autenticacao-necessaria/carteira'))
             const Icon = item.icon

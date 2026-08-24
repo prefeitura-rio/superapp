@@ -25,7 +25,7 @@ export function WalletPageClient() {
       <section className="pb-30 relative h-full px-4">
         <div className="flex items-center justify-between pt-6 pb-4">
           <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
-            Carteira
+            Documentos
           </h2>
           <SearchButton />
         </div>
@@ -52,7 +52,7 @@ export function WalletPageClient() {
     <section className="pb-30 relative h-full px-4">
       <div className="flex items-center justify-between pt-6 pb-4">
         <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
-          Carteira
+          Documentos
         </h2>
         <SearchButton />
       </div>
