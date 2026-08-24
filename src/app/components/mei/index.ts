@@ -1,4 +1,3 @@
-export { MeiHeader } from './mei-header'
 export { MeiOpportunityCard, type MeiOpportunity } from './mei-opportunity-card'
 export {
   MeiProposalCard,
