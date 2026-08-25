@@ -182,13 +182,12 @@ export function SecondaryHeader({
           {/* Center - absolutely positioned so it never competes with side buttons */}
           <div className="absolute inset-x-0 flex justify-center pointer-events-none">
             <div className="pointer-events-auto">
-              {logo ? (
-                logo
-              ) : (
-                <h1 className="text-xl text-nowrap font-medium text-center text-foreground">
-                  {title}
-                </h1>
-              )}
+              {logo ??
+                (title ? (
+                  <h1 className="text-xl text-nowrap font-medium text-center text-foreground">
+                    {title}
+                  </h1>
+                ) : null)}
             </div>
           </div>
 

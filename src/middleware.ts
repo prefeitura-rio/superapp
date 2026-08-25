@@ -20,7 +20,17 @@ const publicRoutes = [
   { path: '/manifest.json', whenAuthenticated: 'next' },
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso', whenAuthenticated: 'next' },
+  { path: '/politica-de-privacidade', whenAuthenticated: 'next' },
 ] as const
+
+/**
+ * Rotas antigas que foram promovidas a documentos institucionais globais.
+ * Mantidas com 308 porque são divulgadas externamente.
+ */
+const legacyRedirects: Record<string, string> = {
+  '/servicos/trabalho/termos-de-uso': '/termos-de-uso',
+}
 
 const oportunidadesCariocasLegacyPaths = [
   '/oportunidadescariocas',
@@ -164,6 +174,20 @@ export async function middleware(request: NextRequest) {
           )
           return response
         }
+      }
+
+      // Legacy URLs: documentos institucionais que saíram de um módulo
+      const legacyRedirect = legacyRedirects[path]
+      if (legacyRedirect) {
+        const url = request.nextUrl.clone()
+        url.pathname = legacyRedirect
+
+        const response = NextResponse.redirect(url, 308)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
       }
 
       // Legacy URLs: Oportunidades Cariocas → serviços de trabalho
