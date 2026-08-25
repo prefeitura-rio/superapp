@@ -40,7 +40,7 @@ test.describe('Home (público)', () => {
 
     await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Serviços' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Carteira' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Documentos' })).toBeVisible()
   })
 
   test('header de visitante oferece login', async ({ page }) => {
@@ -50,14 +50,13 @@ test.describe('Home (público)', () => {
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('link Carteira na barra inferior aponta para fluxo de autenticação', async ({
+  test('link Documentos na barra inferior aponta para fluxo de autenticação', async ({
     page,
   }) => {
     await page.goto('/')
-    await expect(page.getByRole('link', { name: 'Carteira' })).toHaveAttribute(
-      'href',
-      '/autenticacao-necessaria/carteira'
-    )
+    await expect(
+      page.getByRole('link', { name: 'Documentos' })
+    ).toHaveAttribute('href', '/autenticacao-necessaria/carteira')
   })
 
   test('exibe banner de login (carteira / serviços municipais)', async ({
@@ -88,14 +87,16 @@ test.describe('Home (público)', () => {
     expect(await categoryLinks.count()).toBeGreaterThanOrEqual(3)
   })
 
-  test('não exibe a seção Carteira quando não autenticado', async ({
+  test('não exibe a seção Documentos quando não autenticado', async ({
     page,
   }) => {
     await page.goto('/')
     await expect(
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Carteira' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Documentos' })).toHaveCount(
+      0
+    )
   })
 
   test('não exibe banner de atualização de cadastro do usuário logado', async ({
@@ -134,14 +135,13 @@ test.describe('Home (autenticado)', () => {
     })
   })
 
-  test('link Carteira na barra inferior aponta para /carteira', async ({
+  test('link Documentos na barra inferior aponta para /carteira', async ({
     page,
   }) => {
     await page.goto('/')
-    await expect(page.getByRole('link', { name: 'Carteira' })).toHaveAttribute(
-      'href',
-      '/carteira'
-    )
+    await expect(
+      page.getByRole('link', { name: 'Documentos' })
+    ).toHaveAttribute('href', '/carteira')
   })
 
   test('exibe banner de atualização de cadastro em vez do banner de login', async ({
@@ -154,11 +154,11 @@ test.describe('Home (autenticado)', () => {
     await expect(page.getByText('Acesse sua carteira e os')).toHaveCount(0)
   })
 
-  test('exibe Carteira ou estado de carteira vazia após carregar', async ({
+  test('exibe Documentos ou estado de carteira vazia após carregar', async ({
     page,
   }) => {
     await page.goto('/')
-    const carteira = page.getByRole('heading', { name: 'Carteira' })
+    const carteira = page.getByRole('heading', { name: 'Documentos' })
     const empty = page.getByText('No momento sua carteira está vazia.')
     await expect(carteira.or(empty).first()).toBeVisible({ timeout: 25000 })
   })
