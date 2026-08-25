@@ -462,14 +462,31 @@ test.describe('FAQ (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exibe SecondaryHeader "FAQ" e texto "O que é a Plataforma PrefRio?"', async ({
-    page,
-  }) => {
+  test('hub lista os três assuntos com hrefs corretos', async ({ page }) => {
     await page.goto('/faq')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'FAQ' })
+      page.getByRole('heading', { level: 1, name: 'Perguntas Frequentes' })
     ).toBeVisible({ timeout: 15000 })
 
+    await expect(
+      page.getByRole('link', { name: 'PrefRio', exact: true })
+    ).toHaveAttribute('href', '/faq/pref-rio')
+    await expect(
+      page.getByRole('link', { name: 'Cursos', exact: true })
+    ).toHaveAttribute('href', '/servicos/cursos/faq')
+    await expect(
+      page.getByRole('link', { name: 'Trabalho', exact: true })
+    ).toHaveAttribute('href', '/servicos/trabalho/faq')
+  })
+
+  test('assunto PrefRio exibe o conteúdo institucional', async ({ page }) => {
+    await page.goto('/faq')
+    await page.getByRole('link', { name: 'PrefRio', exact: true }).click()
+    await page.waitForURL('**/faq/pref-rio', { timeout: 15000 })
+
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Perguntas Frequentes' })
+    ).toBeVisible({ timeout: 15000 })
     await expect(page.getByText('O que é a Plataforma PrefRio?')).toBeVisible({
       timeout: 10000,
     })
