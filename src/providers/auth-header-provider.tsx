@@ -1,14 +1,15 @@
 'use client'
 
+import {
+  HEADER_QUERY_KEY,
+  type HeaderData,
+  defaultHeaderData,
+  fetchHeaderData,
+} from '@/hooks/use-header-data'
 import { useQuery } from '@tanstack/react-query'
 import { type ReactNode, createContext, useCallback, useContext } from 'react'
 
-export interface AuthHeaderData {
-  isLoggedIn: boolean
-  userName: string
-  userAvatarUrl: string | null
-  userAvatarName: string | null
-}
+export type AuthHeaderData = HeaderData
 
 interface AuthHeaderContextType {
   data: AuthHeaderData
@@ -16,35 +17,13 @@ interface AuthHeaderContextType {
   refetch: () => Promise<void>
 }
 
-const defaultData: AuthHeaderData = {
-  isLoggedIn: false,
-  userName: '',
-  userAvatarUrl: null,
-  userAvatarName: null,
-}
-
 const AuthHeaderContext = createContext<AuthHeaderContextType>({
-  data: defaultData,
+  data: defaultHeaderData,
   isLoading: true,
   refetch: async () => {},
 })
 
 export const useAuthHeader = () => useContext(AuthHeaderContext)
-
-async function fetchHeaderData(): Promise<AuthHeaderData> {
-  const response = await fetch('/api/user/header', {
-    cache: 'no-store',
-    credentials: 'include',
-  })
-  if (!response.ok) return defaultData
-  const d = await response.json()
-  return {
-    isLoggedIn: d.isLoggedIn ?? false,
-    userName: d.userName ?? '',
-    userAvatarUrl: d.userAvatarUrl ?? null,
-    userAvatarName: d.userAvatarName ?? null,
-  }
-}
 
 export function AuthHeaderProvider({ children }: { children: ReactNode }) {
   const {
@@ -52,7 +31,7 @@ export function AuthHeaderProvider({ children }: { children: ReactNode }) {
     isPending,
     refetch: queryRefetch,
   } = useQuery({
-    queryKey: ['header'],
+    queryKey: HEADER_QUERY_KEY,
     queryFn: fetchHeaderData,
     staleTime: 5 * 60 * 1000,
   })
@@ -63,7 +42,7 @@ export function AuthHeaderProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthHeaderContext.Provider
-      value={{ data: data ?? defaultData, isLoading: isPending, refetch }}
+      value={{ data: data ?? defaultHeaderData, isLoading: isPending, refetch }}
     >
       {children}
     </AuthHeaderContext.Provider>

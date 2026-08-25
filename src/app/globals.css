@@ -245,6 +245,15 @@ select:-webkit-autofill:focus {
   /* custom shadow */
   --shadow-float-navigation: var(--shadow-float-navigation);
 
+  /* Global menu header (bg-global-menu-header) — navy institucional, fixo nos
+     dois temas porque o painel do menu não inverte junto com o resto do app */
+  --background-image-global-menu-header: linear-gradient(
+    107deg,
+    #13335a 0%,
+    #1d4a7d 100%
+  );
+  --color-global-menu-accent: #2a5b93;
+
   /* CadMicro wallet card gradients (bg-cadmicro-*) */
   --background-image-cadmicro-autopropelido: linear-gradient(
     242.7deg,

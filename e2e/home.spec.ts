@@ -163,3 +163,158 @@ test.describe('Home (autenticado)', () => {
     await expect(carteira.or(empty).first()).toBeVisible({ timeout: 25000 })
   })
 })
+
+// ---------------------------------------------------------------------------
+// MENU GLOBAL
+// ---------------------------------------------------------------------------
+
+test.describe('Menu global (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('abre pelo header e exibe os acessos públicos', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+
+    const menu = page.getByRole('dialog')
+    await expect(menu).toBeVisible()
+    await expect(
+      menu.getByRole('link', { name: 'Faça seu login' })
+    ).toBeVisible()
+    await expect(
+      menu.getByRole('link', { name: 'Página inicial' })
+    ).toBeVisible()
+    await expect(menu.getByRole('link', { name: 'Serviços' })).toBeVisible()
+    await expect(
+      menu.getByRole('button', { name: 'Oportunidades Cariocas' })
+    ).toBeVisible()
+    await expect(
+      menu.getByRole('button', { name: 'Atendimentos' })
+    ).toBeVisible()
+    await expect(menu.getByRole('button', { name: 'Outros' })).toBeVisible()
+  })
+
+  test('deslogado oculta os itens que exigem login', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+
+    const menu = page.getByRole('dialog')
+    // Documentos continua no menu, mas leva à tela de autenticação necessária
+    await expect(
+      menu.getByRole('link', { name: 'Documentos' })
+    ).toHaveAttribute('href', '/autenticacao-necessaria/carteira')
+    // Sair só existe para quem está logado
+    await expect(menu.getByRole('button', { name: 'Sair' })).toHaveCount(0)
+
+    await menu.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
+    await expect(menu.getByRole('link', { name: 'Ver cursos' })).toBeVisible()
+    await expect(menu.getByRole('link', { name: 'Meus cursos' })).toHaveCount(0)
+    await expect(menu.getByRole('link', { name: 'Certificados' })).toHaveCount(
+      0
+    )
+    await expect(
+      menu.getByRole('link', { name: 'Minhas candidaturas' })
+    ).toHaveCount(0)
+  })
+
+  test('Documentos deslogado leva à tela de autenticação necessária', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('link', { name: 'Documentos' })
+      .click()
+
+    await page.waitForURL('**/autenticacao-necessaria/carteira', {
+      timeout: 15000,
+    })
+    await expect(
+      page.getByText('Informações para você em um só lugar')
+    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('Entre com a sua conta gov.br')).toBeVisible()
+  })
+
+  test('fecha ao navegar por um item', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Outros' }).click()
+    await page.getByRole('link', { name: 'Termos de uso' }).click()
+
+    await page.waitForURL('**/termos-de-uso', { timeout: 15000 })
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Termos de uso' })
+    ).toBeVisible({ timeout: 15000 })
+  })
+
+  test('fecha pelo botão X', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Fechar menu' }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
+  test('toggle "Tema claro" alterna o tema do app', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Outros' }).click()
+
+    const toggle = page.locator('#global-menu-theme')
+    await expect(toggle).toHaveAttribute('data-state', 'checked')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('data-state', 'unchecked')
+    await expect(page.locator('html')).toHaveClass(/dark/)
+
+    await toggle.click()
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+  })
+})
+
+test.describe('Menu global (autenticado)', () => {
+  test.beforeEach(async ({ context }) => {
+    test.skip(
+      !hasE2EAuth(),
+      'Defina E2E_ACCESS_TOKEN para rodar testes autenticados'
+    )
+    await applyE2ECookieConsent(context)
+    await applyE2EAuthCookies(context)
+  })
+
+  test('exibe bloco do usuário, Documentos e Sair', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+
+    const menu = page.getByRole('dialog')
+    await expect(menu.getByText(/\d{3}\.\d{3}\.\d{3}-\d{2}/)).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(
+      menu.getByRole('link', { name: 'Documentos' })
+    ).toHaveAttribute('href', '/carteira')
+    await expect(menu.getByRole('button', { name: 'Sair' })).toBeVisible()
+    await expect(
+      menu.getByRole('link', { name: 'Faça seu login' })
+    ).toHaveCount(0)
+  })
+
+  test('bloco do usuário leva para Dados pessoais', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+
+    await page
+      .getByRole('dialog')
+      .getByRole('link', { name: /\d{3}\.\d{3}\.\d{3}-\d{2}/ })
+      .click()
+
+    await page.waitForURL('**/meu-perfil', { timeout: 15000 })
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
+    ).toBeVisible({ timeout: 15000 })
+  })
+})

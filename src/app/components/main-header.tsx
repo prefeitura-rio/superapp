@@ -1,37 +1,32 @@
+'use client'
+
 import { PrefLogo } from '@/assets/icons/pref-logo'
+import { useHeaderData } from '@/hooks/use-header-data'
+import { GlobalMenuTrigger } from './global-menu/global-menu-trigger'
 import HeaderUserLink from './header-user-link'
 
-interface MainHeaderProps {
-  userName: string
-  isLoggedIn: boolean
-  showSearchIcon?: boolean
-  userAvatarUrl?: string | null
-  userAvatarName?: string | null
-  isLoading?: boolean
-}
+export default function MainHeader() {
+  const { data, isLoading } = useHeaderData()
 
-export default function MainHeader({
-  userName,
-  isLoggedIn,
-  showSearchIcon = true,
-  userAvatarUrl,
-  userAvatarName,
-  isLoading = false,
-}: MainHeaderProps) {
   return (
     <header className="relative  w-full z-50 bg-background text-foreground py-4">
       <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
         {/* Left side - Logo */}
         <PrefLogo fill="var(--primary)" className="h-8 w-20" />
 
-        {/* Right side - User info with icon */}
-        <HeaderUserLink
-          userName={userName}
-          isLoggedIn={isLoggedIn}
-          userAvatarUrl={userAvatarUrl}
-          userAvatarName={userAvatarName}
-          isLoading={isLoading}
-        />
+        {/* Right side - perfil + menu global.
+            O acesso ao perfil segue aqui até o handoff do novo Header chegar;
+            depois dele o menu global passa a ser o único ponto de entrada. */}
+        <div className="flex items-center gap-2">
+          <HeaderUserLink
+            userName={data.userName}
+            isLoggedIn={data.isLoggedIn}
+            userAvatarUrl={data.userAvatarUrl}
+            userAvatarName={data.userAvatarName}
+            isLoading={isLoading}
+          />
+          <GlobalMenuTrigger />
+        </div>
       </div>
     </header>
   )
