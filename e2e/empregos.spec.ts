@@ -139,9 +139,7 @@ test.describe('Empregos — home (público)', () => {
       name: 'Mais recentes',
     })
     const firstCard = vagasHeading
-      .locator(
-        'xpath=following::a[starts-with(@href, "/servicos/trabalho/") and not(@href="/servicos/trabalho/menu")]'
-      )
+      .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
       .and(page.getByRole('link'))
       .first()
     await expect(firstCard).toBeVisible({ timeout: 20000 })
@@ -229,22 +227,22 @@ test.describe('Empregos — home (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('header autenticado exibe ícone de menu para /servicos/trabalho/menu', async ({
+  test('header autenticado exibe o gatilho do menu global', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('header autenticado não exibe ícone de ajuda (FAQ) no header', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible({
+      timeout: 15000,
+    })
     // Ícone de ajuda só aparece para deslogados; menu aparece para logados
     const faqHeaderLink = page.locator(
       'header a[href="/servicos/trabalho/faq"]'
@@ -256,9 +254,9 @@ test.describe('Empregos — home (autenticado)', () => {
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible({
+      timeout: 15000,
+    })
 
     const candidaturasCard = page.getByRole('link', {
       name: 'Candidaturas enviadas',
@@ -282,9 +280,9 @@ test.describe('Empregos — home (autenticado)', () => {
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible({
+      timeout: 15000,
+    })
 
     const candidaturasCard = page.getByRole('link', {
       name: 'Candidaturas enviadas',
@@ -1187,7 +1185,10 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
 
-    await page.getByText('Termos de Uso', { exact: true }).click()
+    // Locator por role: o corpo do accordion passou a ter um link com o texto
+    // exato 'Termos de Uso' (aponta para /termos-de-uso), então getByText
+    // ficaria ambíguo com o accordion aberto.
+    await page.getByRole('button', { name: 'Termos de Uso' }).click()
 
     await expect(
       page.getByText(
@@ -1229,7 +1230,10 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
 
     // Conta sem aceite prévio: aceita de fato (marca o checkbox e salva, o que
     // persiste o aceite via API) e então valida o badge.
-    await page.getByText('Termos de Uso', { exact: true }).click()
+    // Locator por role: o corpo do accordion passou a ter um link com o texto
+    // exato 'Termos de Uso' (aponta para /termos-de-uso), então getByText
+    // ficaria ambíguo com o accordion aberto.
+    await page.getByRole('button', { name: 'Termos de Uso' }).click()
     const checkbox = page.getByRole('checkbox').first()
     await expect(checkbox).toBeVisible({ timeout: 10000 })
     if (!(await checkbox.isChecked())) {
@@ -1533,7 +1537,7 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
 // MENU DE EMPREGOS — AUTENTICADO
 // ---------------------------------------------------------------------------
 
-test.describe('Empregos — menu (autenticado)', () => {
+test.describe('Empregos — menu global (autenticado)', () => {
   test.beforeEach(async ({ context }) => {
     test.skip(
       !hasE2EAuth(),
@@ -1542,38 +1546,35 @@ test.describe('Empregos — menu (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exibe heading "Menu" com todos os itens e links corretos', async ({
+  test('menu global exibe itens de Empregos com hrefs corretos', async ({
     page,
   }) => {
-    await page.goto('/servicos/trabalho/menu')
+    await page.goto('/servicos/trabalho')
 
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
 
+    await expect(page.getByRole('link', { name: 'Ver vagas' })).toHaveAttribute(
+      'href',
+      '/servicos/trabalho'
+    )
     await expect(
       page.getByRole('link', { name: 'Minhas candidaturas' })
     ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
-
     await expect(
       page.getByRole('link', { name: 'Meu currículo' })
     ).toHaveAttribute('href', '/servicos/trabalho/curriculo')
-
-    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
-      'href',
-      '/servicos/trabalho/faq'
-    )
   })
 
-  test('clicar em "Minhas candidaturas" navega para /minhas-candidaturas', async ({
+  test('clicar em "Minhas candidaturas" no menu global navega para /minhas-candidaturas', async ({
     page,
   }) => {
-    await page.goto('/servicos/trabalho/menu')
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+    await page.goto('/servicos/trabalho')
 
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
     await page.getByRole('link', { name: 'Minhas candidaturas' }).click()
+
     await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
       timeout: 15000,
     })
@@ -1582,32 +1583,32 @@ test.describe('Empregos — menu (autenticado)', () => {
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('clicar em "Meu currículo" navega para /curriculo', async ({ page }) => {
-    await page.goto('/servicos/trabalho/menu')
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+  test('clicar em "Meu currículo" no menu global navega para /curriculo', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
 
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
     await page.getByRole('link', { name: 'Meu currículo' }).click()
+
     await page.waitForURL('**/servicos/trabalho/curriculo', { timeout: 15000 })
     await expect(
       page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('clicar em "FAQ" navega para /servicos/trabalho/faq', async ({
+  test('FAQ de Trabalho é alcançável pelo hub de Perguntas Frequentes', async ({
     page,
   }) => {
-    await page.goto('/servicos/trabalho/menu')
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+    await page.goto('/faq')
+    await expect(page.getByRole('link', { name: 'Trabalho' })).toHaveAttribute(
+      'href',
+      '/servicos/trabalho/faq'
+    )
 
-    await page.getByRole('link', { name: 'FAQ' }).click()
+    await page.getByRole('link', { name: 'Trabalho', exact: true }).click()
     await page.waitForURL('**/servicos/trabalho/faq', { timeout: 15000 })
-    await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
-      timeout: 15000,
-    })
   })
 })
 

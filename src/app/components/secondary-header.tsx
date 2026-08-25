@@ -58,15 +58,6 @@ function hasInternalHistory(preferredRoute?: string): boolean {
           }
         }
 
-        // Special case: If we're on /servicos/cursos/opcoes and previous route is /servicos/cursos/meus-cursos,
-        // ignore it to prevent loops (user likely came from a course detail page via meus-cursos)
-        const isOpcoesPage = currentPath === '/servicos/cursos/opcoes'
-        const isMeusCursosPage = previousPath === '/servicos/cursos/meus-cursos'
-        if (isOpcoesPage && isMeusCursosPage) {
-          // Don't use router.back() - use the preferred route instead
-          return false
-        }
-
         // Check if it's not a child route (e.g., we don't want to go back to a child)
         const isChildRoute = previousPath.startsWith(`${currentPath}/`)
         if (!isChildRoute) {
@@ -103,15 +94,6 @@ function hasInternalHistory(preferredRoute?: string): boolean {
               if (isCategoryPage && isCourseDetailPage) {
                 return false
               }
-            }
-
-            // Special case: If we're on /servicos/cursos/opcoes and referrer is /servicos/cursos/meus-cursos,
-            // ignore it to prevent loops (user likely came from a course detail page via meus-cursos)
-            const isOpcoesPage = currentPath === '/servicos/cursos/opcoes'
-            const isMeusCursosPage =
-              referrerUrl.pathname === '/servicos/cursos/meus-cursos'
-            if (isOpcoesPage && isMeusCursosPage) {
-              return false
             }
 
             return true

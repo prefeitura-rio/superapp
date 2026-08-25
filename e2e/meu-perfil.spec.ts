@@ -31,12 +31,12 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exibe SecondaryHeader "Perfil", nome do usuário e CPF', async ({
+  test('exibe SecondaryHeader "Dados pessoais", nome do usuário e CPF', async ({
     page,
   }) => {
     await page.goto('/meu-perfil')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
     // h2 com nome de exibição do usuário
@@ -46,10 +46,10 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await expect(page.getByText(/\d{3}\.\d{3}\.\d{3}-\d{2}/)).toBeVisible()
   })
 
-  test('menu exibe todos os itens com links corretos', async ({ page }) => {
+  test('exibe apenas Meus dados e Endereço', async ({ page }) => {
     await page.goto('/meu-perfil')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
     await expect(
@@ -59,23 +59,28 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       'href',
       '/meu-perfil/endereco'
     )
+
+    // Autorizações, Configurações, FAQ e Sair migraram para o menu global
+    await expect(page.getByRole('link', { name: 'Autorizações' })).toHaveCount(
+      0
+    )
+    await expect(page.getByRole('link', { name: 'Configurações' })).toHaveCount(
+      0
+    )
+    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveCount(0)
+  })
+
+  test('Autorizações e Sair vivem no menu global', async ({ page }) => {
+    await page.goto('/meu-perfil')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
+    ).toBeVisible({ timeout: 15000 })
+
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Outros' }).click()
     await expect(
       page.getByRole('link', { name: 'Autorizações' })
     ).toHaveAttribute('href', '/meu-perfil/autorizacoes')
-    await expect(
-      page.getByRole('link', { name: 'Configurações' })
-    ).toHaveAttribute('href', '/meu-perfil/configuracoes')
-    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
-      'href',
-      '/faq'
-    )
-  })
-
-  test('botão Sair inicia processo de logout', async ({ page }) => {
-    await page.goto('/meu-perfil')
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
-    ).toBeVisible({ timeout: 15000 })
 
     // Intercepta o endpoint de logout para evitar redirecionamento externo
     await page.route('/api/auth/logout', route =>
@@ -85,9 +90,6 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     const sairBtn = page.getByRole('button', { name: 'Sair' })
     await expect(sairBtn).toBeVisible()
     await sairBtn.click()
-
-    // setIsLoading(true) roda de forma síncrona: label muda para "Saindo..."
-    await expect(page.getByText('Saindo...')).toBeVisible({ timeout: 5000 })
   })
 })
 

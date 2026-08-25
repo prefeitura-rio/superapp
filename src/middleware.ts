@@ -31,6 +31,9 @@ const publicRoutes = [
  */
 const legacyRedirects: Record<string, string> = {
   '/servicos/trabalho/termos-de-uso': '/termos-de-uso',
+  // Menus por módulo foram absorvidos pelo menu global
+  '/servicos/cursos/opcoes': '/servicos/cursos',
+  '/servicos/trabalho/menu': '/servicos/trabalho',
 }
 
 const oportunidadesCariocasLegacyPaths = [

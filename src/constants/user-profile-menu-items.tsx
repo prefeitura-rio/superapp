@@ -1,11 +1,4 @@
-import {
-  CheckIcon,
-  HelpCircleIcon,
-  MapPinIcon,
-  PhoneIcon,
-  SettingsIcon,
-  UserIcon,
-} from '@/assets/icons'
+import { MapPinIcon, UserIcon } from '@/assets/icons'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -15,8 +8,10 @@ interface UserProfileMenuItemsData {
   variant?: 'default' | 'danger'
 }
 
-const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
-
+/**
+ * Tela "Dados pessoais". Solicitações, Autorizações, Configurações (tema),
+ * FAQ e Sair saíram daqui — todos passaram a viver no menu global.
+ */
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
     id: 'meus-dados',
@@ -29,39 +24,5 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     icon: <MapPinIcon className="h-5 w-5" />,
     label: 'Endereço',
     href: '/meu-perfil/endereco',
-  },
-  // {
-  //   id: 'trabalho',
-  //   icon: <Briefcase className="h-5 w-5" />,
-  //   label: 'Trabalho',
-  //   href: '/meu-perfil/user-job-info',
-  // },
-  ...(isChamadosEnabled
-    ? [
-        {
-          id: 'solicitacoes',
-          icon: <PhoneIcon className="h-5 w-5" />,
-          label: 'Solicitações',
-          href: '/minhas-solicitacoes',
-        } as UserProfileMenuItemsData,
-      ]
-    : []),
-  {
-    id: 'autorizacoes',
-    icon: <CheckIcon className="h-5 w-5" />,
-    label: 'Autorizações',
-    href: '/meu-perfil/autorizacoes',
-  },
-  {
-    id: 'configuracoes',
-    icon: <SettingsIcon className="h-5 w-5" />,
-    label: 'Configurações',
-    href: '/meu-perfil/configuracoes',
-  },
-  {
-    id: 'faq',
-    icon: <HelpCircleIcon className="h-5 w-5" />,
-    label: 'FAQ',
-    href: '/faq',
   },
 ] as const
