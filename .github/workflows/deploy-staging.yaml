@@ -74,6 +74,7 @@ jobs:
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
             --build-arg NEXT_PUBLIC_FEATURE_CHAMADOS="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="false" \
             --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="c84d3e127f66af2cee4bfe289c58537a" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://storage.googleapis.com/rio-queue" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_API_URL="https://rio-queue.dados.rio" \

@@ -207,6 +207,31 @@ export async function middleware(request: NextRequest) {
         return response
       }
 
+      // Block Dívida Ativa routes when the feature flag is disabled.
+      // Boolean flag (not the NEXT_PUBLIC_FEATURE_FLAG allowlist) because the allowlist means
+      // "everything visible" when it is 'false', which is its value in dev and staging.
+      //
+      // The module lives at /divida-ativa (not under /servicos) on purpose: /servicos/* is in
+      // publicRoutes, so anything below it is public regardless of the folder it sits in.
+      // Outside the allowlist the middleware forces login for the whole module.
+      const isDividaAtivaEnabled =
+        process.env.NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA === 'true'
+      const dividaAtivaRoute = '/divida-ativa'
+      const isDividaAtivaRoute =
+        path === dividaAtivaRoute || path.startsWith(`${dividaAtivaRoute}/`)
+
+      if (!isDividaAtivaEnabled && isDividaAtivaRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/not-found'
+
+        const response = NextResponse.rewrite(url)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
+      }
+
       // FUTURE: cadastro de pet — rota desativada até a feature entrar no ar
       if (
         path === '/carteira/pet/adicionar' ||

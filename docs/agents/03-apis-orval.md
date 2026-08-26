@@ -12,6 +12,7 @@
 | `src/http-pref-rio-carta-servicos/` | Spec local `pref-rio-carta-servicos-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-carta-servicos.ts` | `BASE_API_URL_PREF_RIO_CARTA_SERVICOS` |
 | `src/http-pref-rio-cidadao/` | Spec local `pref-rio-cidadao-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-cidadao.ts` | `BASE_API_URL_PREF_RIO_CIDADAO` |
 | `src/http-pref-rio-chamados-publico/` | Spec local `pref-rio-chamados-publico-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-chamados-publico.ts` | `BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO` |
+| `src/http-divida-ativa/` | Spec local `divida-ativa-api.yaml` (`api-imoveis`, Quarkus — fora deste repo) | `custom-fetch-divida-ativa.ts` | `BASE_API_URL_DIVIDA_ATIVA` |
 
 A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. As exceções são **Carta de Serviços** e **Chamados Público** — APIs públicas sem Bearer do cidadão (auth M2M na camada Mule).
 
