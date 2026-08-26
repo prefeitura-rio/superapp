@@ -25,9 +25,14 @@ Mapeia IDs de organizações (orgao_id/cd_ua) para seus templates PDF correspond
 | `cvlsubtd.pdf` | CVL / Subsecretaria | `52451` | v2 |
 | `sesrio.pdf` | SES-RIO | `1900` | v2 |
 | `spmrio.pdf` | Secretaria Especial de Políticas para Mulheres - SPM-RIO | `4700` | v2 |
+| `smte.pdf` | Secretaria Municipal de Trabalho e Renda - SMTE | `2600` | v2 |
 | `smac.pdf` | Secretaria Municipal de Meio Ambiente e Clima - SMAC | `2400` | legado |
 
 > **Nota:** `smac` ainda usa o layout legado (texto centralizado). Será migrado para o layout v2 quando o novo PDF estiver disponível.
+
+> **Como obter o `cd_ua` de um órgão novo:** `GET {RMI}/v1/departments?sigla_ua=SIGLA` — endpoint
+> público, sem auth. Ex.: `curl "https://services.pref.rio/rmi/v1/departments?sigla_ua=SMTE"`.
+> Confira o valor em staging **e** produção antes de mapear.
 
 **Funções Principais:**
 - `getCertificateTemplate(orgao_id)` - Retorna o nome do template baseado no orgao_id ou `null` se não encontrado
@@ -337,6 +342,26 @@ Texto centralizado no PDF:
 
 ## Testes
 
+### Testes automatizados
+
+| Arquivo | Cobre |
+|---------|-------|
+| `src/lib/__tests__/certificate-template-mapping.test.ts` | mapeamento `orgao_id` → template, URL da rota, layout v2 vs legado |
+| `src/app/api/templates/[template]/__tests__/route.test.ts` | rota serve cada template mapeado como PDF, rejeita template inválido/path traversal, e **guarda de divergência**: todo template mapeado existe em disco e é aceito pela rota |
+| `e2e/cursos.spec.ts` → `Cursos — templates de certificado` | a rota serve cada PDF por HTTP no servidor real (status, content-type, 400) — não precisa de auth nem de dados |
+
+> **Artefato standalone:** os PDFs não são módulos importados — a rota lê do disco via
+> `process.cwd()`. Nenhum teste automatizado cobre o artefato `output: 'standalone'` do Docker,
+> porque `next dev` e `next start` rodam da raiz do repo, onde a pasta existe de qualquer jeito.
+> Verificação manual ao adicionar um template:
+> `npm run build && ls .next/standalone/src/lib/templates/` (validado em 2026-08-20 — o file
+> tracing do Next copia a pasta inteira, e o `smte.pdf` sai byte-idêntico ao original).
+
+> **Por que o guarda de divergência existe:** um template novo precisa ser declarado em três lugares
+> independentes (`TEMPLATE_MAPPINGS`, `NEW_LAYOUT_TEMPLATES`, `VALID_TEMPLATES`) mais o arquivo em disco.
+> Esquecer qualquer um passa no typecheck e só falha em runtime. `CERTIFICATE_TEMPLATES` (derivado de
+> `TEMPLATE_MAPPINGS`) é a fonte de verdade usada pelos testes.
+
 ### Casos de Teste
 
 1. **Certificado com URL**: Verificar download/visualização/compartilhamento/impressão diretos
@@ -438,6 +463,12 @@ http://localhost:3000/servicos/cursos/certificados
 - `src/app/layout.tsx` - Configuração do Toaster (já existente)
 
 ## Histórico de Versões
+
+- **v5.1** - Template da SMTE
+  - ✅ Template `smte` (Secretaria Municipal de Trabalho e Renda), layout v2
+  - ✅ Derivado do mockup entregue pelo design: o PDF original vinha com o texto placeholder
+    desenhado no miolo; o texto foi removido para virar template mudo (só banner + assinaturas)
+  - ✅ `orgao_id` `2600`, confirmado idêntico em staging e produção via API do RMI
 
 - **v5.0** - Layout v2 e novos templates
   - ✅ Templates `cvlsubtd`, `sesrio`, `spmrio` + remapeamento visual de `juvrio`/`smpd`
