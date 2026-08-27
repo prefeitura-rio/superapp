@@ -2,9 +2,14 @@
 import type { ModelsCurso } from '@/http-courses/models'
 import {
   type UserEnrollmentExtended,
+  collectCourseSchedules,
   filterCoursesExcludingMyCourses,
   filterVisibleCourses,
   getCourseEnrollmentInfo,
+  getScheduleAvailability,
+  getScheduleUnavailableLabel,
+  getSchedulesUnavailableLabel,
+  isScheduleSelectable,
   normalizeModalityDisplay,
   shouldShowCourse,
   sortCourses,
@@ -415,5 +420,374 @@ describe('filterCoursesExcludingMyCourses', () => {
     const result = filterCoursesExcludingMyCourses(courses, myCourses)
 
     expect(result).toHaveLength(0)
+  })
+})
+describe('getScheduleAvailability', () => {
+  const NOW = new Date('2026-08-27T15:00:00Z')
+
+  test('available quando a janela está aberta e há vagas', () => {
+    expect(
+      getScheduleAvailability(
+        {
+          enrollment_start_date: '2026-08-01T00:00:00Z',
+          enrollment_end_date: '2026-09-01T00:00:00Z',
+          remaining_vacancies: 3,
+        },
+        NOW
+      )
+    ).toBe('available')
+  })
+
+  test('enrollment_not_started quando a janela ainda não abriu', () => {
+    expect(
+      getScheduleAvailability(
+        {
+          enrollment_start_date: '2026-09-01T00:00:00Z',
+          enrollment_end_date: '2026-10-01T00:00:00Z',
+          remaining_vacancies: 3,
+        },
+        NOW
+      )
+    ).toBe('enrollment_not_started')
+  })
+
+  test('enrollment_closed tem precedência sobre vagas restantes', () => {
+    expect(
+      getScheduleAvailability(
+        {
+          enrollment_end_date: '2026-07-31T13:42:28-03:00',
+          remaining_vacancies: 1,
+        },
+        NOW
+      )
+    ).toBe('enrollment_closed')
+  })
+
+  test('enrollment_closed quando o órgão desliga accepting_enrollments', () => {
+    expect(
+      getScheduleAvailability(
+        { accepting_enrollments: false, remaining_vacancies: 10 },
+        NOW
+      )
+    ).toBe('enrollment_closed')
+  })
+
+  test('no_vacancies quando a janela está aberta mas não há vagas', () => {
+    expect(
+      getScheduleAvailability(
+        {
+          enrollment_end_date: '2027-07-30T10:40:40-03:00',
+          remaining_vacancies: 0,
+        },
+        NOW
+      )
+    ).toBe('no_vacancies')
+  })
+
+  test('compara instantes, não o dia da string (offset -03:00 vs Z)', () => {
+    // 2026-08-27T00:30:00-03:00 é 2026-08-27T03:30:00Z — ainda futuro às 03:00Z
+    const schedule = { enrollment_start_date: '2026-08-27T00:30:00-03:00' }
+    expect(
+      getScheduleAvailability(schedule, new Date('2026-08-27T03:00:00Z'))
+    ).toBe('enrollment_not_started')
+    expect(
+      getScheduleAvailability(
+        { ...schedule, remaining_vacancies: 1 },
+        new Date('2026-08-27T04:00:00Z')
+      )
+    ).toBe('available')
+  })
+})
+
+describe('getCourseEnrollmentInfo — vigência por turma (JIRA bug vigência)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-27T15:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  // Dados reais do curso 2865 do staging: a janela do curso (2026-07-30 →
+  // 2027-07-30) é a união das turmas, então o backend deriva
+  // accepting_enrollments mesmo sem nenhuma turma inscritível.
+  const course2865 = createCourse({
+    id: 2865,
+    status: 'accepting_enrollments',
+    modalidade: 'Presencial',
+    enrollment_start_date: '2026-07-30T10:40:40-03:00',
+    enrollment_end_date: '2027-07-30T10:40:40-03:00',
+    locations: [
+      {
+        id: 'abolicao',
+        schedules: [
+          {
+            id: 'turma-abolicao',
+            enrollment_start_date: '2026-07-30T10:40:40-03:00',
+            enrollment_end_date: '2027-07-30T10:40:40-03:00',
+            accepting_enrollments: true,
+            remaining_vacancies: 0,
+          },
+        ],
+      },
+      {
+        id: 'acari',
+        schedules: [
+          {
+            id: 'turma-acari',
+            enrollment_start_date: '2026-07-30T10:42:28-03:00',
+            enrollment_end_date: '2026-07-31T10:42:28-03:00',
+            accepting_enrollments: true,
+            remaining_vacancies: 1,
+          },
+        ],
+      },
+    ],
+  } as any)
+
+  test('não libera inscrição quando a única turma com vaga está encerrada', () => {
+    const result = getCourseEnrollmentInfo(course2865)
+    expect(result.canEnroll).toBe(false)
+    expect(result.isDisabled).toBe(true)
+  })
+
+  test('accepting_enrollments com todas as turmas encerradas → inscrições encerradas', () => {
+    const course = createCourse({
+      status: 'accepting_enrollments',
+      modalidade: 'Presencial',
+      enrollment_end_date: '2027-01-01T00:00:00Z',
+      locations: [
+        {
+          id: 'a',
+          schedules: [
+            {
+              id: 's1',
+              enrollment_end_date: '2026-08-01T00:00:00Z',
+              remaining_vacancies: 5,
+            },
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+    expect(result.status).toBe('enrollment_closed')
+    expect(result.buttonText).toBe('Inscrições encerradas')
+    expect(result.canEnroll).toBe(false)
+  })
+
+  test('accepting_enrollments com turma encerrada + turma futura → disponível em breve', () => {
+    const course = createCourse({
+      status: 'accepting_enrollments',
+      modalidade: 'Presencial',
+      enrollment_start_date: '2026-08-01T00:00:00Z',
+      enrollment_end_date: '2026-10-01T00:00:00Z',
+      locations: [
+        {
+          id: 'a',
+          schedules: [
+            {
+              id: 'encerrada',
+              enrollment_start_date: '2026-08-01T00:00:00Z',
+              enrollment_end_date: '2026-08-10T00:00:00Z',
+              remaining_vacancies: 5,
+            },
+            {
+              id: 'futura',
+              enrollment_start_date: '2026-09-15T00:00:00Z',
+              enrollment_end_date: '2026-10-01T00:00:00Z',
+              remaining_vacancies: 5,
+            },
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+    expect(result.status).toBe('coming_soon')
+    expect(result.canEnroll).toBe(false)
+  })
+
+  test('libera inscrição quando ao menos uma turma está dentro da vigência', () => {
+    const course = createCourse({
+      status: 'accepting_enrollments',
+      modalidade: 'Presencial',
+      enrollment_end_date: '2026-10-01T00:00:00Z',
+      locations: [
+        {
+          id: 'a',
+          schedules: [
+            {
+              id: 'encerrada',
+              enrollment_end_date: '2026-08-10T00:00:00Z',
+              remaining_vacancies: 5,
+            },
+            {
+              id: 'aberta',
+              enrollment_end_date: '2026-09-30T00:00:00Z',
+              remaining_vacancies: 5,
+            },
+          ],
+        },
+      ],
+    } as any)
+
+    const result = getCourseEnrollmentInfo(course)
+    expect(result.status).toBe('available')
+    expect(result.canEnroll).toBe(true)
+  })
+
+  test('cursos sem turmas continuam usando a janela do curso', () => {
+    const course = createCourse({
+      status: 'accepting_enrollments',
+      modalidade: 'LIVRE_FORMACAO_ONLINE',
+      enrollment_end_date: '2026-12-01T00:00:00Z',
+    })
+
+    expect(getCourseEnrollmentInfo(course).canEnroll).toBe(true)
+  })
+})
+
+describe('isScheduleSelectable', () => {
+  const NOW = new Date('2026-08-27T15:00:00Z')
+
+  test('true apenas quando a turma está dentro da janela e com vaga', () => {
+    expect(
+      isScheduleSelectable(
+        { enrollment_end_date: '2026-09-30T00:00:00Z', remaining_vacancies: 1 },
+        NOW
+      )
+    ).toBe(true)
+  })
+
+  test('false para turma com vaga porém fora da janela', () => {
+    expect(
+      isScheduleSelectable(
+        { enrollment_end_date: '2026-08-01T00:00:00Z', remaining_vacancies: 5 },
+        NOW
+      )
+    ).toBe(false)
+  })
+
+  test('false para turma dentro da janela porém sem vaga', () => {
+    expect(
+      isScheduleSelectable(
+        { enrollment_end_date: '2026-09-30T00:00:00Z', remaining_vacancies: 0 },
+        NOW
+      )
+    ).toBe(false)
+  })
+
+  test('turma sem datas definidas depende só das vagas (compat legado)', () => {
+    expect(isScheduleSelectable({ remaining_vacancies: 2 }, NOW)).toBe(true)
+    expect(isScheduleSelectable({ remaining_vacancies: 0 }, NOW)).toBe(false)
+  })
+})
+
+describe('getScheduleUnavailableLabel', () => {
+  const NOW = new Date('2026-08-27T15:00:00Z')
+
+  test('null quando a turma pode ser escolhida', () => {
+    expect(
+      getScheduleUnavailableLabel(
+        { enrollment_end_date: '2026-09-30T00:00:00Z', remaining_vacancies: 1 },
+        NOW
+      )
+    ).toBeNull()
+  })
+
+  test('informa o motivo real em vez de sempre "sem vagas"', () => {
+    expect(
+      getScheduleUnavailableLabel(
+        { enrollment_end_date: '2026-08-01T00:00:00Z', remaining_vacancies: 5 },
+        NOW
+      )
+    ).toBe('Inscrições encerradas')
+
+    expect(
+      getScheduleUnavailableLabel(
+        {
+          enrollment_start_date: '2026-09-01T00:00:00Z',
+          remaining_vacancies: 5,
+        },
+        NOW
+      )
+    ).toBe('Inscrições ainda não abertas')
+
+    expect(
+      getScheduleUnavailableLabel(
+        { enrollment_end_date: '2026-09-30T00:00:00Z', remaining_vacancies: 0 },
+        NOW
+      )
+    ).toBe('Sem vagas disponíveis')
+  })
+})
+
+describe('getSchedulesUnavailableLabel', () => {
+  const NOW = new Date('2026-08-27T15:00:00Z')
+
+  const aberta = {
+    enrollment_end_date: '2026-09-30T00:00:00Z',
+    remaining_vacancies: 3,
+  }
+  const encerrada = {
+    enrollment_end_date: '2026-08-01T00:00:00Z',
+    remaining_vacancies: 3,
+  }
+  const semVaga = {
+    enrollment_end_date: '2026-09-30T00:00:00Z',
+    remaining_vacancies: 0,
+  }
+  const futura = {
+    enrollment_start_date: '2026-09-15T00:00:00Z',
+    remaining_vacancies: 3,
+  }
+
+  test('null quando ao menos uma turma da unidade está disponível', () => {
+    expect(getSchedulesUnavailableLabel([encerrada, aberta], NOW)).toBeNull()
+  })
+
+  test('unidade sem turmas é tratada como sem vagas', () => {
+    expect(getSchedulesUnavailableLabel([], NOW)).toBe('Sem vagas disponíveis')
+    expect(getSchedulesUnavailableLabel(undefined, NOW)).toBe(
+      'Sem vagas disponíveis'
+    )
+  })
+
+  test('reporta o motivo menos definitivo entre as turmas', () => {
+    // encerrada + futura → a futura ainda vai abrir, é o que interessa ao cidadão
+    expect(getSchedulesUnavailableLabel([encerrada, futura], NOW)).toBe(
+      'Inscrições ainda não abertas'
+    )
+    // encerrada + sem vaga → a que está no prazo é a sem vaga
+    expect(getSchedulesUnavailableLabel([encerrada, semVaga], NOW)).toBe(
+      'Sem vagas disponíveis'
+    )
+    // todas encerradas → não há o que esperar
+    expect(getSchedulesUnavailableLabel([encerrada, encerrada], NOW)).toBe(
+      'Inscrições encerradas'
+    )
+  })
+})
+
+describe('collectCourseSchedules', () => {
+  test('reúne turmas de todas as unidades e da turma remota', () => {
+    const schedules = collectCourseSchedules({
+      locations: [
+        { schedules: [{ remaining_vacancies: 1 }] },
+        { schedules: [{ remaining_vacancies: 2 }, { remaining_vacancies: 3 }] },
+      ],
+      remote_class: { schedules: [{ remaining_vacancies: 4 }] },
+    })
+
+    expect(schedules.map(s => s.remaining_vacancies)).toEqual([1, 2, 3, 4])
+  })
+
+  test('tolera curso sem unidades e sem turma remota', () => {
+    expect(collectCourseSchedules({})).toEqual([])
+    expect(
+      collectCourseSchedules({ locations: null, remote_class: null })
+    ).toEqual([])
   })
 })

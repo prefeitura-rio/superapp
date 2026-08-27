@@ -20,7 +20,9 @@ import type { ModelsCurso } from '@/http-courses/models'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
-  isScheduleEnrollmentClosed,
+  getScheduleUnavailableLabel,
+  getSchedulesUnavailableLabel,
+  isScheduleSelectable,
   normalizeModalityDisplay,
   shouldGrayscaleCourseCover,
 } from '@/lib/course-utils'
@@ -595,17 +597,6 @@ function OnlineClassSelection({
   const onlineClasses = course.remote_class.schedules
   const hasMultiple = onlineClasses.length > 1
 
-  // A turma só aceita inscrição quando ainda tem vagas E o próprio período de
-  // inscrição não encerrou.
-  const isClassAvailable = (onlineClass: any) => {
-    if (isScheduleEnrollmentClosed(onlineClass)) return false
-    return (
-      onlineClass.remaining_vacancies !== undefined &&
-      onlineClass.remaining_vacancies !== null &&
-      onlineClass.remaining_vacancies > 0
-    )
-  }
-
   if (!hasMultiple) {
     return (
       <div className="space-y-4 pt-4">
@@ -621,7 +612,8 @@ function OnlineClassSelection({
     <div className="space-y-4 pt-4">
       <ScrollableCards count={onlineClasses.length} label="Selecione a turma">
         {onlineClasses.map((onlineClass, index) => {
-          const isAvailable = isClassAvailable(onlineClass)
+          const unavailableLabel = getScheduleUnavailableLabel(onlineClass)
+          const isAvailable = unavailableLabel === null
           const isSelected = selectedClassId === onlineClass.id
           return (
             <button
@@ -641,11 +633,9 @@ function OnlineClassSelection({
             >
               <h4 className="font-medium text-foreground text-sm">
                 Turma {index + 1}
-                {!isAvailable && (
+                {unavailableLabel && (
                   <span className="text-muted-foreground text-xs ml-2">
-                    {isScheduleEnrollmentClosed(onlineClass)
-                      ? '(Inscrições encerradas)'
-                      : '(Sem vagas)'}
+                    ({unavailableLabel})
                   </span>
                 )}
               </h4>
@@ -697,6 +687,11 @@ function LocationSelection({
       >
         {course.locations.map(location => {
           const isSelected = selectedLocationId === location.id
+          // The unidade stays clickable — it also reveals the turma details —
+          // but the citizen sees upfront that it has nothing to enroll into
+          const unavailableLabel = getSchedulesUnavailableLabel(
+            location.schedules
+          )
           return (
             <button
               type="button"
@@ -717,6 +712,11 @@ function LocationSelection({
               {location.address && (
                 <p className="text-foreground-light text-xs font-normal leading-4">
                   {location.address}
+                </p>
+              )}
+              {unavailableLabel && (
+                <p className="text-muted-foreground text-xs font-normal leading-4">
+                  ({unavailableLabel})
                 </p>
               )}
             </button>

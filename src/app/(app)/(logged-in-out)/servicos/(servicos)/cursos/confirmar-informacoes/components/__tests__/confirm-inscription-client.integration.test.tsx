@@ -9,8 +9,11 @@ import { ConfirmInscriptionClient } from '../confirm-inscription-client'
 import { basicCourseInfo, courseId, courseSlug } from './fixtures/course-info'
 import {
   emptyUnits,
+  nearbyUnitsMixedWindows,
   nearbyUnitsSingle,
+  onlineClassesMixedWindows,
   onlineClassesSingle,
+  unitWithClosedAndOpenSchedules,
 } from './fixtures/nearby-units'
 import {
   completeUserInfo,
@@ -366,6 +369,95 @@ describe('ConfirmInscriptionClient', () => {
       )
 
       expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
+    })
+  })
+
+  // Regressão: a seleção de unidade/turma só considerava vagas restantes, então
+  // uma turma com vaga porém fora do período de inscrição aparecia disponível e
+  // a recusa só vinha da API, no último passo.
+  describe('período de inscrição por turma', () => {
+    function renderFlow(
+      nearbyUnits: typeof nearbyUnitsMixedWindows,
+      extraProps: Record<string, unknown> = {}
+    ) {
+      return render(
+        <ConfirmInscriptionClient
+          userInfo={completeUserInfo}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnits}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+          shouldShowConfirmationScreen={false}
+          {...extraProps}
+        />,
+        { wrapper }
+      )
+    }
+
+    test('desabilita unidade cuja turma perdeu o prazo, mesmo com vaga', () => {
+      renderFlow(nearbyUnitsMixedWindows)
+
+      expect(screen.getByRole('radio', { name: /Rua Aberta/ })).toBeEnabled()
+      expect(
+        screen.getByRole('radio', { name: /Rua Encerrada/ })
+      ).toBeDisabled()
+    })
+
+    test('mostra o motivo de cada unidade indisponível, não só "sem vagas"', () => {
+      renderFlow(nearbyUnitsMixedWindows)
+
+      expect(screen.getByText('(Inscrições encerradas)')).toBeInTheDocument()
+      expect(screen.getByText('(Sem vagas disponíveis)')).toBeInTheDocument()
+      expect(
+        screen.getByText('(Inscrições ainda não abertas)')
+      ).toBeInTheDocument()
+    })
+
+    test('ignora unidade fora do prazo indicada na URL', () => {
+      renderFlow(nearbyUnitsMixedWindows, {
+        preselectedLocationId: 'unit-closed',
+      })
+
+      expect(
+        screen.getByRole('radio', { name: /Rua Encerrada/ })
+      ).not.toBeChecked()
+    })
+
+    test('desabilita a turma fora do prazo dentro da unidade', () => {
+      renderFlow(unitWithClosedAndOpenSchedules)
+
+      expect(screen.getByRole('radio', { name: /Turma 1/ })).toBeEnabled()
+      expect(screen.getByRole('radio', { name: /Turma 2/ })).toBeDisabled()
+      expect(screen.getByText('(Inscrições encerradas)')).toBeInTheDocument()
+    })
+
+    test('curso online: submete a turma no prazo, nunca a encerrada', async () => {
+      const user = userEvent.setup()
+      mockSubmitCourseInscription.mockResolvedValue({ success: true })
+
+      render(
+        <ConfirmInscriptionClient
+          userInfo={completeUserInfo}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={emptyUnits}
+          onlineClasses={onlineClassesMixedWindows}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      await user.click(
+        screen.getByRole('button', { name: /Confirmar inscrição/i })
+      )
+
+      await waitFor(() => {
+        expect(mockSubmitCourseInscription).toHaveBeenCalledWith(
+          expect.objectContaining({ scheduleId: 'online-open' })
+        )
+      })
     })
   })
 })

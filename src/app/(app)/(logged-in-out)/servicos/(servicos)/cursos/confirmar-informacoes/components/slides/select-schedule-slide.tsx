@@ -1,6 +1,10 @@
 'use client'
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  getScheduleUnavailableLabel,
+  isScheduleSelectable,
+} from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
@@ -34,14 +38,9 @@ export const SelectScheduleSlide = ({
   const selectedUnit =
     nearbyUnits?.find(unit => unit.id === selectedUnitId) || initialSelectedUnit
 
-  // Check if a schedule is available (has remaining_vacancies > 0)
-  const isScheduleAvailable = (schedule: Schedule) => {
-    return (
-      schedule.remaining_vacancies !== undefined &&
-      schedule.remaining_vacancies !== null &&
-      schedule.remaining_vacancies > 0
-    )
-  }
+  // A turma is pickable only inside its own enrollment window and with seats
+  const isScheduleAvailable = (schedule: Schedule) =>
+    isScheduleSelectable(schedule)
 
   // Handle schedule selection with validation
   const handleScheduleChange = async (value: string) => {
@@ -126,7 +125,8 @@ export const SelectScheduleSlide = ({
             className="w-full"
           >
             {selectedUnit.schedules.map((schedule, index) => {
-              const isAvailable = isScheduleAvailable(schedule)
+              const unavailableLabel = getScheduleUnavailableLabel(schedule)
+              const isAvailable = unavailableLabel === null
               return (
                 <label
                   key={schedule.id}
@@ -140,9 +140,9 @@ export const SelectScheduleSlide = ({
                   <div className="flex flex-col gap-1 flex-1">
                     <h3 className="font-medium text-foreground">
                       Turma {index + 1}
-                      {!isAvailable && (
+                      {unavailableLabel && (
                         <span className="text-muted-foreground text-xs ml-2">
-                          (Sem vagas disponíveis)
+                          ({unavailableLabel})
                         </span>
                       )}
                     </h3>

@@ -28,6 +28,10 @@ import { submitCourseInscription } from '@/actions/courses/submit-inscription'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { calculateAge } from '@/lib/calculate-age'
+import {
+  getScheduleUnavailableLabel,
+  isScheduleSelectable,
+} from '@/lib/course-utils'
 import { formatAddressComplete } from '@/lib/format-address-complete'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -133,23 +137,14 @@ export function ConfirmInscriptionClient({
   const hasUnits = nearbyUnits && nearbyUnits.length > 0
   const hasMultipleUnits = nearbyUnits && nearbyUnits.length > 1
 
-  // Helper to check if a class is available (has remaining_vacancies > 0)
-  const isClassAvailable = (cls: Schedule) => {
-    return (
-      cls.remaining_vacancies !== undefined &&
-      cls.remaining_vacancies !== null &&
-      cls.remaining_vacancies > 0
-    )
-  }
+  // A turma can only be picked inside its own enrollment window and with seats
+  // left. The course-level window is the union across turmas, so it stays open
+  // over gaps where no individual turma accepts enrollments — checking seats
+  // alone let closed turmas through to a guaranteed API rejection.
+  const isClassAvailable = (cls: Schedule) => isScheduleSelectable(cls)
 
-  // Helper to check if a schedule is available (has remaining_vacancies > 0)
-  const isScheduleAvailable = (schedule: Schedule) => {
-    return (
-      schedule.remaining_vacancies !== undefined &&
-      schedule.remaining_vacancies !== null &&
-      schedule.remaining_vacancies > 0
-    )
-  }
+  const isScheduleAvailable = (schedule: Schedule) =>
+    isScheduleSelectable(schedule)
 
   // Filter available online classes for initial selection and validation
   const availableOnlineClasses = onlineClasses.filter(isClassAvailable)
@@ -168,16 +163,9 @@ export function ConfirmInscriptionClient({
 
   // Determine initial unit selection
   const getInitialUnitId = () => {
-    // Helper to check if a unit has available schedules
-    const hasAvailableSchedules = (unit: NearbyUnit) => {
-      if (!unit.schedules || unit.schedules.length === 0) return false
-      return unit.schedules.some(
-        schedule =>
-          schedule.remaining_vacancies !== undefined &&
-          schedule.remaining_vacancies !== null &&
-          schedule.remaining_vacancies > 0
-      )
-    }
+    // Helper to check if a unit has any turma open for enrollment
+    const hasAvailableSchedules = (unit: NearbyUnit) =>
+      (unit.schedules ?? []).some(schedule => isScheduleSelectable(schedule))
 
     // If preselectedLocationId is provided and exists in nearbyUnits, use it if it has available schedules
     if (preselectedLocationId) {
@@ -207,7 +195,6 @@ export function ConfirmInscriptionClient({
   // Determine initial schedule selection
   const getInitialScheduleId = () => {
     if (initialUnit && initialUnit.schedules) {
-      // Filter available schedules (with remaining_vacancies > 0)
       const availableSchedules =
         initialUnit.schedules.filter(isScheduleAvailable)
       if (availableSchedules.length === 1) {
@@ -603,7 +590,6 @@ export function ConfirmInscriptionClient({
             // Auto-select if only one online class
             finalScheduleId = availableOnlineClasses[0].id
           } else if (selectedUnit && selectedUnit.schedules) {
-            // Filter available schedules (with remaining_vacancies > 0)
             const availableSchedules =
               selectedUnit.schedules.filter(isScheduleAvailable)
             if (availableSchedules.length === 1) {
@@ -613,26 +599,24 @@ export function ConfirmInscriptionClient({
           }
         }
 
-        // Validate that the selected schedule/class has available vacancies
+        // Last check before hitting the API: the turma must still be inside its
+        // enrollment window and have seats. Report which of the two failed.
         if (finalScheduleId) {
-          if (hasOnlineClasses) {
-            const selectedClass = onlineClasses.find(
-              cls => cls.id === finalScheduleId
-            )
-            if (!selectedClass || !isClassAvailable(selectedClass)) {
-              toast.error('Esta turma não possui vagas disponíveis')
-              setFadeOut(false)
-              return
-            }
-          } else if (selectedUnit) {
-            const selectedSchedule = selectedUnit.schedules?.find(
-              sch => sch.id === finalScheduleId
-            )
-            if (!selectedSchedule || !isScheduleAvailable(selectedSchedule)) {
-              toast.error('Esta turma não possui vagas disponíveis')
-              setFadeOut(false)
-              return
-            }
+          const selectedSchedule = hasOnlineClasses
+            ? onlineClasses.find(cls => cls.id === finalScheduleId)
+            : selectedUnit?.schedules?.find(sch => sch.id === finalScheduleId)
+
+          if (!selectedSchedule) {
+            toast.error('Esta turma não está mais disponível')
+            setFadeOut(false)
+            return
+          }
+
+          const unavailableLabel = getScheduleUnavailableLabel(selectedSchedule)
+          if (unavailableLabel) {
+            toast.error(`Esta turma não está disponível: ${unavailableLabel}`)
+            setFadeOut(false)
+            return
           }
         } else if (hasOnlineClasses && availableOnlineClasses.length === 0) {
           // No available online classes
