@@ -110,17 +110,15 @@ export async function submitCourseInscription(
       }
     }
 
-    // Extract error message from API response
+    // Extract error message from API response. The courses API reports business
+    // rules ("as inscrições desta turma já encerraram") under `error`, not
+    // `message` — reading only `message` reduced every rejection to a generic
+    // toast that told the citizen nothing.
     let errorMessage = 'Erro ao inscrever-se no curso'
-    if (
-      response.status === 400 ||
-      response.status === 409 ||
-      response.status === 500
-    ) {
-      const errorData = 'data' in response ? response.data : null
-      if (errorData && 'message' in errorData && errorData.message) {
-        errorMessage = errorData.message
-      }
+    const errorData = 'data' in response ? (response.data as any) : null
+    const apiMessage = errorData?.error ?? errorData?.message
+    if (typeof apiMessage === 'string' && apiMessage.trim() !== '') {
+      errorMessage = apiMessage
     }
 
     console.error(`API returned status ${response.status}:`, errorMessage)
