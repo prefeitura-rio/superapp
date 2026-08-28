@@ -1,6 +1,10 @@
 'use client'
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  getScheduleUnavailableLabel,
+  isScheduleSelectable,
+} from '@/lib/course-utils'
 import { formatDate } from '@/lib/date'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
@@ -45,14 +49,9 @@ export const SelectOnlineClassSlide = ({
   const [showBottomFade, setShowBottomFade] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
-  // Check if a class is available (has remaining_vacancies > 0)
-  const isClassAvailable = (onlineClass: Schedule) => {
-    return (
-      onlineClass.remaining_vacancies !== undefined &&
-      onlineClass.remaining_vacancies !== null &&
-      onlineClass.remaining_vacancies > 0
-    )
-  }
+  // A turma is pickable only inside its own enrollment window and with seats
+  const isClassAvailable = (onlineClass: Schedule) =>
+    isScheduleSelectable(onlineClass)
 
   const checkScroll = () => {
     if (!listRef.current) return
@@ -106,7 +105,8 @@ export const SelectOnlineClassSlide = ({
             className="w-full"
           >
             {onlineClasses.map((onlineClass, index) => {
-              const isAvailable = isClassAvailable(onlineClass)
+              const unavailableLabel = getScheduleUnavailableLabel(onlineClass)
+              const isAvailable = unavailableLabel === null
               return (
                 <label
                   key={onlineClass.id}
@@ -120,9 +120,9 @@ export const SelectOnlineClassSlide = ({
                   <div className="flex flex-col gap-1 flex-1">
                     <h3 className="font-medium text-foreground">
                       Turma {index + 1}
-                      {!isAvailable && (
+                      {unavailableLabel && (
                         <span className="text-muted-foreground text-xs ml-2">
-                          (Sem vagas disponíveis)
+                          ({unavailableLabel})
                         </span>
                       )}
                     </h3>

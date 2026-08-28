@@ -7,7 +7,10 @@ import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
 } from '@/http/models'
-import { parseCourseDetailResponse } from '@/lib/course-utils'
+import {
+  getCourseEnrollmentInfo,
+  parseCourseDetailResponse,
+} from '@/lib/course-utils'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { isUpdatedWithin } from '@/lib/date'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -72,6 +75,13 @@ export default async function ConfirmInscriptionPage({
 
   // ModelsCurso from Orval omits nested schedule/location fields returned by the API
   const courseWithDetails = courseData as any
+
+  // The enrollment button is hidden when the course is not enrollable, but the
+  // flow was still reachable by URL — and the citizen only found out at the very
+  // last step, when POST /enrollments rejected the turma. Same rule as the button.
+  if (!getCourseEnrollmentInfo(courseData).canEnroll) {
+    redirect(`/servicos/cursos/${courseSlug}`)
+  }
 
   // Type assertion for self-declared fields
   const userInfoExtended = userInfo as typeof userInfo & {
@@ -190,6 +200,11 @@ export default async function ConfirmInscriptionPage({
           location_id: schedule.location_id,
           vacancies: schedule.vacancies,
           remaining_vacancies: schedule.remaining_vacancies,
+          // The turma's own enrollment window gates selection — dropping these
+          // is what let closed turmas reach the API and fail there
+          enrollment_start_date: schedule.enrollment_start_date,
+          enrollment_end_date: schedule.enrollment_end_date,
+          accepting_enrollments: schedule.accepting_enrollments,
           class_start_date: schedule.class_start_date,
           class_end_date: schedule.class_end_date,
           class_time: schedule.class_time || '',
