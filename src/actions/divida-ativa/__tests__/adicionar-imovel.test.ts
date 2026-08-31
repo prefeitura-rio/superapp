@@ -50,6 +50,7 @@ describe('adicionarImovel', () => {
         id: 32,
         inscricao: '00000018',
         endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+        nome: null,
         bairro: null,
         proprietario: null,
         possuiDebitos: null,

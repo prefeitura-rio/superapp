@@ -159,14 +159,17 @@ export function normalizarConsultaFazenda(data: unknown): FazendaImovel | null {
  * ainda — não por ausência no contrato. É `id: null` que impede a tela de oferecer
  * exclusão de algo que o banco local não tem.
  *
- * `bairro`, `proprietario` e `possuiDebitos` seguem `null` pelas mesmas premissas do outro
- * mapper (P22, P19, P12): `FazendaImovel` traz só endereço e inscrição.
+ * `nome`, `bairro`, `proprietario` e `possuiDebitos` seguem `null` pelas mesmas premissas do
+ * outro mapper (P23, P22, P19, P12): `FazendaImovel` traz só endereço e inscrição. O `nome` é
+ * duplamente nulo aqui — além de o contrato não ter onde gravá-lo, esta consulta acontece
+ * **antes** do passo em que o cidadão o escolhe.
  */
 export function mapFazendaToImovel(api: FazendaImovel): ImovelDividaAtiva {
   return {
     id: null,
     inscricao: somenteDigitos(api.numInscricao ?? ''),
     endereco: textoOuNull(api.endereco),
+    nome: null,
     bairro: null,
     proprietario: null,
     possuiDebitos: null,
@@ -179,9 +182,11 @@ export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {
     id: numeroOuNull(api.id),
     inscricao: somenteDigitos(api.numInscricao ?? ''),
     endereco: textoOuNull(api.endereco),
-    // A API não separa bairro nem devolve proprietário, e `GET /imoveis` não consulta a
-    // Fazenda para saber de débitos. Estes três são `null` por ausência de dado, não por
-    // omissão nossa — premissas P22, P19 e P12 em `docs/divida-ativa.md`.
+    // A API não separa bairro, não devolve proprietário nem o nome dado pelo cidadão, e
+    // `GET /imoveis` não consulta a Fazenda para saber de débitos. Estes são `null` por
+    // ausência de dado, não por omissão nossa — premissas P22, P19, P23 e P12 em
+    // `docs/divida-ativa.md`.
+    nome: null,
     bairro: null,
     proprietario: null,
     possuiDebitos: null,

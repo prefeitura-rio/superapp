@@ -262,12 +262,14 @@ src/middleware.ts                     # bloco de gating
 | `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
 | `/divida-ativa/parcelamento` · `/acompanhamento` | Estado provisório até a Fase 3 |
 
-### O cadastro de um imóvel são três telas e duas chamadas
+### O cadastro de um imóvel são quatro telas e duas chamadas
 
-A tela do campo **não** chama a API: ela valida o formato e leva os dígitos para a URL da
-confirmação. Quem consulta é o Server Component de `confirmar`, e quem grava é a Server Action
-disparada pelo botão "Confirmar". Essa separação é a premissa P20 — no legado, consultar já
-cadastrava.
+O fluxo é `novo` (campo da inscrição) → `confirmar` (o cidadão confere o imóvel) → `nome`
+(escolhe um nome, opcional) → `sucesso`. A tela do campo **não** chama a API: ela valida o
+formato e leva os dígitos para a URL da confirmação. Quem consulta é o Server Component de
+`confirmar`, e quem grava é a Server Action disparada pelo "Continuar" do passo do **nome**
+— a ordem confirmação-antes-do-nome é decisão de produto (19/08/2026). Essa separação entre
+consultar e gravar é a premissa P20 — no legado, consultar já cadastrava.
 
 A inscrição trafega **somente com dígitos** em toda a pilha (URL, action e API). A máscara
 (`0.521.766-3`) é aplicada só na exibição, por `formatarInscricaoImobiliaria`. Abaixo de sete
@@ -400,6 +402,7 @@ mas `'desconhecida'` precisa de tratamento visual definido no design. E prefira 
 | P20 | Consulta × cadastro | Dois endpoints, um que só consulta | ✅ | **Confirmada, com atraso.** Não existia em 17/08 e a tela ficou quebrada de propósito; a API entregou `GET /imoveis/{inscricao}/cadastro` em 31/08. Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-ganhou-sua-fonte-de-dados) |
 | P21 | Tamanho da inscrição | 7 **ou** 8 dígitos | ✅ | Confirmada no transporte. Duas ressalvas: a API aceita **menos** de 7 dígitos e a nossa validação não, o que impede testar manualmente com o dado `18` da instância dele; e a resposta vem sempre com 8, então a máscara ganha um `0.` à esquerda que o carnê não tem |
 | P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA EXEMPLO, 123 / LOJA A - BAIRRO"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
+| P23 | Nome/apelido do imóvel | *(premissa nova, descoberta no Figma do fluxo de cadastro, 19/08/2026)* | 🎨 | O Figma tem um passo "Escreva um nome para esse imóvel" ("Minha Casa", "Casa de praia"), mas `ImovelRequest` só aceita `numInscricao` e `ImovelResponse` não devolve nome — não há onde gravar. O front já implementou o passo e transporta o valor até a Server Action, que o **descarta** na fronteira da API (`adicionar-imovel.ts`). Combinado em 19/08: Vladimir adiciona o campo ao contrato; aí é incluir no corpo do `POST /imoveis` e exibir na lista |
 | P18 | Identificador da consulta | Só inscrição imobiliária | 🎨 | **Meia vitória.** `POST /imoveis/{inscricao}/divida-ativa/consultar` aceita quatro critérios — `numInscricao`, `numCda`, `numExecucaoFiscal` e um que não esperávamos, `numGuiaPagamento` (RN-001/RN-002, critério único). Mas a inscrição continua **no path**, e a tag diz "autorizacao por imovel cadastrado": quem só tem a carta de cobrança ainda não entra. Ver detalhamento abaixo |
 
 ### Achados novos, fora da tabela
@@ -480,9 +483,11 @@ GET /imoveis/{inscricao}/cadastro  →  FazendaImovel { endereco, numInscricao }
 > retorna os dados cadastrais do imovel (endereco e inscricao normalizada). **Nao consulta o
 > banco local.** Retorna lista vazia quando nao houver registro para a inscricao."
 
-O fluxo desenhado voltou a valer: campo → confirmação (consulta, não grava) → `POST /imoveis`
-no botão "Confirmar" → sucesso. `getDalDividaAtivaCadastroFazenda` em `src/lib/dal.ts` é quem
-chama, e `mapFazendaToImovel` traduz.
+O fluxo desenhado voltou a valer: campo → confirmação (consulta, **não grava**) → nome do
+imóvel → `POST /imoveis` no "Continuar" do passo de nome → sucesso.
+`getDalDividaAtivaCadastroFazenda` em `src/lib/dal.ts` é quem consulta, e `mapFazendaToImovel`
+traduz. O `nome` que o cidadão escolhe no passo seguinte ainda é descartado na fronteira da
+API — ver premissa P23.
 
 **Duas ressalvas que sobreviveram:**
 
@@ -685,6 +690,7 @@ O que **não** mudou: a Fase 3 continua sem tipo, e o provisionamento de
 | Pendência | Depende de |
 |---|---|
 | ~~Tela `confirmar` funcional (P20)~~ | ✅ resolvida em 31/08/2026 pela saída A |
+| Persistir o nome do imóvel (P23) | Vladimir adicionar o campo a `ImovelRequest`/`ImovelResponse`; o fluxo do front já transporta o valor |
 | Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
 | Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
 | Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |

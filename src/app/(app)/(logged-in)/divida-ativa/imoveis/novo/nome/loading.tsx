@@ -2,13 +2,13 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /** Skeleton fiel ao layout real: título em duas linhas, campo, texto de ajuda e botão. */
-export default function NovoImovelLoading() {
+export default function NomeImovelLoading() {
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
       <SecondaryHeader
         title=""
         className="max-w-4xl"
-        route="/divida-ativa/imoveis"
+        route="/divida-ativa/imoveis/novo"
       />
 
       <div className="px-4 pt-2 pb-6">

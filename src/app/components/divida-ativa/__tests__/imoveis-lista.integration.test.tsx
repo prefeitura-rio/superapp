@@ -2,7 +2,7 @@ import type { ImovelDividaAtiva } from '@/types/divida-ativa'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
 
-import { ImoveisLista } from '../imoveis-lista'
+import { ImoveisLista, ImoveisVazio } from '../imoveis-lista'
 
 vi.mock('@/actions/divida-ativa/excluir-imovel', () => ({
   excluirImovel: vi.fn().mockResolvedValue({ success: true, data: null }),
@@ -19,6 +19,7 @@ const IMOVEIS: ImovelDividaAtiva[] = [
     id: 32,
     inscricao: '06666929',
     endereco: 'Rua Lucio de Mendonca, 27 - Apto 101',
+    nome: null,
     bairro: null,
     proprietario: null,
     possuiDebitos: null,
@@ -28,6 +29,7 @@ const IMOVEIS: ImovelDividaAtiva[] = [
     id: 33,
     inscricao: '05217663',
     endereco: 'Rua Barata Ribeiro, 586 - A 501',
+    nome: null,
     bairro: null,
     proprietario: null,
     possuiDebitos: null,
@@ -51,6 +53,23 @@ describe('ImoveisLista', () => {
     expect(screen.getByText('0.521.766-3')).toBeInTheDocument()
 
     expect(screen.getAllByText('Inscrição imobiliária')).toHaveLength(2)
+    expect(screen.getAllByText('Endereço')).toHaveLength(2)
+  })
+
+  /**
+   * O nome dado pelo cidadão vira o título do card — hoje só aparece quando a API passar
+   * a devolvê-lo (premissa P23); a fixture antecipa esse dia.
+   */
+  test('mostra o nome do imóvel como título do card quando existir', () => {
+    render(<ImoveisLista imoveis={[{ ...IMOVEIS[0], nome: 'Casa Família' }]} />)
+
+    expect(
+      screen.getByRole('heading', { name: 'Casa Família' })
+    ).toBeInTheDocument()
+    // A exclusão também passa a se referir ao nome, que é como o cidadão pensa no imóvel.
+    expect(
+      screen.getByRole('button', { name: 'Excluir imóvel Casa Família' })
+    ).toBeInTheDocument()
   })
 
   /**
@@ -70,6 +89,7 @@ describe('ImoveisLista', () => {
         imoveis={[
           {
             ...IMOVEIS[0],
+            nome: null,
             bairro: 'Maracanã',
             proprietario: 'Fernanda Galvão Assis',
           },
@@ -117,10 +137,18 @@ describe('ImoveisLista', () => {
     ).not.toBeInTheDocument()
   })
 
-  test('sem imóveis, explica o serviço e chama para o cadastro', () => {
-    render(<ImoveisLista imoveis={[]} />)
+  /**
+   * O estado vazio é um componente próprio (renderizado pela rota no lugar da lista):
+   * a mensagem assume o papel de título da página e o CTA leva ao cadastro.
+   */
+  test('sem imóveis, informa que nada foi encontrado e chama para o cadastro', () => {
+    render(<ImoveisVazio />)
 
-    expect(screen.getByText('Nenhum imóvel cadastrado')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Não encontramos nenhum imóvel cadastrado no seu CPF',
+      })
+    ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Adicionar imóvel' })
     ).toHaveAttribute('href', '/divida-ativa/imoveis/novo')
@@ -134,6 +162,7 @@ describe('ImoveisLista', () => {
             id: 34,
             inscricao: '05217663',
             endereco: null,
+            nome: null,
             bairro: null,
             proprietario: null,
             possuiDebitos: null,

@@ -38,8 +38,8 @@ export default async function DividaAtivaPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-xl" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
+      <SecondaryHeader title="" className="max-w-4xl" />
 
       <DividaAtivaLanding quantidadeImoveis={quantidadeImoveis} />
     </div>

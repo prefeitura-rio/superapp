@@ -49,7 +49,7 @@ const SERVICOS: DividaAtivaServico[] = [
 ]
 
 const itemClassName =
-  'flex w-full items-center justify-between gap-4 rounded-2xl bg-card p-4 text-left transition-colors hover:bg-card/50'
+  'flex w-full items-center justify-between gap-4 rounded-2xl bg-card p-4 text-left transition-colors hover:bg-secondary active:bg-secondary'
 
 const labelClassName = 'text-sm font-normal leading-5 text-foreground'
 

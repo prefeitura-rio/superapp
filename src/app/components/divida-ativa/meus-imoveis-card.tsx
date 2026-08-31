@@ -16,7 +16,7 @@ export function MeusImoveisCard({ quantidade }: MeusImoveisCardProps) {
   return (
     <Link
       href="/divida-ativa/imoveis"
-      className="flex w-full items-center gap-3 rounded-2xl bg-card p-4 transition-colors hover:bg-card/50"
+      className="flex w-full items-center gap-3 rounded-2xl bg-card p-4 transition-colors hover:bg-secondary active:bg-secondary"
     >
       {/* Decorativa: o rótulo ao lado já nomeia o card, então um alt aqui só duplicaria o
           texto para quem usa leitor de tela. */}

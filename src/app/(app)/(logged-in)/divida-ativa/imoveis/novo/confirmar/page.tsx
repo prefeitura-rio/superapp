@@ -12,8 +12,9 @@ import { redirect } from 'next/navigation'
 
 /**
  * Segundo passo do cadastro: consulta a inscrição no sistema fiscal e mostra o que veio para
- * o cidadão conferir. **Ainda não grava** — quem grava é o "Confirmar", que dispara a Server
- * Action. No portal legado a consulta já cadastrava; a separação é deliberada (premissa P20).
+ * o cidadão conferir. **Ainda não grava** — quem grava é o "Continuar" do passo seguinte (o
+ * nome do imóvel). No portal legado a consulta já cadastrava; a separação é deliberada
+ * (premissa P20).
  *
  * A consulta é `GET /imoveis/{inscricao}/cadastro`, que lê o `WSFazenda_Iptu` sem tocar no
  * banco local. Até 31/08/2026 esse endpoint não existia e esta tela caía sempre no estado
@@ -35,22 +36,23 @@ export default async function ConfirmarImovelPage({
     redirect('/divida-ativa/imoveis/novo')
   }
 
+  const inscricaoLimpa = somenteDigitos(inscricao)
   const { cpf } = await getUserInfoFromToken()
-  const imovel = await getDalDividaAtivaCadastroFazenda(
-    somenteDigitos(inscricao),
-    cpf
-  )
+  const imovel = await getDalDividaAtivaCadastroFazenda(inscricaoLimpa, cpf)
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
       <SecondaryHeader
         title=""
-        className="max-w-xl"
+        className="max-w-4xl"
         route="/divida-ativa/imoveis/novo"
       />
 
       {imovel ? (
-        <ConfirmarImovel imovel={imovel} />
+        <ConfirmarImovel
+          imovel={imovel}
+          continuarHref={`/divida-ativa/imoveis/novo/nome?inscricao=${inscricaoLimpa}`}
+        />
       ) : (
         <InscricaoNaoEncontrada />
       )}

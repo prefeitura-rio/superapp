@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton'
  */
 export default function DividaAtivaLoading() {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-xl" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
+      <SecondaryHeader title="" className="max-w-4xl" />
 
       <div className="px-4 pt-2 pb-6">
         <Skeleton className="h-8 w-48" />

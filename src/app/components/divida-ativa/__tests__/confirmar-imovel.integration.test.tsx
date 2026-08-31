@@ -1,31 +1,8 @@
-import { adicionarImovel } from '@/actions/divida-ativa/adicionar-imovel'
 import type { ImovelDividaAtiva } from '@/types/divida-ativa'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, expect, test } from 'vitest'
 
 import { ConfirmarImovel } from '../confirmar-imovel'
-
-vi.mock('@/actions/divida-ativa/adicionar-imovel', () => ({
-  adicionarImovel: vi.fn(),
-}))
-
-const push = vi.fn()
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push, back: vi.fn() }),
-}))
-
-const toastError = vi.fn()
-vi.mock('react-hot-toast', () => ({
-  default: {
-    error: (...args: unknown[]) => toastError(...args),
-    success: vi.fn(),
-  },
-  toast: {
-    error: (...args: unknown[]) => toastError(...args),
-    success: vi.fn(),
-  },
-}))
 
 // O componente continua sabendo exibir bairro e proprietário, então a fixture mantém os
 // dois para cobrir esse caminho. A API real não os devolve hoje (P22 e P19) — o que a
@@ -34,24 +11,18 @@ const IMOVEL: ImovelDividaAtiva = {
   id: 32,
   inscricao: '05217663',
   endereco: 'Rua Barata Ribeiro, 586 - A 501',
+  nome: null,
   bairro: 'Copacabana',
   proprietario: 'Bruno Rocha Menezes',
   possuiDebitos: null,
   cadastradoEm: null,
 }
 
-describe('ConfirmarImovel', () => {
-  beforeEach(() => {
-    push.mockClear()
-    toastError.mockClear()
-    vi.mocked(adicionarImovel).mockResolvedValue({
-      success: true,
-      data: IMOVEL,
-    })
-  })
+const CONTINUAR_HREF = '/divida-ativa/imoveis/novo/nome?inscricao=05217663'
 
+describe('ConfirmarImovel', () => {
   test('mostra o que a consulta trouxe para o cidadão conferir', () => {
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+    render(<ConfirmarImovel imovel={IMOVEL} continuarHref={CONTINUAR_HREF} />)
 
     expect(
       screen.getByRole('heading', {
@@ -61,61 +32,22 @@ describe('ConfirmarImovel', () => {
     expect(
       screen.getByText('Rua Barata Ribeiro, 586 - A 501')
     ).toBeInTheDocument()
+    expect(screen.getByText('Endereço')).toBeInTheDocument()
     expect(screen.getByText('Copacabana')).toBeInTheDocument()
     expect(screen.getByText('0.521.766-3')).toBeInTheDocument()
     expect(screen.getByText('Bruno Rocha Menezes')).toBeInTheDocument()
   })
 
-  test('só cadastra o imóvel quando o cidadão confirma', async () => {
-    const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
+  /**
+   * Nada é gravado aqui: o "Continuar" é navegação para o passo do nome, que é quem
+   * dispara a Server Action. A ordem é decisão de produto (19/08/2026).
+   */
+  test('continuar leva ao passo do nome carregando a inscrição', () => {
+    render(<ConfirmarImovel imovel={IMOVEL} continuarHref={CONTINUAR_HREF} />)
 
-    expect(vi.mocked(adicionarImovel)).not.toHaveBeenCalled()
-
-    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
-
-    await waitFor(() =>
-      expect(vi.mocked(adicionarImovel)).toHaveBeenCalledWith('05217663')
-    )
-  })
-
-  test('cadastrado com sucesso, leva à tela de confirmação', async () => {
-    const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
-
-    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
-
-    await waitFor(() =>
-      expect(push).toHaveBeenCalledWith('/divida-ativa/imoveis/novo/sucesso')
-    )
-  })
-
-  test('mostra o motivo da API e permanece na tela quando o cadastro falha', async () => {
-    vi.mocked(adicionarImovel).mockResolvedValue({
-      success: false,
-      error: 'Este imóvel já está na sua lista.',
-      status: 409,
-    })
-
-    const user = userEvent.setup()
-    render(<ConfirmarImovel imovel={IMOVEL} />)
-
-    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
-
-    await waitFor(() =>
-      expect(toastError).toHaveBeenCalledWith(
-        'Este imóvel já está na sua lista.'
-      )
-    )
-    expect(push).not.toHaveBeenCalled()
-  })
-
-  test('voltar leva de novo ao campo da inscrição', () => {
-    render(<ConfirmarImovel imovel={IMOVEL} />)
-
-    expect(screen.getByRole('link', { name: 'Voltar' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Continuar' })).toHaveAttribute(
       'href',
-      '/divida-ativa/imoveis/novo'
+      CONTINUAR_HREF
     )
   })
 })
