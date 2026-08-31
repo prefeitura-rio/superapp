@@ -1,4 +1,4 @@
-import type { ImovelResponse } from '@/http-divida-ativa/models'
+import type { FazendaImovel, ImovelResponse } from '@/http-divida-ativa/models'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import type { ImovelDividaAtiva } from '@/types/divida-ativa'
 
@@ -54,8 +54,10 @@ export function parseValorMonetario(valor: unknown): number | null {
  * formato brasileiro. Compara os componentes depois de montar a data para rejeitar
  * valores como 31/02.
  *
- * A API real usa os dois: `dd/MM/yyyy` nos campos vindos do DAM e um `LocalDateTime`
- * sem fuso (`2026-06-22T15:40:46.477`) em `dataInclusao`.
+ * A API real usa os dois: `dd/MM/yyyy` nos campos vindos do DAM e um date-time sem fuso
+ * (`2026-06-22T15:40:46.477`) em `dataInclusao`. O spec chegou a declarar um schema
+ * `LocalDateTime` para esse campo; em 31/08/2026 ele virou `string`/`date-time` direto,
+ * sem mudança no valor que trafega.
  */
 export function parseDataApi(valor: unknown): string | null {
   if (typeof valor !== 'string' || valor === '') {
@@ -118,6 +120,58 @@ export function normalizarListaImoveis(data: unknown): ImovelResponse[] {
   }
 
   return [data as ImovelResponse]
+}
+
+/**
+ * Desembrulha a resposta de `GET /imoveis/{inscricao}/cadastro`, a consulta prévia à
+ * Fazenda.
+ *
+ * O contrato se contradiz sobre a forma: o schema declara `FazendaImovel`, um objeto, mas
+ * a descrição do endpoint diz "Retorna **lista vazia** quando nao houver registro para a
+ * inscricao". É a mesma armadilha da premissa P11 — `GET /imoveis` também é tipado como
+ * objeto e devolve array cru —, e lá ela custou uma lista vazia em silêncio. Aceitar as
+ * duas formas é mais barato que apostar em uma.
+ *
+ * Sem `numInscricao` não há imóvel: um `{}` ou um array vazio significam "a Fazenda não
+ * conhece essa inscrição", que é um estado de tela, não um erro.
+ */
+export function normalizarConsultaFazenda(data: unknown): FazendaImovel | null {
+  const candidato = Array.isArray(data) ? data[0] : data
+
+  if (typeof candidato !== 'object' || candidato === null) {
+    return null
+  }
+
+  const { numInscricao } = candidato as FazendaImovel
+
+  if (typeof numInscricao !== 'string' || numInscricao === '') {
+    return null
+  }
+
+  return candidato as FazendaImovel
+}
+
+/**
+ * Traduz o resultado da consulta prévia à Fazenda para o tipo de visão.
+ *
+ * A diferença para `mapApiToImovel` não é de campos, é de **estado**: aqui o imóvel ainda
+ * não foi gravado no cadastro local. `id` e `cadastradoEm` são `null` porque não existem
+ * ainda — não por ausência no contrato. É `id: null` que impede a tela de oferecer
+ * exclusão de algo que o banco local não tem.
+ *
+ * `bairro`, `proprietario` e `possuiDebitos` seguem `null` pelas mesmas premissas do outro
+ * mapper (P22, P19, P12): `FazendaImovel` traz só endereço e inscrição.
+ */
+export function mapFazendaToImovel(api: FazendaImovel): ImovelDividaAtiva {
+  return {
+    id: null,
+    inscricao: somenteDigitos(api.numInscricao ?? ''),
+    endereco: textoOuNull(api.endereco),
+    bairro: null,
+    proprietario: null,
+    possuiDebitos: null,
+    cadastradoEm: null,
+  }
 }
 
 export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {

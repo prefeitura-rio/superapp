@@ -1,6 +1,8 @@
 import {
   mapApiToImovel,
   mapApiToMensagemErro,
+  mapFazendaToImovel,
+  normalizarConsultaFazenda,
   normalizarListaImoveis,
   parseDataApi,
   parseValorMonetario,
@@ -65,16 +67,16 @@ describe('mapApiToImovel', () => {
   test('mapeia a resposta real da API para o tipo de visão', () => {
     const imovel = mapApiToImovel({
       id: 32,
-      cpf: '16232350731',
+      cpf: '12345678909',
       dataInclusao: '2026-06-22T15:40:46.477',
-      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+      endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
       numInscricao: '00000018',
     })
 
     expect(imovel).toEqual({
       id: 32,
       inscricao: '00000018',
-      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+      endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
       bairro: null,
       proprietario: null,
       possuiDebitos: null,
@@ -87,7 +89,7 @@ describe('mapApiToImovel', () => {
   test('não propaga o CPF devolvido pela API', () => {
     const imovel = mapApiToImovel({
       numInscricao: '00000018',
-      cpf: '16232350731',
+      cpf: '12345678909',
     })
 
     expect(Object.keys(imovel)).not.toContain('cpf')
@@ -108,12 +110,12 @@ describe('mapApiToImovel', () => {
     expect(imovel.possuiDebitos).toBeNull()
   })
 
-  // O bairro vem embutido na string de endereço ("... - TIJUCA") e fatiar por " - " é
+  // O bairro vem embutido na string de endereço ("... - BAIRRO") e fatiar por " - " é
   // frágil: endereço com hífen no nome quebraria. Fica null até haver decisão.
   test('não tenta extrair o bairro do endereço', () => {
     const imovel = mapApiToImovel({
       numInscricao: '00000018',
-      endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+      endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
     })
 
     expect(imovel.bairro).toBeNull()
@@ -230,5 +232,85 @@ describe('mapApiToMensagemErro', () => {
 
   test('devolve null para error vazio', () => {
     expect(mapApiToMensagemErro({ error: '' }, 400)).toBeNull()
+  })
+})
+
+/**
+ * `GET /imoveis/{inscricao}/cadastro` é a consulta prévia à Fazenda que resolveu a premissa
+ * P20 — a saída A registrada em `docs/divida-ativa.md`, que preserva as três telas do Figma.
+ *
+ * O contrato é ambíguo quanto à forma da resposta: o schema declara `FazendaImovel`, um
+ * objeto, mas a descrição do endpoint diz "Retorna **lista vazia** quando nao houver
+ * registro para a inscricao". É a mesma divergência da premissa P11, em que `GET /imoveis`
+ * é tipado como objeto e devolve array cru — e lá ela custou uma lista silenciosamente
+ * vazia. Estes testes travam as duas formas para que a correção do spec de qualquer um dos
+ * lados não vire quebra silenciosa.
+ */
+describe('normalizarConsultaFazenda', () => {
+  test('aceita o objeto singular declarado no schema', () => {
+    expect(
+      normalizarConsultaFazenda({
+        endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+        numInscricao: '00000018',
+      })
+    ).toEqual({
+      endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+      numInscricao: '00000018',
+    })
+  })
+
+  test('desembrulha o primeiro item quando a API devolve array', () => {
+    expect(normalizarConsultaFazenda([{ numInscricao: '00000018' }])).toEqual({
+      numInscricao: '00000018',
+    })
+  })
+
+  // "Retorna lista vazia quando nao houver registro" — este é o caminho do não encontrado.
+  test('devolve null para a lista vazia da inscrição sem registro', () => {
+    expect(normalizarConsultaFazenda([])).toBeNull()
+  })
+
+  test('devolve null para corpo ausente ou não-objeto', () => {
+    expect(normalizarConsultaFazenda(undefined)).toBeNull()
+    expect(normalizarConsultaFazenda(null)).toBeNull()
+    expect(normalizarConsultaFazenda('')).toBeNull()
+  })
+
+  // Um 200 com objeto vazio não é imóvel encontrado: sem inscrição não há o que confirmar.
+  test('devolve null para objeto sem inscrição', () => {
+    expect(normalizarConsultaFazenda({})).toBeNull()
+  })
+})
+
+describe('mapFazendaToImovel', () => {
+  test('traduz endereço e inscrição para a linguagem do produto', () => {
+    const imovel = mapFazendaToImovel({
+      endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+      numInscricao: '00000018',
+    })
+
+    expect(imovel.inscricao).toBe('00000018')
+    expect(imovel.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
+  })
+
+  /**
+   * A diferença que importa entre este mapper e `mapApiToImovel`: aqui o imóvel **ainda não
+   * está cadastrado**. `id` null é o que impede a tela de oferecer exclusão de algo que não
+   * existe no banco local, e `cadastradoEm` null é a verdade — não há data de inclusão.
+   */
+  test('deixa id e cadastradoEm nulos porque o imóvel ainda não foi gravado', () => {
+    const imovel = mapFazendaToImovel({ numInscricao: '00000018' })
+
+    expect(imovel.id).toBeNull()
+    expect(imovel.cadastradoEm).toBeNull()
+  })
+
+  // Mesmas ausências de `mapApiToImovel`: `FazendaImovel` traz só endereço e inscrição.
+  test('mantém proprietário, bairro e débitos ausentes (P19, P22, P12)', () => {
+    const imovel = mapFazendaToImovel({ numInscricao: '00000018' })
+
+    expect(imovel.proprietario).toBeNull()
+    expect(imovel.bairro).toBeNull()
+    expect(imovel.possuiDebitos).toBeNull()
   })
 })

@@ -1,7 +1,9 @@
 ---
 openapi: 3.0.3
 info:
-  title: api-imoveis API
+  title: api-imoveis
+  description: Cadastro local de inscricoes imobiliarias e servicos de IPTU / Divida
+    Ativa.
   version: 1.0.0
 tags:
 - name: Divida Ativa
@@ -30,6 +32,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/certidoes:
     get:
       tags:
@@ -44,6 +48,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/requerimentos:
     get:
       tags:
@@ -58,6 +64,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/requerimentos/{id}/cancelar:
     post:
       tags:
@@ -72,6 +80,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/requerimentos/{id}/comprovante:
     get:
       tags:
@@ -86,6 +96,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/requerimentos/{id}/formulario:
     get:
       tags:
@@ -100,6 +112,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/validar-senha:
     post:
       tags:
@@ -113,6 +127,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis:
     get:
       tags:
@@ -132,6 +148,8 @@ paths:
           description: "JWT ausente, invalido ou expirado."
         "503":
           description: Falha ao validar token no Keycloak.
+      security:
+      - bearerAuth: []
     post:
       tags:
       - Imoveis
@@ -161,6 +179,8 @@ paths:
           description: "JWT ausente, invalido ou expirado."
         "503":
           description: Falha de validacao no Keycloak ou indisponibilidade de integracao.
+      security:
+      - bearerAuth: []
   /imoveis/{id}:
     delete:
       tags:
@@ -184,6 +204,41 @@ paths:
           description: "JWT ausente, invalido ou expirado."
         "404":
           description: Imovel nao encontrado para o CPF autenticado.
+      security:
+      - bearerAuth: []
+  /imoveis/{inscricao}/cadastro:
+    get:
+      tags:
+      - Imoveis
+      summary: Consulta os dados cadastrais do imovel no WSFazenda_Iptu
+      description: "Valida o JWT no Keycloak e, a partir da inscricao imobiliaria,\
+        \ consulta o WSFazenda_Iptu e retorna os dados cadastrais do imovel (endereco\
+        \ e inscricao normalizada). Nao consulta o banco local. Retorna lista vazia\
+        \ quando nao houver registro para a inscricao."
+      parameters:
+      - name: inscricao
+        in: path
+        description: Inscricao imobiliaria a consultar. Pode vir sem zeros a esquerda;
+          a API normaliza para 8 posicoes.
+        required: true
+        schema:
+          type: string
+        example: "00000018"
+      responses:
+        "200":
+          description: Dados cadastrais do imovel retornados pelo WS Fazenda.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FazendaImovel'
+        "400":
+          description: Inscricao invalida.
+        "401":
+          description: "JWT ausente, invalido ou expirado."
+        "503":
+          description: Falha ao validar token no Keycloak ou ao consultar o WSFazenda_Iptu.
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/consulta:
     get:
       tags:
@@ -223,6 +278,8 @@ paths:
           description: Inscricao nao cadastrada para o CPF autenticado.
         "503":
           description: Falha ao consultar Keycloak ou ePortal.
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa:
     get:
       tags:
@@ -237,6 +294,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/certidoes/requerimento:
     post:
       tags:
@@ -256,6 +315,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/consultar:
     post:
       tags:
@@ -275,6 +336,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/datas-vencimento:
     get:
       tags:
@@ -294,6 +357,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/avista:
     post:
       tags:
@@ -313,6 +378,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/liquidacao:
     post:
       tags:
@@ -332,6 +399,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/regularizacao:
     post:
       tags:
@@ -351,6 +420,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/continuacao:
     get:
       tags:
@@ -373,6 +444,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/liquidacao:
     get:
       tags:
@@ -387,6 +460,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/regularizacao:
     get:
       tags:
@@ -413,6 +488,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/{numeroGuia}/pdf:
     get:
       tags:
@@ -436,6 +513,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/parcelamentos/simular:
     post:
       tags:
@@ -455,6 +534,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/requerimentos:
     post:
       tags:
@@ -474,6 +555,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/avista:
     post:
       tags:
@@ -493,6 +576,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/liquidacao:
     post:
       tags:
@@ -512,6 +597,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/regularizacao:
     post:
       tags:
@@ -531,6 +618,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/parcelamentos:
     get:
       tags:
@@ -559,6 +648,8 @@ paths:
           description: "JWT ausente, invalido ou expirado."
         "503":
           description: Falha ao validar token ou consultar ePortal.
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/segunda-via:
     get:
       tags:
@@ -595,6 +686,8 @@ paths:
           description: "JWT ausente, invalido ou expirado."
         "503":
           description: Falha ao validar token ou gerar URL.
+      security:
+      - bearerAuth: []
   /infra/heartbeat:
     get:
       tags:
@@ -774,6 +867,13 @@ components:
           type: string
         conteudoBase64:
           type: string
+    FazendaImovel:
+      type: object
+      properties:
+        endereco:
+          type: string
+        numInscricao:
+          type: string
     GrerjDamResponse:
       type: object
       properties:
@@ -919,25 +1019,20 @@ components:
         cpf:
           description: CPF do usuario autenticado ao qual o imovel esta vinculado.
           type: string
-          example: "02112968726"
+          example: "12345678909"
         dataInclusao:
+          format: date-time
           description: Data e hora de inclusao do cadastro local.
           type: string
-          allOf:
-          - $ref: '#/components/schemas/LocalDateTime'
-          example: 2026-06-03T17:30:31.14
+          example: 2026-06-03T17:30:31
         endereco:
           description: Endereco retornado pelo WSFazenda_Iptu no momento do cadastro.
           type: string
-          example: "RUA SANTO AFONSO, 216 / LOJA A - TIJUCA"
+          example: "RUA EXEMPLO, 123 / LOJA A - BAIRRO"
         numInscricao:
           description: Numero da inscricao imobiliaria normalizado com 8 digitos.
           type: string
           example: "00000018"
-    LocalDateTime:
-      format: date-time
-      type: string
-      example: 2022-03-10T12:15:50
     OpcaoDividaAtivaResponse:
       description: Opcao de servico de Divida Ativa (menu do portlet legado).
       type: object
@@ -1109,6 +1204,12 @@ components:
         senha:
           type: string
   securitySchemes:
+    bearerAuth:
+      type: http
+      description: "JWT emitido pelo Keycloak. No Swagger UI, informe apenas o token\
+        \ (sem o prefixo Bearer)."
+      scheme: bearer
+      bearerFormat: JWT
     SecurityScheme:
       type: http
       description: Authentication

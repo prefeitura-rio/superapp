@@ -61,11 +61,15 @@ export const MOCK_VAGA_SEM_CRITERIOS = {
 // Note o que a API **não** devolve: proprietário, bairro separado e indicador de débito.
 // Não acrescente esses campos aqui — são premissas em aberto (P19, P22, P12), e um mock
 // mais generoso que a API faria a suíte validar ficção.
+//
+// Os **valores** são fictícios de propósito. A primeira versão destes mocks copiou CPF e
+// endereço reais dos exemplos do spec; a própria API os substituiu por dado fictício em
+// 31/08/2026 e o repositório acompanhou. A *forma* é que precisa ser fiel — nunca o dado.
 export const MOCK_IMOVEL_DIVIDA_ATIVA = {
   id: 32,
-  cpf: '16232350731',
+  cpf: '12345678909',
   dataInclusao: '2026-06-22T15:40:46.477',
-  endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+  endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
   numInscricao: '00000018',
 }
 
@@ -175,6 +179,20 @@ export const handlers = [
   // Dívida Ativa - Excluir imóvel pelo id local do cadastro
   http.delete(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:id`, () => {
     return new HttpResponse(null, { status: 204 })
+  }),
+
+  // Dívida Ativa - Consulta prévia à Fazenda, sem gravar. É esta que a tela "Confirme sua
+  // inscrição" usa. O schema do spec declara um objeto, mas a descrição do endpoint fala
+  // em "lista vazia" para inscrição sem registro — o mock segue o schema, e a forma de
+  // array é exercida por teste com `server.use()`.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/cadastro`, () => {
+    return HttpResponse.json(
+      {
+        endereco: MOCK_IMOVEL_DIVIDA_ATIVA.endereco,
+        numInscricao: MOCK_IMOVEL_DIVIDA_ATIVA.numInscricao,
+      },
+      { status: 200 }
+    )
   }),
 
   // Dívida Ativa - Consulta de um imóvel já cadastrado + opções do ePortal.

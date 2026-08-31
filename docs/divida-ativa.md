@@ -10,17 +10,19 @@ acompanhamento de requerimentos.
 > sistemas corporativos (DAM/PGM); este módulo é camada de apresentação sobre a API de
 > integração em Quarkus (`api-imoveis`), escrita fora deste repo.
 >
-> **O contrato provisório foi substituído pelo real em 17/08/2026**, colhido de
-> `http://10.5.225.173:8080/swagger` e conferido por chamada ao vivo contra a instância de
-> homologação. A [tabela de premissas](#tabela-de-premissas-do-contrato) traz o veredito de
+> **O contrato provisório foi substituído pelo real em 17/08/2026**, colhido então da máquina
+> do dev e conferido por chamada ao vivo. Em **31/08/2026 a API ganhou ambiente de
+> homologação** (`https://api-appimoveishom.apps.ocp.rio.gov.br`) e o spec foi atualizado a
+> partir dele. A [tabela de premissas](#tabela-de-premissas-do-contrato) traz o veredito de
 > cada uma.
 >
-> ⚠️ **Duas coisas ficaram quebradas de propósito, esperando decisão de produto:**
+> ✅ **A premissa P20 caiu — para o nosso lado.** A API expõe
+> `GET /imoveis/{inscricao}/cadastro`, uma consulta ao `WSFazenda_Iptu` que **não grava**. É a
+> saída A que este documento pedia, e `/divida-ativa/imoveis/novo/confirmar` passou a
+> funcionar para imóvel novo.
 >
-> - **`/divida-ativa/imoveis/novo/confirmar` não funciona para imóvel novo.** A API não tem
->   consulta sem cadastro — ver [P20](#p20-em-detalhe--a-tela-de-confirmação-perdeu-a-fonte-de-dados).
-> - **Nada da Fase 3 foi integrado.** A API não liga schema de resposta às operações de dívida
->   ativa, então os oito endpoints que a fase precisa chegam sem tipo.
+> ⚠️ **Ainda em aberto:** nada da Fase 3 foi integrado. A API não liga schema de resposta às
+> operações de dívida ativa, então os oito endpoints que a fase precisa chegam sem tipo.
 >
 > Parcelamento e acompanhamento (Fase 3) já têm rota, com um estado provisório explicando que
 > o serviço está sendo construído — a landing linka para eles desde o primeiro PR e um 404
@@ -284,10 +286,18 @@ vazou: conserte a fronteira, não só o erro.
 
 ## Contrato real (`api-imoveis`)
 
-`divida-ativa-api.yaml` é uma **cópia fiel** do documento OpenAPI que a API do Vladimir serve
-em `/swagger`. Não editamos o arquivo: a procedência fica no commit e aqui. Quando a API dele
-virar repo no GitHub, migrar o `input` do Orval para a URL — um notebook alcançável só pela
-rede interna não serve de fonte para o CI.
+`divida-ativa-api.yaml` é uma **cópia fiel** do documento OpenAPI que a `api-imoveis` serve em
+`/swagger`. Não editamos o arquivo: a procedência fica no commit e aqui.
+
+Desde 31/08/2026 a fonte é a **instância de homologação**,
+`https://api-appimoveishom.apps.ocp.rio.gov.br/swagger` — antes era o notebook do dev
+(`http://10.5.225.173:8080`), que não servia de fonte para ninguém além dele.
+
+O `input` do Orval continua apontando para o **arquivo local**, e é decisão, não pendência:
+`/swagger` é endpoint de runtime, não spec versionado num repositório. Ler dele faria a geração
+do client depender de a homologação estar no ar e de rede interna, e uma mudança de contrato
+entraria sem aparecer no diff do PR. Atualizar o contrato é um passo manual e deliberado —
+copiar o `/swagger` por cima do YAML e regenerar.
 
 > O Quarkus dele **não** expõe `/q/openapi` (dá 404). O path é `/swagger`, e
 > `/swagger?format=json` funciona.
@@ -297,7 +307,8 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado. Note que **
 
 | Tag → pasta | Operações que usamos | Situação |
 |---|---|---|
-| `Imoveis` → `imoveis/` | `GET/POST /imoveis`, `DELETE /imoveis/{id}`, `GET /imoveis/{inscricao}/consulta` | **integradas** |
+| `Imoveis` → `imoveis/` | `GET/POST /imoveis`, `DELETE /imoveis/{id}`, `GET /imoveis/{inscricao}/cadastro` | **integradas** |
+| `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/consulta` | gerada, **sem chamador** — traz as `opcoes` do ePortal de que a Fase 3 precisa |
 | `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/parcelamentos`, `.../segunda-via` | fora do escopo 2026 |
 | `Divida Ativa` → `divida-ativa/` | consulta principal, `consultar`, `datas-vencimento`, `parcelamentos/simular`, `requerimentos` | Fase 3, **sem tipo** |
 | `Divida Ativa` → `divida-ativa/` | `emitir/*`, `simular/*`, `guias/*`, `certidoes/*` | fora do escopo 2026 |
@@ -310,7 +321,7 @@ escopo simplesmente não têm chamador.
 
 ### O que "sem tipo" significa
 
-**25 das 31 operações não declaram schema de resposta** — só `"200": description: OK`. Os
+**25 das 32 operações não declaram schema de resposta** — só `"200": description: OK`. Os
 schemas existem e são bons (`DividaAtivaConsultaResponse`, `CdaResponse`, `GuiaDamResponse`,
 `OpcaoDividaAtivaResponse`), mas não estão referenciados por resposta nenhuma, então o Orval
 gera `data: void`. Ligar os `@APIResponse` é o pedido de maior alavancagem que temos com o
@@ -386,9 +397,9 @@ mas `'desconhecida'` precisa de tratamento visual definido no design. E prefira 
 | P16 | Comprovante em PDF | `application/pdf` como blob | 🔧 | **URL**, o ramo alternativo que a premissa previu. Também `urlPdf` nas guias. Atenção: `/guias/{n}/pdf` é descrito como "URL **publica** de PDF" — guia de dívida acessível por quem tiver o link |
 | P17 | Validade da simulação | `validaAte` é instante | ❓🎨 | Campo não existe. **E o fluxo é outro:** `GET /datas-vencimento?tipo=PARCELAMENTO` devolveu dez datas permitidas, não consecutivas, e `simular` recebe a escolhida. O cidadão **escolhe a data** antes de simular — passo de tela que o Figma não tem |
 | P19 | `proprietario` no imóvel | A API devolve o nome do proprietário | 🎨 | Ausente de `ImovelResponse`, que traz só `id`, `cpf`, `dataInclusao`, `endereco`, `numInscricao`. O nome existe como `nomeContribuinte`, mas na CDA, só após a consulta de dívida ativa. Mapeado para `null`: a linha desaparece da lista e da confirmação |
-| P20 | Consulta × cadastro | Dois endpoints, um que só consulta | 🎨 | **A premissa caiu.** Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-perdeu-a-fonte-de-dados) |
+| P20 | Consulta × cadastro | Dois endpoints, um que só consulta | ✅ | **Confirmada, com atraso.** Não existia em 17/08 e a tela ficou quebrada de propósito; a API entregou `GET /imoveis/{inscricao}/cadastro` em 31/08. Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-ganhou-sua-fonte-de-dados) |
 | P21 | Tamanho da inscrição | 7 **ou** 8 dígitos | ✅ | Confirmada no transporte. Duas ressalvas: a API aceita **menos** de 7 dígitos e a nossa validação não, o que impede testar manualmente com o dado `18` da instância dele; e a resposta vem sempre com 8, então a máscara ganha um `0.` à esquerda que o carnê não tem |
-| P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA SANTO AFONSO, 216 / LOJA A - TIJUCA"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
+| P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA EXEMPLO, 123 / LOJA A - BAIRRO"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
 | P18 | Identificador da consulta | Só inscrição imobiliária | 🎨 | **Meia vitória.** `POST /imoveis/{inscricao}/divida-ativa/consultar` aceita quatro critérios — `numInscricao`, `numCda`, `numExecucaoFiscal` e um que não esperávamos, `numGuiaPagamento` (RN-001/RN-002, critério único). Mas a inscrição continua **no path**, e a tag diz "autorizacao por imovel cadastrado": quem só tem a carta de cobrança ainda não entra. Ver detalhamento abaixo |
 
 ### Achados novos, fora da tabela
@@ -446,22 +457,50 @@ Keycloak (step-up via `acr_values`; o token atual vem com `acr: 0`), não um cam
 > **Não testamos `validar-senha` de propósito.** Chamar com senha errada arriscaria acionar a
 > detecção de força bruta do Keycloak e bloquear uma conta real.
 
-### P20 em detalhe — a tela de confirmação perdeu a fonte de dados
+### P20 em detalhe — a tela de confirmação ganhou sua fonte de dados
 
-A premissa dizia que havia dois endpoints. Não há.
+**Resolvida em 31/08/2026 pela saída A.** Fica o histórico, porque ele explica por que a tela
+esteve quebrada e como não repetir o erro.
+
+Em 17/08 a premissa supunha dois endpoints — um que consultasse a Fazenda sem gravar e outro
+que gravasse. Não havia:
 
 - `GET /imoveis/{inscricao}/consulta` exige o imóvel **já cadastrado** (404 se não estiver) e a
   própria descrição avisa: "Nao chama o WSFazenda_Iptu neste endpoint".
 - `POST /imoveis` é quem consulta a Fazenda — e **grava no mesmo passo**, como o legado.
 
-Não existe como mostrar o endereço antes de cadastrar. `/divida-ativa/imoveis/novo/confirmar`
-está no repositório, compila e é coberto por testes, mas **cai sempre no estado "não
-encontrado"** para um imóvel novo. Fica assim, atrás da feature flag, até a decisão. Três
-saídas:
+Sem consulta prévia, `/divida-ativa/imoveis/novo/confirmar` caía sempre no estado "não
+encontrado" para um imóvel novo. A decisão registrada foi pedir a saída A, e foi o que veio:
+
+```
+GET /imoveis/{inscricao}/cadastro  →  FazendaImovel { endereco, numInscricao }
+```
+
+> "Valida o JWT no Keycloak e, a partir da inscricao imobiliaria, consulta o WSFazenda_Iptu e
+> retorna os dados cadastrais do imovel (endereco e inscricao normalizada). **Nao consulta o
+> banco local.** Retorna lista vazia quando nao houver registro para a inscricao."
+
+O fluxo desenhado voltou a valer: campo → confirmação (consulta, não grava) → `POST /imoveis`
+no botão "Confirmar" → sucesso. `getDalDividaAtivaCadastroFazenda` em `src/lib/dal.ts` é quem
+chama, e `mapFazendaToImovel` traduz.
+
+**Duas ressalvas que sobreviveram:**
+
+1. **`FazendaImovel` traz só `endereco` e `numInscricao`.** Sem proprietário (P19) e sem bairro
+   separado (P22) — a tela de confirmação já protege as duas linhas com `&&`, então elas somem
+   em vez de aparecerem vazias. E sem `id`, que é a verdade: o imóvel ainda não existe no banco
+   local. É `id: null` que impede a tela de oferecer exclusão de algo que não foi gravado.
+2. **O schema diz objeto, a descrição diz "lista vazia".** Mesma contradição da P11, em que
+   `GET /imoveis` é tipado como objeto e devolve array cru — lá ela custou uma lista vazia em
+   silêncio. `normalizarConsultaFazenda` aceita as duas formas de propósito, e há teste para
+   cada uma. **Não "simplifique" isso** para um acesso direto ao objeto sem antes confirmar a
+   forma real com uma chamada autenticada.
+
+As saídas B e C ficam registradas como o que **não** foi preciso fazer:
 
 | | Saída | Custo |
 |---|---|---|
-| **A** | Pedir ao Vladimir um modo consulta (`?persistir=false` ou endpoint de preview) | Preserva o Figma inteiro. Do lado dele é pular o insert — provavelmente a mudança mais barata da lista. **É o que pedir primeiro** |
+| **A** | Pedir ao Vladimir um modo consulta (`?persistir=false` ou endpoint de preview) | Preserva o Figma inteiro. Do lado dele é pular o insert — provavelmente a mudança mais barata da lista. **É o que pedir primeiro** — ✅ foi o que aconteceu |
 | **B** | Inverter: gravar no "Adicionar" e a tela passa a confirmar o que já foi salvo, com `DELETE` como desfazer | Mantém as três telas, muda a semântica e exige copy nova. Um imóvel rejeitado esteve cadastrado por alguns segundos — mas verificamos que falha não deixa lixo gravado |
 | **C** | Assumir o legado: campo → sucesso, com o endereço na tela de sucesso | Mais barato de implementar, some uma tela do Figma |
 
@@ -561,9 +600,21 @@ Nos **testes**, o caminho é MSW no limite de rede — handlers default em
 
 ## Regenerar o client
 
-`orval.config.ts` aceita **uma API por vez** e `docs/orval-apis.md` pede para não commitar a
-config trocada sem combinar com o time. O fluxo é: colar o bloco abaixo no campo `api:`,
-rodar `npx orval`, commitar `src/http-divida-ativa/` e **reverter o `orval.config.ts`**.
+Desde 31/08/2026 o `orval.config.ts` é **multi-projeto** e a Dívida Ativa tem entrada nomeada
+permanente. Não há mais troca de config na mão nem reversão depois do commit:
+
+```bash
+# 1. atualizar o contrato (só quando a API mudar)
+curl -k https://api-appimoveishom.apps.ocp.rio.gov.br/swagger > divida-ativa-api.yaml
+
+# 2. regenerar só este client
+npx orval --project dividaAtiva
+```
+
+⚠️ `npx orval` **sem** `--project` regenera todos os projetos do arquivo. Use sempre a flag.
+
+Depois de regenerar, rode `npx vitest run src/__tests__/divida-ativa-contrato.test.ts`: é o
+teste de fiação que acusa mudança de contrato antes de ela virar bug de tela.
 
 O bloco está registrado em [`orval-apis.md`](./orval-apis.md) junto com os das outras APIs.
 
@@ -609,11 +660,31 @@ A troca do contrato aconteceu em 17/08/2026. O que está pronto:
   não emite; manter era manter teste verde sobre contrato refutado.
 - Tabela de premissas reconciliada acima.
 
+### A subida para homologação — 31/08/2026
+
+A `api-imoveis` ganhou ambiente próprio (`https://api-appimoveishom.apps.ocp.rio.gov.br`) e
+deixou de depender do notebook do dev. O que mudou aqui:
+
+- **Contrato atualizado** a partir do `/swagger` de homologação. O diff é pequeno: um endpoint
+  novo, um schema novo (`FazendaImovel`), o alias `LocalDateTime` removido (`dataInclusao`
+  passou a `string` direto, sem efeito no nosso código) e `security: bearerAuth` declarado em
+  todas as operações — formalização do que o mutator já fazia, sem efeito no client gerado.
+- **`GET /imoveis/{inscricao}/cadastro`**, a consulta prévia à Fazenda. Fechou a P20 e ligou a
+  tela de confirmação. Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-ganhou-sua-fonte-de-dados).
+- **`orval.config.ts` virou multi-projeto**, com entrada nomeada `dividaAtiva`. Acabou a troca
+  manual de campos e a reversão pós-commit — regenerar é `npx orval --project dividaAtiva`.
+- **Dado pessoal real saiu dos mocks e testes.** A primeira versão copiou CPF e endereço reais
+  dos exemplos do spec; a própria API os substituiu por dado fictício e o repositório
+  acompanhou. A *forma* dos mocks precisa ser fiel — nunca o dado.
+
+O que **não** mudou: a Fase 3 continua sem tipo, e o provisionamento de
+`BASE_API_URL_DIVIDA_ATIVA` no Infisical continua pendente.
+
 ### O que ficou pendente, e de quem depende
 
 | Pendência | Depende de |
 |---|---|
-| Tela `confirmar` funcional (P20) | decisão de produto entre A, B e C |
+| ~~Tela `confirmar` funcional (P20)~~ | ✅ resolvida em 31/08/2026 pela saída A |
 | Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
 | Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
 | Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |

@@ -1,7 +1,7 @@
 import { ConfirmarImovel } from '@/app/components/divida-ativa/confirmar-imovel'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { getDalDividaAtivaConsultaInscricao } from '@/lib/dal'
+import { getDalDividaAtivaCadastroFazenda } from '@/lib/dal'
 import {
   isInscricaoImobiliariaValida,
   somenteDigitos,
@@ -14,6 +14,11 @@ import { redirect } from 'next/navigation'
  * Segundo passo do cadastro: consulta a inscrição no sistema fiscal e mostra o que veio para
  * o cidadão conferir. **Ainda não grava** — quem grava é o "Confirmar", que dispara a Server
  * Action. No portal legado a consulta já cadastrava; a separação é deliberada (premissa P20).
+ *
+ * A consulta é `GET /imoveis/{inscricao}/cadastro`, que lê o `WSFazenda_Iptu` sem tocar no
+ * banco local. Até 31/08/2026 esse endpoint não existia e esta tela caía sempre no estado
+ * "não encontrado" para imóvel novo — não confunda a ausência de dado com a tela quebrada
+ * de antes.
  *
  * A inscrição vem por query param porque é estado compartilhável de UI, e a consulta acontece
  * aqui no servidor: assim o token não precisa chegar ao browser.
@@ -31,7 +36,7 @@ export default async function ConfirmarImovelPage({
   }
 
   const { cpf } = await getUserInfoFromToken()
-  const imovel = await getDalDividaAtivaConsultaInscricao(
+  const imovel = await getDalDividaAtivaCadastroFazenda(
     somenteDigitos(inscricao),
     cpf
   )

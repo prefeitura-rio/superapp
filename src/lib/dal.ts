@@ -13,6 +13,7 @@ import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/in
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import {
   getImoveis,
+  getImoveisInscricaoCadastro,
   getImoveisInscricaoConsulta,
 } from '@/http-divida-ativa/imoveis/imoveis'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
@@ -24,6 +25,8 @@ import {
 } from '@/http/citizen/citizen'
 import {
   mapApiToImovel,
+  mapFazendaToImovel,
+  normalizarConsultaFazenda,
   normalizarListaImoveis,
 } from '@/lib/divida-ativa-mappers'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
@@ -532,20 +535,59 @@ export async function getDalDividaAtivaImoveis(
 }
 
 /**
- * Consulta um imóvel **já cadastrado** do cidadão.
+ * Consulta prévia à Fazenda: devolve o endereço de uma inscrição **sem cadastrar nada**.
  *
- * ⚠️ **Não serve à tela "Confirme sua inscrição" e a premissa P20 está em aberto por
- * causa disso.** O contrato provisório supunha dois endpoints — um que consultasse a
- * Fazenda sem gravar e outro que gravasse. A API real não tem o primeiro:
- * `GET /imoveis/{inscricao}/consulta` exige que o imóvel já esteja cadastrado (404 se
- * não estiver) e a própria descrição diz que não chama o `WSFazenda_Iptu`. Quem busca
- * endereço na Fazenda é o `POST /imoveis`, que consulta e grava no mesmo passo, como o
- * portal legado.
+ * É a fonte de dados da tela "Confirme sua inscrição", e o que fechou a premissa P20.
+ * Até 31/08/2026 este endpoint não existia — a única consulta disponível exigia o imóvel
+ * já cadastrado, então a tela caía sempre no estado "não encontrado" para imóvel novo. A
+ * API ganhou `GET /imoveis/{inscricao}/cadastro`, que consulta o `WSFazenda_Iptu` e não
+ * toca no banco local: exatamente a saída A registrada em `docs/divida-ativa.md`, a que
+ * preserva as três telas do desenho.
  *
- * Consequência: `/divida-ativa/imoveis/novo/confirmar` **não funciona** para um imóvel
- * novo — vai sempre cair no estado de "não encontrado". A rota fica assim, atrás da
- * feature flag, até a decisão de produto sobre a P20. Não conserte isto aqui: o conserto
- * é escolher entre pedir um modo de consulta ao Vladimir, inverter a tela ou removê-la.
+ * Devolve `null` em qualquer resposta que não traga um imóvel — inscrição desconhecida,
+ * 400, 401 ou falha do WS da Fazenda (503). A tela tem estado desenhado para "não
+ * encontramos essa inscrição"; estourar o error boundary da rota seria pior para o
+ * cidadão, que pode simplesmente digitar outro número.
+ */
+export async function getDalDividaAtivaCadastroFazenda(
+  inscricao: string,
+  cpf: string
+): Promise<ImovelDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaCadastroFazenda', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveisInscricaoCadastro(
+      somenteDigitos(inscricao),
+      {
+        cache: 'no-store',
+      }
+    )
+
+    addSpanEvent('divida-ativa.cadastro-fazenda.fetched', {
+      'cadastro.status': result.status,
+    })
+
+    if (result.status !== 200) return null
+
+    // A resposta pode vir como objeto ou como lista vazia — o contrato diz as duas coisas.
+    const fazenda = normalizarConsultaFazenda(result.data)
+
+    return fazenda ? mapFazendaToImovel(fazenda) : null
+  })
+}
+
+/**
+ * Consulta um imóvel **já cadastrado** do cidadão, com as opções do ePortal que vêm junto.
+ *
+ * ⚠️ **Sem chamador hoje.** Quem alimenta a tela de confirmação é
+ * `getDalDividaAtivaCadastroFazenda` acima — este endpoint exige o imóvel já cadastrado
+ * (404 se não estiver) e a própria descrição diz que não chama o `WSFazenda_Iptu`.
+ *
+ * Fica no repositório porque é o único caminho para as `opcoes` do ePortal, de que a Fase 3
+ * precisa, no mesmo espírito dos tipos de Fase 3 em `src/types/divida-ativa.ts`: vocabulário
+ * já verificado contra a API real, esperando a tela que vai consumi-lo. Atenção ao custo —
+ * medimos 16 s de resposta, porque a chamada atravessa o ePortal.
  *
  * Devolve `null` quando a inscrição não está cadastrada, para a tela mostrar um estado em
  * vez de estourar o error boundary da rota.

@@ -32,9 +32,9 @@ describe('adicionarImovel', () => {
         HttpResponse.json(
           {
             id: 32,
-            cpf: '16232350731',
+            cpf: '12345678909',
             dataInclusao: '2026-06-22T15:40:46.477',
-            endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+            endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
             numInscricao: '00000018',
           },
           { status: 201 }
@@ -49,7 +49,7 @@ describe('adicionarImovel', () => {
       data: {
         id: 32,
         inscricao: '00000018',
-        endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+        endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
         bairro: null,
         proprietario: null,
         possuiDebitos: null,

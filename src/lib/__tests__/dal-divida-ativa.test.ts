@@ -1,4 +1,5 @@
 import {
+  getDalDividaAtivaCadastroFazenda,
   getDalDividaAtivaConsultaInscricao,
   getDalDividaAtivaImoveis,
 } from '@/lib/dal'
@@ -24,9 +25,9 @@ describe('getDalDividaAtivaImoveis', () => {
           [
             {
               id: 32,
-              cpf: '16232350731',
+              cpf: '12345678909',
               dataInclusao: '2026-06-22T15:40:46.477',
-              endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+              endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
               numInscricao: '00000018',
             },
           ],
@@ -41,7 +42,7 @@ describe('getDalDividaAtivaImoveis', () => {
       {
         id: 32,
         inscricao: '00000018',
-        endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+        endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
         bairro: null,
         proprietario: null,
         possuiDebitos: null,
@@ -104,7 +105,7 @@ describe('getDalDividaAtivaConsultaInscricao', () => {
                 imovel: {
                   id: 32,
                   dataInclusao: '2026-06-22T15:40:46.477',
-                  endereco: 'RUA SANTO AFONSO, 216 / LOJA A - TIJUCA',
+                  endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
                   numInscricao: '00000018',
                 },
                 opcoes: [],
@@ -121,7 +122,7 @@ describe('getDalDividaAtivaConsultaInscricao', () => {
     const imovel = await getDalDividaAtivaConsultaInscricao('00000018', CPF)
 
     expect(imovel?.id).toBe(32)
-    expect(imovel?.endereco).toBe('RUA SANTO AFONSO, 216 / LOJA A - TIJUCA')
+    expect(imovel?.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
   })
 
   test('devolve null quando a inscrição não está cadastrada, sem lançar', async () => {
@@ -147,5 +148,105 @@ describe('getDalDividaAtivaConsultaInscricao', () => {
     const imovel = await getDalDividaAtivaConsultaInscricao('0.000.001-8', CPF)
 
     expect(imovel?.inscricao).toBe('00000018')
+  })
+})
+
+/**
+ * A consulta prévia à Fazenda que a tela "Confirme sua inscrição" precisa: consulta sem
+ * gravar. É o endpoint que resolveu a premissa P20 — antes dele a tela caía sempre no
+ * estado "não encontrado" para imóvel novo, porque a única consulta disponível exigia o
+ * imóvel já cadastrado.
+ *
+ * Diferente de `getDalDividaAtivaImoveis`, aqui **não** engolimos a falha em silêncio por
+ * conveniência: devolvemos `null` porque a tela tem um estado desenhado para "não
+ * encontrado". O que não pode acontecer é estourar o error boundary da rota.
+ */
+describe('getDalDividaAtivaCadastroFazenda', () => {
+  beforeEach(() => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/cadastro`, ({ params }) =>
+        params.inscricao === '00000018'
+          ? HttpResponse.json(
+              {
+                endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+                numInscricao: '00000018',
+              },
+              { status: 200 }
+            )
+          : new HttpResponse(null, { status: 400 })
+      )
+    )
+  })
+
+  test('devolve o imóvel consultado na Fazenda, ainda não cadastrado', async () => {
+    const imovel = await getDalDividaAtivaCadastroFazenda('00000018', CPF)
+
+    expect(imovel?.inscricao).toBe('00000018')
+    expect(imovel?.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
+    // Ainda não gravado: sem id local, não há o que excluir.
+    expect(imovel?.id).toBeNull()
+    expect(imovel?.cadastradoEm).toBeNull()
+  })
+
+  test('devolve null para inscrição inválida, sem lançar', async () => {
+    await expect(
+      getDalDividaAtivaCadastroFazenda('99999999', CPF)
+    ).resolves.toBeNull()
+  })
+
+  // "Retorna lista vazia quando nao houver registro para a inscricao" — descrição da API.
+  test('devolve null quando o 200 vem com lista vazia', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/cadastro`, () =>
+        HttpResponse.json([], { status: 200 })
+      )
+    )
+
+    await expect(
+      getDalDividaAtivaCadastroFazenda('00000018', CPF)
+    ).resolves.toBeNull()
+  })
+
+  /**
+   * O 503 é o caminho mais provável de falha aqui: a própria API documenta "Falha ao
+   * validar token no Keycloak ou ao consultar o WSFazenda_Iptu", e o WS da Fazenda é a
+   * dependência lenta e instável da pilha. A tela mostra "não encontramos essa inscrição"
+   * em vez de uma tela de erro — o cidadão pode tentar de novo.
+   */
+  test('devolve null quando o WSFazenda falha (503), sem lançar', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/cadastro`, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar imovel no WS Fazenda IPTU.' },
+          { status: 503 }
+        )
+      )
+    )
+
+    await expect(
+      getDalDividaAtivaCadastroFazenda('00000018', CPF)
+    ).resolves.toBeNull()
+  })
+
+  test('normaliza a máscara antes de consultar', async () => {
+    const imovel = await getDalDividaAtivaCadastroFazenda('0.000.001-8', CPF)
+
+    expect(imovel?.inscricao).toBe('00000018')
+  })
+
+  test('não serve dado pessoal de cache: cada leitura vai à API', async () => {
+    let chamadas = 0
+
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/cadastro`, () => {
+        chamadas += 1
+        return HttpResponse.json({ numInscricao: '00000018' }, { status: 200 })
+      })
+    )
+
+    await getDalDividaAtivaCadastroFazenda('00000018', CPF)
+    await getDalDividaAtivaCadastroFazenda('00000018', CPF)
+
+    expect(chamadas).toBe(2)
   })
 })
