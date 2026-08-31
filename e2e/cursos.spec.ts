@@ -7,14 +7,13 @@ import {
 
 /**
  * Seletor de card de curso na home: qualquer link para /servicos/cursos/{id}
- * excluindo as sub-rotas estáticas conhecidas (busca, faq, opcoes, etc.) e as
+ * excluindo as sub-rotas estáticas conhecidas (busca, faq, etc.) e as
  * rotas de categoria/confirmar-informacoes. Evita hardcode de IDs de curso.
  */
 const COURSE_CARD_SELECTOR =
   'a[href^="/servicos/cursos/"]' +
   ':not([href="/servicos/cursos/busca"])' +
   ':not([href="/servicos/cursos/faq"])' +
-  ':not([href="/servicos/cursos/opcoes"])' +
   ':not([href="/servicos/cursos/meus-cursos"])' +
   ':not([href="/servicos/cursos/certificados"])' +
   ':not([href="/servicos/cursos/alertas"])' +
@@ -389,13 +388,13 @@ test.describe('Cursos — home (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('header autenticado exibe link para o menu /servicos/cursos/opcoes', async ({
+  test('header autenticado exibe o gatilho do menu global', async ({
     page,
   }) => {
     await page.goto('/servicos/cursos')
-    await expect(
-      page.locator('a[href="/servicos/cursos/opcoes"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('header autenticado exibe link para o perfil /meu-perfil', async ({
@@ -412,7 +411,7 @@ test.describe('Cursos — home (autenticado)', () => {
 // MENU (OPÇÕES) — AUTENTICADO
 // ---------------------------------------------------------------------------
 
-test.describe('Cursos — menu/opções (autenticado)', () => {
+test.describe('Cursos — menu global (autenticado)', () => {
   test.beforeEach(async ({ context }) => {
     test.skip(
       !hasE2EAuth(),
@@ -421,36 +420,51 @@ test.describe('Cursos — menu/opções (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exibe heading "Menu" com itens e hrefs corretos', async ({ page }) => {
-    await page.goto('/servicos/cursos/opcoes')
+  test('menu global exibe itens de Cursos com hrefs corretos', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/cursos')
 
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
 
+    await expect(
+      page.getByRole('link', { name: 'Ver cursos' })
+    ).toHaveAttribute('href', '/servicos/cursos')
     await expect(
       page.getByRole('link', { name: 'Meus cursos' })
     ).toHaveAttribute('href', '/servicos/cursos/meus-cursos')
     await expect(
       page.getByRole('link', { name: 'Certificados' })
     ).toHaveAttribute('href', '/servicos/cursos/certificados')
-    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
-      'href',
-      '/servicos/cursos/faq'
-    )
   })
 
-  test('clicar em "Meus cursos" navega para /meus-cursos', async ({ page }) => {
-    await page.goto('/servicos/cursos/opcoes')
-    await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
-      timeout: 15000,
-    })
+  test('clicar em "Meus cursos" no menu global navega para /meus-cursos', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/cursos')
 
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Oportunidades Cariocas' }).click()
     await page.getByRole('link', { name: 'Meus cursos' }).click()
+
     await page.waitForURL('**/servicos/cursos/meus-cursos', { timeout: 15000 })
     await expect(
       page.getByRole('heading', { name: 'Meus cursos' })
     ).toBeVisible({ timeout: 15000 })
+  })
+
+  test('FAQ de Cursos é alcançável pelo hub de Perguntas Frequentes', async ({
+    page,
+  }) => {
+    await page.goto('/faq')
+    await expect(page.getByRole('link', { name: 'Cursos' })).toHaveAttribute(
+      'href',
+      '/servicos/cursos/faq'
+    )
+
+    await page.getByRole('link', { name: 'Cursos', exact: true }).click()
+    await page.waitForURL('**/servicos/cursos/faq', { timeout: 15000 })
   })
 })
 

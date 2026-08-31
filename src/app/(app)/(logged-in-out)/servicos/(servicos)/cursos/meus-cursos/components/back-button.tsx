@@ -42,10 +42,10 @@ export function MyCoursesBackButton() {
           )
 
           // If we're on meus-cursos and previous route is a course detail page,
-          // navigate to /servicos/cursos/opcoes (the typical entry point for "meus cursos")
-          // This provides a logical navigation path and avoids loops
+          // navigate to /servicos/cursos (the entry point since the module menu
+          // was absorbed by the global menu). Avoids navigation loops.
           if (isCourseDetailPage) {
-            router.push('/servicos/cursos/opcoes')
+            router.push('/servicos/cursos')
             return
           }
 
@@ -79,9 +79,10 @@ export function MyCoursesBackButton() {
               )
 
               // If we're on meus-cursos and referrer is a course detail page,
-              // navigate to /servicos/cursos/opcoes (the typical entry point for "meus cursos")
+              // navigate to /servicos/cursos (the entry point since the module
+              // menu was absorbed by the global menu)
               if (isCourseDetailPage) {
-                router.push('/servicos/cursos/opcoes')
+                router.push('/servicos/cursos')
                 return
               }
 

@@ -11,7 +11,7 @@ export default function MyCoursesLoading() {
   return (
     <div className="max-w-4xl mx-auto py-6">
       <SecondaryHeader
-        route="/servicos/cursos/opcoes"
+        route="/servicos/cursos"
         logo={
           <Link href="/servicos/cursos">
             <Image

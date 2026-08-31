@@ -1,3 +1,4 @@
+import { GlobalMenuTrigger } from '@/app/components/global-menu/global-menu-trigger'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
   oportunidadesCariocasLogo,
@@ -89,6 +90,7 @@ export default function EmpregosFaqPage() {
     <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
       <SecondaryHeader
         fixed={false}
+        rightSlot={<GlobalMenuTrigger />}
         route="/servicos/trabalho"
         logo={
           <Link href="/servicos/trabalho">
