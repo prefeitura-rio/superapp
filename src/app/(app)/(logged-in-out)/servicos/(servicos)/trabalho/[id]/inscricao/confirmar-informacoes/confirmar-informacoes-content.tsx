@@ -12,6 +12,7 @@ import {
   oportunidadesCariocasLogo,
   oportunidadesCariocasLogoDark,
 } from '@/constants/bucket'
+import { formatAddress, hasValidAddress } from '@/helpers/address-data-helpers'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
 import { formatCpf } from '@/lib/format-cpf'
@@ -54,6 +55,7 @@ export function ConfirmarInformacoesContent({
     !contactUpdateStatus?.emailNeedsUpdate && hasValidEmail(userInfo.email)
   const hasPhone =
     !contactUpdateStatus?.phoneNeedsUpdate && hasValidPhone(userInfo.phone)
+  const hasAddress = hasValidAddress(userInfo.address)
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
@@ -77,6 +79,12 @@ export function ConfirmarInformacoesContent({
   const handleEmailClick = () => {
     router.push(
       `/meu-perfil/informacoes-pessoais/atualizar-email?returnUrl=${encodeURIComponent(returnUrl)}`
+    )
+  }
+
+  const handleAddressClick = () => {
+    router.push(
+      `/meu-perfil/endereco/atualizar-endereco?returnUrl=${encodeURIComponent(returnUrl)}`
     )
   }
 
@@ -216,6 +224,36 @@ export function ConfirmarInformacoesContent({
 
           <div className="h-px bg-border" />
 
+          {/* Endereço */}
+          <div
+            className={`pt-4 pb-4 cursor-pointer hover:bg-accent/30 rounded-lg px-2 -mx-2 transition-colors ${
+              !hasAddress ? 'border-l-4 border-destructive pl-2' : ''
+            }`}
+            onClick={handleAddressClick}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
+                  Endereço {!hasAddress && '*'}
+                </p>
+                <p
+                  className={`font-normal ${
+                    hasAddress
+                      ? 'text-foreground'
+                      : 'text-sm md:text-base text-destructive'
+                  }`}
+                >
+                  {hasAddress
+                    ? formatAddress(userInfo.address)
+                    : 'Informe seu endereço'}
+                </p>
+              </div>
+              <EditIcon className="h-5 w-5 mr-2 text-foreground shrink-0 ml-2" />
+            </div>
+          </div>
+
+          <div className="h-px bg-border" />
+
           {/* Gênero */}
           <div
             className={`pt-4 pb-4 cursor-pointer hover:bg-accent/30 rounded-lg px-2 -mx-2 transition-colors ${
@@ -341,7 +379,7 @@ export function ConfirmarInformacoesContent({
             fullWidth
             variant="primary"
             onClick={handleContinuar}
-            disabled={!hasPhone || !hasEmail}
+            disabled={!hasPhone || !hasEmail || !hasAddress}
           >
             Continuar
           </CustomButton>
