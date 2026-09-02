@@ -663,8 +663,17 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       .catch(() => false)
 
     if (isCurriculo) {
+      // O carousel mantém todos os slides no DOM. Quando o contato do cidadão
+      // está pendente, o slide de confirmação também é renderizado e traz o seu
+      // próprio "Continuar" — daí a asserção sem escopo quebrar por strict mode
+      // dependendo do estado da conta de teste. Escopa ao slide do currículo,
+      // que é o que este teste se propõe a verificar.
+      const curriculoSlide = page
+        .locator('.swiper-slide')
+        .filter({ has: curriculo })
+
       await expect(
-        page.getByRole('button', { name: 'Continuar' })
+        curriculoSlide.getByRole('button', { name: 'Continuar' })
       ).toBeVisible()
     }
   })
