@@ -19,11 +19,20 @@ const validEmail = {
   principal: { valor: 'usuario@exemplo.com.br' },
 }
 
+const validAddress = {
+  logradouro: 'Rua Visconde de Figueiredo',
+  numero: '62',
+  bairro: 'Tijuca',
+  municipio: 'Rio de Janeiro',
+  estado: 'RJ',
+}
+
 const baseUserInfo: EmpregosUserInfo = {
   cpf: '12345678901',
   name: 'Maria Silva',
   email: validEmail,
   phone: validPhone,
+  address: validAddress,
   genero: 'Feminino',
   escolaridade: 'Médio completo',
   renda_familiar: 'De 1 a 2 salários mínimos',
@@ -85,6 +94,23 @@ describe('ConfirmarInformacoesContent', () => {
 
       expect(screen.queryByText('Informe seu e-mail')).not.toBeInTheDocument()
     })
+
+    test('exibe o endereço formatado quando preenchido', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(
+        screen.getByText(
+          'Rua Visconde de Figueiredo, 62, Tijuca, Rio de Janeiro, RJ'
+        )
+      ).toBeInTheDocument()
+      expect(screen.queryByText('Informe seu endereço')).not.toBeInTheDocument()
+    })
   })
 
   describe('campos obrigatórios ausentes', () => {
@@ -133,6 +159,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: true,
             emailNeedsUpdate: false,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -150,6 +177,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: false,
             emailNeedsUpdate: true,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -157,10 +185,72 @@ describe('ConfirmarInformacoesContent', () => {
       expect(screen.getByText('Informe seu e-mail')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
     })
+
+    test('exibe "Informe seu endereço" e desabilita botão quando address é nulo', () => {
+      const userInfoSemAddress: EmpregosUserInfo = {
+        ...baseUserInfo,
+        address: null,
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoSemAddress}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    // Cidadãos que usaram a antiga exclusão de endereço ficaram com a string
+    // literal "null" gravada no RMI. Esse endereço não vale como preenchido.
+    test('trata o endereço gravado como "null" no RMI como ausente', () => {
+      const userInfoAddressNull: EmpregosUserInfo = {
+        ...baseUserInfo,
+        address: {
+          logradouro: 'null',
+          numero: 'null',
+          bairro: 'null',
+          municipio: 'null',
+          estado: 'null',
+        },
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoAddressNull}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    test('desabilita botão quando addressNeedsUpdate é true', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+          contactUpdateStatus={{
+            phoneNeedsUpdate: false,
+            emailNeedsUpdate: false,
+            addressNeedsUpdate: true,
+          }}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
   })
 
   describe('botão Continuar habilitado', () => {
-    test('habilita botão quando phone e email estão preenchidos', () => {
+    test('habilita botão quando phone, email e endereço estão preenchidos', () => {
       render(
         <ConfirmarInformacoesContent
           vagaId="vaga-123"
