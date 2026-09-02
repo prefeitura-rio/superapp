@@ -27,6 +27,7 @@ export default async function MyRequestsPage() {
       categoria: mapCategoria(os.categoria),
       status: normalizeStatus(os.status ?? protocolo.status),
       dataAbertura: formatDate(os.dataAbertura ?? protocolo.dataAbertura),
+      isAcessoInformacao: os.isAcessoInformacao ?? false,
     }))
   )
 

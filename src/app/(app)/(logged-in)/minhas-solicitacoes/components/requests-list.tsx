@@ -13,6 +13,7 @@ interface RequestItem {
   categoria: string
   status: RequestStatus
   dataAbertura: string
+  isAcessoInformacao: boolean
 }
 
 const FILTER_TABS = ['Todos', 'Serviços', 'Ouvidoria', 'Acesso à informação']
@@ -33,7 +34,8 @@ function RequestCard({ item }: { item: RequestItem }) {
             {item.servico}
           </h3>
           <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal truncate">
-            Protocolo {item.protocolo} • {item.categoria}
+            Protocolo {item.protocolo} •{' '}
+            {item.isAcessoInformacao ? 'LAI' : item.categoria}
           </p>
         </div>
       </div>
@@ -60,7 +62,9 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
   const filtered = items.filter(r => {
     const matchesFilter =
       activeFilter === 'Todos' ||
-      r.categoria?.toLowerCase() === activeFilter.toLowerCase()
+      (activeFilter === 'Acesso à informação'
+        ? r.isAcessoInformacao === true
+        : r.categoria?.toLowerCase() === activeFilter.toLowerCase())
 
     const matchesSearch =
       search.length < 2 ||
