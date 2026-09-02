@@ -663,8 +663,15 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       .catch(() => false)
 
     if (isCurriculo) {
+      // O carousel mantém todos os slides no DOM, e o slide de confirmação de
+      // dados tem o seu próprio "Continuar". Escopa a asserção ao slide do
+      // currículo para não depender de quantos steps o fluxo tem.
+      const curriculoSlide = page
+        .locator('.swiper-slide')
+        .filter({ has: curriculo })
+
       await expect(
-        page.getByRole('button', { name: 'Continuar' })
+        curriculoSlide.getByRole('button', { name: 'Continuar' })
       ).toBeVisible()
     }
   })
