@@ -159,6 +159,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: true,
             emailNeedsUpdate: false,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -176,6 +177,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: false,
             emailNeedsUpdate: true,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -221,6 +223,24 @@ describe('ConfirmarInformacoesContent', () => {
           vagaId="vaga-123"
           userInfo={userInfoAddressNull}
           userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    test('desabilita botão quando addressNeedsUpdate é true', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+          contactUpdateStatus={{
+            phoneNeedsUpdate: false,
+            emailNeedsUpdate: false,
+            addressNeedsUpdate: true,
+          }}
         />
       )
 

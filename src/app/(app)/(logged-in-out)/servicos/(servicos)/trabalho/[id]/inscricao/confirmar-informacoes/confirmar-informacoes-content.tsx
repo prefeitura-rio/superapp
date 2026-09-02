@@ -55,7 +55,9 @@ export function ConfirmarInformacoesContent({
     !contactUpdateStatus?.emailNeedsUpdate && hasValidEmail(userInfo.email)
   const hasPhone =
     !contactUpdateStatus?.phoneNeedsUpdate && hasValidPhone(userInfo.phone)
-  const hasAddress = hasValidAddress(userInfo.address)
+  const hasAddress =
+    !contactUpdateStatus?.addressNeedsUpdate &&
+    hasValidAddress(userInfo.address)
   const hasGender = !!userInfo.genero
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar

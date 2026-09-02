@@ -17,4 +17,5 @@ export interface EmpregosUserInfo {
 export interface ContactUpdateStatus {
   phoneNeedsUpdate: boolean
   emailNeedsUpdate: boolean
+  addressNeedsUpdate: boolean
 }
