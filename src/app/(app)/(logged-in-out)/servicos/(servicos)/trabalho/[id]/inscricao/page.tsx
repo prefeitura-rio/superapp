@@ -153,7 +153,18 @@ export default async function InscricaoPage({
     months: 6,
   })
 
-  const contactUpdateStatus = { phoneNeedsUpdate, emailNeedsUpdate }
+  // Mesma vigência semestral já aplicada a telefone e e-mail, e que cursos já
+  // aplica ao endereço.
+  const addressNeedsUpdate = !isUpdatedWithin({
+    updatedAt: userInfo.endereco?.principal?.updated_at || null,
+    months: 6,
+  })
+
+  const contactUpdateStatus = {
+    phoneNeedsUpdate,
+    emailNeedsUpdate,
+    addressNeedsUpdate,
+  }
 
   const onboardingData =
     onboardingResponse.status === 200 && onboardingResponse.data
@@ -164,6 +175,7 @@ export default async function InscricaoPage({
   const needsConfirmar =
     contactUpdateStatus.phoneNeedsUpdate ||
     contactUpdateStatus.emailNeedsUpdate ||
+    contactUpdateStatus.addressNeedsUpdate ||
     !hasValidAddress(transformedUserInfo.address) ||
     !transformedUserInfo.genero ||
     !transformedUserInfo.escolaridade ||
