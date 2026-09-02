@@ -663,9 +663,11 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       .catch(() => false)
 
     if (isCurriculo) {
-      // O carousel mantém todos os slides no DOM, e o slide de confirmação de
-      // dados tem o seu próprio "Continuar". Escopa a asserção ao slide do
-      // currículo para não depender de quantos steps o fluxo tem.
+      // O carousel mantém todos os slides no DOM. Quando o contato do cidadão
+      // está pendente, o slide de confirmação também é renderizado e traz o seu
+      // próprio "Continuar" — daí a asserção sem escopo quebrar por strict mode
+      // dependendo do estado da conta de teste. Escopa ao slide do currículo,
+      // que é o que este teste se propõe a verificar.
       const curriculoSlide = page
         .locator('.swiper-slide')
         .filter({ has: curriculo })

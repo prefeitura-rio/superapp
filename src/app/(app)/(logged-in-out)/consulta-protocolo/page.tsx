@@ -20,6 +20,7 @@ interface OsItem {
   status: string
   dataAbertura: string
   protocolo: string
+  isAcessoInformacao: boolean
 }
 
 type PageState = 'form' | 'loading' | 'results' | 'error'
@@ -85,6 +86,7 @@ export default function ConsultaProtocoloPage() {
         status: os.status ?? '',
         dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,
+        isAcessoInformacao: os.isAcessoInformacao ?? false,
       }))
 
       setResults(items)
@@ -148,7 +150,8 @@ export default function ConsultaProtocoloPage() {
                     {item.servico}
                   </h3>
                   <p className="text-xs text-foreground-light truncate">
-                    Protocolo {item.protocolo} • {item.categoria}
+                    Protocolo {item.protocolo} •{' '}
+                    {item.isAcessoInformacao ? 'LAI' : item.categoria}
                   </p>
                 </div>
               </button>
