@@ -67,10 +67,24 @@ export async function middleware(request: NextRequest) {
         'sha256-2i23VGwSXeIneeXADlx8fVlrTbTxqR0AZWE0FIC+FDM=',
       ]
 
+      // NOTE: no 'strict-dynamic' here, on purpose.
+      //
+      // 'strict-dynamic' makes browsers ignore 'self' and every host in the allowlist below,
+      // leaving only the nonce. That breaks client-side navigation: when a route segment needs
+      // a JS chunk the current document has not loaded yet, React inserts
+      // <script src="/_next/static/chunks/...">, and the tag that comes from a `loading.tsx`
+      // boundary carries **no nonce** — the loading shell is rendered without request context,
+      // so there is no per-request nonce to stamp on it. The browser blocks the script, the
+      // segment's client components never resolve, and the Suspense fallback (the skeleton)
+      // stays on screen forever, with no error and no failed request to show for it. A reload
+      // hides the problem because a full document load ships its chunks with the nonce of that
+      // same request.
+      //
+      // Without 'strict-dynamic', 'self' covers /_next/static/* and the host allowlist below
+      // goes back to meaning what it says.
       const scriptSrcDirectives = [
         "'self'",
         `'nonce-${nonce}'`,
-        "'strict-dynamic'",
         "'wasm-unsafe-eval'",
         ...scriptHashes.map(hash => `'${hash}'`),
         ...(isDevelopment ? ["'unsafe-eval'"] : []),

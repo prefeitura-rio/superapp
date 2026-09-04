@@ -685,6 +685,28 @@ deixou de depender do notebook do dev. O que mudou aqui:
 O que **não** mudou: a Fase 3 continua sem tipo, e o provisionamento de
 `BASE_API_URL_DIVIDA_ATIVA` no Infisical continua pendente.
 
+### O skeleton que não saía — 04/09/2026
+
+Sintoma no teste manual: digitar a inscrição, clicar em "Continuar" e ficar preso nos
+skeletons para sempre. Sem erro, sem requisição falhada. Um refresh mostrava a tela certa
+("Não encontramos essa inscrição"), o que fazia parecer lentidão da API — não era: a chamada
+respondia em ~90 ms.
+
+A causa está no CSP montado no `src/middleware.ts`, não neste módulo. `'strict-dynamic'` faz o
+browser **ignorar** `'self'` e toda a allowlist de hosts do `script-src`, deixando valer só o
+nonce. Numa navegação client-side, quando o segmento de destino precisa de um chunk que o
+documento atual ainda não carregou, o React insere
+`<script src="/_next/static/chunks/...">` — e a tag que vem do boundary de `loading.tsx`
+**não tem nonce**, porque o shell de loading é renderizado sem contexto de request. O browser
+bloqueia o script, os client components daquele segmento nunca resolvem e o fallback do
+Suspense (o skeleton) fica na tela. O refresh disfarça porque um carregamento de documento
+inteiro entrega os chunks com o nonce daquela mesma requisição.
+
+`'strict-dynamic'` saiu do `script-src`. Sem ele, `'self'` cobre `/_next/static/*` e a
+allowlist de hosts volta a significar o que diz. A correção é do app inteiro, não só daqui: o
+mesmo travamento acontecia em qualquer navegação client-side cujo destino precisasse de um
+chunk novo.
+
 ### O que ficou pendente, e de quem depende
 
 | Pendência | Depende de |
