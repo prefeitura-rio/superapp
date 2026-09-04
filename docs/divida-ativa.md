@@ -712,7 +712,7 @@ chunk novo.
 | Pendência | Depende de |
 |---|---|
 | ~~Tela `confirmar` funcional (P20)~~ | ✅ resolvida em 31/08/2026 pela saída A |
-| Persistir o nome do imóvel (P23) | Vladimir adicionar o campo a `ImovelRequest`/`ImovelResponse`; o fluxo do front já transporta o valor |
+| Persistir o nome do imóvel (P23) | Vladimir adicionar o campo a `ImovelRequest`/`ImovelResponse`; o fluxo do front já transporta o valor. **Reconferido em 04/09/2026**: o `/swagger` de homologação está byte a byte igual ao contrato local — o campo continua sem existir, e o card do Figma segue sem título |
 | Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
 | Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
 | Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |

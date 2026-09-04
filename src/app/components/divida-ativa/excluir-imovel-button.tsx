@@ -58,9 +58,19 @@ export function ExcluirImovelButton({
         title="Confirmação de exclusão de imóvel"
       >
         <div className="flex flex-col gap-6 pt-6 px-2">
-          <h2 className="text-xl font-medium leading-6 text-popover-foreground">
-            Você tem certeza que gostaria de excluir esse imóvel?
-          </h2>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl font-medium leading-6 text-popover-foreground">
+              Você tem certeza que gostaria de excluir esse imóvel?
+            </h2>
+
+            {/* O aviso de irreversibilidade é parte da confirmação, não enfeite: sem ele o
+                bottom sheet pergunta "tem certeza?" sem dizer do que o cidadão tem de ter
+                certeza. */}
+            <p className="text-sm font-normal leading-5 text-foreground-light">
+              Essa ação é permanente e não poderá ser desfeita. Todos os dados
+              desse imóvel serão excluídos.
+            </p>
+          </div>
 
           <div className="flex flex-col gap-3">
             <CustomButton

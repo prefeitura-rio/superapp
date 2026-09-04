@@ -59,6 +59,15 @@ describe('ExcluirImovelButton', () => {
         'Você tem certeza que gostaria de excluir esse imóvel?'
       )
     ).toBeInTheDocument()
+
+    // O aviso de irreversibilidade é o que dá conteúdo à pergunta — sem ele o cidadão
+    // confirma sem saber que a exclusão não tem volta.
+    expect(
+      screen.getByText(
+        'Essa ação é permanente e não poderá ser desfeita. Todos os dados desse imóvel serão excluídos.'
+      )
+    ).toBeInTheDocument()
+
     expect(vi.mocked(excluirImovel)).not.toHaveBeenCalled()
   })
 
