@@ -12,8 +12,10 @@ interface ImovelResumoCardProps {
  * cadastro — o Figma desenha os dois idênticos: nome dado pelo cidadão como título,
  * endereço (com bairro) e inscrição mascarada.
  *
- * Nome, bairro e proprietário somem quando não há dado (premissas P23, P22 e P19): a API
- * ainda não os devolve, e linha vazia é pior que linha ausente.
+ * Cada linha some quando não há dado — linha vazia é pior que linha ausente. O nome falta
+ * na confirmação por construção (o cidadão só o escolhe no passo seguinte) e falta na
+ * lista quando ele pulou o passo; bairro e proprietário faltam sempre, porque a API não
+ * os devolve (premissas P22 e P19).
  */
 export function ImovelResumoCard({ imovel, acao }: ImovelResumoCardProps) {
   return (

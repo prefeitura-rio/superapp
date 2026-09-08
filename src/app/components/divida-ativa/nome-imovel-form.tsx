@@ -22,10 +22,9 @@ interface NomeImovelFormProps {
  * Último passo do cadastro: um nome para o imóvel ("Minha Casa", "Casa de praia"). O
  * "Continuar" daqui é quem grava — a confirmação anterior só consultou.
  *
- * ⚠️ O contrato ainda não tem onde gravar o nome (premissa P23 em
- * `docs/divida-ativa.md`) — ele chega à Server Action, que o descarta na fronteira da
- * API. A tela existe desde já porque é parte do fluxo do Figma; a persistência chega com
- * o campo no contrato.
+ * O nome é opcional: quem deixa o campo vazio segue com o cadastro, e a Server Action
+ * omite a chave do corpo em vez de mandar string vazia. A persistência chegou em
+ * 08/09/2026, quando o contrato ganhou o campo (premissa P23 em `docs/divida-ativa.md`).
  */
 export function NomeImovelForm({ inscricao }: NomeImovelFormProps) {
   const router = useRouter()

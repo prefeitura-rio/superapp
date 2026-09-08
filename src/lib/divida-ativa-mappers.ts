@@ -159,10 +159,10 @@ export function normalizarConsultaFazenda(data: unknown): FazendaImovel | null {
  * ainda — não por ausência no contrato. É `id: null` que impede a tela de oferecer
  * exclusão de algo que o banco local não tem.
  *
- * `nome`, `bairro`, `proprietario` e `possuiDebitos` seguem `null` pelas mesmas premissas do
- * outro mapper (P23, P22, P19, P12): `FazendaImovel` traz só endereço e inscrição. O `nome` é
- * duplamente nulo aqui — além de o contrato não ter onde gravá-lo, esta consulta acontece
- * **antes** do passo em que o cidadão o escolhe.
+ * `bairro`, `proprietario` e `possuiDebitos` seguem `null` pelas mesmas premissas do outro
+ * mapper (P22, P19, P12): `FazendaImovel` traz só endereço e inscrição. O `nome` também é
+ * `null`, mas por outro motivo — mesmo depois de o contrato ganhar o campo, esta consulta
+ * acontece **antes** do passo em que o cidadão escolhe o nome.
  */
 export function mapFazendaToImovel(api: FazendaImovel): ImovelDividaAtiva {
   return {
@@ -182,11 +182,13 @@ export function mapApiToImovel(api: ImovelResponse): ImovelDividaAtiva {
     id: numeroOuNull(api.id),
     inscricao: somenteDigitos(api.numInscricao ?? ''),
     endereco: textoOuNull(api.endereco),
-    // A API não separa bairro, não devolve proprietário nem o nome dado pelo cidadão, e
-    // `GET /imoveis` não consulta a Fazenda para saber de débitos. Estes são `null` por
-    // ausência de dado, não por omissão nossa — premissas P22, P19, P23 e P12 em
-    // `docs/divida-ativa.md`.
-    nome: null,
+    // `nome` passou a existir no contrato em 08/09/2026 (P23 fechada). Registro gravado
+    // antes disso vem sem o campo, e `textoOuNull` o resolve para `null` — a lista tem
+    // fallback para imóvel sem nome.
+    nome: textoOuNull(api.nome),
+    // A API não separa bairro, não devolve proprietário e `GET /imoveis` não consulta a
+    // Fazenda para saber de débitos. Estes são `null` por ausência de dado, não por
+    // omissão nossa — premissas P22, P19 e P12 em `docs/divida-ativa.md`.
     bairro: null,
     proprietario: null,
     possuiDebitos: null,

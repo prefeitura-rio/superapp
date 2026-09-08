@@ -57,8 +57,9 @@ describe('ImoveisLista', () => {
   })
 
   /**
-   * O nome dado pelo cidadão vira o título do card — hoje só aparece quando a API passar
-   * a devolvê-lo (premissa P23); a fixture antecipa esse dia.
+   * O nome dado pelo cidadão vira o título do card. A API passou a devolvê-lo em
+   * 08/09/2026 (premissa P23 fechada); o card continua opcional porque o cidadão pode ter
+   * pulado o passo, e porque imóvel cadastrado antes dessa data não tem nome gravado.
    */
   test('mostra o nome do imóvel como título do card quando existir', () => {
     render(<ImoveisLista imoveis={[{ ...IMOVEIS[0], nome: 'Casa Família' }]} />)

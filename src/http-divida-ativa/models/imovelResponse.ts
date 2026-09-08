@@ -20,4 +20,6 @@ export interface ImovelResponse {
   endereco?: string
   /** Numero da inscricao imobiliaria normalizado com 8 digitos. */
   numInscricao?: string
+  /** Nome dado pelo cidadao ao imovel. Nulo quando nao informado. */
+  nome?: string
 }

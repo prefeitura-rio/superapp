@@ -71,6 +71,9 @@ export const MOCK_IMOVEL_DIVIDA_ATIVA = {
   dataInclusao: '2026-06-22T15:40:46.477',
   endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
   numInscricao: '00000018',
+  // Entrou no contrato em 08/09/2026. Vem `null` para registro gravado antes disso e para
+  // quem pulou o passo do nome — os dois casos são exercidos por teste com `server.use()`.
+  nome: 'Casa de praia',
 }
 
 // Opções do ePortal que acompanham a consulta de um imóvel já cadastrado. No dado real de

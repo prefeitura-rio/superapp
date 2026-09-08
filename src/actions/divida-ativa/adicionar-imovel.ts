@@ -44,7 +44,9 @@ export async function adicionarImovel(
     }
   }
 
-  if (nome && nome.trim().length > NOME_IMOVEL_TAMANHO_MAXIMO) {
+  const nomeNormalizado = nome?.trim()
+
+  if (nomeNormalizado && nomeNormalizado.length > NOME_IMOVEL_TAMANHO_MAXIMO) {
     return {
       success: false,
       error: `O nome pode ter no máximo ${NOME_IMOVEL_TAMANHO_MAXIMO} caracteres.`,
@@ -52,11 +54,12 @@ export async function adicionarImovel(
     }
   }
 
-  // ⚠️ O `nome` chega até aqui e é descartado: `ImovelRequest` só aceita `numInscricao`
-  // (premissa P23 em `docs/divida-ativa.md`). Quando o contrato ganhar o campo, inclua-o
-  // no corpo abaixo — o resto do fluxo já o transporta.
+  // O campo `nome` entrou no contrato em 08/09/2026 e fechou a premissa P23. Ele é
+  // opcional dos dois lados: sem nome, a chave **sai do corpo** em vez de ir como string
+  // vazia — quem decide o valor ausente é a API, que grava `NULL`.
   const response = await postImoveis({
     numInscricao: somenteDigitos(inscricao),
+    ...(nomeNormalizado ? { nome: nomeNormalizado } : {}),
   })
 
   if (response.status !== 201) {

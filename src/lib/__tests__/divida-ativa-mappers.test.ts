@@ -71,18 +71,28 @@ describe('mapApiToImovel', () => {
       dataInclusao: '2026-06-22T15:40:46.477',
       endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
       numInscricao: '00000018',
+      nome: 'Casa de praia',
     })
 
     expect(imovel).toEqual({
       id: 32,
       inscricao: '00000018',
       endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
-      nome: null,
+      nome: 'Casa de praia',
       bairro: null,
       proprietario: null,
       possuiDebitos: null,
       cadastradoEm: '2026-06-22',
     })
+  })
+
+  // O campo entrou no contrato em 08/09/2026: imóvel cadastrado antes disso vem sem ele, e
+  // quem pulou o passo do nome vem com `null`. Nos dois casos a lista cai no fallback.
+  test('aceita imóvel sem nome, de antes do campo existir no contrato', () => {
+    expect(mapApiToImovel({ numInscricao: '00000018' }).nome).toBeNull()
+    expect(
+      mapApiToImovel({ numInscricao: '00000018', nome: '' }).nome
+    ).toBeNull()
   })
 
   // O CPF vem no corpo da resposta, mas identidade é sempre derivada do token —

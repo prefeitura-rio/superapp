@@ -12,4 +12,9 @@
 export interface ImovelRequest {
   /** Numero da inscricao imobiliaria. Pode ser enviado com ou sem zeros a esquerda e com ou sem mascara; a API considera apenas digitos e normaliza para 8 posicoes. */
   numInscricao: string
+  /**
+   * Nome dado pelo cidadao ao imovel, para exibicao na lista. Opcional.
+   * @maxLength 60
+   */
+  nome?: string
 }

@@ -26,6 +26,70 @@ describe('adicionarImovel', () => {
     expect(bodyRecebido).toEqual({ numInscricao: '05217663' })
   })
 
+  test('envia o nome escolhido pelo cidadão, sem espaço em volta', async () => {
+    let bodyRecebido: unknown
+
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/imoveis`, async ({ request }) => {
+        bodyRecebido = await request.json()
+        return HttpResponse.json(
+          { id: 32, numInscricao: '00000018', nome: 'Casa de praia' },
+          { status: 201 }
+        )
+      })
+    )
+
+    const resultado = await adicionarImovel('00000018', '  Casa de praia  ')
+
+    expect(bodyRecebido).toEqual({
+      numInscricao: '00000018',
+      nome: 'Casa de praia',
+    })
+    expect(resultado.success && resultado.data.nome).toBe('Casa de praia')
+  })
+
+  // Nome vazio é o passo pulado, não string vazia: a chave sai do corpo para a API gravar
+  // `NULL`. Mandar `""` faria o cadastro nascer com um nome que o cidadão não escolheu.
+  test('omite a chave nome quando o cidadão não escreve nada', async () => {
+    let bodyRecebido: unknown
+
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/imoveis`, async ({ request }) => {
+        bodyRecebido = await request.json()
+        return HttpResponse.json(
+          { id: 32, numInscricao: '00000018' },
+          { status: 201 }
+        )
+      })
+    )
+
+    await adicionarImovel('00000018', '   ')
+
+    expect(bodyRecebido).toEqual({ numInscricao: '00000018' })
+  })
+
+  // O limite é o do contrato (`maxLength: 60`) e a coluna do banco tem o mesmo tamanho:
+  // barrar aqui poupa um 400 e mostra a mensagem no campo.
+  test('recusa nome acima do limite sem chamar a API', async () => {
+    let chamou = false
+
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/imoveis`, () => {
+        chamou = true
+        return HttpResponse.json({}, { status: 201 })
+      })
+    )
+
+    const resultado = await adicionarImovel('00000018', 'a'.repeat(61))
+
+    expect(chamou).toBe(false)
+    expect(resultado).toEqual({
+      success: false,
+      error: 'O nome pode ter no máximo 60 caracteres.',
+      status: 400,
+    })
+  })
+
   test('devolve o imóvel cadastrado na linguagem do produto', async () => {
     server.use(
       http.post(`${DIVIDA_ATIVA}/imoveis`, () =>

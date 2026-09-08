@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 /**
- * Limite adotado pelo front enquanto o contrato não define o campo (premissa P23 em
- * `docs/divida-ativa.md`): generoso para "Casa de praia da vovó" e curto o bastante para a
- * lista. Ajustar quando a API declarar o tamanho real da coluna.
+ * O contrato declara `maxLength: 60` em `ImovelRequest.nome`, e a coluna do banco é
+ * `NVARCHAR(60)` — este número **espelha o da API**, não é escolha nossa. Se ele mudar lá,
+ * mude aqui: validar mais que a API aceita devolve 400 no lugar de uma mensagem de campo.
  */
 export const NOME_IMOVEL_TAMANHO_MAXIMO = 60
 

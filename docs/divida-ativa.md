@@ -402,7 +402,7 @@ mas `'desconhecida'` precisa de tratamento visual definido no design. E prefira 
 | P20 | Consulta × cadastro | Dois endpoints, um que só consulta | ✅ | **Confirmada, com atraso.** Não existia em 17/08 e a tela ficou quebrada de propósito; a API entregou `GET /imoveis/{inscricao}/cadastro` em 31/08. Ver [detalhamento](#p20-em-detalhe--a-tela-de-confirmação-ganhou-sua-fonte-de-dados) |
 | P21 | Tamanho da inscrição | 7 **ou** 8 dígitos | ✅ | Confirmada no transporte. Duas ressalvas: a API aceita **menos** de 7 dígitos e a nossa validação não, o que impede testar manualmente com o dado `18` da instância dele; e a resposta vem sempre com 8, então a máscara ganha um `0.` à esquerda que o carnê não tem |
 | P22 | `bairro` como campo próprio | *(premissa nova, descoberta na integração)* | 🎨 | Não existe: vem embutido na string de endereço (`"RUA EXEMPLO, 123 / LOJA A - BAIRRO"`). Fatiar pelo último `" - "` é frágil (endereço com hífen no nome quebra). Mapeado para `null` |
-| P23 | Nome/apelido do imóvel | *(premissa nova, descoberta no Figma do fluxo de cadastro, 19/08/2026)* | 🎨 | O Figma tem um passo "Escreva um nome para esse imóvel" ("Minha Casa", "Casa de praia"), mas `ImovelRequest` só aceita `numInscricao` e `ImovelResponse` não devolve nome — não há onde gravar. O front já implementou o passo e transporta o valor até a Server Action, que o **descarta** na fronteira da API (`adicionar-imovel.ts`). Combinado em 19/08: Vladimir adiciona o campo ao contrato; aí é incluir no corpo do `POST /imoveis` e exibir na lista |
+| P23 | Nome/apelido do imóvel | *(premissa nova, descoberta no Figma do fluxo de cadastro, 19/08/2026)* | ✅ | **Fechada em 08/09/2026.** O contrato ganhou `nome` em `ImovelRequest` (opcional, `maxLength: 60`) e em `ImovelResponse`. O front passou a mandar o valor no corpo do `POST /imoveis` e a mapeá-lo; o card da lista tem título. Ver [detalhamento](#o-nome-do-imóvel-ganhou-onde-morar--08092026) |
 | P18 | Identificador da consulta | Só inscrição imobiliária | 🎨 | **Meia vitória.** `POST /imoveis/{inscricao}/divida-ativa/consultar` aceita quatro critérios — `numInscricao`, `numCda`, `numExecucaoFiscal` e um que não esperávamos, `numGuiaPagamento` (RN-001/RN-002, critério único). Mas a inscrição continua **no path**, e a tag diz "autorizacao por imovel cadastrado": quem só tem a carta de cobrança ainda não entra. Ver detalhamento abaixo |
 
 ### Achados novos, fora da tabela
@@ -486,8 +486,8 @@ GET /imoveis/{inscricao}/cadastro  →  FazendaImovel { endereco, numInscricao }
 O fluxo desenhado voltou a valer: campo → confirmação (consulta, **não grava**) → nome do
 imóvel → `POST /imoveis` no "Continuar" do passo de nome → sucesso.
 `getDalDividaAtivaCadastroFazenda` em `src/lib/dal.ts` é quem consulta, e `mapFazendaToImovel`
-traduz. O `nome` que o cidadão escolhe no passo seguinte ainda é descartado na fronteira da
-API — ver premissa P23.
+traduz. O `nome` que o cidadão escolhe no passo seguinte vai junto no `POST /imoveis` desde
+08/09/2026 — ver premissa P23.
 
 **Duas ressalvas que sobreviveram:**
 
@@ -707,12 +707,36 @@ allowlist de hosts volta a significar o que diz. A correção é do app inteiro,
 mesmo travamento acontecia em qualquer navegação client-side cujo destino precisasse de um
 chunk novo.
 
+### O nome do imóvel ganhou onde morar — 08/09/2026
+
+A `api-imoveis` passou a persistir o nome que o cidadão dá ao imóvel, e a P23 fechou. O passo
+"Escreva um nome para esse imóvel" existia na tela desde 19/08 e o valor era **descartado na
+fronteira da API**, porque não havia campo no contrato — todo card da lista nascia sem título.
+
+Do lado do contrato: `ImovelRequest.nome` (opcional, `maxLength: 60`) e `ImovelResponse.nome`.
+O diff do `/swagger` é só isso; nenhum campo existente mudou. Do lado daqui:
+
+- `adicionar-imovel.ts` manda o nome no corpo do `POST /imoveis`. Nome vazio **sai do corpo**
+  em vez de virar `""`: quem decide o valor ausente é a API, que grava `NULL`. O `trim` é feito
+  aqui, então " Casa " e "Casa" gravam a mesma coisa.
+- `mapApiToImovel` mapeia `nome`. Registro gravado antes de 08/09 vem sem o campo e cai em
+  `null` — o card tem fallback, então imóvel antigo continua legível. `mapFazendaToImovel`
+  segue com `nome: null`, e isso **não** é ausência de contrato: a consulta prévia acontece
+  antes de o cidadão escolher o nome.
+- `NOME_IMOVEL_TAMANHO_MAXIMO` deixou de ser palpite. O 60 agora **espelha** o `maxLength` do
+  contrato e o `NVARCHAR(60)` da coluna; se mudar lá, muda aqui.
+
+**A coluna é `dbo.tbNC_Imovel.nome`, adicionada por DDL manual.** A API não tem Flyway nem
+Liquibase e roda com `hibernate-orm.database.generation=none` — o banco não se atualiza
+sozinho. Ambiente novo (ou restauração de dump antigo) precisa do `ALTER TABLE` antes do
+deploy, senão a listagem quebra em runtime.
+
 ### O que ficou pendente, e de quem depende
 
 | Pendência | Depende de |
 |---|---|
 | ~~Tela `confirmar` funcional (P20)~~ | ✅ resolvida em 31/08/2026 pela saída A |
-| Persistir o nome do imóvel (P23) | Vladimir adicionar o campo a `ImovelRequest`/`ImovelResponse`; o fluxo do front já transporta o valor. **Reconferido em 04/09/2026**: o `/swagger` de homologação está byte a byte igual ao contrato local — o campo continua sem existir, e o card do Figma segue sem título |
+| ~~Persistir o nome do imóvel (P23)~~ | ✅ resolvida em 08/09/2026 — o campo entrou no contrato e o front o grava |
 | Passo de senha na Fase 3 | Vladimir (é obrigatório?) + produto |
 | Toda a integração de Fase 3 | Vladimir ligar os `@APIResponse` |
 | Formato dos valores monetários (P1) | Vladimir dar uma inscrição de teste com CDA em aberto |
