@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ExcluirImovelButton } from '../excluir-imovel-button'
+import { ImovelAcoesButton } from '../imovel-acoes-button'
 
 vi.mock('@/actions/divida-ativa/excluir-imovel', () => ({
   excluirImovel: vi.fn(),
@@ -31,27 +31,47 @@ const PROPS = {
   descricao: 'Rua Barata Ribeiro, 586 - A 501',
 }
 
-describe('ExcluirImovelButton', () => {
+const ABRIR_MENU = { name: 'Ações do imóvel Rua Barata Ribeiro, 586 - A 501' }
+
+describe('ImovelAcoesButton', () => {
   beforeEach(() => {
     vi.mocked(excluirImovel).mockResolvedValue({ success: true, data: null })
     refresh.mockClear()
     toastError.mockClear()
   })
 
-  test('pede confirmação antes de excluir', async () => {
+  test('os três pontinhos abrem o menu com as duas ações', async () => {
     const user = userEvent.setup()
-    render(<ExcluirImovelButton {...PROPS} />)
+    render(<ImovelAcoesButton {...PROPS} />)
+
+    expect(screen.queryByText('Editar nome')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', ABRIR_MENU))
+
+    expect(await screen.findByText('Editar nome')).toBeInTheDocument()
+    expect(screen.getByText('Excluir imóvel')).toBeInTheDocument()
+  })
+
+  // O link carrega o id local, que é como a API identifica o registro — a inscrição não
+  // serve nem para renomear nem para excluir.
+  test('"Editar nome" leva para a edição daquele imóvel', async () => {
+    const user = userEvent.setup()
+    render(<ImovelAcoesButton {...PROPS} />)
+
+    await user.click(screen.getByRole('button', ABRIR_MENU))
 
     expect(
-      screen.queryByText(
-        'Você tem certeza que gostaria de excluir esse imóvel?'
-      )
-    ).not.toBeInTheDocument()
+      await screen.findByRole('link', { name: 'Editar nome' })
+    ).toHaveAttribute('href', '/divida-ativa/imoveis/32/nome')
+  })
 
+  test('"Excluir imóvel" pede confirmação em vez de excluir', async () => {
+    const user = userEvent.setup()
+    render(<ImovelAcoesButton {...PROPS} />)
+
+    await user.click(screen.getByRole('button', ABRIR_MENU))
     await user.click(
-      screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Barata Ribeiro, 586 - A 501',
-      })
+      await screen.findByRole('button', { name: 'Excluir imóvel' })
     )
 
     expect(
@@ -73,12 +93,11 @@ describe('ExcluirImovelButton', () => {
 
   test('cancelar fecha o aviso sem excluir nada', async () => {
     const user = userEvent.setup()
-    render(<ExcluirImovelButton {...PROPS} />)
+    render(<ImovelAcoesButton {...PROPS} />)
 
+    await user.click(screen.getByRole('button', ABRIR_MENU))
     await user.click(
-      screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Barata Ribeiro, 586 - A 501',
-      })
+      await screen.findByRole('button', { name: 'Excluir imóvel' })
     )
     await user.click(await screen.findByRole('button', { name: 'Cancelar' }))
 
@@ -87,12 +106,11 @@ describe('ExcluirImovelButton', () => {
 
   test('confirmar exclui o imóvel pelo id local', async () => {
     const user = userEvent.setup()
-    render(<ExcluirImovelButton {...PROPS} />)
+    render(<ImovelAcoesButton {...PROPS} />)
 
+    await user.click(screen.getByRole('button', ABRIR_MENU))
     await user.click(
-      screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Barata Ribeiro, 586 - A 501',
-      })
+      await screen.findByRole('button', { name: 'Excluir imóvel' })
     )
     await user.click(
       await screen.findByRole('button', { name: 'Excluir imóvel' })
@@ -111,12 +129,11 @@ describe('ExcluirImovelButton', () => {
     })
 
     const user = userEvent.setup()
-    render(<ExcluirImovelButton {...PROPS} />)
+    render(<ImovelAcoesButton {...PROPS} />)
 
+    await user.click(screen.getByRole('button', ABRIR_MENU))
     await user.click(
-      screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Barata Ribeiro, 586 - A 501',
-      })
+      await screen.findByRole('button', { name: 'Excluir imóvel' })
     )
     await user.click(
       await screen.findByRole('button', { name: 'Excluir imóvel' })

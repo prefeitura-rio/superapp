@@ -206,6 +206,45 @@ paths:
           description: Imovel nao encontrado para o CPF autenticado.
       security:
       - bearerAuth: []
+    patch:
+      tags:
+      - Imoveis
+      summary: Renomeia um imovel cadastrado
+      description: "Valida o JWT e troca o nome do registro local pelo id, desde que\
+        \ ele pertenca ao CPF autenticado. So o nome muda: inscricao e endereco vem\
+        \ do WSFazenda_Iptu e nao sao editaveis. Corpo sem nome apaga o nome gravado."
+      parameters:
+      - name: id
+        in: path
+        description: Id local do imovel em dbo.tbNC_Imovel.
+        required: true
+        schema:
+          format: int64
+          type: integer
+        example: 1
+      requestBody:
+        description: "Novo nome do imovel. Ausente, vazio ou so espacos apaga o nome\
+          \ gravado."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImovelRenomearRequest'
+        required: true
+      responses:
+        "200":
+          description: Imovel renomeado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImovelResponse'
+        "400":
+          description: Nome acima do tamanho maximo ou com caracteres invalidos.
+        "401":
+          description: "JWT ausente, invalido ou expirado."
+        "404":
+          description: Imovel nao encontrado para o CPF autenticado.
+      security:
+      - bearerAuth: []
   /imoveis/{inscricao}/cadastro:
     get:
       tags:
@@ -995,6 +1034,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OpcaoIptuResponse'
+    ImovelRenomearRequest:
+      description: Novo nome para um imovel ja cadastrado.
+      type: object
+      properties:
+        nome:
+          description: "Nome dado pelo cidadao ao imovel. Ausente, vazio ou so espacos\
+            \ apaga o nome gravado."
+          maxLength: 60
+          type: string
+          example: Casa de praia
     ImovelRequest:
       description: Dados de entrada para cadastrar uma inscricao imobiliaria.
       required:

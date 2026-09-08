@@ -1,4 +1,4 @@
-import { ExcluirImovelButton } from '@/app/components/divida-ativa/excluir-imovel-button'
+import { ImovelAcoesButton } from '@/app/components/divida-ativa/imovel-acoes-button'
 import { ImovelResumoCard } from '@/app/components/divida-ativa/imovel-resumo-card'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { formatarInscricaoImobiliaria } from '@/lib/divida-ativa-utils'
@@ -28,7 +28,7 @@ export function ImoveisLista({ imoveis }: ImoveisListaProps) {
 }
 
 function ImovelCard({ imovel }: { imovel: ImovelDividaAtiva }) {
-  // Um imóvel sem nome e sem endereço ainda precisa ser distinguível no aviso de exclusão.
+  // Um imóvel sem nome e sem endereço ainda precisa ser distinguível no menu de ações.
   const descricao =
     imovel.nome ??
     imovel.endereco ??
@@ -38,10 +38,10 @@ function ImovelCard({ imovel }: { imovel: ImovelDividaAtiva }) {
     <ImovelResumoCard
       imovel={imovel}
       acao={
-        // Sem id local não há como pedir a exclusão à API — a lixeira não aparece em vez
-        // de aparecer e falhar. A API sempre devolve o id; isto é rede de segurança.
+        // Sem id local não há como renomear nem excluir — o menu não aparece em vez de
+        // aparecer e falhar. A API sempre devolve o id; isto é rede de segurança.
         imovel.id !== null ? (
-          <ExcluirImovelButton id={imovel.id} descricao={descricao} />
+          <ImovelAcoesButton id={imovel.id} descricao={descricao} />
         ) : undefined
       }
     />

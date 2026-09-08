@@ -1,28 +1,36 @@
 'use client'
 
 import { excluirImovel } from '@/actions/divida-ativa/excluir-imovel'
-import { TrashIcon } from '@/assets/icons/trash-icon'
+import { MoreVerticalIcon } from '@/assets/icons'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
 
-interface ExcluirImovelButtonProps {
-  /** Id local do cadastro. A API remove por ele, não pela inscrição imobiliária. */
+interface ImovelAcoesButtonProps {
+  /** Id local do cadastro. A API renomeia e remove por ele, não pela inscrição. */
   id: number
-  /** Como o imóvel aparece na lista — endereço, ou a inscrição mascarada se não houver. */
+  /** Como o imóvel aparece na lista — nome, endereço, ou a inscrição mascarada. */
   descricao: string
 }
 
 /**
- * Exclusão nunca acontece no primeiro toque: a lixeira abre um bottom sheet de confirmação,
- * e só o botão de lá chama a Server Action.
+ * Estados possíveis do botão. Um enum em vez de dois booleanos porque os dois sheets são
+ * mutuamente exclusivos: abrir a confirmação **fecha** o menu, e um par de booleanos
+ * permitiria o estado impossível de ambos abertos.
  */
-export function ExcluirImovelButton({
-  id,
-  descricao,
-}: ExcluirImovelButtonProps) {
-  const [aberto, setAberto] = useState(false)
+type Estado = 'fechado' | 'menu' | 'confirmando-exclusao'
+
+/**
+ * As ações de um imóvel na lista, atrás dos três pontinhos do Figma.
+ *
+ * O menu tem duas saídas — "Editar nome", que navega para a tela de edição, e "Excluir
+ * imóvel", que **não** exclui: abre a confirmação. Exclusão nunca acontece em um toque, e
+ * o caminho até ela tem dois passos de propósito, porque é a única ação irreversível aqui.
+ */
+export function ImovelAcoesButton({ id, descricao }: ImovelAcoesButtonProps) {
+  const [estado, setEstado] = useState<Estado>('fechado')
   const [enviando, startTransition] = useTransition()
 
   function confirmarExclusao() {
@@ -37,7 +45,7 @@ export function ExcluirImovelButton({
       // Sem `router.refresh()` de propósito: o `revalidatePath` da action já devolve a rota
       // re-renderizada na mesma resposta (Next 16, guia de Server Actions), então um refresh
       // aqui seria uma segunda renderização do mesmo estado.
-      setAberto(false)
+      setEstado('fechado')
     })
   }
 
@@ -45,16 +53,42 @@ export function ExcluirImovelButton({
     <>
       <button
         type="button"
-        aria-label={`Excluir imóvel ${descricao}`}
-        onClick={() => setAberto(true)}
+        aria-label={`Ações do imóvel ${descricao}`}
+        onClick={() => setEstado('menu')}
         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/70 active:bg-secondary/70"
       >
-        <TrashIcon className="size-5" />
+        {/* O ícone se chama "vertical" mas já nasce rotacionado por um `transform` próprio,
+            então o que aparece é a reticência horizontal do Figma. */}
+        <MoreVerticalIcon className="size-5" />
       </button>
 
       <BottomSheet
-        open={aberto}
-        onOpenChange={setAberto}
+        open={estado === 'menu'}
+        onOpenChange={aberto => setEstado(aberto ? 'menu' : 'fechado')}
+        title={`Ações do imóvel ${descricao}`}
+      >
+        <div className="flex flex-col gap-3 pt-2 px-2">
+          <CustomButton asChild variant="primary" size="lg" fullWidth>
+            <Link href={`/divida-ativa/imoveis/${id}/nome`}>Editar nome</Link>
+          </CustomButton>
+
+          <CustomButton
+            type="button"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onClick={() => setEstado('confirmando-exclusao')}
+          >
+            Excluir imóvel
+          </CustomButton>
+        </div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={estado === 'confirmando-exclusao'}
+        onOpenChange={aberto =>
+          setEstado(aberto ? 'confirmando-exclusao' : 'fechado')
+        }
         title="Confirmação de exclusão de imóvel"
       >
         <div className="flex flex-col gap-6 pt-6 px-2">
@@ -90,7 +124,7 @@ export function ExcluirImovelButton({
               size="lg"
               fullWidth
               disabled={enviando}
-              onClick={() => setAberto(false)}
+              onClick={() => setEstado('fechado')}
             >
               Cancelar
             </CustomButton>

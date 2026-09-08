@@ -10,6 +10,7 @@ import type {
   GetImoveisInscricaoConsultaParams,
   GetImoveisInscricaoSegundaViaParams,
   ImovelConsultaResponse,
+  ImovelRenomearRequest,
   ImovelRequest,
   ImovelResponse,
   OpcaoIptuResponse,
@@ -164,6 +165,65 @@ export const deleteImoveisId = async (
     {
       ...options,
       method: 'DELETE',
+    }
+  )
+}
+
+export type patchImoveisIdResponse200 = {
+  data: ImovelResponse
+  status: 200
+}
+
+export type patchImoveisIdResponse400 = {
+  data: void
+  status: 400
+}
+
+export type patchImoveisIdResponse401 = {
+  data: void
+  status: 401
+}
+
+export type patchImoveisIdResponse404 = {
+  data: void
+  status: 404
+}
+
+export type patchImoveisIdResponseSuccess = patchImoveisIdResponse200 & {
+  headers: Headers
+}
+export type patchImoveisIdResponseError = (
+  | patchImoveisIdResponse400
+  | patchImoveisIdResponse401
+  | patchImoveisIdResponse404
+) & {
+  headers: Headers
+}
+
+export type patchImoveisIdResponse =
+  | patchImoveisIdResponseSuccess
+  | patchImoveisIdResponseError
+
+export const getPatchImoveisIdUrl = (id: number) => {
+  return `/imoveis/${id}`
+}
+
+/**
+ * Valida o JWT e troca o nome do registro local pelo id, desde que ele pertenca ao CPF autenticado. So o nome muda: inscricao e endereco vem do WSFazenda_Iptu e nao sao editaveis. Corpo sem nome apaga o nome gravado.
+ * @summary Renomeia um imovel cadastrado
+ */
+export const patchImoveisId = async (
+  id: number,
+  imovelRenomearRequest: ImovelRenomearRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<patchImoveisIdResponse> => {
+  return customFetchDividaAtiva<patchImoveisIdResponse>(
+    getPatchImoveisIdUrl(id),
+    {
+      ...options,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(imovelRenomearRequest),
     }
   )
 }

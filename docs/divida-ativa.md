@@ -256,7 +256,8 @@ src/middleware.ts                     # bloco de gating
 | Rota | O que faz |
 |---|---|
 | `/divida-ativa` | Landing: card "Meus imóveis" com contador + cinco serviços |
-| `/divida-ativa/imoveis` | Lista dos imóveis do cidadão, com exclusão por imóvel |
+| `/divida-ativa/imoveis` | Lista dos imóveis do cidadão, com menu de ações por imóvel |
+| `/divida-ativa/imoveis/[id]/nome` | Edição do nome de um imóvel já cadastrado |
 | `/divida-ativa/imoveis/novo` | Campo da inscrição imobiliária, com máscara |
 | `/divida-ativa/imoveis/novo/confirmar?inscricao=` | Consulta ao sistema fiscal e confirmação |
 | `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
@@ -309,7 +310,7 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado. Note que **
 
 | Tag → pasta | Operações que usamos | Situação |
 |---|---|---|
-| `Imoveis` → `imoveis/` | `GET/POST /imoveis`, `DELETE /imoveis/{id}`, `GET /imoveis/{inscricao}/cadastro` | **integradas** |
+| `Imoveis` → `imoveis/` | `GET/POST /imoveis`, `PATCH /imoveis/{id}`, `DELETE /imoveis/{id}`, `GET /imoveis/{inscricao}/cadastro` | **integradas** |
 | `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/consulta` | gerada, **sem chamador** — traz as `opcoes` do ePortal de que a Fase 3 precisa |
 | `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/parcelamentos`, `.../segunda-via` | fora do escopo 2026 |
 | `Divida Ativa` → `divida-ativa/` | consulta principal, `consultar`, `datas-vencimento`, `parcelamentos/simular`, `requerimentos` | Fase 3, **sem tipo** |
@@ -730,6 +731,44 @@ O diff do `/swagger` é só isso; nenhum campo existente mudou. Do lado daqui:
 Liquibase e roda com `hibernate-orm.database.generation=none` — o banco não se atualiza
 sozinho. Ambiente novo (ou restauração de dump antigo) precisa do `ALTER TABLE` antes do
 deploy, senão a listagem quebra em runtime.
+
+### Os três pontinhos, e o nome que passou a ser editável — 08/09/2026
+
+O Figma trocou o botão de lixeira do card por um menu de três pontinhos com duas saídas —
+"Editar nome" e "Excluir imóvel". Editar exigia um endpoint que não existia: a API ganhou
+`PATCH /imoveis/{id}` no mesmo dia.
+
+Do lado do contrato, só o que faltava: `ImovelRenomearRequest` com um único campo e
+`200` devolvendo o `ImovelResponse` atualizado — não `204`, para o card refletir a mudança
+sem uma segunda chamada. **Só o nome muda**, e por construção: o request não tem campo para
+inscrição, e a entidade do lado da API só tem setter para o nome. Trocar a inscrição faria
+dele outro imóvel, o que é excluir e cadastrar.
+
+Do lado daqui:
+
+- `ImovelAcoesButton` substituiu `ExcluirImovelButton`. O estado é um enum de três valores
+  em vez de dois booleanos, porque os sheets são mutuamente exclusivos e um par de booleanos
+  admitiria "ambos abertos". A exclusão **manteve** a confirmação: o menu não exclui, ele
+  abre o aviso. É a única ação irreversível da tela.
+- `EditarNomeImovelForm` é irmã de `NomeImovelForm`, não uma versão parametrizada dela. O
+  que muda não é só a copy: o campo nasce preenchido, a action é outra e o sucesso volta
+  para a lista em vez de ir para a tela de cadastro concluído. O que os dois compartilham de
+  verdade — a regra do campo — mora em `nomeImovelSchema`.
+- A rota lê o imóvel da **própria lista do cidadão** (`GET /imoveis`), não de um
+  `GET /imoveis/{id}` que a API não tem. Isso resolve autorização de graça: a lista só traz
+  o que pertence ao CPF do token, então id de outra pessoa vira 404 sem o front precisar
+  decidir nada.
+
+**Uma diferença de semântica entre as duas actions, fácil de errar:** no `POST`, nome vazio
+sai do corpo — "não escolhi nome". No `PATCH`, nome vazio **viaja** — "apague o nome que eu
+tinha". Omitir a chave no PATCH tornaria impossível desfazer um nome dado por engano.
+
+> O contrato local foi gerado a partir do build do próprio serviço
+> (`-Dquarkus.smallrye-openapi.store-schema-directory`), sem o bloco `servers` que só existe
+> na geração de build, porque **homologação exige VPN** e ela estava desligada na máquina
+> naquele momento. Conferido depois contra o `/swagger` de HOM: **idêntico**. Vale lembrar
+> que essa geração offline serve de contingência, não substitui a cópia do `/swagger` —
+> `curl -s $API/swagger | diff - divida-ativa-api.yaml` é o que dá a palavra final.
 
 ### O que ficou pendente, e de quem depende
 

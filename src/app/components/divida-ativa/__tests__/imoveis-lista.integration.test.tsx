@@ -67,9 +67,10 @@ describe('ImoveisLista', () => {
     expect(
       screen.getByRole('heading', { name: 'Casa Família' })
     ).toBeInTheDocument()
-    // A exclusão também passa a se referir ao nome, que é como o cidadão pensa no imóvel.
+    // O menu de ações também passa a se referir ao nome, que é como o cidadão pensa no
+    // imóvel.
     expect(
-      screen.getByRole('button', { name: 'Excluir imóvel Casa Família' })
+      screen.getByRole('button', { name: 'Ações do imóvel Casa Família' })
     ).toBeInTheDocument()
   })
 
@@ -111,30 +112,30 @@ describe('ImoveisLista', () => {
     ).toHaveAttribute('href', '/divida-ativa/imoveis/novo')
   })
 
-  test('cada imóvel tem uma ação de exclusão com nome acessível próprio', () => {
+  test('cada imóvel tem seu menu de ações com nome acessível próprio', () => {
     render(<ImoveisLista imoveis={IMOVEIS} />)
 
     expect(
       screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Lucio de Mendonca, 27 - Apto 101',
+        name: 'Ações do imóvel Rua Lucio de Mendonca, 27 - Apto 101',
       })
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', {
-        name: 'Excluir imóvel Rua Barata Ribeiro, 586 - A 501',
+        name: 'Ações do imóvel Rua Barata Ribeiro, 586 - A 501',
       })
     ).toBeInTheDocument()
   })
 
   /**
-   * A exclusão precisa do id local; sem ele a API não tem como identificar o registro.
-   * Melhor não oferecer a ação do que oferecer uma que falha sempre.
+   * Renomear e excluir precisam do id local; sem ele a API não tem como identificar o
+   * registro. Melhor não oferecer as ações do que oferecer uma que falha sempre.
    */
-  test('um imóvel sem id local não oferece exclusão', () => {
+  test('um imóvel sem id local não oferece o menu de ações', () => {
     render(<ImoveisLista imoveis={[{ ...IMOVEIS[0], id: null }]} />)
 
     expect(
-      screen.queryByRole('button', { name: /Excluir imóvel/ })
+      screen.queryByRole('button', { name: /Ações do imóvel/ })
     ).not.toBeInTheDocument()
   })
 
@@ -175,7 +176,7 @@ describe('ImoveisLista', () => {
 
     expect(screen.getByText('0.521.766-3')).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Excluir imóvel 0.521.766-3' })
+      screen.getByRole('button', { name: 'Ações do imóvel 0.521.766-3' })
     ).toBeInTheDocument()
   })
 })
