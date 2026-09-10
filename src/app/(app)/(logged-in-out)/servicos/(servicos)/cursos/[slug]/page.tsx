@@ -5,13 +5,17 @@ import { getApiPublicCoursesCourseId } from '@/http-courses/courses/courses'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
 import { parseCourseDetailResponse, shouldShowCourse } from '@/lib/course-utils'
 import { notFound } from 'next/navigation'
+import { CourseUnavailablePage } from './course-unavailable-page'
 
 export default async function CoursePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ from?: string }>
 }) {
   const { slug: courseSlug } = await params
+  const { from } = await searchParams
 
   try {
     const response = await getApiPublicCoursesCourseId(
@@ -20,6 +24,7 @@ export default async function CoursePage({
     const course = parseCourseDetailResponse(response.data)
 
     if (response.status !== 200 || !course) {
+      if (from === 'my-courses') return <CourseUnavailablePage />
       notFound()
     }
 
