@@ -87,7 +87,7 @@ export function MyCoursesCard({
       {courses.map((course, index) => (
         <div key={course.id}>
           <Link
-            href={`/servicos/cursos/${course.id}`}
+            href={`/servicos/cursos/${course.id}?from=my-courses`}
             prefetch={false}
             className="flex items-center gap-3 rounded-lg py-4 bg-background transition cursor-pointer group"
           >
