@@ -229,7 +229,7 @@ test.describe('Meu Perfil — atualizar e-mail (autenticado)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// ENDEREÇO — fluxo completo: excluir → estado vazio → adicionar
+// ENDEREÇO — fluxo completo: editar/adicionar (o endereço não pode ser excluído)
 // ---------------------------------------------------------------------------
 
 test.describe('Meu Perfil — endereço: fluxo completo (autenticado)', () => {
@@ -241,7 +241,7 @@ test.describe('Meu Perfil — endereço: fluxo completo (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exclui endereço existente, verifica estado vazio e adiciona novo endereço', async ({
+  test('protege o endereço contra exclusão e permite editá-lo', async ({
     page,
   }) => {
     await page.goto('/meu-perfil/endereco')
@@ -249,7 +249,9 @@ test.describe('Meu Perfil — endereço: fluxo completo (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Endereço' })
     ).toBeVisible({ timeout: 15000 })
 
-    // --- Passo 1: exclusão (se houver endereço cadastrado) ---
+    // --- Passo 1: chega em atualizar-endereco pelo caminho disponível ---
+    // Com endereço cadastrado o único caminho é "Editar" — o endereço é
+    // obrigatório para cursos e vagas, então não há opção de excluir.
     const addressCard = page
       .locator('[class*="rounded-2xl"][class*="cursor-pointer"]')
       .first()
@@ -260,25 +262,24 @@ test.describe('Meu Perfil — endereço: fluxo completo (autenticado)', () => {
     if (hasAddress) {
       await addressCard.click()
 
-      const deleteDialog = page.getByRole('dialog')
-      await expect(deleteDialog).toBeVisible({ timeout: 10000 })
-      await deleteDialog.getByRole('button', { name: 'Excluir' }).click()
-
-      // Aguarda o estado vazio aparecer após revalidação do servidor
+      const actionsDialog = page.getByRole('dialog')
+      await expect(actionsDialog).toBeVisible({ timeout: 10000 })
       await expect(
-        page.getByText('Não há nenhum endereço cadastrado')
-      ).toBeVisible({ timeout: 15000 })
+        actionsDialog.getByRole('button', { name: 'Excluir' })
+      ).toHaveCount(0)
+
+      await actionsDialog.getByRole('button', { name: 'Editar' }).click()
     } else {
-      // Já está no estado vazio
+      // Sem endereço cadastrado: estado vazio e botão Adicionar
       await expect(
         page.getByText('Não há nenhum endereço cadastrado')
       ).toBeVisible({ timeout: 10000 })
+
+      const addLink = page.getByRole('link', { name: 'Adicionar' })
+      await expect(addLink).toBeVisible()
+      await addLink.click()
     }
 
-    // --- Passo 2: estado vazio e botão Adicionar ---
-    const addLink = page.getByRole('link', { name: 'Adicionar' })
-    await expect(addLink).toBeVisible()
-    await addLink.click()
     await expect(page).toHaveURL('/meu-perfil/endereco/atualizar-endereco')
 
     // --- Passo 3: busca e seleção do endereço ---
@@ -326,7 +327,7 @@ test.describe('Meu Perfil — endereço: fluxo completo (autenticado)', () => {
 
     // --- Passo 5: sucesso ou "sem alteração" ---
     // A API pode retornar "No change" quando o endereço enviado é idêntico
-    // ao já cadastrado (ex: o endereço foi excluído mas a API manteve o dado).
+    // ao já cadastrado (ex: a edição reenviou o mesmo endereço).
     const feedbackTitle = page
       .locator('[data-slot="drawer-title"]')
       .filter({ hasNotText: 'Detalhes do Endereço' })

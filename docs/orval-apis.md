@@ -236,7 +236,7 @@ seguem como receita a migrar quando alguém precisar tocar naquele client.
   },
 ```
 
-> ## API Dívida Ativa Imobiliária (contrato provisório)
+> ## API Dívida Ativa Imobiliária (`api-imoveis`)
 
 * Spec local: `./divida-ativa-api.yaml` (raiz do repo)
 * Documentação do módulo: [`divida-ativa.md`](./divida-ativa.md)

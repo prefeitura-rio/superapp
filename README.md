@@ -82,3 +82,4 @@ npx @biomejs/biome check --write <files>
 ---
 
 Made with ❤️ by IplanRio
+

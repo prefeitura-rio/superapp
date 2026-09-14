@@ -18,3 +18,4 @@ export const empregabilidadeBannerIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/avatar-empregabilidade.png'
 export { default as oportunidadesCariocasLogo } from '../../../public/oportunidades-cariocas-rio-light.png'
 export { default as oportunidadesCariocasLogoDark } from '../../../public/oportunidades-cariocas-rio-dark.png'
+export { default as cadmicroBannerIcon } from '../../../public/cadmicro-banner.svg'

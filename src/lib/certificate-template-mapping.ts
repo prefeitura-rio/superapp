@@ -10,6 +10,7 @@ export type CertificateTemplate =
   | 'cvlsubtd'
   | 'sesrio'
   | 'spmrio'
+  | 'smte'
 
 export interface OrganizationTemplateMapping {
   orgao_id: string // cd_ua do departamento
@@ -27,6 +28,7 @@ const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
   'cvlsubtd',
   'sesrio',
   'spmrio',
+  'smte',
 ])
 
 /**
@@ -40,6 +42,7 @@ const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
  * - cvlsubtd.pdf: CVL / Subsecretaria (layout v2)
  * - sesrio.pdf: SES-RIO (layout v2)
  * - spmrio.pdf: Secretaria Especial de Políticas para Mulheres - SPM-RIO (layout v2)
+ * - smte.pdf: Secretaria Municipal de Trabalho e Renda - SMTE (layout v2)
  *
  * NOTA: Os orgao_id devem ser os valores de cd_ua retornados pela API de departamentos.
  * Para adicionar um novo mapeamento, consulte a API para obter o cd_ua correto.
@@ -73,7 +76,20 @@ const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
     orgao_id: '4700',
     template: 'spmrio',
   },
+  {
+    orgao_id: '2600',
+    template: 'smte',
+  },
 ]
+
+/**
+ * Todos os templates efetivamente mapeados, derivados de TEMPLATE_MAPPINGS.
+ * Fonte de verdade única — evita divergência entre o mapeamento, a rota
+ * `/api/templates/[template]` e os arquivos em `src/lib/templates/`.
+ */
+export const CERTIFICATE_TEMPLATES: readonly CertificateTemplate[] = Array.from(
+  new Set(TEMPLATE_MAPPINGS.map(m => m.template))
+)
 
 /**
  * Indica se o template usa o layout v2 (banner + texto à esquerda).

@@ -94,7 +94,8 @@ describe('DividaAtivaServiceList', () => {
 
     expect(openSpy).toHaveBeenCalledWith(
       'https://exemplo.rio/guia-a-vista',
-      '_blank'
+      '_blank',
+      'noopener,noreferrer'
     )
 
     openSpy.mockRestore()

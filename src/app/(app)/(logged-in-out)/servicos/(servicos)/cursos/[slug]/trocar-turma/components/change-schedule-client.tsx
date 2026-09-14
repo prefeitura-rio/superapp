@@ -9,7 +9,10 @@ import type { SwiperRef } from 'swiper/react'
 import { changeSchedule } from '@/actions/courses/change-schedule'
 import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import type { UserEnrollmentExtended } from '@/lib/course-utils'
+import {
+  type UserEnrollmentExtended,
+  isScheduleSelectable,
+} from '@/lib/course-utils'
 import { useRouter } from 'next/navigation'
 import { ConfirmInscriptionSlider } from '../../../confirmar-informacoes/components/confirm-inscription-slider'
 import {
@@ -52,14 +55,9 @@ export function ChangeScheduleClient({
   const swiperRef = useRef<SwiperRef>(null)
   const router = useRouter()
 
-  // Helper to check if a schedule is available (has remaining_vacancies > 0)
-  const isScheduleAvailable = (schedule: Schedule) => {
-    return (
-      schedule.remaining_vacancies !== undefined &&
-      schedule.remaining_vacancies !== null &&
-      schedule.remaining_vacancies > 0
-    )
-  }
+  // A turma is pickable only inside its own enrollment window and with seats
+  const isScheduleAvailable = (schedule: Schedule) =>
+    isScheduleSelectable(schedule)
 
   // Determine if we have multiple units to choose from
   const hasMultipleUnits = nearbyUnits && nearbyUnits.length > 1

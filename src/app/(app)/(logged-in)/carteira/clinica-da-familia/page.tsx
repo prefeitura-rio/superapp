@@ -80,10 +80,14 @@ export default async function HealthCardDetail() {
     healthData?.clinica_familia?.indicador === false
   ) {
     return (
-      <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-        <SecondaryHeader title="Carteira" className="max-w-xl" />
-        <div className="flex items-center justify-center py-6">
-          <p className="text-muted-foreground text-center">
+      <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
+        <SecondaryHeader
+          title="Carteira"
+          className="max-w-[896px]"
+          fixed={false}
+        />
+        <div className="flex items-center justify-center px-4 pt-2">
+          <p className="text-muted-foreground text-center py-6">
             Dados de saúde não disponíveis.
           </p>
         </div>
@@ -131,10 +135,14 @@ export default async function HealthCardDetail() {
   const isNormalRiskStatus = riskStatus?.risco === 'Verde'
 
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-2 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" fixed={false} />
+    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
+      <SecondaryHeader
+        title="Carteira"
+        className="max-w-[896px]"
+        fixed={false}
+      />
       <div className="z-50">
-        <div className="px-4">
+        <div className="px-4 pt-2">
           <HealthCard
             title="CLÍNICA DA FAMÍLIA"
             name={unitName}

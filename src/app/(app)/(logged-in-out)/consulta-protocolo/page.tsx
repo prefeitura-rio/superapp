@@ -3,6 +3,7 @@
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
 import {
   formatDate,
+  mapCategoria,
   normalizeStatus,
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
@@ -19,6 +20,7 @@ interface OsItem {
   status: string
   dataAbertura: string
   protocolo: string
+  isAcessoInformacao: boolean
 }
 
 type PageState = 'form' | 'loading' | 'results' | 'error'
@@ -80,10 +82,11 @@ export default function ConsultaProtocoloPage() {
       const items: OsItem[] = ordens.map((os: any) => ({
         codigoOs: os.codigoOs ?? '',
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
-        categoria: os.subtema ?? os.categoria ?? 'Serviço',
+        categoria: mapCategoria(os.categoria),
         status: os.status ?? '',
         dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,
+        isAcessoInformacao: os.isAcessoInformacao ?? false,
       }))
 
       setResults(items)
@@ -147,7 +150,8 @@ export default function ConsultaProtocoloPage() {
                     {item.servico}
                   </h3>
                   <p className="text-xs text-foreground-light truncate">
-                    Protocolo {item.protocolo} • {item.categoria}
+                    Protocolo {item.protocolo} •{' '}
+                    {item.isAcessoInformacao ? 'LAI' : item.categoria}
                   </p>
                 </div>
               </button>

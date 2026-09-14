@@ -30,7 +30,7 @@ export default function RequestsSectionCards() {
           </div>
 
           {/* Full-width: Ouvidoria */}
-          <Link href="/ouvidoria">
+          <Link href="https://1746.staging.app.dados.rio/protocolo/ouvidoria">
             <div className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-background hover:bg-secondary transition-colors cursor-pointer">
               <span className="text-sm font-normal text-foreground leading-snug">
                 Ouvidoria
@@ -39,7 +39,7 @@ export default function RequestsSectionCards() {
           </Link>
 
           {/* Full-width: Lei de acesso à informação */}
-          <Link href="/acesso-a-informacao">
+          <Link href="https://1746.staging.app.dados.rio/protocolo/lai">
             <div className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-background hover:bg-secondary transition-colors cursor-pointer">
               <span className="text-sm font-normal text-foreground leading-snug">
                 Lei de acesso à informação

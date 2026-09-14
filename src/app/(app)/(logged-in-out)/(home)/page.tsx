@@ -2,6 +2,7 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import { PendingInviteSection } from '@/app/components/pending-invite-section'
 import RequestsInProgressBanner from '@/app/components/requests-in-progress-banner'
 import RequestsSectionCards from '@/app/components/requests-section-cards'
 import SuggestionCards from '@/app/components/suggestion-cards'
@@ -29,6 +30,8 @@ export default async function Home() {
 
         {/* Requests in progress banner — only visible when logged in with recent requests */}
         {isChamadosEnabled && <RequestsInProgressBanner />}
+
+        <PendingInviteSection />
 
         {/* Suggestion Cards*/}
         <ResponsiveWrapper

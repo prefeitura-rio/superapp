@@ -237,12 +237,30 @@ select:-webkit-autofill:focus {
 
   /* font */
   --font-sans: var(--font-dm-sans);
+  --font-montserrat: var(--font-montserrat-face);
 
   /* custom border width */
   --border-width: var(--border-width);
 
   /* custom shadow */
   --shadow-float-navigation: var(--shadow-float-navigation);
+
+  /* CadMicro wallet card gradients (bg-cadmicro-*) */
+  --background-image-cadmicro-autopropelido: linear-gradient(
+    242.7deg,
+    #0092b8 7.19%,
+    #193cb8 104.16%
+  );
+  --background-image-cadmicro-bike: linear-gradient(
+    59.8deg,
+    #007a55 0.79%,
+    #0092b8 132.58%
+  );
+  --background-image-cadmicro-ciclomotor: linear-gradient(
+    59.8deg,
+    #e17100 0%,
+    #ec003f 170.29%
+  );
 }
 
 :root {
@@ -302,6 +320,22 @@ select:-webkit-autofill:focus {
   --wallet-3b: #5e52ad;
   --wallet-4: #c76e7d;
   --wallet-4b: #c0596a;
+
+  --cadmicro-gradient-autopropelido: linear-gradient(
+    242.7deg,
+    #0092b8 7.19%,
+    #193cb8 104.16%
+  );
+  --cadmicro-gradient-bike: linear-gradient(
+    59.8deg,
+    #007a55 0.79%,
+    #0092b8 132.58%
+  );
+  --cadmicro-gradient-ciclomotor: linear-gradient(
+    59.8deg,
+    #e17100 0%,
+    #ec003f 170.29%
+  );
 
   /* custom theme for light mode */
   --stroke-100: #d0d0d0;

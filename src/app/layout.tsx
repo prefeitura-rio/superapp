@@ -9,7 +9,7 @@ import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import type { Metadata } from 'next'
-import { DM_Sans } from 'next/font/google'
+import { DM_Sans, Montserrat } from 'next/font/google'
 import { headers } from 'next/headers'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
@@ -18,6 +18,12 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
+})
+
+const montserrat = Montserrat({
+  variable: '--font-montserrat-face',
+  subsets: ['latin'],
+  weight: ['800'],
 })
 
 export const metadata: Metadata = {
@@ -92,7 +98,7 @@ export default async function RootLayout({
         )}
       </head>
       <body
-        className={`${dmSans.className} antialiased`}
+        className={`${dmSans.className} ${montserrat.variable} antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider

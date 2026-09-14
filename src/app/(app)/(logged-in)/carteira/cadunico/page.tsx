@@ -30,10 +30,14 @@ export default async function SocialAssistanceCardDetail() {
   const cadunico = socialAssistanceData?.cadunico
 
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" />
+    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
+      <SecondaryHeader
+        title="Carteira"
+        className="max-w-[896px]"
+        fixed={false}
+      />
       <div className="z-50">
-        <div className="px-4">
+        <div className="px-4 pt-2">
           <SocialAssistanceCard
             title="CADÚNICO"
             number={cras?.nome || 'Não disponível'}
