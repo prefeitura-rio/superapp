@@ -11,6 +11,7 @@ import {
   fetchCartaServicosServicesBySubcategory,
   fetchCartaServicosSubcategoriesByCategory,
 } from '@/lib/carta-servicos/fetch'
+import type { PrefRioServiceWithFlags } from '@/lib/carta-servicos/types'
 import {
   getDalCategoriesCategorySubcategories,
   getDalSubcategoriesSubcategoryServices,
@@ -124,7 +125,7 @@ export async function fetchServiceById(
 
 export async function fetchServiceBySlug(
   slug: string
-): Promise<ModelsPrefRioService | null> {
+): Promise<PrefRioServiceWithFlags | null> {
   try {
     if (CARTA_SERVICOS_API_ENABLED) {
       return fetchCartaServicosServiceBySlug(slug)

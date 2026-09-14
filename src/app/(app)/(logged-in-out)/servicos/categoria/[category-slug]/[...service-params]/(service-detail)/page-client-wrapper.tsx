@@ -4,6 +4,7 @@ import { SecondaryHeader } from '@/app/components/secondary-header'
 import { OfficialBanner } from '@/app/components/service'
 import { PrefLogo } from '@/assets/icons/pref-logo'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
 import Link from 'next/link'
 import { useState } from 'react'
 import { PageClient } from './page-client'
@@ -12,12 +13,14 @@ interface PageClientWrapperProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
   categorySlug: string
+  ticketFlags?: ServiceTicketFlags
 }
 
 export function PageClientWrapper({
   serviceData,
   orgaoGestorName,
   categorySlug,
+  ticketFlags,
 }: PageClientWrapperProps) {
   const [bannerHeight, setBannerHeight] = useState(0)
 
@@ -42,6 +45,7 @@ export function PageClientWrapper({
           <PageClient
             serviceData={serviceData}
             orgaoGestorName={orgaoGestorName}
+            ticketFlags={ticketFlags}
           />
         </div>
       </div>
