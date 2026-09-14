@@ -25,7 +25,10 @@ import {
   type CartaServicosThemesWithFilterResponse,
   getFilteredCategoryServices,
 } from '@/lib/carta-servicos/themes-filter-response'
-import type { AppSubcategory } from '@/lib/carta-servicos/types'
+import type {
+  AppSubcategory,
+  PrefRioServiceWithFlags,
+} from '@/lib/carta-servicos/types'
 import type { Category } from '@/lib/categories'
 import type { ReactNode } from 'react'
 
@@ -387,7 +390,7 @@ export async function fetchCartaServicosServicesBySubcategory(
 
 export async function fetchCartaServicosServiceBySlug(
   slug: string
-): Promise<ModelsPrefRioService | null> {
+): Promise<PrefRioServiceWithFlags | null> {
   const response = await getServiceDetail(slug, {
     ...CACHE_10MIN,
     next: { ...CACHE_10MIN.next, tags: ['service', slug] },
@@ -417,5 +420,17 @@ export async function fetchCartaServicosServiceBySlug(
     return null
   }
 
-  return mapServiceDetailToPrefRioService(detailBody.data)
+  const mapped = mapServiceDetailToPrefRioService(detailBody.data)
+  const flags = detailBody.data.flags
+
+  return {
+    ...mapped,
+    ticketFlags: flags?.activeCategoryConfigId
+      ? {
+          allowTicketSubmission: flags.allowTicketSubmission,
+          allowsAnonymity: flags.allowsAnonymity,
+          activeCategoryConfigId: flags.activeCategoryConfigId,
+        }
+      : undefined,
+  }
 }

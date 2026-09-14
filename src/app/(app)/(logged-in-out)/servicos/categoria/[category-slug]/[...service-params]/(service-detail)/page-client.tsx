@@ -18,9 +18,11 @@ import {
   CardDescription,
   CardHeader,
 } from '@/components/ui/card'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
 import { Clock } from 'lucide-react'
@@ -29,11 +31,24 @@ import { MarkdownRenderer } from './components/markdown-renderer'
 interface PageClientProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
+  ticketFlags?: ServiceTicketFlags
 }
 
-export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
+export function PageClient({
+  serviceData,
+  orgaoGestorName,
+  ticketFlags,
+}: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
   const enabledButtons = buttons.filter(btn => btn.is_enabled)
+
+  const canSubmitTicket =
+    ticketFlags?.allowTicketSubmission === true &&
+    !!ticketFlags?.activeCategoryConfigId &&
+    !!TICKET_FORM_BASE_URL
+
+  const ticketUrl = (a: 0 | 1) =>
+    `${TICKET_FORM_BASE_URL}?a=${a}&id=${ticketFlags?.activeCategoryConfigId}`
 
   // Analytics tracking
   const { trackServiceClick } = useAnalytics()
@@ -97,60 +112,97 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
           />
         </div>
 
-        {/* Buttons - One Button or Multiple Buttons */}
-        {enabledButtons.length > 0 && (
-          <div>
-            {enabledButtons.length === 1 ? (
+        {/* Ticket submission buttons (SF-linked services) take priority over generic buttons */}
+        {canSubmitTicket ? (
+          <div className="flex flex-col gap-3">
+            <Button
+              asChild
+              className="w-full rounded-full text-background py-4 h-[52px]"
+              size="lg"
+            >
+              <a
+                href={ticketUrl(0)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-background text-sm leading-5 font-normal"
+              >
+                Solicitar serviço
+              </a>
+            </Button>
+            {ticketFlags?.allowsAnonymity && (
               <Button
                 asChild
-                className="w-full rounded-full text-background py-4 h-[52px]"
+                variant="outline"
+                className="w-full rounded-full py-4 h-[52px]"
                 size="lg"
               >
                 <a
-                  href={enabledButtons[0].url_service}
+                  href={ticketUrl(1)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
-                  className="text-background text-sm leading-5 font-normal"
+                  className="text-sm leading-5 font-normal"
                 >
-                  {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
+                  Solicitar sem login
                 </a>
               </Button>
-            ) : (
-              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-left">
-                {enabledButtons.map((button, index) => (
-                  <Card
-                    key={index}
-                    className="min-w-[268px] w-[268px] md:w-[268px] min-h-[128px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col gap-2"
-                  >
-                    <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
-                      {button.descricao && (
-                        <CardDescription className="text-sm text-foreground-light line-clamp-2">
-                          {button.descricao}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent className="p-6 py-0 mt-auto">
-                      <Button
-                        asChild
-                        className="w-full rounded-full h-11 text-background"
-                      >
-                        <a
-                          href={button.url_service}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => handleButtonClick(e, button, index)}
-                          className="text-background"
-                        >
-                          {button.titulo}
-                        </a>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
             )}
           </div>
+        ) : (
+          /* Fallback: generic buttons from API */
+          enabledButtons.length > 0 && (
+            <div>
+              {enabledButtons.length === 1 ? (
+                <Button
+                  asChild
+                  className="w-full rounded-full text-background py-4 h-[52px]"
+                  size="lg"
+                >
+                  <a
+                    href={enabledButtons[0].url_service}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
+                    className="text-background text-sm leading-5 font-normal"
+                  >
+                    {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
+                  </a>
+                </Button>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-left">
+                  {enabledButtons.map((button, index) => (
+                    <Card
+                      key={index}
+                      className="min-w-[268px] w-[268px] md:w-[268px] min-h-[128px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col gap-2"
+                    >
+                      <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
+                        {button.descricao && (
+                          <CardDescription className="text-sm text-foreground-light line-clamp-2">
+                            {button.descricao}
+                          </CardDescription>
+                        )}
+                      </CardHeader>
+                      <CardContent className="p-6 py-0 mt-auto">
+                        <Button
+                          asChild
+                          className="w-full rounded-full h-11 text-background"
+                        >
+                          <a
+                            href={button.url_service}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => handleButtonClick(e, button, index)}
+                            className="text-background"
+                          >
+                            {button.titulo}
+                          </a>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
         )}
       </div>
 
