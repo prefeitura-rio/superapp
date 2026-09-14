@@ -140,7 +140,7 @@ export function PageClient({
                   href={ticketUrl(1)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm leading-5 font-normal"
+                  className="text-sm leading-5 font-normal text-foreground hover:text-background"
                 >
                   Solicitar sem login
                 </a>
