@@ -133,14 +133,14 @@ export function PageClient({
               <Button
                 asChild
                 variant="outline"
-                className="w-full rounded-full py-4 h-[52px]"
+                className="w-full rounded-full py-4 h-[52px] text-foreground hover:text-foreground hover:bg-foreground/10"
                 size="lg"
               >
                 <a
                   href={ticketUrl(1)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm leading-5 font-normal text-foreground hover:text-background"
+                  className="text-sm leading-5 font-normal"
                 >
                   Solicitar sem login
                 </a>
