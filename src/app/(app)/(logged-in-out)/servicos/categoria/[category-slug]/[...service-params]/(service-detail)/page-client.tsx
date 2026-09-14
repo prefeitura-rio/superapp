@@ -133,7 +133,7 @@ export function PageClient({
               <Button
                 asChild
                 variant="outline"
-                className="w-full rounded-full py-4 h-[52px] text-foreground hover:text-foreground hover:bg-accent/60"
+                className="w-full rounded-full py-4 h-[52px] text-foreground hover:text-foreground hover:bg-foreground/10"
                 size="lg"
               >
                 <a
