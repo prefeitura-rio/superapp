@@ -10,12 +10,12 @@ import {
 const KEY = 'courses-visited-history'
 
 function seed(courses: VisitedCourse[]) {
-  localStorage.setItem(KEY, JSON.stringify(courses))
+  window.localStorage.setItem(KEY, JSON.stringify(courses))
 }
 
 describe('course-history', () => {
-  beforeEach(() => localStorage.clear())
-  afterEach(() => localStorage.clear())
+  beforeEach(() => window.localStorage.clear())
+  afterEach(() => window.localStorage.clear())
 
   describe('getVisitedCourses', () => {
     test('retorna [] quando não há histórico', () => {
@@ -32,9 +32,9 @@ describe('course-history', () => {
     })
 
     test('limpa e retorna [] quando o JSON armazenado é inválido', () => {
-      localStorage.setItem(KEY, '{json-invalido')
+      window.localStorage.setItem(KEY, '{json-invalido')
       expect(getVisitedCourses()).toEqual([])
-      expect(localStorage.getItem(KEY)).toBeNull()
+      expect(window.localStorage.getItem(KEY)).toBeNull()
     })
   })
 
