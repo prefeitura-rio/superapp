@@ -686,27 +686,34 @@ deixou de depender do notebook do dev. O que mudou aqui:
 O que **não** mudou: a Fase 3 continua sem tipo, e o provisionamento de
 `BASE_API_URL_DIVIDA_ATIVA` no Infisical continua pendente.
 
-### O skeleton que não saía — 04/09/2026
+### O skeleton que não saía — 04/09/2026, revisto em 16/09/2026
 
 Sintoma no teste manual: digitar a inscrição, clicar em "Continuar" e ficar preso nos
 skeletons para sempre. Sem erro, sem requisição falhada. Um refresh mostrava a tela certa
 ("Não encontramos essa inscrição"), o que fazia parecer lentidão da API — não era: a chamada
 respondia em ~90 ms.
 
-A causa está no CSP montado no `src/middleware.ts`, não neste módulo. `'strict-dynamic'` faz o
-browser **ignorar** `'self'` e toda a allowlist de hosts do `script-src`, deixando valer só o
-nonce. Numa navegação client-side, quando o segmento de destino precisa de um chunk que o
-documento atual ainda não carregou, o React insere
-`<script src="/_next/static/chunks/...">` — e a tag que vem do boundary de `loading.tsx`
-**não tem nonce**, porque o shell de loading é renderizado sem contexto de request. O browser
-bloqueia o script, os client components daquele segmento nunca resolvem e o fallback do
-Suspense (o skeleton) fica na tela. O refresh disfarça porque um carregamento de documento
-inteiro entrega os chunks com o nonce daquela mesma requisição.
+A causa está no CSP montado no `src/middleware.ts`, não neste módulo. Com `'strict-dynamic'`,
+o browser **ignora** `'self'` e toda a allowlist de hosts do `script-src`, e só o nonce vale.
+Numa navegação client-side, quando o segmento de destino precisa de um chunk que o documento
+atual ainda não carregou, o React insere `<script src="/_next/static/chunks/...">` — e a tag
+que vem do boundary de `loading.tsx` saía **sem nonce**, porque o shell de loading era
+renderizado sem contexto de request. O browser bloqueia o script, os client components daquele
+segmento nunca resolvem e o fallback do Suspense (o skeleton) fica na tela. O refresh disfarça
+porque um carregamento de documento inteiro entrega os chunks com o nonce daquela mesma
+requisição.
 
-`'strict-dynamic'` saiu do `script-src`. Sem ele, `'self'` cobre `/_next/static/*` e a
-allowlist de hosts volta a significar o que diz. A correção é do app inteiro, não só daqui: o
-mesmo travamento acontecia em qualquer navegação client-side cujo destino precisasse de um
-chunk novo.
+A primeira correção tentada aqui foi **tirar `'strict-dynamic'` do `script-src`**. Ela foi
+**revertida na review do PR #629**, e com razão: sem `'strict-dynamic'` a mitigação de XSS do
+app inteiro passa a valer só o que a allowlist de hosts cobre, e isso é caro demais para
+destravar uma entrega que já está atrás de uma feature flag desligada em staging e produção.
+
+O defeito é do Next, não do CSP. O upstream corrigiu a tag sem nonce em
+[vercel/next.js#98398](https://github.com/vercel/next.js/pull/98398), com backport em
+[#98403](https://github.com/vercel/next.js/pull/98403) — que saiu na **16.3.5**. O repo está
+na 16.3.0, então o travamento reaparece até o bump, e ele vai em **PR separado**, fora deste
+módulo. `'strict-dynamic'` continua no `script-src`, como a documentação oficial do App Router
+pede.
 
 ### O nome do imóvel ganhou onde morar — 08/09/2026
 
@@ -783,6 +790,7 @@ tinha". Omitir a chave no PATCH tornaria impossível desfazer um nome dado por e
 | Indicador de débito na lista (P12) | produto confirmar que a tela fica de pé sem ele |
 | Estado de carregamento para as chamadas de 15 s | design |
 | Serializador `dd/MM/yyyy` na saída | nada — é só escrever, mas só a Fase 3 usa (YAGNI) |
+| Bump do Next para ≥ 16.3.5 (fix do nonce em `loading.tsx`) | PR separado — até lá, navegação client-side para um segmento com `loading.tsx` pode travar no skeleton |
 
 ### Dois cuidados que continuam valendo
 
