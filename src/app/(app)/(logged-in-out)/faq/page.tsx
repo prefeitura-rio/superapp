@@ -236,9 +236,21 @@ export default function FaqHubPage() {
                 <div className="space-y-8">
                   {group.items.map((item, i) => (
                     <div key={item.id}>
-                      <Link
-                        href={`${SOURCE_HREF[group.source]}#${item.originalId}&highlight=${encodeURIComponent(debouncedQuery.trim())}`}
-                        className="block space-y-2 hover:opacity-80 transition-opacity"
+                      <div
+                        role="link"
+                        tabIndex={0}
+                        onClick={() =>
+                          router.push(
+                            `${SOURCE_HREF[group.source]}#${item.originalId}&highlight=${encodeURIComponent(debouncedQuery.trim())}`
+                          )
+                        }
+                        onKeyDown={e =>
+                          e.key === 'Enter' &&
+                          router.push(
+                            `${SOURCE_HREF[group.source]}#${item.originalId}&highlight=${encodeURIComponent(debouncedQuery.trim())}`
+                          )
+                        }
+                        className="block space-y-2 hover:opacity-80 transition-opacity cursor-pointer"
                       >
                         <h3 className="text-base font-medium leading-snug">
                           <Highlighted
@@ -250,7 +262,7 @@ export default function FaqHubPage() {
                           content={item.content}
                           query={debouncedQuery.trim()}
                         />
-                      </Link>
+                      </div>
                       {i < group.items.length - 1 && (
                         <div className="mt-8 border-t border-border" />
                       )}
