@@ -1,5 +1,6 @@
 'use client'
 
+import { BirthDateDrawerContent } from '@/app/components/drawer-contents/birth-date-drawer-content'
 import { DisabilityDrawerContent } from '@/app/components/drawer-contents/disability-drawer-content'
 import { EducationDrawerContent } from '@/app/components/drawer-contents/education-drawer-content'
 import { FamilyIncomeDrawerContent } from '@/app/components/drawer-contents/family-income-drawer-content'
@@ -15,6 +16,7 @@ import {
 import { formatAddress, hasValidAddress } from '@/helpers/address-data-helpers'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
+import { formatBirthDatePtBr, isBirthDateEditable } from '@/lib/birth-date'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatDisability } from '@/lib/format-disability'
 import { formatEducation } from '@/lib/format-education'
@@ -35,6 +37,8 @@ interface ConfirmarInformacoesContentProps {
     name: string
   }
   contactUpdateStatus?: ContactUpdateStatus
+  /** Quando a vaga exige idade mínima e o cidadão precisa informar nascimento */
+  requiresBirthDate?: boolean
   /** Quando em fluxo único (carousel), chamado ao clicar Continuar em vez de router.push */
   onContinuar?: () => void
   /** URL de retorno para links de atualizar telefone/email (ex: /servicos/trabalho/[id]/inscricao?step=1) */
@@ -46,6 +50,7 @@ export function ConfirmarInformacoesContent({
   userInfo,
   userAuthInfo,
   contactUpdateStatus,
+  requiresBirthDate = false,
   onContinuar,
   returnUrlForProfile,
 }: ConfirmarInformacoesContentProps) {
@@ -62,11 +67,16 @@ export function ConfirmarInformacoesContent({
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
+  const hasBirthDate = !!userInfo.nascimento?.data
+  const birthDateEditable = isBirthDateEditable(userInfo.nascimento)
+  const showBirthDateField = requiresBirthDate
+  const birthDateRequiredMissing = requiresBirthDate && !hasBirthDate
 
   const [genderDrawerOpen, setGenderDrawerOpen] = useState(false)
   const [educationDrawerOpen, setEducationDrawerOpen] = useState(false)
   const [familyIncomeDrawerOpen, setFamilyIncomeDrawerOpen] = useState(false)
   const [disabilityDrawerOpen, setDisabilityDrawerOpen] = useState(false)
+  const [birthDateDrawerOpen, setBirthDateDrawerOpen] = useState(false)
 
   const returnUrl =
     returnUrlForProfile ??
@@ -94,6 +104,11 @@ export function ConfirmarInformacoesContent({
   const handleEducationClick = () => setEducationDrawerOpen(true)
   const handleFamilyIncomeClick = () => setFamilyIncomeDrawerOpen(true)
   const handleDisabilityClick = () => setDisabilityDrawerOpen(true)
+  const handleBirthDateClick = () => {
+    if (birthDateEditable) {
+      setBirthDateDrawerOpen(true)
+    }
+  }
 
   const handleContinuar = () => {
     if (onContinuar) {
@@ -256,6 +271,45 @@ export function ConfirmarInformacoesContent({
 
           <div className="h-px bg-border" />
 
+          {showBirthDateField && (
+            <>
+              <div
+                className={`pt-4 pb-4 rounded-lg px-2 -mx-2 transition-colors ${
+                  birthDateEditable ? 'cursor-pointer hover:bg-accent/30' : ''
+                } ${
+                  birthDateRequiredMissing
+                    ? 'border-l-4 border-destructive pl-2'
+                    : ''
+                }`}
+                onClick={handleBirthDateClick}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
+                      Data de nascimento {birthDateRequiredMissing && '*'}
+                    </p>
+                    <p
+                      className={`font-normal ${
+                        hasBirthDate
+                          ? 'text-foreground'
+                          : 'text-sm md:text-base text-destructive'
+                      }`}
+                    >
+                      {hasBirthDate
+                        ? formatBirthDatePtBr(userInfo.nascimento?.data)
+                        : 'Informe sua data de nascimento'}
+                    </p>
+                  </div>
+                  {birthDateEditable && (
+                    <EditIcon className="h-5 w-5 mr-2 text-foreground shrink-0 ml-2" />
+                  )}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+            </>
+          )}
+
           {/* Gênero */}
           <div
             className={`pt-4 pb-4 cursor-pointer hover:bg-accent/30 rounded-lg px-2 -mx-2 transition-colors ${
@@ -381,7 +435,9 @@ export function ConfirmarInformacoesContent({
             fullWidth
             variant="primary"
             onClick={handleContinuar}
-            disabled={!hasPhone || !hasEmail || !hasAddress}
+            disabled={
+              !hasPhone || !hasEmail || !hasAddress || birthDateRequiredMissing
+            }
           >
             Continuar
           </CustomButton>
@@ -434,6 +490,18 @@ export function ConfirmarInformacoesContent({
         <DisabilityDrawerContent
           currentDisability={userInfo.deficiencia}
           onClose={() => setDisabilityDrawerOpen(false)}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        open={birthDateDrawerOpen}
+        onOpenChange={setBirthDateDrawerOpen}
+        title="Data de nascimento"
+        showHandle
+      >
+        <BirthDateDrawerContent
+          currentBirthDate={userInfo.nascimento?.data}
+          onClose={() => setBirthDateDrawerOpen(false)}
         />
       </BottomSheet>
     </>

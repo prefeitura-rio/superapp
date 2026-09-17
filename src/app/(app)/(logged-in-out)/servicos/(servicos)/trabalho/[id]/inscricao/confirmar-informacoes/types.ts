@@ -12,6 +12,10 @@ export interface EmpregosUserInfo {
   escolaridade?: string
   renda_familiar?: string
   deficiencia?: string
+  nascimento?: {
+    data?: string
+    origem?: string
+  }
 }
 
 export interface ContactUpdateStatus {
