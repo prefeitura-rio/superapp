@@ -50,6 +50,22 @@ paths:
           description: OK
       security:
       - bearerAuth: []
+  /divida-ativa/consultar:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: "Consulta avulsa por CDA, execucao fiscal, guia ou inscricao — nao\
+        \ exige imovel cadastrado (somente leitura)"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultaFiltroRequest'
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
   /divida-ativa/requerimentos:
     get:
       tags:
@@ -859,14 +875,24 @@ components:
         numeroGuiaPagamento:
           type: string
     DividaAtivaConsultaResponse:
-      description: Consulta principal de Divida Ativa para uma inscricao cadastrada.
+      description: "Consulta de Divida Ativa de um imovel. Serve tanto a consulta\
+        \ do imovel cadastrado quanto a consulta avulsa por CDA, execucao fiscal ou\
+        \ guia."
       type: object
       properties:
         imovel:
-          description: Imovel local vinculado ao CPF autenticado.
+          description: "Imovel da consulta. No fluxo cadastrado vem do banco local\
+            \ (com id e dataInclusao); na consulta avulsa e montado com a inscricao\
+            \ encontrada e o endereco da Fazenda, sem id."
           type: object
           allOf:
           - $ref: '#/components/schemas/ImovelResponse'
+        imovelCadastrado:
+          description: "Indica se o imovel ja esta em Meus Imoveis do CPF autenticado.\
+            \ Falso na consulta avulsa de imovel nao cadastrado: nesse caso a resposta\
+            \ e somente leitura e opcoes vem vazia, porque emitir guia e requerer\
+            \ parcelamento exigem o cadastro."
+          type: boolean
         cdas:
           description: CDAs nao parceladas (datagrid 1 do legado T04).
           type: array
@@ -900,11 +926,28 @@ components:
             e parcial.
           type: string
     DocumentoDamRequest:
+      description: Documento anexado ao requerimento de parcelamento.
+      required:
+      - tipo
+      - nomeArquivo
+      - conteudoBase64
       type: object
       properties:
-        nomeArquivo:
+        tipo:
+          description: "Tipo do documento. Obrigatorio: e ele que define o campo do\
+            \ formulario, o limite de tamanho e o nome enviado ao DAM."
           type: string
+          allOf:
+          - $ref: '#/components/schemas/TipoDocumentoDam'
+        nomeArquivo:
+          description: "Nome original do arquivo escolhido pelo cidadao. A API usa\
+            \ apenas a extensao (pdf, jpg, jpeg, png ou gif) e monta o nome que o\
+            \ DAM espera a partir do tipo."
+          type: string
+          example: IMG_20260917.jpg
         conteudoBase64:
+          description: "Conteudo do arquivo em base64. Aceita data URI (\"data:application/pdf;base64,...\"\
+            ); a API remove o prefixo antes de enviar ao DAM."
           type: string
     FazendaImovel:
       type: object
@@ -1257,6 +1300,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentoDamRequest'
+    TipoDocumentoDam:
+      description: Tipo do documento anexado ao requerimento de parcelamento.
+      enum:
+      - IDENTIDADE
+      - CPF
+      - IDENTIDADE_OUTORGANTE
+      - CPF_OUTORGANTE
+      - PROCURACAO
+      - ESCRITURA
+      - CNPJ
+      - REGISTRO_EMPRESA
+      - ATA
+      - OUTROS
+      type: string
     ValidarSenhaRequest:
       type: object
       properties:

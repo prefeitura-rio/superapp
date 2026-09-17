@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
+  ConsultaFiltroRequest,
   GetDividaAtivaCertidoesParams,
   GetDividaAtivaRequerimentosParams,
   ValidarSenhaRequest,
@@ -88,6 +89,41 @@ export const getDividaAtivaCertidoes = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+export type postDividaAtivaConsultarResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postDividaAtivaConsultarResponseSuccess =
+  postDividaAtivaConsultarResponse200 & {
+    headers: Headers
+  }
+
+export type postDividaAtivaConsultarResponse =
+  postDividaAtivaConsultarResponseSuccess
+
+export const getPostDividaAtivaConsultarUrl = () => {
+  return `/divida-ativa/consultar`
+}
+
+/**
+ * @summary Consulta avulsa por CDA, execucao fiscal, guia ou inscricao — nao exige imovel cadastrado (somente leitura)
+ */
+export const postDividaAtivaConsultar = async (
+  consultaFiltroRequest?: ConsultaFiltroRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<postDividaAtivaConsultarResponse> => {
+  return customFetchDividaAtiva<postDividaAtivaConsultarResponse>(
+    getPostDividaAtivaConsultarUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(consultaFiltroRequest),
     }
   )
 }
