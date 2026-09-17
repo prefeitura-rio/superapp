@@ -5,14 +5,8 @@
  * API para gerenciamento de dados de cidadãos do Rio de Janeiro, incluindo autodeclaração de informações e verificação de contato.
  * OpenAPI spec version: 1.0
  */
+import type { ClientsSalesforceFieldError } from './clientsSalesforceFieldError'
 
-export interface ModelsNascimento {
-  data?: string
-  municipio?: string
-  municipio_id?: string
-  origem?: string
-  pais?: string
-  pais_id?: string
-  sistema?: string
-  uf?: string
+export interface ClientsSalesforceErrorBody {
+  errors?: ClientsSalesforceFieldError[]
 }

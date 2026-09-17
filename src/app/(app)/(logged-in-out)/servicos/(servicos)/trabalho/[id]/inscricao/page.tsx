@@ -137,6 +137,12 @@ export default async function InscricaoPage({
     escolaridade: userInfoExtended.escolaridade,
     renda_familiar: userInfoExtended.renda_familiar,
     deficiencia: userInfoExtended.deficiencia,
+    nascimento: userInfo.nascimento
+      ? {
+          data: userInfo.nascimento.data,
+          origem: userInfo.nascimento.origem,
+        }
+      : undefined,
   }
 
   const phoneNeedsUpdate = !isUpdatedWithin({
@@ -172,6 +178,9 @@ export default async function InscricaoPage({
       : null
   const showBemVindo = onboardingData?.is_first_login === true
 
+  const requiresBirthDate = vagaResponse.data.idade_minima != null
+  const hasBirthDate = !!transformedUserInfo.nascimento?.data
+
   const needsConfirmar =
     contactUpdateStatus.phoneNeedsUpdate ||
     contactUpdateStatus.emailNeedsUpdate ||
@@ -180,7 +189,8 @@ export default async function InscricaoPage({
     !transformedUserInfo.genero ||
     !transformedUserInfo.escolaridade ||
     !transformedUserInfo.renda_familiar ||
-    !transformedUserInfo.deficiencia
+    !transformedUserInfo.deficiencia ||
+    (requiresBirthDate && !hasBirthDate)
 
   const requestedStep = Math.max(0, Number.parseInt(stepParam ?? '0', 10) || 0)
   const initialStep = showBemVindo || needsConfirmar ? 0 : requestedStep
@@ -202,6 +212,7 @@ export default async function InscricaoPage({
         showConfirmarInformacoes={needsConfirmar}
         hasPerguntasAdicionais={hasPerguntasAdicionais}
         userInfo={transformedUserInfo}
+        requiresBirthDate={requiresBirthDate}
         userAuthInfo={userAuthInfo}
         contactUpdateStatus={contactUpdateStatus}
         informacoesComplementares={informacoesComplementares}

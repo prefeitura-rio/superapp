@@ -6,13 +6,15 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsNascimento {
+export interface ClientsSalesforceConsentimento {
+  /** legacy: optin | optout */
+  acao?: string
+  canal?: string
+  categoria?: string
   data?: string
-  municipio?: string
-  municipio_id?: string
-  origem?: string
-  pais?: string
-  pais_id?: string
-  sistema?: string
-  uf?: string
+  finalidade?: string
+  /** required when status=OUT / acao=optout */
+  motivo?: string
+  /** IN | OUT */
+  status?: string
 }

@@ -118,6 +118,11 @@ export const handlers = [
     return HttpResponse.json(DEFAULT_SUCCESS_RESPONSE, { status: 200 })
   }),
 
+  // RMI - Update birth date (self-declared)
+  http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/birth-date`, () => {
+    return HttpResponse.json(DEFAULT_SUCCESS_RESPONSE, { status: 200 })
+  }),
+
   // Courses - Enrollment
   http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
     return HttpResponse.json(

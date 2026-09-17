@@ -6,13 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsNascimento {
-  data?: string
-  municipio?: string
-  municipio_id?: string
-  origem?: string
+export interface ClientsSalesforceEndereco {
+  bairro?: string
+  cep?: string
+  cidade?: string
+  complemento?: string
+  estado?: string
+  logradouro?: string
   pais?: string
-  pais_id?: string
-  sistema?: string
-  uf?: string
 }

@@ -6,13 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ModelsNascimento {
-  data?: string
-  municipio?: string
-  municipio_id?: string
-  origem?: string
-  pais?: string
-  pais_id?: string
-  sistema?: string
-  uf?: string
+export interface ClientsSalesforceCanOpenAction {
+  available?: boolean
+  categoryId?: string
 }

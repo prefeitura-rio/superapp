@@ -65,6 +65,9 @@
       "include": [
         "src/http/**",
         "src/http-agent-api/**",
+        "src/http-app-catalogo/**",
+        "src/http-busca-search/**",
+        "src/http-courses/**",
         "src/http-divida-ativa/**"
       ],
       "linter": {

@@ -341,4 +341,68 @@ describe('ConfirmarInformacoesContent', () => {
       ).not.toBeDisabled()
     })
   })
+
+  describe('data de nascimento (idade mínima da vaga)', () => {
+    test('exibe campo e desabilita Continuar quando requiresBirthDate e nascimento ausente', () => {
+      const userInfoSemNascimento: EmpregosUserInfo = {
+        ...baseUserInfo,
+        nascimento: undefined,
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoSemNascimento}
+          userAuthInfo={baseAuthInfo}
+          requiresBirthDate
+        />
+      )
+
+      expect(
+        screen.getByText('Informe sua data de nascimento')
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    test('habilita Continuar quando requiresBirthDate e nascimento preenchido', () => {
+      const userInfoComNascimento: EmpregosUserInfo = {
+        ...baseUserInfo,
+        nascimento: { data: '1990-01-01', origem: 'self-declared' },
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoComNascimento}
+          userAuthInfo={baseAuthInfo}
+          requiresBirthDate
+        />
+      )
+
+      expect(
+        screen.queryByText('Informe sua data de nascimento')
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+
+    test('não exibe campo de nascimento quando a vaga não exige idade', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={{ ...baseUserInfo, nascimento: undefined }}
+          userAuthInfo={baseAuthInfo}
+          requiresBirthDate={false}
+        />
+      )
+
+      expect(
+        screen.queryByText('Informe sua data de nascimento')
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+  })
 })

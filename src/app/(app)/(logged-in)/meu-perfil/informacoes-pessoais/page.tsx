@@ -1,4 +1,5 @@
 import { ActionDiv } from '@/app/components/action-div'
+import { BirthDateDrawerContent } from '@/app/components/drawer-contents/birth-date-drawer-content'
 import { DisabilityDrawerContent } from '@/app/components/drawer-contents/disability-drawer-content'
 import { DisplayNameDrawerContent } from '@/app/components/drawer-contents/display-name-drawer-content'
 import { EducationDrawerContent } from '@/app/components/drawer-contents/education-drawer-content'
@@ -9,6 +10,7 @@ import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
+import { formatBirthDatePtBr, isBirthDateEditable } from '@/lib/birth-date'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatDisability } from '@/lib/format-disability'
@@ -36,13 +38,6 @@ export default async function PersonalInfoForm() {
     }
   }
 
-  const formatDate = (dateStr: string | undefined) => {
-    if (!dateStr) return ''
-    const d = new Date(dateStr)
-    // Fixa o fuso de Brasília para não deslocar o dia no SSR (pods rodam em UTC)
-    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-  }
-
   const showPhoneBadge = userInfo?.telefone?.principal
     ? shouldShowUpdateBadge(userInfo.telefone.principal.updated_at) ||
       !userInfo?.telefone?.principal?.ddi ||
@@ -64,6 +59,8 @@ export default async function PersonalInfoForm() {
   const showFamilyIncomeBadge = !userInfoExtended?.renda_familiar // Show badge when family income info is missing
   const showEducationBadge = !userInfoExtended?.escolaridade // Show badge when education info is missing
   const showDisabilityBadge = !userInfoExtended?.deficiencia // Show badge when disability info is missing
+  const birthDateEditable = isBirthDateEditable(userInfo?.nascimento)
+  const showBirthDateBadge = !userInfo?.nascimento?.data
 
   return (
     <>
@@ -243,15 +240,38 @@ export default async function PersonalInfoForm() {
             drawerTitle="Você tem alguma deficiência?"
           />
 
-          <CustomInput
-            id="birthDate"
-            label="Data de nascimento"
-            defaultValue={
-              formatDate(userInfo?.nascimento?.data) ||
-              'Informação indisponível'
-            }
-            isEditable={false}
-          />
+          {birthDateEditable ? (
+            <ActionDiv
+              label="Data de nascimento"
+              optionalLabelVariant={
+                showBirthDateBadge ? 'destructive' : undefined
+              }
+              optionalLabel={showBirthDateBadge ? 'Atualizar' : undefined}
+              content={
+                formatBirthDatePtBr(userInfo?.nascimento?.data) ||
+                'Informação indisponível'
+              }
+              variant="default"
+              disabled
+              rightIcon={<EditIcon />}
+              drawerContent={
+                <BirthDateDrawerContent
+                  currentBirthDate={userInfo?.nascimento?.data}
+                />
+              }
+              drawerTitle="Data de nascimento"
+            />
+          ) : (
+            <CustomInput
+              id="birthDate"
+              label="Data de nascimento"
+              defaultValue={
+                formatBirthDatePtBr(userInfo?.nascimento?.data) ||
+                'Informação indisponível'
+              }
+              isEditable={false}
+            />
+          )}
 
           <CustomInput
             id="nationality"
