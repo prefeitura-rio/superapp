@@ -1,222 +1,267 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import { faqSections } from '@/constants/faqs/pref-rio'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
+import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
+import { MenuIcon } from '@/assets/icons/menu-icon'
+import { SearchIcon } from '@/assets/icons/search-icon'
+import { XIcon } from '@/assets/icons/x-icon'
+import { IconButton } from '@/components/ui/custom/icon-button'
+import {
+  ALL_FAQ_ITEMS,
+  FAQ_SOURCE_LABELS,
+  type FaqSource,
+} from '@/constants/faqs'
+import { FormattedContent, Highlighted } from '@/lib/faq-utils'
+import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-export default function FaqPagePrefRio() {
-  const [headerH, setHeaderH] = useState<number>(80)
-  const [currentId, setCurrentId] = useState<string>(faqSections[0]?.id)
-  const [showMini, setShowMini] = useState<boolean>(false)
+function useDebounce(value: string, delay = 350) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return debounced
+}
 
-  const [miniH, setMiniH] = useState<number>(0)
-  const miniRef = useRef<HTMLDivElement | null>(null)
+function normalize(text: string) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+}
 
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
-  const registerSection = useCallback(
-    (id: string) => (el: HTMLElement | null) => {
-      sectionRefs.current[id] = el
-    },
-    []
-  )
+const SOURCE_ORDER: FaqSource[] = ['prefrio', 'cursos', 'trabalho']
 
-  const firstH2Ref = useRef<HTMLHeadingElement | null>(null)
+const SOURCE_HREF: Record<FaqSource, string> = {
+  prefrio: '/faq/prefrio?from=faq',
+  cursos: '/servicos/cursos/faq?from=faq',
+  trabalho: '/servicos/trabalho/faq?from=faq',
+}
+
+const NAV_ITEMS: { label: string; href: string }[] = [
+  { label: FAQ_SOURCE_LABELS.prefrio, href: SOURCE_HREF.prefrio },
+  { label: FAQ_SOURCE_LABELS.cursos, href: SOURCE_HREF.cursos },
+  { label: FAQ_SOURCE_LABELS.trabalho, href: SOURCE_HREF.trabalho },
+]
+
+export default function FaqHubPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
+  const [headerH, setHeaderH] = useState(64)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const debouncedQuery = useDebounce(query)
+  const isSearching = query.length > 0 && debouncedQuery !== query
+  const hasQuery = debouncedQuery.trim().length > 0
 
   useEffect(() => {
-    const headerEl =
-      (document.querySelector('[data-app-header]') as HTMLElement) ||
-      (document.querySelector('header.fixed') as HTMLElement)
+    fetch('/api/user/header', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : { isLoggedIn: false }))
+      .then(d => setIsLoggedIn(d.isLoggedIn ?? false))
+      .catch(() => {})
+  }, [])
 
-    const update = () => setHeaderH(headerEl?.offsetHeight ?? 80)
+  // sync debounced query → URL without looping.
+  // router and searchParams are stable refs — storing them avoids listing as deps.
+  const routerRef = useRef(router)
+  const searchParamsRef = useRef(searchParams)
+  routerRef.current = router
+  searchParamsRef.current = searchParams
+
+  useEffect(() => {
+    const sp = searchParamsRef.current
+    const next = debouncedQuery.trim()
+    if (next === (sp.get('q') ?? '')) return
+    const params = new URLSearchParams(sp.toString())
+    if (next) {
+      params.set('q', next)
+    } else {
+      params.delete('q')
+    }
+    routerRef.current.replace(`/faq?${params.toString()}`, { scroll: false })
+  }, [debouncedQuery])
+
+  useEffect(() => {
+    const headerEl = document.querySelector(
+      '[data-faq-hub-header]'
+    ) as HTMLElement
+    if (!headerEl) return
+    const update = () => setHeaderH(headerEl.offsetHeight)
     update()
-
-    const ro = headerEl ? new ResizeObserver(update) : null
-    if (headerEl && ro) ro.observe(headerEl)
+    const ro = new ResizeObserver(update)
+    ro.observe(headerEl)
     window.addEventListener('resize', update)
-
     return () => {
-      if (ro && headerEl) ro.unobserve(headerEl)
+      ro.disconnect()
       window.removeEventListener('resize', update)
     }
   }, [])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <unnecessary>
-  useEffect(() => {
-    const update = () => {
-      const h = miniRef.current?.offsetHeight
-      if (h && h !== miniH) setMiniH(h)
-    }
-    update()
-    const ro = miniRef.current ? new ResizeObserver(update) : null
-    if (miniRef.current && ro) ro.observe(miniRef.current)
-    window.addEventListener('resize', update)
-    return () => {
-      ro?.disconnect()
-      window.removeEventListener('resize', update)
-    }
-  }, [showMini, miniH])
+  const results = useMemo(() => {
+    if (!hasQuery) return []
+    const q = normalize(debouncedQuery.trim())
+    return ALL_FAQ_ITEMS.filter(
+      item =>
+        normalize(item.title).includes(q) || normalize(item.content).includes(q)
+    )
+  }, [debouncedQuery, hasQuery])
 
-  // Detect actual section in view
-  useEffect(() => {
-    let ticking = false
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        const y = headerH + 8
-        let bestId = faqSections[0]?.id
-        let bestDelta = Number.POSITIVE_INFINITY
-
-        for (const sec of faqSections) {
-          const el = sectionRefs.current[sec.id]
-          if (!el) continue
-          const rect = el.getBoundingClientRect()
-          const delta = Math.abs(rect.top - y)
-          if (rect.top - y <= 0 && delta < bestDelta) {
-            bestDelta = delta
-            bestId = sec.id
-          }
-        }
-
-        if (!bestId) {
-          const firstVisible = faqSections.find(sec => {
-            const el = sectionRefs.current[sec.id]
-            if (!el) return false
-            const r = el.getBoundingClientRect()
-            return r.top >= y && r.top < window.innerHeight
-          })
-          if (firstVisible) bestId = firstVisible.id
-        }
-
-        setCurrentId(bestId)
-
-        // determine if we should show the mini title - after scrolling past first h2
-        const h2Rect = firstH2Ref.current?.getBoundingClientRect()
-        const crossedHeader = h2Rect ? h2Rect.bottom <= headerH + 0.5 : true
-        setShowMini(crossedHeader)
-
-        ticking = false
-      })
-    }
-
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [headerH])
-
-  const currentTitle = useMemo(
-    () => faqSections.find(s => s.id === currentId)?.title ?? '',
-    [currentId]
-  )
-
-  const fadeH = 32
-  const safeTopPadding = headerH
+  const groups = useMemo(() => {
+    if (!results.length) return []
+    return SOURCE_ORDER.flatMap(source => {
+      const items = results.filter(r => r.source === source)
+      if (!items.length) return []
+      return [{ source, label: FAQ_SOURCE_LABELS[source], items }]
+    })
+  }, [results])
 
   return (
     <main
       className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
-      style={{ paddingTop: safeTopPadding }}
+      style={{ paddingTop: headerH }}
     >
-      <SecondaryHeader title="FAQ" />
-
-      {showMini && (
-        <>
-          <div
-            className="fixed left-0 right-0 z-40 bg-background"
-            style={{ top: headerH }}
-            aria-live="polite"
-          >
-            <div className="mx-auto max-w-4xl px-4">
-              <div
-                ref={miniRef}
-                className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
-              >
-                <span key={currentId} className="mini-animate inline-block">
-                  {currentTitle}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* fade */}
-          <div
-            className="fixed left-0 right-0 z-30 pointer-events-none bg-gradient-to-b from-background to-background/0"
-            style={{ top: headerH + miniH - 1, height: fadeH + 1 }}
+      {/* header fixo — botão de voltar + hamburguer (só quando logado) */}
+      <header
+        data-faq-hub-header
+        className="fixed top-0 left-0 right-0 z-50 bg-background max-w-4xl mx-auto px-4 py-4 md:py-6"
+      >
+        <div className="relative flex items-center justify-between">
+          <IconButton
+            icon={ChevronLeftIcon}
+            onClick={() => (isLoggedIn ? router.back() : router.push('/'))}
           />
-        </>
-      )}
+          {isLoggedIn ? (
+            <IconButton
+              icon={MenuIcon}
+              onClick={() => router.push('/meu-perfil')}
+              aria-label="Menu"
+            />
+          ) : (
+            <div className="size-11" />
+          )}
+        </div>
+      </header>
 
-      <div className="p-4 pt-10 max-w-4xl mx-auto">
-        {faqSections.map((section, sIdx) => (
-          <section
-            key={section.id}
-            id={section.id}
-            ref={registerSection(section.id)}
-            className={sIdx > 0 ? 'mt-14' : ''}
-          >
-            {section.title && (
-              <h2
-                className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10"
-                ref={sIdx === 0 ? firstH2Ref : undefined}
-              >
-                {section.title}
-              </h2>
-            )}
+      <div className="px-4 pb-4 max-w-4xl mx-auto">
+        {/* título na página, não no header */}
+        <h1 className="text-foreground font-medium text-3xl leading-9 tracking-tight">
+          Perguntas Frequentes
+        </h1>
+        <p className="text-foreground-light text-sm leading-5 mb-5">
+          Escolha um dos assuntos abaixo ou pesquise na barra de busca para
+          encontrar respostas de forma rápida
+        </p>
 
-            <div className="space-y-8 mt-6">
-              {section.items.map((item, index) => (
-                <div key={index}>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium tracking-normal leading-5">
-                      {item.title}
-                    </h3>
-
-                    {Array.isArray(item.content) ? (
-                      <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed space-y-1">
-                        {item.content.map((line, i) => (
-                          <li key={i}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-foreground-light text-sm leading-relaxed whitespace-pre-line">
-                        {item.content}
-                      </p>
-                    )}
-                  </div>
-
-                  {index < section.items.length - 1 && (
-                    <div className="mt-8 border-t border-border" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+        {/* search bar com ícone de lupa */}
+        <div className="flex h-14 items-center rounded-full bg-card px-4 gap-3">
+          <SearchIcon className="h-5 w-5 shrink-0 text-foreground" />
+          <input
+            ref={inputRef}
+            type="search"
+            placeholder="O que você precisa?"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            className="flex-1 min-w-0 bg-transparent border-0 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-0 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('')
+                inputRef.current?.focus()
+              }}
+              className="shrink-0 text-card-foreground"
+              aria-label="Limpar busca"
+            >
+              <XIcon className="h-6 w-6 text-card-foreground" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* mini-title animation */}
-      <style jsx>{`
-        @keyframes miniSlideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        .mini-animate {
-          animation: miniSlideIn 180ms ease-out;
-          will-change: transform, opacity;
-        }
+      <div className="px-4 max-w-4xl mx-auto">
+        {/* idle state */}
+        {!hasQuery && !isSearching && (
+          <nav className="mt-2">
+            {NAV_ITEMS.map((item, i) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-between py-5 text-foreground hover:text-primary transition-colors ${
+                  i < NAV_ITEMS.length - 1 ? 'border-b border-border' : ''
+                }`}
+              >
+                <span className="text-sm font-normal leading-5">
+                  {item.label}
+                </span>
+                <ChevronRightIcon className="h-5 w-5 text-primary shrink-0" />
+              </Link>
+            ))}
+          </nav>
+        )}
 
-        @media (prefers-reduced-motion: reduce) {
-          .mini-animate {
-            animation: none;
-          }
-        }
-      `}</style>
+        {/* spinner while debouncing */}
+        {isSearching && (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+
+        {/* results */}
+        {hasQuery && !isSearching && groups.length === 0 && (
+          <p className="py-10 text-center text-sm text-foreground/50">
+            Nenhum resultado para &ldquo;{debouncedQuery}&rdquo;
+          </p>
+        )}
+
+        {hasQuery && !isSearching && groups.length > 0 && (
+          <div className="mt-2">
+            {groups.map((group, gIdx) => (
+              <section key={group.source}>
+                {/* divider pontilhado entre grupos de fontes diferentes */}
+                {gIdx > 0 && (
+                  <div className="my-8 border-t-2 border-dashed border-border" />
+                )}
+
+                {groups.length > 1 && (
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">
+                    {group.label}
+                  </h2>
+                )}
+
+                <div className="space-y-8">
+                  {group.items.map((item, i) => (
+                    <div key={item.id}>
+                      <Link
+                        href={`${SOURCE_HREF[group.source]}#${item.originalId}&highlight=${encodeURIComponent(debouncedQuery.trim())}`}
+                        className="block space-y-2 hover:opacity-80 transition-opacity"
+                      >
+                        <h3 className="text-base font-medium leading-snug">
+                          <Highlighted
+                            text={item.title}
+                            query={debouncedQuery.trim()}
+                          />
+                        </h3>
+                        <FormattedContent
+                          content={item.content}
+                          query={debouncedQuery.trim()}
+                        />
+                      </Link>
+                      {i < group.items.length - 1 && (
+                        <div className="mt-8 border-t border-border" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }

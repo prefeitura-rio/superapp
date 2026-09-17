@@ -1,27 +1,21 @@
 'use client'
 
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import { trabalhoFaqSections } from '@/constants/faqs/trabalho'
+import { faqSections } from '@/constants/faqs/pref-rio'
 import { useFaqHighlight } from '@/hooks/useFaqHighlight'
 import { useSectionTracker } from '@/hooks/useSectionTracker'
 import { FormattedContent, Highlighted } from '@/lib/faq-utils'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-const SECTIONS_FOR_TRACKER = trabalhoFaqSections.map(s => ({
+const SECTIONS_FOR_TRACKER = faqSections.map(s => ({
   id: s.id,
-  title: s.title,
+  title: s.title ?? '',
 }))
 
 const FADE_H = 32
 
-export default function EmpregosFaqPage() {
+export default function FaqPagePrefRio() {
   const [headerH, setHeaderH] = useState(80)
   const searchParams = useSearchParams()
   const fromHub = searchParams.get('from') === 'faq'
@@ -54,36 +48,15 @@ export default function EmpregosFaqPage() {
   } = useSectionTracker(SECTIONS_FOR_TRACKER, headerH)
 
   const highlightQuery = useFaqHighlight(headerH)
-  const miniLabel = fromHub ? `Trabalho · ${currentTitle}` : currentTitle
+  const miniLabel = fromHub ? `PrefRio · ${currentTitle}` : currentTitle
+  const safeTopPadding = headerH
 
   return (
     <main
       className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
-      style={{ paddingTop: headerH }}
+      style={{ paddingTop: safeTopPadding }}
     >
-      <SecondaryHeader
-        route="/servicos/trabalho"
-        logo={
-          <Link href="/servicos/trabalho">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
-      />
+      <SecondaryHeader title="FAQ" route="/faq" />
 
       {showMini && (
         <>
@@ -111,38 +84,60 @@ export default function EmpregosFaqPage() {
         </>
       )}
 
-      <div className="p-5 pt-4 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
-        <div className="space-y-8">
-          {trabalhoFaqSections.map((section, index) => (
-            <div
-              key={section.id}
-              id={section.id}
-              ref={el => {
-                registerSection(section.id)(el)
-                if (index === 0) {
-                  ;(
-                    firstAnchorRef as React.MutableRefObject<HTMLElement | null>
-                  ).current = el
-                }
-              }}
-            >
-              <div className="space-y-2">
-                <h2 className="text-lg font-medium tracking-normal leading-5">
-                  <Highlighted text={section.title} query={highlightQuery} />
-                </h2>
-                <FormattedContent
-                  content={section.content}
-                  className="text-foreground"
-                  query={highlightQuery}
-                />
-              </div>
-              {index < trabalhoFaqSections.length - 1 && (
-                <div className="mt-8 border-t border-border" />
-              )}
+      <div className="p-4 pt-10 max-w-4xl mx-auto">
+        {faqSections.map((section, sIdx) => (
+          <section
+            key={section.id}
+            id={section.id}
+            ref={el => {
+              registerSection(section.id)(el)
+              if (sIdx === 0) {
+                ;(
+                  firstAnchorRef as React.MutableRefObject<HTMLElement | null>
+                ).current = el
+              }
+            }}
+            className={sIdx > 0 ? 'mt-14' : ''}
+          >
+            {section.title && (
+              <h2 className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10">
+                {section.title}
+              </h2>
+            )}
+
+            <div className="space-y-8 mt-6">
+              {section.items.map((item, index) => (
+                <div key={index}>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium tracking-normal leading-5">
+                      <Highlighted text={item.title} query={highlightQuery} />
+                    </h3>
+
+                    {Array.isArray(item.content) ? (
+                      <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed space-y-1">
+                        {item.content.map((line, i) => (
+                          <li key={i}>
+                            <Highlighted text={line} query={highlightQuery} />
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <FormattedContent
+                        content={item.content}
+                        query={highlightQuery}
+                        className="text-foreground-light opacity-100"
+                      />
+                    )}
+                  </div>
+
+                  {index < section.items.length - 1 && (
+                    <div className="mt-8 border-t border-border" />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </section>
+        ))}
       </div>
 
       <style jsx>{`

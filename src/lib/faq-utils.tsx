@@ -86,8 +86,62 @@ export function parseContent(text: string): ContentPart[] {
   return parts.length > 0 ? parts : [{ type: 'text', content: text }]
 }
 
+export function Highlighted({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escaped})`, 'gi')
+  const parts = text.split(regex)
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark
+            key={i}
+            className="bg-neutral-200 dark:bg-neutral-700 rounded-sm px-0.5 text-inherit not-italic"
+          >
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  )
+}
+
+function highlightText(text: string, query: string) {
+  if (!query) return <>{text}</>
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escaped})`, 'gi')
+  const parts = text.split(regex)
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark
+            key={i}
+            className="bg-neutral-200 dark:bg-neutral-700 rounded-sm px-0.5 text-inherit not-italic"
+          >
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  )
+}
+
 export const FormattedContent = memo(
-  ({ content, className }: { content: string; className?: string }) => {
+  ({
+    content,
+    className,
+    query,
+  }: {
+    content: string
+    className?: string
+    query?: string
+  }) => {
     const parts = parseContent(content)
 
     return (
@@ -101,14 +155,16 @@ export const FormattedContent = memo(
           if (part.type === 'video-title') {
             return (
               <span key={i} className="italic opacity-100">
-                "{part.content}"
+                &ldquo;
+                {query ? highlightText(part.content, query) : part.content}
+                &rdquo;
               </span>
             )
           }
           if (part.type === 'bold') {
             return (
               <span key={i} className="font-semibold opacity-100">
-                {part.content}
+                {query ? highlightText(part.content, query) : part.content}
               </span>
             )
           }
@@ -121,11 +177,15 @@ export const FormattedContent = memo(
                 rel="noopener noreferrer"
                 className="italic underline opacity-100 hover:opacity-80 transition-opacity"
               >
-                {part.content}
+                {query ? highlightText(part.content, query) : part.content}
               </a>
             )
           }
-          return <span key={i}>{part.content}</span>
+          return (
+            <span key={i}>
+              {query ? highlightText(part.content, query) : part.content}
+            </span>
+          )
         })}
       </p>
     )
