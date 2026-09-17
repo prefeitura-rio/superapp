@@ -9,9 +9,11 @@ import Link from 'next/link'
 
 export default function FaqCoursesLoading() {
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
+    <main
+      className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
+      style={{ paddingTop: 80 }}
+    >
       <SecondaryHeader
-        fixed={false}
         route="/servicos/trabalho"
         logo={
           <Link href="/servicos/trabalho">
