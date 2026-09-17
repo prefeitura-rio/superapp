@@ -11,6 +11,11 @@ import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
+import {
+  getImoveis,
+  getImoveisInscricaoCadastro,
+  getImoveisInscricaoConsulta,
+} from '@/http-divida-ativa/imoveis/imoveis'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -18,8 +23,16 @@ import {
   getCitizenCpfMaintenanceRequest,
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
+import {
+  mapApiToImovel,
+  mapFazendaToImovel,
+  normalizarConsultaFazenda,
+  normalizarListaImoveis,
+} from '@/lib/divida-ativa-mappers'
+import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
+import type { ImovelDividaAtiva } from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
 // Recommended caching strategy for high traffic (500K+ users/month)
@@ -487,4 +500,119 @@ export async function revalidateDalSubcategoriesSubcategoryServices(
   // to invalidate cache when services change
   // Example: after admin creates/updates/deletes services
   revalidateTag(`subcategory-services-${subcategory}`, { expire: 0 })
+}
+
+// ---------------------------------------------------------------------------
+// Dívida Ativa
+//
+// Dado patrimonial do cidadão: `cache: 'no-store'` sempre, sem tag e sem revalidate.
+// O `cpf` entra apenas para mascarar o span (LGPD) — a API deriva a identidade do Bearer
+// token e nenhum endpoint do módulo recebe CPF por path, query ou body.
+// ---------------------------------------------------------------------------
+
+export async function getDalDividaAtivaImoveis(
+  cpf: string
+): Promise<ImovelDividaAtiva[]> {
+  return withSpan('dal.getDividaAtivaImoveis', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveis({ cache: 'no-store' })
+
+    // `normalizarListaImoveis` em vez de `.map()` direto: a API devolve array cru, mas o
+    // spec tipa objeto singular, então o tipo gerado não corresponde à realidade.
+    const imoveis =
+      result.status === 200
+        ? normalizarListaImoveis(result.data).map(mapApiToImovel)
+        : []
+
+    addSpanEvent('divida-ativa.imoveis.fetched', {
+      'imoveis.count': imoveis.length,
+    })
+
+    return imoveis
+  })
+}
+
+/**
+ * Consulta prévia à Fazenda: devolve o endereço de uma inscrição **sem cadastrar nada**.
+ *
+ * É a fonte de dados da tela "Confirme sua inscrição", e o que fechou a premissa P20.
+ * Até 31/08/2026 este endpoint não existia — a única consulta disponível exigia o imóvel
+ * já cadastrado, então a tela caía sempre no estado "não encontrado" para imóvel novo. A
+ * API ganhou `GET /imoveis/{inscricao}/cadastro`, que consulta o `WSFazenda_Iptu` e não
+ * toca no banco local: exatamente a saída A registrada em `docs/divida-ativa.md`, a que
+ * preserva as três telas do desenho.
+ *
+ * Devolve `null` em qualquer resposta que não traga um imóvel — inscrição desconhecida,
+ * 400, 401 ou falha do WS da Fazenda (503). A tela tem estado desenhado para "não
+ * encontramos essa inscrição"; estourar o error boundary da rota seria pior para o
+ * cidadão, que pode simplesmente digitar outro número.
+ */
+export async function getDalDividaAtivaCadastroFazenda(
+  inscricao: string,
+  cpf: string
+): Promise<ImovelDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaCadastroFazenda', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveisInscricaoCadastro(
+      somenteDigitos(inscricao),
+      {
+        cache: 'no-store',
+      }
+    )
+
+    addSpanEvent('divida-ativa.cadastro-fazenda.fetched', {
+      'cadastro.status': result.status,
+    })
+
+    if (result.status !== 200) return null
+
+    // A resposta pode vir como objeto ou como lista vazia — o contrato diz as duas coisas.
+    const fazenda = normalizarConsultaFazenda(result.data)
+
+    return fazenda ? mapFazendaToImovel(fazenda) : null
+  })
+}
+
+/**
+ * Consulta um imóvel **já cadastrado** do cidadão, com as opções do ePortal que vêm junto.
+ *
+ * ⚠️ **Sem chamador hoje.** Quem alimenta a tela de confirmação é
+ * `getDalDividaAtivaCadastroFazenda` acima — este endpoint exige o imóvel já cadastrado
+ * (404 se não estiver) e a própria descrição diz que não chama o `WSFazenda_Iptu`.
+ *
+ * Fica no repositório porque é o único caminho para as `opcoes` do ePortal, de que a Fase 3
+ * precisa, no mesmo espírito dos tipos de Fase 3 em `src/types/divida-ativa.ts`: vocabulário
+ * já verificado contra a API real, esperando a tela que vai consumi-lo. Atenção ao custo —
+ * medimos 16 s de resposta, porque a chamada atravessa o ePortal.
+ *
+ * Devolve `null` quando a inscrição não está cadastrada, para a tela mostrar um estado em
+ * vez de estourar o error boundary da rota.
+ */
+export async function getDalDividaAtivaConsultaInscricao(
+  inscricao: string,
+  cpf: string
+): Promise<ImovelDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaConsultaInscricao', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    // O segundo parâmetro é o `exercicio` da query string, que não usamos aqui.
+    const result = await getImoveisInscricaoConsulta(
+      somenteDigitos(inscricao),
+      undefined,
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.consulta-inscricao.fetched', {
+      'consulta.status': result.status,
+    })
+
+    if (result.status !== 200 || !result.data?.imovel) return null
+
+    return mapApiToImovel(result.data.imovel)
+  })
 }

@@ -12,8 +12,8 @@ vi.mock('@/constants/divida-ativa-links', () => ({
 }))
 
 describe('DividaAtivaLanding', () => {
-  test('anuncia o módulo e a lista de serviços', () => {
-    render(<DividaAtivaLanding />)
+  test('anuncia o módulo e separa "Meus imóveis" dos serviços', () => {
+    render(<DividaAtivaLanding quantidadeImoveis={2} />)
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Dívida ativa' })
@@ -23,8 +23,35 @@ describe('DividaAtivaLanding', () => {
     ).toBeInTheDocument()
   })
 
-  test('mostra os cinco serviços da landing', () => {
-    render(<DividaAtivaLanding />)
+  test('leva à lista de imóveis mostrando quantos o cidadão já cadastrou', () => {
+    render(<DividaAtivaLanding quantidadeImoveis={2} />)
+
+    const card = screen.getByRole('link', { name: /Meus imóveis/ })
+
+    expect(card).toHaveAttribute('href', '/divida-ativa/imoveis')
+    expect(card).toHaveTextContent('2')
+  })
+
+  test('sem contagem disponível, o card continua navegável e não mostra número', () => {
+    // A contagem é conteúdo secundário: se a leitura falhar, a landing não pode cair junto.
+    render(<DividaAtivaLanding quantidadeImoveis={null} />)
+
+    const card = screen.getByRole('link', { name: /Meus imóveis/ })
+
+    expect(card).toHaveAttribute('href', '/divida-ativa/imoveis')
+    expect(card).not.toHaveTextContent(/\d/)
+  })
+
+  test('mostra zero para quem ainda não cadastrou nenhum imóvel', () => {
+    render(<DividaAtivaLanding quantidadeImoveis={0} />)
+
+    expect(
+      screen.getByRole('link', { name: /Meus imóveis/ })
+    ).toHaveTextContent('0')
+  })
+
+  test('mantém os cinco serviços da landing', () => {
+    render(<DividaAtivaLanding quantidadeImoveis={2} />)
 
     expect(
       screen.getByRole('button', {
@@ -39,13 +66,5 @@ describe('DividaAtivaLanding', () => {
         name: 'Acompanhar requerimento de parcelamento',
       })
     ).toBeInTheDocument()
-  })
-
-  test('não oferece Meus Imóveis nesta entrega', () => {
-    render(<DividaAtivaLanding />)
-
-    expect(
-      screen.queryByRole('link', { name: /Meus imóveis/ })
-    ).not.toBeInTheDocument()
   })
 })

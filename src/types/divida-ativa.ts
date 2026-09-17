@@ -37,6 +37,12 @@ export interface ImovelDividaAtiva {
   id: number | null
   /** Inscrição imobiliária somente com dígitos. A máscara de exibição é decisão de design. */
   inscricao: string
+  /**
+   * Nome dado pelo cidadão ("Casa de praia"), gravado no cadastro. `null` quando o cidadão
+   * pulou o passo, quando o registro é anterior ao campo no contrato (08/09/2026, premissa
+   * P23) ou na consulta prévia à Fazenda, que acontece antes de o nome ser escolhido.
+   */
+  nome: string | null
   endereco: string | null
   /**
    * A API não separa o bairro: ele vem dentro de `endereco`. Sempre `null` hoje —

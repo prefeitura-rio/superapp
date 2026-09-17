@@ -1,10 +1,13 @@
 import {
   getImoveis,
+  getImoveisInscricaoCadastro,
   getImoveisInscricaoConsulta,
   postImoveis,
 } from '@/http-divida-ativa/imoveis/imoveis'
 import {
   mapApiToImovel,
+  mapFazendaToImovel,
+  normalizarConsultaFazenda,
   normalizarListaImoveis,
 } from '@/lib/divida-ativa-mappers'
 import { describe, expect, test } from 'vitest'
@@ -44,7 +47,7 @@ describe('Dívida Ativa — fiação do contrato real', () => {
     expect(imoveis).toHaveLength(1)
     expect(imoveis[0].id).toBe(32)
     expect(imoveis[0].inscricao).toBe('00000018')
-    expect(imoveis[0].endereco).toBe('RUA SANTO AFONSO, 216 / LOJA A - TIJUCA')
+    expect(imoveis[0].endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
     // LocalDateTime sem fuso vira data ISO simples no tipo de visão (premissa P3).
     expect(imoveis[0].cadastradoEm).toBe('2026-06-22')
   })
@@ -71,7 +74,7 @@ describe('Dívida Ativa — fiação do contrato real', () => {
     const imovel = mapApiToImovel(data)
 
     expect(imovel.inscricao).toBe('00000018')
-    expect(imovel.endereco).toBe('RUA SANTO AFONSO, 216 / LOJA A - TIJUCA')
+    expect(imovel.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
   })
 
   test('a consulta de um imóvel cadastrado atravessa a pilha', async () => {
@@ -97,5 +100,24 @@ describe('Dívida Ativa — fiação do contrato real', () => {
     expect(imovel.proprietario).toBeNull()
     expect(imovel.bairro).toBeNull()
     expect(imovel.possuiDebitos).toBeNull()
+  })
+  /**
+   * A fiação que resolveu a premissa P20. Antes deste endpoint não havia como mostrar o
+   * endereço **antes** de cadastrar, e a tela de confirmação caía sempre no "não
+   * encontrado" para imóvel novo. Se este teste cair, a tela de confirmação voltou a ficar
+   * sem fonte de dados.
+   */
+  test('a consulta prévia à Fazenda atravessa a pilha sem cadastrar', async () => {
+    const { data } = assertStatus(
+      await getImoveisInscricaoCadastro('00000018'),
+      200
+    )
+
+    const imovel = mapFazendaToImovel(normalizarConsultaFazenda(data) ?? {})
+
+    expect(imovel.inscricao).toBe('00000018')
+    expect(imovel.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
+    // O que separa esta consulta do cadastro: nada foi gravado, então não há id local.
+    expect(imovel.id).toBeNull()
   })
 })

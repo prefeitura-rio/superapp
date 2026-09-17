@@ -1,13 +1,24 @@
-### Metodologia para gerar novos http clients com orval:
+### Metodologia para gerar http clients com orval
 
-- No arquivo **orval.config.ts, trocar esses campos de acordo com a api:**
-- **input**
-- **target**
-- **schema**
-- **path**
-- **baseUrl**
-- **name**
-- Copiar o bloco da API desejada abaixo para o `api:` em `orval.config.ts`, rodar `npx orval`, e **não** commitar a config trocada sem combinar com o time.
+O `orval.config.ts` é **multi-projeto**: uma entrada nomeada por API, permanente e commitada.
+Nada de trocar campos na mão e reverter depois.
+
+**Para regenerar um client que já tem projeto:**
+
+```bash
+npx orval --project dividaAtiva
+```
+
+⚠️ `npx orval` **sem** `--project` regenera todos os projetos do arquivo. Um client que a sua
+tarefa não tocou entra no diff, e se o spec remoto dele andou desde a última geração, entra
+com mudança de verdade. Use sempre `--project`.
+
+**Para adicionar uma API que ainda não tem projeto:** copie o bloco dela abaixo para uma
+entrada nomeada nova no `orval.config.ts` (a chave é o nome do projeto), rode
+`npx orval --project <nome>` e **commite a entrada junto** com o client gerado.
+
+Projetos configurados hoje: `prefRioChamadosPublico`, `dividaAtiva`. Os demais blocos abaixo
+seguem como receita a migrar quando alguém precisar tocar naquele client.
 
 > ### app-busca-search
 
@@ -230,14 +241,23 @@
 * Spec local: `./divida-ativa-api.yaml` (raiz do repo)
 * Documentação do módulo: [`divida-ativa.md`](./divida-ativa.md)
 
-> Contrato **real** (`api-imoveis`, Quarkus), cópia fiel do documento servido em
-> `http://10.5.225.173:8080/swagger`. Substituiu o contrato provisório em 17/08/2026; as
-> premissas estão reconciliadas em `docs/divida-ativa.md`. Não editar o arquivo à mão — ele é
-> de outra equipe. Quando a API virar repo no GitHub, migrar o `input` para a URL.
+> **Projeto `dividaAtiva`** — regenerar com `npx orval --project dividaAtiva`.
 >
-> Cuidados conhecidos do spec: 25 das 31 operações não declaram schema de resposta (o Orval
-> gera `data: void`), nenhuma tem `operationId` (os nomes das funções saem do path) e
-> `GET /imoveis` está tipado como objeto singular quando devolve array.
+> Contrato **real** (`api-imoveis`, Quarkus), cópia fiel do documento servido pela instância
+> de homologação em `https://api-appimoveishom.apps.ocp.rio.gov.br/swagger`. Substituiu o
+> contrato provisório em 17/08/2026 (colhido então da máquina do dev, em
+> `http://10.5.225.173:8080/swagger`) e foi atualizado a partir de homologação em 31/08/2026.
+> Não editar o arquivo à mão — ele é de outra equipe; para atualizar, **copie o spec de novo**.
+>
+> O `input` aponta para o arquivo local, não para a URL, de propósito: `/swagger` é endpoint de
+> runtime, não spec versionado. Ler dele faria a geração do client depender de a homologação
+> estar no ar e de rede interna, e uma mudança de contrato entraria sem aparecer no diff do PR.
+>
+> Cuidados conhecidos do spec: 25 das 32 operações não declaram schema de resposta (o Orval
+> gera `data: void`), nenhuma tem `operationId` (os nomes das funções saem do path),
+> `GET /imoveis` está tipado como objeto singular quando devolve array, e
+> `GET /imoveis/{inscricao}/cadastro` declara um objeto no schema mas a descrição fala em
+> "lista vazia" — as duas formas são absorvidas por `normalizarConsultaFazenda`.
 
 ```
   api: {
