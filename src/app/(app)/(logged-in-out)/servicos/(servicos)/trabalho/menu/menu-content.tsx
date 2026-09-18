@@ -44,7 +44,7 @@ export function EmpregosMenuContent() {
           isFirst
         />
         <MenuItem label="Meu currículo" href="/servicos/trabalho/curriculo" />
-        <MenuItem label="FAQ" href="/servicos/trabalho/faq" isLast />
+        <MenuItem label="FAQ" href="/faq/trabalho" isLast />
       </div>
     </main>
   )
