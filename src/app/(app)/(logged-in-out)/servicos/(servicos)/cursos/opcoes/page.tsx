@@ -59,7 +59,7 @@ export default async function ProfilePage() {
             href="/servicos/cursos/certificados"
           />
           {/* )} */}
-          <MenuItem label="FAQ" href="/servicos/cursos/faq" />
+          <MenuItem label="FAQ" href="/faq/cursos" />
         </nav>
       </div>
     </div>

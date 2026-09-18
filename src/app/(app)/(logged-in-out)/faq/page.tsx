@@ -37,8 +37,8 @@ const SOURCE_ORDER: FaqSource[] = ['prefrio', 'cursos', 'trabalho']
 
 const SOURCE_HREF: Record<FaqSource, string> = {
   prefrio: '/faq/prefrio?from=faq',
-  cursos: '/servicos/cursos/faq?from=faq',
-  trabalho: '/servicos/trabalho/faq?from=faq',
+  cursos: '/faq/cursos?from=faq',
+  trabalho: '/faq/trabalho?from=faq',
 }
 
 const NAV_ITEMS: { label: string; href: string }[] = [
