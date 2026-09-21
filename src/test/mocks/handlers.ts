@@ -89,6 +89,45 @@ export const MOCK_OPCOES_IPTU_DIVIDA_ATIVA = [
   },
 ]
 
+// Dívida Ativa — consulta de débitos (Fase 3). Forma tirada do contrato real depois de a
+// `dam-api` declarar os schemas de resposta em 21/09/2026.
+//
+// Repare que **todo valor monetário é string**: é assim que o DAM devolve. Qual convenção
+// decimal ele usa segue não verificada (premissa P1) — o imóvel de teste de homologação não
+// tem CDA em aberto, então na prática só vimos `null`. O mock usa pt-BR com milhar; a outra
+// convenção é exercida nos testes de mapper.
+export const MOCK_CDA_DIVIDA_ATIVA = {
+  cdaId: '20240000111',
+  exercicio: '2024',
+  naturezaDivida: 'IPTU',
+  receita: '1112',
+  situacaoPrincipal: 'EM ABERTO',
+  situacaoHonorarios: 'EM ABERTO',
+  faseCobranca: 'AJUIZADA',
+  valorSaldoPrincipal: '1.234,56',
+  valorSaldoHonorarios: '123,45',
+  inscricaoImobiliaria: '00000018',
+  // D9: a CDA é selecionável **e** tem protocolo aberto. Não é contradição — é exatamente o
+  // caso que a tela precisa tratar como informação, não como bloqueio.
+  selecionavelParcelamento: true,
+  protocoloRequerimentoAberto: '2026000123',
+}
+
+export const MOCK_GUIA_PARCELADA_DIVIDA_ATIVA = {
+  numeroGuia: '900123',
+  descricaoSituacaoGuia: 'EM DIA',
+  descricaoTipoPagamento: 'PARCELAMENTO',
+  faseCobranca: 'AJUIZADA',
+  // `dd/MM/yyyy`: o formato que a API devolve nos campos vindos do DAM.
+  dataVencimento: '15/10/2026',
+  qtdPagas: '3',
+  qtdeParcelas: '12',
+  valorTotalGuia: '1.200,00',
+  valorSaldoTotal: '900,00',
+  linhaDigitavel: '00190000090123456789012345678901234567890123',
+  urlPdf: null,
+}
+
 export const handlers = [
   // RMI - Citizen profile
   http.get(`${RMI_BASE_URL}/v1/citizen/:cpf`, () => {
@@ -198,6 +237,26 @@ export const handlers = [
       {
         endereco: MOCK_IMOVEL_DIVIDA_ATIVA.endereco,
         numInscricao: MOCK_IMOVEL_DIVIDA_ATIVA.numInscricao,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Consulta de débitos do imóvel (CDAs + guias parceladas + totais).
+  // Exige imóvel cadastrado: a API responde 404 para inscrição que não é do CPF. Os totais
+  // vêm da API e não do tamanho dos arrays, porque `totalParcelado` desduplica número de
+  // guia — estados vazio e 404 são montados por teste com `server.use()`.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
       },
       { status: 200 }
     )

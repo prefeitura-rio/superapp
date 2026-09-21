@@ -1,6 +1,17 @@
-import type { FazendaImovel, ImovelResponse } from '@/http-divida-ativa/models'
+import type {
+  CdaResponse,
+  DividaAtivaConsultaResponse,
+  FazendaImovel,
+  GuiaDamResponse,
+  ImovelResponse,
+} from '@/http-divida-ativa/models'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
-import type { ImovelDividaAtiva } from '@/types/divida-ativa'
+import type {
+  DebitoDividaAtiva,
+  DebitosDividaAtiva,
+  GuiaParceladaDividaAtiva,
+  ImovelDividaAtiva,
+} from '@/types/divida-ativa'
 
 /**
  * Camada anti-corrupção entre o contrato da API `api-imoveis` e os tipos de visão do
@@ -275,4 +286,118 @@ export function mapApiToMensagemErro(
   )
 
   return conhecida ? conhecida.exibir : mensagem
+}
+
+/**
+ * `exercicio` chega como string no contrato (`"2024"`). Devolve `null` para ausente ou não
+ * numérico — `Number('')` é 0, e um exercício zero na tela seria pior que a ausência.
+ */
+function anoOuNull(valor: string | undefined): number | null {
+  if (typeof valor !== 'string' || valor.trim() === '') {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isInteger(numero) ? numero : null
+}
+
+/** `qtdPagas` e `qtdeParcelas` são strings no contrato do DAM. */
+function contagemOuNull(valor: string | undefined): number | null {
+  if (typeof valor !== 'string' || valor.trim() === '') {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isInteger(numero) && numero >= 0 ? numero : null
+}
+
+/**
+ * Converte uma CDA do contrato para o tipo de visão.
+ *
+ * Duas decisões de `docs/divida-ativa.md` vivem aqui e não devem ser "simplificadas":
+ *
+ * - **D5** — `valorPrincipal` e `valorHonorarios` ficam separados. A tela exibe os dois para
+ *   o cidadão identificar o que é o quê; a seleção do parcelamento continua sendo por CDA,
+ *   porque `ParcelamentoSimularRequest` recebe só `cdas`.
+ * - **D9** — `parcelavel` vem exclusivamente de `selecionavelParcelamento`, e
+ *   `protocoloRequerimentoAberto` é informação, não impedimento. Se o DAM disser que pode,
+ *   pode, ainda que exista protocolo aberto.
+ *
+ * As situações (`situacaoPrincipal`, `situacaoHonorarios`) passam como texto da API. A
+ * versão anterior deste tipo traduzia para um enum nosso, o que seria reimplementar no front
+ * uma classificação que é do DAM.
+ *
+ * `nomeContribuinte` e `tipoPessoa` existem na resposta e são descartados de propósito, pelo
+ * mesmo motivo que `mapApiToImovel` descarta `cpf`: dado pessoal não atravessa a fronteira
+ * sem uma tela que o exija.
+ */
+export function mapApiToDebito(api: CdaResponse): DebitoDividaAtiva {
+  return {
+    numeroCda: api.cdaId ?? '',
+    exercicio: anoOuNull(api.exercicio),
+    natureza: textoOuNull(api.naturezaDivida),
+    receita: textoOuNull(api.receita),
+    situacaoPrincipal: textoOuNull(api.situacaoPrincipal),
+    situacaoHonorarios: textoOuNull(api.situacaoHonorarios),
+    faseCobranca: textoOuNull(api.faseCobranca),
+    valorPrincipal: parseValorMonetario(api.valorSaldoPrincipal),
+    valorHonorarios: parseValorMonetario(api.valorSaldoHonorarios),
+    // `?? false` e não `!== false`: ausência da flag significa "não sabemos", e na dúvida o
+    // front nunca oferece parcelamento por conta própria.
+    parcelavel: api.selecionavelParcelamento ?? false,
+    protocoloRequerimentoAberto: textoOuNull(api.protocoloRequerimentoAberto),
+    inscricao: textoOuNull(api.inscricaoImobiliaria),
+  }
+}
+
+/**
+ * Converte uma guia de parcelamento existente para o tipo de visão.
+ *
+ * Mapeia só o que a tela de débitos mostra. `GuiaDamResponse` traz ainda `cotas`, `grerjs`,
+ * `itens` e a quebra de descontos por principal/honorários — entram quando existir tela que
+ * os exiba.
+ */
+export function mapApiToGuiaParcelada(
+  api: GuiaDamResponse
+): GuiaParceladaDividaAtiva {
+  return {
+    numeroGuia: api.numeroGuia ?? '',
+    situacao: textoOuNull(api.descricaoSituacaoGuia),
+    tipoPagamento: textoOuNull(api.descricaoTipoPagamento),
+    faseCobranca: textoOuNull(api.faseCobranca),
+    // O DAM devolve `dd/MM/yyyy`; `parseDataApi` já aceitava esse formato antes de sabermos.
+    vencimento: parseDataApi(api.dataVencimento),
+    parcelasPagas: contagemOuNull(api.qtdPagas),
+    totalParcelas: contagemOuNull(api.qtdeParcelas),
+    valorTotal: parseValorMonetario(api.valorTotalGuia),
+    valorSaldo: parseValorMonetario(api.valorSaldoTotal),
+    linhaDigitavel: textoOuNull(api.linhaDigitavel),
+    urlPdf: textoOuNull(api.urlPdf),
+  }
+}
+
+/**
+ * Desembrulha `DividaAtivaConsultaResponse` para o tipo de visão da tela de débitos.
+ *
+ * Os totais vêm da API em vez de `.length` de propósito: `totalParcelado` desduplica número
+ * de guia, então contar o array daria número diferente do que o legado mostra.
+ *
+ * Listas ausentes viram `[]` — uma tela que faz `.map()` sobre `undefined` quebra, e o
+ * contrato marca todos esses campos como opcionais.
+ */
+export function mapApiToDebitos(
+  api: DividaAtivaConsultaResponse
+): DebitosDividaAtiva {
+  return {
+    imovel: api.imovel ? mapApiToImovel(api.imovel) : null,
+    imovelCadastrado: api.imovelCadastrado ?? false,
+    cdas: (api.cdas ?? []).map(mapApiToDebito),
+    guiasParceladas: (api.guiasParceladas ?? []).map(mapApiToGuiaParcelada),
+    totalCdas: numeroOuNull(api.totalCdas) ?? 0,
+    totalParcelado: numeroOuNull(api.totalParcelado) ?? 0,
+    totalDebitos: numeroOuNull(api.totalDebitos) ?? 0,
+    mensagem: textoOuNull(api.mensagem),
+  }
 }

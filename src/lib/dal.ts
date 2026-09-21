@@ -11,6 +11,7 @@ import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
+import { getImoveisInscricaoDividaAtiva } from '@/http-divida-ativa/divida-ativa/divida-ativa'
 import {
   getImoveis,
   getImoveisInscricaoCadastro,
@@ -24,6 +25,7 @@ import {
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
 import {
+  mapApiToDebitos,
   mapApiToImovel,
   mapFazendaToImovel,
   normalizarConsultaFazenda,
@@ -32,7 +34,10 @@ import {
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
-import type { ImovelDividaAtiva } from '@/types/divida-ativa'
+import type {
+  DebitosDividaAtiva,
+  ImovelDividaAtiva,
+} from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
 // Recommended caching strategy for high traffic (500K+ users/month)
@@ -614,5 +619,52 @@ export async function getDalDividaAtivaConsultaInscricao(
     if (result.status !== 200 || !result.data?.imovel) return null
 
     return mapApiToImovel(result.data.imovel)
+  })
+}
+
+/**
+ * Consulta os débitos de dívida ativa de um imóvel: CDAs não parceladas, guias já
+ * parceladas e os totais que o legado exibia nos dois datagrids da tela T04.
+ *
+ * ⚠️ **Exige o imóvel cadastrado em "Meus Imóveis"** — a inscrição vai no path e a API
+ * autoriza por imóvel do CPF autenticado, respondendo 404 para inscrição que o cidadão não
+ * cadastrou. Quem chega com a carta da PGM na mão e não tem cadastro passa pela consulta
+ * avulsa (`POST /divida-ativa/consultar`), que é somente leitura — outra função, outra tela.
+ *
+ * ⚠️ **Custo.** Esta chamada atravessa o ePortal; medimos 16 s na consulta por inscrição,
+ * que percorre o mesmo caminho. A rota precisa de `loading.tsx` com skeleton.
+ *
+ * Devolve `null` para qualquer resposta que não seja 200 — inscrição não cadastrada (404),
+ * 401 ou indisponibilidade do ePortal (503). "Sem débito" **não** é `null`: é uma resposta
+ * 200 com listas vazias e uma `mensagem` amigável, e a tela tem estado próprio para isso.
+ */
+export async function getDalDividaAtivaDebitos(
+  inscricao: string,
+  cpf: string
+): Promise<DebitosDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaDebitos', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveisInscricaoDividaAtiva(
+      somenteDigitos(inscricao),
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.debitos.fetched', {
+      'debitos.status': result.status,
+    })
+
+    if (result.status !== 200) return null
+
+    const debitos = mapApiToDebitos(result.data)
+
+    addSpanEvent('divida-ativa.debitos.mapped', {
+      'debitos.cdas': debitos.cdas.length,
+      'debitos.guias': debitos.guiasParceladas.length,
+      'debitos.total': debitos.totalDebitos,
+    })
+
+    return debitos
   })
 }

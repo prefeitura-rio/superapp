@@ -1,4 +1,6 @@
 import {
+  mapApiToDebito,
+  mapApiToGuiaParcelada,
   mapApiToImovel,
   mapApiToMensagemErro,
   mapFazendaToImovel,
@@ -324,5 +326,161 @@ describe('mapFazendaToImovel', () => {
     expect(imovel.proprietario).toBeNull()
     expect(imovel.bairro).toBeNull()
     expect(imovel.possuiDebitos).toBeNull()
+  })
+})
+
+describe('mapApiToDebito', () => {
+  /**
+   * `CdaResponse` devolve **todos** os valores monetários como string, e qual convenção a
+   * API usa segue não verificada (premissa P1): no dado de homologação disponível todos os
+   * campos de valor vieram `null`, porque o imóvel de teste não tem CDA em aberto. As duas
+   * convenções possíveis são exercidas aqui para que a descoberta do formato real não
+   * custe uma correção de tela.
+   */
+  test('aceita valor em pt-BR com milhar', () => {
+    const debito = mapApiToDebito({
+      cdaId: '123',
+      valorSaldoPrincipal: '1.234,56',
+      valorSaldoHonorarios: '123,45',
+    })
+
+    expect(debito.valorPrincipal).toBe(1234.56)
+    expect(debito.valorHonorarios).toBe(123.45)
+  })
+
+  test('aceita valor decimal com ponto', () => {
+    const debito = mapApiToDebito({
+      cdaId: '123',
+      valorSaldoPrincipal: '1234.56',
+      valorSaldoHonorarios: '123.45',
+    })
+
+    expect(debito.valorPrincipal).toBe(1234.56)
+    expect(debito.valorHonorarios).toBe(123.45)
+  })
+
+  test('resolve valor ausente para null, nunca NaN', () => {
+    const debito = mapApiToDebito({ cdaId: '123' })
+
+    expect(debito.valorPrincipal).toBeNull()
+    expect(debito.valorHonorarios).toBeNull()
+  })
+
+  /**
+   * Decisão D5 de `docs/divida-ativa.md`: principal e honorários são **exibidos** separados
+   * para o cidadão identificar o que é o quê, mas a seleção do parcelamento é só por CDA.
+   * Se alguém somar os dois num campo único aqui, a tela perde a quebra e a decisão morre
+   * silenciosamente.
+   */
+  test('mantém principal e honorários separados (D5)', () => {
+    const debito = mapApiToDebito({
+      cdaId: '123',
+      valorSaldoPrincipal: '100,00',
+      valorSaldoHonorarios: '20,00',
+    })
+
+    expect(debito.valorPrincipal).toBe(100)
+    expect(debito.valorHonorarios).toBe(20)
+    expect(debito).not.toHaveProperty('valorTotal')
+  })
+
+  /**
+   * Decisão D9: quem decide se a CDA pode ser parcelada é o DAM, por
+   * `selecionavelParcelamento`. `protocoloRequerimentoAberto` informa e dá caminho para o
+   * acompanhamento — nunca bloqueia. Derivar um do outro seria inventar regra de negócio no
+   * front, contra a regra de ouro nº 9 do plano.
+   */
+  test('não deriva parcelável de protocolo aberto (D9)', () => {
+    const debito = mapApiToDebito({
+      cdaId: '123',
+      selecionavelParcelamento: true,
+      protocoloRequerimentoAberto: '2026000123',
+    })
+
+    expect(debito.parcelavel).toBe(true)
+    expect(debito.protocoloRequerimentoAberto).toBe('2026000123')
+  })
+
+  // Na dúvida é `false`: nunca oferecer parcelamento por conta própria.
+  test('assume não parcelável quando a API omite a flag', () => {
+    expect(mapApiToDebito({ cdaId: '123' }).parcelavel).toBe(false)
+  })
+
+  test('converte exercício de string para número', () => {
+    expect(mapApiToDebito({ cdaId: '1', exercicio: '2024' }).exercicio).toBe(
+      2024
+    )
+    expect(mapApiToDebito({ cdaId: '1' }).exercicio).toBeNull()
+    expect(
+      mapApiToDebito({ cdaId: '1', exercicio: 'n/d' }).exercicio
+    ).toBeNull()
+  })
+
+  /**
+   * `nomeContribuinte` e `tipoPessoa` existem em `CdaResponse` e são deliberadamente
+   * descartados, no mesmo espírito do `cpf` em `mapApiToImovel`: dado pessoal não atravessa
+   * a fronteira para o tipo de visão sem uma tela que o exija (LGPD).
+   */
+  test('não deixa dado pessoal vazar para o tipo de visão', () => {
+    const debito = mapApiToDebito({
+      cdaId: '123',
+      nomeContribuinte: 'FULANO DE TAL',
+      tipoPessoa: 'F',
+    })
+
+    expect(debito).not.toHaveProperty('nomeContribuinte')
+    expect(debito).not.toHaveProperty('tipoPessoa')
+  })
+})
+
+describe('mapApiToGuiaParcelada', () => {
+  test('mapeia a guia parcelada para o tipo de visão', () => {
+    const guia = mapApiToGuiaParcelada({
+      numeroGuia: '900123',
+      descricaoSituacaoGuia: 'EM DIA',
+      descricaoTipoPagamento: 'PARCELAMENTO',
+      faseCobranca: 'AJUIZADA',
+      dataVencimento: '15/10/2026',
+      qtdPagas: '3',
+      qtdeParcelas: '12',
+      valorTotalGuia: '1.200,00',
+      valorSaldoTotal: '900,00',
+      linhaDigitavel: '00190000090123456789012345678901234567890123',
+      urlPdf: 'https://exemplo/guia.pdf',
+    })
+
+    expect(guia).toEqual({
+      numeroGuia: '900123',
+      situacao: 'EM DIA',
+      tipoPagamento: 'PARCELAMENTO',
+      faseCobranca: 'AJUIZADA',
+      vencimento: '2026-10-15',
+      parcelasPagas: 3,
+      totalParcelas: 12,
+      valorTotal: 1200,
+      valorSaldo: 900,
+      linhaDigitavel: '00190000090123456789012345678901234567890123',
+      urlPdf: 'https://exemplo/guia.pdf',
+    })
+  })
+
+  // A API real devolve `dd/MM/yyyy` nos campos vindos do DAM.
+  test('normaliza a data brasileira do DAM para ISO', () => {
+    const guia = mapApiToGuiaParcelada({
+      numeroGuia: '1',
+      dataVencimento: '01/02/2026',
+    })
+
+    expect(guia.vencimento).toBe('2026-02-01')
+  })
+
+  test('resolve campos ausentes para null sem quebrar', () => {
+    const guia = mapApiToGuiaParcelada({ numeroGuia: '1' })
+
+    expect(guia.vencimento).toBeNull()
+    expect(guia.parcelasPagas).toBeNull()
+    expect(guia.totalParcelas).toBeNull()
+    expect(guia.valorTotal).toBeNull()
+    expect(guia.urlPdf).toBeNull()
   })
 })
