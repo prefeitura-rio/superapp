@@ -5,6 +5,11 @@ info:
   description: Cadastro local de inscricoes imobiliarias e servicos de IPTU / Divida
     Ativa.
   version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Auto generated value
+- url: http://0.0.0.0:8080
+  description: Auto generated value
 tags:
 - name: Divida Ativa
   description: "Servicos de Divida Ativa via DAM (menu integral do portlet legado),\
@@ -31,7 +36,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Endereco correspondente ao CEP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnderecoCepResponse'
       security:
       - bearerAuth: []
   /divida-ativa/certidoes:
@@ -47,7 +56,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Certidao de situacao fiscal do protocolo informado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertidaoDamResponse'
       security:
       - bearerAuth: []
   /divida-ativa/consultar:
@@ -63,7 +76,12 @@ paths:
               $ref: '#/components/schemas/ConsultaFiltroRequest'
       responses:
         "200":
-          description: OK
+          description: "Consulta somente leitura. imovelCadastrado indica se o imovel\
+            \ ja esta em Meus Imoveis; quando false, opcoes vem vazia."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DividaAtivaConsultaResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos:
@@ -79,7 +97,14 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: "Requerimentos do CPF autenticado, ou o requerimento do protocolo\
+            \ informado."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos/{id}/cancelar:
@@ -95,7 +120,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Requerimento apos o cancelamento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos/{id}/comprovante:
@@ -111,7 +140,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: URL do comprovante do requerimento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUrlResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos/{id}/formulario:
@@ -127,7 +160,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: URL do formulario da guia do requerimento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUrlResponse'
       security:
       - bearerAuth: []
   /divida-ativa/validar-senha:
@@ -142,7 +179,12 @@ paths:
               $ref: '#/components/schemas/ValidarSenhaRequest'
       responses:
         "200":
-          description: OK
+          description: "Resultado da revalidacao. Responde 200 tambem quando a senha\
+            \ e invalida: o campo valido carrega o resultado."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidarSenhaResponse'
       security:
       - bearerAuth: []
   /imoveis:
@@ -348,7 +390,12 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: "CDAs nao parceladas, guias parceladas, totais e menu de opcoes\
+            \ do imovel."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DividaAtivaConsultaResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/certidoes/requerimento:
@@ -368,8 +415,12 @@ paths:
             schema:
               $ref: '#/components/schemas/RequerimentoCertidaoRequest'
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Requerimento de certidao aberto na PGM.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertidaoDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/consultar:
@@ -390,7 +441,12 @@ paths:
               $ref: '#/components/schemas/ConsultaFiltroRequest'
       responses:
         "200":
-          description: OK
+          description: "Mesma resposta da consulta principal, filtrada por criterio\
+            \ unico."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DividaAtivaConsultaResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/datas-vencimento:
@@ -411,7 +467,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Datas de vencimento aceitas para a operacao escolhida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasVencimentoResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/avista:
@@ -432,7 +492,12 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: "Guia a vista emitida, com linha digitavel e URL de PDF quando\
+            \ disponivel."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/liquidacao:
@@ -453,7 +518,11 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: Guia de liquidacao emitida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/regularizacao:
@@ -474,7 +543,11 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: Guia de regularizacao emitida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/continuacao:
@@ -498,7 +571,13 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Guias de parcelamento disponiveis para segunda via.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/liquidacao:
@@ -514,7 +593,13 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Guias disponiveis para liquidacao.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/regularizacao:
@@ -542,7 +627,13 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Guias com parcelas em atraso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/guias/{numeroGuia}/pdf:
@@ -567,7 +658,11 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: URL publica do PDF da guia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUrlResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/parcelamentos/simular:
@@ -588,7 +683,12 @@ paths:
               $ref: '#/components/schemas/ParcelamentoSimularRequest'
       responses:
         "200":
-          description: OK
+          description: "Opcoes de parcelamento possiveis para as CDAs informadas,\
+            \ com saldos e descontos por CDA."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulacaoParcelamentoResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/requerimentos:
@@ -608,8 +708,12 @@ paths:
             schema:
               $ref: '#/components/schemas/RequerimentoParcelamentoRequest'
       responses:
-        "200":
-          description: OK
+        "201":
+          description: "Requerimento aberto no DAM, com protocolo e URL de comprovante."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/avista:
@@ -630,7 +734,11 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: "Guia a vista simulada, sem emissao."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/liquidacao:
@@ -651,7 +759,11 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: "Liquidacao simulada, sem emissao."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/regularizacao:
@@ -672,7 +784,13 @@ paths:
               $ref: '#/components/schemas/GuiaOperacaoRequest'
       responses:
         "200":
-          description: OK
+          description: Cotas em atraso que compoem a regularizacao simulada.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CotaDamResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/parcelamentos:
@@ -842,6 +960,39 @@ components:
           type: string
         situacao:
           type: string
+    CertidaoDamResponse:
+      type: object
+      properties:
+        numProtocolo:
+          type: string
+        nomeContribuinte:
+          type: string
+        tipoPessoa:
+          type: string
+        datSolicitacao:
+          type: string
+        datPrevisaoEntrega:
+          type: string
+        datEmissao:
+          type: string
+        datValidade:
+          type: string
+        nomRequerente:
+          type: string
+        numCpfRequerente:
+          type: string
+        andamento:
+          type: string
+        situacaoFiscal:
+          type: string
+        numInscricaoMunicipal:
+          type: string
+        numCodigoControle:
+          type: string
+        txtObservacaoComplementar:
+          type: string
+        mensagemErro:
+          type: string
     ConsultaFiltroRequest:
       type: object
       properties:
@@ -873,6 +1024,15 @@ components:
         linhaDigitavel:
           type: string
         numeroGuiaPagamento:
+          type: string
+    DatasVencimentoResponse:
+      type: object
+      properties:
+        datas:
+          type: array
+          items:
+            type: string
+        mensagem:
           type: string
     DividaAtivaConsultaResponse:
       description: "Consulta de Divida Ativa de um imovel. Serve tanto a consulta\
@@ -948,6 +1108,23 @@ components:
         conteudoBase64:
           description: "Conteudo do arquivo em base64. Aceita data URI (\"data:application/pdf;base64,...\"\
             ); a API remove o prefixo antes de enviar ao DAM."
+          type: string
+    EnderecoCepResponse:
+      type: object
+      properties:
+        cep:
+          type: string
+        logradouro:
+          type: string
+        bairro:
+          type: string
+        cidade:
+          type: string
+        uf:
+          type: string
+        complemento:
+          type: string
+        mensagemErro:
           type: string
     FazendaImovel:
       type: object
@@ -1189,6 +1366,22 @@ components:
           description: Mensagem de indisponibilidade ou falha quando disponivel=false.
           type: string
           example: Parcelamento indisponivel para esta inscricao.
+    ParcelaOpcaoResponse:
+      type: object
+      properties:
+        qtdeParcelas:
+          format: int32
+          type: integer
+        valor1aParcela:
+          type: string
+        valorJuros:
+          type: string
+        valorTotalDescontoPrinc:
+          type: string
+        valorTotalDescontoHonor:
+          type: string
+        valorDescontos:
+          type: string
     ParcelamentoSimularRequest:
       type: object
       properties:
@@ -1200,6 +1393,13 @@ components:
           type: array
           items:
             type: string
+    PdfUrlResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        numeroReferencia:
+          type: string
     RequerimentoCertidaoRequest:
       type: object
       properties:
@@ -1300,6 +1500,60 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentoDamRequest'
+    RequerimentoParcelamentoResponse:
+      type: object
+      properties:
+        numProtocoloRequerimentoParcelamento:
+          type: string
+        dataSolicitacao:
+          type: string
+        datPrevisaoEntrega:
+          type: string
+        datResposta:
+          type: string
+        situacaoId:
+          type: string
+        nomeContribuinte:
+          type: string
+        requerimentoGuiaPagamentoId:
+          type: string
+        txtMotivoRejeicao:
+          type: string
+        numCpfRequerente:
+          type: string
+        nomeComprovanteEntregaRequerimento:
+          type: string
+        anoRequerimento:
+          type: string
+        urlComprovante:
+          type: string
+        mensagemErro:
+          type: string
+    SimulacaoParcelamentoResponse:
+      type: object
+      properties:
+        mensagemErro:
+          type: string
+        valorTotalAvista:
+          type: string
+        valorSaldoTotalPrincipal:
+          type: string
+        valorSaldoTotalHonorario:
+          type: string
+        valorTotalDescontoPrincipal:
+          type: string
+        valorTotalDescontoHonorario:
+          type: string
+        valorTotalPagarGrerj:
+          type: string
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/CdaSimulacaoItemResponse'
+        opcoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParcelaOpcaoResponse'
     TipoDocumentoDam:
       description: Tipo do documento anexado ao requerimento de parcelamento.
       enum:
@@ -1318,6 +1572,13 @@ components:
       type: object
       properties:
         senha:
+          type: string
+    ValidarSenhaResponse:
+      type: object
+      properties:
+        valida:
+          type: boolean
+        mensagem:
           type: string
   securitySchemes:
     bearerAuth:

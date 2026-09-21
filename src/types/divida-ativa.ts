@@ -6,9 +6,19 @@
  * pelas Server Actions e por `src/lib/divida-ativa-mappers.ts`.
  *
  * O contrato real (`api-imoveis`) substituiu o provisório em 17/08/2026. `ImovelDividaAtiva`
- * já reflete a API real; os tipos de Fase 3 abaixo **ainda não**, porque a API não liga
- * schema de resposta às operações de dívida ativa e as premissas P7/P8 seguem abertas.
- * Eles ficam aqui como vocabulário de produto para a Fase 3 — não há mapper para eles hoje.
+ * já reflete a API real.
+ *
+ * ⚠️ **Os tipos de Fase 3 abaixo ainda não.** Até 21/09/2026 a API não declarava schema de
+ * resposta nas operações de dívida ativa, então eles foram escritos como vocabulário de
+ * produto, sem contrato para conferir. As anotações `@APIResponse` entraram na `dam-api` e o
+ * client gerado agora traz a forma real — e ela **diverge**. O caso mais claro é
+ * `CondicaoParcelamento`: o que a API devolve é `ParcelaOpcaoResponse`
+ * (`qtdeParcelas`, `valor1aParcela`, `valorJuros`, `valorDescontos`), sem `valorEntrada`,
+ * `valorTotal` nem `vencimentoPrimeiraParcela`, e com desconto em reais, não em percentual
+ * (o que confirma a decisão D4 de `docs/divida-ativa.md`).
+ *
+ * A reconciliação acontece na Fase 3, junto das telas que consomem cada tipo — reescrevê-los
+ * agora, sem a tela, só trocaria um palpite por outro. Não há mapper para eles hoje.
  */
 
 export type SituacaoDebito =
