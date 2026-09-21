@@ -1,6 +1,7 @@
 import {
   getDalDividaAtivaCadastroFazenda,
   getDalDividaAtivaConsultaInscricao,
+  getDalDividaAtivaDebitos,
   getDalDividaAtivaImoveis,
 } from '@/lib/dal'
 import { TEST_ENV } from '@/test/mocks/env'
@@ -249,5 +250,158 @@ describe('getDalDividaAtivaCadastroFazenda', () => {
     await getDalDividaAtivaCadastroFazenda('00000018', CPF)
 
     expect(chamadas).toBe(2)
+  })
+})
+
+describe('getDalDividaAtivaDebitos', () => {
+  const INSCRICAO = '00000018'
+
+  test('devolve CDAs, guias parceladas e totais do imóvel', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json(
+          {
+            imovel: {
+              id: 32,
+              dataInclusao: '2026-06-22T15:40:46.477',
+              endereco: 'RUA EXEMPLO, 123',
+              numInscricao: '00000018',
+              nome: 'Casa de praia',
+            },
+            imovelCadastrado: true,
+            cdas: [
+              {
+                cdaId: '111',
+                exercicio: '2024',
+                naturezaDivida: 'IPTU',
+                situacaoPrincipal: 'EM ABERTO',
+                valorSaldoPrincipal: '1.000,00',
+                valorSaldoHonorarios: '100,00',
+                selecionavelParcelamento: true,
+              },
+            ],
+            totalCdas: 1,
+            guiasParceladas: [
+              { numeroGuia: '900123', descricaoSituacaoGuia: 'EM DIA' },
+            ],
+            totalParcelado: 1,
+            totalDebitos: 2,
+            mensagem: null,
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+
+    expect(debitos?.imovelCadastrado).toBe(true)
+    expect(debitos?.imovel?.inscricao).toBe('00000018')
+    expect(debitos?.cdas).toHaveLength(1)
+    expect(debitos?.cdas[0]).toMatchObject({
+      numeroCda: '111',
+      exercicio: 2024,
+      natureza: 'IPTU',
+      valorPrincipal: 1000,
+      valorHonorarios: 100,
+      parcelavel: true,
+    })
+    expect(debitos?.guiasParceladas).toHaveLength(1)
+    expect(debitos?.totalDebitos).toBe(2)
+  })
+
+  /**
+   * "Sem débito" é um estado de tela legítimo, não um erro — a API inclusive manda uma
+   * `mensagem` amigável junto. Devolver `null` aqui faria a tela dizer "não encontramos o
+   * imóvel" para quem simplesmente está em dia.
+   */
+  test('devolve estrutura vazia, não null, quando o imóvel não tem débito', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json(
+          {
+            imovel: { numInscricao: '00000018' },
+            imovelCadastrado: true,
+            cdas: [],
+            guiasParceladas: [],
+            totalCdas: 0,
+            totalParcelado: 0,
+            totalDebitos: 0,
+            mensagem: 'Nao ha debitos inscritos em divida ativa.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.guiasParceladas).toEqual([])
+    expect(debitos?.totalDebitos).toBe(0)
+    expect(debitos?.mensagem).toBe('Nao ha debitos inscritos em divida ativa.')
+  })
+
+  // Listas ausentes no corpo não podem virar `undefined` numa tela que faz `.map()`.
+  test('tolera listas ausentes no corpo da resposta', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json({ imovelCadastrado: true }, { status: 200 })
+      )
+    )
+
+    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.guiasParceladas).toEqual([])
+    expect(debitos?.totalDebitos).toBe(0)
+  })
+
+  /**
+   * 404 é o que a API responde para inscrição que não está em Meus Imóveis — este endpoint
+   * exige o imóvel cadastrado. A tela tem estado para isso; estourar o error boundary seria
+   * pior para quem só digitou a inscrição errada.
+   */
+  test('devolve null quando o imóvel não está cadastrado (404)', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json({ error: 'Nao encontrado' }, { status: 404 })
+      )
+    )
+
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toBeNull()
+  })
+
+  test('devolve null quando a API falha', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json({ error: 'Indisponivel' }, { status: 503 })
+      )
+    )
+
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toBeNull()
+  })
+
+  /**
+   * Regra de ouro nº 2 do plano: dado financeiro nunca vai para cache. Este teste vigia a
+   * inscrição normalizada no path e existe sobretudo para documentar a expectativa de que
+   * a chamada saia com `no-store` — se alguém trocar por `unstable_cache`, o CPF do cookie
+   * vazaria entre cidadãos.
+   */
+  test('normaliza a inscrição para somente dígitos no path', async () => {
+    let pathChamado = ''
+    server.use(
+      http.get(
+        `${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`,
+        ({ params }) => {
+          pathChamado = String(params.inscricao)
+          return HttpResponse.json({ imovelCadastrado: true }, { status: 200 })
+        }
+      )
+    )
+
+    await getDalDividaAtivaDebitos('0.000.001-8', CPF)
+
+    expect(pathChamado).toBe('00000018')
   })
 })

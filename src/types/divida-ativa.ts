@@ -11,24 +11,18 @@
  * ⚠️ **Os tipos de Fase 3 abaixo ainda não.** Até 21/09/2026 a API não declarava schema de
  * resposta nas operações de dívida ativa, então eles foram escritos como vocabulário de
  * produto, sem contrato para conferir. As anotações `@APIResponse` entraram na `dam-api` e o
- * client gerado agora traz a forma real — e ela **diverge**. O caso mais claro é
- * `CondicaoParcelamento`: o que a API devolve é `ParcelaOpcaoResponse`
- * (`qtdeParcelas`, `valor1aParcela`, `valorJuros`, `valorDescontos`), sem `valorEntrada`,
- * `valorTotal` nem `vencimentoPrimeiraParcela`, e com desconto em reais, não em percentual
- * (o que confirma a decisão D4 de `docs/divida-ativa.md`).
+ * client gerado agora traz a forma real. Os tipos de **débito** (`DebitoDividaAtiva`,
+ * `GuiaParceladaDividaAtiva`, `DebitosDividaAtiva`) já foram reconciliados contra ele e
+ * têm mapper.
  *
- * A reconciliação acontece na Fase 3, junto das telas que consomem cada tipo — reescrevê-los
- * agora, sem a tela, só trocaria um palpite por outro. Não há mapper para eles hoje.
+ * ⚠️ **`CondicaoParcelamento` e `SimulacaoParcelamento` ainda não.** O que a API devolve é
+ * `ParcelaOpcaoResponse` (`qtdeParcelas`, `valor1aParcela`, `valorJuros`,
+ * `valorDescontos`), sem `valorEntrada`, `valorTotal` nem `vencimentoPrimeiraParcela`, e
+ * com desconto em reais, não em percentual — o que confirma a decisão D4 de
+ * `docs/divida-ativa.md`. Eles são reescritos junto da tela de simulação, porque decidir a
+ * forma sem a tela seria trocar um palpite por outro. `RequerimentoDividaAtiva` está na
+ * mesma situação, e espera a tela de acompanhamento.
  */
-
-export type SituacaoDebito =
-  | 'em_aberto'
-  | 'ajuizada'
-  | 'parcelada'
-  | 'quitada'
-  | 'suspensa'
-  | 'cancelada'
-  | 'desconhecida'
 
 export type SituacaoRequerimento =
   | 'em_analise'
@@ -74,22 +68,87 @@ export interface ImovelDividaAtiva {
   cadastradoEm: string | null
 }
 
+/**
+ * Uma CDA não parcelada — o datagrid 1 da tela de débitos.
+ *
+ * As situações vêm como **texto livre da API**, não como enum nosso. A versão anterior
+ * deste tipo traduzia para `'em_aberto' | 'ajuizada' | ...`, o que significaria decidir
+ * aqui o que o DAM já decidiu: é a regra de ouro nº 9 do plano (situação de CDA é regra de
+ * negócio da API; o UI exibe o que o contrato devolver).
+ */
 export interface DebitoDividaAtiva {
+  /** `cdaId` no contrato. Identificador da CDA, e o que o parcelamento seleciona. */
   numeroCda: string
   exercicio: number | null
-  tributo: string | null
-  situacao: SituacaoDebito
-  /** Elegibilidade decidida pela API. Na dúvida é `false`: nunca oferecer parcelamento por conta própria. */
-  parcelavel: boolean
-  vencimento: string | null
+  /** `naturezaDivida` — IPTU, TCL etc. */
+  natureza: string | null
+  receita: string | null
+  /** Texto da API, exibido como veio. */
+  situacaoPrincipal: string | null
+  situacaoHonorarios: string | null
+  faseCobranca: string | null
+  /**
+   * Principal e honorários ficam **separados** por decisão D5: o cidadão precisa
+   * identificar o que é o quê. Não somar num total aqui — a soma, se a tela quiser, é
+   * apresentação.
+   */
   valorPrincipal: number | null
-  valorAtualizado: number | null
-  valorReferenciaEm: string | null
+  valorHonorarios: number | null
+  /**
+   * Elegibilidade decidida pela API (`selecionavelParcelamento`). Na dúvida é `false`:
+   * nunca oferecer parcelamento por conta própria.
+   */
+  parcelavel: boolean
+  /**
+   * Protocolo de um requerimento já aberto para esta CDA, quando existe.
+   *
+   * Decisão D9: isto **informa e dá caminho** para o acompanhamento — nunca bloqueia. Quem
+   * diz se pode parcelar é `parcelavel`, e os dois não se derivam um do outro.
+   */
+  protocoloRequerimentoAberto: string | null
+  /** Inscrição a que a CDA pertence. Importa na busca por execução fiscal, que pode abranger mais de um imóvel. */
+  inscricao: string | null
 }
 
-export interface ListaDebitos {
-  debitos: DebitoDividaAtiva[]
-  valorTotalAtualizado: number | null
+/**
+ * Uma guia de parcelamento já existente — o datagrid 2 da tela de débitos.
+ *
+ * `GuiaDamResponse` tem ~30 campos; aqui estão só os que a tela de débitos mostra. `cotas`,
+ * `grerjs` e `itens` ficam de fora até alguma tela pedir — mapear o que ninguém exibe só
+ * cria superfície para o contrato quebrar sem ninguém notar.
+ */
+export interface GuiaParceladaDividaAtiva {
+  numeroGuia: string
+  /** `descricaoSituacaoGuia`, texto da API. */
+  situacao: string | null
+  tipoPagamento: string | null
+  faseCobranca: string | null
+  vencimento: string | null
+  parcelasPagas: number | null
+  totalParcelas: number | null
+  valorTotal: number | null
+  valorSaldo: number | null
+  linhaDigitavel: string | null
+  urlPdf: string | null
+}
+
+/** A tela de débitos inteira: o imóvel, os dois datagrids e os totais que a API calcula. */
+export interface DebitosDividaAtiva {
+  imovel: ImovelDividaAtiva | null
+  /**
+   * Falso só na consulta avulsa de imóvel não cadastrado, onde a resposta é somente
+   * leitura. Nesse caso a tela mostra o CTA de cadastro, porque emitir guia e requerer
+   * parcelamento exigem o cadastro.
+   */
+  imovelCadastrado: boolean
+  cdas: DebitoDividaAtiva[]
+  guiasParceladas: GuiaParceladaDividaAtiva[]
+  /** Totais vêm da API, não de `.length`: ela desduplica número de guia. */
+  totalCdas: number
+  totalParcelado: number
+  totalDebitos: number
+  /** Texto institucional da API para "não há débitos" ou consulta parcial. */
+  mensagem: string | null
 }
 
 export interface CondicaoParcelamento {
