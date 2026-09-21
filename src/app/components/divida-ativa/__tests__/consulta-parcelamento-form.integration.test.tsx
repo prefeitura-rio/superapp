@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ConsultaParcelamentoForm } from '../consulta-parcelamento-form'
-import { MODOS_CONSULTA } from '../modos-consulta'
 
 const push = vi.fn()
 vi.mock('next/navigation', () => ({
@@ -18,7 +17,7 @@ describe('ConsultaParcelamentoForm', () => {
   describe('modo inscrição imobiliária', () => {
     test('aplica a máscara da inscrição e leva só os dígitos para a URL', async () => {
       const user = userEvent.setup()
-      render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.inscricao} />)
+      render(<ConsultaParcelamentoForm modo="inscricao" />)
 
       const campo = screen.getByLabelText('N° da Inscrição Imobiliária')
       await user.type(campo, '05217663')
@@ -35,7 +34,7 @@ describe('ConsultaParcelamentoForm', () => {
 
     test('recusa inscrição curta demais sem chamar a navegação', async () => {
       const user = userEvent.setup()
-      render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.inscricao} />)
+      render(<ConsultaParcelamentoForm modo="inscricao" />)
 
       await user.type(
         screen.getByLabelText('N° da Inscrição Imobiliária'),
@@ -53,7 +52,7 @@ describe('ConsultaParcelamentoForm', () => {
   describe('modo CDA', () => {
     test('leva o número da certidão para a URL como cda', async () => {
       const user = userEvent.setup()
-      render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.cda} />)
+      render(<ConsultaParcelamentoForm modo="cda" />)
 
       await user.type(
         screen.getByLabelText('N° da Certidão de Dívida Ativa'),
@@ -72,7 +71,7 @@ describe('ConsultaParcelamentoForm', () => {
      */
     test('aceita qualquer quantidade de dígitos', async () => {
       const user = userEvent.setup()
-      render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.cda} />)
+      render(<ConsultaParcelamentoForm modo="cda" />)
 
       await user.type(
         screen.getByLabelText('N° da Certidão de Dívida Ativa'),
@@ -89,9 +88,7 @@ describe('ConsultaParcelamentoForm', () => {
   describe('modo execução fiscal', () => {
     test('aplica a máscara CNJ e leva só os dígitos', async () => {
       const user = userEvent.setup()
-      render(
-        <ConsultaParcelamentoForm modo={MODOS_CONSULTA['execucao-fiscal']} />
-      )
+      render(<ConsultaParcelamentoForm modo="execucao-fiscal" />)
 
       const campo = screen.getByLabelText('N° da Execução Fiscal')
       await user.type(campo, '00123456720248190001')
@@ -111,9 +108,7 @@ describe('ConsultaParcelamentoForm', () => {
      */
     test('aceita o número colado já formatado', async () => {
       const user = userEvent.setup()
-      render(
-        <ConsultaParcelamentoForm modo={MODOS_CONSULTA['execucao-fiscal']} />
-      )
+      render(<ConsultaParcelamentoForm modo="execucao-fiscal" />)
 
       const campo = screen.getByLabelText('N° da Execução Fiscal')
       await user.click(campo)
@@ -130,9 +125,7 @@ describe('ConsultaParcelamentoForm', () => {
 
     test('recusa número incompleto', async () => {
       const user = userEvent.setup()
-      render(
-        <ConsultaParcelamentoForm modo={MODOS_CONSULTA['execucao-fiscal']} />
-      )
+      render(<ConsultaParcelamentoForm modo="execucao-fiscal" />)
 
       await user.type(screen.getByLabelText('N° da Execução Fiscal'), '0012345')
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
@@ -146,7 +139,7 @@ describe('ConsultaParcelamentoForm', () => {
 
   test('exige o campo preenchido antes de consultar', async () => {
     const user = userEvent.setup()
-    render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.inscricao} />)
+    render(<ConsultaParcelamentoForm modo="inscricao" />)
 
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
@@ -159,7 +152,7 @@ describe('ConsultaParcelamentoForm', () => {
   // Manter a mensagem enquanto o cidadão corrige é ruído.
   test('limpa o erro assim que o cidadão volta a digitar', async () => {
     const user = userEvent.setup()
-    render(<ConsultaParcelamentoForm modo={MODOS_CONSULTA.inscricao} />)
+    render(<ConsultaParcelamentoForm modo="inscricao" />)
 
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
     expect(
