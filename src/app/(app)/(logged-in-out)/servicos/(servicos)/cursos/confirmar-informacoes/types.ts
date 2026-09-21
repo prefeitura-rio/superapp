@@ -23,6 +23,7 @@ export interface CourseUserInfo {
   deficiencia?: string
   nascimento?: {
     data?: string
+    origem?: string
   }
   raca?: string
 }

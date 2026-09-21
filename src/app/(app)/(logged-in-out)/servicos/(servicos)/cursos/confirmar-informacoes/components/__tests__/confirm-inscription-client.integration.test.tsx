@@ -126,6 +126,9 @@ describe('ConfirmInscriptionClient', () => {
       expect(screen.getByText(/Informe seu celular/i)).toBeInTheDocument()
       expect(screen.getByText(/Informe seu e-mail/i)).toBeInTheDocument()
       expect(screen.getByText(/Informe seu endereço/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Informe sua data de nascimento/i)
+      ).toBeInTheDocument()
     })
 
     test('renders required fields message when user data is incomplete', () => {
@@ -184,6 +187,25 @@ describe('ConfirmInscriptionClient', () => {
         name: /Confirmar inscrição/i,
       })
       expect(continueButton).not.toBeDisabled()
+    })
+
+    test('disables continue button when birth date is missing', () => {
+      render(
+        <ConfirmInscriptionClient
+          userInfo={{ ...completeUserInfo, nascimento: undefined }}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnitsSingle}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      expect(
+        screen.getByText(/Informe sua data de nascimento/i)
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Continuar/i })).toBeDisabled()
     })
   })
 

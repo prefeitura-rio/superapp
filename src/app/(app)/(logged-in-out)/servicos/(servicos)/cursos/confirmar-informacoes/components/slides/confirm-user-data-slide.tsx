@@ -1,5 +1,6 @@
 'use client'
 
+import { BirthDateDrawerContent } from '@/app/components/drawer-contents/birth-date-drawer-content'
 import { DisabilityDrawerContent } from '@/app/components/drawer-contents/disability-drawer-content'
 import { EducationDrawerContent } from '@/app/components/drawer-contents/education-drawer-content'
 import { FamilyIncomeDrawerContent } from '@/app/components/drawer-contents/family-income-drawer-content'
@@ -8,13 +9,14 @@ import { EditIcon } from '@/assets/icons/edit-icon'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { getEmailValue, hasValidEmail } from '@/helpers/email-data-helpers'
 import { getPhoneValue, hasValidPhone } from '@/helpers/phone-data-helpers'
+import { formatBirthDatePtBr, isBirthDateEditable } from '@/lib/birth-date'
 import { formatCpf } from '@/lib/format-cpf'
 import { formatDisability } from '@/lib/format-disability'
 import { formatEducation } from '@/lib/format-education'
 import { formatFamilyIncome } from '@/lib/format-family-income'
 import { formatGender } from '@/lib/format-gender'
 import { formatTitleCase } from '@/lib/utils'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { CourseUserInfo } from '../../types'
 import type { ContactUpdateStatus } from '../confirm-inscription-client'
@@ -63,11 +65,15 @@ export default function ConfirmUserDataSlide({
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
+  const hasBirthDate = !!userInfo.nascimento?.data
+  const birthDateEditable = isBirthDateEditable(userInfo.nascimento)
+  const birthDateRequiredMissing = !hasBirthDate
 
   const [genderDrawerOpen, setGenderDrawerOpen] = useState(false)
   const [educationDrawerOpen, setEducationDrawerOpen] = useState(false)
   const [familyIncomeDrawerOpen, setFamilyIncomeDrawerOpen] = useState(false)
   const [disabilityDrawerOpen, setDisabilityDrawerOpen] = useState(false)
+  const [birthDateDrawerOpen, setBirthDateDrawerOpen] = useState(false)
 
   const formatAddress = () => {
     if (!userInfo.address) return 'Endereço não cadastrado'
@@ -118,6 +124,12 @@ export default function ConfirmUserDataSlide({
 
   const handleDisabilityClick = () => {
     setDisabilityDrawerOpen(true)
+  }
+
+  const handleBirthDateClick = () => {
+    if (birthDateEditable) {
+      setBirthDateDrawerOpen(true)
+    }
   }
 
   return (
@@ -240,6 +252,42 @@ export default function ConfirmUserDataSlide({
                 </p>
               </div>
               <EditIcon className="h-5 w-5 mr-2 text-foreground flex-shrink-0 ml-2" />
+            </div>
+          </div>
+
+          <div className="h-px bg-border" />
+
+          {/* Data de nascimento */}
+          <div
+            className={`pt-4 pb-4 rounded-lg px-2 -mx-2 transition-colors ${
+              birthDateEditable ? 'cursor-pointer hover:bg-accent/30' : ''
+            } ${
+              birthDateRequiredMissing
+                ? 'border-l-4 border-destructive pl-2'
+                : ''
+            }`}
+            onClick={handleBirthDateClick}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground tracking-normal leading-5 font-normal">
+                  Data de nascimento {birthDateRequiredMissing && '*'}
+                </p>
+                <p
+                  className={`font-normal ${
+                    hasBirthDate
+                      ? 'text-foreground'
+                      : 'text-sm md:text-base text-destructive'
+                  }`}
+                >
+                  {hasBirthDate
+                    ? formatBirthDatePtBr(userInfo.nascimento?.data)
+                    : 'Informe sua data de nascimento'}
+                </p>
+              </div>
+              {birthDateEditable && (
+                <EditIcon className="h-5 w-5 mr-2 text-foreground flex-shrink-0 ml-2" />
+              )}
             </div>
           </div>
 
@@ -411,6 +459,18 @@ export default function ConfirmUserDataSlide({
         <DisabilityDrawerContent
           currentDisability={userInfo.deficiencia}
           onClose={() => setDisabilityDrawerOpen(false)}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        open={birthDateDrawerOpen}
+        onOpenChange={setBirthDateDrawerOpen}
+        title="Data de nascimento"
+        showHandle
+      >
+        <BirthDateDrawerContent
+          currentBirthDate={userInfo.nascimento?.data}
+          onClose={() => setBirthDateDrawerOpen(false)}
         />
       </BottomSheet>
     </div>

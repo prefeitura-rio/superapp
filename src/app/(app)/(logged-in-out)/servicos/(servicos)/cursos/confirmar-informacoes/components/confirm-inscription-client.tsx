@@ -120,9 +120,11 @@ export function ConfirmInscriptionClient({
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
+  const hasBirthDate = !!userInfo.nascimento?.data
 
-  // Only require phone, email, and address for course enrollment
-  const hasAllRequiredFields = hasPhone && hasEmail && hasAddress
+  // Phone, email, address and birth date are required for course enrollment
+  const hasAllRequiredFields =
+    hasPhone && hasEmail && hasAddress && hasBirthDate
 
   // Check if any contact info needs update
   const needsContactUpdate =

@@ -51,7 +51,6 @@ interface InscricaoFlowCarouselProps {
   userInfo: EmpregosUserInfo
   userAuthInfo: { cpf: string; name: string }
   contactUpdateStatus: ContactUpdateStatus
-  requiresBirthDate?: boolean
   informacoesComplementares: InformacaoComplementarForPerguntas[]
   onEnviarCandidatura?: (
     vagaId: string,
@@ -73,7 +72,6 @@ export function InscricaoFlowCarousel({
   userInfo,
   userAuthInfo,
   contactUpdateStatus,
-  requiresBirthDate = false,
   informacoesComplementares,
   onEnviarCandidatura,
 }: InscricaoFlowCarouselProps) {
@@ -175,7 +173,6 @@ export function InscricaoFlowCarousel({
               userInfo={userInfo}
               userAuthInfo={userAuthInfo}
               contactUpdateStatus={contactUpdateStatus}
-              requiresBirthDate={requiresBirthDate}
               onContinuar={handleConfirmarContinuar}
               returnUrlForProfile={returnUrlConfirmar}
             />

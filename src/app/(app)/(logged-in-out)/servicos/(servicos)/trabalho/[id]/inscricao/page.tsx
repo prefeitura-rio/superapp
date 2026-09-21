@@ -178,7 +178,6 @@ export default async function InscricaoPage({
       : null
   const showBemVindo = onboardingData?.is_first_login === true
 
-  const requiresBirthDate = vagaResponse.data.idade_minima != null
   const hasBirthDate = !!transformedUserInfo.nascimento?.data
 
   const needsConfirmar =
@@ -186,11 +185,11 @@ export default async function InscricaoPage({
     contactUpdateStatus.emailNeedsUpdate ||
     contactUpdateStatus.addressNeedsUpdate ||
     !hasValidAddress(transformedUserInfo.address) ||
+    !hasBirthDate ||
     !transformedUserInfo.genero ||
     !transformedUserInfo.escolaridade ||
     !transformedUserInfo.renda_familiar ||
-    !transformedUserInfo.deficiencia ||
-    (requiresBirthDate && !hasBirthDate)
+    !transformedUserInfo.deficiencia
 
   const requestedStep = Math.max(0, Number.parseInt(stepParam ?? '0', 10) || 0)
   const initialStep = showBemVindo || needsConfirmar ? 0 : requestedStep
@@ -212,7 +211,6 @@ export default async function InscricaoPage({
         showConfirmarInformacoes={needsConfirmar}
         hasPerguntasAdicionais={hasPerguntasAdicionais}
         userInfo={transformedUserInfo}
-        requiresBirthDate={requiresBirthDate}
         userAuthInfo={userAuthInfo}
         contactUpdateStatus={contactUpdateStatus}
         informacoesComplementares={informacoesComplementares}
