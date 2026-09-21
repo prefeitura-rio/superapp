@@ -37,7 +37,8 @@ export default async function ParcelamentoPage({
       </h1>
 
       {modoSelecionado ? (
-        <ConsultaParcelamentoForm modo={modoSelecionado} />
+        // Só o id: a configuração carrega funções, que não atravessam a fronteira RSC.
+        <ConsultaParcelamentoForm modo={modoSelecionado.id} />
       ) : (
         <ModoConsultaList />
       )}

@@ -1,6 +1,9 @@
 'use client'
 
-import type { ModoConsultaConfig } from '@/app/components/divida-ativa/modos-consulta'
+import {
+  MODOS_CONSULTA,
+  type ModoConsulta,
+} from '@/app/components/divida-ativa/modos-consulta'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
@@ -8,7 +11,20 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface ConsultaParcelamentoFormProps {
-  modo: ModoConsultaConfig
+  /**
+   * Só o identificador do modo, **nunca a configuração inteira**.
+   *
+   * `ModoConsultaConfig` carrega `formatar` e `validar`, que são funções — e função não
+   * atravessa a fronteira Server → Client Component. Passar o objeto inteiro derruba a
+   * página em runtime com "Functions cannot be passed directly to Client Components", e o
+   * `error.tsx` do módulo transforma isso num redirect silencioso para `/servicos`.
+   *
+   * Uma string sempre serializa, então a prop com este tipo torna o erro impossível de
+   * reintroduzir. Nem o typecheck nem os testes em jsdom pegam essa classe de problema: o
+   * TypeScript não modela serializabilidade e o teste renderiza este componente direto, sem
+   * cruzar a fronteira.
+   */
+  modo: ModoConsulta
 }
 
 /**
@@ -22,11 +38,14 @@ interface ConsultaParcelamentoFormProps {
  * formato e nenhum estado de servidor. O RHF entra quando houver o que ele resolve.
  */
 export function ConsultaParcelamentoForm({
-  modo,
+  modo: modoId,
 }: ConsultaParcelamentoFormProps) {
   const router = useRouter()
   const [valor, setValor] = useState('')
   const [erro, setErro] = useState<string | null>(null)
+
+  // A configuração é resolvida aqui, no cliente, a partir do id que veio do servidor.
+  const modo = MODOS_CONSULTA[modoId]
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setValor(modo.formatar(event.target.value))
