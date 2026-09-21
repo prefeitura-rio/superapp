@@ -33,6 +33,7 @@ export async function updateUserBirthDate(birthDate: string) {
     revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
     revalidatePath('/meu-perfil/informacoes-pessoais', 'page')
     revalidatePath('/servicos/trabalho', 'layout')
+    revalidatePath('/servicos/cursos', 'layout')
     return {
       success: true,
       message: 'Data de nascimento atualizada com sucesso.',

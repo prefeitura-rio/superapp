@@ -37,6 +37,7 @@ const baseUserInfo: EmpregosUserInfo = {
   escolaridade: 'Médio completo',
   renda_familiar: 'De 1 a 2 salários mínimos',
   deficiencia: 'Nenhuma',
+  nascimento: { data: '1990-01-01', origem: 'bcadastro' },
 }
 
 const baseAuthInfo = { cpf: '12345678901', name: 'MARIA SILVA' }
@@ -250,7 +251,7 @@ describe('ConfirmarInformacoesContent', () => {
   })
 
   describe('botão Continuar habilitado', () => {
-    test('habilita botão quando phone, email e endereço estão preenchidos', () => {
+    test('habilita botão quando phone, email, endereço e nascimento estão preenchidos', () => {
       render(
         <ConfirmarInformacoesContent
           vagaId="vaga-123"
@@ -342,8 +343,8 @@ describe('ConfirmarInformacoesContent', () => {
     })
   })
 
-  describe('data de nascimento (idade mínima da vaga)', () => {
-    test('exibe campo e desabilita Continuar quando requiresBirthDate e nascimento ausente', () => {
+  describe('data de nascimento', () => {
+    test('exibe campo e desabilita Continuar quando nascimento está ausente', () => {
       const userInfoSemNascimento: EmpregosUserInfo = {
         ...baseUserInfo,
         nascimento: undefined,
@@ -354,7 +355,6 @@ describe('ConfirmarInformacoesContent', () => {
           vagaId="vaga-123"
           userInfo={userInfoSemNascimento}
           userAuthInfo={baseAuthInfo}
-          requiresBirthDate
         />
       )
 
@@ -364,7 +364,7 @@ describe('ConfirmarInformacoesContent', () => {
       expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
     })
 
-    test('habilita Continuar quando requiresBirthDate e nascimento preenchido', () => {
+    test('habilita Continuar quando nascimento está preenchido', () => {
       const userInfoComNascimento: EmpregosUserInfo = {
         ...baseUserInfo,
         nascimento: { data: '1990-01-01', origem: 'self-declared' },
@@ -375,7 +375,6 @@ describe('ConfirmarInformacoesContent', () => {
           vagaId="vaga-123"
           userInfo={userInfoComNascimento}
           userAuthInfo={baseAuthInfo}
-          requiresBirthDate
         />
       )
 
@@ -387,16 +386,16 @@ describe('ConfirmarInformacoesContent', () => {
       ).not.toBeDisabled()
     })
 
-    test('não exibe campo de nascimento quando a vaga não exige idade', () => {
+    test('exibe data oficial somente leitura e habilita Continuar', () => {
       render(
         <ConfirmarInformacoesContent
           vagaId="vaga-123"
-          userInfo={{ ...baseUserInfo, nascimento: undefined }}
+          userInfo={baseUserInfo}
           userAuthInfo={baseAuthInfo}
-          requiresBirthDate={false}
         />
       )
 
+      expect(screen.getByText('01/01/1990')).toBeInTheDocument()
       expect(
         screen.queryByText('Informe sua data de nascimento')
       ).not.toBeInTheDocument()

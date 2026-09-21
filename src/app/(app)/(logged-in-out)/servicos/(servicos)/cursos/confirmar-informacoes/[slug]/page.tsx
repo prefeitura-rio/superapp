@@ -115,6 +115,7 @@ export default async function ConfirmInscriptionPage({
     nascimento: userInfo.nascimento
       ? {
           data: userInfo.nascimento.data,
+          origem: userInfo.nascimento.origem,
         }
       : undefined,
     raca: userInfo.raca,
@@ -172,12 +173,14 @@ export default async function ConfirmInscriptionPage({
   const hasEducation = isValidValue(transformedUserInfo.escolaridade)
   const hasFamilyIncome = isValidValue(transformedUserInfo.renda_familiar)
   const hasDisability = isValidValue(transformedUserInfo.deficiencia)
+  const hasBirthDate = isValidValue(transformedUserInfo.nascimento?.data)
 
   // Show confirmation screen if ANY field (required or optional) is missing
   const shouldShowConfirmationScreen =
     !hasValidPhoneField ||
     !hasValidEmailField ||
     !hasValidAddress ||
+    !hasBirthDate ||
     !hasGender ||
     !hasEducation ||
     !hasFamilyIncome ||
