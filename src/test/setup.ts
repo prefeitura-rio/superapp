@@ -22,6 +22,11 @@ if (typeof window !== 'undefined') {
       dispatchEvent: vi.fn(),
     })),
   })
+
+  // vaul (Drawer) calls setPointerCapture on pointerdown; jsdom does not implement it.
+  Element.prototype.hasPointerCapture ??= () => false
+  Element.prototype.setPointerCapture ??= () => {}
+  Element.prototype.releasePointerCapture ??= () => {}
 }
 
 // jsdom doesn't implement the Pointer Capture API. Vaul (the library behind BottomSheet
@@ -37,6 +42,7 @@ if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
   unstable_cache: vi.fn(fn => fn),
 }))
 

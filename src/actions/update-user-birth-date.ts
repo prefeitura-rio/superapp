@@ -4,7 +4,7 @@ import { putCitizenCpfBirthDate } from '@/http/citizen/citizen'
 import type { HandlersErrorResponse } from '@/http/models'
 import type { ModelsSelfDeclaredBirthDateInput } from '@/http/models/modelsSelfDeclaredBirthDateInput'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 
 export async function updateUserBirthDate(birthDate: string) {
   const userInfo = await getUserInfoFromToken()
@@ -30,7 +30,7 @@ export async function updateUserBirthDate(birthDate: string) {
       )
     }
 
-    revalidateTag(`user-info-${userInfo.cpf}`, { expire: 0 })
+    updateTag(`user-info-${userInfo.cpf}`)
     revalidatePath('/meu-perfil/informacoes-pessoais', 'page')
     revalidatePath('/servicos/trabalho', 'layout')
     revalidatePath('/servicos/cursos', 'layout')

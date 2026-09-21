@@ -19,11 +19,13 @@ import toast from 'react-hot-toast'
 interface BirthDateDrawerContentProps {
   currentBirthDate?: string
   onClose?: () => void
+  onSaved?: (birthDate: string) => void
 }
 
 export function BirthDateDrawerContent({
   currentBirthDate,
   onClose,
+  onSaved,
 }: BirthDateDrawerContentProps) {
   const router = useRouter()
   const {
@@ -53,6 +55,7 @@ export function BirthDateDrawerContent({
       const result = await updateUserBirthDate(data.birthDate)
       if (result.success) {
         toast.success('Data de nascimento atualizada com sucesso')
+        onSaved?.(data.birthDate)
         router.refresh()
         onClose?.()
       }

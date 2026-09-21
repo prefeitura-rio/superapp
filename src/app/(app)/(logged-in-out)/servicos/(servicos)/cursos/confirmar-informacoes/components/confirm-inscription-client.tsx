@@ -92,6 +92,7 @@ export function ConfirmInscriptionClient({
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const [savedBirthDate, setSavedBirthDate] = useState<string>()
 
   // Helper to check if a value is valid (not null, undefined, empty string, or "null" string)
   const isValidAddressValue = (value: string | null | undefined): boolean => {
@@ -120,7 +121,7 @@ export function ConfirmInscriptionClient({
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
-  const hasBirthDate = !!userInfo.nascimento?.data
+  const hasBirthDate = !!(userInfo.nascimento?.data || savedBirthDate)
 
   // Phone, email, address and birth date are required for course enrollment
   const hasAllRequiredFields =
@@ -374,7 +375,13 @@ export function ConfirmInscriptionClient({
           {
             id: 'confirm-user-data',
             component: ConfirmUserDataSlide,
-            props: { userInfo, userAuthInfo, contactUpdateStatus, courseSlug },
+            props: {
+              userInfo,
+              userAuthInfo,
+              contactUpdateStatus,
+              courseSlug,
+              onBirthDateSaved: setSavedBirthDate,
+            },
             showPagination: false,
             showBackButton: true,
           },
