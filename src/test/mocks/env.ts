@@ -6,6 +6,7 @@ export const TEST_ENV = {
   COURSES_BASE_API_URL: 'http://localhost:3002',
   BASE_API_URL_APP_BUSCA_SEARCH: 'http://localhost:3003',
   BASE_API_URL_SUBPAV_OSA_API: 'http://localhost:3004',
+  API_KEY_SUBPAV_OSA_SMS: 'test-subpav-osa-sms-key',
   NODE_ENV: 'test',
 } as const
 

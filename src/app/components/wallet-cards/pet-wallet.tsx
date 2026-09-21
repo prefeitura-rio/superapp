@@ -55,7 +55,7 @@ export function PetCard({
             ? String(petData.microchip_numero)
             : 'Pendente'
         }
-        petImageUrl={petData.foto_url!}
+        petImageUrl={petData.foto_url}
       />
     </PetCardBase>
   )
