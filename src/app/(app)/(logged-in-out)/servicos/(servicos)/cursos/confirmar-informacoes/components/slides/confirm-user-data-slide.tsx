@@ -29,6 +29,7 @@ interface ConfirmUserDataSlideProps {
   }
   contactUpdateStatus?: ContactUpdateStatus
   courseSlug?: string
+  onBirthDateSaved?: (birthDate: string) => void
 }
 
 export default function ConfirmUserDataSlide({
@@ -36,6 +37,7 @@ export default function ConfirmUserDataSlide({
   userAuthInfo,
   contactUpdateStatus,
   courseSlug = '',
+  onBirthDateSaved,
 }: ConfirmUserDataSlideProps) {
   const router = useRouter()
 
@@ -65,8 +67,15 @@ export default function ConfirmUserDataSlide({
   const hasEducation = !!userInfo.escolaridade
   const hasFamilyIncome = !!userInfo.renda_familiar
   const hasDisability = !!userInfo.deficiencia
-  const hasBirthDate = !!userInfo.nascimento?.data
-  const birthDateEditable = isBirthDateEditable(userInfo.nascimento)
+  const [savedBirthDate, setSavedBirthDate] = useState<string>()
+  const displayedBirthDate = userInfo.nascimento?.data ?? savedBirthDate
+  const hasBirthDate = !!displayedBirthDate
+  const birthDateEditable = isBirthDateEditable(
+    userInfo.nascimento ??
+      (savedBirthDate
+        ? { data: savedBirthDate, origem: 'self-declared' }
+        : undefined)
+  )
   const birthDateRequiredMissing = !hasBirthDate
 
   const [genderDrawerOpen, setGenderDrawerOpen] = useState(false)
@@ -281,7 +290,7 @@ export default function ConfirmUserDataSlide({
                   }`}
                 >
                   {hasBirthDate
-                    ? formatBirthDatePtBr(userInfo.nascimento?.data)
+                    ? formatBirthDatePtBr(displayedBirthDate)
                     : 'Informe sua data de nascimento'}
                 </p>
               </div>
@@ -469,8 +478,12 @@ export default function ConfirmUserDataSlide({
         showHandle
       >
         <BirthDateDrawerContent
-          currentBirthDate={userInfo.nascimento?.data}
+          currentBirthDate={displayedBirthDate}
           onClose={() => setBirthDateDrawerOpen(false)}
+          onSaved={birthDate => {
+            setSavedBirthDate(birthDate)
+            onBirthDateSaved?.(birthDate)
+          }}
         />
       </BottomSheet>
     </div>

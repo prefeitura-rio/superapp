@@ -28,6 +28,7 @@ const mockPush = vi.fn()
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
+    refresh: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
 }))
@@ -36,8 +37,13 @@ vi.mock('next/navigation', () => ({
 const mockToastError = vi.fn()
 
 vi.mock('react-hot-toast', () => ({
+  default: {
+    success: vi.fn(),
+    error: (message: string) => mockToastError(message),
+  },
   toast: {
     error: (message: string) => mockToastError(message),
+    success: vi.fn(),
   },
 }))
 
@@ -67,6 +73,10 @@ vi.mock('@/actions/courses/submit-inscription', () => ({
   submitCourseInscription: vi.fn(),
 }))
 
+vi.mock('@/actions/update-user-birth-date', () => ({
+  updateUserBirthDate: vi.fn(),
+}))
+
 // Mock ThemeAwareVideo
 vi.mock('@/components/ui/custom/theme-aware-video', () => ({
   ThemeAwareVideo: () => <div data-testid="theme-aware-video" />,
@@ -74,8 +84,10 @@ vi.mock('@/components/ui/custom/theme-aware-video', () => ({
 
 // Import mocked server action
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
+import { updateUserBirthDate } from '@/actions/update-user-birth-date'
 
 const mockSubmitCourseInscription = vi.mocked(submitCourseInscription)
+const mockUpdateUserBirthDate = vi.mocked(updateUserBirthDate)
 
 function wrapper({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient({
@@ -206,6 +218,50 @@ describe('ConfirmInscriptionClient', () => {
         screen.getByText(/Informe sua data de nascimento/i)
       ).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Continuar/i })).toBeDisabled()
+    })
+
+    test('enables continue button after saving missing birth date in drawer', async () => {
+      const user = userEvent.setup()
+      mockUpdateUserBirthDate.mockResolvedValue({
+        success: true,
+        message: 'Data de nascimento atualizada com sucesso.',
+      })
+
+      render(
+        <ConfirmInscriptionClient
+          userInfo={{ ...completeUserInfo, nascimento: undefined }}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnitsSingle}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      expect(screen.getByRole('button', { name: /Continuar/i })).toBeDisabled()
+
+      await user.click(screen.getByText(/Informe sua data de nascimento/i))
+
+      const dateInput = await waitFor(() => {
+        const input = document.querySelector('#birth-date-input')
+        expect(input).toBeTruthy()
+        return input as HTMLInputElement
+      })
+
+      await user.clear(dateInput)
+      await user.type(dateInput, '1990-05-15')
+
+      const saveButton = await screen.findByRole('button', { name: 'Salvar' })
+      await waitFor(() => expect(saveButton).not.toBeDisabled())
+      await user.click(saveButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('15/05/1990')).toBeInTheDocument()
+      })
+      expect(
+        screen.getByRole('button', { name: /Confirmar inscrição/i })
+      ).not.toBeDisabled()
     })
   })
 

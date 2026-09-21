@@ -1,14 +1,22 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { updateUserBirthDate } from '@/actions/update-user-birth-date'
 import { ConfirmarInformacoesContent } from '../confirmar-informacoes-content'
 import type { EmpregosUserInfo } from '../types'
 
+const mockUpdateUserBirthDate = vi.mocked(updateUserBirthDate)
+
 const mockPush = vi.fn()
+const mockRefresh = vi.fn()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+}))
+
+vi.mock('@/actions/update-user-birth-date', () => ({
+  updateUserBirthDate: vi.fn(),
 }))
 
 const validPhone = {
@@ -381,6 +389,46 @@ describe('ConfirmarInformacoesContent', () => {
       expect(
         screen.queryByText('Informe sua data de nascimento')
       ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+
+    test('habilita Continuar após salvar data de nascimento ausente no drawer', async () => {
+      const user = userEvent.setup()
+      mockUpdateUserBirthDate.mockResolvedValue({
+        success: true,
+        message: 'Data de nascimento atualizada com sucesso.',
+      })
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={{ ...baseUserInfo, nascimento: undefined }}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+
+      await user.click(screen.getByText('Informe sua data de nascimento'))
+
+      const dateInput = (await waitFor(() => {
+        const input = document.querySelector('#birth-date-input')
+        expect(input).toBeTruthy()
+        return input as HTMLInputElement
+      })) as HTMLInputElement
+
+      await user.clear(dateInput)
+      await user.type(dateInput, '1990-05-15')
+
+      const saveButton = await screen.findByRole('button', { name: 'Salvar' })
+      await waitFor(() => expect(saveButton).not.toBeDisabled())
+      await user.click(saveButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('15/05/1990')).toBeInTheDocument()
+      })
       expect(
         screen.getByRole('button', { name: 'Continuar' })
       ).not.toBeDisabled()
