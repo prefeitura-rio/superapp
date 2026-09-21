@@ -6,16 +6,22 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
+  CertidaoDamResponse,
   ConsultaFiltroRequest,
+  DividaAtivaConsultaResponse,
+  EnderecoCepResponse,
   GetDividaAtivaCertidoesParams,
   GetDividaAtivaRequerimentosParams,
+  PdfUrlResponse,
+  RequerimentoParcelamentoResponse,
   ValidarSenhaRequest,
+  ValidarSenhaResponse,
 } from '../models'
 
 import { customFetchDividaAtiva } from '../../../custom-fetch-divida-ativa'
 
 export type getDividaAtivaCepCepResponse200 = {
-  data: void
+  data: EnderecoCepResponse
   status: 200
 }
 
@@ -47,7 +53,7 @@ export const getDividaAtivaCepCep = async (
 }
 
 export type getDividaAtivaCertidoesResponse200 = {
-  data: void
+  data: CertidaoDamResponse
   status: 200
 }
 
@@ -94,7 +100,7 @@ export const getDividaAtivaCertidoes = async (
 }
 
 export type postDividaAtivaConsultarResponse200 = {
-  data: void
+  data: DividaAtivaConsultaResponse
   status: 200
 }
 
@@ -129,7 +135,7 @@ export const postDividaAtivaConsultar = async (
 }
 
 export type getDividaAtivaRequerimentosResponse200 = {
-  data: void
+  data: RequerimentoParcelamentoResponse[]
   status: 200
 }
 
@@ -176,7 +182,7 @@ export const getDividaAtivaRequerimentos = async (
 }
 
 export type postDividaAtivaRequerimentosIdCancelarResponse200 = {
-  data: void
+  data: RequerimentoParcelamentoResponse
   status: 200
 }
 
@@ -209,7 +215,7 @@ export const postDividaAtivaRequerimentosIdCancelar = async (
 }
 
 export type getDividaAtivaRequerimentosIdComprovanteResponse200 = {
-  data: void
+  data: PdfUrlResponse
   status: 200
 }
 
@@ -242,7 +248,7 @@ export const getDividaAtivaRequerimentosIdComprovante = async (
 }
 
 export type getDividaAtivaRequerimentosIdFormularioResponse200 = {
-  data: void
+  data: PdfUrlResponse
   status: 200
 }
 
@@ -275,7 +281,7 @@ export const getDividaAtivaRequerimentosIdFormulario = async (
 }
 
 export type postDividaAtivaValidarSenhaResponse200 = {
-  data: void
+  data: ValidarSenhaResponse
   status: 200
 }
 
