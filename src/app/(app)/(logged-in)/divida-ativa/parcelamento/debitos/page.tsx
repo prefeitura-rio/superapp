@@ -1,7 +1,10 @@
 import { DebitosSelecao } from '@/app/components/divida-ativa/debitos-selecao'
 import { DebitosVazio } from '@/app/components/divida-ativa/debitos-vazio'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { getDalDividaAtivaConsultaAvulsa } from '@/lib/dal'
+import {
+  getDalDividaAtivaConsultaAvulsa,
+  getDalDividaAtivaDebitos,
+} from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import type { CriterioDebitos } from '@/types/divida-ativa'
 import { redirect } from 'next/navigation'
@@ -30,11 +33,21 @@ function criterioDaUrl(params: {
 /**
  * Débitos encontrados para o número consultado, e a seleção do que entra no parcelamento.
  *
- * Os três modos de entrada convergem nesta rota e numa única chamada —
- * `POST /divida-ativa/consultar`, que aceita qualquer um dos critérios e devolve a mesma
- * resposta. A alternativa, `GET /imoveis/{inscricao}/divida-ativa`, serviria só o modo
- * inscrição **e** responderia 404 para imóvel fora de Meus Imóveis: a tela de entrada aceita
- * qualquer inscrição digitada, então esse 404 seria o caminho comum, não a exceção.
+ * ### Por que dois endpoints, e não um
+ *
+ * O contrato tem `POST /divida-ativa/consultar`, que aceita qualquer um dos três critérios
+ * e resolveria a tela com uma chamada só. **Ele não está deployado em homologação** — o
+ * swagger de hom não o lista e a rota responde 404, enquanto o
+ * `GET /imoveis/{inscricao}/divida-ativa` responde 401 sem token, ou seja, existe. Ele veio
+ * para o `divida-ativa-api.yaml` deste repositório pela branch do backend, não pelo que está
+ * no ar. É a única rota em que os dois divergem.
+ *
+ * Então o modo inscrição usa o GET, que funciona hoje, e os outros dois seguem no endpoint
+ * do contrato — que falha até o backend subir. Trocar os três pelo GET não é opção: ele leva
+ * a inscrição no path, e não há onde pôr uma CDA ou uma execução fiscal.
+ *
+ * O preço do GET é exigir o imóvel cadastrado em Meus Imóveis: inscrição de fora dela
+ * responde 404. Enquanto a consulta avulsa não sobe, esse é o comportamento.
  *
  * ⚠️ A chamada atravessa o ePortal e leva ~16 s — daí o `loading.tsx` com skeleton ao lado.
  *
@@ -61,7 +74,11 @@ export default async function DebitosPage({
   }
 
   const { cpf } = await getUserInfoFromToken()
-  const debitos = await getDalDividaAtivaConsultaAvulsa(criterio, cpf)
+
+  const debitos =
+    criterio.tipo === 'inscricao'
+      ? await getDalDividaAtivaDebitos(criterio.valor, cpf)
+      : await getDalDividaAtivaConsultaAvulsa(criterio, cpf)
 
   // `null` é falha da API — indisponibilidade do ePortal, token recusado. "Sem débito" é
   // outra coisa, e chega aqui como objeto com listas vazias.

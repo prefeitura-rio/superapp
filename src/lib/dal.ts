@@ -658,7 +658,15 @@ export async function getDalDividaAtivaDebitos(
       'debitos.status': result.status,
     })
 
-    if (result.status !== 200) return null
+    if (result.status !== 200) {
+      // O span cobre produção, mas o tracing fica desligado em dev — e uma chamada de 16 s
+      // que falha em silêncio custa caro para diagnosticar. Só o status: o número consultado
+      // é dado financeiro do cidadão e não entra em log.
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /imoveis/{inscricao}/divida-ativa respondeu ${result.status}`
+      )
+      return null
+    }
 
     const debitos = mapApiToDebitos(result.data)
 
@@ -733,7 +741,16 @@ export async function getDalDividaAtivaConsultaAvulsa(
       'consulta.status': result.status,
     })
 
-    if (result.status !== 200) return null
+    if (result.status !== 200) {
+      const pista =
+        result.status === 404
+          ? ' — endpoint ausente em homologação; ver docs/divida-ativa.md'
+          : ''
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/consultar respondeu ${result.status}${pista}`
+      )
+      return null
+    }
 
     const debitos = mapApiToDebitos(result.data)
 
