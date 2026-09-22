@@ -178,3 +178,18 @@ export interface RequerimentoDividaAtiva {
   /** Texto institucional da API. Nunca escrever um motivo no front. */
   motivoIndeferimento: string | null
 }
+
+/**
+ * O critério único com que a tela de débitos consulta a API.
+ *
+ * "Único" é regra da API (RN-001/RN-002): `ConsultaFiltroRequest` aceita vários campos, mas
+ * a consulta é por **um** deles. Modelar como união fechada em vez de objeto com três
+ * opcionais impede, no tipo, a chamada ambígua que a API recusaria.
+ *
+ * Os três correspondem aos modos da tela de entrada — inscrição imobiliária (o imóvel), CDA
+ * (a dívida inscrita) e execução fiscal (o processo judicial).
+ */
+export type CriterioDebitos =
+  | { tipo: 'inscricao'; valor: string }
+  | { tipo: 'cda'; valor: string }
+  | { tipo: 'execucao-fiscal'; valor: string }

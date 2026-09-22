@@ -1,5 +1,6 @@
 import {
   getDalDividaAtivaCadastroFazenda,
+  getDalDividaAtivaConsultaAvulsa,
   getDalDividaAtivaConsultaInscricao,
   getDalDividaAtivaDebitos,
   getDalDividaAtivaImoveis,
@@ -403,5 +404,220 @@ describe('getDalDividaAtivaDebitos', () => {
     await getDalDividaAtivaDebitos('0.000.001-8', CPF)
 
     expect(pathChamado).toBe('00000018')
+  })
+})
+
+describe('getDalDividaAtivaConsultaAvulsa', () => {
+  /**
+   * A razão de esta função existir. `GET /imoveis/{inscricao}/divida-ativa` exige o imóvel
+   * cadastrado e só aceita inscrição no path — não há onde colocar uma CDA ou uma execução
+   * fiscal. A consulta avulsa é o único caminho para os outros dois modos da tela de entrada.
+   */
+  test('consulta por CDA enviando somente numCda', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '20240000111' },
+      CPF
+    )
+
+    // Critério único: os outros campos não podem ir junto, nem como `undefined` explícito.
+    expect(corpo).toEqual({ numCda: '20240000111' })
+  })
+
+  test('consulta por execução fiscal enviando somente numExecucaoFiscal', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'execucao-fiscal', valor: '00071070720188190001' },
+      CPF
+    )
+
+    expect(corpo).toEqual({ numExecucaoFiscal: '00071070720188190001' })
+  })
+
+  /**
+   * A máscara é exibição, nunca transporte — a mesma regra do formulário de entrada. Se o
+   * critério chegar pontuado pela URL, o que vai para a API são só os dígitos.
+   */
+  test('envia somente os dígitos do critério', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'inscricao', valor: '0.521.766-3' },
+      CPF
+    )
+
+    expect(corpo).toEqual({ numInscricao: '05217663' })
+  })
+
+  test('mapeia a resposta para o mesmo tipo de visão da consulta por inscrição', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json(
+          {
+            imovel: null,
+            imovelCadastrado: false,
+            cdas: [
+              {
+                cdaId: '20240000111',
+                exercicio: '2024',
+                naturezaDivida: 'IPTU',
+                receita: 'IPTU/Taxas - Predial',
+                situacaoPrincipal: 'EM ABERTO',
+                situacaoHonorarios: 'EM ABERTO',
+                faseCobranca: 'AJUIZADA',
+                valorSaldoPrincipal: '1.534,21',
+                valorSaldoHonorarios: '153,42',
+                inscricaoImobiliaria: '00000018',
+                selecionavelParcelamento: true,
+                protocoloRequerimentoAberto: null,
+              },
+            ],
+            totalCdas: 1,
+            guiasParceladas: [],
+            totalParcelado: 0,
+            totalDebitos: 1,
+            mensagem: null,
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const debitos = await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '20240000111' },
+      CPF
+    )
+
+    expect(debitos?.cdas).toHaveLength(1)
+    expect(debitos?.cdas[0]).toMatchObject({
+      numeroCda: '20240000111',
+      exercicio: 2024,
+      natureza: 'IPTU',
+      valorPrincipal: 1534.21,
+      valorHonorarios: 153.42,
+      parcelavel: true,
+    })
+    // Consulta avulsa é somente leitura: a API sinaliza que o imóvel não está em Meus Imóveis.
+    expect(debitos?.imovelCadastrado).toBe(false)
+  })
+
+  /**
+   * "Sem débito" **não** é `null`: é 200 com listas vazias, e a tela tem estado próprio —
+   * a do Figma diz "Não encontramos nenhum débito associado ao número informado". Confundir
+   * os dois mandaria o cidadão para o error boundary em vez da tela desenhada.
+   */
+  test('resposta vazia devolve objeto com listas vazias, não null', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json(
+          {
+            imovel: null,
+            imovelCadastrado: false,
+            cdas: [],
+            totalCdas: 0,
+            guiasParceladas: [],
+            totalParcelado: 0,
+            totalDebitos: 0,
+            mensagem: 'Nao ha debitos inscritos em divida ativa.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const debitos = await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '99999' },
+      CPF
+    )
+
+    expect(debitos).not.toBeNull()
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.mensagem).toBe('Nao ha debitos inscritos em divida ativa.')
+  })
+
+  test('devolve null quando a API não responde 200', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json({}, { status: 503 })
+      )
+    )
+
+    const debitos = await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '20240000111' },
+      CPF
+    )
+
+    expect(debitos).toBeNull()
   })
 })

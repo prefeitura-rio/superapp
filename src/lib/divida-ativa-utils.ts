@@ -111,3 +111,21 @@ export function isExecucaoFiscalValida(valor: string): boolean {
 export function isCdaValida(valor: string): boolean {
   return somenteDigitos(valor).length > 0
 }
+
+/**
+ * Valor monetário em reais, no formato que o Figma mostra: `R$1.534,21` — sem espaço
+ * depois do cifrão, como no resto do app (ver `src/lib/emprego-utils.ts`).
+ *
+ * Devolve `null` para valor ausente, e não `R$0,00`: zero é um saldo, ausência é
+ * desconhecimento, e a tela precisa distinguir os dois para omitir a linha em vez de
+ * afirmar que o cidadão não deve nada. Premissa P1 — valores monetários ainda não foram
+ * vistos preenchidos em homologação.
+ */
+export function formatarValorBRL(valor: number | null): string | null {
+  if (valor === null || !Number.isFinite(valor)) return null
+
+  return `R$${valor.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}

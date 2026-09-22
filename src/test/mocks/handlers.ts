@@ -262,6 +262,25 @@ export const handlers = [
     )
   }),
 
+  // Dívida Ativa - Consulta avulsa por critério único (inscrição, CDA ou execução fiscal).
+  // Somente leitura e **sem exigir imóvel cadastrado**: é o caminho da tela de débitos, que
+  // aceita qualquer número que o cidadão digite. `imovelCadastrado: false` não é erro.
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/divida-ativa/consultar`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
+      },
+      { status: 200 }
+    )
+  }),
+
   // Dívida Ativa - Consulta de um imóvel já cadastrado + opções do ePortal.
   // Não é consulta prévia à Fazenda: a API exige que o imóvel já exista (404 se não).
   http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/consulta`, () => {
