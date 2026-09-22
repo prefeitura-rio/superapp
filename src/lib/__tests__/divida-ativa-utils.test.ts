@@ -1,6 +1,7 @@
 import {
   formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
+  formatarValorBRL,
   isCdaValida,
   isExecucaoFiscalValida,
   somenteDigitos,
@@ -115,5 +116,31 @@ describe('isCdaValida', () => {
     expect(isCdaValida('')).toBe(false)
     expect(isCdaValida('   ')).toBe(false)
     expect(isCdaValida('abc')).toBe(false)
+  })
+})
+
+describe('formatarValorBRL', () => {
+  test('formata no padrão do Figma, sem espaço depois do cifrão', () => {
+    expect(formatarValorBRL(1534.21)).toBe('R$1.534,21')
+    expect(formatarValorBRL(1765.41)).toBe('R$1.765,41')
+  })
+
+  test('sempre com duas casas decimais', () => {
+    expect(formatarValorBRL(1200)).toBe('R$1.200,00')
+    expect(formatarValorBRL(0.5)).toBe('R$0,50')
+  })
+
+  /**
+   * Zero é um saldo — a CDA quitada existe e vale R$0,00. Ausência é outra coisa, e a tela
+   * omite a linha em vez de afirmar que não há dívida (premissa P1).
+   */
+  test('distingue saldo zero de valor ausente', () => {
+    expect(formatarValorBRL(0)).toBe('R$0,00')
+    expect(formatarValorBRL(null)).toBeNull()
+  })
+
+  test('não deixa NaN chegar à tela', () => {
+    expect(formatarValorBRL(Number.NaN)).toBeNull()
+    expect(formatarValorBRL(Number.POSITIVE_INFINITY)).toBeNull()
   })
 })

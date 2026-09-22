@@ -11,12 +11,14 @@ import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
+import { postDividaAtivaConsultar } from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
 import { getImoveisInscricaoDividaAtiva } from '@/http-divida-ativa/divida-ativa/divida-ativa'
 import {
   getImoveis,
   getImoveisInscricaoCadastro,
   getImoveisInscricaoConsulta,
 } from '@/http-divida-ativa/imoveis/imoveis'
+import type { ConsultaFiltroRequest } from '@/http-divida-ativa/models'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -35,6 +37,7 @@ import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type {
+  CriterioDebitos,
   DebitosDividaAtiva,
   ImovelDividaAtiva,
 } from '@/types/divida-ativa'
@@ -663,6 +666,81 @@ export async function getDalDividaAtivaDebitos(
       'debitos.cdas': debitos.cdas.length,
       'debitos.guias': debitos.guiasParceladas.length,
       'debitos.total': debitos.totalDebitos,
+    })
+
+    return debitos
+  })
+}
+
+/**
+ * Traduz o critério da tela para o corpo que `POST /divida-ativa/consultar` espera.
+ *
+ * Monta **um campo só**, e não um objeto com três opcionais: a API consulta por critério
+ * único (RN-001/RN-002), e `JSON.stringify` omitiria os `undefined` de qualquer forma — mas
+ * aí o "único" seria acidente de serialização em vez de garantia. Sempre só os dígitos: a
+ * máscara é exibição, nunca transporte.
+ */
+function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
+  const digitos = somenteDigitos(criterio.valor)
+
+  switch (criterio.tipo) {
+    case 'inscricao':
+      return { numInscricao: digitos }
+    case 'cda':
+      return { numCda: digitos }
+    case 'execucao-fiscal':
+      return { numExecucaoFiscal: digitos }
+  }
+}
+
+/**
+ * Consulta avulsa de débitos por inscrição, CDA ou execução fiscal.
+ *
+ * Complementa `getDalDividaAtivaDebitos`, que só serve o modo inscrição **e** exige o imóvel
+ * cadastrado em Meus Imóveis: `GET /imoveis/{inscricao}/divida-ativa` leva a inscrição no
+ * path, e não há onde pôr uma CDA ou uma execução fiscal. Este endpoint é somente leitura e
+ * atende os três modos da tela de entrada, devolvendo a mesma `DividaAtivaConsultaResponse`
+ * — por isso o mesmo mapper e o mesmo tipo de visão.
+ *
+ * `imovelCadastrado: false` na resposta não é erro: é a via de quem chegou com a carta da
+ * PGM na mão e ainda não cadastrou o imóvel. A tela usa esse sinal para oferecer o cadastro,
+ * porque requerer parcelamento exige estar cadastrado.
+ *
+ * ⚠️ **Custo.** Atravessa o ePortal; medimos 16 s em chamada do mesmo caminho. A rota precisa
+ * de `loading.tsx` com skeleton.
+ *
+ * Devolve `null` só quando a API não responde 200. "Sem débito" é 200 com listas vazias e
+ * `mensagem` preenchida — estado de tela, não falha.
+ */
+export async function getDalDividaAtivaConsultaAvulsa(
+  criterio: CriterioDebitos,
+  cpf: string
+): Promise<DebitosDividaAtiva | null> {
+  return withSpan('dal.getDividaAtivaConsultaAvulsa', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    // O critério identifica dado financeiro do cidadão; só o tipo entra no span, nunca o valor.
+    span.setAttribute('consulta.criterio', criterio.tipo)
+
+    const result = await postDividaAtivaConsultar(
+      criterioParaFiltro(criterio),
+      {
+        cache: 'no-store',
+      }
+    )
+
+    addSpanEvent('divida-ativa.consulta-avulsa.fetched', {
+      'consulta.status': result.status,
+    })
+
+    if (result.status !== 200) return null
+
+    const debitos = mapApiToDebitos(result.data)
+
+    addSpanEvent('divida-ativa.consulta-avulsa.mapped', {
+      'debitos.cdas': debitos.cdas.length,
+      'debitos.guias': debitos.guiasParceladas.length,
+      'debitos.imovel-cadastrado': debitos.imovelCadastrado,
     })
 
     return debitos
