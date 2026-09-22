@@ -2,6 +2,7 @@ import {
   formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
   formatarValorBRL,
+  inscricaoParaApi,
   isCdaValida,
   isExecucaoFiscalValida,
   somenteDigitos,
@@ -142,5 +143,37 @@ describe('formatarValorBRL', () => {
   test('não deixa NaN chegar à tela', () => {
     expect(formatarValorBRL(Number.NaN)).toBeNull()
     expect(formatarValorBRL(Number.POSITIVE_INFINITY)).toBeNull()
+  })
+})
+
+describe('inscricaoParaApi', () => {
+  /**
+   * A razão de existir. O carnê traz 7 dígitos; o cadastro da API guarda 8, com o zero à
+   * esquerda (premissa P21, e é o que a decisão D7 exibe). O endpoint de débitos leva a
+   * inscrição no path e **não** documenta a normalização que o `/consulta` promete — sem
+   * completar aqui, os 7 dígitos digitados não casam com o registro de 8 e a API responde 404.
+   */
+  test('completa com zero à esquerda até as 8 posições da API', () => {
+    expect(inscricaoParaApi('5217663')).toBe('05217663')
+    expect(inscricaoParaApi('18')).toBe('00000018')
+  })
+
+  test('deixa intacta a inscrição que já tem 8 dígitos', () => {
+    expect(inscricaoParaApi('05217663')).toBe('05217663')
+    expect(inscricaoParaApi('06666929')).toBe('06666929')
+  })
+
+  /** Máscara é exibição, nunca transporte — vale aqui como no resto do módulo. */
+  test('descarta a máscara antes de completar', () => {
+    expect(inscricaoParaApi('521.766-3')).toBe('05217663')
+    expect(inscricaoParaApi('0.521.766-3')).toBe('05217663')
+  })
+
+  /**
+   * Nada de truncar: um valor longo demais é erro de quem chamou, e cortar dígitos mandaria
+   * à API uma inscrição de outro imóvel — pior que um 404 honesto.
+   */
+  test('não mexe em valor maior que 8 dígitos', () => {
+    expect(inscricaoParaApi('123456789')).toBe('123456789')
   })
 })

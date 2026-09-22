@@ -129,3 +129,26 @@ export function formatarValorBRL(valor: number | null): string | null {
     maximumFractionDigits: 2,
   })}`
 }
+
+/** Posições com que a API grava e devolve a inscrição imobiliária (premissa P21). */
+export const INSCRICAO_DIGITOS_API = 8
+
+/**
+ * Forma canônica da inscrição para ir à API: 8 dígitos, completando com zero à esquerda.
+ *
+ * O carnê de IPTU traz 7 dígitos e o cadastro da API guarda 8 — é o mesmo zero que a decisão
+ * D7 manda exibir. `GET /imoveis/{inscricao}/divida-ativa` leva a inscrição no **path** e,
+ * ao contrário de `/imoveis/{inscricao}/consulta`, não documenta normalização nenhuma; sem
+ * completar aqui, quem digita o número do carnê recebe 404 de imóvel não cadastrado mesmo
+ * tendo o imóvel cadastrado.
+ *
+ * Valor acima de 8 dígitos passa intacto: truncar mandaria à API a inscrição de outro
+ * imóvel, o que é pior que um 404 honesto.
+ */
+export function inscricaoParaApi(valor: string): string {
+  const digitos = somenteDigitos(valor)
+
+  return digitos.length < INSCRICAO_DIGITOS_API
+    ? digitos.padStart(INSCRICAO_DIGITOS_API, '0')
+    : digitos
+}
