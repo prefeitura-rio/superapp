@@ -37,6 +37,7 @@ import { inscricaoParaApi, somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type {
+  ConsultaDebitos,
   CriterioDebitos,
   DebitosDividaAtiva,
   ImovelDividaAtiva,
@@ -644,7 +645,7 @@ export async function getDalDividaAtivaConsultaInscricao(
 export async function getDalDividaAtivaDebitos(
   inscricao: string,
   cpf: string
-): Promise<DebitosDividaAtiva | null> {
+): Promise<ConsultaDebitos> {
   return withSpan('dal.getDividaAtivaDebitos', async span => {
     span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
     span.setAttribute('cache.strategy', 'no-store')
@@ -666,7 +667,13 @@ export async function getDalDividaAtivaDebitos(
         `[DAL_DIVIDA_ATIVA] GET /imoveis/{inscricao}/divida-ativa respondeu ${result.status} ` +
           `(inscricao com ${inscricaoParaApi(inscricao).length} digitos)`
       )
-      return null
+
+      // Este endpoint exige o imóvel cadastrado, então o 404 dele é do **recurso**: a
+      // inscrição não está em Meus Imóveis. É acionável pelo cidadão — cadastrar resolve —
+      // ao contrário de qualquer outra falha, em que não há o que ele corrija.
+      return result.status === 404
+        ? { situacao: 'nao-cadastrado' }
+        : { situacao: 'indisponivel' }
     }
 
     const debitos = mapApiToDebitos(result.data)
@@ -677,7 +684,7 @@ export async function getDalDividaAtivaDebitos(
       'debitos.total': debitos.totalDebitos,
     })
 
-    return debitos
+    return { situacao: 'ok', debitos }
   })
 }
 
@@ -724,7 +731,7 @@ function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
 export async function getDalDividaAtivaConsultaAvulsa(
   criterio: CriterioDebitos,
   cpf: string
-): Promise<DebitosDividaAtiva | null> {
+): Promise<ConsultaDebitos> {
   return withSpan('dal.getDividaAtivaConsultaAvulsa', async span => {
     span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
     span.setAttribute('cache.strategy', 'no-store')
@@ -750,7 +757,11 @@ export async function getDalDividaAtivaConsultaAvulsa(
       console.error(
         `[DAL_DIVIDA_ATIVA] POST /divida-ativa/consultar respondeu ${result.status}${pista}`
       )
-      return null
+
+      // Aqui o 404 é da **rota**, não do recurso: o endpoint não foi deployado em
+      // homologação. Mandar o cidadão cadastrar um imóvel não consertaria nada, então é
+      // indisponibilidade — ao contrário do 404 do GET acima.
+      return { situacao: 'indisponivel' }
     }
 
     const debitos = mapApiToDebitos(result.data)
@@ -761,6 +772,6 @@ export async function getDalDividaAtivaConsultaAvulsa(
       'debitos.imovel-cadastrado': debitos.imovelCadastrado,
     })
 
-    return debitos
+    return { situacao: 'ok', debitos }
   })
 }
