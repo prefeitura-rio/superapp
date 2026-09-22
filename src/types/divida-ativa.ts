@@ -193,3 +193,27 @@ export type CriterioDebitos =
   | { tipo: 'inscricao'; valor: string }
   | { tipo: 'cda'; valor: string }
   | { tipo: 'execucao-fiscal'; valor: string }
+
+/**
+ * Desfecho de uma consulta de débitos.
+ *
+ * Substitui o `DebitosDividaAtiva | null` que a fatia 1 devolvia. O `null` colapsava três
+ * situações que a tela precisa distinguir, e a distinção não é cosmética — ela decide o que
+ * o cidadão deve fazer a seguir:
+ *
+ * - `nao-cadastrado` (404): o imóvel não está em Meus Imóveis. Tentar de novo **não**
+ *   resolve; cadastrar resolve.
+ * - `indisponivel` (503 e demais): o serviço de dívida ativa do DAM está fora. O número
+ *   digitado está certo e tentar de novo mais tarde resolve.
+ *
+ * Medido em homologação em 22/09/2026: inscrição cadastrada devolve 503
+ * (`{"error":"Servico de Divida Ativa indisponivel no momento."}`) enquanto
+ * `/imoveis/{inscricao}/consulta`, que atravessa o mesmo ePortal, devolve 200 — ou seja, os
+ * dois desfechos acontecem de verdade e chegam pelo mesmo `null` de antes.
+ *
+ * "Sem débito" não está aqui: é `ok` com listas vazias, porque é resposta legítima da API.
+ */
+export type ConsultaDebitos =
+  | { situacao: 'ok'; debitos: DebitosDividaAtiva }
+  | { situacao: 'nao-cadastrado' }
+  | { situacao: 'indisponivel' }

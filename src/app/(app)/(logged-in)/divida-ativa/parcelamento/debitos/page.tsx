@@ -1,3 +1,4 @@
+import { DebitosErro } from '@/app/components/divida-ativa/debitos-erro'
 import { DebitosSelecao } from '@/app/components/divida-ativa/debitos-selecao'
 import { DebitosVazio } from '@/app/components/divida-ativa/debitos-vazio'
 import { SecondaryHeader } from '@/app/components/secondary-header'
@@ -75,18 +76,13 @@ export default async function DebitosPage({
 
   const { cpf } = await getUserInfoFromToken()
 
-  const debitos =
+  const consulta =
     criterio.tipo === 'inscricao'
       ? await getDalDividaAtivaDebitos(criterio.valor, cpf)
       : await getDalDividaAtivaConsultaAvulsa(criterio, cpf)
 
-  // `null` é falha da API — indisponibilidade do ePortal, token recusado. "Sem débito" é
-  // outra coisa, e chega aqui como objeto com listas vazias.
-  if (!debitos) {
-    throw new Error('Não foi possível consultar os débitos de dívida ativa.')
-  }
-
-  const temDebitos = debitos.cdas.length > 0
+  const temDebitos =
+    consulta.situacao === 'ok' && consulta.debitos.cdas.length > 0
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -96,10 +92,12 @@ export default async function DebitosPage({
         route="/divida-ativa/parcelamento"
       />
 
-      {temDebitos ? (
-        <DebitosSelecao cdas={debitos.cdas} />
+      {consulta.situacao !== 'ok' ? (
+        <DebitosErro tipo={consulta.situacao} />
+      ) : temDebitos ? (
+        <DebitosSelecao cdas={consulta.debitos.cdas} />
       ) : (
-        <DebitosVazio mensagem={debitos.mensagem} />
+        <DebitosVazio mensagem={consulta.debitos.mensagem} />
       )}
     </div>
   )

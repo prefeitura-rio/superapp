@@ -294,7 +294,8 @@ describe('getDalDividaAtivaDebitos', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
 
     expect(debitos?.imovelCadastrado).toBe(true)
     expect(debitos?.imovel?.inscricao).toBe('00000018')
@@ -335,7 +336,8 @@ describe('getDalDividaAtivaDebitos', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
 
     expect(debitos?.cdas).toEqual([])
     expect(debitos?.guiasParceladas).toEqual([])
@@ -351,7 +353,8 @@ describe('getDalDividaAtivaDebitos', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
 
     expect(debitos?.cdas).toEqual([])
     expect(debitos?.guiasParceladas).toEqual([])
@@ -359,28 +362,55 @@ describe('getDalDividaAtivaDebitos', () => {
   })
 
   /**
-   * 404 é o que a API responde para inscrição que não está em Meus Imóveis — este endpoint
-   * exige o imóvel cadastrado. A tela tem estado para isso; estourar o error boundary seria
-   * pior para quem só digitou a inscrição errada.
+   * 404 e 503 não podem chegar à tela como a mesma coisa. Um diz "o imóvel não está no seu
+   * cadastro" — tentar de novo não resolve, cadastrar resolve. O outro diz "o serviço está
+   * fora" — o número está certo e tentar de novo mais tarde resolve. Era isso que o `null`
+   * de antes apagava.
    */
-  test('devolve null quando o imóvel não está cadastrado (404)', async () => {
+  test('404 vira não-cadastrado', async () => {
     server.use(
       http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
         HttpResponse.json({ error: 'Nao encontrado' }, { status: 404 })
       )
     )
 
-    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toBeNull()
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+      situacao: 'nao-cadastrado',
+    })
   })
 
-  test('devolve null quando a API falha', async () => {
+  /**
+   * O corpo é o que homologação devolveu de verdade em 22/09/2026 para uma inscrição
+   * cadastrada e válida.
+   */
+  test('503 vira indisponível', async () => {
     server.use(
       http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
-        HttpResponse.json({ error: 'Indisponivel' }, { status: 503 })
+        HttpResponse.json(
+          { error: 'Servico de Divida Ativa indisponivel no momento.' },
+          { status: 503 }
+        )
       )
     )
 
-    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toBeNull()
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+      situacao: 'indisponivel',
+    })
+  })
+
+  /** Qualquer outra falha é indisponibilidade: o cidadão não tem o que corrigir. */
+  test('401 e 500 também viram indisponível', async () => {
+    for (const status of [401, 500]) {
+      server.use(
+        http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+          HttpResponse.json({}, { status })
+        )
+      )
+
+      await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+        situacao: 'indisponivel',
+      })
+    }
   })
 
   /**
@@ -554,10 +584,11 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaConsultaAvulsa(
+    const resultado = await getDalDividaAtivaConsultaAvulsa(
       { tipo: 'cda', valor: '20240000111' },
       CPF
     )
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
 
     expect(debitos?.cdas).toHaveLength(1)
     expect(debitos?.cdas[0]).toMatchObject({
@@ -596,10 +627,11 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaConsultaAvulsa(
+    const resultado = await getDalDividaAtivaConsultaAvulsa(
       { tipo: 'cda', valor: '99999' },
       CPF
     )
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
 
     expect(debitos).not.toBeNull()
     expect(debitos?.cdas).toEqual([])
@@ -613,11 +645,32 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
       )
     )
 
-    const debitos = await getDalDividaAtivaConsultaAvulsa(
-      { tipo: 'cda', valor: '20240000111' },
-      CPF
+    await expect(
+      getDalDividaAtivaConsultaAvulsa(
+        { tipo: 'cda', valor: '20240000111' },
+        CPF
+      )
+    ).resolves.toEqual({ situacao: 'indisponivel' })
+  })
+
+  /**
+   * `POST /divida-ativa/consultar` responde 404 em homologação porque a **rota** não foi
+   * deployada, não porque o imóvel não exista. Mapear isso para "não cadastrado" mandaria o
+   * cidadão cadastrar um imóvel que já está cadastrado — daí este endpoint tratar 404 como
+   * indisponibilidade, ao contrário do GET.
+   */
+  test('404 aqui é rota ausente, não imóvel não cadastrado', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json({}, { status: 404 })
+      )
     )
 
-    expect(debitos).toBeNull()
+    await expect(
+      getDalDividaAtivaConsultaAvulsa(
+        { tipo: 'cda', valor: '20240000111' },
+        CPF
+      )
+    ).resolves.toEqual({ situacao: 'indisponivel' })
   })
 })
