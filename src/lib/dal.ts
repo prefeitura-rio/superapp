@@ -33,7 +33,7 @@ import {
   normalizarConsultaFazenda,
   normalizarListaImoveis,
 } from '@/lib/divida-ativa-mappers'
-import { somenteDigitos } from '@/lib/divida-ativa-utils'
+import { inscricaoParaApi, somenteDigitos } from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type {
@@ -610,7 +610,7 @@ export async function getDalDividaAtivaConsultaInscricao(
 
     // O segundo parâmetro é o `exercicio` da query string, que não usamos aqui.
     const result = await getImoveisInscricaoConsulta(
-      somenteDigitos(inscricao),
+      inscricaoParaApi(inscricao),
       undefined,
       { cache: 'no-store' }
     )
@@ -650,7 +650,7 @@ export async function getDalDividaAtivaDebitos(
     span.setAttribute('cache.strategy', 'no-store')
 
     const result = await getImoveisInscricaoDividaAtiva(
-      somenteDigitos(inscricao),
+      inscricaoParaApi(inscricao),
       { cache: 'no-store' }
     )
 
@@ -663,7 +663,8 @@ export async function getDalDividaAtivaDebitos(
       // que falha em silêncio custa caro para diagnosticar. Só o status: o número consultado
       // é dado financeiro do cidadão e não entra em log.
       console.error(
-        `[DAL_DIVIDA_ATIVA] GET /imoveis/{inscricao}/divida-ativa respondeu ${result.status}`
+        `[DAL_DIVIDA_ATIVA] GET /imoveis/{inscricao}/divida-ativa respondeu ${result.status} ` +
+          `(inscricao com ${inscricaoParaApi(inscricao).length} digitos)`
       )
       return null
     }
@@ -693,7 +694,7 @@ function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
 
   switch (criterio.tipo) {
     case 'inscricao':
-      return { numInscricao: digitos }
+      return { numInscricao: inscricaoParaApi(criterio.valor) }
     case 'cda':
       return { numCda: digitos }
     case 'execucao-fiscal':
