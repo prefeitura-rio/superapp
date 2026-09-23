@@ -1,4 +1,4 @@
-import { EmpregosHeaderClient } from '@/app/components/empregos/empregos-header-client'
+
 import { EmpregosPageClient } from '@/app/components/empregos/empregos-page-client'
 import type { VagaCardData } from '@/app/components/empregos/vaga-card'
 import { transformVagaToCardData } from '@/app/components/empregos/vagas-utils'
@@ -27,8 +27,8 @@ export default async function EmpregosPage() {
   }
 
   return (
-    <div className="min-h-lvh">
-      <EmpregosHeaderClient />
+    <div>
+
       <main className="max-w-4xl mx-auto pb-36 text-foreground">
         <EmpregosPageClient recentVagas={recentVagas} />
       </main>
