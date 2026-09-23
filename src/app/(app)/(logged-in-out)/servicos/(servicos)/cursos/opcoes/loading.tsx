@@ -1,40 +1,9 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import Image from 'next/image'
-import Link from 'next/link'
 
 export default function CoursesOptionsLoading() {
   return (
-    <div className="pb-25 pt-20 max-w-4xl mx-auto text-white flex flex-col">
-      <SecondaryHeader
-        route="/servicos/cursos"
-        logo={
-          <Link href="/servicos/cursos">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
-      />
-
-      <div className="flex-1 px-4">
+    <main className="max-w-4xl mx-auto text-foreground pb-10">
+      <div className="px-4 pt-3.5">
         <Skeleton className="h-9 w-20 mb-2 pt-3" />
         <nav className="space-y-1">
           {/* Menu Item 1 - Meus cursos */}
@@ -71,6 +40,6 @@ export default function CoursesOptionsLoading() {
           </div>
         </nav>
       </div>
-    </div>
+    </main>
   )
 }

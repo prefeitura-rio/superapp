@@ -1,6 +1,6 @@
 import { CategoryFiltersMobileSkeleton } from '@/app/components/courses/category-filters-mobile-skeleton'
 import { CategoryFiltersSwipeSkeleton } from '@/app/components/courses/category-filters-swipe-skeleton'
-import { CoursesHeaderClient } from '@/app/components/courses/courses-header-client'
+
 import {
   CourseCardSkeleton,
   RecentlyAddedCoursesSwipeSkeleton,
@@ -76,8 +76,8 @@ function AllCoursesSkeleton() {
 
 export default function CoursesLoading() {
   return (
-    <div className="min-h-lvh">
-      <CoursesHeaderClient />
+    <div>
+
       <main className="max-w-4xl mx-auto pb-34 text-white">
         {/* Category Filters - renderizando ambos e usando classes responsivas para evitar layout shift */}
         <div className="block sm:hidden">
