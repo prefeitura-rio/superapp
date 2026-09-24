@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation'
 const LOGO_LIGHT =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas.png'
 const LOGO_DARK =
-  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas.png'
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas-dark.png'
 
 interface OportunidadesSubHeaderProps {
   menuHref: string
@@ -84,7 +84,7 @@ export function OportunidadesSubHeader({
       <div
         className="w-full px-4 py-4"
         style={{
-          background: 'linear-gradient(180deg, var(--card) 0%, #F1F1F4 100%)',
+          background: 'linear-gradient(180deg, var(--card) 0%, var(--card) 100%)',
         }}
       >
         <div className="mx-auto md:px-4 max-w-4xl">

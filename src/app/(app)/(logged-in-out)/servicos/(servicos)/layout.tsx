@@ -66,7 +66,7 @@ export default function ServicosLayout({
           <OportunidadesSubHeader menuHref={menuHref} logoHref={logoHref} />
           <div
             style={{
-              background: 'linear-gradient(180deg, #F1F1F4 0%, var(--background) 100%)',
+              background: 'linear-gradient(180deg, var(--card) 0%, var(--background) 100%)',
               backgroundSize: '100% 210px',
               backgroundRepeat: 'no-repeat',
             }}
