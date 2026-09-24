@@ -60,7 +60,7 @@ export function FloatNavigationClient({
                   </div>
                   <p
                     className={cn(
-                      'hidden sm:block text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 opcity-100',
+                      'block text-sm leading-5 font-normal tracking-normal transition-opacity duration-150 opcity-100',
                       isActive ? 'text-primary' : 'text-foreground-light/80'
                     )}
                   >
