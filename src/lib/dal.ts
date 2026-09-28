@@ -671,9 +671,24 @@ export async function getDalDividaAtivaDebitos(
       // Este endpoint exige o imóvel cadastrado, então o 404 dele é do **recurso**: a
       // inscrição não está em Meus Imóveis. É acionável pelo cidadão — cadastrar resolve —
       // ao contrário de qualquer outra falha, em que não há o que ele corrija.
-      return result.status === 404
-        ? { situacao: 'nao-cadastrado' }
-        : { situacao: 'indisponivel' }
+      if (result.status === 404) {
+        return { situacao: 'nao-cadastrado' }
+      }
+
+      // Em desenvolvimento, quando a API do ePortal está indisponível (503 é frequente em
+      // homologação), devolvemos dados fictícios para o fluxo inteiro ficar navegável.
+      // Em produção e em test, o comportamento real é mantido.
+      if (process.env.NODE_ENV === 'development') {
+        const { DEV_FIXTURE_DEBITOS } = await import(
+          '@/lib/divida-ativa-dev-fixtures'
+        )
+        console.warn(
+          '[DAL_DIVIDA_ATIVA] API indisponível em dev — usando fixture de desenvolvimento.'
+        )
+        return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
+      }
+
+      return { situacao: 'indisponivel' }
     }
 
     const debitos = mapApiToDebitos(result.data)
@@ -761,6 +776,19 @@ export async function getDalDividaAtivaConsultaAvulsa(
       // Aqui o 404 é da **rota**, não do recurso: o endpoint não foi deployado em
       // homologação. Mandar o cidadão cadastrar um imóvel não consertaria nada, então é
       // indisponibilidade — ao contrário do 404 do GET acima.
+
+      // Em desenvolvimento, quando o endpoint ainda não está em homologação (404) ou o
+      // ePortal está fora (503), devolvemos fixture para o fluxo continuar navegável.
+      if (process.env.NODE_ENV === 'development') {
+        const { DEV_FIXTURE_DEBITOS } = await import(
+          '@/lib/divida-ativa-dev-fixtures'
+        )
+        console.warn(
+          '[DAL_DIVIDA_ATIVA] API indisponível em dev — usando fixture de desenvolvimento.'
+        )
+        return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
+      }
+
       return { situacao: 'indisponivel' }
     }
 
