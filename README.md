@@ -16,7 +16,7 @@
 
 | Category       | Technology                    |
 | -------------- | ----------------------------- |
-| Framework      | Next.js 15.4.6 + React 19     |
+| Framework      | Next.js 16.3.5 + React 19     |
 | Language       | TypeScript                    |
 | Styling        | TailwindCSS 4 + shadcn/ui     |
 | Authentication | Keycloak (Identidade Carioca) |
