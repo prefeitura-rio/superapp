@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { MailIcon, PhoneIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
 import {
@@ -85,50 +85,54 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
     : 'Informação pendente'
 
   return (
-    <div className="pt-20 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-      <SecondaryHeader
-        title=""
-        route={
-          courseSlug
-            ? `/servicos/cursos/confirmar-informacoes/${courseSlug}`
-            : '/servicos/cursos/'
-        }
+    <div className="min-h-lvh text-foreground">
+      <OportunidadesSubHeader
+        menuHref="/servicos/cursos/menu"
+        logoHref="/servicos/cursos"
+        showSearchIcon
+        searchUrl="/busca?tipo=cursos"
       />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 pt-8 pb-10">
+          <h1 className="text-3xl font-medium text-foreground pt-2 pb-6 leading-9 tracking-tight">
+            O que você gostaria de atualizar?
+          </h1>
 
-      <div className="px-4">
-        <h1 className="text-3xl font-medium text-foreground pt-2 pb-6 leading-9 tracking-tight">
-          O que você gostaria de atualizar?
-        </h1>
+          <div className="space-y-0">
+            <MenuItem
+              icon={<PhoneIcon className="h-5 w-5" />}
+              title="Celular"
+              label={phoneDisplay as string}
+              href={`/meu-perfil/informacoes-pessoais/atualizar-telefone${
+                courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
+              }`}
+              showBadge={phoneNeedsUpdate}
+              badgeText="Atualizar"
+            />
 
-        <div className="space-y-0">
-          <MenuItem
-            icon={<PhoneIcon className="h-5 w-5" />}
-            title="Celular"
-            label={phoneDisplay as string}
-            href={`/meu-perfil/informacoes-pessoais/atualizar-telefone${
-              courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
-            }`}
-            showBadge={phoneNeedsUpdate}
-            badgeText="Atualizar"
-          />
+            <MenuItem
+              icon={<MailIcon className="h-5 w-5" />}
+              title="E-mail"
+              label={emailDisplay as string}
+              href={`/meu-perfil/informacoes-pessoais/atualizar-email${
+                courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
+              }`}
+              showBadge={emailNeedsUpdate}
+              badgeText="Atualizar"
+              isLast
+            />
+          </div>
 
-          <MenuItem
-            icon={<MailIcon className="h-5 w-5" />}
-            title="E-mail"
-            label={emailDisplay as string}
-            href={`/meu-perfil/informacoes-pessoais/atualizar-email${
-              courseSlug ? `?redirectFromCourses=${courseSlug}` : ''
-            }`}
-            showBadge={emailNeedsUpdate}
-            badgeText="Atualizar"
-            isLast
-          />
+          <p className="font-sm text-muted-foreground font-normal leading-5 tracking-normal pt-8">
+            As demais informações são obtidas a partir dos dados fornecidos pela
+            plataforma Gov.br
+          </p>
         </div>
-
-        <p className="font-sm text-muted-foreground font-normal leading-5 tracking-normal pt-8">
-          As demais informações são obtidas a partir dos dados fornecidos pela
-          plataforma Gov.br
-        </p>
       </div>
     </div>
   )

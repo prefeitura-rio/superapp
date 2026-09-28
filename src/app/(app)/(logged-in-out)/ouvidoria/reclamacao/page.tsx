@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import autofalante2 from '@/assets/autofalante2.png'
 import autofalante3 from '@/assets/autofalante3.png'
 import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
@@ -7,9 +7,8 @@ import Link from 'next/link'
 
 export default function ReclamacaoPage() {
   return (
-    <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader title="" className="max-w-xl" />
+    <div className="pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
+      <HeaderWrapperClient />
 
       <section className="relative">
         <div className="flex flex-col mb-6 pt-2 ">

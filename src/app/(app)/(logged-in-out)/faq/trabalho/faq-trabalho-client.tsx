@@ -1,44 +1,18 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { useFaqHighlight } from '@/hooks/useFaqHighlight'
 import { useSectionTracker } from '@/hooks/useSectionTracker'
 import type { FaqSection } from '@/lib/faq-utils'
 import { FormattedContent, Highlighted } from '@/lib/faq-utils'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 const FADE_H = 32
 
 export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
   const sectionsForTracker = sections.map(s => ({ id: s.id, title: s.title }))
-  const [headerH, setHeaderH] = useState(80)
   const searchParams = useSearchParams()
   const fromHub = searchParams.get('from') === 'faq'
-
-  useEffect(() => {
-    const headerEl =
-      (document.querySelector('[data-app-header]') as HTMLElement) ||
-      (document.querySelector('header.fixed') as HTMLElement)
-
-    const update = () => setHeaderH(headerEl?.offsetHeight ?? 80)
-    update()
-
-    const ro = headerEl ? new ResizeObserver(update) : null
-    if (headerEl && ro) ro.observe(headerEl)
-    window.addEventListener('resize', update)
-
-    return () => {
-      if (ro && headerEl) ro.unobserve(headerEl)
-      window.removeEventListener('resize', update)
-    }
-  }, [])
 
   const {
     currentTitle,
@@ -47,101 +21,75 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
     miniRef,
     registerSection,
     firstAnchorRef,
-  } = useSectionTracker(sectionsForTracker, headerH)
+  } = useSectionTracker(sectionsForTracker, 0)
 
-  const highlightQuery = useFaqHighlight(headerH)
+  const highlightQuery = useFaqHighlight(0)
   const miniLabel = fromHub ? `Trabalho · ${currentTitle}` : currentTitle
 
   return (
-    <main
-      className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
-      style={{ paddingTop: headerH }}
-    >
-      <SecondaryHeader
-        route="/servicos/trabalho"
-        logo={
-          <Link href="/servicos/trabalho">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
-      />
-
-      {showMini && (
-        <>
-          <div
-            className="fixed left-0 right-0 z-40 bg-background"
-            style={{ top: headerH }}
-            aria-live="polite"
-          >
-            <div className="mx-auto max-w-4xl px-4">
-              <div
-                ref={miniRef}
-                className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
-              >
-                <span key={miniLabel} className="mini-animate inline-block">
-                  {miniLabel}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="fixed left-0 right-0 z-30 pointer-events-none bg-linear-to-b from-background to-background/0"
-            style={{ top: headerH + miniH - 1, height: FADE_H + 1 }}
-          />
-        </>
-      )}
-
-      <div className="p-5 pt-4 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
-        <div className="space-y-8">
-          {sections.map((section, index) => (
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <main className="max-w-4xl min-h-lvh mx-auto pb-10">
+        {showMini && (
+          <>
             <div
-              key={section.id}
-              id={section.id}
-              ref={el => {
-                registerSection(section.id)(el)
-                if (index === 0) {
-                  ;(
-                    firstAnchorRef as React.MutableRefObject<HTMLElement | null>
-                  ).current = el
-                }
-              }}
+              className="fixed left-0 right-0 top-0 z-40 bg-background"
+              aria-live="polite"
             >
-              <div className="space-y-2">
-                <h2 className="text-lg font-medium tracking-normal leading-5">
-                  <Highlighted text={section.title} query={highlightQuery} />
-                </h2>
-                <FormattedContent
-                  content={section.content}
-                  className="text-foreground"
-                  query={highlightQuery}
-                />
+              <div className="mx-auto max-w-4xl px-4">
+                <div
+                  ref={miniRef}
+                  className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
+                >
+                  <span key={miniLabel} className="mini-animate inline-block">
+                    {miniLabel}
+                  </span>
+                </div>
               </div>
-              {index < sections.length - 1 && (
-                <div className="mt-8 border-t border-border" />
-              )}
             </div>
-          ))}
-        </div>
-      </div>
 
-      <style jsx>{`
+            <div
+              className="fixed left-0 right-0 z-30 pointer-events-none bg-linear-to-b from-background to-background/0"
+              style={{ top: miniH - 1, height: FADE_H + 1 }}
+            />
+          </>
+        )}
+
+        <div className="p-5 pt-4 max-w-4xl mx-auto">
+          <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
+          <div className="space-y-8">
+            {sections.map((section, index) => (
+              <div
+                key={section.id}
+                id={section.id}
+                ref={el => {
+                  registerSection(section.id)(el)
+                  if (index === 0) {
+                    ;(
+                      firstAnchorRef as React.MutableRefObject<HTMLElement | null>
+                    ).current = el
+                  }
+                }}
+              >
+                <div className="space-y-2">
+                  <h2 className="text-lg font-medium tracking-normal leading-5">
+                    <Highlighted text={section.title} query={highlightQuery} />
+                  </h2>
+                  <FormattedContent
+                    content={section.content}
+                    className="text-foreground"
+                    query={highlightQuery}
+                  />
+                </div>
+                {index < sections.length - 1 && (
+                  <div className="mt-8 border-t border-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <style jsx>{`
         @keyframes miniSlideIn {
           from {
             opacity: 0;
@@ -163,6 +111,7 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
           }
         }
       `}</style>
-    </main>
+      </main>
+    </div>
   )
 }

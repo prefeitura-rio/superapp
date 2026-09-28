@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { useInviteConductorMutation } from '@/hooks/cadmicro/use-cadmicro-mutations'
@@ -77,14 +77,9 @@ export function ConductorInviteFlow({ vehicleId }: ConductorInviteFlowProps) {
   }, [reset])
 
   return (
-    <div className="mx-auto flex min-h-lvh w-full max-w-[896px] flex-col justify-between bg-background pb-10">
+    <div className="mx-auto flex min-h-lvh w-full max-w-4xl flex-col justify-between bg-background pb-10">
       <div>
-        <SecondaryHeader
-          route={detailPath}
-          className="max-w-[896px]"
-          fixed={false}
-          disabled={isPending}
-        />
+        <ProfileHeaderWrapper />
 
         <div className="px-4 pb-6 pt-2">
           <h1 className="text-xl font-medium leading-6 text-foreground">

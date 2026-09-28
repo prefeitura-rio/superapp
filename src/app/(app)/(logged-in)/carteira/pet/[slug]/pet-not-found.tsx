@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import petsEmptyImage from '@/assets/dog-pet.svg'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import Image from 'next/image'
@@ -6,15 +6,10 @@ import Link from 'next/link'
 
 export function PetNotFound() {
   return (
-    <div className="min-h-screen bg-background max-w-[896px] mx-auto">
-      <SecondaryHeader
-        title=""
-        route="/carteira"
-        className="max-w-[896px]"
-        fixed={false}
-      />
+    <div className="max-w-4xl mx-auto">
+      <ProfileHeaderWrapper />
 
-      <main className="max-w-[896px] pt-2 mx-auto px-4 pb-10">
+      <main className="max-w-4xl pt-2 mx-auto px-4 pb-10">
         <div className="flex flex-col items-center pt-6">
           <Image
             src={petsEmptyImage}

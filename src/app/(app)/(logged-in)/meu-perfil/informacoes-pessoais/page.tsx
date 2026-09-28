@@ -7,7 +7,7 @@ import { FamilyIncomeDrawerContent } from '@/app/components/drawer-contents/fami
 import { GenderDrawerContent } from '@/app/components/drawer-contents/gender-drawer-content'
 import { RaceDrawerContent } from '@/app/components/drawer-contents/race-drawer-content'
 import { SocialNameDrawerContent } from '@/app/components/drawer-contents/social-name-drawer-content'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { EditIcon } from '@/assets/icons/edit-icon'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { formatBirthDatePtBr, isBirthDateEditable } from '@/lib/birth-date'
@@ -64,12 +64,8 @@ export default async function PersonalInfoForm() {
 
   return (
     <>
-      <div className="min-h-screen max-w-4xl mx-auto pb-10 bg-background">
-        <SecondaryHeader
-          title="Informações pessoais"
-          className="relative"
-          route="/meu-perfil"
-        />
+      <div className="max-w-4xl mx-auto pb-10 bg-background">
+        <ProfileHeaderWrapper />
         <div className="space-y-6 p-4">
           <CustomInput
             id="cpf"

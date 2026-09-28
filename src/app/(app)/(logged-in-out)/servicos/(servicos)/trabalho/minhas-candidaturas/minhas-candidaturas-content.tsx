@@ -1,13 +1,8 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import Image from 'next/image'
 import Link from 'next/link'
 import * as React from 'react'
 import type { CandidaturaCardData, StatusUi } from './minhas-candidaturas-utils'
@@ -125,51 +120,44 @@ export function MinhasCandidaturasContent({
 }: MinhasCandidaturasContentProps) {
   const hasCandidaturas = candidaturas.length > 0
 
-  const logo = (
-    <Link href="/servicos/trabalho">
-      <Image
-        src={oportunidadesCariocasLogoDark}
-        alt="Oportunidades Cariocas"
-        width={170}
-        height={38}
-        priority
-        className="dark:block hidden"
-      />
-      <Image
-        src={oportunidadesCariocasLogo}
-        alt="Oportunidades Cariocas"
-        width={170}
-        height={38}
-        priority
-        className="dark:hidden block"
-      />
-    </Link>
-  )
-
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader fixed={false} route="/servicos/trabalho" logo={logo} />
-
-      <div className="px-4 pt-2 md:pt-0">
-        <h1 className="text-3xl font-medium text-foreground pb-2 pt-2">
-          Minhas candidaturas
-        </h1>
-        {hasError ? (
-          <p className="text-foreground font-medium">
-            Não foi possível carregar suas candidaturas. Tente novamente.
-          </p>
-        ) : !hasCandidaturas ? (
-          <p className="text-3xl text-foreground font-medium leading-9 text-left">
-            Você ainda não possui candidaturas enviadas
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-            {candidaturas.map(candidatura => (
-              <CandidaturaCard key={candidatura.id} candidatura={candidatura} />
-            ))}
-          </div>
-        )}
+    <div className="text-foreground">
+      <OportunidadesSubHeader
+        menuHref="/servicos/trabalho/menu"
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
+      />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 pt-2 pb-10">
+          <h1 className="text-3xl font-medium text-foreground pb-2">
+            Minhas candidaturas
+          </h1>
+          {hasError ? (
+            <p className="text-foreground font-medium">
+              Não foi possível carregar suas candidaturas. Tente novamente.
+            </p>
+          ) : !hasCandidaturas ? (
+            <p className="text-3xl text-foreground font-medium leading-9 text-left">
+              Você ainda não possui candidaturas enviadas
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+              {candidaturas.map(candidatura => (
+                <CandidaturaCard
+                  key={candidatura.id}
+                  candidatura={candidatura}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -1,12 +1,9 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { OfficialBanner } from '@/app/components/service'
-import { PrefLogo } from '@/assets/icons/pref-logo'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
-import Link from 'next/link'
-import { useState } from 'react'
 import { PageClient } from './page-client'
 
 interface PageClientWrapperProps {
@@ -22,26 +19,14 @@ export function PageClientWrapper({
   categorySlug,
   ticketFlags,
 }: PageClientWrapperProps) {
-  const [bannerHeight, setBannerHeight] = useState(0)
-
   return (
     <>
-      <OfficialBanner onHeightChange={setBannerHeight} />
+      <OfficialBanner />
 
-      <div className="min-h-lvh max-w-[896px] mx-auto">
-        <SecondaryHeader
-          logo={
-            <Link href="/" className="cursor-pointer">
-              <PrefLogo fill="var(--primary)" className="h-8 w-20" />
-            </Link>
-          }
-          showSearchButton
-          className="max-w-[896px]"
-          defaultRoute="/"
-          style={{ top: `${bannerHeight}px` }}
-        />
+      <div className="max-w-4xl mx-auto">
+        <HeaderWrapperClient />
 
-        <div className="pt-20 md:pt-24 pb-20 px-4">
+        <div className="pb-20 px-4">
           <PageClient
             serviceData={serviceData}
             orgaoGestorName={orgaoGestorName}
