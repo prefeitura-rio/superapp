@@ -292,4 +292,88 @@ export const handlers = [
       { status: 200 }
     )
   }),
+
+  // Dívida Ativa - Datas de vencimento disponíveis para parcelamento (fatia 5).
+  // `DatasVencimentoResponse`: array de strings `dd/MM/yyyy`. O query param `cdas` é
+  // ignorado aqui — o mock devolve as mesmas datas para qualquer combinação de CDAs.
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/datas-vencimento`,
+    () => {
+      return HttpResponse.json(
+        {
+          datas: [
+            '05/10/2026',
+            '05/11/2026',
+            '05/12/2026',
+            '05/01/2027',
+            '05/02/2027',
+          ],
+          mensagem: null,
+        },
+        { status: 200 }
+      )
+    }
+  ),
+
+  // Dívida Ativa - Simulação de parcelamento (fatia 6).
+  // `SimulacaoParcelamentoResponse`: opções de parcela com valor da 1ª parcela e descontos.
+  // Os valores são strings no padrão do DAM (`"1.357,89"`); o front normaliza ao exibir.
+  http.post(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/parcelamentos/simular`,
+    () => {
+      return HttpResponse.json(
+        {
+          valorTotalAvista: '1.357,89',
+          valorSaldoTotalPrincipal: '1.234,56',
+          valorSaldoTotalHonorario: '123,33',
+          valorTotalDescontoPrincipal: '100,00',
+          valorTotalDescontoHonorario: '0,00',
+          valorTotalPagarGrerj: '0,00',
+          opcoes: [
+            {
+              qtdeParcelas: 1,
+              valor1aParcela: '1.357,89',
+              valorJuros: '0,00',
+              valorDescontos: '100,00',
+              valorTotalDescontoPrinc: '100,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 3,
+              valor1aParcela: '465,30',
+              valorJuros: '38,42',
+              valorDescontos: '50,00',
+              valorTotalDescontoPrinc: '50,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 6,
+              valor1aParcela: '240,18',
+              valorJuros: '83,19',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 12,
+              valor1aParcela: '127,53',
+              valorJuros: '172,47',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 24,
+              valor1aParcela: '70,21',
+              valorJuros: '331,14',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+          ],
+        },
+        { status: 200 }
+      )
+    }
+  ),
 ]
