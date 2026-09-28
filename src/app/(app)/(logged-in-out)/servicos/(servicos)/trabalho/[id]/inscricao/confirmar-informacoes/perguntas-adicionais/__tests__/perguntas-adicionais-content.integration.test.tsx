@@ -10,6 +10,7 @@ const mockToastError = vi.fn()
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
+  usePathname: () => '/servicos/trabalho',
 }))
 
 vi.mock('react-hot-toast', () => ({

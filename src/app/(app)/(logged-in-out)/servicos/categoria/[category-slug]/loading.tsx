@@ -1,5 +1,3 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import { PrefLogo } from '@/assets/icons/pref-logo'
 import {
   Accordion,
   AccordionContent,
@@ -7,26 +5,22 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
-import Link from 'next/link'
 
 export default function CategoryServicesLoading() {
   return (
-    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
-      <SecondaryHeader
-        logo={
-          <Link href="/" className="cursor-pointer">
-            <PrefLogo fill="var(--primary)" className="h-8 w-20" />
-          </Link>
-        }
-        showSearchButton
-        className="max-w-[896px]"
-        defaultRoute="/"
-      />
-
-      <div className="min-h-screen text-white">
-        <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-4">
-          <Skeleton className="h-10 w-48 mb-4" />
+    <div className="text-foreground">
+      <header className="relative w-full z-50 bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="rounded-full h-11 w-11" />
+            <Skeleton className="rounded-full h-11 w-11" />
+          </div>
         </div>
+      </header>
+
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <Skeleton className="h-10 w-48 mb-4 mt-2" />
         <div className="flex items-center justify-between mb-2 px-4">
           <Skeleton className="h-5 w-32" />
         </div>
