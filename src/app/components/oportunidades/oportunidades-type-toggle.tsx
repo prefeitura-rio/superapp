@@ -10,8 +10,18 @@ interface OportunidadesTypeToggleProps {
 }
 
 const TABS = [
-  { id: 'cursos', label: 'Cursos', href: '/servicos/cursos', enterFrom: 'left' },
-  { id: 'empregabilidade', label: 'Trabalho', href: '/servicos/trabalho/', enterFrom: 'right' },
+  {
+    id: 'cursos',
+    label: 'Cursos',
+    href: '/servicos/cursos',
+    enterFrom: 'left',
+  },
+  {
+    id: 'empregabilidade',
+    label: 'Trabalho',
+    href: '/servicos/trabalho/',
+    enterFrom: 'right',
+  },
 ] as const
 
 export function OportunidadesTypeToggle({
@@ -69,7 +79,8 @@ export function OportunidadesTypeToggle({
               style={
                 isActive
                   ? {
-                      background: 'linear-gradient(180deg, #227BE7 0%, #2166BB 100%)',
+                      background:
+                        'linear-gradient(180deg, #227BE7 0%, #2166BB 100%)',
                       boxShadow: '0 2px 12px 0 rgba(0, 0, 0, 0.10)',
                     }
                   : {

@@ -1,6 +1,5 @@
 'use client'
 
-import { SearchButton } from '@/app/components/search-button'
 import { WalletContent } from '@/app/components/wallet-content'
 import { WalletContentLoadingSkeleton } from '@/app/components/wallet-page-loading-skeleton'
 import type { WalletApiResponse } from '@/lib/wallet-api-types'
@@ -23,11 +22,10 @@ export function WalletPageClient() {
   if (isLoadingWallet) {
     return (
       <section className="pb-30 relative h-full px-4">
-        <div className="flex items-center justify-between pt-6 pb-4">
+        <div className="pt-6 pb-4">
           <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
             Carteira
           </h2>
-          <SearchButton />
         </div>
         <WalletContentLoadingSkeleton />
       </section>
@@ -50,11 +48,10 @@ export function WalletPageClient() {
 
   return (
     <section className="pb-30 relative h-full px-4">
-      <div className="flex items-center justify-between pt-6 pb-4">
+      <div className="pt-6 pb-4">
         <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
           Carteira
         </h2>
-        <SearchButton />
       </div>
 
       <Suspense>

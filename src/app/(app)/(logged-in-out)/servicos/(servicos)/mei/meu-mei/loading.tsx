@@ -1,4 +1,3 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
 function MeiDataItemSkeleton() {
@@ -12,27 +11,44 @@ function MeiDataItemSkeleton() {
 
 export default function MeuMeiLoading() {
   return (
-    <main className="max-w-xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader defaultRoute="/servicos/mei/menu" fixed={false} />
-      <div className="px-4 pt-4 pb-12">
-        {/* Company name skeleton */}
-        <Skeleton className="h-8 w-3/4 mb-4" />
-
-        {/* Status badge skeleton */}
-        <div className="flex items-center gap-2 mb-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-6 w-16 rounded-full" />
-        </div>
-
-        {/* Data items skeletons */}
-        <div className="flex flex-col">
-          <MeiDataItemSkeleton />
-          <MeiDataItemSkeleton />
-          <MeiDataItemSkeleton />
-          <MeiDataItemSkeleton />
-          <MeiDataItemSkeleton />
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
         </div>
       </div>
-    </main>
+      {/* OportunidadesCariocas band skeleton */}
+      <div className="w-full bg-card py-4">
+        <div className="mx-auto px-4 max-w-4xl">
+          <Skeleton className="h-9 w-44" />
+        </div>
+      </div>
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-xl mx-auto px-4 pt-4 pb-12">
+          <Skeleton className="h-8 w-3/4 mb-4" />
+          <div className="flex items-center gap-2 mb-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </div>
+          <div className="flex flex-col">
+            <MeiDataItemSkeleton />
+            <MeiDataItemSkeleton />
+            <MeiDataItemSkeleton />
+            <MeiDataItemSkeleton />
+            <MeiDataItemSkeleton />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

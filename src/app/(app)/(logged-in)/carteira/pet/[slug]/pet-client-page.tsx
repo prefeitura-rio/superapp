@@ -1,6 +1,6 @@
 import { MicroshippingStatusCard } from '@/app/(app)/(logged-in)/carteira/pet/components/microchipping-status-card'
 import { TutorInfo } from '@/app/(app)/(logged-in)/carteira/pet/components/tutor-info'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import { ChipIcon } from '@/assets/icons/chip-icon'
 import { DogPaw2Icon } from '@/assets/icons/dog-paw2-icon'
@@ -44,13 +44,8 @@ export function PetClientPage({
   const showMicrochipActions = !petHasMicrochip
 
   return (
-    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
-      <SecondaryHeader
-        title="Carteira"
-        route="/carteira"
-        className="max-w-[896px]"
-        fixed={false}
-      />
+    <div className="max-w-4xl mx-auto pb-10">
+      <ProfileHeaderWrapper />
       <div className="pt-2">
         <div className="px-4 flex flex-col gap-4">
           <PetCard

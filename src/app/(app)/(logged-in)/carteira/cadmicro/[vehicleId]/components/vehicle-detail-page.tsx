@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
 import { useDeleteOrLeaveVehicleMutation } from '@/hooks/cadmicro/use-cadmicro-mutations'
@@ -61,23 +61,18 @@ export function VehicleDetailPage({
   }
 
   return (
-    <div className="mx-auto min-h-lvh w-full max-w-[896px] bg-background pb-10">
-      <SecondaryHeader
-        title={vehicle.displayName}
-        route="/carteira?mobilidade=true"
-        className="max-w-[896px]"
-        fixed={false}
-        rightSlot={
-          isConductor ? (
+    <div className="mx-auto w-full max-w-4xl bg-background pb-10">
+      <ProfileHeaderWrapper />
+      <div className="flex flex-col gap-6 px-4 pt-2">
+        {isConductor && (
+          <div className="flex justify-end">
             <IconButton
               icon={TrashIcon}
               aria-label="Excluir veículo"
               onClick={openDeleteDrawer}
             />
-          ) : undefined
-        }
-      />
-      <div className="flex flex-col gap-6 px-4 pt-2">
+          </div>
+        )}
         <VehicleCardPhotoGallery vehicle={vehicle} />
         {!isConductor && (
           <VehicleActionTiles

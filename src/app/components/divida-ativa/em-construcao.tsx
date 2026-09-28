@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
@@ -15,8 +15,8 @@ interface EmConstrucaoProps {
  */
 export function EmConstrucao({ titulo, descricao }: EmConstrucaoProps) {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       <div className="flex flex-1 flex-col px-4">
         <h1 className="pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
@@ -44,8 +44,16 @@ export function EmConstrucao({ titulo, descricao }: EmConstrucaoProps) {
 /** Skeleton fiel ao layout do estado provisório: título, parágrafo e botão. */
 export function EmConstrucaoLoading() {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-1 flex-col px-4">
         <div className="pt-2 pb-6">

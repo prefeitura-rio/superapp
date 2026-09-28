@@ -26,7 +26,7 @@ export default async function Home() {
   return (
     <AuthStatusProvider>
       <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
-        <HeaderWrapperClient />
+        <HeaderWrapperClient showSearchPlaceholder />
 
         {/* Requests in progress banner — only visible when logged in with recent requests */}
         {isChamadosEnabled && <RequestsInProgressBanner />}

@@ -1,7 +1,6 @@
 import { CategorySubcategoriesAccordion } from '@/app/components/category-subcategories-accordion'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { MostAccessedServiceLink } from '@/app/components/most-accessed-service-link'
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import { PrefLogo } from '@/assets/icons/pref-logo'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { getCardColorForCategory } from '@/constants/category-color-palettes'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
@@ -12,7 +11,6 @@ import {
   fetchSubcategoriesByCategory,
   getCategoryNameBySlug,
 } from '@/lib/services-utils'
-import Link from 'next/link'
 
 export const revalidate = 600
 
@@ -90,22 +88,14 @@ export default async function CategoryPage({
     }))
 
   return (
-    <div className="min-h-lvh max-w-4xl mx-auto flex flex-col">
-      <SecondaryHeader
-        logo={
-          <Link href="/" className="cursor-pointer">
-            <PrefLogo fill="var(--primary)" className="h-8 w-20" />
-          </Link>
-        }
-        showSearchButton
-        className="max-w-[896px]"
-        defaultRoute="/"
-      />
+    <div className="text-foreground">
+      <HeaderWrapperClient />
 
-      <div className="min-h-screen text-white">
-        <div className="max-w-4xl mx-auto pt-20 md:pt-22 px-4 pb-4">
-          <h1 className="text-4xl font-bold text-foreground">{categoryName}</h1>
-        </div>
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <h1 className="text-4xl font-bold text-foreground pt-2 pb-4">
+          {categoryName}
+        </h1>
+
         {services.length > 0 ? (
           <>
             <div className="flex items-center justify-between mb-2 px-4">

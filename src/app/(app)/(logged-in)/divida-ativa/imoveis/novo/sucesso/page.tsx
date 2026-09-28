@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import imovelAdicionado from '@/assets/imovel-adicionado.png'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import Image from 'next/image'
@@ -9,12 +9,8 @@ import Link from 'next/link'
  */
 export default function ImovelAdicionadoPage() {
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader
-        title=""
-        className="max-w-4xl"
-        route="/divida-ativa/imoveis"
-      />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       <div className="flex flex-1 flex-col px-4">
         <h1 className="pt-2 pb-6 text-center text-3xl font-medium leading-9 text-foreground">

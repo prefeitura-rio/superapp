@@ -1,5 +1,5 @@
 import { NomeImovelForm } from '@/app/components/divida-ativa/nome-imovel-form'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import {
   isInscricaoImobiliariaValida,
   somenteDigitos,
@@ -26,12 +26,8 @@ export default async function NomeImovelPage({
   const inscricaoLimpa = somenteDigitos(inscricao)
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader
-        title=""
-        className="max-w-4xl"
-        route={`/divida-ativa/imoveis/novo/confirmar?inscricao=${inscricaoLimpa}`}
-      />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       <h1 className="px-4 pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
         Escreva um nome para esse imóvel

@@ -1,11 +1,10 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function UserProfileLoading() {
   return (
-    <div className="pt-20 min-h-lvh max-w-4xl mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader title="Perfil" route="/" />
+    <div className="max-w-4xl mx-auto text-foreground flex flex-col">
+      <ProfileHeaderWrapper hideAvatar />
 
       {/* Profile Info Skeleton */}
       <div className="flex flex-col items-center mt-6 mb-10">

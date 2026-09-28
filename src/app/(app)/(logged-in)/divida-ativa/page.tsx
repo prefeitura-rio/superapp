@@ -1,5 +1,5 @@
 import { DividaAtivaLanding } from '@/app/components/divida-ativa/divida-ativa-landing'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getDalDividaAtivaImoveis } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -38,8 +38,8 @@ export default async function DividaAtivaPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-4xl" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       <DividaAtivaLanding quantidadeImoveis={quantidadeImoveis} />
     </div>

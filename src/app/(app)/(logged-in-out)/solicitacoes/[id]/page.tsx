@@ -4,7 +4,7 @@ import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/compone
 import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { decodeHtmlEntities } from '@/lib/html-entities'
 import { useParams, useSearchParams } from 'next/navigation'
@@ -392,15 +392,11 @@ function RequestDetail({ data }: { data: DetailData }) {
   }
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-
-      <div className="pt-25 pb-32 px-4 flex flex-col gap-2">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-2">
         <h1
-          className="text-3xl font-medium text-card-foreground leading-9 mb-4"
+          className="text-3xl font-medium text-card-foreground leading-9 mb-4 pt-2"
           style={{ letterSpacing: '-0.4px' }}
         >
           {data.servico}
@@ -603,13 +599,9 @@ function RequestDetail({ data }: { data: DetailData }) {
 
 function LoadingState() {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-
-      <div className="pt-25 pb-32 px-4 flex flex-col gap-4">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -630,12 +622,9 @@ function LoadingState() {
 
 function ErrorState({ protocolo }: { protocolo: string }) {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-      <div className="pt-25 pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col items-center justify-center text-center gap-2 pt-10">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>

@@ -66,7 +66,8 @@ export default function ServicosLayout({
           <OportunidadesSubHeader menuHref={menuHref} logoHref={logoHref} />
           <div
             style={{
-              background: 'linear-gradient(180deg, var(--card) 0%, var(--background) 100%)',
+              background:
+                'linear-gradient(180deg, var(--card) 0%, var(--background) 100%)',
               backgroundSize: '100% 210px',
               backgroundRepeat: 'no-repeat',
             }}
@@ -76,7 +77,13 @@ export default function ServicosLayout({
                 <div className="max-w-4xl mx-auto pb-0">
                   <OportunidadesSearchPlaceholder searchUrl={searchUrl} />
                   <div className="mb-5 mt-5 px-4">
-                    <OportunidadesTypeToggle activeType={activeType === 'empregabilidade' ? 'empregabilidade' : 'cursos'} />
+                    <OportunidadesTypeToggle
+                      activeType={
+                        activeType === 'empregabilidade'
+                          ? 'empregabilidade'
+                          : 'cursos'
+                      }
+                    />
                   </div>
                 </div>
               ) : (

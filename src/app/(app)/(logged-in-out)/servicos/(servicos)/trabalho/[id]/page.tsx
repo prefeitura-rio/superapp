@@ -37,7 +37,7 @@ export default async function VagaDetailPage({ params }: PageProps) {
     }
 
     return (
-      <div className="min-h-lvh pb-36">
+      <div className="pb-36">
         <VagaDetailClient vaga={vaga} vagaAtiva={vagaAtiva} />
       </div>
     )

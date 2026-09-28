@@ -10,6 +10,7 @@ import { ChevronLeftIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { onboardingSlides } from '@/constants/onboarding-slides'
 import { useViewportHeight } from '@/hooks/useViewport'
+import MainHeader from './main-header'
 import { OnboardingControls } from './onboarding-controls'
 import { OnboardingSlider } from './onboarding-slider'
 import { WelcomeMessage } from './welcome-message'
@@ -76,8 +77,9 @@ export default function Onboarding({
   const showSkipButton = currentIndex < onboardingSlides.length - 1
 
   return (
-    <div className="relative min-h-lvh w-full px-4 mx-auto justify-center bg-background text-foreground flex flex-col overflow-hidden">
-      <div className="relative h-11 flex-shrink-0 pt-8 justify-self-start self-start w-full flex items-center">
+    <div className="relative min-h-lvh w-full mx-auto justify-center bg-background text-foreground flex flex-col overflow-hidden">
+      <MainHeader userName="" isLoggedIn={false} />
+      <div className="relative h-11 shrink-0 pt-8 justify-self-start self-start w-full flex items-center px-4">
         <CustomButton
           className={` bg-card text-muted-foreground rounded-full w-11 h-11 hover:bg-card/80 outline-none focus:ring-0 transition-all duration-300 ease-out ${
             showBackButton

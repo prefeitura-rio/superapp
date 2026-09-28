@@ -19,7 +19,9 @@ async function fetchHeaderData() {
   return response.json()
 }
 
-export default function HeaderWrapperClient() {
+export default function HeaderWrapperClient({
+  showSearchPlaceholder = false,
+}: { showSearchPlaceholder?: boolean }) {
   const { data, isLoading } = useQuery({
     queryKey: ['header'],
     queryFn: fetchHeaderData,
@@ -35,11 +37,15 @@ export default function HeaderWrapperClient() {
         userAvatarUrl={data?.userAvatarUrl ?? null}
         userAvatarName={data?.userAvatarName ?? null}
         isLoading={isLoading}
+        menuHref={undefined}
+        logoHref="/"
       />
 
-      <div>
-        <SearchPlaceholder />
-      </div>
+      {showSearchPlaceholder && (
+        <div>
+          <SearchPlaceholder />
+        </div>
+      )}
     </>
   )
 }
