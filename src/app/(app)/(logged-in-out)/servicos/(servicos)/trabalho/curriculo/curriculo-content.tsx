@@ -59,6 +59,7 @@ import type {
   InitialIdiomaItem,
 } from './get-curriculo-formacao-data'
 import type { InitialSituacaoData } from './get-curriculo-situacao-data'
+import { HabilidadesCompetencias } from './habilidades-competencias'
 import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
@@ -79,6 +80,7 @@ const ACCORDION_ITEMS = [
   { value: 'formacao', title: 'Formação' },
   { value: 'experiencia', title: 'Experiência Profissional' },
   { value: 'situacao', title: 'Situação atual' },
+  { value: 'habilidades-competencias', title: 'Habilidades e Competências' },
   { value: 'termos', title: 'Termos de Uso' },
 ] as const
 
@@ -1833,6 +1835,20 @@ export function CurriculoContent({
                         onSaveSuccess={handleSituacaoSaveSuccess}
                         snapshot={situacaoSnapshotRef.current}
                       />
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="habilidades-competencias"
+                    className="border-b border-border py-2 last:border-b-0"
+                  >
+                    <AccordionTrigger
+                      chevronClassName="text-primary stroke-[1.5]"
+                      className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                    >
+                      Habilidades e Competências
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-5 pb-4">
+                      <HabilidadesCompetencias />
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem
