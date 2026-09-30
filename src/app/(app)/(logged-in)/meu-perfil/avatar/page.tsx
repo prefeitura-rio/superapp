@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import type { ModelsAvatarsListResponse } from '@/http/models'
 import { getDalAvatars, getDalCitizenCpfAvatar } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
@@ -51,8 +51,8 @@ export default async function AvatarPage() {
 
   if (error) {
     return (
-      <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-        <SecondaryHeader title="" route="/meu-perfil" className="max-w-xl" />
+      <div className="pb-4 max-w-xl mx-auto text-foreground flex flex-col">
+        <ProfileHeaderWrapper />
         <div className="px-4 mt-6 text-center">
           <p className="text-destructive">{error}</p>
           <p className="text-sm text-muted-foreground mt-2">
@@ -63,7 +63,6 @@ export default async function AvatarPage() {
     )
   }
 
-  // Filter out inactive avatars, ensure required fields exist, and only show Avatar 1-12
   const availableAvatars =
     avatars.data?.filter(
       avatar => avatar.is_active && avatar.id && avatar.url && avatar.name
@@ -71,8 +70,8 @@ export default async function AvatarPage() {
 
   if (availableAvatars.length === 0) {
     return (
-      <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-        <SecondaryHeader title="" route="/meu-perfil" className="max-w-xl" />
+      <div className="pb-4 max-w-xl mx-auto text-foreground flex flex-col">
+        <ProfileHeaderWrapper />
         <div className="px-4 mt-6 text-center">
           <p className="text-muted-foreground">
             Nenhum avatar disponível no momento
@@ -86,9 +85,8 @@ export default async function AvatarPage() {
   }
 
   return (
-    <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader title="" route="/meu-perfil" className="max-w-xl" />
+    <div className="pb-4 max-w-xl mx-auto text-foreground flex flex-col">
+      <ProfileHeaderWrapper />
 
       {/* Avatar Grid */}
       <AvatarSelector

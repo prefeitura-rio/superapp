@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { HealthCard } from '@/app/components/wallet-cards/health-card'
 import {
   CalendarIcon,
@@ -80,12 +80,8 @@ export default async function HealthCardDetail() {
     healthData?.clinica_familia?.indicador === false
   ) {
     return (
-      <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
-        <SecondaryHeader
-          title="Carteira"
-          className="max-w-[896px]"
-          fixed={false}
-        />
+      <div className="max-w-4xl mx-auto pb-10">
+        <ProfileHeaderWrapper />
         <div className="flex items-center justify-center px-4 pt-2">
           <p className="text-muted-foreground text-center py-6">
             Dados de saúde não disponíveis.
@@ -135,12 +131,8 @@ export default async function HealthCardDetail() {
   const isNormalRiskStatus = riskStatus?.risco === 'Verde'
 
   return (
-    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
-      <SecondaryHeader
-        title="Carteira"
-        className="max-w-[896px]"
-        fixed={false}
-      />
+    <div className="max-w-4xl mx-auto pb-10">
+      <ProfileHeaderWrapper />
       <div className="z-50">
         <div className="px-4 pt-2">
           <HealthCard

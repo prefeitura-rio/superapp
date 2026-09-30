@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function MyCoursesLoading() {
+export default function InscricaoLoading() {
   return (
     <div className="text-foreground">
       {/* MainHeader skeleton */}
@@ -25,25 +25,17 @@ export default function MyCoursesLoading() {
             'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
         }}
       >
-        <div className="max-w-4xl mx-auto px-4 pt-6 pb-10">
-          <Skeleton className="h-4 w-28 mb-4" />
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 rounded-lg py-3 bg-background"
-              >
-                <div className="relative w-30 h-30 overflow-hidden rounded-xl">
-                  <Skeleton className="w-full h-full" />
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2 mb-2" />
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                </div>
-              </div>
-            ))}
+        <div className="px-4 max-w-4xl mx-auto pt-8 pb-10 flex flex-col gap-4">
+          <Skeleton className="h-9 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/5" />
+          <div className="flex flex-col gap-3 mt-4">
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
           </div>
+          <Skeleton className="h-12 w-full rounded-full mt-4" />
         </div>
       </div>
     </div>

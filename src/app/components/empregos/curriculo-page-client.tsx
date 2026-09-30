@@ -1,7 +1,7 @@
 'use client'
 
 import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery } from '@tanstack/react-query'
 
@@ -30,25 +30,31 @@ function AccordionItemSkeleton({ titleWidth }: { titleWidth: string }) {
 
 function CurriculoSkeleton() {
   return (
-    <>
-      <div className="max-w-4xl mx-auto">
-        <SecondaryHeader
-          fixed={false}
-          className="max-w-4xl mx-auto"
-          route="/servicos/trabalho"
-        />
-      </div>
-      <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-        <Skeleton className="h-9 w-48 mt-2 mb-6" />
-        <div className="w-full">
-          <AccordionItemSkeleton titleWidth="h-5 w-24" />
-          <AccordionItemSkeleton titleWidth="h-5 w-44" />
-          <AccordionItemSkeleton titleWidth="h-5 w-28" />
-          <AccordionItemSkeleton titleWidth="h-5 w-52" />
-          <AccordionItemSkeleton titleWidth="h-5 w-28" />
+    <div>
+      <OportunidadesSubHeader
+        menuHref="/servicos/trabalho/menu"
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
+      />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+          <Skeleton className="h-9 w-48 mt-2 mb-6" />
+          <div className="w-full">
+            <AccordionItemSkeleton titleWidth="h-5 w-24" />
+            <AccordionItemSkeleton titleWidth="h-5 w-44" />
+            <AccordionItemSkeleton titleWidth="h-5 w-28" />
+            <AccordionItemSkeleton titleWidth="h-5 w-52" />
+            <AccordionItemSkeleton titleWidth="h-5 w-28" />
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

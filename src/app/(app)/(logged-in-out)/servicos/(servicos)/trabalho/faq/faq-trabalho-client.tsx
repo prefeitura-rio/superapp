@@ -1,16 +1,10 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { useFaqHighlight } from '@/hooks/useFaqHighlight'
 import { useSectionTracker } from '@/hooks/useSectionTracker'
 import type { FaqSection } from '@/lib/faq-utils'
 import { FormattedContent, Highlighted } from '@/lib/faq-utils'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -53,95 +47,81 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
   const miniLabel = fromHub ? `Trabalho · ${currentTitle}` : currentTitle
 
   return (
-    <main
-      className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
-      style={{ paddingTop: headerH }}
-    >
-      <SecondaryHeader
-        route="/servicos/trabalho"
-        logo={
-          <Link href="/servicos/trabalho">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
+    <>
+      <OportunidadesSubHeader
+        menuHref="/servicos/trabalho/menu"
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
       />
-
-      {showMini && (
-        <>
-          <div
-            className="fixed left-0 right-0 z-40 bg-background"
-            style={{ top: headerH }}
-            aria-live="polite"
-          >
-            <div className="mx-auto max-w-4xl px-4">
-              <div
-                ref={miniRef}
-                className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
-              >
-                <span key={miniLabel} className="mini-animate inline-block">
-                  {miniLabel}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="fixed left-0 right-0 z-30 pointer-events-none bg-linear-to-b from-background to-background/0"
-            style={{ top: headerH + miniH - 1, height: FADE_H + 1 }}
-          />
-        </>
-      )}
-
-      <div className="p-5 pt-4 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
-        <div className="space-y-8">
-          {sections.map((section, index) => (
+      <main
+        className="max-w-4xl mx-auto text-foreground pb-10"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        {showMini && (
+          <>
             <div
-              key={section.id}
-              id={section.id}
-              ref={el => {
-                registerSection(section.id)(el)
-                if (index === 0) {
-                  ;(
-                    firstAnchorRef as React.MutableRefObject<HTMLElement | null>
-                  ).current = el
-                }
-              }}
+              className="fixed left-0 right-0 z-40 bg-background"
+              style={{ top: headerH }}
+              aria-live="polite"
             >
-              <div className="space-y-2">
-                <h2 className="text-lg font-medium tracking-normal leading-5">
-                  <Highlighted text={section.title} query={highlightQuery} />
-                </h2>
-                <FormattedContent
-                  content={section.content}
-                  className="text-foreground"
-                  query={highlightQuery}
-                />
+              <div className="mx-auto max-w-4xl px-4">
+                <div
+                  ref={miniRef}
+                  className="h-9 flex items-center text-xs font-medium tracking-wide uppercase text-primary overflow-hidden"
+                >
+                  <span key={miniLabel} className="mini-animate inline-block">
+                    {miniLabel}
+                  </span>
+                </div>
               </div>
-              {index < sections.length - 1 && (
-                <div className="mt-8 border-t border-border" />
-              )}
             </div>
-          ))}
-        </div>
-      </div>
 
-      <style jsx>{`
+            <div
+              className="fixed left-0 right-0 z-30 pointer-events-none bg-linear-to-b from-background to-background/0"
+              style={{ top: headerH + miniH - 1, height: FADE_H + 1 }}
+            />
+          </>
+        )}
+
+        <div className="p-5 pt-4 max-w-4xl mx-auto">
+          <h1 className="text-3xl font-medium text-foreground pb-4">FAQ</h1>
+          <div className="space-y-8">
+            {sections.map((section, index) => (
+              <div
+                key={section.id}
+                id={section.id}
+                ref={el => {
+                  registerSection(section.id)(el)
+                  if (index === 0) {
+                    ;(
+                      firstAnchorRef as React.MutableRefObject<HTMLElement | null>
+                    ).current = el
+                  }
+                }}
+              >
+                <div className="space-y-2">
+                  <h2 className="text-lg font-medium tracking-normal leading-5">
+                    <Highlighted text={section.title} query={highlightQuery} />
+                  </h2>
+                  <FormattedContent
+                    content={section.content}
+                    className="text-foreground"
+                    query={highlightQuery}
+                  />
+                </div>
+                {index < sections.length - 1 && (
+                  <div className="mt-8 border-t border-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <style jsx>{`
         @keyframes miniSlideIn {
           from {
             opacity: 0;
@@ -163,6 +143,7 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
           }
         }
       `}</style>
-    </main>
+      </main>
+    </>
   )
 }

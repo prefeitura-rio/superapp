@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import { CalendarIcon } from '@/assets/icons'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
@@ -30,12 +30,8 @@ export default async function SocialAssistanceCardDetail() {
   const cadunico = socialAssistanceData?.cadunico
 
   return (
-    <div className="min-h-lvh max-w-[896px] mx-auto pb-10">
-      <SecondaryHeader
-        title="Carteira"
-        className="max-w-[896px]"
-        fixed={false}
-      />
+    <div className="max-w-4xl mx-auto pb-10">
+      <ProfileHeaderWrapper />
       <div className="z-50">
         <div className="px-4 pt-2">
           <SocialAssistanceCard

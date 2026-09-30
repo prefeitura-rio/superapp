@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
@@ -11,9 +11,14 @@ export function CourseUnavailablePage() {
   const { isBelowBreakpoint } = useViewportHeight(648)
 
   return (
-    <div className="max-w-xl max-h-lvh mx-auto pt-20 flex flex-col overflow-y-hidden">
-      <SecondaryHeader title="" />
-      <div className="px-4">
+    <div className="flex flex-col max-h-lvh overflow-y-hidden">
+      <OportunidadesSubHeader
+        menuHref="/servicos/cursos/menu"
+        logoHref="/servicos/cursos"
+        showSearchIcon
+        searchUrl="/busca?tipo=cursos"
+      />
+      <div className="max-w-xl mx-auto w-full px-4">
         <ThemeAwareVideo
           source={VIDEO_SOURCES.courseUnavailable}
           containerClassName="mb-8 flex items-center justify-center h-[min(328px,50vh)] max-h-[328px]"

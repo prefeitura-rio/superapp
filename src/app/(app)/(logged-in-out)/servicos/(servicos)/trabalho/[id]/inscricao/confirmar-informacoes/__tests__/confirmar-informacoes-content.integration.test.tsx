@@ -13,6 +13,7 @@ const mockRefresh = vi.fn()
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+  usePathname: () => '/servicos/trabalho',
 }))
 
 vi.mock('@/actions/update-user-birth-date', () => ({

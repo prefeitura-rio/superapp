@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
@@ -11,9 +11,9 @@ export default function NotFound() {
   const { isBelowBreakpoint } = useViewportHeight(648)
 
   return (
-    <div className="max-w-xl max-h-lvh mx-auto pt-20 flex flex-col overflow-y-hidden">
-      <SecondaryHeader title="" />
-      <div className="px-4">
+    <div className="flex flex-col overflow-y-hidden">
+      <HeaderWrapperClient />
+      <div className="max-w-xl mx-auto px-4 w-full">
         <ThemeAwareVideo
           source={VIDEO_SOURCES.notFound}
           containerClassName="mb-8 flex items-center justify-center h-[min(328px,50vh)] max-h-[328px]"

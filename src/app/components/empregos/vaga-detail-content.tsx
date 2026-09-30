@@ -1,14 +1,13 @@
 'use client'
 
-import { handleBackNavigation } from '@/app/(app)/(logged-in-out)/busca/utils/navigation-helpers'
 import { MarkdownRenderer } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/components/markdown-renderer'
 import { CandidaturaFeedbackCard } from '@/app/components/empregos/candidatura-feedback-card'
 import { EtapasProcessoSeletivoCard } from '@/app/components/empregos/etapas-processo-seletivo-card'
 import type { VagaBadge } from '@/app/components/empregos/vaga-card'
 import { VagaParceriaCard } from '@/app/components/empregos/vaga-parceria-card'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import {
   BriefcaseIcon,
-  ChevronLeftIcon,
   ChevronRightIcon,
   CltIcon,
   MapPinIcon,
@@ -17,16 +16,11 @@ import {
   UsersIcon,
 } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
 import { buildAuthUrl } from '@/constants/url'
 import type { VagaDetail } from '@/lib/emprego-utils'
 import { DollarSign, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 interface VagaDetailContentProps {
   vaga: VagaDetail
@@ -97,7 +91,6 @@ export function VagaDetailContent({
   hasCandidatura = false,
   vagaAtiva = true,
 }: VagaDetailContentProps) {
-  const router = useRouter()
   const hasEtapas = (vaga.etapasProcessoSeletivo?.length ?? 0) > 0
 
   const handleShare = async () => {
@@ -120,234 +113,237 @@ export function VagaDetailContent({
     'bg-[#3E5782] hover:bg-[#3E5782]/90 text-white border-0'
 
   return (
-    <div className="max-w-4xl mx-auto text-foreground">
-      {/* Capa: colada no topo, sem padding externo, borda apenas embaixo */}
-      <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6">
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => handleBackNavigation(router, '/servicos/trabalho')}
-            className="flex items-center justify-center rounded-full w-11 h-11 bg-black/5 text-white hover:bg-black/20 hover:cursor-pointer transition-colors"
-            aria-label="Voltar"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-          <div className="flex justify-center">
-            <Link href="/servicos/trabalho">
-              <Image
-                src={oportunidadesCariocasLogoDark}
-                alt="Oportunidades Cariocas"
-                width={170}
-                height={38}
-                priority
-              />
-            </Link>
-          </div>
-          <button
-            type="button"
-            onClick={handleShare}
-            className="flex items-center justify-center rounded-full w-11 h-11  text-white hover:cursor-pointer"
-            aria-label="Compartilhar"
-          >
-            <ShareIcon className="h-5 w-5 text-white" />
-          </button>
-        </div>
-        <h1 className="text-3xl leading-9 font-medium text-white mt-12">
-          {vaga.titulo}
-        </h1>
-        <p className="text-sm text-white leading-5 pb-6 font-normal">
-          Inscrições até {vaga.dataEncerramentoInscricoes}
-        </p>
-        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-0">
-          {vaga.badges.map((badge, index) => (
-            <span
-              key={`${badge.text}-${index}`}
-              className="inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full bg-white/10 text-white"
-            >
-              <DetailBadgeIcon type={badge.type} />
-              <span className="text-xs">{badge.text}</span>
-            </span>
-          ))}
-        </div>
-      </header>
-
-      {/* Conteúdo abaixo da capa com padding */}
-      <div className="p-4">
-        {/* Informação da empresa - link para detalhe da empresa quando houver CNPJ */}
-        {vaga.empresaCnpj ? (
-          <Link
-            href={`/servicos/empresas/${encodeURIComponent(vaga.empresaCnpj)}`}
-            className="flex items-center gap-3 rounded-xl transition-opacity hover:opacity-90"
-          >
-            <div className="size-10 border border-border shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
-              {vaga.empresaLogo ? (
-                <Image
-                  src={vaga.empresaLogo}
-                  alt={vaga.empresaNome}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-              ) : (
-                <span className="text-xs font-semibold uppercase text-muted-foreground">
-                  {vaga.empresaNome?.charAt(0) || '?'}
-                </span>
-              )}
-            </div>
-            <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
-              {vaga.empresaNome}
-            </span>
-            <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
-          </Link>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
-              {vaga.empresaLogo ? (
-                <Image
-                  src={vaga.empresaLogo}
-                  alt={vaga.empresaNome}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-              ) : (
-                <span className="text-xs font-semibold uppercase text-muted-foreground">
-                  {vaga.empresaNome?.charAt(0) || '?'}
-                </span>
-              )}
-            </div>
-            <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
-              {vaga.empresaNome}
-            </span>
-            <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
-          </div>
-        )}
-
-        {/* Descrição */}
-        {vaga.descricao ? (
-          <MarkdownRenderer
-            content={vaga.descricao}
-            className="text-sm font-normal leading-5 text-foreground-light mt-4"
-          />
-        ) : null}
-        {/* Card de feedback da candidatura */}
-        {hasCandidatura && vaga.statusCandidatura && (
-          <div className="mt-6">
-            <CandidaturaFeedbackCard
-              statusCandidatura={vaga.statusCandidatura}
-              etapaAtualCandidatura={vaga.etapaAtualCandidatura}
-            />
-          </div>
-        )}
-
-        {/* Botão quando o usuário ainda não se candidatou; etapas quando já se candidatou e a vaga tem etapas */}
-        {(!hasCandidatura || hasEtapas) && (
-          <div className="mt-6">
-            {hasCandidatura ? (
-              <EtapasProcessoSeletivoCard
-                etapas={vaga.etapasProcessoSeletivo ?? []}
-                etapaAtualCandidatura={vaga.etapaAtualCandidatura}
-                statusCandidatura={vaga.statusCandidatura}
-                hasCandidatura
-              />
-            ) : !vagaAtiva ? (
-              <CustomButton size="lg" fullWidth disabled>
-                Inscrições encerradas para esta vaga
-              </CustomButton>
-            ) : isLoggedIn ? (
-              <CustomButton
-                asChild
-                size="lg"
-                fullWidth
-                className={candidacyButtonClassName}
+    <div className="text-foreground">
+      <OportunidadesSubHeader
+        menuHref="/servicos/trabalho/menu"
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
+      />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-4xl mx-auto">
+          {/* Capa */}
+          <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6 mx-4">
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center justify-center rounded-full w-11 h-11 text-white hover:cursor-pointer"
+                aria-label="Compartilhar"
               >
-                <Link href={`/servicos/trabalho/${vaga.id}/inscricao`}>
-                  Candidatar-se à vaga
-                </Link>
-              </CustomButton>
-            ) : (
-              <CustomButton
-                asChild
-                size="lg"
-                fullWidth
-                className={candidacyButtonClassName}
-              >
-                <Link
-                  href={buildAuthUrl(`/servicos/trabalho/${vaga.id}/inscricao`)}
+                <ShareIcon className="h-5 w-5 text-white" />
+              </button>
+            </div>
+            <h1 className="text-3xl leading-9 font-medium text-white mt-6">
+              {vaga.titulo}
+            </h1>
+            <p className="text-sm text-white leading-5 pb-6 font-normal">
+              Inscrições até {vaga.dataEncerramentoInscricoes}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-0">
+              {vaga.badges.map((badge, index) => (
+                <span
+                  key={`${badge.text}-${index}`}
+                  className="inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full bg-white/10 text-white"
                 >
-                  Fazer login para se candidatar
-                </Link>
-              </CustomButton>
-            )}
-          </div>
-        )}
+                  <DetailBadgeIcon type={badge.type} />
+                  <span className="text-xs">{badge.text}</span>
+                </span>
+              ))}
+            </div>
+          </header>
 
-        {/* Informações gerais */}
-        <h2 className="text-sm font-normal leading-5 text-foreground mt-8">
-          Informações gerais
-        </h2>
-        <div className="bg-card rounded-xl p-6 mt-2">
-          <InfoRow label="Valor da Vaga" value={vaga.valorVaga || '—'} />
-          <InfoRow
-            label="Regime de contratação"
-            value={vaga.regimeContratacao || '—'}
-          />
-          <InfoRow
-            label="Modelo de trabalho"
-            value={vaga.modeloTrabalho || '—'}
-          />
-          <InfoRow
-            label="Local de trabalho"
-            value={vaga.localTrabalho || '—'}
-          />
-          <InfoRow
-            label="Data limite de inscrição"
-            value={vaga.dataLimiteInscricao || '—'}
-          />
-          {vaga.acessibilidade && vaga.acessibilidade !== 'Não informado' && (
-            <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
-          )}
-          {(vaga.tiposPcd?.length ?? 0) > 0 && (
-            <>
-              <div className="h-[0.5px] bg-terciary mt-3 mb-4" />
-              <div className="text-sm font-normal">
-                <p className="text-foreground-light pb-1">
-                  Vaga oferecida preferencialmente para pessoas com deficiência:
-                </p>
-                <ul className="ml-2 mt-2 list-disc list-inside leading-6 text-foreground marker:text-[12px]">
-                  {vaga.tiposPcd!.map(tipo => (
-                    <li key={tipo}>{tipo}</li>
-                  ))}
-                </ul>
+          {/* Conteúdo abaixo da capa com padding */}
+          <div className="p-4">
+            {/* Informação da empresa - link para detalhe da empresa quando houver CNPJ */}
+            {vaga.empresaCnpj ? (
+              <Link
+                href={`/servicos/empresas/${encodeURIComponent(vaga.empresaCnpj)}`}
+                className="flex items-center gap-3 rounded-xl transition-opacity hover:opacity-90"
+              >
+                <div className="size-10 border border-border shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+                  {vaga.empresaLogo ? (
+                    <Image
+                      src={vaga.empresaLogo}
+                      alt={vaga.empresaNome}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold uppercase text-muted-foreground">
+                      {vaga.empresaNome?.charAt(0) || '?'}
+                    </span>
+                  )}
+                </div>
+                <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
+                  {vaga.empresaNome}
+                </span>
+                <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="size-10 shrink-0 overflow-hidden rounded-full bg-card flex items-center justify-center">
+                  {vaga.empresaLogo ? (
+                    <Image
+                      src={vaga.empresaLogo}
+                      alt={vaga.empresaNome}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold uppercase text-muted-foreground">
+                      {vaga.empresaNome?.charAt(0) || '?'}
+                    </span>
+                  )}
+                </div>
+                <span className="flex-1 min-w-0 text-sm font-normal leading-5 text-foreground line-clamp-2">
+                  {vaga.empresaNome}
+                </span>
+                <ChevronRightIcon className="h-5 w-5 shrink-0 text-foreground" />
               </div>
-            </>
-          )}
-        </div>
+            )}
 
-        {/* Requisitos, Diferenciais, Responsabilidades, Benefícios */}
-        <SectionBlock title="Requisitos" content={vaga.requisitos} />
-        <SectionBlock title="Diferenciais" content={vaga.diferenciais ?? ''} />
-        <SectionBlock
-          title="Responsabilidades"
-          content={vaga.responsabilidades ?? ''}
-        />
-        <SectionBlock title="Benefícios" content={vaga.beneficios} />
+            {/* Descrição */}
+            {vaga.descricao ? (
+              <MarkdownRenderer
+                content={vaga.descricao}
+                className="text-sm font-normal leading-5 text-foreground-light mt-4"
+              />
+            ) : null}
+            {/* Card de feedback da candidatura */}
+            {hasCandidatura && vaga.statusCandidatura && (
+              <div className="mt-6">
+                <CandidaturaFeedbackCard
+                  statusCandidatura={vaga.statusCandidatura}
+                  etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+                />
+              </div>
+            )}
 
-        {/* Etapas do processo seletivo: só na posição inferior quando a vaga tem etapas e o usuário NÃO está candidato (quando está candidato, já foi exibido no lugar do botão) */}
-        {hasEtapas && !hasCandidatura && (
-          <div className="mt-6">
-            <EtapasProcessoSeletivoCard
-              etapas={vaga.etapasProcessoSeletivo ?? []}
-              etapaAtualCandidatura={vaga.etapaAtualCandidatura}
-              statusCandidatura={vaga.statusCandidatura}
-              hasCandidatura={false}
+            {/* Botão quando o usuário ainda não se candidatou; etapas quando já se candidatou e a vaga tem etapas */}
+            {(!hasCandidatura || hasEtapas) && (
+              <div className="mt-6">
+                {hasCandidatura ? (
+                  <EtapasProcessoSeletivoCard
+                    etapas={vaga.etapasProcessoSeletivo ?? []}
+                    etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+                    statusCandidatura={vaga.statusCandidatura}
+                    hasCandidatura
+                  />
+                ) : !vagaAtiva ? (
+                  <CustomButton size="lg" fullWidth disabled>
+                    Inscrições encerradas para esta vaga
+                  </CustomButton>
+                ) : isLoggedIn ? (
+                  <CustomButton
+                    asChild
+                    size="lg"
+                    fullWidth
+                    className={candidacyButtonClassName}
+                  >
+                    <Link href={`/servicos/trabalho/${vaga.id}/inscricao`}>
+                      Candidatar-se à vaga
+                    </Link>
+                  </CustomButton>
+                ) : (
+                  <CustomButton
+                    asChild
+                    size="lg"
+                    fullWidth
+                    className={candidacyButtonClassName}
+                  >
+                    <Link
+                      href={buildAuthUrl(
+                        `/servicos/trabalho/${vaga.id}/inscricao`
+                      )}
+                    >
+                      Fazer login para se candidatar
+                    </Link>
+                  </CustomButton>
+                )}
+              </div>
+            )}
+
+            {/* Informações gerais */}
+            <h2 className="text-sm font-normal leading-5 text-foreground mt-8">
+              Informações gerais
+            </h2>
+            <div className="bg-card rounded-xl p-6 mt-2">
+              <InfoRow label="Valor da Vaga" value={vaga.valorVaga || '—'} />
+              <InfoRow
+                label="Regime de contratação"
+                value={vaga.regimeContratacao || '—'}
+              />
+              <InfoRow
+                label="Modelo de trabalho"
+                value={vaga.modeloTrabalho || '—'}
+              />
+              <InfoRow
+                label="Local de trabalho"
+                value={vaga.localTrabalho || '—'}
+              />
+              <InfoRow
+                label="Data limite de inscrição"
+                value={vaga.dataLimiteInscricao || '—'}
+              />
+              {vaga.acessibilidade &&
+                vaga.acessibilidade !== 'Não informado' && (
+                  <InfoRow label="Acessibilidade" value={vaga.acessibilidade} />
+                )}
+              {(vaga.tiposPcd?.length ?? 0) > 0 && (
+                <>
+                  <div className="h-[0.5px] bg-terciary mt-3 mb-4" />
+                  <div className="text-sm font-normal">
+                    <p className="text-foreground-light pb-1">
+                      Vaga oferecida preferencialmente para pessoas com
+                      deficiência:
+                    </p>
+                    <ul className="ml-2 mt-2 list-disc list-inside leading-6 text-foreground marker:text-[12px]">
+                      {vaga.tiposPcd!.map(tipo => (
+                        <li key={tipo}>{tipo}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Requisitos, Diferenciais, Responsabilidades, Benefícios */}
+            <SectionBlock title="Requisitos" content={vaga.requisitos} />
+            <SectionBlock
+              title="Diferenciais"
+              content={vaga.diferenciais ?? ''}
             />
-          </div>
-        )}
+            <SectionBlock
+              title="Responsabilidades"
+              content={vaga.responsabilidades ?? ''}
+            />
+            <SectionBlock title="Benefícios" content={vaga.beneficios} />
 
-        {vaga.orgaoParceiro ? (
-          <VagaParceriaCard orgaoParceiro={vaga.orgaoParceiro} />
-        ) : null}
+            {/* Etapas do processo seletivo: só na posição inferior quando a vaga tem etapas e o usuário NÃO está candidato (quando está candidato, já foi exibido no lugar do botão) */}
+            {hasEtapas && !hasCandidatura && (
+              <div className="mt-6">
+                <EtapasProcessoSeletivoCard
+                  etapas={vaga.etapasProcessoSeletivo ?? []}
+                  etapaAtualCandidatura={vaga.etapaAtualCandidatura}
+                  statusCandidatura={vaga.statusCandidatura}
+                  hasCandidatura={false}
+                />
+              </div>
+            )}
+
+            {vaga.orgaoParceiro ? (
+              <VagaParceriaCard orgaoParceiro={vaga.orgaoParceiro} />
+            ) : null}
+          </div>
+        </div>
       </div>
     </div>
   )

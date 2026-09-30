@@ -1,14 +1,19 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function FaqPrefRioLoading() {
   return (
-    <main
-      className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10"
-      style={{ paddingTop: 80 }}
-    >
-      <SecondaryHeader title="FAQ" route="/faq" />
-      <div className="p-4 pt-10 max-w-4xl mx-auto">
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 pt-4 pb-10">
         <div className="space-y-14">
           {Array.from({ length: 3 }).map((_, sIdx) => (
             <div key={sIdx}>
@@ -34,6 +39,6 @@ export default function FaqPrefRioLoading() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -1,12 +1,10 @@
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function UserAuthorizationsLoading() {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-28 flex flex-col space-y-4">
-      {/* Fixed header skeleton mimicking SecondaryHeader */}
-      <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-start max-w-4xl mx-auto z-50 bg-background text-foreground h-16">
-        <Skeleton className="h-12 w-12 rounded-full" />
-      </header>
+    <div className="max-w-4xl mx-auto flex flex-col space-y-4">
+      <ProfileHeaderWrapper />
 
       <div className="space-y-4 mx-4">
         {/* Main heading skeleton */}

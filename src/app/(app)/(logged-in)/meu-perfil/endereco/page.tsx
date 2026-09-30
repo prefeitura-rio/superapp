@@ -1,6 +1,6 @@
 import { AddressInfoCard } from '@/app/components/address-info-card'
 import { EmptyAddress } from '@/app/components/empty-address'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getDalCitizenCpf } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { shouldShowUpdateBadge } from '@/lib/utils'
@@ -28,8 +28,8 @@ export default async function UserAddress() {
     : false
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-      <SecondaryHeader title="Endereço" route="/meu-perfil" />
+    <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+      <ProfileHeaderWrapper />
       {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
         <>
           <AddressInfoCard address={addressInfo} />

@@ -1,5 +1,5 @@
 import { OptInSwitch } from '@/app/components/opt-in-switch'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getCitizenCpfOptin } from '@/http/citizen/citizen'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -24,8 +24,8 @@ export default async function ConsentForm() {
   }
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-      <SecondaryHeader title="Autorizações" route="/meu-perfil" />
+    <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+      <ProfileHeaderWrapper />
       <div className="space-y-4 mx-4 ">
         <h1 className="text-xl font-medium text-primary">
           Você autoriza receber comunicações diretas pelos canais da Prefeitura

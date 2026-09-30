@@ -1,5 +1,5 @@
 import { ConfirmarImovel } from '@/app/components/divida-ativa/confirmar-imovel'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { getDalDividaAtivaCadastroFazenda } from '@/lib/dal'
 import {
@@ -41,12 +41,8 @@ export default async function ConfirmarImovelPage({
   const imovel = await getDalDividaAtivaCadastroFazenda(inscricaoLimpa, cpf)
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader
-        title=""
-        className="max-w-4xl"
-        route="/divida-ativa/imoveis/novo"
-      />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       {imovel ? (
         <ConfirmarImovel

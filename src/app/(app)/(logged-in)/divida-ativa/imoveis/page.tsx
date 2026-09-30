@@ -2,7 +2,7 @@ import {
   ImoveisLista,
   ImoveisVazio,
 } from '@/app/components/divida-ativa/imoveis-lista'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getDalDividaAtivaImoveis } from '@/lib/dal'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
@@ -18,8 +18,8 @@ export default async function MeusImoveisPage() {
   const imoveis = await getDalDividaAtivaImoveis(cpf)
 
   return (
-    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-      <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
+    <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pb-4 text-foreground">
+      <ProfileHeaderWrapper />
 
       {/* No vazio a mensagem assume o lugar do título (Figma) — o h1 "Meus imóveis"
           só existe quando há lista para intitular. */}
