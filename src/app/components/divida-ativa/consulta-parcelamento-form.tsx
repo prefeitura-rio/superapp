@@ -48,7 +48,6 @@ export function ConsultaParcelamentoForm({
   const modo = MODOS_CONSULTA[modoId]
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    console.log('Modo ', modo)
     setValor(modo.formatar(event.target.value))
 
     // Some com o erro assim que o cidadão volta a digitar: manter a mensagem enquanto ele
