@@ -1,20 +1,25 @@
+import { ConsultaInscricaoForm } from '@/app/components/divida-ativa/consulta-inscricao-form'
 import { ConsultaParcelamentoForm } from '@/app/components/divida-ativa/consulta-parcelamento-form'
 import { ModoConsultaList } from '@/app/components/divida-ativa/modo-consulta-list'
 import { parseModoConsulta } from '@/app/components/divida-ativa/modos-consulta'
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import { getDalDividaAtivaImoveis } from '@/lib/dal'
+import { getUserInfoFromToken } from '@/lib/user-info'
 
 /**
- * Entrada do parcelamento, em dois passos na mesma rota.
+ * Entrada do parcelamento — até três passos na mesma rota.
  *
- * Sem `?modo=`, mostra a lista dos três identificadores. Com `?modo=`, mostra o campo
- * correspondente. O título é o mesmo nos dois passos, como no Figma — o que muda é o corpo.
+ * **Sem `?modo=`:** lista dos três identificadores (`ModoConsultaList`).
  *
- * Um `?modo=` desconhecido cai na lista em vez de estourar: o endereço é compartilhável, e um
- * link velho ou editado à mão não deve virar erro para o cidadão.
+ * **Com `?modo=inscricao`:** `ConsultaInscricaoForm` — campo manual com máscara +
+ * lista de "Meus Imóveis" filtrável. Os imóveis são buscados aqui, no Server Component,
+ * para o Client Component não precisar de token nem de fetch: ele recebe apenas dados
+ * serializáveis.
  *
- * O "Continuar" leva para `/divida-ativa/parcelamento/debitos`, com o critério na query. Os
- * três modos convergem para a mesma tela porque a API aceita **critério único** por consulta
- * (RN-001/RN-002) e devolve a mesma resposta para os quatro critérios que aceita.
+ * **Com `?modo=cda` ou `?modo=execucao-fiscal`:** `ConsultaParcelamentoForm` genérico —
+ * campo único sem lista de imóveis (esses identificadores não têm vínculo com o cadastro).
+ *
+ * Um `?modo=` desconhecido cai na lista: link velho ou editado à mão não vira erro.
  */
 export default async function ParcelamentoPage({
   searchParams,
@@ -23,6 +28,16 @@ export default async function ParcelamentoPage({
 }) {
   const { modo } = await searchParams
   const modoSelecionado = parseModoConsulta(modo)
+
+  // Imóveis só são necessários no modo inscrição. A chamada é feita aqui, no RSC, porque:
+  // 1. O token de acesso fica em cookie httpOnly — Client Component não o vê.
+  // 2. A lista chega pronta como prop serializável, sem fetch no cliente.
+  // 3. `getDalDividaAtivaImoveis` já tem `no-store` — dado financeiro nunca vai a cache.
+
+  const imoveis =
+    modoSelecionado?.id === 'inscricao'
+      ? await getDalDividaAtivaImoveis((await getUserInfoFromToken()).cpf)
+      : []
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -36,8 +51,11 @@ export default async function ParcelamentoPage({
         Selecione uma das informações para consulta
       </h1>
 
-      {modoSelecionado ? (
-        // Só o id: a configuração carrega funções, que não atravessam a fronteira RSC.
+      {modoSelecionado?.id === 'inscricao' ? (
+        <ConsultaInscricaoForm imoveis={imoveis} />
+      ) : modoSelecionado ? (
+        // CDA e execução fiscal: campo simples, sem lista de imóveis.
+        // Só o id atravessa a fronteira RSC — funções (formatar/validar) ficam no cliente.
         <ConsultaParcelamentoForm modo={modoSelecionado.id} />
       ) : (
         <ModoConsultaList />
