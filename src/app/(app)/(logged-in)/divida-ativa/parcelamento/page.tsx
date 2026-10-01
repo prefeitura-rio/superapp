@@ -45,6 +45,7 @@ export default async function ParcelamentoPage({
         title=""
         className="max-w-4xl"
         route={modoSelecionado ? '/divida-ativa/parcelamento' : '/divida-ativa'}
+        forceRoute
       />
 
       <h1 className="px-4 pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
