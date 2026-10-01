@@ -66,13 +66,24 @@ export default async function DebitosPage({
     execucaoFiscal?: string
   }>
 }) {
-  const criterio = criterioDaUrl(await searchParams)
+  const params = await searchParams
+  const criterio = criterioDaUrl(params)
 
   // Sem critério não há o que consultar: volta para a escolha do modo em vez de mostrar uma
   // tela vazia. O endereço é compartilhável, e um link truncado não deve virar beco sem saída.
   if (!criterio) {
     redirect('/divida-ativa/parcelamento')
   }
+
+  // Volta para o formulário do modo usado — preserva o ?modo= para o cidadão não perder
+  // o contexto (ex: voltou de débitos e ainda está na aba "Inscrição imobiliária").
+  const modoVoltar =
+    criterio.tipo === 'inscricao'
+      ? 'inscricao'
+      : criterio.tipo === 'cda'
+        ? 'cda'
+        : 'execucao-fiscal'
+  const rotaVoltar = `/divida-ativa/parcelamento?modo=${modoVoltar}`
 
   const { cpf } = await getUserInfoFromToken()
 
@@ -89,7 +100,8 @@ export default async function DebitosPage({
       <SecondaryHeader
         title=""
         className="max-w-4xl"
-        route="/divida-ativa/parcelamento"
+        route={rotaVoltar}
+        forceRoute
       />
 
       {consulta.situacao !== 'ok' ? (

@@ -129,7 +129,7 @@ export default async function SimulacaoPage({
   // - etapa 1 volta à tela de débitos
   const rotaVoltar = parcelas
     ? `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`
-    : '/divida-ativa/parcelamento/debitos'
+    : `/divida-ativa/parcelamento/debitos?${new URLSearchParams(searchParamsAtual)}`
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
