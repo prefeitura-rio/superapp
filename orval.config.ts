@@ -60,4 +60,23 @@ export default defineConfig({
       },
     },
   },
+  appGoApi: {
+    input: './.tmp/pref-381-openapi.json',
+    output: {
+      target: './.tmp/orval-pref-381/api.ts',
+      schemas: './.tmp/orval-pref-381/models',
+      mode: 'tags-split',
+      client: 'fetch',
+      formatter: 'biome',
+      httpClient: 'fetch',
+      clean: true,
+      baseUrl: process.env.COURSES_BASE_API_URL,
+      override: {
+        mutator: {
+          path: './custom-fetch-course.ts',
+          name: 'customFetch',
+        },
+      },
+    },
+  },
 })

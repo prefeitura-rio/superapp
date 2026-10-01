@@ -3,6 +3,7 @@
 import { ActionDiv } from '@/app/components/action-div'
 import { CandidaturaEnviadaDrawer } from '@/app/components/empregos/candidatura-enviada-drawer'
 import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
+import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
   Accordion,
   AccordionContent,
@@ -12,10 +13,6 @@ import {
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
 import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/models'
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
@@ -23,8 +20,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -59,6 +54,7 @@ import type {
   InitialIdiomaItem,
 } from './get-curriculo-formacao-data'
 import type { InitialSituacaoData } from './get-curriculo-situacao-data'
+import { HabilidadesCompetencias } from './habilidades-competencias'
 import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
@@ -74,13 +70,6 @@ import { TermosUsoAccordionContent } from './termos-uso-accordion-content'
 import { TipoFormacaoDrawerContent } from './tipo-formacao-drawer-content'
 import { TipoVinculoDrawerContent } from './tipo-vinculo-drawer-content'
 import { deepEqual } from './utils/deep-equal'
-
-const ACCORDION_ITEMS = [
-  { value: 'formacao', title: 'Formação' },
-  { value: 'experiencia', title: 'Experiência Profissional' },
-  { value: 'situacao', title: 'Situação atual' },
-  { value: 'termos', title: 'Termos de Uso' },
-] as const
 
 const HINT_CLASS = 'text-muted-foreground text-sm leading-5 font-normal mt-1'
 
@@ -1708,11 +1697,20 @@ export function CurriculoContent({
             'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
         }}
       >
+        <SecondaryHeader
+          fixed={false}
+          route={backRoute}
+          className="max-w-4xl"
+          style={{
+            background: 'transparent',
+            paddingTop: '8px',
+          }}
+        />
         <FormacaoApiProvider initialData={formacaoOptions}>
           <SituacaoApiProvider initialData={situacaoOptions}>
             <ExperienciaApiProvider initialData={experienciaOptions}>
               <FormProvider {...form}>
-                <div className="px-4 max-w-4xl mx-auto flex flex-col pt-8 pb-10 overflow-x-hidden">
+                <div className="px-4 max-w-4xl mx-auto flex flex-col pb-10 overflow-x-hidden">
                   <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pb-4">
                     Meu Currículo
                   </h1>
@@ -1817,6 +1815,20 @@ export function CurriculoContent({
                           onSaveSuccess={handleSituacaoSaveSuccess}
                           snapshot={situacaoSnapshotRef.current}
                         />
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem
+                      value="habilidades-competencias"
+                      className="border-b border-border py-2 last:border-b-0"
+                    >
+                      <AccordionTrigger
+                        chevronClassName="text-primary stroke-[1.5]"
+                        className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
+                      >
+                        Habilidades e Competências
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-5 pb-4">
+                        <HabilidadesCompetencias />
                       </AccordionContent>
                     </AccordionItem>
                     <AccordionItem

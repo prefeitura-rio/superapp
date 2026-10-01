@@ -49,6 +49,7 @@ function CurriculoSkeleton() {
             <AccordionItemSkeleton titleWidth="h-5 w-24" />
             <AccordionItemSkeleton titleWidth="h-5 w-44" />
             <AccordionItemSkeleton titleWidth="h-5 w-28" />
+            <AccordionItemSkeleton titleWidth="h-5 w-52" />
             <AccordionItemSkeleton titleWidth="h-5 w-28" />
           </div>
         </div>
