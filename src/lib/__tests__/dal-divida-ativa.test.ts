@@ -660,24 +660,26 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
   })
 
   /**
-   * `POST /divida-ativa/consultar` responde 404 em homologação porque a **rota** não foi
-   * deployada, não porque o imóvel não exista. Mapear isso para "não cadastrado" mandaria o
-   * cidadão cadastrar um imóvel que já está cadastrado — daí este endpoint tratar 404 como
-   * indisponibilidade, ao contrário do GET.
+   * Com a rota em homologação, o 404 da consulta avulsa é do recurso: não há dívida para o
+   * número. Não é "não cadastrado" (a consulta avulsa não exige cadastro) nem
+   * indisponibilidade (tentar de novo o mesmo número não muda nada).
    */
-  test('404 aqui é rota ausente, não imóvel não cadastrado', async () => {
+  test('404 vira não-encontrado', async () => {
     server.use(
       http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
-        HttpResponse.json({}, { status: 404 })
+        HttpResponse.json(
+          { error: 'Não encontramos dívida ativa para o número informado.' },
+          { status: 404 }
+        )
       )
     )
 
     await expect(
       getDalDividaAtivaConsultaAvulsa(
-        { tipo: 'cda', valor: '20240000111' },
+        { tipo: 'cda', valor: '01021580200300' },
         CPF
       )
-    ).resolves.toEqual({ situacao: 'indisponivel' })
+    ).resolves.toEqual({ situacao: 'nao-encontrado' })
   })
 })
 
