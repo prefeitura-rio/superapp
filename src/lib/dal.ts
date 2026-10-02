@@ -54,6 +54,40 @@ import type {
 } from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
+/**
+ * Dados de exemplo da dívida ativa no lugar de um erro da API — **só com opt-in**.
+ *
+ * Antes a troca era automática em dev, e uma consulta que falhava em hom aparecia na tela
+ * como débitos "bonitos demais", sem nenhum sinal de erro: era impossível saber se a API
+ * respondia. Agora o erro real aparece, e quem precisa navegar o fluxo sem a API liga
+ * `DIVIDA_ATIVA_DEV_FIXTURES=true` no `.env`.
+ */
+async function fixtureDeDesenvolvimento(): Promise<ConsultaDebitos | null> {
+  if (
+    process.env.NODE_ENV !== 'development' ||
+    process.env.DIVIDA_ATIVA_DEV_FIXTURES !== 'true'
+  ) {
+    return null
+  }
+
+  const { DEV_FIXTURE_DEBITOS } = await import(
+    '@/lib/divida-ativa-dev-fixtures'
+  )
+  console.warn(
+    '[DAL_DIVIDA_ATIVA] DIVIDA_ATIVA_DEV_FIXTURES ligado — usando fixture de desenvolvimento.'
+  )
+  return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
+}
+
+/** Mensagem de erro da API para o log — o texto do sistema, nunca o número consultado. */
+function motivoDoErro(data: unknown): string {
+  const erro =
+    typeof data === 'object' && data !== null
+      ? (data as { error?: unknown }).error
+      : undefined
+  return typeof erro === 'string' && erro !== '' ? `: ${erro}` : ''
+}
+
 // Recommended caching strategy for high traffic (500K+ users/month)
 // 30-minute cache provides optimal balance of performance and data freshness
 export async function getDalCitizenCpfWallet(cpf: string) {
@@ -685,20 +719,7 @@ export async function getDalDividaAtivaDebitos(
         return { situacao: 'nao-cadastrado' }
       }
 
-      // Em desenvolvimento, quando a API do ePortal está indisponível (503 é frequente em
-      // homologação), devolvemos dados fictícios para o fluxo inteiro ficar navegável.
-      // Em produção e em test, o comportamento real é mantido.
-      if (process.env.NODE_ENV === 'development') {
-        const { DEV_FIXTURE_DEBITOS } = await import(
-          '@/lib/divida-ativa-dev-fixtures'
-        )
-        console.warn(
-          '[DAL_DIVIDA_ATIVA] API indisponível em dev — usando fixture de desenvolvimento.'
-        )
-        return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
-      }
-
-      return { situacao: 'indisponivel' }
+      return (await fixtureDeDesenvolvimento()) ?? { situacao: 'indisponivel' }
     }
 
     const debitos = mapApiToDebitos(result.data)
@@ -775,31 +796,19 @@ export async function getDalDividaAtivaConsultaAvulsa(
     })
 
     if (result.status !== 200) {
-      const pista =
-        result.status === 404
-          ? ' — endpoint ausente em homologação; ver docs/divida-ativa.md'
-          : ''
+      const motivo = motivoDoErro(result.data)
       console.error(
-        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/consultar respondeu ${result.status}${pista}`
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/consultar respondeu ${result.status}${motivo}`
       )
 
-      // Aqui o 404 é da **rota**, não do recurso: o endpoint não foi deployado em
-      // homologação. Mandar o cidadão cadastrar um imóvel não consertaria nada, então é
-      // indisponibilidade — ao contrário do 404 do GET acima.
-
-      // Em desenvolvimento, quando o endpoint ainda não está em homologação (404) ou o
-      // ePortal está fora (503), devolvemos fixture para o fluxo continuar navegável.
-      if (process.env.NODE_ENV === 'development') {
-        const { DEV_FIXTURE_DEBITOS } = await import(
-          '@/lib/divida-ativa-dev-fixtures'
-        )
-        console.warn(
-          '[DAL_DIVIDA_ATIVA] API indisponível em dev — usando fixture de desenvolvimento.'
-        )
-        return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
+      // Com a rota em homologação desde 02/10/2026, o 404 é do **recurso**: o DAM não tem
+      // dívida para o número informado. O cidadão pode conferir o número; tentar de novo o
+      // mesmo número não muda nada.
+      if (result.status === 404) {
+        return { situacao: 'nao-encontrado' }
       }
 
-      return { situacao: 'indisponivel' }
+      return (await fixtureDeDesenvolvimento()) ?? { situacao: 'indisponivel' }
     }
 
     const debitos = mapApiToDebitos(result.data)

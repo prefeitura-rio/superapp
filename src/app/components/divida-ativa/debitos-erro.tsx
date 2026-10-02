@@ -6,7 +6,10 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 
-export type TipoErroDebitos = 'indisponivel' | 'nao-cadastrado'
+export type TipoErroDebitos =
+  | 'indisponivel'
+  | 'nao-cadastrado'
+  | 'nao-encontrado'
 
 /**
  * Copy provisória — escrita a partir do que a API devolve, sem Figma.
@@ -33,6 +36,18 @@ const ERROS: Record<
     toast:
       'Serviço de dívida ativa indisponível. Tente novamente em alguns minutos.',
     permiteNovaTentativa: true,
+    acao: {
+      rotulo: 'Consultar outro número',
+      href: '/divida-ativa/parcelamento',
+    },
+  },
+  'nao-encontrado': {
+    titulo: 'Não encontramos dívida ativa para este número',
+    descricao:
+      'Confira se o número foi digitado como aparece no documento. Se estiver certo, não há dívida ativa em aberto registrada para ele.',
+    toast: 'Não encontramos dívida ativa para este número.',
+    // O mesmo número devolveria o mesmo 404: o que muda o resultado é corrigir o número.
+    permiteNovaTentativa: false,
     acao: {
       rotulo: 'Consultar outro número',
       href: '/divida-ativa/parcelamento',

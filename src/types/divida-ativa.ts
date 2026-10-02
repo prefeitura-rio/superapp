@@ -203,6 +203,8 @@ export type CriterioDebitos =
  *
  * - `nao-cadastrado` (404): o imóvel não está em Meus Imóveis. Tentar de novo **não**
  *   resolve; cadastrar resolve.
+ * - `nao-encontrado` (404 da consulta avulsa): o DAM não tem dívida para o número
+ *   informado. Conferir o número resolve; tentar de novo o mesmo número, não.
  * - `indisponivel` (503 e demais): o serviço de dívida ativa do DAM está fora. O número
  *   digitado está certo e tentar de novo mais tarde resolve.
  *
@@ -216,6 +218,7 @@ export type CriterioDebitos =
 export type ConsultaDebitos =
   | { situacao: 'ok'; debitos: DebitosDividaAtiva }
   | { situacao: 'nao-cadastrado' }
+  | { situacao: 'nao-encontrado' }
   | { situacao: 'indisponivel' }
 
 /**
