@@ -447,7 +447,7 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
    */
   /**
    * A CDA vai com barras: a API só reordena o ano quando vê a barra, e os 12 dígitos da carta
-   * (`SSNNNNNNAAAA`) sem ela seriam lidos com o ano no lugar errado.
+   * (`SSNNNNNNAAAA…`) sem ela seriam lidos com o ano no lugar errado.
    */
   test('consulta por CDA enviando somente numCda, com barras', async () => {
     let corpo: unknown = null
@@ -476,12 +476,12 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
     )
 
     await getDalDividaAtivaConsultaAvulsa(
-      { tipo: 'cda', valor: '012345672020' },
+      { tipo: 'cda', valor: '01021580200300' },
       CPF
     )
 
     // Critério único: os outros campos não podem ir junto, nem como `undefined` explícito.
-    expect(corpo).toEqual({ numCda: '01/234567/2020' })
+    expect(corpo).toEqual({ numCda: '01/021580/2003-00' })
   })
 
   test('consulta por execução fiscal enviando somente numExecucaoFiscal', async () => {

@@ -61,12 +61,13 @@ export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
     id: 'cda',
     rotuloLista: 'N° da Certidão de Dívida Ativa',
     rotuloCampo: 'N° da Certidão de Dívida Ativa',
-    placeholder: '00/000.000/0000',
+    placeholder: '00/000000/0000-00',
     parametro: 'cda',
     formatar: formatarCda,
     validar: isCdaValida,
     mensagemVazio: 'Digite o número da certidão de dívida ativa.',
-    mensagemFormato: 'O número da certidão tem 12 números.',
+    mensagemFormato:
+      'Confira o número da certidão: ele tem o formato 00/000000/0000.',
   },
   'execucao-fiscal': {
     id: 'execucao-fiscal',
