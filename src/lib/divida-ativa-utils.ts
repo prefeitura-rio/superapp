@@ -100,16 +100,63 @@ export function isExecucaoFiscalValida(valor: string): boolean {
   return somenteDigitos(valor).length === EXECUCAO_FISCAL_DIGITOS
 }
 
+/** Dígitos da CDA como a carta da PGM a mostra: série, número e ano (`SS/NNN.NNN/AAAA`). */
+export const CDA_DIGITOS = 12
+
 /**
- * A CDA é validada só como "tem número".
+ * Máscara da CDA, `SS/NNN.NNN/AAAA` — a mesma do portlet legado (`99/999.999/9999` no
+ * `FormatadorUtil`), que é como o número chega impresso ao cidadão.
  *
- * O contrato tipa `cdaId` como string livre e não documenta contagem de dígitos, então
- * qualquer limite que inventássemos recusaria valor que a API aceita — o oposto do que a
- * decisão D8 quer, que é evitar chamada à toa sem bloquear o cidadão. Apertar isto quando o
- * formato real for conhecido.
+ * Posições fixas, como a execução fiscal: a máscara entra a cada tecla e tolera o número
+ * colado já pontuado.
  */
+export function formatarCda(valor: string): string {
+  const digitos = somenteDigitos(valor).slice(0, CDA_DIGITOS)
+
+  const partes: Array<{ tamanho: number; separador: string }> = [
+    { tamanho: 2, separador: '/' },
+    { tamanho: 3, separador: '.' },
+    { tamanho: 3, separador: '/' },
+    { tamanho: 4, separador: '' },
+  ]
+
+  let restante = digitos
+  let formatado = ''
+
+  for (const { tamanho, separador } of partes) {
+    if (restante === '') break
+
+    const grupo = restante.slice(0, tamanho)
+    restante = restante.slice(tamanho)
+    formatado += grupo
+
+    if (grupo.length === tamanho && restante !== '') {
+      formatado += separador
+    }
+  }
+
+  return formatado
+}
+
+/**
+ * CDA no formato que a API entende sem ambiguidade: `SS/NNNNNN/AAAA`.
+ *
+ * **Exceção à regra "só dígitos".** A API guarda a CDA com o ano na frente
+ * (`AAAASSNNNNNN`) e só reordena quando o valor chega com barra; só dígitos ela lê como já
+ * reordenado. Os 12 dígitos da carta (`SSNNNNNNAAAA`) iriam com o ano no lugar errado e a
+ * consulta não acharia nada. Por isso a barra vai junto — ver `DamFiltroFormat` na API.
+ */
+export function cdaParaApi(valor: string): string {
+  const digitos = somenteDigitos(valor)
+
+  if (digitos.length !== CDA_DIGITOS) return digitos
+
+  return `${digitos.slice(0, 2)}/${digitos.slice(2, 8)}/${digitos.slice(8)}`
+}
+
+/** Formato aceito pelo front. Existência da certidão é da API. */
 export function isCdaValida(valor: string): boolean {
-  return somenteDigitos(valor).length > 0
+  return somenteDigitos(valor).length === CDA_DIGITOS
 }
 
 /**

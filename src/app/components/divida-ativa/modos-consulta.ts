@@ -1,4 +1,5 @@
 import {
+  formatarCda,
   formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
   isCdaValida,
@@ -27,6 +28,8 @@ export interface ModoConsultaConfig {
   rotuloLista: string
   /** Rótulo acima do campo, na tela seguinte. */
   rotuloCampo: string
+  /** Texto do campo vazio — o formato esperado, quando o número tem um. */
+  placeholder: string
   /**
    * Nome do parâmetro com que o critério chega à tela de débitos. A API aceita um critério
    * único por consulta (RN-001/RN-002), então a tela recebe exatamente um destes.
@@ -47,6 +50,7 @@ export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
     id: 'inscricao',
     rotuloLista: 'N° da Inscrição Imobiliária',
     rotuloCampo: 'N° da Inscrição Imobiliária',
+    placeholder: 'Escreva aqui',
     parametro: 'inscricao',
     formatar: formatarInscricaoImobiliaria,
     validar: isInscricaoImobiliariaValida,
@@ -57,18 +61,18 @@ export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
     id: 'cda',
     rotuloLista: 'N° da Certidão de Dívida Ativa',
     rotuloCampo: 'N° da Certidão de Dívida Ativa',
+    placeholder: '00/000.000/0000',
     parametro: 'cda',
-    // Sem máscara: o contrato não documenta contagem de dígitos da CDA, e formatar às cegas
-    // atrapalharia quem cola o número da carta da PGM.
-    formatar: valor => valor.replace(/\D/g, ''),
+    formatar: formatarCda,
     validar: isCdaValida,
     mensagemVazio: 'Digite o número da certidão de dívida ativa.',
-    mensagemFormato: 'Digite somente os números da certidão.',
+    mensagemFormato: 'O número da certidão tem 12 números.',
   },
   'execucao-fiscal': {
     id: 'execucao-fiscal',
     rotuloLista: 'N° da Execução Fiscal',
     rotuloCampo: 'N° da Execução Fiscal',
+    placeholder: '0000000-00.0000.0.00.0000',
     parametro: 'execucaoFiscal',
     formatar: formatarExecucaoFiscal,
     validar: isExecucaoFiscalValida,

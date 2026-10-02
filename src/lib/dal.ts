@@ -38,7 +38,11 @@ import {
   normalizarConsultaFazenda,
   normalizarListaImoveis,
 } from '@/lib/divida-ativa-mappers'
-import { inscricaoParaApi, somenteDigitos } from '@/lib/divida-ativa-utils'
+import {
+  cdaParaApi,
+  inscricaoParaApi,
+  somenteDigitos,
+} from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type {
@@ -714,8 +718,8 @@ export async function getDalDividaAtivaDebitos(
  *
  * Monta **um campo só**, e não um objeto com três opcionais: a API consulta por critério
  * único (RN-001/RN-002), e `JSON.stringify` omitiria os `undefined` de qualquer forma — mas
- * aí o "único" seria acidente de serialização em vez de garantia. Sempre só os dígitos: a
- * máscara é exibição, nunca transporte.
+ * aí o "único" seria acidente de serialização em vez de garantia. Só dígitos, exceto a CDA,
+ * que vai com barras para a API saber onde está o ano (`cdaParaApi`).
  */
 function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
   const digitos = somenteDigitos(criterio.valor)
@@ -724,7 +728,7 @@ function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
     case 'inscricao':
       return { numInscricao: inscricaoParaApi(criterio.valor) }
     case 'cda':
-      return { numCda: digitos }
+      return { numCda: cdaParaApi(criterio.valor) }
     case 'execucao-fiscal':
       return { numExecucaoFiscal: digitos }
   }

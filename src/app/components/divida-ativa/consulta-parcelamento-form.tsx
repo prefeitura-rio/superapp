@@ -31,8 +31,9 @@ interface ConsultaParcelamentoFormProps {
  * Segundo passo da consulta: um campo só, com o rótulo do modo escolhido.
  *
  * Campo aberto com máscara aplicada a cada tecla. O que sai daqui para a URL — e depois para
- * a API — são **somente os dígitos**: a máscara é exibição, nunca transporte. Vale para os
- * três modos, inclusive a execução fiscal, cujo número o cidadão cola já pontuado da citação.
+ * o DAL — são **somente os dígitos**: a máscara é exibição. Vale para os três modos, inclusive
+ * a execução fiscal, cujo número o cidadão cola já pontuado da citação. (A CDA ganha as
+ * barras de volta no DAL, ao ir para a API — ver `cdaParaApi`.)
  *
  * Sem React Hook Form aqui, ao contrário do formulário de cadastro: é um campo, uma regra de
  * formato e nenhum estado de servidor. O RHF entra quando houver o que ele resolve.
@@ -84,7 +85,7 @@ export function ConsultaParcelamentoForm({
       <CustomInput
         id={`consulta-${modo.id}`}
         label={modo.rotuloCampo}
-        placeholder="Escreva aqui"
+        placeholder={modo.placeholder}
         inputMode="numeric"
         autoComplete="off"
         value={valor}
