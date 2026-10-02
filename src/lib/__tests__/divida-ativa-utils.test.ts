@@ -105,23 +105,16 @@ describe('isExecucaoFiscalValida', () => {
 })
 
 describe('isCdaValida', () => {
-  /**
-   * A CDA tem 12 dígitos — `SS/NNN.NNN/AAAA`, a máscara do portlet legado e da carta da PGM.
-   * Antes o front aceitava qualquer contagem por não conhecer o formato.
-   */
-  test('aceita os 12 dígitos da carta, com ou sem máscara', () => {
-    expect(isCdaValida('012345672020')).toBe(true)
-    expect(isCdaValida('01/234.567/2020')).toBe(true)
+  test('aceita a CDA com ou sem o sufixo depois do hífen', () => {
+    expect(isCdaValida('01/021580/2003')).toBe(true)
+    expect(isCdaValida('01/021580/2003-0')).toBe(true)
+    expect(isCdaValida('01/021580/2003-00')).toBe(true)
+    expect(isCdaValida('01021580200300')).toBe(true)
   })
 
-  test('recusa número incompleto ou longo demais', () => {
-    expect(isCdaValida('20240000111')).toBe(false)
-    expect(isCdaValida('0123456720201')).toBe(false)
-  })
-
-  test('recusa vazio e valor sem dígito', () => {
+  test('recusa número sem o ano completo', () => {
+    expect(isCdaValida('01/021580/200')).toBe(false)
     expect(isCdaValida('')).toBe(false)
-    expect(isCdaValida('   ')).toBe(false)
     expect(isCdaValida('abc')).toBe(false)
   })
 })
@@ -185,28 +178,28 @@ describe('inscricaoParaApi', () => {
 })
 
 describe('formatarCda', () => {
-  test('aplica a máscara SS/NNN.NNN/AAAA da carta da PGM', () => {
-    expect(formatarCda('012345672020')).toBe('01/234.567/2020')
+  test('aplica a máscara da carta da PGM, com o sufixo quando há', () => {
+    expect(formatarCda('01021580200300')).toBe('01/021580/2003-00')
+    expect(formatarCda('010215802003')).toBe('01/021580/2003')
   })
 
   test('mascara progressivamente, sem separador sobrando no fim', () => {
     expect(formatarCda('01')).toBe('01')
-    expect(formatarCda('012')).toBe('01/2')
-    expect(formatarCda('01234')).toBe('01/234')
-    expect(formatarCda('012345')).toBe('01/234.5')
-    expect(formatarCda('01234567')).toBe('01/234.567')
-    expect(formatarCda('012345672')).toBe('01/234.567/2')
+    expect(formatarCda('010')).toBe('01/0')
+    expect(formatarCda('01021580')).toBe('01/021580')
+    expect(formatarCda('010215802')).toBe('01/021580/2')
+    expect(formatarCda('0102158020030')).toBe('01/021580/2003-0')
   })
 
   test('tolera o número colado pontuado e corta o excesso', () => {
-    expect(formatarCda('01/234.567/2020')).toBe('01/234.567/2020')
-    expect(formatarCda('0123456720209')).toBe('01/234.567/2020')
+    expect(formatarCda('01/021580/2003-00')).toBe('01/021580/2003-00')
+    expect(formatarCda('010215802003009')).toBe('01/021580/2003-00')
   })
 })
 
 describe('cdaParaApi', () => {
-  test('envia SS/NNNNNN/AAAA, com barras, para a API achar o ano', () => {
-    expect(cdaParaApi('012345672020')).toBe('01/234567/2020')
-    expect(cdaParaApi('01/234.567/2020')).toBe('01/234567/2020')
+  test('envia a CDA com barras e hífen, para a API achar o ano', () => {
+    expect(cdaParaApi('01021580200300')).toBe('01/021580/2003-00')
+    expect(cdaParaApi('010215802003')).toBe('01/021580/2003')
   })
 })

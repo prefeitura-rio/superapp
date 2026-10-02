@@ -50,19 +50,34 @@ describe('ConsultaParcelamentoForm', () => {
   })
 
   describe('modo CDA', () => {
+    test('aceita a CDA sem o sufixo', async () => {
+      const user = userEvent.setup()
+      render(<ConsultaParcelamentoForm modo="cda" />)
+
+      await user.type(
+        screen.getByLabelText('N° da Certidão de Dívida Ativa'),
+        '010215802003'
+      )
+      await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+      expect(push).toHaveBeenCalledWith(
+        '/divida-ativa/parcelamento/debitos?cda=010215802003'
+      )
+    })
+
     test('aplica a máscara da carta da PGM e leva só os dígitos', async () => {
       const user = userEvent.setup()
       render(<ConsultaParcelamentoForm modo="cda" />)
 
       const campo = screen.getByLabelText('N° da Certidão de Dívida Ativa')
-      await user.type(campo, '012345672020')
+      await user.type(campo, '01021580200300')
 
-      expect(campo).toHaveValue('01/234.567/2020')
+      expect(campo).toHaveValue('01/021580/2003-00')
 
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
       expect(push).toHaveBeenCalledWith(
-        '/divida-ativa/parcelamento/debitos?cda=012345672020'
+        '/divida-ativa/parcelamento/debitos?cda=01021580200300'
       )
     })
 
@@ -72,9 +87,9 @@ describe('ConsultaParcelamentoForm', () => {
 
       const campo = screen.getByLabelText('N° da Certidão de Dívida Ativa')
       await user.click(campo)
-      await user.paste('01/234.567/2020')
+      await user.paste('01/021580/2003-00')
 
-      expect(campo).toHaveValue('01/234.567/2020')
+      expect(campo).toHaveValue('01/021580/2003-00')
     })
 
     test('recusa número incompleto sem navegar', async () => {
@@ -88,7 +103,9 @@ describe('ConsultaParcelamentoForm', () => {
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
       expect(
-        screen.getByText('O número da certidão tem 12 números.')
+        screen.getByText(
+          'Confira o número da certidão: ele tem o formato 00/000000/0000.'
+        )
       ).toBeInTheDocument()
       expect(push).not.toHaveBeenCalled()
     })

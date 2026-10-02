@@ -100,24 +100,29 @@ export function isExecucaoFiscalValida(valor: string): boolean {
   return somenteDigitos(valor).length === EXECUCAO_FISCAL_DIGITOS
 }
 
-/** Dígitos da CDA como a carta da PGM a mostra: série, número e ano (`SS/NNN.NNN/AAAA`). */
-export const CDA_DIGITOS = 12
+/**
+ * A CDA tem série, número e ano — 12 dígitos — e pode trazer um sufixo de até dois dígitos
+ * depois do hífen: `01/021580/2003-00`. O sufixo nem sempre aparece, então o front aceita
+ * as três formas.
+ */
+export const CDA_MIN_DIGITOS = 12
+export const CDA_MAX_DIGITOS = 14
 
 /**
- * Máscara da CDA, `SS/NNN.NNN/AAAA` — a mesma do portlet legado (`99/999.999/9999` no
- * `FormatadorUtil`), que é como o número chega impresso ao cidadão.
+ * Máscara da CDA, `SS/NNNNNN/AAAA-XX`, como o número vem na carta da PGM.
  *
  * Posições fixas, como a execução fiscal: a máscara entra a cada tecla e tolera o número
- * colado já pontuado.
+ * colado já pontuado. O hífen só aparece se o cidadão continuar digitando depois do ano —
+ * a CDA sem sufixo termina em `/AAAA`.
  */
 export function formatarCda(valor: string): string {
-  const digitos = somenteDigitos(valor).slice(0, CDA_DIGITOS)
+  const digitos = somenteDigitos(valor).slice(0, CDA_MAX_DIGITOS)
 
   const partes: Array<{ tamanho: number; separador: string }> = [
     { tamanho: 2, separador: '/' },
-    { tamanho: 3, separador: '.' },
-    { tamanho: 3, separador: '/' },
-    { tamanho: 4, separador: '' },
+    { tamanho: 6, separador: '/' },
+    { tamanho: 4, separador: '-' },
+    { tamanho: 2, separador: '' },
   ]
 
   let restante = digitos
@@ -139,24 +144,23 @@ export function formatarCda(valor: string): string {
 }
 
 /**
- * CDA no formato que a API entende sem ambiguidade: `SS/NNNNNN/AAAA`.
+ * CDA no formato que a API entende sem ambiguidade: `SS/NNNNNN/AAAA` ou
+ * `SS/NNNNNN/AAAA-XX` — é a própria máscara.
  *
  * **Exceção à regra "só dígitos".** A API guarda a CDA com o ano na frente
- * (`AAAASSNNNNNN`) e só reordena quando o valor chega com barra; só dígitos ela lê como já
- * reordenado. Os 12 dígitos da carta (`SSNNNNNNAAAA`) iriam com o ano no lugar errado e a
+ * (`AAAASSNNNNNN…`) e só reordena quando o valor chega com barra; só dígitos ela lê como já
+ * reordenado. Os dígitos da carta (`SSNNNNNNAAAA…`) iriam com o ano no lugar errado e a
  * consulta não acharia nada. Por isso a barra vai junto — ver `DamFiltroFormat` na API.
  */
 export function cdaParaApi(valor: string): string {
-  const digitos = somenteDigitos(valor)
-
-  if (digitos.length !== CDA_DIGITOS) return digitos
-
-  return `${digitos.slice(0, 2)}/${digitos.slice(2, 8)}/${digitos.slice(8)}`
+  return formatarCda(valor)
 }
 
-/** Formato aceito pelo front. Existência da certidão é da API. */
+/** Formato aceito pelo front: 12 dígitos, com ou sem o sufixo. Existência é da API. */
 export function isCdaValida(valor: string): boolean {
-  return somenteDigitos(valor).length === CDA_DIGITOS
+  const digitos = somenteDigitos(valor)
+
+  return digitos.length >= CDA_MIN_DIGITOS && digitos.length <= CDA_MAX_DIGITOS
 }
 
 /**
