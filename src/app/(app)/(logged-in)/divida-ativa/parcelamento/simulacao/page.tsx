@@ -1,101 +1,39 @@
 import { SelecaoDataVencimento } from '@/app/components/divida-ativa/selecao-data-vencimento'
 import { SelecaoParcelas } from '@/app/components/divida-ativa/selecao-parcelas'
+import { SimulacaoAviso } from '@/app/components/divida-ativa/simulacao-aviso'
 import { SecondaryHeader } from '@/app/components/secondary-header'
+import {
+  getDalDividaAtivaDatasVencimento,
+  getDalDividaAtivaSimulacao,
+} from '@/lib/dal'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
-
-// ---------------------------------------------------------------------------
-// Dados mockados — substituir por chamadas ao DAL quando os endpoints subirem
-//
-// Etapa 1 (sem ?parcelas=): opções de parcelamento vêm de
-//   POST /imoveis/{inscricao}/divida-ativa/parcelamentos/simular
-//   corpo: { cdas: string[] }
-//   resposta: SimulacaoParcelamentoResponse → opcoes: ParcelaOpcaoResponse[]
-//
-// Etapa 2 (com ?parcelas=N): datas de vencimento disponíveis para aquela
-//   quantidade de parcelas virão de
-//   GET /imoveis/{inscricao}/divida-ativa/datas-vencimento?cdas=...
-//   resposta: DatasVencimentoResponse → datas: string[]
-//
-// As strings monetárias seguem o padrão do DAM ("1.357,89"); as datas seguem
-// "dd/MM/yyyy". A forma é fiel aos tipos Orval — só os valores são fictícios.
-// ---------------------------------------------------------------------------
-
-const MOCK_OPCOES_PARCELAMENTO = [
-  {
-    qtdeParcelas: 1,
-    valor1aParcela: '1.357,89',
-    valorJuros: '0,00',
-    valorDescontos: '100,00',
-    valorTotalDescontoPrinc: '100,00',
-    valorTotalDescontoHonor: '0,00',
-  },
-  {
-    qtdeParcelas: 3,
-    valor1aParcela: '465,30',
-    valorJuros: '38,42',
-    valorDescontos: '50,00',
-    valorTotalDescontoPrinc: '50,00',
-    valorTotalDescontoHonor: '0,00',
-  },
-  {
-    qtdeParcelas: 6,
-    valor1aParcela: '240,18',
-    valorJuros: '83,19',
-    valorDescontos: '0,00',
-    valorTotalDescontoPrinc: '0,00',
-    valorTotalDescontoHonor: '0,00',
-  },
-  {
-    qtdeParcelas: 12,
-    valor1aParcela: '127,53',
-    valorJuros: '172,47',
-    valorDescontos: '0,00',
-    valorTotalDescontoPrinc: '0,00',
-    valorTotalDescontoHonor: '0,00',
-  },
-  {
-    qtdeParcelas: 24,
-    valor1aParcela: '70,21',
-    valorJuros: '331,14',
-    valorDescontos: '0,00',
-    valorTotalDescontoPrinc: '0,00',
-    valorTotalDescontoHonor: '0,00',
-  },
-]
-
-const MOCK_DATAS_VENCIMENTO = [
-  '05/10/2026',
-  '05/11/2026',
-  '05/12/2026',
-  '05/01/2027',
-  '05/02/2027',
-]
 
 /**
  * Simulação de parcelamento — duas etapas na mesma rota.
  *
- * ### Etapa 1 — Seleção de parcelas (sem `?parcelas=`)
+ * ### Etapa 1 — Data de vencimento (sem `?data=`)
  *
- * O cidadão chega da tela de débitos com as CDAs selecionadas. A página mostra as opções
- * de quantidade de parcelas com o respectivo valor da primeira. Ao clicar "Continuar",
- * `?parcelas=N` é acrescentado à URL e a etapa 2 é exibida.
+ * O cidadão chega da tela de débitos com as CDAs selecionadas (`?cdas=`) e escolhe quando
+ * vence a primeira parcela, entre as datas que o DAM oferece.
  *
- * ### Etapa 2 — Seleção da data de vencimento (com `?parcelas=N`)
+ * ### Etapa 2 — Quantidade de parcelas (com `?data=`)
  *
- * Com a quantidade de parcelas definida, o cidadão escolhe a data de vencimento da
- * primeira parcela. O "Continuar" leva ao requerimento multi-step (PR 4) com `?data=`.
+ * Com a data escolhida, a simulação traz as opções de parcela e o valor da primeira. O
+ * "Continuar" leva ao requerimento com `?data=` e `?parcelas=`.
  *
- * ### Ordem das etapas
+ * ### Por que a data vem antes
  *
- * Parcelas antes de data porque a lista de opções de parcela não depende da data — a
- * API de simulação recebe só as CDAs e devolve todas as quantidades possíveis. A data
- * de vencimento, por outro lado, pode variar por quantidade (o DAM pode ter janelas
- * diferentes para 1x e 24x), então ela é coletada depois da escolha de parcelas.
+ * O Figma desenha parcelas antes de data, mas o DAM calcula as opções **a partir da data**:
+ * juros e descontos mudam com o vencimento, e a API recusa a simulação sem ela. Simular com
+ * uma data provisória e trocá-la depois mostraria valores que deixam de valer — decidido
+ * inverter as etapas em 02/10/2026.
  *
- * ### URL compartilhável
+ * ### Sem inscrição
  *
- * Ambos os estados vivem na mesma rota com parâmetros distintos, o que mantém o Voltar
- * do navegador previsível: etapa 2 → etapa 1 → tela de débitos.
+ * Datas e simulação são pelas CDAs (`/divida-ativa/...`), sem exigir o imóvel em Meus
+ * Imóveis: servem quem chegou pela inscrição, pela CDA ou pela execução fiscal. O critério
+ * da consulta segue na URL só para o Voltar reconstruir a tela de débitos.
  */
 export default async function SimulacaoPage({
   searchParams,
@@ -105,11 +43,11 @@ export default async function SimulacaoPage({
     cda?: string
     execucaoFiscal?: string
     cdas?: string
-    parcelas?: string
+    data?: string
   }>
 }) {
   const params = await searchParams
-  const { parcelas, ...outrosParams } = params
+  const { data, ...outrosParams } = params
 
   // Sem critério de busca: o cidadão chegou aqui sem passar pela entrada do parcelamento.
   const temCriterio = params.inscricao || params.cda || params.execucaoFiscal
@@ -123,13 +61,25 @@ export default async function SimulacaoPage({
       (entry): entry is [string, string] => entry[1] !== undefined
     )
   )
+  const rotaDebitos = `/divida-ativa/parcelamento/debitos?${new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(searchParamsAtual).filter(([chave]) => chave !== 'cdas')
+    )
+  )}`
+
+  const cdas = (params.cdas ?? '').split(',').filter(Boolean)
+
+  // Sem CDA selecionada não há o que simular: volta para a seleção de débitos.
+  if (cdas.length === 0) {
+    redirect(rotaDebitos)
+  }
 
   // Rota de retorno:
-  // - etapa 2 (com ?parcelas=) volta à etapa 1 (sem ?parcelas=)
+  // - etapa 2 (com ?data=) volta à etapa 1 (sem ?data=)
   // - etapa 1 volta à tela de débitos
-  const rotaVoltar = parcelas
+  const rotaVoltar = data
     ? `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`
-    : `/divida-ativa/parcelamento/debitos?${new URLSearchParams(searchParamsAtual)}`
+    : rotaDebitos
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -140,19 +90,102 @@ export default async function SimulacaoPage({
         forceRoute
       />
 
-      {parcelas ? (
-        /* Etapa 2: data de vencimento da primeira parcela */
-        <SelecaoDataVencimento
-          datas={MOCK_DATAS_VENCIMENTO}
-          searchParamsAtual={{ ...searchParamsAtual, parcelas }}
+      {data ? (
+        <EtapaParcelas
+          cdas={cdas}
+          data={data}
+          searchParamsAtual={{ ...searchParamsAtual, data }}
+          rotaVoltar={rotaVoltar}
         />
       ) : (
-        /* Etapa 1: quantidade de parcelas */
-        <SelecaoParcelas
-          opcoes={MOCK_OPCOES_PARCELAMENTO}
+        <EtapaData
           searchParamsAtual={searchParamsAtual}
+          rotaDebitos={rotaDebitos}
         />
       )}
     </div>
+  )
+}
+
+async function EtapaData({
+  searchParamsAtual,
+  rotaDebitos,
+}: {
+  searchParamsAtual: Record<string, string>
+  rotaDebitos: string
+}) {
+  const datas = await getDalDividaAtivaDatasVencimento()
+
+  if (!datas || datas.length === 0) {
+    return (
+      <SimulacaoAviso
+        titulo="Não há datas de vencimento disponíveis"
+        descricao={
+          datas
+            ? 'O sistema da Procuradoria não ofereceu nenhuma data para a primeira parcela agora. Tente novamente mais tarde.'
+            : 'O serviço de dívida ativa está indisponível no momento. Tente novamente em alguns minutos.'
+        }
+        acao={{ rotulo: 'Voltar aos débitos', href: rotaDebitos }}
+      />
+    )
+  }
+
+  return (
+    <SelecaoDataVencimento
+      datas={datas}
+      searchParamsAtual={searchParamsAtual}
+    />
+  )
+}
+
+async function EtapaParcelas({
+  cdas,
+  data,
+  searchParamsAtual,
+  rotaVoltar,
+}: {
+  cdas: string[]
+  data: string
+  searchParamsAtual: Record<string, string>
+  rotaVoltar: string
+}) {
+  const { cpf } = await getUserInfoFromToken()
+  const simulacao = await getDalDividaAtivaSimulacao(cdas, data, cpf)
+
+  if (simulacao.situacao === 'recusada') {
+    return (
+      <SimulacaoAviso
+        titulo="Não foi possível simular o parcelamento"
+        descricao={simulacao.mensagem}
+        acao={{ rotulo: 'Escolher outra data', href: rotaVoltar }}
+      />
+    )
+  }
+
+  if (simulacao.situacao === 'indisponivel') {
+    return (
+      <SimulacaoAviso
+        titulo="O serviço de dívida ativa está indisponível no momento"
+        descricao="A sua seleção está correta — quem não respondeu foi o sistema da Procuradoria. Tente novamente em alguns minutos."
+        acao={{ rotulo: 'Voltar', href: rotaVoltar }}
+      />
+    )
+  }
+
+  if (simulacao.opcoes.length === 0) {
+    return (
+      <SimulacaoAviso
+        titulo="Não há opções de parcelamento para esta seleção"
+        descricao="Tente outra data de vencimento ou outra combinação de débitos."
+        acao={{ rotulo: 'Escolher outra data', href: rotaVoltar }}
+      />
+    )
+  }
+
+  return (
+    <SelecaoParcelas
+      opcoes={simulacao.opcoes}
+      searchParamsAtual={searchParamsAtual}
+    />
   )
 }
