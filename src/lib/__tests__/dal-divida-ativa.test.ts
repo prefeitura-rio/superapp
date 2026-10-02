@@ -2,8 +2,10 @@ import {
   getDalDividaAtivaCadastroFazenda,
   getDalDividaAtivaConsultaAvulsa,
   getDalDividaAtivaConsultaInscricao,
+  getDalDividaAtivaDatasVencimento,
   getDalDividaAtivaDebitos,
   getDalDividaAtivaImoveis,
+  getDalDividaAtivaSimulacao,
 } from '@/lib/dal'
 import { TEST_ENV } from '@/test/mocks/env'
 import { server } from '@/test/mocks/server'
@@ -672,5 +674,133 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
         CPF
       )
     ).resolves.toEqual({ situacao: 'indisponivel' })
+  })
+})
+
+describe('getDalDividaAtivaDatasVencimento', () => {
+  test('pede as datas de parcelamento e devolve a lista do DAM', async () => {
+    let tipo: string | null = null
+    server.use(
+      http.get(
+        `${DIVIDA_ATIVA}/divida-ativa/datas-vencimento`,
+        ({ request }) => {
+          tipo = new URL(request.url).searchParams.get('tipo')
+          return HttpResponse.json(
+            { datas: ['05/10/2026', '05/11/2026'] },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    expect(await getDalDividaAtivaDatasVencimento()).toEqual([
+      '05/10/2026',
+      '05/11/2026',
+    ])
+    expect(tipo).toBe('PARCELAMENTO')
+  })
+
+  test('devolve null quando a API falha, para a tela distinguir de "sem datas"', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/divida-ativa/datas-vencimento`, () =>
+        HttpResponse.json({ error: 'indisponivel' }, { status: 503 })
+      )
+    )
+
+    expect(await getDalDividaAtivaDatasVencimento()).toBeNull()
+  })
+})
+
+describe('getDalDividaAtivaSimulacao', () => {
+  const CDAS = ['202001234567']
+  const DATA = '05/10/2026'
+
+  test('simula pelas CDAs e pela data, sem inscrição, e devolve as opções', async () => {
+    let corpo: unknown
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`,
+        async ({ request }) => {
+          corpo = await request.json()
+          return HttpResponse.json(
+            {
+              opcoes: [
+                {
+                  qtdeParcelas: 1,
+                  valor1aParcela: '1.357,89',
+                  valorDescontos: '100,00',
+                },
+                { qtdeParcelas: 12, valor1aParcela: '127,53' },
+                { valor1aParcela: '0,00' },
+              ],
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    const simulacao = await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)
+
+    expect(corpo).toEqual({ cdas: CDAS, dataVencimento: DATA })
+    // Opção sem quantidade não é escolhível e sai da lista.
+    expect(simulacao).toEqual({
+      situacao: 'ok',
+      opcoes: [
+        {
+          qtdeParcelas: 1,
+          valor1aParcela: '1.357,89',
+          valorDescontos: '100,00',
+        },
+        { qtdeParcelas: 12, valor1aParcela: '127,53', valorDescontos: null },
+      ],
+    })
+  })
+
+  test('recusa com 400 vira mensagem para o cidadão', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { error: 'Não é possível parcelar CDA suspensa.' },
+          { status: 400 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não é possível parcelar CDA suspensa.',
+    })
+  })
+
+  test('recusa do DAM com 200 e mensagemErro também é recusa, não falha', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { mensagemErro: 'Valor insuficiente para parcelamento.', opcoes: [] },
+          { status: 200 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Valor insuficiente para parcelamento.',
+    })
+  })
+
+  test('5xx é indisponibilidade, sem vazar a mensagem do sistema', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar o ePortal' },
+          { status: 503 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'indisponivel',
+    })
   })
 })

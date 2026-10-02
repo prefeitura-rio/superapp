@@ -1,32 +1,33 @@
 'use client'
 
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import type { ParcelaOpcaoResponse } from '@/http-divida-ativa/models'
 import { formatarValorBRL } from '@/lib/divida-ativa-utils'
+import type { ResultadoSimulacao } from '@/types/divida-ativa'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 interface SelecaoParcelasProps {
   /**
-   * Opções de parcelamento retornadas pelo endpoint `POST .../parcelamentos/simular`.
+   * Opções de parcelamento retornadas por `POST /divida-ativa/parcelamentos/simular` para a
+   * data já escolhida.
    *
-   * Cada opção tem o número de parcelas e o valor da primeira parcela. Os descontos e juros
-   * vêm separados (decisão D4: desconto em reais absolutos, não em percentual).
+   * Cada opção tem o número de parcelas e o valor da primeira parcela. O desconto vem em
+   * reais absolutos, não em percentual (decisão D4).
    */
-  opcoes: ParcelaOpcaoResponse[]
+  opcoes: Extract<ResultadoSimulacao, { situacao: 'ok' }>['opcoes']
   /** Parâmetros correntes da URL, para mantê-los na navegação de retorno. */
   searchParamsAtual: Record<string, string>
 }
 
 /**
- * Seleção de quantas parcelas o cidadão quer pagar (Figma, tela direita).
+ * Seleção de quantas parcelas o cidadão quer pagar — etapa 2 da simulação, depois da data.
  *
  * Cada item da lista é uma opção de `qtdeParcelas` com o respectivo `valor1aParcela`.
  * Seleção única, como as datas: um número, um clique, "Continuar".
  *
- * O número de parcelas escolhido vai como `?parcelas=N` na URL — a próxima tela
- * (requerimento) o usa para preencher `ParcelamentoSimularRequest.qtdeParcelas` no
- * corpo do requerimento, e o cidadão que compartilha o link reencontra a mesma escolha.
+ * O número de parcelas escolhido vai como `?parcelas=N` na URL do requerimento, junto da
+ * `?data=` já escolhida — ele preenche `qtdeParcelas` no corpo do requerimento, e o
+ * cidadão que compartilha o link reencontra a mesma escolha.
  *
  * Client Component: a interatividade do radio não roda no servidor.
  */
@@ -50,8 +51,8 @@ export function SelecaoParcelas({
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('parcelas', String(parcelasSelecionadas))
 
-    // Próxima etapa: seleção da data de vencimento, na mesma rota com ?parcelas=N.
-    router.push(`/divida-ativa/parcelamento/simulacao?${destino}`)
+    // Próxima etapa: requerimento, com ?data= e ?parcelas= para montar o corpo da API.
+    router.push(`/divida-ativa/parcelamento/requerimento?${destino}`)
   }
 
   return (
@@ -64,8 +65,6 @@ export function SelecaoParcelas({
         <legend className="sr-only">Número de parcelas</legend>
 
         {opcoes.map(opcao => {
-          if (opcao.qtdeParcelas === undefined) return null
-
           const selecionada = parcelasSelecionadas === opcao.qtdeParcelas
           const inputId = `parcelas-${opcao.qtdeParcelas}`
 
@@ -119,7 +118,7 @@ export function SelecaoParcelas({
                 name="qtde-parcelas"
                 value={opcao.qtdeParcelas}
                 checked={selecionada}
-                onChange={() => setParcelasSelecionadas(opcao.qtdeParcelas!)}
+                onChange={() => setParcelasSelecionadas(opcao.qtdeParcelas)}
                 className="sr-only"
               />
 

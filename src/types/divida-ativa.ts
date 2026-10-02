@@ -217,3 +217,23 @@ export type ConsultaDebitos =
   | { situacao: 'ok'; debitos: DebitosDividaAtiva }
   | { situacao: 'nao-cadastrado' }
   | { situacao: 'indisponivel' }
+
+/**
+ * Desfecho da simulação de parcelamento.
+ *
+ * `recusada` é a API dizendo não com motivo para o cidadão — CDA suspensa, em leilão, com
+ * requerimento aberto, ou o DAM sem opção de parcela para aquele valor. Vem como 400 com
+ * `error` ou como 200 com `mensagemErro`, e nos dois casos a tela mostra a mensagem.
+ * `indisponivel` é o serviço fora: tentar de novo mais tarde pode resolver.
+ */
+export type ResultadoSimulacao =
+  | {
+      situacao: 'ok'
+      opcoes: Array<{
+        qtdeParcelas: number
+        valor1aParcela: string | null
+        valorDescontos: string | null
+      }>
+    }
+  | { situacao: 'recusada'; mensagem: string }
+  | { situacao: 'indisponivel' }

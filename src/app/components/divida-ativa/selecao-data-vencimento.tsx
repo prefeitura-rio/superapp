@@ -13,16 +13,16 @@ interface SelecaoDataVencimentoProps {
    * é o mesmo valor que vai em `ParcelamentoSimularRequest.dataVencimento`.
    */
   datas: string[]
-  /** Parâmetros correntes da URL — inscrição, CDAs — que precisam seguir para a próxima tela. */
+  /** Parâmetros correntes da URL — critério da consulta, CDAs — que seguem para a próxima etapa. */
   searchParamsAtual: Record<string, string>
 }
 
 /**
- * Seleção da data de vencimento da primeira parcela — etapa 2 do fluxo de simulação.
+ * Seleção da data de vencimento da primeira parcela — etapa 1 da simulação.
  *
- * O cidadão já escolheu quantas parcelas quer; agora escolhe quando vence a primeira.
- * A data escolhida vai como `?data=` na URL do requerimento, onde alimenta
- * `ParcelamentoSimularRequest.dataVencimento` no corpo da chamada ao endpoint de simular.
+ * Vem antes das parcelas porque o DAM calcula as opções a partir da data. A escolhida vai
+ * como `?data=` para a etapa 2, na mesma rota, onde alimenta
+ * `ParcelamentoSimularRequest.dataVencimento`.
  *
  * O estado da URL é compartilhável: cidadão que compartilha o link reencontra a mesma
  * seleção. O botão Voltar devolve esta tela com a data já marcada.
@@ -47,9 +47,8 @@ export function SelecaoDataVencimento({
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('data', dataSelecionada)
 
-    // Próxima etapa: requerimento multi-step (PR 4). `?parcelas=` e `?data=` já estão
-    // em searchParamsAtual + este set — o requerimento os usa para montar o corpo da API.
-    router.push(`/divida-ativa/parcelamento/requerimento?${destino}`)
+    // Próxima etapa: quantidade de parcelas, na mesma rota com ?data=.
+    router.push(`/divida-ativa/parcelamento/simulacao?${destino}`)
   }
 
   return (

@@ -11,7 +11,11 @@ import { getApiV1Categorias } from '@/http-courses/categorias/categorias'
 import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
-import { postDividaAtivaConsultar } from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
+import {
+  getDividaAtivaDatasVencimento,
+  postDividaAtivaConsultar,
+  postDividaAtivaParcelamentosSimular,
+} from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
 import { getImoveisInscricaoDividaAtiva } from '@/http-divida-ativa/divida-ativa/divida-ativa'
 import {
   getImoveis,
@@ -29,6 +33,7 @@ import {
 import {
   mapApiToDebitos,
   mapApiToImovel,
+  mapApiToMensagemErro,
   mapFazendaToImovel,
   normalizarConsultaFazenda,
   normalizarListaImoveis,
@@ -41,6 +46,7 @@ import type {
   CriterioDebitos,
   DebitosDividaAtiva,
   ImovelDividaAtiva,
+  ResultadoSimulacao,
 } from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
@@ -801,5 +807,106 @@ export async function getDalDividaAtivaConsultaAvulsa(
     })
 
     return { situacao: 'ok', debitos }
+  })
+}
+
+/**
+ * Datas de vencimento que o DAM aceita para a primeira parcela.
+ *
+ * A lista é a mesma para qualquer imóvel e qualquer CDA — o DAM não recebe nenhum dos dois
+ * nesta chamada —, por isso a função não leva parâmetro. Devolve `null` quando a API não
+ * responde 200, e lista vazia quando o DAM não tem data a oferecer, que a tela trata igual.
+ */
+export async function getDalDividaAtivaDatasVencimento(): Promise<
+  string[] | null
+> {
+  return withSpan('dal.getDividaAtivaDatasVencimento', async span => {
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getDividaAtivaDatasVencimento(
+      { tipo: 'PARCELAMENTO' },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.datas-vencimento.fetched', {
+      'datas.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /divida-ativa/datas-vencimento respondeu ${result.status}`
+      )
+      return null
+    }
+
+    return result.data.datas ?? []
+  })
+}
+
+/**
+ * Opções de parcelamento para as CDAs escolhidas, com a primeira parcela vencendo em
+ * `dataVencimento`.
+ *
+ * A data vem **antes** das parcelas porque o DAM calcula as opções a partir dela: juros e
+ * descontos mudam com o vencimento, e a API recusa a simulação sem data.
+ *
+ * Não exige imóvel cadastrado — a simulação é pelas CDAs, que é o que o DAM recebe. Serve
+ * quem chegou pela inscrição, pela CDA ou pela execução fiscal.
+ *
+ * ⚠️ Atravessa o ePortal, como a consulta: a rota precisa do `loading.tsx`.
+ */
+export async function getDalDividaAtivaSimulacao(
+  cdas: string[],
+  dataVencimento: string,
+  cpf: string
+): Promise<ResultadoSimulacao> {
+  return withSpan('dal.getDividaAtivaSimulacao', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    span.setAttribute('simulacao.cdas', cdas.length)
+
+    const result = await postDividaAtivaParcelamentosSimular(
+      { cdas, dataVencimento },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.simulacao.fetched', {
+      'simulacao.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/parcelamentos/simular respondeu ${result.status}`
+      )
+
+      const mensagem = mapApiToMensagemErro(result.data, result.status)
+      return mensagem
+        ? { situacao: 'recusada', mensagem }
+        : { situacao: 'indisponivel' }
+    }
+
+    // O DAM recusa algumas simulações com 200 e `mensagemErro` (ex.: valor sem parcela
+    // possível). É recusa com motivo, não falha de serviço.
+    if (result.data.mensagemErro) {
+      return { situacao: 'recusada', mensagem: result.data.mensagemErro }
+    }
+
+    const opcoes = (result.data.opcoes ?? []).flatMap(opcao =>
+      opcao.qtdeParcelas
+        ? [
+            {
+              qtdeParcelas: opcao.qtdeParcelas,
+              valor1aParcela: opcao.valor1aParcela ?? null,
+              valorDescontos: opcao.valorDescontos ?? null,
+            },
+          ]
+        : []
+    )
+
+    addSpanEvent('divida-ativa.simulacao.mapped', {
+      'simulacao.opcoes': opcoes.length,
+    })
+
+    return { situacao: 'ok', opcoes }
   })
 }
