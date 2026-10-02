@@ -1,6 +1,7 @@
 'use client'
 
 import { MODOS_CONSULTA } from '@/app/components/divida-ativa/modos-consulta'
+import { SearchIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import {
@@ -9,7 +10,6 @@ import {
   somenteDigitos,
 } from '@/lib/divida-ativa-utils'
 import type { ImovelDividaAtiva } from '@/types/divida-ativa'
-import { SearchIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -112,18 +112,28 @@ export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
             Selecione um imóvel
           </p>
 
-          {/* Campo de busca */}
-          <CustomInput
-            id="busca-imovel"
-            placeholder="Busque por endereço ou bairro..."
-            value={busca}
-            onChange={e => setBusca(e.target.value)}
-            leftIcon={<SearchIcon className="size-4" aria-hidden />}
-            autoComplete="off"
-          />
+          {/* Campo de busca — pílula cinza sem borda, como no Figma. Não usa o
+              `CustomInput` porque ele é transparente com borda até receber foco; aqui o
+              fundo cinza fica fixo, com ou sem foco. */}
+          <div className="flex h-14 items-center gap-3 rounded-full bg-card px-4 transition-shadow focus-within:ring-1 focus-within:ring-ring/30">
+            <SearchIcon
+              className="size-7 shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              id="busca-imovel"
+              type="text"
+              aria-label="Busque por endereço ou bairro"
+              placeholder="Busque por endereço ou bairro..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              autoComplete="off"
+              className="min-w-0 flex-1 truncate border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            />
+          </div>
 
           {/* Cards de imóveis */}
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-3">
             {imoveisFiltrados.map(imovel => (
               <li key={imovel.inscricao}>
                 <button
@@ -131,20 +141,25 @@ export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
                   onClick={() => selecionarImovel(imovel)}
                   className="w-full rounded-2xl bg-card p-4 text-left transition-colors hover:bg-secondary active:bg-secondary"
                 >
-                  <dl className="flex flex-col gap-2">
+                  <dl className="flex flex-col gap-4">
                     {imovel.endereco && (
                       <div>
-                        <dt className="text-xs font-normal leading-4 text-foreground-light">
+                        <dt className="text-sm font-normal leading-5 text-foreground-light">
                           Endereço
                         </dt>
-                        <dd className="text-sm font-normal leading-5 text-foreground">
+                        <dd className="text-base font-normal leading-6 text-foreground">
                           {imovel.endereco}
                         </dd>
+                        {imovel.bairro && (
+                          <dd className="text-base font-normal leading-6 text-foreground">
+                            {imovel.bairro}
+                          </dd>
+                        )}
                       </div>
                     )}
 
                     <div>
-                      <dt className="text-xs font-normal leading-4 text-foreground-light">
+                      <dt className="text-sm font-normal leading-5 text-foreground-light">
                         Inscrição imobiliária
                       </dt>
                       <dd className="text-sm font-normal leading-5 text-foreground">
@@ -167,7 +182,7 @@ export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
 
       <CustomButton
         type="submit"
-        variant="primary"
+        variant="secondary"
         size="lg"
         fullWidth
         className="mt-auto"
