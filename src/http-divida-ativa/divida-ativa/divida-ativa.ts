@@ -9,20 +9,14 @@ import type {
   CertidaoDamResponse,
   ConsultaFiltroRequest,
   CotaDamResponse,
-  DatasVencimentoResponse,
   DividaAtivaConsultaResponse,
-  GetImoveisInscricaoDividaAtivaDatasVencimentoParams,
   GetImoveisInscricaoDividaAtivaGuiasContinuacaoParams,
   GetImoveisInscricaoDividaAtivaGuiasNumeroGuiaPdfParams,
   GetImoveisInscricaoDividaAtivaGuiasRegularizacaoParams,
   GuiaDamResponse,
   GuiaOperacaoRequest,
-  ParcelamentoSimularRequest,
   PdfUrlResponse,
   RequerimentoCertidaoRequest,
-  RequerimentoParcelamentoRequest,
-  RequerimentoParcelamentoResponse,
-  SimulacaoParcelamentoResponse,
 } from '../models'
 
 import { customFetchDividaAtiva } from '../../../custom-fetch-divida-ativa'
@@ -132,55 +126,6 @@ export const postImoveisInscricaoDividaAtivaConsultar = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(consultaFiltroRequest),
-    }
-  )
-}
-
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponse200 = {
-  data: DatasVencimentoResponse
-  status: 200
-}
-
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponseSuccess =
-  getImoveisInscricaoDividaAtivaDatasVencimentoResponse200 & {
-    headers: Headers
-  }
-
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponse =
-  getImoveisInscricaoDividaAtivaDatasVencimentoResponseSuccess
-
-export const getGetImoveisInscricaoDividaAtivaDatasVencimentoUrl = (
-  inscricao: string,
-  params?: GetImoveisInscricaoDividaAtivaDatasVencimentoParams
-) => {
-  const normalizedParams = new URLSearchParams()
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  })
-
-  const stringifiedParams = normalizedParams.toString()
-
-  return stringifiedParams.length > 0
-    ? `/imoveis/${inscricao}/divida-ativa/datas-vencimento?${stringifiedParams}`
-    : `/imoveis/${inscricao}/divida-ativa/datas-vencimento`
-}
-
-/**
- * @summary Datas de vencimento (a vista ou parcelamento)
- */
-export const getImoveisInscricaoDividaAtivaDatasVencimento = async (
-  inscricao: string,
-  params?: GetImoveisInscricaoDividaAtivaDatasVencimentoParams,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<getImoveisInscricaoDividaAtivaDatasVencimentoResponse> => {
-  return customFetchDividaAtiva<getImoveisInscricaoDividaAtivaDatasVencimentoResponse>(
-    getGetImoveisInscricaoDividaAtivaDatasVencimentoUrl(inscricao, params),
-    {
-      ...options,
-      method: 'GET',
     }
   )
 }
@@ -483,82 +428,6 @@ export const getImoveisInscricaoDividaAtivaGuiasNumeroGuiaPdf = async (
     {
       ...options,
       method: 'GET',
-    }
-  )
-}
-
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponse200 = {
-  data: SimulacaoParcelamentoResponse
-  status: 200
-}
-
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponseSuccess =
-  postImoveisInscricaoDividaAtivaParcelamentosSimularResponse200 & {
-    headers: Headers
-  }
-
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponse =
-  postImoveisInscricaoDividaAtivaParcelamentosSimularResponseSuccess
-
-export const getPostImoveisInscricaoDividaAtivaParcelamentosSimularUrl = (
-  inscricao: string
-) => {
-  return `/imoveis/${inscricao}/divida-ativa/parcelamentos/simular`
-}
-
-/**
- * @summary Simula parcelamentos possiveis
- */
-export const postImoveisInscricaoDividaAtivaParcelamentosSimular = async (
-  inscricao: string,
-  parcelamentoSimularRequest?: ParcelamentoSimularRequest,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<postImoveisInscricaoDividaAtivaParcelamentosSimularResponse> => {
-  return customFetchDividaAtiva<postImoveisInscricaoDividaAtivaParcelamentosSimularResponse>(
-    getPostImoveisInscricaoDividaAtivaParcelamentosSimularUrl(inscricao),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(parcelamentoSimularRequest),
-    }
-  )
-}
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponse201 = {
-  data: RequerimentoParcelamentoResponse
-  status: 201
-}
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponseSuccess =
-  postImoveisInscricaoDividaAtivaRequerimentosResponse201 & {
-    headers: Headers
-  }
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponse =
-  postImoveisInscricaoDividaAtivaRequerimentosResponseSuccess
-
-export const getPostImoveisInscricaoDividaAtivaRequerimentosUrl = (
-  inscricao: string
-) => {
-  return `/imoveis/${inscricao}/divida-ativa/requerimentos`
-}
-
-/**
- * @summary Envia requerimento de parcelamento (docs base64 + reauth senha + declaracao)
- */
-export const postImoveisInscricaoDividaAtivaRequerimentos = async (
-  inscricao: string,
-  requerimentoParcelamentoRequest?: RequerimentoParcelamentoRequest,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<postImoveisInscricaoDividaAtivaRequerimentosResponse> => {
-  return customFetchDividaAtiva<postImoveisInscricaoDividaAtivaRequerimentosResponse>(
-    getPostImoveisInscricaoDividaAtivaRequerimentosUrl(inscricao),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(requerimentoParcelamentoRequest),
     }
   )
 }

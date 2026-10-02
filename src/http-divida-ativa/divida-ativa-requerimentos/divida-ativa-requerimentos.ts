@@ -8,12 +8,17 @@
 import type {
   CertidaoDamResponse,
   ConsultaFiltroRequest,
+  DatasVencimentoResponse,
   DividaAtivaConsultaResponse,
   EnderecoCepResponse,
   GetDividaAtivaCertidoesParams,
+  GetDividaAtivaDatasVencimentoParams,
   GetDividaAtivaRequerimentosParams,
+  ParcelamentoSimularRequest,
   PdfUrlResponse,
+  RequerimentoParcelamentoRequest,
   RequerimentoParcelamentoResponse,
+  SimulacaoParcelamentoResponse,
   ValidarSenhaRequest,
   ValidarSenhaResponse,
 } from '../models'
@@ -117,7 +122,7 @@ export const getPostDividaAtivaConsultarUrl = () => {
 }
 
 /**
- * @summary Consulta avulsa por CDA, execucao fiscal, guia ou inscricao — nao exige imovel cadastrado (somente leitura)
+ * @summary Consulta avulsa por CDA, execucao fiscal, guia ou inscricao — nao exige imovel cadastrado; o parcelamento segue pelas CDAs
  */
 export const postDividaAtivaConsultar = async (
   consultaFiltroRequest?: ConsultaFiltroRequest,
@@ -130,6 +135,88 @@ export const postDividaAtivaConsultar = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(consultaFiltroRequest),
+    }
+  )
+}
+
+export type getDividaAtivaDatasVencimentoResponse200 = {
+  data: DatasVencimentoResponse
+  status: 200
+}
+
+export type getDividaAtivaDatasVencimentoResponseSuccess =
+  getDividaAtivaDatasVencimentoResponse200 & {
+    headers: Headers
+  }
+
+export type getDividaAtivaDatasVencimentoResponse =
+  getDividaAtivaDatasVencimentoResponseSuccess
+
+export const getGetDividaAtivaDatasVencimentoUrl = (
+  params?: GetDividaAtivaDatasVencimentoParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/divida-ativa/datas-vencimento?${stringifiedParams}`
+    : `/divida-ativa/datas-vencimento`
+}
+
+/**
+ * @summary Datas de vencimento (a vista ou parcelamento) — iguais para qualquer imovel, nao exige inscricao
+ */
+export const getDividaAtivaDatasVencimento = async (
+  params?: GetDividaAtivaDatasVencimentoParams,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<getDividaAtivaDatasVencimentoResponse> => {
+  return customFetchDividaAtiva<getDividaAtivaDatasVencimentoResponse>(
+    getGetDividaAtivaDatasVencimentoUrl(params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type postDividaAtivaParcelamentosSimularResponse200 = {
+  data: SimulacaoParcelamentoResponse
+  status: 200
+}
+
+export type postDividaAtivaParcelamentosSimularResponseSuccess =
+  postDividaAtivaParcelamentosSimularResponse200 & {
+    headers: Headers
+  }
+
+export type postDividaAtivaParcelamentosSimularResponse =
+  postDividaAtivaParcelamentosSimularResponseSuccess
+
+export const getPostDividaAtivaParcelamentosSimularUrl = () => {
+  return `/divida-ativa/parcelamentos/simular`
+}
+
+/**
+ * @summary Simula parcelamentos possiveis a partir das CDAs — nao exige imovel cadastrado
+ */
+export const postDividaAtivaParcelamentosSimular = async (
+  parcelamentoSimularRequest?: ParcelamentoSimularRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<postDividaAtivaParcelamentosSimularResponse> => {
+  return customFetchDividaAtiva<postDividaAtivaParcelamentosSimularResponse>(
+    getPostDividaAtivaParcelamentosSimularUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(parcelamentoSimularRequest),
     }
   )
 }
@@ -177,6 +264,41 @@ export const getDividaAtivaRequerimentos = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+export type postDividaAtivaRequerimentosResponse201 = {
+  data: RequerimentoParcelamentoResponse
+  status: 201
+}
+
+export type postDividaAtivaRequerimentosResponseSuccess =
+  postDividaAtivaRequerimentosResponse201 & {
+    headers: Headers
+  }
+
+export type postDividaAtivaRequerimentosResponse =
+  postDividaAtivaRequerimentosResponseSuccess
+
+export const getPostDividaAtivaRequerimentosUrl = () => {
+  return `/divida-ativa/requerimentos`
+}
+
+/**
+ * @summary Envia requerimento de parcelamento a partir das CDAs (docs base64 + reauth senha + declaracao) — nao exige imovel cadastrado
+ */
+export const postDividaAtivaRequerimentos = async (
+  requerimentoParcelamentoRequest?: RequerimentoParcelamentoRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<postDividaAtivaRequerimentosResponse> => {
+  return customFetchDividaAtiva<postDividaAtivaRequerimentosResponse>(
+    getPostDividaAtivaRequerimentosUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(requerimentoParcelamentoRequest),
     }
   )
 }

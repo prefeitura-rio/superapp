@@ -14,9 +14,9 @@ import type { OpcaoDividaAtivaResponse } from './opcaoDividaAtivaResponse'
  * Consulta de Divida Ativa de um imovel. Serve tanto a consulta do imovel cadastrado quanto a consulta avulsa por CDA, execucao fiscal ou guia.
  */
 export interface DividaAtivaConsultaResponse {
-  /** Imovel da consulta. No fluxo cadastrado vem do banco local (com id e dataInclusao); na consulta avulsa e montado com a inscricao encontrada e o endereco da Fazenda, sem id. */
+  /** Imovel da consulta. No fluxo cadastrado vem do banco local (com id e dataInclusao); na consulta avulsa e montado com a inscricao encontrada e o endereco da Fazenda, sem id. Nulo na consulta avulsa cujo resultado abrange mais de um imovel (execucao fiscal): cada CDA traz a propria inscricaoImobiliaria. */
   imovel?: ImovelResponse
-  /** Indica se o imovel ja esta em Meus Imoveis do CPF autenticado. Falso na consulta avulsa de imovel nao cadastrado: nesse caso a resposta e somente leitura e opcoes vem vazia, porque emitir guia e requerer parcelamento exigem o cadastro. */
+  /** Indica se o imovel ja esta em Meus Imoveis do CPF autenticado. Falso na consulta avulsa de imovel nao cadastrado: o parcelamento segue pelas CDAs (/divida-ativa/parcelamentos/simular e /divida-ativa/requerimentos), mas as guias exigem o cadastro, por isso opcoes traz so PARCELAMENTO, ACOMPANHAR_REQUERIMENTO e FAQ. */
   imovelCadastrado?: boolean
   /** CDAs nao parceladas (datagrid 1 do legado T04). */
   cdas?: CdaResponse[]
