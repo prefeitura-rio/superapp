@@ -50,38 +50,47 @@ describe('ConsultaParcelamentoForm', () => {
   })
 
   describe('modo CDA', () => {
-    test('leva o número da certidão para a URL como cda', async () => {
+    test('aplica a máscara da carta da PGM e leva só os dígitos', async () => {
       const user = userEvent.setup()
       render(<ConsultaParcelamentoForm modo="cda" />)
 
-      await user.type(
-        screen.getByLabelText('N° da Certidão de Dívida Ativa'),
-        '20240000111'
-      )
+      const campo = screen.getByLabelText('N° da Certidão de Dívida Ativa')
+      await user.type(campo, '012345672020')
+
+      expect(campo).toHaveValue('01/234.567/2020')
+
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
       expect(push).toHaveBeenCalledWith(
-        '/divida-ativa/parcelamento/debitos?cda=20240000111'
+        '/divida-ativa/parcelamento/debitos?cda=012345672020'
       )
     })
 
-    /**
-     * A CDA não tem contagem conhecida — o contrato tipa `cdaId` como string livre. O front
-     * só exige "tem número", para não recusar valor que a API aceitaria.
-     */
-    test('aceita qualquer quantidade de dígitos', async () => {
+    test('aceita o número colado já pontuado', async () => {
+      const user = userEvent.setup()
+      render(<ConsultaParcelamentoForm modo="cda" />)
+
+      const campo = screen.getByLabelText('N° da Certidão de Dívida Ativa')
+      await user.click(campo)
+      await user.paste('01/234.567/2020')
+
+      expect(campo).toHaveValue('01/234.567/2020')
+    })
+
+    test('recusa número incompleto sem navegar', async () => {
       const user = userEvent.setup()
       render(<ConsultaParcelamentoForm modo="cda" />)
 
       await user.type(
         screen.getByLabelText('N° da Certidão de Dívida Ativa'),
-        '7'
+        '0123'
       )
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
-      expect(push).toHaveBeenCalledWith(
-        '/divida-ativa/parcelamento/debitos?cda=7'
-      )
+      expect(
+        screen.getByText('O número da certidão tem 12 números.')
+      ).toBeInTheDocument()
+      expect(push).not.toHaveBeenCalled()
     })
   })
 

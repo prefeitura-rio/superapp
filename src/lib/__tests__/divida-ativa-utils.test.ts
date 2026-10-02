@@ -1,4 +1,6 @@
 import {
+  cdaParaApi,
+  formatarCda,
   formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
   formatarValorBRL,
@@ -104,13 +106,17 @@ describe('isExecucaoFiscalValida', () => {
 
 describe('isCdaValida', () => {
   /**
-   * Não sabemos a contagem de dígitos de uma CDA — o contrato tipa `cdaId` como string livre.
-   * O front valida só "tem número", para não recusar um valor que a API aceitaria. Quem
-   * descobrir o formato real deve apertar isto, no espírito da decisão D8.
+   * A CDA tem 12 dígitos — `SS/NNN.NNN/AAAA`, a máscara do portlet legado e da carta da PGM.
+   * Antes o front aceitava qualquer contagem por não conhecer o formato.
    */
-  test('aceita qualquer sequência de dígitos', () => {
-    expect(isCdaValida('20240000111')).toBe(true)
-    expect(isCdaValida('1')).toBe(true)
+  test('aceita os 12 dígitos da carta, com ou sem máscara', () => {
+    expect(isCdaValida('012345672020')).toBe(true)
+    expect(isCdaValida('01/234.567/2020')).toBe(true)
+  })
+
+  test('recusa número incompleto ou longo demais', () => {
+    expect(isCdaValida('20240000111')).toBe(false)
+    expect(isCdaValida('0123456720201')).toBe(false)
   })
 
   test('recusa vazio e valor sem dígito', () => {
@@ -175,5 +181,32 @@ describe('inscricaoParaApi', () => {
    */
   test('não mexe em valor maior que 8 dígitos', () => {
     expect(inscricaoParaApi('123456789')).toBe('123456789')
+  })
+})
+
+describe('formatarCda', () => {
+  test('aplica a máscara SS/NNN.NNN/AAAA da carta da PGM', () => {
+    expect(formatarCda('012345672020')).toBe('01/234.567/2020')
+  })
+
+  test('mascara progressivamente, sem separador sobrando no fim', () => {
+    expect(formatarCda('01')).toBe('01')
+    expect(formatarCda('012')).toBe('01/2')
+    expect(formatarCda('01234')).toBe('01/234')
+    expect(formatarCda('012345')).toBe('01/234.5')
+    expect(formatarCda('01234567')).toBe('01/234.567')
+    expect(formatarCda('012345672')).toBe('01/234.567/2')
+  })
+
+  test('tolera o número colado pontuado e corta o excesso', () => {
+    expect(formatarCda('01/234.567/2020')).toBe('01/234.567/2020')
+    expect(formatarCda('0123456720209')).toBe('01/234.567/2020')
+  })
+})
+
+describe('cdaParaApi', () => {
+  test('envia SS/NNNNNN/AAAA, com barras, para a API achar o ano', () => {
+    expect(cdaParaApi('012345672020')).toBe('01/234567/2020')
+    expect(cdaParaApi('01/234.567/2020')).toBe('01/234567/2020')
   })
 })

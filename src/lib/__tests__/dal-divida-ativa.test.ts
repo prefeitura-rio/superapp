@@ -445,7 +445,11 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
    * cadastrado e só aceita inscrição no path — não há onde colocar uma CDA ou uma execução
    * fiscal. A consulta avulsa é o único caminho para os outros dois modos da tela de entrada.
    */
-  test('consulta por CDA enviando somente numCda', async () => {
+  /**
+   * A CDA vai com barras: a API só reordena o ano quando vê a barra, e os 12 dígitos da carta
+   * (`SSNNNNNNAAAA`) sem ela seriam lidos com o ano no lugar errado.
+   */
+  test('consulta por CDA enviando somente numCda, com barras', async () => {
     let corpo: unknown = null
 
     server.use(
@@ -472,12 +476,12 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
     )
 
     await getDalDividaAtivaConsultaAvulsa(
-      { tipo: 'cda', valor: '20240000111' },
+      { tipo: 'cda', valor: '012345672020' },
       CPF
     )
 
     // Critério único: os outros campos não podem ir junto, nem como `undefined` explícito.
-    expect(corpo).toEqual({ numCda: '20240000111' })
+    expect(corpo).toEqual({ numCda: '01/234567/2020' })
   })
 
   test('consulta por execução fiscal enviando somente numExecucaoFiscal', async () => {
