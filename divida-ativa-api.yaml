@@ -68,7 +68,7 @@ paths:
       tags:
       - Divida Ativa - Requerimentos
       summary: "Consulta avulsa por CDA, execucao fiscal, guia ou inscricao — nao\
-        \ exige imovel cadastrado (somente leitura)"
+        \ exige imovel cadastrado; o parcelamento segue pelas CDAs"
       requestBody:
         content:
           application/json:
@@ -76,12 +76,55 @@ paths:
               $ref: '#/components/schemas/ConsultaFiltroRequest'
       responses:
         "200":
-          description: "Consulta somente leitura. imovelCadastrado indica se o imovel\
-            \ ja esta em Meus Imoveis; quando false, opcoes vem vazia."
+          description: "imovelCadastrado indica se o imovel ja esta em Meus Imoveis;\
+            \ quando false, opcoes traz so PARCELAMENTO, ACOMPANHAR_REQUERIMENTO e\
+            \ FAQ. imovel vem nulo quando o resultado abrange mais de um imovel."
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DividaAtivaConsultaResponse'
+      security:
+      - bearerAuth: []
+  /divida-ativa/datas-vencimento:
+    get:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: "Datas de vencimento (a vista ou parcelamento) — iguais para qualquer\
+        \ imovel, nao exige inscricao"
+      parameters:
+      - name: tipo
+        in: query
+        description: AVISTA ou PARCELAMENTO
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Datas de vencimento aceitas para a operacao escolhida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasVencimentoResponse'
+      security:
+      - bearerAuth: []
+  /divida-ativa/parcelamentos/simular:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: Simula parcelamentos possiveis a partir das CDAs — nao exige imovel
+        cadastrado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParcelamentoSimularRequest'
+      responses:
+        "200":
+          description: "Opcoes de parcelamento possiveis para as CDAs informadas,\
+            \ com saldos e descontos por CDA."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulacaoParcelamentoResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos:
@@ -105,6 +148,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: Envia requerimento de parcelamento a partir das CDAs (docs base64 +
+        reauth senha + declaracao) — nao exige imovel cadastrado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequerimentoParcelamentoRequest'
+      responses:
+        "201":
+          description: "Requerimento aberto no DAM, com protocolo e URL de comprovante."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
       security:
       - bearerAuth: []
   /divida-ativa/requerimentos/{id}/cancelar:
@@ -449,31 +511,6 @@ paths:
                 $ref: '#/components/schemas/DividaAtivaConsultaResponse'
       security:
       - bearerAuth: []
-  /imoveis/{inscricao}/divida-ativa/datas-vencimento:
-    get:
-      tags:
-      - Divida Ativa
-      summary: Datas de vencimento (a vista ou parcelamento)
-      parameters:
-      - name: inscricao
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: tipo
-        in: query
-        description: AVISTA ou PARCELAMENTO
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Datas de vencimento aceitas para a operacao escolhida.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DatasVencimentoResponse'
-      security:
-      - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/emitir/avista:
     post:
       tags:
@@ -663,57 +700,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PdfUrlResponse'
-      security:
-      - bearerAuth: []
-  /imoveis/{inscricao}/divida-ativa/parcelamentos/simular:
-    post:
-      tags:
-      - Divida Ativa
-      summary: Simula parcelamentos possiveis
-      parameters:
-      - name: inscricao
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ParcelamentoSimularRequest'
-      responses:
-        "200":
-          description: "Opcoes de parcelamento possiveis para as CDAs informadas,\
-            \ com saldos e descontos por CDA."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SimulacaoParcelamentoResponse'
-      security:
-      - bearerAuth: []
-  /imoveis/{inscricao}/divida-ativa/requerimentos:
-    post:
-      tags:
-      - Divida Ativa
-      summary: Envia requerimento de parcelamento (docs base64 + reauth senha + declaracao)
-      parameters:
-      - name: inscricao
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RequerimentoParcelamentoRequest'
-      responses:
-        "201":
-          description: "Requerimento aberto no DAM, com protocolo e URL de comprovante."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RequerimentoParcelamentoResponse'
       security:
       - bearerAuth: []
   /imoveis/{inscricao}/divida-ativa/simular/avista:
@@ -1043,15 +1029,18 @@ components:
         imovel:
           description: "Imovel da consulta. No fluxo cadastrado vem do banco local\
             \ (com id e dataInclusao); na consulta avulsa e montado com a inscricao\
-            \ encontrada e o endereco da Fazenda, sem id."
+            \ encontrada e o endereco da Fazenda, sem id. Nulo na consulta avulsa\
+            \ cujo resultado abrange mais de um imovel (execucao fiscal): cada CDA\
+            \ traz a propria inscricaoImobiliaria."
           type: object
           allOf:
           - $ref: '#/components/schemas/ImovelResponse'
         imovelCadastrado:
           description: "Indica se o imovel ja esta em Meus Imoveis do CPF autenticado.\
-            \ Falso na consulta avulsa de imovel nao cadastrado: nesse caso a resposta\
-            \ e somente leitura e opcoes vem vazia, porque emitir guia e requerer\
-            \ parcelamento exigem o cadastro."
+            \ Falso na consulta avulsa de imovel nao cadastrado: o parcelamento segue\
+            \ pelas CDAs (/divida-ativa/parcelamentos/simular e /divida-ativa/requerimentos),\
+            \ mas as guias exigem o cadastro, por isso opcoes traz so PARCELAMENTO,\
+            \ ACOMPANHAR_REQUERIMENTO e FAQ."
           type: boolean
         cdas:
           description: CDAs nao parceladas (datagrid 1 do legado T04).

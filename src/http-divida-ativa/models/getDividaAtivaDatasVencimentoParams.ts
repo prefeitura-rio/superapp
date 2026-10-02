@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetImoveisInscricaoDividaAtivaDatasVencimentoParams = {
+export type GetDividaAtivaDatasVencimentoParams = {
   /**
    * AVISTA ou PARCELAMENTO
    */
