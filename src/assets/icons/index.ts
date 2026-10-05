@@ -11,10 +11,13 @@ import { DoctorIcon } from './doctor-icon'
 import { DownloadIcon } from './download-icon'
 import { EditIcon } from './edit-icon'
 import { EyeIcon } from './eye-icon'
+import { FacebookIcon } from './facebook-icon'
 import { GlobeIcon } from './globe-icon'
 import { HelpCircleIcon } from './help-circle-icon'
 import { HomeIcon } from './home-icon'
 import { InfoIcon } from './info-icon'
+import { InstagramIcon } from './instagram-icon'
+import { LinkedinIcon } from './linkedin-icon'
 import { LogoutIcon } from './logout-icon'
 import { MailIcon } from './mail-icon'
 import { MapPinIcon } from './map-pin-icon'
@@ -34,15 +37,22 @@ import { ShareIcon } from './share-icon'
 import { SquarePenIcon } from './square-pen-icon'
 import { SunIcon } from './sun-icon'
 import { TrashIcon } from './trash-icon'
+import { TwitterXIcon } from './twitter-x-icon'
 import { UserIcon } from './user-icon'
 import { UsersIcon } from './users-icon'
 import { WalletIcon } from './wallet-icon'
 import { WhatsappIcon } from './whatsapp-icon'
 import { XCircleIcon } from './x-circle-icon'
 import { XIcon } from './x-icon'
+import { YoutubeIcon } from './youtube-icon'
 
 export {
   AiImproveIcon,
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  TwitterXIcon,
+  YoutubeIcon,
   BriefcaseIcon,
   CalendarIcon,
   CltIcon,
