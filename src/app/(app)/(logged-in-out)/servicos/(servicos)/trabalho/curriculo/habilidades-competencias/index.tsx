@@ -20,6 +20,10 @@ import {
   extrairIdsHabilidadesUnicos,
 } from './utils'
 
+interface HabilidadesCompetenciasAccordionContentProps {
+  onCancel: () => void
+}
+
 async function fetchHabilidadesCompetencias(): Promise<HabilidadesCompetenciasData> {
   const response = await fetch(
     '/api/user/empregos/curriculo/habilidades-competencias'
@@ -31,8 +35,10 @@ async function fetchHabilidadesCompetencias(): Promise<HabilidadesCompetenciasDa
 
 function HabilidadesCompetenciasEditor({
   initialData,
+  onCancel,
 }: {
   initialData: HabilidadesCompetenciasData
+  onCancel: () => void
 }) {
   const queryClient = useQueryClient()
   const [areasAtuacao, setAreasAtuacao] = useState(() =>
@@ -133,6 +139,24 @@ function HabilidadesCompetenciasEditor({
     }
   }
 
+  const handleCancel = () => {
+    // Desfaz todas as possíveis alterações, retornando assim ao estado anterior.
+    queryClient.setQueryData<HabilidadesCompetenciasData>(
+      ['habilidades-competencias'],
+      {
+        areasAtuacao: structuredClone(initialData.areasAtuacao),
+        comportamentoAtitudes: structuredClone(
+          initialData.comportamentoAtitudes
+        ),
+      }
+    )
+
+    setSnapshotHabilidades([...idsHabilidadesAtuais])
+    setSnapshotComportamentos([...idsComportamentosAtuais])
+
+    onCancel()
+  }
+
   return (
     <div className="space-y-6">
       <AreaAtuacao
@@ -149,23 +173,35 @@ function HabilidadesCompetenciasEditor({
         itens={comportamentos}
         onToggle={toggleComportamento}
       />
-
-      <CustomButton
-        type="button"
-        size="lg"
-        fullWidth
-        variant="primary"
-        disabled={!houveAlteracao || salvando}
-        onClick={salvar}
-      >
-        {salvando && <Loader2 className="size-4 animate-spin" />}
-        {salvando ? 'Salvando...' : 'Continuar'}
-      </CustomButton>
+      <div className="flex gap-3">
+        <CustomButton
+          type="button"
+          variant="secondary"
+          size="lg"
+          className="flex-1"
+          onClick={handleCancel}
+        >
+          Cancelar
+        </CustomButton>
+        <CustomButton
+          type="button"
+          variant="primary"
+          size="lg"
+          className="flex-1"
+          onClick={salvar}
+          disabled={!houveAlteracao || salvando}
+        >
+          {salvando && <Loader2 className="size-4 animate-spin" />}
+          {salvando ? 'Salvando...' : 'Salvar'}
+        </CustomButton>
+      </div>
     </div>
   )
 }
 
-export function HabilidadesCompetencias() {
+export function HabilidadesCompetencias({
+  onCancel,
+}: HabilidadesCompetenciasAccordionContentProps) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['habilidades-competencias'],
     queryFn: fetchHabilidadesCompetencias,
@@ -191,5 +227,7 @@ export function HabilidadesCompetencias() {
     )
   }
 
-  return <HabilidadesCompetenciasEditor initialData={data} />
+  return (
+    <HabilidadesCompetenciasEditor initialData={data} onCancel={onCancel} />
+  )
 }

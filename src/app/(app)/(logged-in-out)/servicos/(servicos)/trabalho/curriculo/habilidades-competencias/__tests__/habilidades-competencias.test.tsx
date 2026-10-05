@@ -61,6 +61,8 @@ const initialData = {
   ],
 }
 
+const onCancel = vi.fn()
+
 function renderHabilidadesCompetencias() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -78,7 +80,7 @@ function renderHabilidadesCompetencias() {
 
   return {
     queryClient,
-    ...render(<HabilidadesCompetencias />, {
+    ...render(<HabilidadesCompetencias onCancel={onCancel} />, {
       wrapper: Wrapper,
     }),
   }
@@ -87,12 +89,17 @@ function renderHabilidadesCompetencias() {
 function mockFetchSuccess() {
   vi.mocked(fetch).mockImplementation(async (_input, init) => {
     if (init?.method === 'PUT') {
-      return new Response(JSON.stringify({ message: 'Currículo atualizado' }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      return new Response(
+        JSON.stringify({
+          message: 'Currículo atualizado',
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
     }
 
     return new Response(JSON.stringify(initialData), {
@@ -110,17 +117,16 @@ describe('HabilidadesCompetencias', () => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('mantém Continuar desabilitado enquanto não houver alteração semântica', async () => {
+  it('mantém Salvar desabilitado enquanto não houver alteração semântica', async () => {
     mockFetchSuccess()
 
     renderHabilidadesCompetencias()
 
-    const continuar = await screen.findByRole('button', {
-      name: 'Continuar',
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
     })
 
-    expect(continuar).toBeDisabled()
-
+    expect(salvar).toBeDisabled()
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 
@@ -130,11 +136,11 @@ describe('HabilidadesCompetencias', () => {
 
     renderHabilidadesCompetencias()
 
-    const continuar = await screen.findByRole('button', {
-      name: 'Continuar',
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
     })
 
-    expect(continuar).toBeDisabled()
+    expect(salvar).toBeDisabled()
 
     await user.click(
       screen.getByRole('button', {
@@ -154,11 +160,11 @@ describe('HabilidadesCompetencias', () => {
 
     await user.click(conhecimento)
 
-    expect(continuar).toBeEnabled()
+    expect(salvar).toBeEnabled()
 
     await user.click(conhecimento)
 
-    expect(continuar).toBeDisabled()
+    expect(salvar).toBeDisabled()
 
     expect(fetch).toHaveBeenCalledTimes(1)
   })
@@ -169,8 +175,8 @@ describe('HabilidadesCompetencias', () => {
 
     renderHabilidadesCompetencias()
 
-    const continuar = await screen.findByRole('button', {
-      name: 'Continuar',
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
     })
 
     await user.click(
@@ -197,9 +203,9 @@ describe('HabilidadesCompetencias', () => {
       })
     )
 
-    expect(continuar).toBeEnabled()
+    expect(salvar).toBeEnabled()
 
-    await user.click(continuar)
+    await user.click(salvar)
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledTimes(2)
@@ -217,7 +223,7 @@ describe('HabilidadesCompetencias', () => {
     })
 
     await waitFor(() => {
-      expect(continuar).toBeDisabled()
+      expect(salvar).toBeDisabled()
     })
 
     expect(mockToastSuccess).toHaveBeenCalledWith(
@@ -245,8 +251,8 @@ describe('HabilidadesCompetencias', () => {
 
     renderHabilidadesCompetencias()
 
-    const continuar = await screen.findByRole('button', {
-      name: 'Continuar',
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
     })
 
     await user.click(
@@ -255,9 +261,9 @@ describe('HabilidadesCompetencias', () => {
       })
     )
 
-    expect(continuar).toBeEnabled()
+    expect(salvar).toBeEnabled()
 
-    await user.click(continuar)
+    await user.click(salvar)
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith(
@@ -265,8 +271,7 @@ describe('HabilidadesCompetencias', () => {
       )
     })
 
-    expect(continuar).toBeEnabled()
-
+    expect(salvar).toBeEnabled()
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
