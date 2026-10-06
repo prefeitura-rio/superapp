@@ -6,7 +6,8 @@
  * OpenAPI spec version: 1.0.3
  */
 
-export interface UpsertResponse {
-  status?: string
-  accountId?: string
+export type ChamadoDetailResponseOrdensDeServicoItemCanOpenElogio = {
+  available?: boolean
+  /** @nullable */
+  categoryId?: string | null
 }

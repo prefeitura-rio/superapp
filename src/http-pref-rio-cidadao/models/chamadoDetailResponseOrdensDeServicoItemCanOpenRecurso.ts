@@ -7,11 +7,15 @@
  */
 
 /**
- * Órgão pai (resolveN1).
  * @nullable
  */
-export type ChamadoDetailResponseOrdensDeServicoItemOrgaoResponsavelPai = {
-  id?: string
-  nome?: string
-  sigla?: string
+export type ChamadoDetailResponseOrdensDeServicoItemCanOpenRecurso = {
+  available?: boolean
+  /** @nullable */
+  categoryId?: string | null
+  /**
+   * Prazo-limite ISO-8601 para abrir recurso.
+   * @nullable
+   */
+  deadline?: string | null
 } | null
