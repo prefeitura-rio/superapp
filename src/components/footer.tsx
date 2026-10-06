@@ -9,6 +9,7 @@ import {
 import prefRioLogo from '@/assets/pref-rio-logo.svg'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Footer1746Link } from './footer-1746-link'
 
 const menuLinks = [
   { label: 'Página inicial', href: '/' },
@@ -16,12 +17,15 @@ const menuLinks = [
 ]
 
 const atendimentoLinks = [
-  { label: '1746', href: 'https://1746.rio/', external: true },
-  { label: 'Ouvidoria', href: '/ouvidoria', external: false },
+  {
+    label: 'Ouvidoria',
+    href: 'https://1746.staging.app.dados.rio/protocolo/ouvidoria',
+    external: false,
+  },
   {
     label: 'Lei de Acesso à Informação',
-    href: 'https://www.rio.rj.gov.br/web/cgm/lai',
-    external: true,
+    href: 'https://1746.staging.app.dados.rio/protocolo/lai',
+    external: false,
   },
   { label: 'Perguntas frequentes', href: '/faq', external: false },
 ]
@@ -101,9 +105,11 @@ function SocialLinks() {
 function NavSection({
   title,
   links,
+  firstItem,
 }: {
   title: string
   links: { label: string; href: string; external?: boolean }[]
+  firstItem?: React.ReactNode
 }) {
   return (
     <div className="flex flex-col">
@@ -111,6 +117,7 @@ function NavSection({
         {title}
       </p>
       <ul className="flex flex-col">
+        {firstItem && <li className="mt-1">{firstItem}</li>}
         {links.map(link => (
           <li key={link.href} className="mt-1">
             <Link
@@ -160,7 +167,11 @@ export function Footer() {
 
           <div className="flex flex-col gap-6">
             <NavSection title="Menu" links={menuLinks} />
-            <NavSection title="Atendimento" links={atendimentoLinks} />
+            <NavSection
+              title="Atendimento"
+              links={atendimentoLinks}
+              firstItem={<Footer1746Link />}
+            />
           </div>
 
           <SocialLinks />
@@ -181,7 +192,11 @@ export function Footer() {
 
             <div className="flex gap-6">
               <NavSection title="Menu" links={menuLinks} />
-              <NavSection title="Atendimento" links={atendimentoLinks} />
+              <NavSection
+                title="Atendimento"
+                links={atendimentoLinks}
+                firstItem={<Footer1746Link />}
+              />
             </div>
           </div>
 
