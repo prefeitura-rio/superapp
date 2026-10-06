@@ -83,6 +83,8 @@ export interface DebitoDividaAtiva {
   /** `naturezaDivida` — IPTU, TCL etc. */
   natureza: string | null
   receita: string | null
+  /** `nomeContribuinte` — o devedor inscrito, que nem sempre é quem está consultando. */
+  contribuinte: string | null
   /** Texto da API, exibido como veio. */
   situacaoPrincipal: string | null
   situacaoHonorarios: string | null

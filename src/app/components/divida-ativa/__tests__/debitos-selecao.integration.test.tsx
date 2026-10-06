@@ -1,5 +1,5 @@
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -29,6 +29,7 @@ const CDA_2024: DebitoDividaAtiva = {
   exercicio: 2024,
   natureza: 'IPTU',
   receita: 'IPTU/Taxas - Predial',
+  contribuinte: 'RONALD FREITAS CAMPOS',
   situacaoPrincipal: 'EM ABERTO',
   situacaoHonorarios: 'EM ABERTO',
   faseCobranca: 'AJUIZADA',
@@ -85,10 +86,10 @@ describe('DebitosSelecao', () => {
   })
 
   /**
-   * O valor dos honorários só aparece no "Ver mais" — mas aparece **separado** do principal,
-   * nunca somado (decisão D5). Este teste falha se alguém juntar os dois num total.
+   * O valor dos honorários só aparece no drawer do "Ver mais" — mas aparece **separado** do
+   * principal, nunca somado (decisão D5). Este teste falha se alguém juntar os dois num total.
    */
-  test('"Ver mais" revela honorários, fase de cobrança e situações', async () => {
+  test('"Ver mais" abre um drawer com honorários, contribuinte, inscrição e situações', async () => {
     const user = userEvent.setup()
     render(<DebitosSelecao cdas={[CDA_2024]} />)
 
@@ -96,22 +97,48 @@ describe('DebitosSelecao', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ver mais' }))
 
-    expect(screen.getByText('R$153,42')).toBeInTheDocument()
-    expect(screen.getByText('AJUIZADA')).toBeInTheDocument()
-    expect(screen.getAllByText('EM ABERTO')).toHaveLength(2)
+    const drawer = await screen.findByRole('dialog')
+    expect(within(drawer).getByText('R$153,42')).toBeInTheDocument()
+    expect(
+      within(drawer).getByText('RONALD FREITAS CAMPOS')
+    ).toBeInTheDocument()
+    expect(within(drawer).getByText('0.000.001-8')).toBeInTheDocument()
+    expect(within(drawer).getByText('AJUIZADA')).toBeInTheDocument()
+    expect(within(drawer).getAllByText('EM ABERTO')).toHaveLength(2)
 
     // E o principal continua em reais próprios, não absorvido por um total.
-    expect(screen.getByText('R$1.534,21')).toBeInTheDocument()
+    expect(within(drawer).getByText('R$1.534,21')).toBeInTheDocument()
   })
 
-  test('"Ver mais" vira "Ver menos" e recolhe de novo', async () => {
+  /** O Figma trocou a expansão pelo drawer: o card não cresce, e o detalhe não vive nele. */
+  test('"Ver mais" não expande o card', async () => {
     const user = userEvent.setup()
     render(<DebitosSelecao cdas={[CDA_2024]} />)
 
     await user.click(screen.getByRole('button', { name: 'Ver mais' }))
-    await user.click(screen.getByRole('button', { name: 'Ver menos' }))
+    await screen.findByRole('dialog')
 
-    expect(screen.queryByText('R$153,42')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Ver menos', hidden: true })
+    ).not.toBeInTheDocument()
+    expect(
+      within(screen.getByRole('article', { hidden: true })).queryByText(
+        'R$153,42'
+      )
+    ).not.toBeInTheDocument()
+  })
+
+  test('fechar o drawer com Esc esconde os detalhes', async () => {
+    const user = userEvent.setup()
+    render(<DebitosSelecao cdas={[CDA_2024]} />)
+
+    await user.click(screen.getByRole('button', { name: 'Ver mais' }))
+    await screen.findByRole('dialog')
+    await user.keyboard('{Escape}')
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
   })
 
   /**
@@ -149,9 +176,10 @@ describe('DebitosSelecao', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ver mais' }))
 
-    expect(screen.getByText(/2026000123/)).toBeInTheDocument()
+    const drawer = await screen.findByRole('dialog')
+    expect(within(drawer).getByText(/2026000123/)).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Acompanhar requerimento' })
+      within(drawer).getByRole('link', { name: 'Acompanhar requerimento' })
     ).toHaveAttribute('href', '/divida-ativa/acompanhamento')
   })
 
