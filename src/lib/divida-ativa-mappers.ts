@@ -339,6 +339,7 @@ export function mapApiToDebito(api: CdaResponse): DebitoDividaAtiva {
     exercicio: anoOuNull(api.exercicio),
     natureza: textoOuNull(api.naturezaDivida),
     receita: textoOuNull(api.receita),
+    contribuinte: textoOuNull(api.nomeContribuinte),
     situacaoPrincipal: textoOuNull(api.situacaoPrincipal),
     situacaoHonorarios: textoOuNull(api.situacaoHonorarios),
     faseCobranca: textoOuNull(api.faseCobranca),

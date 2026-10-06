@@ -4,8 +4,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { formatarValorBRL } from '@/lib/divida-ativa-utils'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import { FileTextIcon } from 'lucide-react'
-import Link from 'next/link'
-import { useId, useState } from 'react'
+import { useState } from 'react'
+import { DebitoDetalhesDrawer } from './debito-detalhes-drawer'
 
 /**
  * Uma linha rótulo/valor do card.
@@ -37,12 +37,12 @@ interface DebitoCardProps {
  * Card de uma CDA na tela de seleção de débitos.
  *
  * O que fica visível é o que o Figma mostra — certidão, ano, natureza e valor. O resto do
- * que a API devolve (honorários, fase de cobrança, as duas situações e o protocolo aberto)
- * vive atrás do "Ver mais": é informação de quem foi conferir, e deixá-la sempre aberta
- * faria a lista de CDAs crescer a ponto de esconder o "Continuar".
+ * que a API devolve (honorários, contribuinte, inscrição, fase de cobrança, as duas situações
+ * e o protocolo aberto) vive no drawer do "Ver mais" (`DebitoDetalhesDrawer`): é informação
+ * de quem foi conferir, e o Figma a tira do card para a lista não crescer.
  *
  * **Principal e honorários nunca são somados** (decisão D5). O card mostra o principal como
- * "Valor" e os honorários como linha própria no expandido; um total agregado não existe no
+ * "Valor" e os honorários como linha própria no drawer; um total agregado não existe no
  * contrato (premissa P13) e inventá-lo no front seria afirmar um número que a API não
  * confirma.
  *
@@ -50,11 +50,9 @@ interface DebitoCardProps {
  * certidão que o Figma usa. Ver a descrição da PR.
  */
 export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
-  const [expandido, setExpandido] = useState(false)
-  const detalhesId = useId()
+  const [detalhesAbertos, setDetalhesAbertos] = useState(false)
 
   const valorPrincipal = formatarValorBRL(debito.valorPrincipal)
-  const valorHonorarios = formatarValorBRL(debito.valorHonorarios)
 
   return (
     <article className="rounded-2xl bg-card p-4">
@@ -91,48 +89,15 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
               valor={debito.receita ?? debito.natureza}
             />
             <Linha rotulo="Valor" valor={valorPrincipal} />
-
-            {expandido && (
-              <div id={detalhesId} className="flex flex-col gap-1 pt-1">
-                <Linha rotulo="Honorários" valor={valorHonorarios} />
-                <Linha rotulo="Fase de cobrança" valor={debito.faseCobranca} />
-                {/* Situação vem em CAIXA ALTA, como texto livre do DAM. Exibida como veio:
-                    traduzir aqui seria reimplementar uma classificação que é da API. */}
-                <Linha
-                  rotulo="Situação do principal"
-                  valor={debito.situacaoPrincipal}
-                />
-                <Linha
-                  rotulo="Situação dos honorários"
-                  valor={debito.situacaoHonorarios}
-                />
-              </div>
-            )}
           </dl>
-
-          {expandido && debito.protocoloRequerimentoAberto && (
-            /* Decisão D9: protocolo aberto informa e dá caminho — nunca bloqueia. Quem diz
-               se pode parcelar é `parcelavel`, e os dois não se derivam um do outro. */
-            <p className="text-sm font-normal leading-5 text-foreground-light">
-              Já existe um requerimento em andamento para esta certidão,
-              protocolo {debito.protocoloRequerimentoAberto}.{' '}
-              <Link
-                href="/divida-ativa/acompanhamento"
-                className="underline underline-offset-2 text-foreground"
-              >
-                Acompanhar requerimento
-              </Link>
-            </p>
-          )}
 
           <button
             type="button"
-            onClick={() => setExpandido(atual => !atual)}
-            aria-expanded={expandido}
-            aria-controls={expandido ? detalhesId : undefined}
+            onClick={() => setDetalhesAbertos(true)}
+            aria-haspopup="dialog"
             className="self-start text-sm font-normal leading-5 text-foreground underline-offset-2 hover:underline"
           >
-            {expandido ? 'Ver menos' : 'Ver mais'}
+            Ver mais
           </button>
         </div>
 
@@ -152,6 +117,12 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
           Esta certidão não está disponível para parcelamento.
         </p>
       )}
+
+      <DebitoDetalhesDrawer
+        debito={debito}
+        open={detalhesAbertos}
+        onOpenChange={setDetalhesAbertos}
+      />
     </article>
   )
 }
