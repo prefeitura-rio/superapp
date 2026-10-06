@@ -1581,6 +1581,11 @@ export function CurriculoContent({
     setAccordionValue('')
   }
 
+  const handleHabilidadesCompetenciasCancel = () => {
+    form.clearErrors()
+    setAccordionValue('')
+  }
+
   /**
    * Handler quando usuário clica "Cancelar" no modal.
    * Fecha o modal e mantém o accordion aberto.
@@ -1825,10 +1830,17 @@ export function CurriculoContent({
                         chevronClassName="text-primary stroke-[1.5]"
                         className="py-0 min-h-[60px] items-center text-left text-base font-medium leading-5 text-foreground hover:no-underline data-[state=open]:border-b-0"
                       >
-                        Habilidades e Competências
+                        <span className="flex items-center gap-2.5">
+                          Habilidades e Competências
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
+                            <Check className="size-3.5 text-white stroke-3" />
+                          </span>
+                        </span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-5 pb-4">
-                        <HabilidadesCompetencias />
+                        <HabilidadesCompetencias
+                          onCancel={() => setAccordionValue('')}
+                        />
                       </AccordionContent>
                     </AccordionItem>
                     <AccordionItem
