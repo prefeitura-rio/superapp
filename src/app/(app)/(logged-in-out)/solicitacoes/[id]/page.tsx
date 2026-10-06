@@ -192,6 +192,13 @@ interface DetailData {
   origem: string
   andamentos: { evento: string; dataInsercao: string; descricao: string }[]
   isLoggedIn: boolean
+  osId: string
+  isAcessoInformacao: boolean
+  canOpenRecurso: {
+    available: boolean
+    categoryId: string | null
+    deadline: string | null
+  } | null
   // não logado
   ultimoAndamento?: {
     evento: string
@@ -370,6 +377,34 @@ function OuvidoriaCard() {
   )
 }
 
+const BASE_1746 = 'https://1746.staging.app.dados.rio/protocolo'
+
+function buildRecursoLaiLink(categoryId: string | null, woId: string): string {
+  const params = new URLSearchParams({ woId })
+  if (categoryId) params.set('id', categoryId)
+  return `${BASE_1746}/lai/?${params.toString()}`
+}
+
+function RecursoCard({ href }: { href: string }) {
+  return (
+    <SectionCard>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-medium text-foreground">Recurso</p>
+        <p className="text-sm text-foreground-light leading-5">
+          Conteste uma resposta negativa, a falta de resposta ou uma resposta
+          insatisfatória.
+        </p>
+      </div>
+      <a
+        href={href}
+        className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
+      >
+        Solicitar Recurso
+      </a>
+    </SectionCard>
+  )
+}
+
 function RequestDetail({ data }: { data: DetailData }) {
   const { macroStatus } = data
   const [isCopied, setIsCopied] = useState(false)
@@ -489,6 +524,18 @@ function RequestDetail({ data }: { data: DetailData }) {
             )}
           </div>
         )}
+
+        {/* Recurso LAI — só logado, pedido LAI elegível */}
+        {data.isLoggedIn &&
+          data.isAcessoInformacao &&
+          data.canOpenRecurso?.available === true && (
+            <RecursoCard
+              href={buildRecursoLaiLink(
+                data.canOpenRecurso.categoryId,
+                data.osId
+              )}
+            />
+          )}
 
         {/* Ouvidoria — só logado e concluído */}
         {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
@@ -710,6 +757,9 @@ export default function RequestDetailPage() {
               origem: json.origem ?? '',
               andamentos,
               isLoggedIn: true,
+              osId: os?.id ?? '',
+              isAcessoInformacao: os?.isAcessoInformacao ?? false,
+              canOpenRecurso: os?.canOpen?.recurso ?? null,
             })
             setLoading(false)
             return
@@ -758,6 +808,9 @@ export default function RequestDetailPage() {
             origem: '',
             andamentos: [],
             isLoggedIn: false,
+            osId: '',
+            isAcessoInformacao: false,
+            canOpenRecurso: null,
             ultimoAndamento: ultimo,
           })
         } else {
