@@ -234,10 +234,21 @@ export type ConsultaDebitos =
 export type ResultadoSimulacao =
   | {
       situacao: 'ok'
+      /**
+       * `valorTotalAvista` — o saldo devedor das CDAs escolhidas, principal e honorários,
+       * já somado pela API. Base do "Total" da tela de parcelas.
+       */
+      valorTotalAvista: number | null
+      /**
+       * Valores já convertidos para número. A API os devolve formatados pelo DAM, com
+       * moeda e espaço não separável (`"R$\u00a0848,29"`).
+       */
       opcoes: Array<{
         qtdeParcelas: number
-        valor1aParcela: string | null
-        valorDescontos: string | null
+        valor1aParcela: number | null
+        /** Juros de todo o parcelamento naquela quantidade de parcelas, não por parcela. */
+        valorJuros: number | null
+        valorDescontos: number | null
       }>
     }
   | { situacao: 'recusada'; mensagem: string }

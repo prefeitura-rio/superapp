@@ -185,6 +185,7 @@ async function EtapaParcelas({
   return (
     <SelecaoParcelas
       opcoes={simulacao.opcoes}
+      valorTotalAvista={simulacao.valorTotalAvista}
       searchParamsAtual={searchParamsAtual}
     />
   )
