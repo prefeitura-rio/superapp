@@ -27,15 +27,11 @@ export function EmConstrucao({ titulo, descricao }: EmConstrucaoProps) {
           {descricao}
         </p>
 
-        <CustomButton
-          asChild
-          variant="primary"
-          size="lg"
-          fullWidth
-          className="mt-auto"
-        >
-          <Link href="/divida-ativa">Voltar a página de Dívida ativa</Link>
-        </CustomButton>
+        <div className="mt-auto pt-6">
+          <CustomButton asChild variant="primary" size="lg" fullWidth>
+            <Link href="/divida-ativa">Voltar a página de Dívida ativa</Link>
+          </CustomButton>
+        </div>
       </div>
     </div>
   )
@@ -54,7 +50,9 @@ export function EmConstrucaoLoading() {
 
         <Skeleton className="h-16 w-full" />
 
-        <Skeleton className="mt-auto h-13 w-full rounded-full" />
+        <div className="mt-auto pt-6">
+          <Skeleton className="h-13 w-full rounded-full" />
+        </div>
       </div>
     </div>
   )

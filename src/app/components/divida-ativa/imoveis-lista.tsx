@@ -61,15 +61,11 @@ export function ImoveisVazio() {
         Não encontramos nenhum imóvel cadastrado no seu CPF
       </h1>
 
-      <CustomButton
-        asChild
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        <Link href={ADICIONAR_HREF}>Adicionar imóvel</Link>
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton asChild variant="primary" size="lg" fullWidth>
+          <Link href={ADICIONAR_HREF}>Adicionar imóvel</Link>
+        </CustomButton>
+      </div>
     </div>
   )
 }

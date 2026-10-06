@@ -72,15 +72,11 @@ function InscricaoNaoEncontrada() {
         endereço do imóvel e tente de novo.
       </p>
 
-      <CustomButton
-        asChild
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        <Link href="/divida-ativa/imoveis/novo">Digitar outro número</Link>
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton asChild variant="primary" size="lg" fullWidth>
+          <Link href="/divida-ativa/imoveis/novo">Digitar outro número</Link>
+        </CustomButton>
+      </div>
     </div>
   )
 }

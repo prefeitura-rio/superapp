@@ -180,15 +180,11 @@ export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
         </div>
       )}
 
-      <CustomButton
-        type="submit"
-        variant="secondary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        Continuar
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton type="submit" variant="secondary" size="lg" fullWidth>
+          Continuar
+        </CustomButton>
+      </div>
     </form>
   )
 }

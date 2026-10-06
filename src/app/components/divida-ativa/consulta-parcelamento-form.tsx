@@ -93,15 +93,11 @@ export function ConsultaParcelamentoForm({
         error={erro ?? undefined}
       />
 
-      <CustomButton
-        type="submit"
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        Continuar
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton type="submit" variant="primary" size="lg" fullWidth>
+          Continuar
+        </CustomButton>
+      </div>
     </form>
   )
 }
