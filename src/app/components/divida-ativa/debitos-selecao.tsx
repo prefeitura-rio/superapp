@@ -95,17 +95,20 @@ export function DebitosSelecao({ cdas }: DebitosSelecaoProps) {
         ))}
       </ul>
 
-      <CustomButton
-        type="button"
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-        disabled={selecionadas.size === 0}
-        onClick={continuar}
-      >
-        Continuar
-      </CustomButton>
+      {/* `mt-auto` sozinho zera quando a lista passa da altura da tela; o `pt-6` garante o
+          respiro mínimo entre o último card e o botão. */}
+      <div className="mt-auto pt-6">
+        <CustomButton
+          type="button"
+          variant="primary"
+          size="lg"
+          fullWidth
+          disabled={selecionadas.size === 0}
+          onClick={continuar}
+        >
+          Continuar
+        </CustomButton>
+      </div>
     </div>
   )
 }

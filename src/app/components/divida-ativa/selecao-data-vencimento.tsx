@@ -109,17 +109,18 @@ export function SelecaoDataVencimento({
         })}
       </fieldset>
 
-      <CustomButton
-        type="button"
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-        disabled={!dataSelecionada}
-        onClick={continuar}
-      >
-        Continuar
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton
+          type="button"
+          variant="primary"
+          size="lg"
+          fullWidth
+          disabled={!dataSelecionada}
+          onClick={continuar}
+        >
+          Continuar
+        </CustomButton>
+      </div>
     </div>
   )
 }

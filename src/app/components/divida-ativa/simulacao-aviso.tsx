@@ -27,15 +27,11 @@ export function SimulacaoAviso({
       </h1>
       <p className="text-sm leading-5 text-foreground-light">{descricao}</p>
 
-      <CustomButton
-        asChild
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        <Link href={acao.href}>{acao.rotulo}</Link>
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton asChild variant="primary" size="lg" fullWidth>
+          <Link href={acao.href}>{acao.rotulo}</Link>
+        </CustomButton>
+      </div>
     </div>
   )
 }

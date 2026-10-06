@@ -53,7 +53,9 @@ export default function DebitosLoading() {
           ))}
         </div>
 
-        <Skeleton className="mt-auto h-13 w-full rounded-full" />
+        <div className="mt-auto pt-6">
+          <Skeleton className="h-13 w-full rounded-full" />
+        </div>
       </div>
     </div>
   )
