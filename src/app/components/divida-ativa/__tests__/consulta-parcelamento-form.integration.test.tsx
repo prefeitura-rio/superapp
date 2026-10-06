@@ -104,7 +104,7 @@ describe('ConsultaParcelamentoForm', () => {
 
       expect(
         screen.getByText(
-          'Confira o número da certidão: ele tem o formato 00/000000/0000.'
+          'Confira o número da certidão: ele tem o formato 00/000000/0000 ou 00/000000/0000-00.'
         )
       ).toBeInTheDocument()
       expect(push).not.toHaveBeenCalled()

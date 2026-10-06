@@ -67,7 +67,7 @@ export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
     validar: isCdaValida,
     mensagemVazio: 'Digite o número da certidão de dívida ativa.',
     mensagemFormato:
-      'Confira o número da certidão: ele tem o formato 00/000000/0000.',
+      'Confira o número da certidão: ele tem o formato 00/000000/0000 ou 00/000000/0000-00.',
   },
   'execucao-fiscal': {
     id: 'execucao-fiscal',

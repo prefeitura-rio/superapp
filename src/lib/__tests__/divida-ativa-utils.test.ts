@@ -129,9 +129,12 @@ describe('isExecucaoFiscalValida', () => {
 describe('isCdaValida', () => {
   test('aceita a CDA com ou sem o sufixo depois do hífen', () => {
     expect(isCdaValida('01/021580/2003')).toBe(true)
-    expect(isCdaValida('01/021580/2003-0')).toBe(true)
     expect(isCdaValida('01/021580/2003-00')).toBe(true)
     expect(isCdaValida('01021580200300')).toBe(true)
+  })
+
+  test('recusa o sufixo pela metade, que o DAM não acha', () => {
+    expect(isCdaValida('01/021580/2003-0')).toBe(false)
   })
 
   test('recusa número sem o ano completo', () => {
