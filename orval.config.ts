@@ -20,4 +20,23 @@ export default defineConfig({
       },
     },
   },
+  cidadao: {
+    input: './pref-rio-cidadao-api.yaml',
+    output: {
+      target: './src/http-pref-rio-cidadao/default/default.ts',
+      schemas: './src/http-pref-rio-cidadao/models',
+      mode: 'single',
+      client: 'fetch',
+      formatter: 'biome',
+      httpClient: 'fetch',
+      clean: true,
+      baseUrl: process.env.BASE_API_URL_PREF_RIO_CIDADAO,
+      override: {
+        mutator: {
+          path: './custom-fetch-pref-rio-cidadao.ts',
+          name: 'customFetchPrefRioCidadao',
+        },
+      },
+    },
+  },
 })
