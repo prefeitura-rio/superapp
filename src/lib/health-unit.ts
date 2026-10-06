@@ -45,27 +45,63 @@ export type GetHealthUnitRiskResponse = {
   headers: Headers
 }
 
+const getBody = async (response: Response) => {
+  const contentType = response.headers.get('content-type')
+
+  if (contentType?.includes('application/json')) {
+    return response.json()
+  }
+
+  return response.text()
+}
+
 // Custom fetch for health unit API
 const healthUnitFetch = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
   const baseUrl = process.env.BASE_API_URL_SUBPAV_OSA_API
+  const apiKey = process.env.API_KEY_SUBPAV_OSA_SMS
 
-  const url = `${baseUrl}${endpoint}`
-
-  const headers = {
-    Authorization: `Bearer ${process.env.API_KEY_SUBPAV_OSA_SMS}`,
-    'Content-Type': 'application/json',
-    ...options.headers,
+  if (!baseUrl) {
+    throw new Error(
+      'BASE_API_URL_SUBPAV_OSA_API environment variable is not set.'
+    )
   }
+
+  if (!apiKey) {
+    console.error(
+      '[health-unit] API_KEY_SUBPAV_OSA_SMS is not set; skipping request to',
+      endpoint
+    )
+    return {
+      data: null,
+      status: 401,
+      headers: new Headers(),
+    } as T
+  }
+
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+  const url = `${normalizedBaseUrl}${endpoint}`
 
   const response = await fetch(url, {
     ...options,
-    headers,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
   })
 
-  const data = await response.json()
+  const data = await getBody(response)
+
+  if (!response.ok) {
+    console.error('[health-unit] Request failed', {
+      url,
+      status: response.status,
+      data,
+    })
+  }
 
   return {
     data,

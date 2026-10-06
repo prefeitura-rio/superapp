@@ -8,6 +8,7 @@ const oportunidadesCariocasLegacyPaths = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  transpilePackages: ['react-pdf', 'pdfjs-dist'],
   async redirects() {
     return [
       {

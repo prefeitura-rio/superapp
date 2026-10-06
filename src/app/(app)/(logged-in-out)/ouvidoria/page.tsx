@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import autofalante from '@/assets/autofalante.png'
 import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
 import joia from '@/assets/joinha.png'
@@ -10,9 +10,8 @@ export const dynamic = 'force-static'
 
 export default function OuvidoriaPage() {
   return (
-    <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader title="" className="max-w-xl" />
+    <div className="pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
+      <HeaderWrapperClient />
 
       <section className="relative">
         <div className="flex flex-col mb-6 pt-2 ">

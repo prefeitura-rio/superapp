@@ -1,6 +1,5 @@
 'use client'
 
-import { CoursesHeaderClient } from '@/app/components/courses/courses-header-client'
 import RecentlyAddedCourses from '@/app/components/recently-added-courses'
 import { useAllCoursesPage } from '@/hooks/courses/use-all-courses-page'
 import { useUserEnrollments } from '@/hooks/courses/use-user-enrollments'
@@ -69,7 +68,6 @@ export default function CoursePageClient({
   if (initialCoursesPage.courses.length === 0) {
     return (
       <div className="min-h-lvh">
-        <CoursesHeaderClient />
         <main className="max-w-4xl mx-auto pb-20 text-white">
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
@@ -83,7 +81,6 @@ export default function CoursePageClient({
 
   return (
     <div className="min-h-lvh">
-      <CoursesHeaderClient />
       <main className="max-w-4xl mx-auto pb-34 text-white">
         {categoryFilters.length > 0 && (
           <>

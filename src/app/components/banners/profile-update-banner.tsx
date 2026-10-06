@@ -34,7 +34,7 @@ export const ProfileUpdateBanner = ({
           <span className="text-white font-medium text-base leading-5">
             Atualize seu cadastro
           </span>
-          <span className="text-white text-normal text-sm leading-4">
+          <span className="text-white text-normal text-xs md:text-sm leading-4">
             E personalize seu atendimento
           </span>
         </div>
@@ -48,7 +48,7 @@ export const ProfileUpdateBanner = ({
           alt="Atualize seu cadastro"
           width={200}
           height={200}
-          className="h-32 w-auto absolute bottom-0 -right-8 z-20  md:right-0"
+          className="h-32 rounded-br-xl rounded-tr-xl w-auto absolute bottom-0 -right-8 z-20  md:right-0"
         />
       }
     />

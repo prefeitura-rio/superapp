@@ -14,7 +14,11 @@ export default defineConfig({
   retries: 2,
   workers: 1,
   expect: { timeout: process.env.CI ? 15000 : 15000 },
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['./e2e/reporters/skips-reporter.ts'],
+  ],
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',

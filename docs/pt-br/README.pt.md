@@ -13,9 +13,9 @@
 
 ## Visão Geral
 
-Este é um projeto **Next.js 15** construído com:
+Este é um projeto **Next.js 16** construído com:
 
-- **Framework**: Next.js 15.4.6 com React 19
+- **Framework**: Next.js 16.3.5 com React 19
 - **Linguagem**: TypeScript
 - **Estilização**: Tailwind CSS 4.1.5
 - **Autenticação**: Keycloak (Identidade Carioca)
@@ -75,6 +75,10 @@ BASE_API_URL_APP_BUSCA_SEARCH=
 BASE_API_URL_SUBPAV_OSA_API=
 BASE_API_URL_RMI=
 COURSES_BASE_API_URL=
+BASE_API_URL_DIVIDA_ATIVA=
+
+# Feature flags
+NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA=
 
 # Gov.br
 NEXT_PUBLIC_GOVBR_BASE_URL=

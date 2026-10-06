@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { MoonIcon, SunIcon } from '@/assets/icons'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useTheme } from 'next-themes'
@@ -9,8 +9,8 @@ export default function UserSettingsForm() {
   const { setTheme, theme } = useTheme()
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
-      <SecondaryHeader title="Configurações" route="/meu-perfil" />
+    <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+      <ProfileHeaderWrapper />
 
       <RadioGroup
         value={theme}

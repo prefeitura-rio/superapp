@@ -1,14 +1,23 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { updateUserBirthDate } from '@/actions/update-user-birth-date'
 import { ConfirmarInformacoesContent } from '../confirmar-informacoes-content'
 import type { EmpregosUserInfo } from '../types'
 
+const mockUpdateUserBirthDate = vi.mocked(updateUserBirthDate)
+
 const mockPush = vi.fn()
+const mockRefresh = vi.fn()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+  usePathname: () => '/servicos/trabalho',
+}))
+
+vi.mock('@/actions/update-user-birth-date', () => ({
+  updateUserBirthDate: vi.fn(),
 }))
 
 const validPhone = {
@@ -19,15 +28,25 @@ const validEmail = {
   principal: { valor: 'usuario@exemplo.com.br' },
 }
 
+const validAddress = {
+  logradouro: 'Rua Visconde de Figueiredo',
+  numero: '62',
+  bairro: 'Tijuca',
+  municipio: 'Rio de Janeiro',
+  estado: 'RJ',
+}
+
 const baseUserInfo: EmpregosUserInfo = {
   cpf: '12345678901',
   name: 'Maria Silva',
   email: validEmail,
   phone: validPhone,
+  address: validAddress,
   genero: 'Feminino',
   escolaridade: 'Médio completo',
   renda_familiar: 'De 1 a 2 salários mínimos',
   deficiencia: 'Nenhuma',
+  nascimento: { data: '1990-01-01', origem: 'bcadastro' },
 }
 
 const baseAuthInfo = { cpf: '12345678901', name: 'MARIA SILVA' }
@@ -85,6 +104,23 @@ describe('ConfirmarInformacoesContent', () => {
 
       expect(screen.queryByText('Informe seu e-mail')).not.toBeInTheDocument()
     })
+
+    test('exibe o endereço formatado quando preenchido', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(
+        screen.getByText(
+          'Rua Visconde de Figueiredo, 62, Tijuca, Rio de Janeiro, RJ'
+        )
+      ).toBeInTheDocument()
+      expect(screen.queryByText('Informe seu endereço')).not.toBeInTheDocument()
+    })
   })
 
   describe('campos obrigatórios ausentes', () => {
@@ -133,6 +169,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: true,
             emailNeedsUpdate: false,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -150,6 +187,7 @@ describe('ConfirmarInformacoesContent', () => {
           contactUpdateStatus={{
             phoneNeedsUpdate: false,
             emailNeedsUpdate: true,
+            addressNeedsUpdate: false,
           }}
         />
       )
@@ -157,10 +195,72 @@ describe('ConfirmarInformacoesContent', () => {
       expect(screen.getByText('Informe seu e-mail')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
     })
+
+    test('exibe "Informe seu endereço" e desabilita botão quando address é nulo', () => {
+      const userInfoSemAddress: EmpregosUserInfo = {
+        ...baseUserInfo,
+        address: null,
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoSemAddress}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    // Cidadãos que usaram a antiga exclusão de endereço ficaram com a string
+    // literal "null" gravada no RMI. Esse endereço não vale como preenchido.
+    test('trata o endereço gravado como "null" no RMI como ausente', () => {
+      const userInfoAddressNull: EmpregosUserInfo = {
+        ...baseUserInfo,
+        address: {
+          logradouro: 'null',
+          numero: 'null',
+          bairro: 'null',
+          municipio: 'null',
+          estado: 'null',
+        },
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoAddressNull}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    test('desabilita botão quando addressNeedsUpdate é true', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+          contactUpdateStatus={{
+            phoneNeedsUpdate: false,
+            emailNeedsUpdate: false,
+            addressNeedsUpdate: true,
+          }}
+        />
+      )
+
+      expect(screen.getByText('Informe seu endereço')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
   })
 
   describe('botão Continuar habilitado', () => {
-    test('habilita botão quando phone e email estão preenchidos', () => {
+    test('habilita botão quando phone, email, endereço e nascimento estão preenchidos', () => {
       render(
         <ConfirmarInformacoesContent
           vagaId="vaga-123"
@@ -246,6 +346,108 @@ describe('ConfirmarInformacoesContent', () => {
         />
       )
 
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+  })
+
+  describe('data de nascimento', () => {
+    test('exibe campo e desabilita Continuar quando nascimento está ausente', () => {
+      const userInfoSemNascimento: EmpregosUserInfo = {
+        ...baseUserInfo,
+        nascimento: undefined,
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoSemNascimento}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(
+        screen.getByText('Informe sua data de nascimento')
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+    })
+
+    test('habilita Continuar quando nascimento está preenchido', () => {
+      const userInfoComNascimento: EmpregosUserInfo = {
+        ...baseUserInfo,
+        nascimento: { data: '1990-01-01', origem: 'self-declared' },
+      }
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={userInfoComNascimento}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(
+        screen.queryByText('Informe sua data de nascimento')
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+
+    test('habilita Continuar após salvar data de nascimento ausente no drawer', async () => {
+      const user = userEvent.setup()
+      mockUpdateUserBirthDate.mockResolvedValue({
+        success: true,
+        message: 'Data de nascimento atualizada com sucesso.',
+      })
+
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={{ ...baseUserInfo, nascimento: undefined }}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+
+      await user.click(screen.getByText('Informe sua data de nascimento'))
+
+      const dateInput = (await waitFor(() => {
+        const input = document.querySelector('#birth-date-input')
+        expect(input).toBeTruthy()
+        return input as HTMLInputElement
+      })) as HTMLInputElement
+
+      await user.clear(dateInput)
+      await user.type(dateInput, '1990-05-15')
+
+      const saveButton = await screen.findByRole('button', { name: 'Salvar' })
+      await waitFor(() => expect(saveButton).not.toBeDisabled())
+      await user.click(saveButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('15/05/1990')).toBeInTheDocument()
+      })
+      expect(
+        screen.getByRole('button', { name: 'Continuar' })
+      ).not.toBeDisabled()
+    })
+
+    test('exibe data oficial somente leitura e habilita Continuar', () => {
+      render(
+        <ConfirmarInformacoesContent
+          vagaId="vaga-123"
+          userInfo={baseUserInfo}
+          userAuthInfo={baseAuthInfo}
+        />
+      )
+
+      expect(screen.getByText('01/01/1990')).toBeInTheDocument()
+      expect(
+        screen.queryByText('Informe sua data de nascimento')
+      ).not.toBeInTheDocument()
       expect(
         screen.getByRole('button', { name: 'Continuar' })
       ).not.toBeDisabled()

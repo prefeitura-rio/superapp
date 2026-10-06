@@ -60,8 +60,10 @@ export const SuccessSlide = ({ onFinish }: SuccessSlideProps) => {
       </div>
 
       <CustomButton
+        variant="primary"
+        size="lg"
+        fullWidth
         onClick={handleFinish}
-        className="w-full py-3 bg-primary text-background rounded-full font-medium hover:bg-primary/90"
       >
         Finalizar
       </CustomButton>

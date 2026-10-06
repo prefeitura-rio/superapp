@@ -9,4 +9,6 @@
 export type ServiceDetailFlags = {
   allowsAnonymity?: boolean
   allowTicketSubmission?: boolean
+  activeCategoryConfigId?: string
+  activeCategoryName?: string
 }

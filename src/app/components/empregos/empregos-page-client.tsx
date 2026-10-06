@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { AllVagas } from './all-vagas'
 import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
+import { MeuCurriculoCtaCard } from './meu-curriculo-cta-card'
 import { RecentlyAddedVagas } from './recently-added-vagas'
 import type { VagaCardData } from './vaga-card'
 
@@ -41,11 +42,10 @@ export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
 
   return (
     <>
-      {hasCandidaturas && (
-        <div className="px-4 pb-4">
-          <CandidaturasEnviadasCtaCard />
-        </div>
-      )}
+      <div className="flex flex-col gap-2 px-4 pb-4">
+        <MeuCurriculoCtaCard />
+        {hasCandidaturas && <CandidaturasEnviadasCtaCard />}
+      </div>
       <Suspense fallback={null}>
         <RecentlyAddedVagasOnFirstPage vagas={recentVagas} />
       </Suspense>

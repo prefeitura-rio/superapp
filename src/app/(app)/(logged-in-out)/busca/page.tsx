@@ -1,19 +1,15 @@
 'use client'
 
 import { ExternalLinkDrawer } from '@/app/components/drawer-contents/external-link-drawer'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { sendGAEvent } from '@next/third-parties/google'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { CatalogSearchContext } from './hooks/use-catalog-search'
@@ -208,226 +204,233 @@ export default function Search() {
 
   const logoHref =
     context === 'empregos' ? '/servicos/trabalho' : '/servicos/cursos'
+  const searchUrl =
+    context === 'empregos' ? '/busca?tipo=empregos' : '/busca?tipo=cursos'
+  const menuHref =
+    context === 'empregos'
+      ? '/servicos/trabalho/menu'
+      : '/servicos/cursos/opcoes'
 
   return (
-    <div className="min-h-lvh max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
-      {(context === 'empregos' || context === 'cursos') && (
-        <div className="flex justify-center mb-8">
-          <Link href={logoHref}>
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        </div>
+    <div>
+      {context === 'empregos' || context === 'cursos' ? (
+        <OportunidadesSubHeader
+          menuHref={menuHref}
+          logoHref={logoHref}
+          showSearchIcon
+          searchUrl={searchUrl}
+        />
+      ) : (
+        <HeaderWrapperClient />
       )}
-      <SearchInput
-        ref={searchInputRef}
-        placeholder="Do que você precisa?"
-        value={query}
-        onChange={e => onQueryChange(e.target.value)}
-        onBack={handleBack}
-        onClear={clearSearch}
-      />
+      <div
+        style={
+          context === 'empregos' || context === 'cursos'
+            ? {
+                background:
+                  'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+              }
+            : undefined
+        }
+      >
+        <div className="max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
+          <SearchInput
+            ref={searchInputRef}
+            placeholder="Do que você precisa?"
+            value={query}
+            onChange={e => onQueryChange(e.target.value)}
+            onBack={handleBack}
+            onClear={clearSearch}
+          />
 
-      <div className="text-white space-y-3 mt-6">
-        {isLoading ? (
-          <div>
-            <h2 className="text-base text-foreground font-medium">
-              Resultados da Pesquisa
-            </h2>
-            <SearchResultSkeleton />
-          </div>
-        ) : hasQuery ? (
-          <>
-            {/* Primary results – context type */}
-            {hasPrimary ? (
+          <div className="text-white space-y-3 mt-6">
+            {isLoading ? (
               <div>
                 <h2 className="text-base text-foreground font-medium">
                   Resultados da Pesquisa
                 </h2>
-                <ul className="space-y-2 pt-4">
-                  {primaryResults.map((item, index) => (
-                    <ResultItem
-                      key={item.id ?? index}
-                      item={item}
-                      onClick={() => handleResultClick(item)}
-                    />
-                  ))}
-                </ul>
+                <SearchResultSkeleton />
               </div>
+            ) : hasQuery ? (
+              <>
+                {/* Primary results – context type */}
+                {hasPrimary ? (
+                  <div>
+                    <h2 className="text-base text-foreground font-medium">
+                      Resultados da Pesquisa
+                    </h2>
+                    <ul className="space-y-2 pt-4">
+                      {primaryResults.map((item, index) => (
+                        <ResultItem
+                          key={item.id ?? index}
+                          item={item}
+                          onClick={() => handleResultClick(item)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center justify-center py-8">
+                    <ThemeAwareVideo
+                      source={VIDEO_SOURCES.emptyAddress}
+                      containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
+                    />
+                    <p className="text-lg text-muted-foreground">
+                      Ops... nenhum resultado encontrado para a sua busca
+                    </p>
+                  </div>
+                )}
+
+                {/* Secondary results – other types */}
+                {hasSecondary && (
+                  <div className={hasPrimary ? 'pt-4' : ''}>
+                    <h2 className="text-base text-foreground font-medium">
+                      Você também pode estar procurando
+                    </h2>
+                    <ul className="space-y-2 pt-4">
+                      {secondaryResults.map((item, index) => (
+                        <ResultItem
+                          key={item.id ?? index}
+                          item={item}
+                          onClick={() => handleResultClick(item)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="flex flex-col items-center text-center justify-center py-8">
-                <ThemeAwareVideo
-                  source={VIDEO_SOURCES.emptyAddress}
-                  containerClassName="mb-6 flex items-center justify-center h-[min(328px,40vh)] max-h-[328px]"
-                />
-                <p className="text-lg text-muted-foreground">
-                  Ops... nenhum resultado encontrado para a sua busca
-                </p>
-              </div>
-            )}
-
-            {/* Secondary results – other types */}
-            {hasSecondary && (
-              <div className={hasPrimary ? 'pt-4' : ''}>
-                <h2 className="text-base text-foreground font-medium">
-                  Você também pode estar procurando
+              /* Mais pesquisados / Mais recentes */
+              <div>
+                <h2 className="text-base font-medium text-foreground">
+                  {isDynamicContext ? 'Mais recentes' : 'Mais pesquisados'}
                 </h2>
-                <ul className="space-y-2 pt-4">
-                  {secondaryResults.map((item, index) => (
-                    <ResultItem
-                      key={item.id ?? index}
-                      item={item}
-                      onClick={() => handleResultClick(item)}
-                    />
+
+                {/* Static list (default / servicos) */}
+                {showStaticPopular && (
+                  <ul>
+                    {STATIC_POPULAR.map(({ title, href }) => (
+                      <li
+                        key={href}
+                        className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                        onClick={() => {
+                          sendGAEvent('event', 'mais_pesquisados_click', {
+                            search_query: title,
+                            event_timestamp: new Date().toISOString(),
+                          })
+                          saveCatalogHistory(title)
+                          router.push(href)
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            sendGAEvent('event', 'mais_pesquisados_click', {
+                              search_query: title,
+                              event_timestamp: new Date().toISOString(),
+                            })
+                            saveCatalogHistory(title)
+                            router.push(href)
+                          }
+                        }}
+                      >
+                        <span>{title}</span>
+                        <ChevronRightIcon className="text-primary h-6 w-6" />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Dynamic list (empregos / mei / cursos) */}
+                {isDynamicContext &&
+                  (suggestionsLoading ? (
+                    <ul>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <li
+                          key={i}
+                          className="flex justify-between items-center py-4 border-b border-border"
+                        >
+                          <div className="h-4 w-48 rounded bg-card-foreground/10 animate-pulse" />
+                          <div className="h-6 w-6 rounded-full bg-card-foreground/10 animate-pulse" />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul>
+                      {dynamicSuggestions.slice(0, 4).map((item, index) => (
+                        <li
+                          key={item.id ?? index}
+                          className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                          onClick={() => {
+                            if (item.title) saveCatalogHistory(item.title)
+                            handleResultClick(item)
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              if (item.title) saveCatalogHistory(item.title)
+                              handleResultClick(item)
+                            }
+                          }}
+                        >
+                          <span>{item.title || '—'}</span>
+                          <ChevronRightIcon className="text-primary h-6 w-6" />
+                        </li>
+                      ))}
+                    </ul>
                   ))}
-                </ul>
               </div>
             )}
-          </>
-        ) : (
-          /* Mais pesquisados / Mais recentes */
-          <div>
-            <h2 className="text-base font-medium text-foreground">
-              {isDynamicContext ? 'Mais recentes' : 'Mais pesquisados'}
-            </h2>
+          </div>
 
-            {/* Static list (default / servicos) */}
-            {showStaticPopular && (
+          {/* Search history */}
+          {query.length <= 2 && searchHistory.length > 0 && (
+            <div className="pt-6 flex flex-col">
+              <h2 className="text-base font-medium text-foreground">
+                Pesquisados por você
+              </h2>
               <ul>
-                {STATIC_POPULAR.map(({ title, href }) => (
+                {searchHistory.map((text, index) => (
                   <li
-                    key={href}
-                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
-                    onClick={() => {
-                      sendGAEvent('event', 'mais_pesquisados_click', {
-                        search_query: title,
-                        event_timestamp: new Date().toISOString(),
-                      })
-                      saveCatalogHistory(title)
-                      router.push(href)
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        sendGAEvent('event', 'mais_pesquisados_click', {
-                          search_query: title,
-                          event_timestamp: new Date().toISOString(),
-                        })
-                        saveCatalogHistory(title)
-                        router.push(href)
-                      }
-                    }}
+                    key={index}
+                    className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
                   >
-                    <span>{title}</span>
-                    <ChevronRightIcon className="text-primary h-6 w-6" />
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/* Dynamic list (empregos / mei / cursos) */}
-            {isDynamicContext &&
-              (suggestionsLoading ? (
-                <ul>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <li
-                      key={i}
-                      className="flex justify-between items-center py-4 border-b border-border"
-                    >
-                      <div className="h-4 w-48 rounded bg-card-foreground/10 animate-pulse" />
-                      <div className="h-6 w-6 rounded-full bg-card-foreground/10 animate-pulse" />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <ul>
-                  {dynamicSuggestions.slice(0, 4).map((item, index) => (
-                    <li
-                      key={item.id ?? index}
-                      className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                    <span
+                      className="flex-1"
                       onClick={() => {
-                        if (item.title) saveCatalogHistory(item.title)
-                        handleResultClick(item)
+                        setQuery(text)
+                        handleSearch(text)
                       }}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                          if (item.title) saveCatalogHistory(item.title)
-                          handleResultClick(item)
+                          setQuery(text)
+                          handleSearch(text)
                         }
                       }}
                     >
-                      <span>{item.title || '—'}</span>
-                      <ChevronRightIcon className="text-primary h-6 w-6" />
-                    </li>
-                  ))}
-                </ul>
-              ))}
-          </div>
-        )}
-      </div>
+                      {text}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        removeFromHistory(text)
+                      }}
+                      className="text-primary h-5 w-5 hover:text-destructive transition-colors"
+                      aria-label={`Remove "${text}" from search history`}
+                    >
+                      <XIcon className="h-5 w-5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      {/* Search history */}
-      {query.length <= 2 && searchHistory.length > 0 && (
-        <div className="pt-6 flex flex-col">
-          <h2 className="text-base font-medium text-foreground">
-            Pesquisados por você
-          </h2>
-          <ul>
-            {searchHistory.map((text, index) => (
-              <li
-                key={index}
-                className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer group"
-              >
-                <span
-                  className="flex-1"
-                  onClick={() => {
-                    setQuery(text)
-                    handleSearch(text)
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      setQuery(text)
-                      handleSearch(text)
-                    }
-                  }}
-                >
-                  {text}
-                </span>
-                <button
-                  type="button"
-                  onClick={e => {
-                    e.stopPropagation()
-                    removeFromHistory(text)
-                  }}
-                  className="text-primary h-5 w-5 hover:text-destructive transition-colors"
-                  aria-label={`Remove "${text}" from search history`}
-                >
-                  <XIcon className="h-5 w-5" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <ExternalLinkDrawer
+            open={externalLinkDrawerOpen}
+            onOpenChange={setExternalLinkDrawerOpen}
+            externalUrl={selectedExternalUrl}
+          />
         </div>
-      )}
-
-      <ExternalLinkDrawer
-        open={externalLinkDrawerOpen}
-        onOpenChange={setExternalLinkDrawerOpen}
-        externalUrl={selectedExternalUrl}
-      />
+      </div>
     </div>
   )
 }

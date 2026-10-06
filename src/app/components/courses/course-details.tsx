@@ -1,6 +1,7 @@
 'use client'
 
 import { deleteEnrollment } from '@/actions/courses/delete-enrollment'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons'
 import { CourseStatusCard } from './course-status-card'
 
@@ -14,13 +15,14 @@ import { PersonIcon } from '@/assets/icons/person-icon'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { IconButton } from '@/components/ui/custom/icon-button'
-import { oportunidadesCariocasLogoDark } from '@/constants/bucket'
 import { useUserEnrollment } from '@/hooks/courses/use-user-enrollment'
 import type { ModelsCurso } from '@/http-courses/models'
 import type { ModelsDepartmentResponse } from '@/http/models'
 import {
   getCourseEnrollmentInfo,
-  isScheduleEnrollmentClosed,
+  getScheduleUnavailableLabel,
+  getSchedulesUnavailableLabel,
+  isScheduleSelectable,
   normalizeModalityDisplay,
   shouldGrayscaleCourseCover,
 } from '@/lib/course-utils'
@@ -136,24 +138,6 @@ function CourseHeader({ course, onBack }: CourseHeaderProps) {
   }
   return (
     <div className="h-[280px] md:h-[340px] w-full relative">
-      {/* Header bar: botão + logo centralizados verticalmente */}
-      <div className="absolute top-0 inset-x-0 z-10 flex items-center px-4 py-4">
-        <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
-        <div className="absolute inset-x-0 flex justify-center pointer-events-none">
-          <div className="pointer-events-auto">
-            <Link href="/servicos/cursos">
-              <Image
-                src={oportunidadesCariocasLogoDark}
-                alt="Oportunidades Cariocas"
-                width={170}
-                height={38}
-                priority
-              />
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {course.cover_image && (
         <Image
           src={course.cover_image}
@@ -292,22 +276,31 @@ function CourseMetadata({ course }: CourseMetadataProps) {
       : []),
   ].filter(item => item.value)
 
-  const isOdd = items.length % 2 !== 0
+  const count = items.length
+  // Grid: 2 cols on mobile, 3 cols on sm+.
+  // Last item spans remaining cols when it would be stranded alone in its row.
+  const loneInMobileRow = count % 2 !== 0
+  const loneInDesktopRow = count % 3 !== 0
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
-      {items.map((item, index) => (
-        <div
-          key={item.label}
-          className={
-            isOdd && index === items.length - 1
-              ? 'col-span-2 sm:col-span-1'
-              : ''
-          }
-        >
-          <MetaCard label={item.label} value={item.value} />
-        </div>
-      ))}
+      {items.map((item, index) => {
+        const isLast = index === count - 1
+        const className =
+          isLast && (loneInMobileRow || loneInDesktopRow)
+            ? [
+                loneInMobileRow ? 'col-span-2' : '',
+                loneInDesktopRow ? 'sm:col-span-3' : 'sm:col-span-1',
+              ]
+                .filter(Boolean)
+                .join(' ')
+            : ''
+        return (
+          <div key={item.label} className={className}>
+            <MetaCard label={item.label} value={item.value} />
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -586,17 +579,6 @@ function OnlineClassSelection({
   const onlineClasses = course.remote_class.schedules
   const hasMultiple = onlineClasses.length > 1
 
-  // A turma só aceita inscrição quando ainda tem vagas E o próprio período de
-  // inscrição não encerrou.
-  const isClassAvailable = (onlineClass: any) => {
-    if (isScheduleEnrollmentClosed(onlineClass)) return false
-    return (
-      onlineClass.remaining_vacancies !== undefined &&
-      onlineClass.remaining_vacancies !== null &&
-      onlineClass.remaining_vacancies > 0
-    )
-  }
-
   if (!hasMultiple) {
     return (
       <div className="space-y-4 pt-4">
@@ -612,7 +594,8 @@ function OnlineClassSelection({
     <div className="space-y-4 pt-4">
       <ScrollableCards count={onlineClasses.length} label="Selecione a turma">
         {onlineClasses.map((onlineClass, index) => {
-          const isAvailable = isClassAvailable(onlineClass)
+          const unavailableLabel = getScheduleUnavailableLabel(onlineClass)
+          const isAvailable = unavailableLabel === null
           const isSelected = selectedClassId === onlineClass.id
           return (
             <button
@@ -632,11 +615,9 @@ function OnlineClassSelection({
             >
               <h4 className="font-medium text-foreground text-sm">
                 Turma {index + 1}
-                {!isAvailable && (
+                {unavailableLabel && (
                   <span className="text-muted-foreground text-xs ml-2">
-                    {isScheduleEnrollmentClosed(onlineClass)
-                      ? '(Inscrições encerradas)'
-                      : '(Sem vagas)'}
+                    ({unavailableLabel})
                   </span>
                 )}
               </h4>
@@ -688,6 +669,11 @@ function LocationSelection({
       >
         {course.locations.map(location => {
           const isSelected = selectedLocationId === location.id
+          // The unidade stays clickable — it also reveals the turma details —
+          // but the citizen sees upfront that it has nothing to enroll into
+          const unavailableLabel = getSchedulesUnavailableLabel(
+            location.schedules
+          )
           return (
             <button
               type="button"
@@ -708,6 +694,11 @@ function LocationSelection({
               {location.address && (
                 <p className="text-foreground-light text-xs font-normal leading-4">
                   {location.address}
+                </p>
+              )}
+              {unavailableLabel && (
+                <p className="text-muted-foreground text-xs font-normal leading-4">
+                  ({unavailableLabel})
                 </p>
               )}
             </button>
@@ -1008,128 +999,145 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
   const enrollmentText = getEnrollmentText(course.enrollment_end_date)
 
   return (
-    <div className="flex flex-col items-center pb-20">
-      <div className="w-full max-w-3xl">
-        {/* Confirmation Bottom Sheet */}
-        <BottomSheet
-          open={showConfirmation}
-          onOpenChange={setShowConfirmation}
-          title="Confirmar cancelamento"
-          headerClassName="text-center p-0 mb-6"
-        >
-          <div className="text-center p-2">
-            <h2 className="text-base mb-4">Confirmar cancelamento</h2>
-            <p className="text-foreground-light mb-2">
-              Tem certeza que deseja cancelar sua inscrição neste curso?
-            </p>
-          </div>
-          <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-2">
-            <CustomButton
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={() => setShowConfirmation(false)}
+    <div>
+      <OportunidadesSubHeader
+        menuHref="/servicos/cursos/opcoes"
+        logoHref="/servicos/cursos"
+        showSearchIcon
+        searchUrl="/servicos/cursos/busca"
+      />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="flex flex-col items-center pb-20">
+          <div className="w-full max-w-3xl">
+            {/* Confirmation Bottom Sheet */}
+            <BottomSheet
+              open={showConfirmation}
+              onOpenChange={setShowConfirmation}
+              title="Confirmar cancelamento"
+              headerClassName="text-center p-0 mb-6"
             >
-              Cancelar
-            </CustomButton>
-            <CustomButton
-              variant="secondary"
-              size="lg"
-              fullWidth
-              onClick={handleCancelEnrollment}
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Cancelando...' : 'Confirmar'}
-            </CustomButton>
-          </div>
-        </BottomSheet>
-
-        {/* Cover image */}
-        <CourseHeader course={course} />
-
-        {/* Content area — bottom-sheet visual */}
-        <div className="flex flex-col items-center self-stretch rounded-t-2xl bg-background -mt-4 relative z-10">
-          {/* Drag indicator */}
-          <div className="w-[37px] h-1 rounded-full bg-[#E4E4E4] mt-4 mb-0 shrink-0" />
-
-          <div className="flex flex-col gap-4 px-4 w-full pt-4">
-            {/* Title + enrollment deadline — 4px gap between them */}
-            <div className="flex flex-col gap-1">
-              <h1 className="text-foreground font-medium text-3xl leading-9 tracking-tight">
-                {course.title || 'Título não disponível'}
-              </h1>
-              {enrollmentText && (
-                <p className="text-card-2 text-sm font-normal leading-5">
-                  {enrollmentText}
+              <div className="text-center p-2">
+                <h2 className="text-base mb-4">Confirmar cancelamento</h2>
+                <p className="text-foreground-light mb-2">
+                  Tem certeza que deseja cancelar sua inscrição neste curso?
                 </p>
-              )}
-            </div>
+              </div>
+              <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto p-2">
+                <CustomButton
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  onClick={() => setShowConfirmation(false)}
+                >
+                  Cancelar
+                </CustomButton>
+                <CustomButton
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  onClick={handleCancelEnrollment}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Cancelando...' : 'Confirmar'}
+                </CustomButton>
+              </div>
+            </BottomSheet>
 
-            {/* Status card */}
-            {userEnrollment?.status && (
-              <CourseStatusCard
-                status={userEnrollment.status as any}
-                className="w-full"
-                hasCertificate={course.has_certificate}
-              />
-            )}
+            {/* Cover image */}
+            <CourseHeader course={course} />
 
-            {/* Action buttons for approved/pending - above description */}
-            {(userEnrollment?.status === 'approved' ||
-              userEnrollment?.status === 'pending') && (
-              <div className="w-full">{renderActionButton()}</div>
-            )}
+            {/* Content area — bottom-sheet visual */}
+            <div className="flex flex-col items-center self-stretch rounded-t-2xl bg-background -mt-4 relative z-10">
+              {/* Drag indicator */}
+              <div className="w-[37px] h-1 rounded-full bg-[#E4E4E4] mt-4 mb-0 shrink-0" />
 
-            {/* Description */}
-            <div>
-              {course.description ? (
-                <MarkdownRenderer
-                  className="text-sm text-foreground-light"
-                  content={course.description}
-                />
-              ) : (
-                <div className="text-foreground-light text-base leading-4 md:leading-6">
-                  Descrição não disponível
+              <div className="flex flex-col gap-4 px-4 w-full pt-4">
+                {/* Title + enrollment deadline — 4px gap between them */}
+                <div className="flex flex-col gap-1">
+                  <h1 className="text-foreground font-medium text-3xl leading-9 tracking-tight">
+                    {course.title || 'Título não disponível'}
+                  </h1>
+                  {enrollmentText && (
+                    <p className="text-card-2 text-sm font-normal leading-5">
+                      {enrollmentText}
+                    </p>
+                  )}
                 </div>
-              )}
+
+                {/* Status card */}
+                {userEnrollment?.status && (
+                  <CourseStatusCard
+                    status={userEnrollment.status as any}
+                    className="w-full"
+                    hasCertificate={course.has_certificate}
+                  />
+                )}
+
+                {/* Action buttons for approved/pending - above description */}
+                {(userEnrollment?.status === 'approved' ||
+                  userEnrollment?.status === 'pending') && (
+                  <div className="w-full">{renderActionButton()}</div>
+                )}
+
+                {/* Description */}
+                <div>
+                  {course.description ? (
+                    <MarkdownRenderer
+                      className="text-sm text-foreground-light"
+                      content={course.description}
+                    />
+                  ) : (
+                    <div className="text-foreground-light text-base leading-4 md:leading-6">
+                      Descrição não disponível
+                    </div>
+                  )}
+                </div>
+
+                {/* Metadata cards */}
+                <CourseMetadata course={course} />
+
+                {/* Offered by card — 8px gap from metadata */}
+                <div className="-mt-2">
+                  <CourseInfo course={course} department={department} />
+                </div>
+
+                {/* Enroll button — below "Curso oferecido por", 32px gap */}
+                {(!isEnrolled ||
+                  enrollmentInfo.status === 'certificate_available') && (
+                  <div className="w-full mt-4">{renderActionButton()}</div>
+                )}
+
+                {/* Location / schedule selection */}
+                <LocationSelection
+                  course={course}
+                  selectedLocationId={selectedLocationId}
+                  onLocationSelect={handleLocationSelect}
+                />
+                <OnlineClassSelection
+                  course={course}
+                  selectedClassId={selectedClassId}
+                  onClassSelect={handleClassSelect}
+                />
+
+                {/* Extra content sections */}
+                <div className="mt-8">
+                  <CourseContent course={course} />
+                </div>
+
+                {/* Bottom action button */}
+                {userEnrollment?.status !== 'approved' &&
+                  userEnrollment?.status !== 'pending' && (
+                    <div className="w-full pt-4 pb-4">
+                      {renderActionButton()}
+                    </div>
+                  )}
+              </div>
             </div>
-
-            {/* Metadata cards */}
-            <CourseMetadata course={course} />
-
-            {/* Offered by card — 8px gap from metadata */}
-            <div className="-mt-2">
-              <CourseInfo course={course} department={department} />
-            </div>
-
-            {/* Enroll button — below "Curso oferecido por", 32px gap */}
-            {(!isEnrolled ||
-              enrollmentInfo.status === 'certificate_available') && (
-              <div className="w-full mt-4">{renderActionButton()}</div>
-            )}
-
-            {/* Location / schedule selection */}
-            <LocationSelection
-              course={course}
-              selectedLocationId={selectedLocationId}
-              onLocationSelect={handleLocationSelect}
-            />
-            <OnlineClassSelection
-              course={course}
-              selectedClassId={selectedClassId}
-              onClassSelect={handleClassSelect}
-            />
-
-            {/* Extra content sections */}
-            <div className="mt-8">
-              <CourseContent course={course} />
-            </div>
-
-            {/* Bottom action button */}
-            {userEnrollment?.status !== 'approved' &&
-              userEnrollment?.status !== 'pending' && (
-                <div className="w-full pt-4 pb-4">{renderActionButton()}</div>
-              )}
           </div>
         </div>
       </div>

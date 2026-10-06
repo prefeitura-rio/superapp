@@ -1,25 +1,13 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import Image from 'next/image'
-import Link from 'next/link'
 
 function CandidaturaCardSkeleton() {
   return (
     <div className="bg-card rounded-3xl p-4 flex flex-col gap-4">
-      {/* Badge */}
       <Skeleton className="h-6 w-24 rounded-full" />
-
-      {/* Título + empresa */}
       <div className="flex-1 flex flex-col justify-center space-y-1.5">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-3 w-2/3" />
       </div>
-
-      {/* Área de progresso */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <Skeleton className="h-3 w-20" />
@@ -33,41 +21,39 @@ function CandidaturaCardSkeleton() {
 
 export default function MinhasCandidaturasLoading() {
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader
-        fixed={false}
-        route="/servicos/trabalho"
-        logo={
-          <Link href="/servicos/trabalho">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
-      />
-      <div className="px-4 pt-2 md:pt-0">
-        <h1 className="text-3xl font-medium text-foreground pb-2">
-          Minhas candidaturas
-        </h1>
-        <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <CandidaturaCardSkeleton key={i} />
-          ))}
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
         </div>
       </div>
-    </main>
+      {/* OportunidadesCariocas band skeleton */}
+      <div className="w-full bg-card py-4">
+        <div className="mx-auto px-4 max-w-4xl">
+          <Skeleton className="h-9 w-44" />
+        </div>
+      </div>
+
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 pt-2 pb-10">
+          <Skeleton className="h-9 w-52 mb-2" />
+          <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <CandidaturaCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

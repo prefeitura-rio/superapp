@@ -1,7 +1,7 @@
 import { processVagas } from '@/app/components/empregos/vagas-utils'
 import { EmpresaDetailContent } from '@/app/components/empresas/empresa-detail-content'
 import { getApiV1EmpregabilidadeEmpresasCnpj } from '@/http-courses/empregabilidade-empresas/empregabilidade-empresas'
-import { getApiV1EmpregabilidadeVagas } from '@/http-courses/empregabilidade-vagas/empregabilidade-vagas'
+import { getApiPublicEmpregabilidadeVagas } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeVaga } from '@/http-courses/models'
 import { mapEmpregabilidadeEmpresaToDetail } from '@/lib/empresa-utils'
 import { notFound } from 'next/navigation'
@@ -31,7 +31,7 @@ export default async function EmpresaDetailPage({ params }: PageProps) {
     let vagasEmpresa: EmpregabilidadeVaga[] = []
 
     try {
-      const vagasResponse = await getApiV1EmpregabilidadeVagas({
+      const vagasResponse = await getApiPublicEmpregabilidadeVagas({
         contratante: decodedCnpj,
         status: 'publicado_ativo',
       })

@@ -1,4 +1,5 @@
 import { buildAuthUrl } from '@/constants/url'
+import { hasValidAddress } from '@/helpers/address-data-helpers'
 import { normalizeEmailData } from '@/helpers/email-data-helpers'
 import { normalizePhoneData } from '@/helpers/phone-data-helpers'
 import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
@@ -120,10 +121,28 @@ export default async function InscricaoPage({
     name: userInfo.nome || userAuthInfo.name,
     email: normalizeEmailData(userInfo.email),
     phone: normalizePhoneData(userInfo.telefone),
+    address: userInfo.endereco?.principal
+      ? {
+          logradouro: userInfo.endereco.principal.logradouro,
+          numero: userInfo.endereco.principal.numero,
+          bairro: userInfo.endereco.principal.bairro,
+          municipio: userInfo.endereco.principal.municipio,
+          estado: userInfo.endereco.principal.estado,
+          tipo_logradouro: userInfo.endereco.principal.tipo_logradouro,
+          complemento: userInfo.endereco.principal.complemento,
+          cep: userInfo.endereco.principal.cep,
+        }
+      : null,
     genero: userInfoExtended.genero,
     escolaridade: userInfoExtended.escolaridade,
     renda_familiar: userInfoExtended.renda_familiar,
     deficiencia: userInfoExtended.deficiencia,
+    nascimento: userInfo.nascimento
+      ? {
+          data: userInfo.nascimento.data,
+          origem: userInfo.nascimento.origem,
+        }
+      : undefined,
   }
 
   const phoneNeedsUpdate = !isUpdatedWithin({
@@ -140,7 +159,18 @@ export default async function InscricaoPage({
     months: 6,
   })
 
-  const contactUpdateStatus = { phoneNeedsUpdate, emailNeedsUpdate }
+  // Mesma vigência semestral já aplicada a telefone e e-mail, e que cursos já
+  // aplica ao endereço.
+  const addressNeedsUpdate = !isUpdatedWithin({
+    updatedAt: userInfo.endereco?.principal?.updated_at || null,
+    months: 6,
+  })
+
+  const contactUpdateStatus = {
+    phoneNeedsUpdate,
+    emailNeedsUpdate,
+    addressNeedsUpdate,
+  }
 
   const onboardingData =
     onboardingResponse.status === 200 && onboardingResponse.data
@@ -148,9 +178,14 @@ export default async function InscricaoPage({
       : null
   const showBemVindo = onboardingData?.is_first_login === true
 
+  const hasBirthDate = !!transformedUserInfo.nascimento?.data
+
   const needsConfirmar =
     contactUpdateStatus.phoneNeedsUpdate ||
     contactUpdateStatus.emailNeedsUpdate ||
+    contactUpdateStatus.addressNeedsUpdate ||
+    !hasValidAddress(transformedUserInfo.address) ||
+    !hasBirthDate ||
     !transformedUserInfo.genero ||
     !transformedUserInfo.escolaridade ||
     !transformedUserInfo.renda_familiar ||

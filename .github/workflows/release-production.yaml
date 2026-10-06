@@ -56,6 +56,7 @@ jobs:
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="cursos,empregos" \
             --build-arg NEXT_PUBLIC_FEATURE_CHAMADOS="false" \
             --build-arg NEXT_PUBLIC_USE_MOCK_CHAMADOS="false" \
+            --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="false" \
             --tag $IMAGE_NAME:$VERSION \
             --tag $IMAGE_NAME:$VERSION_NO_V \
             --tag $IMAGE_NAME:stable \

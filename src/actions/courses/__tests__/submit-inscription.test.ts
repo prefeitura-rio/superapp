@@ -164,6 +164,74 @@ describe('submitCourseInscription', () => {
       })
     })
 
+    // A API de cursos reporta regra de negócio no campo `error`, não em
+    // `message`. Ler apenas `message` reduzia toda recusa ao texto genérico, e
+    // o cidadão não descobria que a turma estava fora do período de inscrição.
+    test('surfaces the reason from the API `error` field (status 500)', async () => {
+      server.use(
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.json(
+            { error: 'as inscrições desta turma já encerraram' },
+            { status: 500 }
+          )
+        })
+      )
+
+      const result = await submitCourseInscription({
+        courseId: '123',
+        userInfo: baseUserInfo,
+        scheduleId: 'turma-encerrada',
+        reason: 'Turma fora da vigência',
+      })
+
+      expect(result).toEqual({
+        success: false,
+        error: 'as inscrições desta turma já encerraram',
+      })
+    })
+
+    test('surfaces the reason from the API `error` field (status 400)', async () => {
+      server.use(
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.json(
+            { error: 'as inscrições desta turma ainda não iniciaram' },
+            { status: 400 }
+          )
+        })
+      )
+
+      const result = await submitCourseInscription({
+        courseId: '123',
+        userInfo: baseUserInfo,
+        scheduleId: 'turma-futura',
+        reason: 'Turma ainda não aberta',
+      })
+
+      expect(result).toEqual({
+        success: false,
+        error: 'as inscrições desta turma ainda não iniciaram',
+      })
+    })
+
+    test('falls back to the generic message when the body carries no reason', async () => {
+      server.use(
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {
+          return HttpResponse.json({ success: false }, { status: 500 })
+        })
+      )
+
+      const result = await submitCourseInscription({
+        courseId: '123',
+        userInfo: baseUserInfo,
+        reason: 'Sem motivo no corpo',
+      })
+
+      expect(result).toEqual({
+        success: false,
+        error: 'Erro ao inscrever-se no curso',
+      })
+    })
+
     test('returns generic error for network failure', async () => {
       server.use(
         http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () => {

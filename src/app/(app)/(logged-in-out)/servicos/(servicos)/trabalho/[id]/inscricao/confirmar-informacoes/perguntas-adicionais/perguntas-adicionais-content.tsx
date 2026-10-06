@@ -2,14 +2,10 @@
 
 import { ActionDiv } from '@/app/components/action-div'
 import { CandidaturaEnviadaDrawer } from '@/app/components/empregos/candidatura-enviada-drawer'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
@@ -232,215 +228,201 @@ export function PerguntasAdicionaisContent({
 
   return (
     <>
-      <div className="max-w-4xl mx-auto">
-        <SecondaryHeader
-          fixed={false}
-          className="max-w-4xl mx-auto"
-          route={
-            backRoute ??
-            `/servicos/trabalho/${vagaId}/inscricao/confirmar-informacoes`
-          }
-          logo={
-            <Link href="/servicos/trabalho">
-              <Image
-                src={oportunidadesCariocasLogoDark}
-                alt="Oportunidades Cariocas"
-                width={170}
-                height={38}
-                priority
-                className="dark:block hidden"
-              />
-              <Image
-                src={oportunidadesCariocasLogo}
-                alt="Oportunidades Cariocas"
-                width={170}
-                height={38}
-                priority
-                className="dark:hidden block"
-              />
-            </Link>
-          }
-        />
+      <OportunidadesSubHeader
+        menuHref="/servicos/trabalho/menu"
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
+      />
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <FormProvider {...form}>
+          <form onSubmit={handleSubmit(onSubmit, onError)}>
+            <div className="px-4 max-w-4xl mx-auto flex flex-col overflow-x-hidden">
+              <div className="text-left shrink-0 pb-6 pt-2">
+                <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">
+                  Perguntas adicionais
+                </h1>
+              </div>
+
+              <div className="space-y-6">
+                {informacoesComplementares.map(info => {
+                  const fieldName = `field_${info.id}`
+                  const error = errors[fieldName]?.message as string | undefined
+
+                  return (
+                    <div key={info.id}>
+                      {info.tipo_campo === 'resposta_curta' && (
+                        <Controller
+                          control={control}
+                          name={fieldName}
+                          render={({ field }) => (
+                            <CustomInput
+                              {...field}
+                              value={(field.value as string) ?? ''}
+                              label={info.titulo}
+                              placeholder="Escreva aqui"
+                              error={error}
+                              isRequired={info.obrigatorio}
+                              className="rounded-xl border-2 border-border h-16 bg-transparent text-sm shadow-none placeholder:text-sm placeholder:text-foreground-light dark:placeholder:text-muted-foreground focus:bg-card"
+                              containerClassName="space-y-3"
+                            />
+                          )}
+                        />
+                      )}
+
+                      {info.tipo_campo === 'resposta_numerica' && (
+                        <Controller
+                          control={control}
+                          name={fieldName}
+                          render={({ field }) => (
+                            <CustomInput
+                              {...field}
+                              type="number"
+                              label={info.titulo}
+                              placeholder="Escreva aqui"
+                              error={error}
+                              isRequired={info.obrigatorio}
+                              min={info.valor_minimo ?? undefined}
+                              max={info.valor_maximo ?? undefined}
+                              onChange={e => {
+                                const value = e.target.value
+                                field.onChange(
+                                  value === '' ? '' : Number(value)
+                                )
+                              }}
+                              value={
+                                field.value === ''
+                                  ? ''
+                                  : (field.value as number)
+                              }
+                              className="rounded-xl border-2 border-border h-16 bg-transparent text-sm shadow-none placeholder:text-sm placeholder:text-foreground-light dark:placeholder:text-muted-foreground focus:bg-card"
+                              containerClassName="space-y-3"
+                            />
+                          )}
+                        />
+                      )}
+
+                      {info.tipo_campo === 'selecao_unica' && (
+                        <Controller
+                          control={control}
+                          name={fieldName}
+                          render={({ field }) => {
+                            const hasSelection = Boolean(field.value)
+
+                            return (
+                              <ActionDiv
+                                ref={field.ref}
+                                label={info.titulo}
+                                isRequired={info.obrigatorio}
+                                content={
+                                  hasSelection ? (
+                                    (field.value as string)
+                                  ) : (
+                                    <span className="text-foreground-light dark:text-muted-foreground">
+                                      Selecionar
+                                    </span>
+                                  )
+                                }
+                                disabled
+                                variant="default"
+                                error={error}
+                                rightIcon={
+                                  <ChevronDownIcon
+                                    className={
+                                      hasSelection
+                                        ? 'text-primary stroke-[1.5] size-5'
+                                        : 'text-foreground-light stroke-[1.5] size-5'
+                                    }
+                                  />
+                                }
+                                drawerContent={
+                                  <UnicaSelecaoDrawerContent
+                                    fieldName={fieldName}
+                                    opcoes={info.opcoes ?? []}
+                                  />
+                                }
+                                drawerTitle={info.titulo}
+                                containerClassName="space-y-3"
+                              />
+                            )
+                          }}
+                        />
+                      )}
+
+                      {info.tipo_campo === 'selecao_multipla' && (
+                        <Controller
+                          control={control}
+                          name={fieldName}
+                          render={({ field }) => {
+                            const value = (field.value as string[]) ?? []
+                            const hasSelection = value.length > 0
+
+                            return (
+                              <ActionDiv
+                                ref={field.ref}
+                                label={info.titulo}
+                                isRequired={info.obrigatorio}
+                                content={
+                                  hasSelection ? (
+                                    <span className="line-clamp-2">
+                                      {value.join(', ')}
+                                    </span>
+                                  ) : (
+                                    <span className="text-foreground-light dark:text-muted-foreground">
+                                      Selecionar
+                                    </span>
+                                  )
+                                }
+                                disabled
+                                variant="default"
+                                error={error}
+                                rightIcon={
+                                  <ChevronDownIcon
+                                    className={
+                                      hasSelection
+                                        ? 'text-primary stroke-[1.5] size-5'
+                                        : 'text-foreground-light stroke-[1.5] size-5'
+                                    }
+                                  />
+                                }
+                                drawerContent={
+                                  <MultiplaSelecaoDrawerContent
+                                    fieldName={fieldName}
+                                    opcoes={info.opcoes ?? []}
+                                  />
+                                }
+                                drawerTitle={info.titulo}
+                                containerClassName="space-y-3"
+                              />
+                            )
+                          }}
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="shrink-0 pt-6 pb-8">
+                <CustomButton
+                  type="submit"
+                  size="lg"
+                  fullWidth
+                  variant="primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Finalizando...' : 'Finalizar inscrição'}
+                </CustomButton>
+              </div>
+            </div>
+          </form>
+        </FormProvider>
       </div>
-
-      <FormProvider {...form}>
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
-          <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-            <div className="text-left shrink-0 pb-6 pt-2">
-              <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">
-                Perguntas adicionais
-              </h1>
-            </div>
-
-            <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 space-y-6">
-              {informacoesComplementares.map(info => {
-                const fieldName = `field_${info.id}`
-                const error = errors[fieldName]?.message as string | undefined
-
-                return (
-                  <div key={info.id}>
-                    {info.tipo_campo === 'resposta_curta' && (
-                      <Controller
-                        control={control}
-                        name={fieldName}
-                        render={({ field }) => (
-                          <CustomInput
-                            {...field}
-                            value={(field.value as string) ?? ''}
-                            label={info.titulo}
-                            placeholder="Escreva aqui"
-                            error={error}
-                            isRequired={info.obrigatorio}
-                            className="rounded-xl border-2 border-border h-16 bg-transparent text-sm shadow-none placeholder:text-sm placeholder:text-foreground-light dark:placeholder:text-muted-foreground focus:bg-card"
-                            containerClassName="space-y-3"
-                          />
-                        )}
-                      />
-                    )}
-
-                    {info.tipo_campo === 'resposta_numerica' && (
-                      <Controller
-                        control={control}
-                        name={fieldName}
-                        render={({ field }) => (
-                          <CustomInput
-                            {...field}
-                            type="number"
-                            label={info.titulo}
-                            placeholder="Escreva aqui"
-                            error={error}
-                            isRequired={info.obrigatorio}
-                            min={info.valor_minimo ?? undefined}
-                            max={info.valor_maximo ?? undefined}
-                            onChange={e => {
-                              const value = e.target.value
-                              field.onChange(value === '' ? '' : Number(value))
-                            }}
-                            value={
-                              field.value === '' ? '' : (field.value as number)
-                            }
-                            className="rounded-xl border-2 border-border h-16 bg-transparent text-sm shadow-none placeholder:text-sm placeholder:text-foreground-light dark:placeholder:text-muted-foreground focus:bg-card"
-                            containerClassName="space-y-3"
-                          />
-                        )}
-                      />
-                    )}
-
-                    {info.tipo_campo === 'selecao_unica' && (
-                      <Controller
-                        control={control}
-                        name={fieldName}
-                        render={({ field }) => {
-                          const hasSelection = Boolean(field.value)
-
-                          return (
-                            <ActionDiv
-                              ref={field.ref}
-                              label={info.titulo}
-                              isRequired={info.obrigatorio}
-                              content={
-                                hasSelection ? (
-                                  (field.value as string)
-                                ) : (
-                                  <span className="text-foreground-light dark:text-muted-foreground">
-                                    Selecionar
-                                  </span>
-                                )
-                              }
-                              disabled
-                              variant="default"
-                              error={error}
-                              rightIcon={
-                                <ChevronDownIcon
-                                  className={
-                                    hasSelection
-                                      ? 'text-primary stroke-[1.5] size-5'
-                                      : 'text-foreground-light stroke-[1.5] size-5'
-                                  }
-                                />
-                              }
-                              drawerContent={
-                                <UnicaSelecaoDrawerContent
-                                  fieldName={fieldName}
-                                  opcoes={info.opcoes ?? []}
-                                />
-                              }
-                              drawerTitle={info.titulo}
-                              containerClassName="space-y-3"
-                            />
-                          )
-                        }}
-                      />
-                    )}
-
-                    {info.tipo_campo === 'selecao_multipla' && (
-                      <Controller
-                        control={control}
-                        name={fieldName}
-                        render={({ field }) => {
-                          const value = (field.value as string[]) ?? []
-                          const hasSelection = value.length > 0
-
-                          return (
-                            <ActionDiv
-                              ref={field.ref}
-                              label={info.titulo}
-                              isRequired={info.obrigatorio}
-                              content={
-                                hasSelection ? (
-                                  <span className="line-clamp-2">
-                                    {value.join(', ')}
-                                  </span>
-                                ) : (
-                                  <span className="text-foreground-light dark:text-muted-foreground">
-                                    Selecionar
-                                  </span>
-                                )
-                              }
-                              disabled
-                              variant="default"
-                              error={error}
-                              rightIcon={
-                                <ChevronDownIcon
-                                  className={
-                                    hasSelection
-                                      ? 'text-primary stroke-[1.5] size-5'
-                                      : 'text-foreground-light stroke-[1.5] size-5'
-                                  }
-                                />
-                              }
-                              drawerContent={
-                                <MultiplaSelecaoDrawerContent
-                                  fieldName={fieldName}
-                                  opcoes={info.opcoes ?? []}
-                                />
-                              }
-                              drawerTitle={info.titulo}
-                              containerClassName="space-y-3"
-                            />
-                          )
-                        }}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="shrink-0 pt-6 pb-8">
-              <CustomButton
-                type="submit"
-                size="lg"
-                fullWidth
-                variant="primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Finalizando...' : 'Finalizar inscrição'}
-              </CustomButton>
-            </div>
-          </div>
-        </form>
-      </FormProvider>
 
       <CandidaturaEnviadaDrawer
         open={successDrawerOpen}

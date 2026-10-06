@@ -1,4 +1,5 @@
 import { CookieConsent } from '@/components/cookie-consent'
+import { FooterWrapper } from '@/components/footer-wrapper'
 import { RouteTracker } from '@/components/route-tracker'
 import { ReactQueryProvider } from '@/providers/query-client-provider'
 import { OnboardingWrapperClient } from '../components/onboarding-wrapper-client'
@@ -16,7 +17,8 @@ export default async function AppLayout({
           <RouteTracker />
           <SessionExpiredHandler />
           <CookieConsent variant="mini" />
-          <main>{children}</main>
+          {children}
+          <FooterWrapper />
         </div>
       </OnboardingWrapperClient>
     </ReactQueryProvider>

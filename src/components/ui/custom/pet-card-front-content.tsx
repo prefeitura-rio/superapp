@@ -2,7 +2,7 @@
 
 import { PrefLogo } from '@/assets/icons/pref-logo'
 import Image from 'next/image'
-import { createElement, useState } from 'react'
+import { useState } from 'react'
 import { Badge } from '../badge'
 
 interface PetCardFrontContentProps {
@@ -19,6 +19,18 @@ const FALLBACK_CANINE =
 const FALLBACK_FELINE =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/avatars/avatar11.png'
 
+export function isValidImageSrc(src: string | undefined): src is string {
+  if (!src?.trim()) return false
+  if (src.startsWith('/')) return !src.startsWith('//')
+
+  try {
+    const url = new URL(src)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 interface FallbackImageProps {
   src?: string
   alt?: string
@@ -28,20 +40,19 @@ interface FallbackImageProps {
   fallback: string
 }
 
-const FallbackImage = ({
-  src,
-  alt,
-  fallback,
-  ...props
-}: FallbackImageProps) => {
-  const [imgSrc, setImgSrc] = useState(src)
+function FallbackImage({ src, alt, fallback, ...props }: FallbackImageProps) {
+  const [imgSrc, setImgSrc] = useState(isValidImageSrc(src) ? src : fallback)
 
-  return createElement(Image, {
-    ...props,
-    src: imgSrc || fallback,
-    alt: alt || 'Imagem',
-    onError: () => setImgSrc(fallback),
-  })
+  return (
+    <Image
+      {...props}
+      src={imgSrc}
+      alt={alt || 'Imagem'}
+      onError={() => {
+        if (imgSrc !== fallback) setImgSrc(fallback)
+      }}
+    />
+  )
 }
 
 export function PetCardFrontContent({

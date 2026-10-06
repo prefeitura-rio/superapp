@@ -1,4 +1,3 @@
-import { EmpregosHeaderClient } from '@/app/components/empregos/empregos-header-client'
 import { Skeleton } from '@/components/ui/skeleton'
 
 function RecentBadgeSkeleton({ width }: { width: string }) {
@@ -109,8 +108,7 @@ function AllVagasSkeleton() {
 
 export default function EmpregosLoading() {
   return (
-    <div className="min-h-lvh">
-      <EmpregosHeaderClient />
+    <div>
       <main className="max-w-4xl mx-auto pb-20 text-foreground">
         <RecentlyAddedVagasSkeleton />
         <AllVagasSkeleton />

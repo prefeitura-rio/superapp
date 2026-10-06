@@ -1,4 +1,4 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import {
   formatEducationOperatingHours,
   getOperatingStatus,
@@ -42,10 +42,10 @@ export default async function EducationCardDetail() {
     : '#'
 
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pt-26 pb-10">
-      <SecondaryHeader title="Carteira" className="max-w-xl" />
+    <div className="max-w-4xl mx-auto pb-10">
+      <ProfileHeaderWrapper />
       <div className="z-50">
-        <div className="px-4">
+        <div className="px-4 pt-2">
           <EducationCard
             title="ESCOLA DE JOVENS E ADULTOS"
             name={escola?.nome || 'Não disponível'}

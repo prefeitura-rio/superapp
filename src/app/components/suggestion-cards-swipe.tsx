@@ -2,7 +2,7 @@
 
 import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
-import { suggestedBanners } from '@/constants/banners'
+import { resolveBannerRoute, suggestedBanners } from '@/constants/banners'
 import { useAuthStatus } from '@/providers/auth-status-provider'
 import { sendGAEvent } from '@next/third-parties/google'
 
@@ -59,7 +59,8 @@ export function SuggestionCardsSwipe() {
 
   const handleBannerClick = (
     banner: (typeof suggestedBanners)[0],
-    position: number
+    position: number,
+    route: string
   ) => {
     const ehFixo = banner.id !== 'update' && banner.id !== 'login'
 
@@ -69,7 +70,7 @@ export function SuggestionCardsSwipe() {
       title: banner.title,
       subtitle: banner.subtitle,
       id: banner.id,
-      link: banner.route,
+      link: route,
       position: position,
       ehFixo,
     })
@@ -96,16 +97,17 @@ export function SuggestionCardsSwipe() {
                   {slideBanners.map((banner, bannerIndex) => {
                     const BannerComponent = banner.component
                     const position = startIndex + bannerIndex + 1
+                    const route = resolveBannerRoute(banner, isLoggedIn)
 
                     return (
                       <BannerComponent
                         key={banner.id}
                         onBannerClick={() =>
-                          handleBannerClick(banner, position)
+                          handleBannerClick(banner, position, route)
                         }
                         title={banner.title}
                         subtitle={banner.subtitle}
-                        route={banner.route}
+                        route={route}
                       />
                     )
                   })}

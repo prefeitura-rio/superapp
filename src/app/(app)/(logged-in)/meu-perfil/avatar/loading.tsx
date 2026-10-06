@@ -1,11 +1,10 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AvatarLoading() {
   return (
-    <div className="pt-20 pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader title="" route="/meu-perfil" className="max-w-xl" />
+    <div className="pb-4 max-w-xl mx-auto text-foreground flex flex-col">
+      <ProfileHeaderWrapper />
       {/* Loading Avatar Grid */}
       <div className="px-4">
         <div className="text-base text-foreground pb-8 pt-3 font-medium">

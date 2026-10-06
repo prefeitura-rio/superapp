@@ -29,6 +29,9 @@ export const REDIRECT_DIRECT_TO_GOVBR_ROUTE =
 
 export const REDIRECT_WHEN_SESSION_EXPIRED_ROUTE = '/sessao-expirada'
 
+export const TICKET_FORM_BASE_URL =
+  'https://1746.staging.app.dados.rio/protocolo'
+
 /**
  * Builds authentication URL with optional return URL for post-login redirect
  * @param returnUrl - The URL to redirect to after successful authentication

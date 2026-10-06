@@ -22,12 +22,27 @@ if (typeof window !== 'undefined') {
       dispatchEvent: vi.fn(),
     })),
   })
+
+  // vaul (Drawer) calls setPointerCapture on pointerdown; jsdom does not implement it.
+  Element.prototype.hasPointerCapture ??= () => false
+  Element.prototype.setPointerCapture ??= () => {}
+  Element.prototype.releasePointerCapture ??= () => {}
+}
+
+// jsdom doesn't implement the Pointer Capture API. Vaul (the library behind BottomSheet
+// and Drawer) calls setPointerCapture on pointerdown, which throws an unhandled TypeError
+// and can turn real failures into false positives. Guard against node env tests.
+if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = vi.fn()
+  Element.prototype.releasePointerCapture = vi.fn()
+  Element.prototype.hasPointerCapture = vi.fn(() => false)
 }
 
 // Mock next/cache
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
   unstable_cache: vi.fn(fn => fn),
 }))
 

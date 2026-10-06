@@ -1,6 +1,6 @@
 'use client'
 import { updateUserDisplayName } from '@/actions/update-user-display-name'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { InputField } from '@/components/ui/custom/input-field'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
@@ -110,9 +110,9 @@ export default function DisplayNameForm() {
     : '/meu-perfil'
 
   return (
-    <div className="max-w-xl min-h-lvh mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-xl mx-auto flex flex-col space-y-6">
       <div>
-        <SecondaryHeader title="" route={routeBackUrl} />
+        <ProfileHeaderWrapper />
         <section className="relative">
           <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
             Como prefere ser

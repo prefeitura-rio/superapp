@@ -13,6 +13,7 @@ const VALID_TEMPLATES: CertificateTemplate[] = [
   'cvlsubtd',
   'sesrio',
   'spmrio',
+  'smte',
 ]
 
 export async function GET(

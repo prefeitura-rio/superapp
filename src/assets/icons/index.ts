@@ -3,6 +3,7 @@ import { BriefcaseIcon } from './briefcase-icon'
 import { CalendarIcon } from './calendar-icon'
 import { CheckCircleIcon } from './check-circle-icon'
 import { CheckIcon } from './check-icon'
+import { ChevronDownIcon } from './chevron-down-icon'
 import { ChevronLeftIcon } from './chevron-left-icon'
 import { ChevronRightIcon } from './chevron-right-icon'
 import { CltIcon } from './clt-icon'
@@ -10,10 +11,13 @@ import { DoctorIcon } from './doctor-icon'
 import { DownloadIcon } from './download-icon'
 import { EditIcon } from './edit-icon'
 import { EyeIcon } from './eye-icon'
+import { FacebookIcon } from './facebook-icon'
 import { GlobeIcon } from './globe-icon'
 import { HelpCircleIcon } from './help-circle-icon'
 import { HomeIcon } from './home-icon'
 import { InfoIcon } from './info-icon'
+import { InstagramIcon } from './instagram-icon'
+import { LinkedinIcon } from './linkedin-icon'
 import { LogoutIcon } from './logout-icon'
 import { MailIcon } from './mail-icon'
 import { MapPinIcon } from './map-pin-icon'
@@ -30,22 +34,31 @@ import { SearchIcon } from './search-icon'
 import { ServicesIcon } from './services-icon'
 import { SettingsIcon } from './settings-icon'
 import { ShareIcon } from './share-icon'
+import { SquarePenIcon } from './square-pen-icon'
 import { SunIcon } from './sun-icon'
 import { TrashIcon } from './trash-icon'
+import { TwitterXIcon } from './twitter-x-icon'
 import { UserIcon } from './user-icon'
 import { UsersIcon } from './users-icon'
 import { WalletIcon } from './wallet-icon'
 import { WhatsappIcon } from './whatsapp-icon'
 import { XCircleIcon } from './x-circle-icon'
 import { XIcon } from './x-icon'
+import { YoutubeIcon } from './youtube-icon'
 
 export {
   AiImproveIcon,
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  TwitterXIcon,
+  YoutubeIcon,
   BriefcaseIcon,
   CalendarIcon,
   CltIcon,
   CheckCircleIcon,
   CheckIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DoctorIcon,
@@ -72,6 +85,7 @@ export {
   ServicesIcon,
   SettingsIcon,
   ShareIcon,
+  SquarePenIcon,
   SunIcon,
   TrashIcon,
   UserIcon,

@@ -1,7 +1,7 @@
 'use client'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { suggestedBanners } from '@/constants/banners'
+import { resolveBannerRoute, suggestedBanners } from '@/constants/banners'
 import { useAuthStatus } from '@/providers/auth-status-provider'
 import { sendGAEvent } from '@next/third-parties/google'
 
@@ -32,7 +32,8 @@ export default function SuggestionCards() {
 
   const handleBannerClick = (
     banner: (typeof suggestedBanners)[0],
-    position: number
+    position: number,
+    route: string
   ) => {
     const ehFixo = banner.id !== 'update' && banner.id !== 'login'
 
@@ -42,7 +43,7 @@ export default function SuggestionCards() {
       title: banner.title,
       subtitle: banner.subtitle,
       id: banner.id,
-      link: banner.route,
+      link: route,
       position: position,
       ehFixo,
     })
@@ -54,14 +55,17 @@ export default function SuggestionCards() {
         <div className="flex gap-2 px-4 py-2 w-max">
           {filteredBanners.map((banner, index) => {
             const BannerComponent = banner.component
+            const route = resolveBannerRoute(banner, isLoggedIn)
 
             return (
               <BannerComponent
                 key={banner.id}
-                onBannerClick={() => handleBannerClick(banner, index + 1)}
+                onBannerClick={() =>
+                  handleBannerClick(banner, index + 1, route)
+                }
                 title={banner.title}
                 subtitle={banner.subtitle}
-                route={banner.route}
+                route={route}
               />
             )
           })}

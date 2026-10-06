@@ -1,63 +1,49 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import Image from 'next/image'
-import Link from 'next/link'
 
 export default function MyCoursesLoading() {
   return (
-    <div className="max-w-4xl mx-auto py-6">
-      <SecondaryHeader
-        route="/servicos/cursos/opcoes"
-        logo={
-          <Link href="/servicos/cursos">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
-      />
-
-      <div className="relative overflow-hidden mt-16 px-4">
-        <Skeleton className="h-4 w-28 mb-4" />
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-3 rounded-lg py-3 bg-background"
-            >
-              {/* Course Image Skeleton */}
-              <div className="relative w-30 h-30 overflow-hidden rounded-xl">
-                <Skeleton className="w-full h-full" />
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
+        </div>
+      </div>
+      {/* OportunidadesCariocas band skeleton */}
+      <div className="w-full bg-card py-4">
+        <div className="mx-auto px-4 max-w-4xl">
+          <Skeleton className="h-9 w-44" />
+        </div>
+      </div>
+      <div
+        style={{
+          background:
+            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 pt-6 pb-10">
+          <Skeleton className="h-4 w-28 mb-4" />
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 rounded-lg py-3 bg-background"
+              >
+                <div className="relative w-30 h-30 overflow-hidden rounded-xl">
+                  <Skeleton className="w-full h-full" />
+                </div>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
               </div>
-
-              {/* Course Content Skeleton */}
-              <div className="flex flex-col flex-1 min-w-0">
-                {/* Course Title Skeleton */}
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2 mb-2" />
-
-                {/* Status Badge Skeleton */}
-                <Skeleton className="h-6 w-20 rounded-full" />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

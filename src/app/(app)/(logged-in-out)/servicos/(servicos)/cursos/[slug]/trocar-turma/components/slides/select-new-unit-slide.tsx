@@ -1,6 +1,7 @@
 'use client'
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { getSchedulesUnavailableLabel } from '@/lib/course-utils'
 import type { UserEnrollmentExtended } from '@/lib/course-utils'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
@@ -32,16 +33,10 @@ export const SelectNewUnitSlide = ({
   // Get current enrolled unit ID from enrollment
   const currentEnrolledUnitId = (currentEnrollment as any)?.enrolled_unit?.id
 
-  // Check if a unit has any available schedules (with remaining_vacancies > 0)
-  const hasAvailableSchedules = (unit: NearbyUnit) => {
-    if (!unit.schedules || unit.schedules.length === 0) return false
-    return unit.schedules.some(
-      schedule =>
-        schedule.remaining_vacancies !== undefined &&
-        schedule.remaining_vacancies !== null &&
-        schedule.remaining_vacancies > 0
-    )
-  }
+  // A unidade is pickable when at least one of its turmas is inside its own
+  // enrollment window AND still has seats
+  const hasAvailableSchedules = (unit: NearbyUnit) =>
+    getSchedulesUnavailableLabel(unit.schedules) === null
 
   // Handle unit selection with validation
   const handleUnitChange = async (value: string) => {
@@ -98,7 +93,10 @@ export const SelectNewUnitSlide = ({
             className="w-full"
           >
             {nearbyUnits.map((unit, index) => {
-              const isAvailable = hasAvailableSchedules(unit)
+              const unavailableLabel = getSchedulesUnavailableLabel(
+                unit.schedules
+              )
+              const isAvailable = unavailableLabel === null
               const isCurrentUnit = unit.id === currentEnrolledUnitId
               return (
                 <label
@@ -118,9 +116,9 @@ export const SelectNewUnitSlide = ({
                           (Unidade atual)
                         </span>
                       )}
-                      {!isAvailable && (
+                      {unavailableLabel && (
                         <span className="text-muted-foreground text-xs ml-2">
-                          (Sem vagas disponíveis)
+                          ({unavailableLabel})
                         </span>
                       )}
                     </h3>

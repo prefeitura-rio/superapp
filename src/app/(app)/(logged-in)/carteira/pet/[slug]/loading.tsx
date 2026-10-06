@@ -1,16 +1,19 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function PetPageLoading() {
   return (
-    <div className="min-h-lvh max-w-xl mx-auto pb-10">
-      <SecondaryHeader
-        title="Carteira"
-        route="/carteira"
-        className="max-w-xl mt-2"
-      />
-
-      <div className="pt-21 md:pt-25">
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto pb-10 pt-2">
         <div className="px-4 flex flex-col gap-4">
           <Skeleton className="w-full h-[185px] rounded-2xl" />
           <div className="flex justify-center gap-1">

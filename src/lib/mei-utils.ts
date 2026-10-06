@@ -21,6 +21,7 @@ import type { ModelsLegalEntity } from '@/http/models'
 /**
  * Mapeia forma de pagamento da API para texto legível
  */
+
 export function formatPaymentMethod(method?: string): string {
   const paymentMethodMap: Record<string, string> = {
     CHEQUE: 'Cheque',

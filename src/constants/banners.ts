@@ -1,9 +1,12 @@
+import { CadMicroBanner } from '@/app/components/banners/cadmicro-banner'
 import { CursosBanner } from '@/app/components/banners/cursos-banner'
 import { EmpregabilidadeBanner } from '@/app/components/banners/empregabilidade-banner'
 import { IptuBanner } from '@/app/components/banners/iptu-banner'
 import { LicensesBanner } from '@/app/components/banners/licenses-banner'
 import { LoginBanner } from '@/app/components/banners/login-banner'
 import { ProfileUpdateBanner } from '@/app/components/banners/profile-update-banner'
+import { buildAuthUrl } from '@/constants/url'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 
 type BannerProps = {
   id: string
@@ -18,11 +21,17 @@ type BannerProps = {
   route: string
 }
 
-const _featureFlag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
-const _empregosEnabled =
-  _featureFlag === 'false' || _featureFlag.split(',').includes('empregos')
+const _empregosEnabled = isFeatureEnabled('empregos')
+const _cadmicroEnabled = isFeatureEnabled('cadmicro')
 
 export const suggestedBanners: BannerProps[] = [
+  {
+    id: 'cadmicro',
+    component: CadMicroBanner,
+    title: 'Cadastre seu veículo',
+    subtitle: 'habilite o uso em toda a cidade',
+    route: '/carteira?mobilidade=true',
+  },
   {
     id: 'empregabilidade',
     component: EmpregabilidadeBanner,
@@ -72,4 +81,18 @@ export const suggestedBanners: BannerProps[] = [
   //   subtitle: 'E ganhe até 50% de desconto',
   //   route: '/servicos/categoria/cidade/5b6ac4fc-b4c7-4ce4-9d0a-3b6f48619694',
   // },
-].filter(banner => banner.id !== 'empregabilidade' || _empregosEnabled)
+].filter(
+  banner =>
+    (banner.id !== 'empregabilidade' || _empregosEnabled) &&
+    (banner.id !== 'cadmicro' || _cadmicroEnabled)
+)
+
+export function resolveBannerRoute(
+  banner: BannerProps,
+  isLoggedIn: boolean
+): string {
+  if (banner.id === 'cadmicro' && !isLoggedIn) {
+    return buildAuthUrl('/carteira?mobilidade=true')
+  }
+  return banner.route
+}
