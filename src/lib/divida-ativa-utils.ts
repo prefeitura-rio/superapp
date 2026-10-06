@@ -178,11 +178,18 @@ export function cdaParaApi(valor: string): string {
   return formatarCda(valor)
 }
 
-/** Formato aceito pelo front: 12 dígitos, com ou sem o sufixo. Existência é da API. */
+/**
+ * Formato aceito pelo front: 12 dígitos sem o sufixo, ou 14 com ele. Existência é da API.
+ *
+ * Treze não: é o sufixo pela metade (`01/021580/2003-0`), e o DAM não acha a CDA assim —
+ * conferido em homologação em 06/10/2026, com o mesmo número achado com 12 e com 14 dígitos.
+ */
 export function isCdaValida(valor: string): boolean {
   const digitos = somenteDigitos(valor)
 
-  return digitos.length >= CDA_MIN_DIGITOS && digitos.length <= CDA_MAX_DIGITOS
+  return (
+    digitos.length === CDA_MIN_DIGITOS || digitos.length === CDA_MAX_DIGITOS
+  )
 }
 
 /**
