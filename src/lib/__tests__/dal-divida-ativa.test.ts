@@ -730,14 +730,22 @@ describe('getDalDividaAtivaSimulacao', () => {
           corpo = await request.json()
           return HttpResponse.json(
             {
+              // Formato real do DAM em homologação: moeda e espaço não separável.
+              valorTotalAvista: 'R$ 1.696,61',
               opcoes: [
                 {
                   qtdeParcelas: 1,
-                  valor1aParcela: '1.357,89',
-                  valorDescontos: '100,00',
+                  valor1aParcela: 'R$\u00a01.696,56',
+                  valorJuros: 'R$\u00a00,00',
+                  valorDescontos: '',
                 },
-                { qtdeParcelas: 12, valor1aParcela: '127,53' },
-                { valor1aParcela: '0,00' },
+                {
+                  qtdeParcelas: 2,
+                  valor1aParcela: 'R$\u00a0848,29',
+                  valorJuros: 'R$\u00a08,48',
+                  valorDescontos: 'R$\u00a0100,00',
+                },
+                { valor1aParcela: 'R$\u00a00,00' },
               ],
             },
             { status: 200 }
@@ -750,15 +758,23 @@ describe('getDalDividaAtivaSimulacao', () => {
 
     expect(corpo).toEqual({ cdas: CDAS, dataVencimento: DATA })
     // Opção sem quantidade não é escolhível e sai da lista.
+    // Valores formatados pelo DAM chegam como número; desconto vazio vira `null`.
     expect(simulacao).toEqual({
       situacao: 'ok',
+      valorTotalAvista: 1696.61,
       opcoes: [
         {
           qtdeParcelas: 1,
-          valor1aParcela: '1.357,89',
-          valorDescontos: '100,00',
+          valor1aParcela: 1696.56,
+          valorJuros: 0,
+          valorDescontos: null,
         },
-        { qtdeParcelas: 12, valor1aParcela: '127,53', valorDescontos: null },
+        {
+          qtdeParcelas: 2,
+          valor1aParcela: 848.29,
+          valorJuros: 8.48,
+          valorDescontos: 100,
+        },
       ],
     })
   })

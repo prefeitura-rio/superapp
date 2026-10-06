@@ -37,6 +37,7 @@ import {
   mapFazendaToImovel,
   normalizarConsultaFazenda,
   normalizarListaImoveis,
+  parseValorMonetario,
 } from '@/lib/divida-ativa-mappers'
 import {
   cdaParaApi,
@@ -909,8 +910,9 @@ export async function getDalDividaAtivaSimulacao(
         ? [
             {
               qtdeParcelas: opcao.qtdeParcelas,
-              valor1aParcela: opcao.valor1aParcela ?? null,
-              valorDescontos: opcao.valorDescontos ?? null,
+              valor1aParcela: parseValorMonetario(opcao.valor1aParcela),
+              valorJuros: parseValorMonetario(opcao.valorJuros),
+              valorDescontos: parseValorMonetario(opcao.valorDescontos),
             },
           ]
         : []
@@ -920,6 +922,10 @@ export async function getDalDividaAtivaSimulacao(
       'simulacao.opcoes': opcoes.length,
     })
 
-    return { situacao: 'ok', opcoes }
+    return {
+      situacao: 'ok',
+      valorTotalAvista: parseValorMonetario(result.data.valorTotalAvista),
+      opcoes,
+    }
   })
 }
