@@ -57,8 +57,8 @@ describe('formatarInscricaoImobiliaria', () => {
 
 describe('formatarExecucaoFiscal', () => {
   /**
-   * Número único do CNJ: `NNNNNNN-DD.AAAA.J.TR.OOOO`, 20 dígitos. É o que o cidadão copia da
-   * citação da Justiça, e ele já vem pontuado de lá — por isso a máscara precisa aceitar o
+   * Número único do CNJ: `NNNNNNN-DD.AAAA.J.TR.OOOO`, até 20 dígitos. É o que o cidadão copia
+   * da citação da Justiça, e ele já vem pontuado de lá — por isso a máscara precisa aceitar o
    * valor colado inteiro sem duplicar separador.
    */
   test('aplica a máscara CNJ nos 20 dígitos', () => {
@@ -67,20 +67,32 @@ describe('formatarExecucaoFiscal', () => {
     )
   })
 
-  test('mascara progressivamente enquanto o cidadão digita', () => {
-    expect(formatarExecucaoFiscal('0012345')).toBe('0012345')
-    expect(formatarExecucaoFiscal('001234567')).toBe('0012345-67')
-    expect(formatarExecucaoFiscal('0012345672024')).toBe('0012345-67.2024')
-    expect(formatarExecucaoFiscal('00123456720248')).toBe('0012345-67.2024.8')
-    expect(formatarExecucaoFiscal('0012345672024819')).toBe(
-      '0012345-67.2024.8.19'
+  // O sequencial costuma vir sem os zeros à esquerda; a cauda do CNJ é que é fixa.
+  test('aplica a máscara CNJ pela direita quando faltam os zeros do sequencial', () => {
+    expect(formatarExecucaoFiscal('4236809220108190001')).toBe(
+      '423680-92.2010.8.19.0001'
     )
+    expect(formatarExecucaoFiscal('123456720248190001')).toBe(
+      '12345-67.2024.8.19.0001'
+    )
+  })
+
+  test('aplica a máscara antiga do TJRJ nos 14 dígitos', () => {
+    expect(formatarExecucaoFiscal('20001200007061')).toBe('2000.120.000706-1')
+  })
+
+  test('deixa sem máscara enquanto não dá para saber o formato', () => {
+    expect(formatarExecucaoFiscal('0012345')).toBe('0012345')
+    expect(formatarExecucaoFiscal('0012345672024')).toBe('0012345672024')
   })
 
   // O número colado da citação já vem pontuado.
   test('reaplica a máscara sobre um valor já formatado', () => {
     expect(formatarExecucaoFiscal('0012345-67.2024.8.19.0001')).toBe(
       '0012345-67.2024.8.19.0001'
+    )
+    expect(formatarExecucaoFiscal('2000.120.000706-1')).toBe(
+      '2000.120.000706-1'
     )
   })
 
@@ -92,13 +104,23 @@ describe('formatarExecucaoFiscal', () => {
 })
 
 describe('isExecucaoFiscalValida', () => {
-  test('aceita 20 dígitos, com ou sem máscara', () => {
+  test('aceita o CNJ completo, com ou sem máscara', () => {
     expect(isExecucaoFiscalValida('0012345-67.2024.8.19.0001')).toBe(true)
     expect(isExecucaoFiscalValida('00123456720248190001')).toBe(true)
   })
 
-  test('recusa contagem diferente de 20', () => {
-    expect(isExecucaoFiscalValida('0012345672024819000')).toBe(false)
+  test('aceita o CNJ sem os zeros à esquerda do sequencial', () => {
+    expect(isExecucaoFiscalValida('4236809220108190001')).toBe(true)
+    expect(isExecucaoFiscalValida('423680-92.2010.8.19.0001')).toBe(true)
+  })
+
+  test('aceita o formato antigo do TJRJ, com 14 dígitos', () => {
+    expect(isExecucaoFiscalValida('20001200007061')).toBe(true)
+    expect(isExecucaoFiscalValida('2000.120.000706-1')).toBe(true)
+  })
+
+  test('recusa menos de 14 ou mais de 20 dígitos', () => {
+    expect(isExecucaoFiscalValida('2000120000706')).toBe(false)
     expect(isExecucaoFiscalValida('001234567202481900012')).toBe(false)
     expect(isExecucaoFiscalValida('')).toBe(false)
   })

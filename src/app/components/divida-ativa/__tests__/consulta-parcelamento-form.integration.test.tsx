@@ -149,6 +149,30 @@ describe('ConsultaParcelamentoForm', () => {
       )
     })
 
+    test.each([
+      [
+        'CNJ sem os zeros à esquerda',
+        '4236809220108190001',
+        '423680-92.2010.8.19.0001',
+      ],
+      ['antigo do TJRJ', '20001200007061', '2000.120.000706-1'],
+    ])('aceita o formato %s', async (_formato, digitos, mascarado) => {
+      const user = userEvent.setup()
+      render(<ConsultaParcelamentoForm modo="execucao-fiscal" />)
+
+      const campo = screen.getByLabelText('N° da Execução Fiscal')
+      await user.click(campo)
+      await user.paste(digitos)
+
+      expect(campo).toHaveValue(mascarado)
+
+      await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+      expect(push).toHaveBeenCalledWith(
+        `/divida-ativa/parcelamento/debitos?execucaoFiscal=${digitos}`
+      )
+    })
+
     test('recusa número incompleto', async () => {
       const user = userEvent.setup()
       render(<ConsultaParcelamentoForm modo="execucao-fiscal" />)
@@ -157,7 +181,9 @@ describe('ConsultaParcelamentoForm', () => {
       await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
       expect(
-        screen.getByText('O número da execução fiscal tem 20 números.')
+        screen.getByText(
+          'Confira o número da execução fiscal: ele tem de 14 a 20 números.'
+        )
       ).toBeInTheDocument()
       expect(push).not.toHaveBeenCalled()
     })

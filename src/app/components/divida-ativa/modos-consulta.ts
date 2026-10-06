@@ -78,7 +78,8 @@ export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
     formatar: formatarExecucaoFiscal,
     validar: isExecucaoFiscalValida,
     mensagemVazio: 'Digite o número da execução fiscal.',
-    mensagemFormato: 'O número da execução fiscal tem 20 números.',
+    mensagemFormato:
+      'Confira o número da execução fiscal: ele tem de 14 a 20 números.',
   },
 }
 

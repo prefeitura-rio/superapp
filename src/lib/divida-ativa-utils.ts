@@ -51,53 +51,75 @@ export function isInscricaoImobiliariaValida(valor: string): boolean {
   )
 }
 
-/** Dígitos do número único de processo do CNJ (`NNNNNNN-DD.AAAA.J.TR.OOOO`). */
-export const EXECUCAO_FISCAL_DIGITOS = 20
+/**
+ * O número da execução fiscal chega em dois formatos, conforme a época do ajuizamento:
+ *
+ * - **CNJ** (a partir de 2010), `NNNNNNN-DD.AAAA.J.TR.OOOO` — 20 dígitos. O sequencial
+ *   costuma vir **sem os zeros à esquerda** (`4236809-22.2010.8.19.0001` em vez de
+ *   `0423680-92…`): o que identifica o processo é a cauda fixa de 13 dígitos, então o número
+ *   real pode ter de 15 a 20 dígitos.
+ * - **Antigo do TJRJ** (antes do CNJ), `AAAA.CCC.NNNNNN-D` — 14 dígitos: ano, comarca/serventia,
+ *   sequencial e verificador. Ex.: `2000.120.000706-1`.
+ */
+export const EXECUCAO_FISCAL_ANTIGA_DIGITOS = 14
+export const EXECUCAO_FISCAL_CNJ_MIN_DIGITOS = 15
+export const EXECUCAO_FISCAL_CNJ_MAX_DIGITOS = 20
+
+/** Cauda fixa do CNJ, `DD.AAAA.J.TR.OOOO`, lida da direita para a esquerda. */
+const CAUDA_CNJ: Array<{ tamanho: number; separador: string }> = [
+  { tamanho: 4, separador: '.' },
+  { tamanho: 2, separador: '.' },
+  { tamanho: 1, separador: '.' },
+  { tamanho: 4, separador: '.' },
+  { tamanho: 2, separador: '-' },
+]
 
 /**
- * Máscara do número da execução fiscal, no padrão CNJ `NNNNNNN-DD.AAAA.J.TR.OOOO`:
- * sequencial, dígito verificador, ano, segmento judiciário, tribunal e origem.
+ * Máscara do número da execução fiscal, escolhida pelo tamanho:
  *
- * Diferente da inscrição imobiliária, aqui as posições são **fixas**, então a máscara pode
- * ser aplicada progressivamente a cada tecla sem produzir estado ambíguo. E ela precisa
- * tolerar o valor já pontuado: o cidadão copia o número da citação da Justiça, que vem
- * formatado — `somenteDigitos` desmonta antes de remontar, então colar não duplica separador.
+ * - até 13 dígitos → sem máscara (ainda não dá para saber o formato);
+ * - 14 dígitos → antigo do TJRJ, `AAAA.CCC.NNNNNN-D`;
+ * - 15 a 20 dígitos → CNJ, ancorado **pela direita**: a cauda tem posições fixas e o que
+ *   sobra à esquerda é o sequencial, com ou sem os zeros.
+ *
+ * Como a inscrição imobiliária, a máscara muda enquanto o cidadão digita — é o preço de
+ * aceitar o sequencial sem zeros. E ela tolera o valor colado já pontuado: `somenteDigitos`
+ * desmonta antes de remontar, então colar não duplica separador.
  */
 export function formatarExecucaoFiscal(valor: string): string {
-  const digitos = somenteDigitos(valor).slice(0, EXECUCAO_FISCAL_DIGITOS)
+  const digitos = somenteDigitos(valor).slice(
+    0,
+    EXECUCAO_FISCAL_CNJ_MAX_DIGITOS
+  )
 
-  const partes: Array<{ tamanho: number; separador: string }> = [
-    { tamanho: 7, separador: '-' },
-    { tamanho: 2, separador: '.' },
-    { tamanho: 4, separador: '.' },
-    { tamanho: 1, separador: '.' },
-    { tamanho: 2, separador: '.' },
-    { tamanho: 4, separador: '' },
-  ]
+  if (digitos.length < EXECUCAO_FISCAL_ANTIGA_DIGITOS) return digitos
+
+  if (digitos.length === EXECUCAO_FISCAL_ANTIGA_DIGITOS) {
+    return `${digitos.slice(0, 4)}.${digitos.slice(4, 7)}.${digitos.slice(7, 13)}-${digitos.slice(13)}`
+  }
 
   let restante = digitos
   let formatado = ''
 
-  for (const { tamanho, separador } of partes) {
-    if (restante === '') break
-
-    const grupo = restante.slice(0, tamanho)
-    restante = restante.slice(tamanho)
-    formatado += grupo
-
-    // O separador só entra depois de o grupo fechar E havendo dígito para o próximo — senão
-    // o campo terminaria em "-" ou "." enquanto o cidadão ainda digita.
-    if (grupo.length === tamanho && restante !== '') {
-      formatado += separador
-    }
+  for (const { tamanho, separador } of CAUDA_CNJ) {
+    formatado = `${separador}${restante.slice(-tamanho)}${formatado}`
+    restante = restante.slice(0, -tamanho)
   }
 
-  return formatado
+  return `${restante}${formatado}`
 }
 
-/** Formato aceito pelo front. Existência do processo é da API. */
+/**
+ * Formato aceito pelo front: CNJ (15 a 20 dígitos) ou antigo do TJRJ (14). Existência do
+ * processo é da API — por isso não conferimos o dígito verificador aqui.
+ */
 export function isExecucaoFiscalValida(valor: string): boolean {
-  return somenteDigitos(valor).length === EXECUCAO_FISCAL_DIGITOS
+  const digitos = somenteDigitos(valor)
+
+  return (
+    digitos.length >= EXECUCAO_FISCAL_ANTIGA_DIGITOS &&
+    digitos.length <= EXECUCAO_FISCAL_CNJ_MAX_DIGITOS
+  )
 }
 
 /**
@@ -111,7 +133,7 @@ export const CDA_MAX_DIGITOS = 14
 /**
  * Máscara da CDA, `SS/NNNNNN/AAAA-XX`, como o número vem na carta da PGM.
  *
- * Posições fixas, como a execução fiscal: a máscara entra a cada tecla e tolera o número
+ * Posições fixas: a máscara entra a cada tecla e tolera o número
  * colado já pontuado. O hífen só aparece se o cidadão continuar digitando depois do ano —
  * a CDA sem sufixo termina em `/AAAA`.
  */
