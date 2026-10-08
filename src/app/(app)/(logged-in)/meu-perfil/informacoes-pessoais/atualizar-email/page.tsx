@@ -132,64 +132,66 @@ export default function EmailForm() {
   const routeBackUrl = getRouteBackUrl()
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col space-y-6">
-      <div>
-        <ProfileHeaderWrapper />
-        <section className="relative">
-          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-            Escreva seu <br /> email
-          </h2>
-        </section>
-      </div>
-      <div className="flex flex-col gap-14 px-4 items-center">
-        <form className="w-full" onSubmit={handleFormSubmit}>
-          <InputField
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            type="email"
-            placeholder="Digite seu email"
-            onClear={clearEmail}
-            state={emailStateInput}
-            showClearButton
-          />
-        </form>
-        <EmailFeedback
-          email={email}
-          emailStateInput={emailStateInput}
-          suggestion={suggestion}
-          onAcceptSuggestion={acceptSuggestion}
-        />
-        <CustomButton
-          size="xl"
-          fullWidth
-          onClick={handleSave}
-          className="-mt-5"
-          disabled={isPending || emailStateInput !== 'success'}
-        >
-          {isPending ? 'Salvando...' : 'Salvar'}
-        </CustomButton>
-      </div>
-
-      {/* Drawer for feedback after email update */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-none mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
-          <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
-            <DrawerHeader className="text-center">
-              <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                Email <br />
-                atualizado!
-              </DrawerTitle>
-            </DrawerHeader>
-            <ThemeAwareVideo
-              source={VIDEO_SOURCES.updatedEmail}
-              containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
+    <>
+      <ProfileHeaderWrapper />
+      <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+        <div>
+          <section className="relative">
+            <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+              Escreva seu <br /> email
+            </h2>
+          </section>
+        </div>
+        <div className="flex flex-col gap-14 px-4">
+          <form className="w-full" onSubmit={handleFormSubmit}>
+            <InputField
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              type="email"
+              placeholder="Digite seu email"
+              onClear={clearEmail}
+              state={emailStateInput}
+              showClearButton
             />
-            <CustomButton size="xl" fullWidth onClick={handleDrawerClose}>
-              Finalizar
-            </CustomButton>
-          </div>
-        </DrawerContent>
-      </Drawer>
-    </div>
+          </form>
+          <EmailFeedback
+            email={email}
+            emailStateInput={emailStateInput}
+            suggestion={suggestion}
+            onAcceptSuggestion={acceptSuggestion}
+          />
+          <CustomButton
+            size="xl"
+            fullWidth
+            onClick={handleSave}
+            className="-mt-5"
+            disabled={isPending || emailStateInput !== 'success'}
+          >
+            {isPending ? 'Salvando...' : 'Salvar'}
+          </CustomButton>
+        </div>
+
+        {/* Drawer for feedback after email update */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerContent className="max-w-none mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+            <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+              <DrawerHeader className="text-center">
+                <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                  Email <br />
+                  atualizado!
+                </DrawerTitle>
+              </DrawerHeader>
+              <ThemeAwareVideo
+                source={VIDEO_SOURCES.updatedEmail}
+                containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
+              />
+              <CustomButton size="xl" fullWidth onClick={handleDrawerClose}>
+                Finalizar
+              </CustomButton>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    </>
   )
 }
