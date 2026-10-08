@@ -110,73 +110,75 @@ export default function DisplayNameForm() {
     : '/meu-perfil'
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col space-y-6">
-      <div>
-        <ProfileHeaderWrapper />
-        <section className="relative">
-          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-            Como prefere ser
-            <br /> chamado(a)?
-          </h2>
-        </section>
-      </div>
-      <div className="flex flex-col gap-14 px-4 items-center">
-        <form className="w-full" onSubmit={handleFormSubmit}>
-          <InputField
-            value={displayName}
-            onChange={e => setDisplayName(e.target.value)}
-            type="text"
-            placeholder="Digite como quer ser chamado"
-            onClear={clearDisplayName}
-            state={displayNameStateInput}
-            showClearButton
-          />
-        </form>
-        <DisplayNameFeedback
-          displayName={displayName}
-          displayNameStateInput={displayNameStateInput}
-        />
-        <CustomButton
-          size="xl"
-          fullWidth
-          onClick={handleSave}
-          className="-mt-5"
-          disabled={
-            isPending ||
-            displayNameStateInput !== 'success' ||
-            isDisplayNameTooLong
-          }
-        >
-          {isPending ? 'Salvando...' : 'Salvar'}
-        </CustomButton>
-      </div>
-
-      {/* Drawer for feedback after display name update */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-w-none mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
-          <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
-            <DrawerHeader className="text-center">
-              <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                Nome de exibição
-                <br />
-                atualizado!
-              </DrawerTitle>
-            </DrawerHeader>
-            <ThemeAwareVideo
-              source={VIDEO_SOURCES.updateName}
-              containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
+    <>
+      <ProfileHeaderWrapper />
+      <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+        <div>
+          <section className="relative">
+            <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+              Como prefere ser
+              <br /> chamado(a)?
+            </h2>
+          </section>
+        </div>
+        <div className="flex flex-col gap-14 px-4">
+          <form className="w-full" onSubmit={handleFormSubmit}>
+            <InputField
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              type="text"
+              placeholder="Digite como quer ser chamado"
+              onClear={clearDisplayName}
+              state={displayNameStateInput}
+              showClearButton
             />
-            <CustomButton
-              size="xl"
-              fullWidth
-              variant="primary"
-              onClick={handleDrawerClose}
-            >
-              Finalizar
-            </CustomButton>
-          </div>
-        </DrawerContent>
-      </Drawer>
-    </div>
+          </form>
+          <DisplayNameFeedback
+            displayName={displayName}
+            displayNameStateInput={displayNameStateInput}
+          />
+          <CustomButton
+            size="xl"
+            fullWidth
+            onClick={handleSave}
+            className="-mt-5"
+            disabled={
+              isPending ||
+              displayNameStateInput !== 'success' ||
+              isDisplayNameTooLong
+            }
+          >
+            {isPending ? 'Salvando...' : 'Salvar'}
+          </CustomButton>
+        </div>
+
+        {/* Drawer for feedback after display name update */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerContent className="max-w-none mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+            <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+              <DrawerHeader className="text-center">
+                <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                  Nome de exibição
+                  <br />
+                  atualizado!
+                </DrawerTitle>
+              </DrawerHeader>
+              <ThemeAwareVideo
+                source={VIDEO_SOURCES.updateName}
+                containerClassName="mb-10 flex items-center justify-center  h-[min(328px,40vh)] max-h-[328px]"
+              />
+              <CustomButton
+                size="xl"
+                fullWidth
+                variant="primary"
+                onClick={handleDrawerClose}
+              >
+                Finalizar
+              </CustomButton>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    </>
   )
 }

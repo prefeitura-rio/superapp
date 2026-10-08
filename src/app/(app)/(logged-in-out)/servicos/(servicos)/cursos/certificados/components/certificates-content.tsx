@@ -73,7 +73,7 @@ export function CertificatesContent({
 
   if (certificates.length === 0) {
     return (
-      <div className="overflow-hidden mt-20 px-4 flex justify-center items-center">
+      <div className="overflow-hidden px-4 flex justify-center items-center">
         <p className="block text-lg text-muted-foreground text-center">
           Você ainda não possui nenhum certificado.
         </p>
@@ -82,7 +82,7 @@ export function CertificatesContent({
   }
 
   return (
-    <div className="relative overflow-hidden mt-16 px-4">
+    <div className="relative overflow-hidden px-4">
       <h1 className="text-base font-medium text-foreground">Certificados</h1>
       <MyCertificatesCard
         certificates={certificates}

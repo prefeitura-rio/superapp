@@ -17,7 +17,7 @@ export default function MostAccessedServiceCards({
   if (services.length === 0) {
     return (
       <>
-        <div className="flex items-center justify-between mb-2 px-4">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="text-md font-medium text-foreground">
             Mais acessados
           </h2>
@@ -37,12 +37,12 @@ export default function MostAccessedServiceCards({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2 px-4">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
       </div>
       {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
       <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-2 px-4 min-w-full">
+        <div className="flex gap-2 min-w-full">
           {services.map((service, index) => (
             <MostAccessedServiceLink
               key={service.id}

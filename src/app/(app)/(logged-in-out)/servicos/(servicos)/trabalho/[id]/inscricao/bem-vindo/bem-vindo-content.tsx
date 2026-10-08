@@ -59,12 +59,7 @@ export function BemVindoContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="px-4 max-w-4xl mx-auto pt-8 pb-10">
           <h1 className="text-3xl font-medium leading-9 text-foreground">
             Bem vindo ao{' '}

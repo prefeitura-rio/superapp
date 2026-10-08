@@ -19,12 +19,7 @@ export default function AtualizarDadosLoading() {
           <Skeleton className="h-9 w-44" />
         </div>
       </div>
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-xl mx-auto px-4 pt-2 pb-10">
           <div className="pt-2 pb-6">
             <Skeleton className="h-9 w-80" />

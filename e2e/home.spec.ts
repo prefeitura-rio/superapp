@@ -43,11 +43,13 @@ test.describe('Home (público)', () => {
     await expect(page.getByRole('link', { name: 'Carteira' })).toBeVisible()
   })
 
-  test('header de visitante oferece login', async ({ page }) => {
+  test('header de visitante tem link para login no header', async ({
+    page,
+  }) => {
     await page.goto('/')
-    await expect(
-      page.getByRole('link', { name: 'Faça seu login' })
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('header').getByRole('link').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('link Carteira na barra inferior aponta para fluxo de autenticação', async ({

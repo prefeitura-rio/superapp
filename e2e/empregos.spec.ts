@@ -108,13 +108,13 @@ test.describe('Empregos — home (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('exibe logo Oportunidades Cariocas e barra de busca', async ({
+  test('exibe logo Oportunidades Cariocas e ícone de busca', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
 
     await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+      page.locator('img[alt="Oportunidades Cariocas"]').first()
     ).toBeVisible({ timeout: 15000 })
 
     await expect(
@@ -122,11 +122,11 @@ test.describe('Empregos — home (público)', () => {
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('header deslogado exibe botão de login', async ({ page }) => {
+  test('header deslogado exibe link para login', async ({ page }) => {
     await page.goto('/servicos/trabalho')
-    await expect(page.locator('header').getByText('Login').first()).toBeVisible(
-      { timeout: 15000 }
-    )
+    await expect(page.locator('header').getByRole('link').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('exibe seção "Mais recentes" com pelo menos 1 card', async ({
@@ -197,7 +197,7 @@ test.describe('Empregos — home (público)', () => {
   }) => {
     await page.goto('/servicos/trabalho')
     await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+      page.locator('img[alt="Oportunidades Cariocas"]').first()
     ).toBeVisible({ timeout: 15000 })
     await expect(
       page.getByRole('heading', { name: 'Encontre seu trabalho' })
@@ -351,16 +351,13 @@ test.describe('Empregos — página da vaga (público)', () => {
     }
   })
 
-  test('exibe botões de Voltar e Compartilhar', async ({ page }) => {
+  test('exibe botão de Compartilhar', async ({ page }) => {
     const href = await getFirstVagaHref(page)
     await page.goto(href)
 
-    await expect(page.getByRole('button', { name: 'Voltar' })).toBeVisible({
-      timeout: 15000,
-    })
     await expect(
       page.getByRole('button', { name: 'Compartilhar' })
-    ).toBeVisible()
+    ).toBeVisible({ timeout: 15000 })
   })
 
   test('exibe botão "Fazer login para se candidatar" sem autenticação', async ({

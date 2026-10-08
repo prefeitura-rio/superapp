@@ -19,12 +19,7 @@ export default function InscricaoLoading() {
           <Skeleton className="h-9 w-44" />
         </div>
       </div>
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="px-4 max-w-4xl mx-auto pt-8 pb-10 flex flex-col gap-4">
           <Skeleton className="h-9 w-3/4" />
           <Skeleton className="h-4 w-full" />

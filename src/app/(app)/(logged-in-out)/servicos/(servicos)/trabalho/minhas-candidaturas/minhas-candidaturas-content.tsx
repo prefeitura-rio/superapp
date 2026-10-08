@@ -128,12 +128,7 @@ export function MinhasCandidaturasContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto px-4 pt-2 pb-10">
           <h1 className="text-3xl font-medium text-foreground pb-2">
             Minhas candidaturas

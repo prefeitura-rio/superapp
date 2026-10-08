@@ -37,12 +37,7 @@ function CurriculoSkeleton() {
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
           <Skeleton className="h-9 w-48 mt-2 mb-6" />
           <div className="w-full">

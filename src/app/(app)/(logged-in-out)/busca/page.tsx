@@ -223,16 +223,7 @@ export default function Search() {
       ) : (
         <HeaderWrapperClient />
       )}
-      <div
-        style={
-          context === 'empregos' || context === 'cursos'
-            ? {
-                background:
-                  'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-              }
-            : undefined
-        }
-      >
+      <div>
         <div className="max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
           <SearchInput
             ref={searchInputRef}

@@ -3,7 +3,6 @@
 import { ActionDiv } from '@/app/components/action-div'
 import { CandidaturaEnviadaDrawer } from '@/app/components/empregos/candidatura-enviada-drawer'
 import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
-import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
   Accordion,
   AccordionContent,
@@ -1696,21 +1695,7 @@ export function CurriculoContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
-        <SecondaryHeader
-          fixed={false}
-          route={backRoute}
-          className="max-w-4xl"
-          style={{
-            background: 'transparent',
-            paddingTop: '8px',
-          }}
-        />
+      <div>
         <FormacaoApiProvider initialData={formacaoOptions}>
           <SituacaoApiProvider initialData={situacaoOptions}>
             <ExperienciaApiProvider initialData={experienciaOptions}>

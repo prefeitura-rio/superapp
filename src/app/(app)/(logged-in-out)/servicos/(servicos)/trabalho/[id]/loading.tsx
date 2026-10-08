@@ -19,12 +19,7 @@ export default function VagaDetailLoading() {
           <Skeleton className="h-9 w-44" />
         </div>
       </div>
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="p-4 max-w-4xl mx-auto">
           <Skeleton className="h-52 w-full rounded-3xl bg-muted" />
           <div className="flex items-center gap-3 mt-4">

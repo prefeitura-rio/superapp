@@ -19,12 +19,7 @@ export default async function MyCoursesPage() {
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto px-4 pt-6 pb-10">
           <h1 className="text-base font-medium text-foreground">Meus cursos</h1>
           <MyCoursesContent />

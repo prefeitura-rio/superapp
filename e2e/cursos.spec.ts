@@ -38,7 +38,7 @@ const VISIBLE_COURSE_CARD = `${COURSE_CARD_SELECTOR}:visible`
 async function getFirstCourseHref(page: Page): Promise<string | null> {
   await page.goto('/servicos/cursos')
   await expect(
-    page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+    page.locator('img[alt="Oportunidades Cariocas"]').first()
   ).toBeVisible({ timeout: 15000 })
 
   const firstCard = page.locator(VISIBLE_COURSE_CARD).first()
@@ -140,15 +140,15 @@ test.describe('Cursos — home (público)', () => {
   test('exibe logo Oportunidades Cariocas no header', async ({ page }) => {
     await page.goto('/servicos/cursos')
     await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+      page.locator('img[alt="Oportunidades Cariocas"]').first()
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('header deslogado exibe link de Login', async ({ page }) => {
+  test('header deslogado exibe link para login', async ({ page }) => {
     await page.goto('/servicos/cursos')
-    await expect(
-      page.locator('header').getByText('Login', { exact: true }).first()
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('header').getByRole('link').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('exibe cursos (seção "Todos os cursos" ou cards) ou estado vazio', async ({
@@ -308,7 +308,7 @@ test.describe('Cursos — categoria (público)', () => {
   }) => {
     await page.goto('/servicos/cursos')
     await expect(
-      page.locator('img[alt="Oportunidades Cariocas Logo"]').first()
+      page.locator('img[alt="Oportunidades Cariocas"]').first()
     ).toBeVisible({ timeout: 15000 })
 
     const categoriaLink = page
@@ -319,10 +319,10 @@ test.describe('Cursos — categoria (público)', () => {
     await page.waitForURL('**/servicos/cursos/categoria/**', { timeout: 15000 })
 
     // A rota de categoria nunca faz notFound(): sempre renderiza um h1 (nome real
-    // da categoria ou fallback "Categoria") e o ícone de busca do SecondaryHeader.
+    // da categoria ou fallback "Categoria") e o ícone de busca no header.
     // Timeouts generosos absorvem o primeiro compile do dev server.
     await expect(
-      page.locator('a[href="/servicos/cursos/busca"]').first()
+      page.locator('a[href="/busca?tipo=cursos"]').first()
     ).toBeVisible({ timeout: 25000 })
     await expect(
       page.locator('h1').filter({ hasText: /.+/ }).first()

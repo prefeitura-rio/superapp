@@ -83,65 +83,67 @@ export default function PhoneNumberForm() {
   }
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col space-y-6">
-      <div>
-        <ProfileHeaderWrapper />
-        <section className="relative">
-          <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
-            Escreva seu <br /> celular
-          </h2>
-        </section>
-      </div>
-      <div className="flex flex-col gap-14 px-4 items-center">
-        <PhoneInputForm
-          value={phone}
-          onChange={setPhone}
-          country={country}
-          onCountryChange={setCountry}
-          onSubmit={handleSave}
-        />
-        <CustomButton
-          size="xl"
-          onClick={handleSave}
-          variant="primary"
-          fullWidth
-          disabled={isPending || !isPhoneValid}
-        >
-          {isPending ? 'Enviando...' : 'Enviar'}
-        </CustomButton>
-      </div>
+    <>
+      <ProfileHeaderWrapper />
+      <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+        <div>
+          <section className="relative">
+            <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
+              Escreva seu <br /> celular
+            </h2>
+          </section>
+        </div>
+        <div className="flex flex-col gap-14 px-4">
+          <PhoneInputForm
+            value={phone}
+            onChange={setPhone}
+            country={country}
+            onCountryChange={setCountry}
+            onSubmit={handleSave}
+          />
+          <CustomButton
+            size="xl"
+            onClick={handleSave}
+            variant="primary"
+            fullWidth
+            disabled={isPending || !isPhoneValid}
+          >
+            {isPending ? 'Enviando...' : 'Enviar'}
+          </CustomButton>
+        </div>
 
-      {/* Drawer for feedback after email update */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
-          <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
-            <DrawerHeader className="text-center">
-              <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
-                Número <br />
-                atualizado!
-              </DrawerTitle>
-            </DrawerHeader>
-            <Image
-              src={welcomeImage}
-              alt="Email atualizado"
-              width={260}
-              height={320}
-              className="mx-auto mb-10"
-              style={{ objectFit: 'contain', maxHeight: '320px' }}
-              priority
-            />
-            <CustomButton
-              size="lg"
-              fullWidth
-              variant="primary"
-              className="max-w-xs mt-8"
-              onClick={handleDrawerClose}
-            >
-              Finalizar
-            </CustomButton>
-          </div>
-        </DrawerContent>
-      </Drawer>
-    </div>
+        {/* Drawer for feedback after email update */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerContent className="mx-auto rounded-t-none! min-h-screen flex flex-col items-center justify-center">
+            <div className="flex flex-col min-h-[60vh] items-center justify-evenly bg-background px-4 py-8">
+              <DrawerHeader className="text-center">
+                <DrawerTitle className="text-4xl font-medium leading-10 mb-6">
+                  Número <br />
+                  atualizado!
+                </DrawerTitle>
+              </DrawerHeader>
+              <Image
+                src={welcomeImage}
+                alt="Email atualizado"
+                width={260}
+                height={320}
+                className="mx-auto mb-10"
+                style={{ objectFit: 'contain', maxHeight: '320px' }}
+                priority
+              />
+              <CustomButton
+                size="lg"
+                fullWidth
+                variant="primary"
+                className="max-w-xs mt-8"
+                onClick={handleDrawerClose}
+              >
+                Finalizar
+              </CustomButton>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    </>
   )
 }

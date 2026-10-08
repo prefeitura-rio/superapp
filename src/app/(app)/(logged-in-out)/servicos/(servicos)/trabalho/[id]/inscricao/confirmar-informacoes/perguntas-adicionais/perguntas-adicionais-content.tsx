@@ -234,12 +234,7 @@ export function PerguntasAdicionaisContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <FormProvider {...form}>
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="px-4 max-w-4xl mx-auto flex flex-col overflow-x-hidden">
