@@ -1006,14 +1006,9 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
         showSearchIcon
         searchUrl="/servicos/cursos/busca"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div className="bg-white dark:bg-background">
         <div className="flex flex-col items-center pb-20">
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-4xl px-4">
             {/* Confirmation Bottom Sheet */}
             <BottomSheet
               open={showConfirmation}
