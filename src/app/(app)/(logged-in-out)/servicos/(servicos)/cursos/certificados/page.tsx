@@ -24,18 +24,11 @@ export default async function CoursesCertifiedPage({
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
-        <div className="max-w-4xl mx-auto px-4 pt-6 pb-10">
-          <CertificatesContent
-            autoOpenCourseId={resolvedSearchParams.courseId}
-            studentName={userInfo.name || 'Usuário'}
-          />
-        </div>
+      <div className="max-w-4xl mx-auto px-4 pt-7 pb-10">
+        <CertificatesContent
+          autoOpenCourseId={resolvedSearchParams.courseId}
+          studentName={userInfo.name || 'Usuário'}
+        />
       </div>
     </div>
   )

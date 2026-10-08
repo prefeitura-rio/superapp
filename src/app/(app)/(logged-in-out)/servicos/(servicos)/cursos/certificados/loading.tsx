@@ -19,12 +19,7 @@ export default function CoursesCertifiedLoading() {
           <Skeleton className="h-9 w-44" />
         </div>
       </div>
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto px-4 pt-6 pb-10">
           <Skeleton className="h-4 w-28 mb-4" />
           <div className="flex flex-col gap-3">
