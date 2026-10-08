@@ -59,20 +59,27 @@ export default function HeaderUserLink({
       {!hideAvatar && (
         <Link
           href={profileHref}
-          className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden"
+          className="flex items-center space-x-3"
           onClick={handleClick}
         >
-          {isLoggedIn && userAvatarUrl ? (
-            <Image
-              src={userAvatarUrl}
-              alt={userAvatarName || 'Avatar do usuário'}
-              width={48}
-              height={48}
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <UserIcon className="h-5 w-5" />
+          {!isLoggedIn && (
+            <span className="text-sm font-normal text-muted-foreground">
+              Faça seu login
+            </span>
           )}
+          <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden shrink-0">
+            {isLoggedIn && userAvatarUrl ? (
+              <Image
+                src={userAvatarUrl}
+                alt={userAvatarName || 'Avatar do usuário'}
+                width={48}
+                height={48}
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <UserIcon className="h-5 w-5" />
+            )}
+          </div>
         </Link>
       )}
       {resolvedMenuHref ? (
