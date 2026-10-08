@@ -1700,7 +1700,7 @@ export function CurriculoContent({
           <SituacaoApiProvider initialData={situacaoOptions}>
             <ExperienciaApiProvider initialData={experienciaOptions}>
               <FormProvider {...form}>
-                <div className="px-4 max-w-4xl mx-auto flex flex-col pb-10 overflow-x-hidden">
+                <div className="px-4 pt-4 max-w-4xl mx-auto flex flex-col pb-10 overflow-x-hidden">
                   <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight pb-4">
                     Meu Currículo
                   </h1>

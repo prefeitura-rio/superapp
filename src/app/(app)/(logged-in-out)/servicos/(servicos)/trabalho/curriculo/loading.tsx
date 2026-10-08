@@ -37,7 +37,7 @@ export default function CurriculoLoading() {
         </div>
       </div>
       <div>
-        <div className="max-w-4xl mx-auto px-4 pt-2 pb-10">
+        <div className="max-w-4xl mx-auto px-4 pt-4 pb-10">
           <Skeleton className="h-9 w-48 mt-2 mb-6" />
           <div className="w-full">
             <AccordionItemSkeleton titleWidth="h-5 w-24" />
