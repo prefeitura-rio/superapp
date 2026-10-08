@@ -360,3 +360,8 @@ lint:
 format:
     @echo "✨ Formatting code..."
     npm run format
+
+# Generate app-go-api client safely
+orval-app-go-api:
+    @echo "🔧 Generating app-go-api client..."
+    node scripts/generate-app-go-api.mjs

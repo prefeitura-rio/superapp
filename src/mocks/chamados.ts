@@ -199,6 +199,7 @@ export const MOCK_DETAIL: Record<string, object> = {
     origem: 'Portal Pref.Rio',
     ordens_de_servico: [
       {
+        id: '0WObe000005jXubGA0',
         codigoOs: '00000005',
         categoria: 'Solicitação',
         servico: 'Pedido de Acesso à Informação',
@@ -213,6 +214,16 @@ export const MOCK_DETAIL: Record<string, object> = {
           'Solicito informações sobre os contratos firmados pela prefeitura no exercício de 2025.',
         endereco: null,
         isAcessoInformacao: true,
+        canOpen: {
+          elogio: { available: false, categoryId: null },
+          sugestao: { available: false, categoryId: null },
+          reclamacao: { available: false, categoryId: null },
+          recurso: {
+            available: false,
+            categoryId: 'a09be00000BaYHlAAN',
+            deadline: null,
+          },
+        },
         andamentos: [
           {
             dataInsercao: '2026-08-01T10:00:00Z',
@@ -237,6 +248,7 @@ export const MOCK_DETAIL: Record<string, object> = {
     origem: 'Portal Pref.Rio',
     ordens_de_servico: [
       {
+        id: '0WObe000005jXubGAE',
         codigoOs: '00000006',
         categoria: 'Solicitação',
         servico: 'Pedido de Acesso à Informação',
@@ -252,6 +264,16 @@ export const MOCK_DETAIL: Record<string, object> = {
           'Solicito relação de servidores cedidos a outros órgãos em 2024.',
         endereco: null,
         isAcessoInformacao: true,
+        canOpen: {
+          elogio: { available: false, categoryId: null },
+          sugestao: { available: false, categoryId: null },
+          reclamacao: { available: false, categoryId: null },
+          recurso: {
+            available: true,
+            categoryId: 'a09be00000BaYHlAAN',
+            deadline: '2026-10-20T00:00:00Z',
+          },
+        },
         andamentos: [
           {
             dataInsercao: '2026-08-10T14:30:00Z',

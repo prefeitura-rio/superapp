@@ -20,7 +20,7 @@ export function CourseUnavailablePage() {
       />
       <div className="max-w-xl mx-auto w-full px-4">
         <ThemeAwareVideo
-          source={VIDEO_SOURCES.notFound}
+          source={VIDEO_SOURCES.courseUnavailable}
           containerClassName="mb-8 flex items-center justify-center h-[min(328px,50vh)] max-h-[328px]"
         />
         <h2 className="text-2xl font-semibold text-foreground mb-1">

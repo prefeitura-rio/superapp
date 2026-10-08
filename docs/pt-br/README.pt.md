@@ -13,9 +13,9 @@
 
 ## Visão Geral
 
-Este é um projeto **Next.js 15** construído com:
+Este é um projeto **Next.js 16** construído com:
 
-- **Framework**: Next.js 15.4.6 com React 19
+- **Framework**: Next.js 16.3.5 com React 19
 - **Linguagem**: TypeScript
 - **Estilização**: Tailwind CSS 4.1.5
 - **Autenticação**: Keycloak (Identidade Carioca)
