@@ -54,13 +54,7 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <main
-        className="max-w-4xl mx-auto text-foreground pb-10"
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <main className="max-w-4xl mx-auto text-foreground pb-10">
         {showMini && (
           <>
             <div

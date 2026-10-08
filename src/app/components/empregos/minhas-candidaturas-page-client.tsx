@@ -26,12 +26,7 @@ function MinhasCandidaturasSkeleton() {
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <main className="max-w-4xl mx-auto text-foreground pb-10">
           <div className="px-4 pt-2 md:pt-0">
             <Skeleton className="h-9 w-52 mb-2" />

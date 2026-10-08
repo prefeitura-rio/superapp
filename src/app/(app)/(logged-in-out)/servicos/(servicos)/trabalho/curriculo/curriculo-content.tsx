@@ -1702,12 +1702,7 @@ export function CurriculoContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <FormacaoApiProvider initialData={formacaoOptions}>
           <SituacaoApiProvider initialData={situacaoOptions}>
             <ExperienciaApiProvider initialData={experienciaOptions}>

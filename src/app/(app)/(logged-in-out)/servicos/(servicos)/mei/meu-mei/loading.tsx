@@ -28,12 +28,7 @@ export default function MeuMeiLoading() {
           <Skeleton className="h-9 w-44" />
         </div>
       </div>
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-xl mx-auto px-4 pt-4 pb-12">
           <Skeleton className="h-8 w-3/4 mb-4" />
           <div className="flex items-center gap-2 mb-2">

@@ -23,12 +23,7 @@ export function EligibilityBlocker({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto text-foreground">
           <div className="flex flex-col px-6 pt-8 pb-10 gap-6">
             <h1 className="text-3xl font-medium leading-9 tracking-tight text-foreground">

@@ -123,12 +123,7 @@ export function ConfirmarInformacoesContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="px-4 max-w-4xl mx-auto flex flex-col overflow-x-hidden pb-10">
           <div className="text-left shrink-0 pb-5 pt-2">
             <h1 className="text-3xl font-medium text-foreground mb-2 leading-9 tracking-tight">

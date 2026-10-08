@@ -120,12 +120,7 @@ export function VagaDetailContent({
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto">
           {/* Capa */}
           <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6 mx-4">

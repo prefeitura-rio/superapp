@@ -69,12 +69,7 @@ export default async function CoursesCategoryPage({
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
       />
-      <div
-        style={{
-          background:
-            'linear-gradient(180deg, var(--card) 0%, var(--background) 100%) top / 100% 210px no-repeat',
-        }}
-      >
+      <div>
         <div className="max-w-4xl mx-auto pb-20">
           <section className="px-4 pt-6">
             <h1 className="text-3xl font-medium text-foreground pb-4">
