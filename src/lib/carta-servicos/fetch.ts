@@ -1,13 +1,13 @@
+import {
+  getApiPublicServicesSlug,
+  getApiPublicSubthemesSlugServices,
+  getApiPublicThemes,
+  getApiPublicThemesSlugSubthemes,
+} from '@/http-app-catalogo/carta/carta'
 import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
-import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
 import type { ModelsSubcategoryResponse } from '@/http-busca-search/models/modelsSubcategoryResponse'
 import type { ModelsSubcategoryServicesResponse } from '@/http-busca-search/models/modelsSubcategoryServicesResponse'
-import {
-  getServiceDetail,
-  getServicesBySubtheme,
-  getSubthemesByTheme,
-  getThemes,
-} from '@/http-pref-rio-carta-servicos/default/default'
 import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
 import type { ServiceListItem } from '@/http-pref-rio-carta-servicos/models/serviceListItem'
 import type { Subtheme } from '@/http-pref-rio-carta-servicos/models/subtheme'
@@ -15,16 +15,11 @@ import type { Theme } from '@/http-pref-rio-carta-servicos/models/theme'
 import type { ThemesResponse } from '@/http-pref-rio-carta-servicos/models/themesResponse'
 import {
   mapServiceDetailToPrefRioService,
-  mapServiceFilteredItemToServiceDocument,
   mapServiceListItemToServiceDocument,
   mapSubthemeToSubcategory,
   mapThemeToCategory,
 } from '@/lib/carta-servicos/mappers'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
-import {
-  type CartaServicosThemesWithFilterResponse,
-  getFilteredCategoryServices,
-} from '@/lib/carta-servicos/themes-filter-response'
 import type {
   AppSubcategory,
   PrefRioServiceWithFlags,
@@ -35,6 +30,9 @@ import type { ReactNode } from 'react'
 const CACHE_10MIN = {
   next: { revalidate: 600 },
 } as const
+
+/** Temporary stand-in for GET /themes?filter_category= until catalogo exposes highlights. */
+const CATEGORY_HIGHLIGHT_COUNT = 4
 
 const SUBCATEGORIES_MAX_ATTEMPTS = 3
 const SUBCATEGORIES_RETRY_BASE_MS = 50
@@ -49,7 +47,7 @@ export type SubcategoriesFetchResult =
       error: string
     }
 
-/** Exported for tests — parses MuleSoft payloads that may arrive as objects or JSON strings. */
+/** Exported for tests — parses Carta payloads that may arrive as objects or JSON strings. */
 export function parseCartaServicosPayload<T>(payload: unknown): T | null {
   if (payload === null || payload === undefined) {
     return null
@@ -90,9 +88,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getThemesFromPayload(payload: unknown): Theme[] {
-  const body = parseCartaServicosPayload<
-    ThemesResponse | CartaServicosThemesWithFilterResponse
-  >(payload)
+  const body = parseCartaServicosPayload<ThemesResponse>(payload)
   if (!body || !isRecord(body) || !Array.isArray(body.data)) {
     return []
   }
@@ -139,7 +135,7 @@ export async function fetchCartaServicosCategories(
   getIconForCategory: (name: string) => ReactNode,
   options?: RequestInit
 ): Promise<Category[]> {
-  const response = await getThemes(
+  const response = await getApiPublicThemes(
     { include_empty: false, per_page: 100 },
     {
       ...CACHE_10MIN,
@@ -185,45 +181,47 @@ export async function fetchCartaServicosServicesByCategory(
   categorySlug: string,
   getIconForCategory: (name: string) => ReactNode
 ): Promise<{ filtered_category?: ModelsFilteredCategoryResult } | null> {
-  const resolved = await resolveThemeSlug(categorySlug, getIconForCategory)
-  if (!resolved) return null
+  const subcategoriesResult = await fetchCartaServicosSubcategoriesByCategory(
+    categorySlug,
+    getIconForCategory
+  )
+  if (!subcategoriesResult.ok) return null
 
-  const response = await getThemes(
-    {
-      filter_category: resolved.themeSlug,
-      page: 1,
-      per_page: 20,
-    },
-    {
-      ...CACHE_10MIN,
-      next: {
-        ...CACHE_10MIN.next,
-        tags: ['category-services', categorySlug],
-      },
+  const categoryName = subcategoriesResult.data.category
+  const subcategories = (subcategoriesResult.data.subcategories ??
+    []) as AppSubcategory[]
+  const services: ModelsServiceDocument[] = []
+  const seenSlugs = new Set<string>()
+
+  for (const subcategory of subcategories) {
+    if (services.length >= CATEGORY_HIGHLIGHT_COUNT) break
+    const subcategorySlug = subcategory.slug
+    if (!subcategorySlug) continue
+
+    const page = await fetchCartaServicosServicesBySubcategory(
+      subcategorySlug,
+      1,
+      CATEGORY_HIGHLIGHT_COUNT,
+      categoryName
+    )
+    if (!page?.services) continue
+
+    for (const service of page.services) {
+      if (!service.slug || seenSlugs.has(service.slug)) continue
+      seenSlugs.add(service.slug)
+      services.push(service)
+      if (services.length >= CATEGORY_HIGHLIGHT_COUNT) break
     }
-  )
-
-  if (response.status !== 200) {
-    return null
   }
-
-  const filteredCategory = getFilteredCategoryServices(response.data)
-  if (!filteredCategory) {
-    return null
-  }
-
-  const categoryName = filteredCategory.name ?? resolved.categoryName
-  const services = (filteredCategory.services ?? []).map(item =>
-    mapServiceFilteredItemToServiceDocument(item, categoryName)
-  )
 
   return {
     filtered_category: {
       name: categoryName,
-      page: filteredCategory.page,
-      per_page: filteredCategory.per_page,
+      page: 1,
+      per_page: CATEGORY_HIGHLIGHT_COUNT,
       services,
-      total_services: filteredCategory.total_services,
+      // Card count, not the category total. See docs/carta-servicos-catalogo.md.
+      total_services: services.length,
     },
   }
 }
@@ -234,7 +232,7 @@ async function fetchSubthemesOnce(
   categorySlugOrName: string,
   attempt: number
 ): Promise<ModelsSubcategoryResponse> {
-  const response = await getSubthemesByTheme(
+  const response = await getApiPublicThemesSlugSubthemes(
     themeSlug,
     { per_page: 100 },
     {
@@ -353,9 +351,10 @@ export async function fetchCartaServicosSubcategoriesByCategory(
 export async function fetchCartaServicosServicesBySubcategory(
   subcategorySlug: string,
   page = 1,
-  perPage = 50
+  perPage = 50,
+  categoryName?: string
 ): Promise<ModelsSubcategoryServicesResponse | null> {
-  const response = await getServicesBySubtheme(
+  const response = await getApiPublicSubthemesSlugServices(
     subcategorySlug,
     {
       page,
@@ -377,7 +376,9 @@ export async function fetchCartaServicosServicesBySubcategory(
     meta?: { page?: number; per_page?: number; total?: number }
   }>(response.data)
   const items = servicesBody?.data ?? []
-  const services = items.map(item => mapServiceListItemToServiceDocument(item))
+  const services = items.map(item =>
+    mapServiceListItemToServiceDocument(item, categoryName)
+  )
 
   return {
     subcategory: subcategorySlug,
@@ -391,14 +392,18 @@ export async function fetchCartaServicosServicesBySubcategory(
 export async function fetchCartaServicosServiceBySlug(
   slug: string
 ): Promise<PrefRioServiceWithFlags | null> {
-  const response = await getServiceDetail(slug, {
+  const response = await getApiPublicServicesSlug(slug, {
     ...CACHE_10MIN,
     next: { ...CACHE_10MIN.next, tags: ['service', slug] },
   })
 
-  if (response.status === 404) return null
+  // Catalogo does not return 301 yet. The branch stays for when it does
+  // (`redirect: 'manual'` will be required so fetch does not follow it).
+  const status = response.status as number
 
-  if (response.status === 301) {
+  if (status === 404) return null
+
+  if (status === 301) {
     const redirectBody = parseCartaServicosPayload<{ redirect?: string }>(
       response.data
     )

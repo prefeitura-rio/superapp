@@ -37,7 +37,37 @@ const getUrl = (contextUrl: string): string => {
   return requestUrl.toString()
 }
 
-const getHeaders = async (headers?: HeadersInit): Promise<HeadersInit> => {
+/**
+ * Carta navigation is public and cached with `revalidate`. Calling `cookies()`
+ * here would opt those pages into dynamic rendering.
+ */
+function isCartaPublicNavigationPath(url: string): boolean {
+  const path = url.split('?')[0] ?? url
+  return (
+    path === '/api/public/themes' ||
+    path.startsWith('/api/public/themes/') ||
+    path.startsWith('/api/public/subthemes/') ||
+    path.startsWith('/api/public/services/')
+  )
+}
+
+const getHeaders = async (
+  url: string,
+  headers?: HeadersInit
+): Promise<HeadersInit> => {
+  const hasContentType =
+    headers && typeof headers === 'object' && 'Content-Type' in headers
+  const contentType = hasContentType
+    ? {}
+    : { 'Content-Type': 'application/json' }
+
+  if (isCartaPublicNavigationPath(url)) {
+    return {
+      ...headers,
+      ...contentType,
+    } as HeadersInit
+  }
+
   const cookieStore = await cookies()
   const access_token = cookieStore.get('access_token')?.value
 
@@ -45,16 +75,11 @@ const getHeaders = async (headers?: HeadersInit): Promise<HeadersInit> => {
     console.warn('[CUSTOM_FETCH_APP_CATALOGO] No access token found in cookies')
   }
 
-  // Check if Content-Type is already set in headers
-  const hasContentType =
-    headers && typeof headers === 'object' && 'Content-Type' in headers
-
   return {
     ...headers,
     ...(access_token && { Authorization: `Bearer ${access_token}` }),
-    // Don't override Content-Type if it's already set in headers
-    ...(hasContentType ? {} : { 'Content-Type': 'application/json' }),
-  }
+    ...contentType,
+  } as HeadersInit
 }
 
 export const customFetchAppCatalogo = async <T>(
@@ -62,7 +87,7 @@ export const customFetchAppCatalogo = async <T>(
   options: RequestInit
 ): Promise<T> => {
   const requestUrl = getUrl(url)
-  const requestHeaders = await getHeaders(options.headers)
+  const requestHeaders = await getHeaders(url, options.headers)
 
   const requestInit: RequestInit = {
     ...options,
