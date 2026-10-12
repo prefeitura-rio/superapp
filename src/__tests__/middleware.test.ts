@@ -156,3 +156,16 @@ describe('middleware — gating de Dívida Ativa', () => {
     })
   })
 })
+
+describe('middleware — CSP do VLibras', () => {
+  test('a rota pública libera o iframe do widget em frame-src', async () => {
+    const response = await middleware(requestFor('/'))
+    const csp = response?.headers.get('Content-Security-Policy') ?? ''
+    const frameSrc = csp
+      .split(';')
+      .find(directive => directive.includes('frame-src'))
+
+    expect(frameSrc).toContain('https://vlibras.gov.br')
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-eval'/)
+  })
+})
