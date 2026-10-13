@@ -547,7 +547,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     }
 
     // A página exibe um dos 3 estados possíveis do carousel
-    const bemVindo = page.getByText('Cadastro de oportunidades de Trabalho', {
+    const bemVindo = page.getByText('Cadastro de oportunidades de', {
       exact: false,
     })
     const confirmarInfos = page.getByText('confirme suas informações', {
@@ -581,7 +581,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     await candidatarBtn.click()
     await page.waitForURL('**/inscricao**', { timeout: 15000 })
 
-    const bemVindo = page.getByText('Cadastro de oportunidades de Trabalho', {
+    const bemVindo = page.getByText('Cadastro de oportunidades de', {
       exact: false,
     })
     const isBemVindo = await bemVindo
@@ -1567,7 +1567,7 @@ test.describe('Empregos — menu (autenticado)', () => {
 
     await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
       'href',
-      '/servicos/trabalho/faq'
+      '/faq/trabalho'
     )
   })
 
@@ -1601,16 +1601,14 @@ test.describe('Empregos — menu (autenticado)', () => {
     ).toBeVisible({ timeout: 15000 })
   })
 
-  test('clicar em "FAQ" navega para /servicos/trabalho/faq', async ({
-    page,
-  }) => {
+  test('clicar em "FAQ" navega para /faq/trabalho', async ({ page }) => {
     await page.goto('/servicos/trabalho/menu')
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible({
       timeout: 15000,
     })
 
     await page.getByRole('link', { name: 'FAQ' }).click()
-    await page.waitForURL('**/servicos/trabalho/faq', { timeout: 15000 })
+    await page.waitForURL('**/faq/trabalho', { timeout: 15000 })
     await expect(page.getByRole('heading', { name: 'FAQ' })).toBeVisible({
       timeout: 15000,
     })
