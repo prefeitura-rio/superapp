@@ -436,7 +436,7 @@ test.describe('Cursos — menu/opções (autenticado)', () => {
     ).toHaveAttribute('href', '/servicos/cursos/certificados')
     await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
       'href',
-      '/servicos/cursos/faq'
+      '/faq/cursos'
     )
   })
 

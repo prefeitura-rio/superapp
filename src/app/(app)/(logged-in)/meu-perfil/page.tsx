@@ -50,7 +50,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
-      <ProfileHeaderWrapper hideAvatar />
+      <ProfileHeaderWrapper hideAvatar title="Perfil" />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">

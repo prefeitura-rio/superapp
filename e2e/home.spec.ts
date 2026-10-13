@@ -38,9 +38,12 @@ test.describe('Home (público)', () => {
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
 
-    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Serviços' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Carteira' })).toBeVisible()
+    // Escopo no <nav> da navegação flutuante: o footer global (contentinfo)
+    // também tem um link "Serviços".
+    const floatNav = page.getByRole('navigation')
+    await expect(floatNav.getByRole('link', { name: 'Home' })).toBeVisible()
+    await expect(floatNav.getByRole('link', { name: 'Serviços' })).toBeVisible()
+    await expect(floatNav.getByRole('link', { name: 'Carteira' })).toBeVisible()
   })
 
   test('header de visitante tem link para login no header', async ({

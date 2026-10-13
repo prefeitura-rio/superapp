@@ -6,22 +6,12 @@ import { applyE2EAuthCookies, hasE2EAuth } from './fixtures/auth'
  * desligada o middleware reescreve para `/not-found`, então estes testes só fazem sentido em
  * ambiente com a flag ligada (`.env` local e o quality gate).
  *
- * A API de Dívida Ativa ainda não existe em homologação: as telas que dependem dela são
- * interceptadas com `page.route()` em vez de bater na rede. Isso também evita gravar dado
- * real na conta de teste.
+ * "Meus imóveis" busca a lista no servidor (DAL → `BASE_API_URL_DIVIDA_ATIVA`), então
+ * `page.route()` não intercepta nada ali: o teste aceita os dois estados reais (lista ou
+ * vazio) e só roda quando a API está configurada. Sem ela a página cai no error boundary,
+ * que redireciona para /servicos. A URL de homolog ainda não está provisionada para o CI
+ * (ver docs/divida-ativa.md, "Provisionamento pendente").
  */
-
-const IMOVEIS_MOCK = {
-  data: [
-    {
-      inscricaoImobiliaria: '05217663',
-      endereco: 'Rua Barata Ribeiro, 586 - A 501',
-      bairro: 'Copacabana',
-      proprietario: 'Bruno Rocha Menezes',
-      possuiDebitos: true,
-    },
-  ],
-}
 
 test.describe('Dívida Ativa', () => {
   test.beforeEach(async ({ context }) => {
@@ -66,16 +56,25 @@ test.describe('Dívida Ativa', () => {
   test('cidadão chega à lista de imóveis a partir da landing', async ({
     page,
   }) => {
-    await page.route('**/v1/imoveis', async route => {
-      await route.fulfill({ json: IMOVEIS_MOCK })
-    })
+    test.skip(
+      !process.env.BASE_API_URL_DIVIDA_ATIVA,
+      'BASE_API_URL_DIVIDA_ATIVA ausente: a lista é buscada no servidor e a página cai no error boundary'
+    )
 
     await page.goto('/divida-ativa')
     await page.getByRole('link', { name: /Meus imóveis/ }).click()
+    await page.waitForURL('**/divida-ativa/imoveis', { timeout: 20000 })
 
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Meus imóveis' })
-    ).toBeVisible({ timeout: 20000 })
+    // Com imóveis o h1 é "Meus imóveis"; sem nenhum, a mensagem de vazio assume o h1.
+    const comLista = page.getByRole('heading', {
+      level: 1,
+      name: 'Meus imóveis',
+    })
+    const vazio = page.getByRole('heading', {
+      level: 1,
+      name: 'Não encontramos nenhum imóvel cadastrado no seu CPF',
+    })
+    await expect(comLista.or(vazio)).toBeVisible({ timeout: 20000 })
     await expect(
       page.getByRole('link', { name: 'Adicionar imóvel' })
     ).toBeVisible()

@@ -34,6 +34,8 @@ export function FaqPrefRioClient({ sections }: { sections: FAQSection[] }) {
     <div className="text-foreground">
       <HeaderWrapperClient />
       <main className="max-w-4xl min-h-lvh mx-auto pb-10">
+        {/* O header global não exibe título: h1 só para leitores de tela. */}
+        <h1 className="sr-only">FAQ</h1>
         {showMini && (
           <>
             <div

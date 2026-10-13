@@ -65,7 +65,7 @@ export default async function PersonalInfoForm() {
   return (
     <>
       <div className="max-w-4xl mx-auto pb-10 bg-background">
-        <ProfileHeaderWrapper />
+        <ProfileHeaderWrapper title="Informações pessoais" />
         <div className="space-y-6 p-4">
           <CustomInput
             id="cpf"
