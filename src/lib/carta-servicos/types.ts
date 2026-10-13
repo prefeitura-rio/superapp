@@ -15,3 +15,6 @@ export interface ServiceTicketFlags {
 export interface PrefRioServiceWithFlags extends ModelsPrefRioService {
   ticketFlags?: ServiceTicketFlags
 }
+
+/** Carta de Serviços publishes HTML. app-busca-search still publishes markdown. */
+export type ServiceContentFormat = 'html' | 'markdown'

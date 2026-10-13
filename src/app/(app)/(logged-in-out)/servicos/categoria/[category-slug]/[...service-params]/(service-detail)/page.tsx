@@ -1,6 +1,10 @@
 import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
-import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
+import { sanitizePrefRioServiceHtml } from '@/lib/carta-servicos/sanitize-service-html'
+import type {
+  ServiceContentFormat,
+  ServiceTicketFlags,
+} from '@/lib/carta-servicos/types'
 import { fetchServiceBySlug, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
 import { PageClientWrapper } from './page-client-wrapper'
@@ -89,12 +93,20 @@ export default async function ServicePage({
   }
 
   const ticketFlags: ServiceTicketFlags | undefined = serviceData.ticketFlags
+  const contentFormat: ServiceContentFormat = CARTA_SERVICOS_API_ENABLED
+    ? 'html'
+    : 'markdown'
+  const serviceForPage =
+    contentFormat === 'html'
+      ? sanitizePrefRioServiceHtml(serviceData)
+      : serviceData
 
   return (
     <PageClientWrapper
-      serviceData={serviceData}
+      serviceData={serviceForPage}
       orgaoGestorName={orgaoGestorName}
       categorySlug={categorySlug}
+      contentFormat={contentFormat}
       ticketFlags={ticketFlags}
     />
   )

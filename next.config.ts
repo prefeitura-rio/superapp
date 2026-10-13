@@ -9,6 +9,9 @@ const oportunidadesCariocasLegacyPaths = [
 const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['react-pdf', 'pdfjs-dist'],
+  // jsdom backs HTML sanitization during server render. Bundling it pulls
+  // optional native deps and breaks the client build.
+  serverExternalPackages: ['jsdom'],
   async redirects() {
     return [
       {

@@ -1,7 +1,5 @@
 # Migração Carta de Serviços — comparativo da página de detalhe
 
-> Histórico. A flag `CARTA_SERVICOS_API_ENABLED` não chama mais a API MuleSoft: o lado ligado usa a app-catalogo. Decisões e dívidas atuais estão em [`carta-servicos-catalogo.md`](./carta-servicos-catalogo.md).
-
 Comparação entre `app-busca-search` (`ModelsPrefRioService`) e a API Pref.Rio Carta de Serviços (`ServiceDetail` via `GET /services/{slug}`).
 
 ## Feature flag

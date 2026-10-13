@@ -3,13 +3,17 @@
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { OfficialBanner } from '@/app/components/service'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
-import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
+import type {
+  ServiceContentFormat,
+  ServiceTicketFlags,
+} from '@/lib/carta-servicos/types'
 import { PageClient } from './page-client'
 
 interface PageClientWrapperProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
   categorySlug: string
+  contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
 }
 
@@ -17,6 +21,7 @@ export function PageClientWrapper({
   serviceData,
   orgaoGestorName,
   categorySlug,
+  contentFormat = 'markdown',
   ticketFlags,
 }: PageClientWrapperProps) {
   return (
@@ -30,6 +35,7 @@ export function PageClientWrapper({
           <PageClient
             serviceData={serviceData}
             orgaoGestorName={orgaoGestorName}
+            contentFormat={contentFormat}
             ticketFlags={ticketFlags}
           />
         </div>

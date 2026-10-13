@@ -505,6 +505,58 @@ select:-webkit-autofill:focus {
   font-size: 0.9rem !important;
 }
 
+/* HTML da carta não passa pelo TipTap. O preflight zera margem e list-style. */
+.carta-servico-html > * + * {
+  margin-top: 0.75rem;
+}
+
+.carta-servico-html h1,
+.carta-servico-html h2,
+.carta-servico-html h3,
+.carta-servico-html h4,
+.carta-servico-html h5,
+.carta-servico-html h6 {
+  margin-top: 1rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.carta-servico-html > :first-child {
+  margin-top: 0 !important;
+}
+
+.carta-servico-html ul,
+.carta-servico-html ol {
+  padding-left: 1.5rem;
+}
+
+.carta-servico-html ul {
+  list-style-type: disc;
+}
+
+.carta-servico-html ol {
+  list-style-type: decimal;
+}
+
+.carta-servico-html li {
+  display: list-item;
+  margin-top: 0.25rem;
+}
+
+.carta-servico-html li > ul,
+.carta-servico-html li > ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.carta-servico-html a {
+  color: rgb(37 99 235);
+  text-decoration: underline;
+}
+
+.carta-servico-html a:hover {
+  color: rgb(29 78 216);
+}
+
 .ProseMirror ul,
 .ProseMirror ol {
   padding-left: 1.5rem;

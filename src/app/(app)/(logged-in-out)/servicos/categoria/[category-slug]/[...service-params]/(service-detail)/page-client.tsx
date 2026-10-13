@@ -11,6 +11,7 @@ import {
   QuickInfoDepartment,
   QuickInfoTime,
 } from '@/app/components/service'
+import { ServiceHtmlContent } from '@/app/components/service/service-html-content'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -22,7 +23,10 @@ import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
-import type { ServiceTicketFlags } from '@/lib/carta-servicos/types'
+import type {
+  ServiceContentFormat,
+  ServiceTicketFlags,
+} from '@/lib/carta-servicos/types'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
 import { Clock } from 'lucide-react'
@@ -31,12 +35,14 @@ import { MarkdownRenderer } from './components/markdown-renderer'
 interface PageClientProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
+  contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
 }
 
 export function PageClient({
   serviceData,
   orgaoGestorName,
+  contentFormat = 'markdown',
   ticketFlags,
 }: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
@@ -88,10 +94,12 @@ export function PageClient({
   const digitalChannels: string[] = serviceData?.canais_digitais || []
   const legislation: string[] = serviceData?.legislacao_relacionada || []
 
-  // Function to render markdown
-  const renderMarkdown = (content: string) => (
-    <MarkdownRenderer content={content} />
-  )
+  const renderContent = (content: string, className?: string) =>
+    contentFormat === 'html' ? (
+      <ServiceHtmlContent content={content} className={className} />
+    ) : (
+      <MarkdownRenderer content={content} className={className} />
+    )
 
   // Format last_update date (timestamp in seconds)
   const updatedAtFormatted = serviceData?.last_update
@@ -106,10 +114,10 @@ export function PageClient({
           <h1 className="text-4xl text-foreground leading-10 mb-2 font-medium">
             {serviceData.nome_servico}
           </h1>
-          <MarkdownRenderer
-            content={serviceData.resumo}
-            className="text-sm font-normal text-foreground-light leading-5"
-          />
+          {renderContent(
+            serviceData.resumo,
+            'text-sm font-normal text-foreground-light leading-5'
+          )}
         </div>
 
         {/* Ticket submission buttons (SF-linked services) take priority over generic buttons */}
@@ -221,7 +229,8 @@ export function PageClient({
       <div className="mb-8">
         <MainInformation
           serviceData={serviceData}
-          renderMarkdown={renderMarkdown}
+          contentFormat={contentFormat}
+          renderContent={renderContent}
         />
       </div>
 
