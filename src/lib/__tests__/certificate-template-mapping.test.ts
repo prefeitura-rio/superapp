@@ -14,6 +14,7 @@ describe('getCertificateTemplate', () => {
     expect(getCertificateTemplate('1900')).toBe('sesrio')
     expect(getCertificateTemplate('4700')).toBe('spmrio')
     expect(getCertificateTemplate('2600')).toBe('smte')
+    expect(getCertificateTemplate('1300')).toBe('sma')
   })
 
   it('mantém smac no mapeamento legado', () => {
@@ -50,6 +51,7 @@ describe('usesNewCertificateLayout', () => {
     expect(usesNewCertificateLayout('sesrio')).toBe(true)
     expect(usesNewCertificateLayout('spmrio')).toBe(true)
     expect(usesNewCertificateLayout('smte')).toBe(true)
+    expect(usesNewCertificateLayout('sma')).toBe(true)
   })
 
   it('mantém smac no layout legado', () => {

@@ -533,6 +533,7 @@ test.describe('Cursos — templates de certificado', () => {
     'sesrio',
     'spmrio',
     'smte',
+    'sma',
   ] as const
 
   for (const template of TEMPLATES) {
