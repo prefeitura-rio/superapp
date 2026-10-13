@@ -1,9 +1,6 @@
 export const dynamic = 'force-dynamic'
 
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
-import { EqualWebPlugin } from '@/components/equalweb-plugin'
-import { HandTalkPlugin } from '@/components/hand-talk-plugin'
-import { PertoDigitalPlugin } from '@/components/perto-digital-plugin'
 import { VLibrasPlugin } from '@/components/vlibras-plugin'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
@@ -71,12 +68,6 @@ export default async function RootLayout({
           nonce={nonce}
           gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
         />
-        {process.env.NEXT_PUBLIC_HAND_TALK_TOKEN && (
-          <HandTalkPlugin
-            token={process.env.NEXT_PUBLIC_HAND_TALK_TOKEN}
-            nonce={nonce}
-          />
-        )}
         {process.env.NEXT_PUBLIC_RIO_QUEUE_URL &&
           process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
             <script
@@ -88,15 +79,6 @@ export default async function RootLayout({
               async
             />
           )}
-        {process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY && (
-          <EqualWebPlugin
-            sitekey={process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY}
-            nonce={nonce}
-          />
-        )}
-        {process.env.NEXT_PUBLIC_PERTO_DIGITAL_ENABLED && (
-          <PertoDigitalPlugin nonce={nonce} />
-        )}
         {process.env.NEXT_PUBLIC_VLIBRAS_ENABLED && (
           <VLibrasPlugin nonce={nonce} />
         )}
