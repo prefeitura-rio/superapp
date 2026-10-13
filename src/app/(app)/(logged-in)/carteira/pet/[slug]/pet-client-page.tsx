@@ -45,7 +45,7 @@ export function PetClientPage({
 
   return (
     <div className="max-w-4xl mx-auto pb-10">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title="Carteira" />
       <div className="pt-2">
         <div className="px-4 flex flex-col gap-4">
           <PetCard

@@ -43,7 +43,7 @@ export default async function EducationCardDetail() {
 
   return (
     <div className="max-w-4xl mx-auto pb-10">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title="Carteira" />
       <div className="z-50">
         <div className="px-4 pt-2">
           <EducationCard

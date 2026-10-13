@@ -10,7 +10,7 @@ export default function UserSettingsForm() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title="Configurações" />
 
       <RadioGroup
         value={theme}

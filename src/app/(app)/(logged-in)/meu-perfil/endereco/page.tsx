@@ -29,7 +29,7 @@ export default async function UserAddress() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title="Endereço" />
       {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
         <>
           <AddressInfoCard address={addressInfo} />

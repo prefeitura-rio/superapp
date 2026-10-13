@@ -62,7 +62,7 @@ export function VehicleDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl bg-background pb-10">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title={vehicle.displayName} />
       <div className="flex flex-col gap-6 px-4 pt-2">
         {isConductor && (
           <div className="flex justify-end">
