@@ -14,6 +14,7 @@ const VALID_TEMPLATES: CertificateTemplate[] = [
   'sesrio',
   'spmrio',
   'smte',
+  'sma',
 ]
 
 export async function GET(
