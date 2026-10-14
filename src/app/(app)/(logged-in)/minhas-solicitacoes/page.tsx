@@ -34,7 +34,7 @@ export default async function MyRequestsPage() {
   return (
     <div className="text-foreground">
       <ProfileHeaderWrapper />
-      <div className="max-w-4xl mx-auto px-4 pb-10">
+      <div className="max-w-4xl mx-auto px-4 pb-4">
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações
         </h1>

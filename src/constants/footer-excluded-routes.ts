@@ -11,7 +11,6 @@ export const FOOTER_EXCLUDED_ROUTES = [
   // Fluxos de cadastro na carteira
   '/carteira/pet/adicionar',
   '/carteira/cadmicro/adicionar-veiculo',
-  '/carteira/cadmicro',
   // Fluxo de dívida ativa
   '/divida-ativa/imoveis/novo',
   '/divida-ativa/imoveis',

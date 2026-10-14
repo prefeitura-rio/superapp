@@ -94,7 +94,7 @@ export default function FaqHubPage() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-      <main className="max-w-4xl min-h-lvh mx-auto pb-10">
+      <main className="max-w-4xl mx-auto pb-10">
         <div className="px-4 pb-4 max-w-4xl mx-auto">
           {/* título na página, não no header */}
           <h1 className="text-foreground font-medium text-3xl leading-9 tracking-tight">

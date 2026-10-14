@@ -4,15 +4,46 @@ export function LinkedinIcon(props: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="26"
-      height="26"
-      viewBox="0 0 26 26"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
       fill="none"
       {...props}
     >
       <path
-        d="M6.66586 23.939H2.04886V9.09175H6.66586V23.939ZM4.35736 7.06878C2.87506 7.06878 1.67828 5.872 1.67828 4.39578C1.67828 2.91955 2.87506 1.72278 4.35736 1.72278C5.83358 1.72278 7.03036 2.91955 7.03036 4.39578C7.03036 5.86593 5.83358 7.06878 4.35736 7.06878ZM23.9432 23.939H19.3322V16.722C19.3322 15.0027 19.3019 12.7854 16.9326 12.7854C14.533 12.7854 14.1685 14.6625 14.1685 16.6005V23.939H9.56363V9.09175H13.9862V11.1208H14.047C14.6606 9.9544 16.1672 8.72118 18.4088 8.72118C23.0805 8.72118 23.9432 11.7951 23.9432 15.7925V23.939Z"
-        fill="currentColor"
+        d="M17 3H7C4.79086 3 3 4.79086 3 7V17C3 19.2091 4.79086 21 7 21H17C19.2091 21 21 19.2091 21 17V7C21 4.79086 19.2091 3 17 3Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 10.5V16.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 7.5H8.01"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 16.5V10.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 13C12 12.337 12.2634 11.7011 12.7322 11.2322C13.2011 10.7634 13.837 10.5 14.5 10.5C15.163 10.5 15.7989 10.7634 16.2678 11.2322C16.7366 11.7011 17 12.337 17 13V16.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
