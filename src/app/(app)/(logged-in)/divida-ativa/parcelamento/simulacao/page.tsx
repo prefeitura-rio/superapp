@@ -33,7 +33,13 @@ import { redirect } from 'next/navigation'
  *
  * Datas e simulação são pelas CDAs (`/divida-ativa/...`), sem exigir o imóvel em Meus
  * Imóveis: servem quem chegou pela inscrição, pela CDA ou pela execução fiscal. O critério
- * da consulta segue na URL só para o Voltar reconstruir a tela de débitos.
+ * da consulta segue na URL só para o Voltar reconstruir a tela de revisão.
+ *
+ * ### Voltar vai para a revisão, não para a seleção de débitos
+ *
+ * `/parcelamento/revisao` passou a ficar entre a seleção de débitos e esta simulação. O
+ * "Voltar" da etapa 1 (sem `?data=`) leva para lá, e é a revisão quem decide se volta mais
+ * um passo, até a seleção de débitos.
  */
 export default async function SimulacaoPage({
   searchParams,
@@ -61,25 +67,24 @@ export default async function SimulacaoPage({
       (entry): entry is [string, string] => entry[1] !== undefined
     )
   )
-  const rotaDebitos = `/divida-ativa/parcelamento/debitos?${new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(searchParamsAtual).filter(([chave]) => chave !== 'cdas')
-    )
-  )}`
+  // Volta para a revisão (não para a seleção de débitos): entre as duas passou a existir a
+  // etapa "Revise as informações de pagamento", e é ela quem antecede a simulação agora.
+  const rotaRevisao = `/divida-ativa/parcelamento/revisao?${new URLSearchParams(searchParamsAtual)}`
 
   const cdas = (params.cdas ?? '').split(',').filter(Boolean)
 
-  // Sem CDA selecionada não há o que simular: volta para a seleção de débitos.
+  // Sem CDA selecionada não há o que simular: volta para a revisão, que por sua vez volta
+  // para a seleção de débitos se também não tiver CDA.
   if (cdas.length === 0) {
-    redirect(rotaDebitos)
+    redirect(rotaRevisao)
   }
 
   // Rota de retorno:
   // - etapa 2 (com ?data=) volta à etapa 1 (sem ?data=)
-  // - etapa 1 volta à tela de débitos
+  // - etapa 1 volta à revisão
   const rotaVoltar = data
     ? `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`
-    : rotaDebitos
+    : rotaRevisao
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -100,7 +105,7 @@ export default async function SimulacaoPage({
       ) : (
         <EtapaData
           searchParamsAtual={searchParamsAtual}
-          rotaDebitos={rotaDebitos}
+          rotaRevisao={rotaRevisao}
         />
       )}
     </div>
@@ -109,10 +114,10 @@ export default async function SimulacaoPage({
 
 async function EtapaData({
   searchParamsAtual,
-  rotaDebitos,
+  rotaRevisao,
 }: {
   searchParamsAtual: Record<string, string>
-  rotaDebitos: string
+  rotaRevisao: string
 }) {
   const datas = await getDalDividaAtivaDatasVencimento()
 
@@ -125,7 +130,7 @@ async function EtapaData({
             ? 'O sistema da Procuradoria não ofereceu nenhuma data para a primeira parcela agora. Tente novamente mais tarde.'
             : 'O serviço de dívida ativa está indisponível no momento. Tente novamente em alguns minutos.'
         }
-        acao={{ rotulo: 'Voltar aos débitos', href: rotaDebitos }}
+        acao={{ rotulo: 'Voltar à revisão', href: rotaRevisao }}
       />
     )
   }

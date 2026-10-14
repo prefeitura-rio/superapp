@@ -1,3 +1,5 @@
+import type { CriterioDebitos } from '@/types/divida-ativa'
+
 /**
  * Formatadores client-safe do módulo Dívida Ativa.
  *
@@ -231,4 +233,28 @@ export function inscricaoParaApi(valor: string): string {
   return digitos.length < INSCRICAO_DIGITOS_API
     ? digitos.padStart(INSCRICAO_DIGITOS_API, '0')
     : digitos
+}
+
+/**
+ * Traduz o que a tela de entrada pôs na URL no critério único da consulta.
+ *
+ * A ordem é a da lista de modos, e o primeiro preenchido vence: a API aceita **um** critério
+ * por consulta (RN-001/RN-002), e um endereço editado à mão com dois parâmetros não pode
+ * virar chamada ambígua.
+ *
+ * Compartilhada entre `/parcelamento/debitos` e `/parcelamento/revisao`: as duas rotas
+ * recebem o mesmo critério na URL e consultam a mesma API (`getDalDividaAtivaConsultaAvulsa`).
+ */
+export function criterioDaUrl(params: {
+  inscricao?: string
+  cda?: string
+  execucaoFiscal?: string
+}): CriterioDebitos | null {
+  if (params.inscricao) return { tipo: 'inscricao', valor: params.inscricao }
+  if (params.cda) return { tipo: 'cda', valor: params.cda }
+  if (params.execucaoFiscal) {
+    return { tipo: 'execucao-fiscal', valor: params.execucaoFiscal }
+  }
+
+  return null
 }
