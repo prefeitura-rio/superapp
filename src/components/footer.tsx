@@ -11,6 +11,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Footer1746Link } from './footer-1746-link'
 
+const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
+
 const menuLinks = [
   { label: 'Página inicial', href: '/' },
   { label: 'Serviços', href: '/servicos' },
@@ -61,43 +63,57 @@ const socialLinks = [
 function Logos() {
   return (
     <div className="flex items-center gap-4">
-      <Image
-        src={brasaoPrefeitura}
-        alt="Prefeitura do Rio"
-        width={77}
-        height={32}
-        style={{ width: '77px', height: '31.233px', aspectRatio: '77/31.23' }}
-        className="object-contain"
-        unoptimized
-      />
-      <Image
-        src={prefRioLogo}
-        alt="PrefRio"
-        width={111}
-        height={43}
-        style={{ width: '105.3px', height: '42.9px' }}
-        className="object-contain"
-        unoptimized
-      />
+      <a
+        href={PREFEITURA_RIO_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Prefeitura do Rio"
+      >
+        <Image
+          src={brasaoPrefeitura}
+          alt="Prefeitura do Rio"
+          width={77}
+          height={32}
+          style={{ width: '77px', height: '31.233px', aspectRatio: '77/31.23' }}
+          className="object-contain"
+          unoptimized
+        />
+      </a>
+      <Link href="/" aria-label="PrefRio">
+        <Image
+          src={prefRioLogo}
+          alt="PrefRio"
+          width={111}
+          height={43}
+          style={{ width: '105.3px', height: '42.9px' }}
+          className="object-contain"
+          unoptimized
+        />
+      </Link>
     </div>
   )
 }
 
 function SocialLinks() {
   return (
-    <div className="flex items-center gap-4">
-      {socialLinks.map(({ icon: Icon, label, href }) => (
-        <a
-          key={label}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={label}
-          className="text-primary transition-colors"
-        >
-          <Icon width={24} height={24} />
-        </a>
-      ))}
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium leading-none tracking-normal text-foreground">
+        Redes
+      </p>
+      <div className="flex items-center gap-4">
+        {socialLinks.map(({ icon: Icon, label, href }) => (
+          <a
+            key={label}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            className="text-primary transition-colors"
+          >
+            <Icon width={24} height={24} />
+          </a>
+        ))}
+      </div>
     </div>
   )
 }
@@ -138,10 +154,11 @@ function NavSection({
 
 function LegalRow() {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
       <p className="text-sm font-normal leading-5 tracking-normal text-foreground">
         ©2026 PrefRio. Todos os direitos reservados.
       </p>
+      <span className="hidden sm:inline text-sm text-foreground-light">•</span>
       <div className="flex items-center gap-2">
         <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light cursor-default select-none">
           Termos de uso
@@ -157,9 +174,11 @@ function LegalRow() {
 
 export function Footer() {
   return (
-    <footer className="w-full pb-28">
+    <footer className="w-full pb-28 bg-background">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="border-t border-border" />
+        <div className="pt-6">
+          <div className="border-t border-border" />
+        </div>
 
         {/* ── MOBILE (< sm) ── */}
         <div className="sm:hidden flex flex-col pt-6 pb-6 gap-12">
@@ -184,10 +203,9 @@ export function Footer() {
 
         {/* ── DESKTOP (≥ sm) ── */}
         <div className="hidden sm:flex flex-col pt-6 pb-6">
-          <div className="flex items-stretch">
-            <div className="flex flex-col justify-between items-start flex-1 self-stretch">
+          <div className="flex items-start">
+            <div className="flex-1">
               <Logos />
-              <SocialLinks />
             </div>
 
             <div className="flex gap-6">
@@ -197,6 +215,7 @@ export function Footer() {
                 links={atendimentoLinks}
                 firstItem={<Footer1746Link />}
               />
+              <SocialLinks />
             </div>
           </div>
 
