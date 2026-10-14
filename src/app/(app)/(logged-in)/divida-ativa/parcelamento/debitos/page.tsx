@@ -3,30 +3,9 @@ import { DebitosSelecao } from '@/app/components/divida-ativa/debitos-selecao'
 import { DebitosVazio } from '@/app/components/divida-ativa/debitos-vazio'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { getDalDividaAtivaConsultaAvulsa } from '@/lib/dal'
+import { criterioDaUrl } from '@/lib/divida-ativa-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
-import type { CriterioDebitos } from '@/types/divida-ativa'
 import { redirect } from 'next/navigation'
-
-/**
- * Traduz o que a tela de entrada pôs na URL no critério único da consulta.
- *
- * A ordem é a da lista de modos, e o primeiro preenchido vence: a API aceita **um** critério
- * por consulta (RN-001/RN-002), e um endereço editado à mão com dois parâmetros não pode
- * virar chamada ambígua.
- */
-function criterioDaUrl(params: {
-  inscricao?: string
-  cda?: string
-  execucaoFiscal?: string
-}): CriterioDebitos | null {
-  if (params.inscricao) return { tipo: 'inscricao', valor: params.inscricao }
-  if (params.cda) return { tipo: 'cda', valor: params.cda }
-  if (params.execucaoFiscal) {
-    return { tipo: 'execucao-fiscal', valor: params.execucaoFiscal }
-  }
-
-  return null
-}
 
 /**
  * Débitos encontrados para o número consultado, e a seleção do que entra no parcelamento.

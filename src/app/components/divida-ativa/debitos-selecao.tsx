@@ -70,11 +70,13 @@ export function DebitosSelecao({ cdas }: DebitosSelecaoProps) {
       .map(cda => cda.numeroCda)
 
     // O critério da consulta (`inscricao`, `cda` ou `execucaoFiscal`) segue junto: a tela de
-    // simulação precisa dele para chamar a API, e reconstruí-lo lá seria adivinhação.
+    // revisão precisa dele para repetir a consulta e chegar ao mesmo conjunto de CDAs.
     const destino = new URLSearchParams(searchParams)
     destino.set(PARAM_CDAS, escolhidas.join(','))
 
-    router.push(`/divida-ativa/parcelamento/simulacao?${destino}`)
+    // Próxima etapa: revisão das informações de pagamento, antes da simulação (data +
+    // parcelas). "Continuar" aqui não simula nada ainda — só confirma a seleção.
+    router.push(`/divida-ativa/parcelamento/revisao?${destino}`)
   }
 
   return (

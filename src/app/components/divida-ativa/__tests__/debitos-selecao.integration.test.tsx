@@ -183,7 +183,7 @@ describe('DebitosSelecao', () => {
     ).toHaveAttribute('href', '/divida-ativa/acompanhamento')
   })
 
-  test('"Continuar" leva à simulação com as CDAs escolhidas na URL', async () => {
+  test('"Continuar" leva à revisão com as CDAs escolhidas na URL', async () => {
     const user = userEvent.setup()
     searchParams = new URLSearchParams('inscricao=05217663')
     render(<DebitosSelecao cdas={[CDA_2024, CDA_2023]} />)
@@ -196,8 +196,8 @@ describe('DebitosSelecao', () => {
     expect(push).toHaveBeenCalledTimes(1)
 
     const destino = new URL(push.mock.calls[0][0], 'https://pref.rio')
-    expect(destino.pathname).toBe('/divida-ativa/parcelamento/simulacao')
-    // O critério da consulta viaja junto: a tela seguinte precisa dele para simular.
+    expect(destino.pathname).toBe('/divida-ativa/parcelamento/revisao')
+    // O critério da consulta viaja junto: a tela seguinte precisa dele para repetir a consulta.
     expect(destino.searchParams.get('inscricao')).toBe('05217663')
     expect(destino.searchParams.get('cdas')).toBe('01/137861/2025-00')
   })
