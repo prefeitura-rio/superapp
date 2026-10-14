@@ -26,6 +26,7 @@ Mapeia IDs de organizações (orgao_id/cd_ua) para seus templates PDF correspond
 | `sesrio.pdf` | SES-RIO | `1900` | v2 |
 | `spmrio.pdf` | Secretaria Especial de Políticas para Mulheres - SPM-RIO | `4700` | v2 |
 | `smte.pdf` | Secretaria Municipal de Trabalho e Renda - SMTE | `2600` | v2 |
+| `sma.pdf` | Secretaria Municipal de Administração - SMA | `1300` | v2 |
 | `smac.pdf` | Secretaria Municipal de Meio Ambiente e Clima - SMAC | `2400` | legado |
 
 > **Nota:** `smac` ainda usa o layout legado (texto centralizado). Será migrado para o layout v2 quando o novo PDF estiver disponível.
@@ -355,7 +356,8 @@ Texto centralizado no PDF:
 > porque `next dev` e `next start` rodam da raiz do repo, onde a pasta existe de qualquer jeito.
 > Verificação manual ao adicionar um template:
 > `npm run build && ls .next/standalone/src/lib/templates/` (validado em 2026-08-20 — o file
-> tracing do Next copia a pasta inteira, e o `smte.pdf` sai byte-idêntico ao original).
+> tracing do Next copia a pasta inteira, e o `smte.pdf` sai byte-idêntico ao original;
+> revalidado em 2026-10-07 com o `sma.pdf`, servido pelo `node server.js` do standalone).
 
 > **Por que o guarda de divergência existe:** um template novo precisa ser declarado em três lugares
 > independentes (`TEMPLATE_MAPPINGS`, `NEW_LAYOUT_TEMPLATES`, `VALID_TEMPLATES`) mais o arquivo em disco.
@@ -463,6 +465,11 @@ http://localhost:3000/servicos/cursos/certificados
 - `src/app/layout.tsx` - Configuração do Toaster (já existente)
 
 ## Histórico de Versões
+
+- **v5.2** - Template da SMA
+  - ✅ Template `sma` (Secretaria Municipal de Administração), layout v2
+  - ✅ Derivado do mockup do design, mesmo processo da SMTE (texto do miolo removido)
+  - ✅ `orgao_id` `1300`, confirmado idêntico em staging e produção via API do RMI
 
 - **v5.1** - Template da SMTE
   - ✅ Template `smte` (Secretaria Municipal de Trabalho e Renda), layout v2
