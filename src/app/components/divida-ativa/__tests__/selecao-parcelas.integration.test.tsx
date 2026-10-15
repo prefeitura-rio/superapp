@@ -44,17 +44,32 @@ const OPCOES: Opcoes = [
 
 const PARAMS = { cda: '01/140646/2026-00', cdas: '01/140646/2026-00' }
 
-function renderizar(opcoes = OPCOES) {
+function renderizar(opcoes = OPCOES, valorGrerj: number | null = null) {
   return render(
     <SelecaoParcelas
       opcoes={opcoes}
       valorTotalAvista={1696.61}
+      valorGrerj={valorGrerj}
       searchParamsAtual={{ ...PARAMS, data: '15/10/2026' }}
     />
   )
 }
 
 describe('SelecaoParcelas', () => {
+  test('com custas judiciais, o total explica que a GRERJ já está incluída', () => {
+    renderizar(OPCOES, 1199.97)
+
+    expect(
+      screen.getByText('Inclui R$1.199,97 de custas judiciais (GRERJ)')
+    ).toBeInTheDocument()
+  })
+
+  test('sem custas judiciais, não há linha de GRERJ', () => {
+    renderizar(OPCOES, null)
+
+    expect(screen.queryByText(/custas judiciais/)).not.toBeInTheDocument()
+  })
+
   test('1x é "Valor à vista"; as demais, "Valor da 1ª parcela", cada uma com os juros totais', () => {
     renderizar()
 

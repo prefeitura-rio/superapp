@@ -4,6 +4,7 @@ import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import {
   formatarInscricaoImobiliaria,
   formatarValorBRL,
+  rotuloNatureza,
 } from '@/lib/divida-ativa-utils'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import Link from 'next/link'
@@ -47,7 +48,7 @@ export function DebitoDetalhesDrawer({
   open,
   onOpenChange,
 }: DebitoDetalhesDrawerProps) {
-  const titulo = debito.natureza ?? 'Certidão de Dívida Ativa'
+  const titulo = rotuloNatureza(debito.natureza) ?? 'Certidão de Dívida Ativa'
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title={titulo}>
@@ -65,10 +66,7 @@ export function DebitoDetalhesDrawer({
             rotulo="Ano"
             valor={debito.exercicio === null ? null : String(debito.exercicio)}
           />
-          <Item
-            rotulo="Natureza da dívida"
-            valor={debito.receita ?? debito.natureza}
-          />
+          <Item rotulo="Natureza da dívida" valor={debito.natureza} />
           <Item
             rotulo="Valor"
             valor={formatarValorBRL(debito.valorPrincipal)}

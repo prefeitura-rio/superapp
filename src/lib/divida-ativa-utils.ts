@@ -258,3 +258,17 @@ export function criterioDaUrl(params: {
 
   return null
 }
+
+/**
+ * Rótulo curto da natureza da dívida, para o título dos cards: `"IPTU/Taxas - Predial"` →
+ * `"IPTU"`.
+ *
+ * O DAM só manda a descrição longa (`naturezaDivida`) — `receita` é código (`"4693"`), não
+ * texto. O Figma usa o trecho antes da barra como título e a descrição inteira na linha
+ * "Natureza da dívida". Sem barra, a descrição já é o rótulo.
+ */
+export function rotuloNatureza(natureza: string | null): string | null {
+  const rotulo = natureza?.split('/')[0].trim()
+
+  return rotulo || null
+}

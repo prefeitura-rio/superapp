@@ -5,6 +5,7 @@ import {
   getDalDividaAtivaDatasVencimento,
   getDalDividaAtivaDebitos,
   getDalDividaAtivaImoveis,
+  getDalDividaAtivaRevisaoPagamento,
   getDalDividaAtivaSimulacao,
 } from '@/lib/dal'
 import { TEST_ENV } from '@/test/mocks/env'
@@ -567,8 +568,9 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
               {
                 cdaId: '20240000111',
                 exercicio: '2024',
-                naturezaDivida: 'IPTU',
-                receita: 'IPTU/Taxas - Predial',
+                // Como o DAM devolve: descrição em naturezaDivida, receita é código.
+                naturezaDivida: 'IPTU/Taxas - Predial',
+                receita: '4693',
                 situacaoPrincipal: 'EM ABERTO',
                 situacaoHonorarios: 'EM ABERTO',
                 faseCobranca: 'AJUIZADA',
@@ -600,7 +602,7 @@ describe('getDalDividaAtivaConsultaAvulsa', () => {
     expect(debitos?.cdas[0]).toMatchObject({
       numeroCda: '20240000111',
       exercicio: 2024,
-      natureza: 'IPTU',
+      natureza: 'IPTU/Taxas - Predial',
       valorPrincipal: 1534.21,
       valorHonorarios: 153.42,
       parcelavel: true,
@@ -732,6 +734,7 @@ describe('getDalDividaAtivaSimulacao', () => {
             {
               // Formato real do DAM em homologação: moeda e espaço não separável.
               valorTotalAvista: 'R$ 1.696,61',
+              valorTotalPagarGrerj: 'R$\u00a0757,60',
               opcoes: [
                 {
                   qtdeParcelas: 1,
@@ -762,6 +765,7 @@ describe('getDalDividaAtivaSimulacao', () => {
     expect(simulacao).toEqual({
       situacao: 'ok',
       valorTotalAvista: 1696.61,
+      valorGrerj: 757.6,
       opcoes: [
         {
           qtdeParcelas: 1,
@@ -822,6 +826,126 @@ describe('getDalDividaAtivaSimulacao', () => {
     )
 
     expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'indisponivel',
+    })
+  })
+})
+
+describe('getDalDividaAtivaRevisaoPagamento', () => {
+  const CDAS = ['01/137861/2025-00']
+  const URL = `${DIVIDA_ATIVA}/divida-ativa/avista/simular`
+
+  test('simula à vista só pelas CDAs, sem data, e devolve totais, itens e GRERJ', async () => {
+    let corpo: unknown
+    server.use(
+      http.post(URL, async ({ request }) => {
+        corpo = await request.json()
+        return HttpResponse.json(
+          {
+            dataVencimento: '20/10/2026',
+            valorTotalAvista: 'R$\u00a02.881,83',
+            valorSaldoTotalPrincipal: 'R$\u00a01.534,21',
+            valorTotalDescontoPrincipal: 'R$\u00a00,00',
+            valorSaldoTotalHonorario: 'R$\u00a0147,65',
+            valorTotalDescontoHonorario: 'R$\u00a00,00',
+            itens: [
+              {
+                cdaId: '01/137861/2025-00',
+                natureza: 'IPTU/Taxas - Predial',
+                contribuinte: 'Deusdete de Oliveira Carvalho',
+                saldoPrincipal: 'R$\u00a01.534,21',
+                descontoPrincipal: 'R$\u00a00,00',
+                saldoHonorarios: 'R$\u00a0147,65',
+                descontoHonorarios: 'R$\u00a00,00',
+              },
+              // Item sem CDA não tem como ser exibido e sai da lista.
+              { saldoPrincipal: 'R$\u00a010,00' },
+            ],
+            grerjs: [
+              {
+                numeroExecucaoFiscal: '0423680-92.2010.8.19.0001',
+                valor: 'R$\u00a01.199,97',
+              },
+              { valor: 'R$\u00a01,00' },
+            ],
+          },
+          { status: 200 }
+        )
+      })
+    )
+
+    const revisao = await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)
+
+    // Sem `dataVencimento`: quem escolhe a data à vista é a API.
+    expect(corpo).toEqual({ cdas: CDAS })
+    expect(revisao).toEqual({
+      situacao: 'ok',
+      dataVencimento: '20/10/2026',
+      valorTotal: 2881.83,
+      saldoPrincipalTotal: 1534.21,
+      descontoPrincipalTotal: 0,
+      honorariosTotal: 147.65,
+      descontoHonorariosTotal: 0,
+      itens: [
+        {
+          numeroCda: '01/137861/2025-00',
+          natureza: 'IPTU/Taxas - Predial',
+          contribuinte: 'Deusdete de Oliveira Carvalho',
+          saldoPrincipal: 1534.21,
+          descontoPrincipal: 0,
+          honorarios: 147.65,
+          descontoHonorarios: 0,
+        },
+      ],
+      grerjs: [{ execucaoFiscal: '0423680-92.2010.8.19.0001', valor: 1199.97 }],
+    })
+  })
+
+  test('recusa com 400 vira mensagem para o cidadão', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          { error: 'Não é possível parcelar CDA suspensa.' },
+          { status: 400 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não é possível parcelar CDA suspensa.',
+    })
+  })
+
+  test('recusa do DAM com 200 e mensagemErro também é recusa, não falha', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          {
+            mensagemErro: 'Não há datas de vencimento disponíveis no momento.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não há datas de vencimento disponíveis no momento.',
+    })
+  })
+
+  test('5xx é indisponibilidade, sem vazar a mensagem do sistema', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar o ePortal' },
+          { status: 503 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
       situacao: 'indisponivel',
     })
   })

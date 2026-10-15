@@ -1,7 +1,7 @@
-import { DebitosErro } from '@/app/components/divida-ativa/debitos-erro'
 import { RevisaoPagamento } from '@/app/components/divida-ativa/revisao-pagamento'
+import { SimulacaoAviso } from '@/app/components/divida-ativa/simulacao-aviso'
 import { SecondaryHeader } from '@/app/components/secondary-header'
-import { getDalDividaAtivaConsultaAvulsa } from '@/lib/dal'
+import { getDalDividaAtivaRevisaoPagamento } from '@/lib/dal'
 import { criterioDaUrl } from '@/lib/divida-ativa-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
@@ -9,17 +9,19 @@ import { redirect } from 'next/navigation'
 /**
  * "Revise as informações de pagamento" — entre a seleção de débitos e a simulação.
  *
- * ### Por que consulta de novo em vez de receber a seleção por navegação
+ * ### Simulação à vista, não a consulta de novo
  *
- * `DebitosSelecao` é Client Component: o estado de seleção vive só nele e some ao navegar.
- * A alternativa seria guardar os objetos completos em `sessionStorage`, mas isso quebraria a
- * convenção do módulo de que **a URL é a fonte da verdade** (um link compartilhado ou um
- * refresh teriam de funcionar sem o storage). Por isso esta rota repete a mesma consulta de
- * `/parcelamento/debitos` — ela já é `no-store` e o cidadão já pagou o mesmo custo de ~16 s
- * entre `/debitos` e `/simulacao` antes desta PR, então o padrão não piora a jornada.
+ * Descontos e GRERJ só existem depois de uma simulação à vista; a consulta de débitos não os
+ * tem. Por isso esta rota chama `POST /divida-ativa/avista/simular` com as CDAs de `?cdas=`, e
+ * a API simula com a primeira data à vista do DAM — o cidadão ainda não escolheu o vencimento
+ * do parcelamento. É uma chamada só: a API já reconsulta as CDAs para validá-las e para
+ * trazer contribuinte e natureza, então repetir a consulta aqui seria pagar os ~16 s duas vezes.
  *
- * As CDAs exibidas são a interseção entre o que a consulta devolve agora e o que veio
- * marcado em `?cdas=` — a mesma defesa contra seleção fantasma que `DebitosSelecao` já faz.
+ * A elegibilidade é da API, a mesma do parcelamento: uma CDA editada à mão em `?cdas=` que não
+ * pode ser parcelada volta como recusa com motivo, e a tela a mostra.
+ *
+ * O critério da consulta (`inscricao`, `cda` ou `execucaoFiscal`) segue na URL só para o Voltar
+ * reconstruir a tela de débitos.
  */
 export default async function RevisaoPage({
   searchParams,
@@ -32,68 +34,29 @@ export default async function RevisaoPage({
   }>
 }) {
   const params = await searchParams
-  const criterio = criterioDaUrl(params)
 
-  if (!criterio) {
+  if (!criterioDaUrl(params)) {
     redirect('/divida-ativa/parcelamento')
   }
 
-  const modoVoltar =
-    criterio.tipo === 'inscricao'
-      ? 'inscricao'
-      : criterio.tipo === 'cda'
-        ? 'cda'
-        : 'execucao-fiscal'
-
-  // Volta para a tela de seleção de débitos, com o mesmo critério — não para o formulário de
-  // entrada, porque o cidadão já tinha escolhido as CDAs e precisa poder ajustá-las.
   const searchParamsAtual = Object.fromEntries(
     Object.entries(params).filter(
-      (entry): entry is [string, string] =>
-        entry[1] !== undefined && entry[0] !== 'cdas'
+      (entry): entry is [string, string] => entry[1] !== undefined
     )
   )
+  // Volta para a seleção de débitos, com o mesmo critério e a seleção marcada — o cidadão
+  // pode querer ajustar as CDAs.
   const rotaDebitos = `/divida-ativa/parcelamento/debitos?${new URLSearchParams(searchParamsAtual)}`
 
-  const cdasSelecionadas = (params.cdas ?? '').split(',').filter(Boolean)
+  const cdas = (params.cdas ?? '').split(',').filter(Boolean)
 
-  // Sem CDA selecionada não há o que revisar: volta para a seleção de débitos.
-  if (cdasSelecionadas.length === 0) {
-    redirect(rotaDebitos)
-  }
-
-  const { cpf } = await getUserInfoFromToken()
-  const consulta = await getDalDividaAtivaConsultaAvulsa(criterio, cpf)
-
-  if (consulta.situacao !== 'ok') {
-    return (
-      <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
-        <SecondaryHeader
-          title=""
-          className="max-w-4xl"
-          route={rotaDebitos}
-          forceRoute
-        />
-        <DebitosErro tipo={consulta.situacao} />
-      </div>
-    )
-  }
-
-  // Só o que existe nesta lista e segue marcado: uma CDA que deixou de vir na consulta (ex.:
-  // já foi parcelada por outra via) não pode aparecer na revisão como se ainda estivesse lá.
-  const existentes = new Set(consulta.debitos.cdas.map(cda => cda.numeroCda))
-  const cdas = consulta.debitos.cdas.filter(
-    cda =>
-      cdasSelecionadas.includes(cda.numeroCda) && existentes.has(cda.numeroCda)
-  )
-
+  // Sem CDA selecionada não há o que revisar.
   if (cdas.length === 0) {
     redirect(rotaDebitos)
   }
 
-  const rotaContinuar = `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(
-    { ...searchParamsAtual, cdas: cdasSelecionadas.join(',') }
-  )}`
+  const { cpf } = await getUserInfoFromToken()
+  const revisao = await getDalDividaAtivaRevisaoPagamento(cdas, cpf)
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -104,7 +67,25 @@ export default async function RevisaoPage({
         forceRoute
       />
 
-      <RevisaoPagamento cdas={cdas} rotaContinuar={rotaContinuar} />
+      {revisao.situacao === 'recusada' ? (
+        <SimulacaoAviso
+          titulo="Não foi possível calcular o pagamento"
+          descricao={revisao.mensagem}
+          acao={{ rotulo: 'Voltar aos débitos', href: rotaDebitos }}
+        />
+      ) : revisao.situacao === 'indisponivel' ? (
+        <SimulacaoAviso
+          titulo="O serviço de dívida ativa está indisponível no momento"
+          descricao="A sua seleção está correta — quem não respondeu foi o sistema da Procuradoria. Tente novamente em alguns minutos."
+          acao={{ rotulo: 'Voltar aos débitos', href: rotaDebitos }}
+        />
+      ) : (
+        <RevisaoPagamento
+          revisao={revisao}
+          cdas={cdas}
+          rotaContinuar={`/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`}
+        />
+      )}
     </div>
   )
 }

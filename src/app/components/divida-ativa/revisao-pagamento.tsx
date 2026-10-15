@@ -1,17 +1,27 @@
 'use client'
 
+import { emitirGuiaAvista } from '@/actions/divida-ativa/emitir-guia-avista'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { formatarValorBRL } from '@/lib/divida-ativa-utils'
-import type { DebitoDividaAtiva } from '@/types/divida-ativa'
-import { FileTextIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { formatarValorBRL, rotuloNatureza } from '@/lib/divida-ativa-utils'
+import type { ResultadoRevisaoPagamento } from '@/types/divida-ativa'
+import { BuildingIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
 
-/** Uma linha rótulo/valor do resumo e dos cards por CDA. Some quando não há valor. */
+type RevisaoOk = Extract<ResultadoRevisaoPagamento, { situacao: 'ok' }>
+
+/**
+ * Uma linha rótulo/valor, com o valor logo depois do rótulo, como no Figma.
+ *
+ * Some inteira quando não há valor — a mesma regra das linhas de `DebitoCard`. Um desconto
+ * zero **aparece** ("R$0,00"): zero é resposta do DAM, `null` é que é ausência.
+ */
 function Linha({ rotulo, valor }: { rotulo: string; valor: string | null }) {
   if (!valor) return null
 
   return (
-    <div className="flex items-baseline justify-between gap-2">
+    <div className="flex flex-wrap items-baseline gap-x-1">
       <dt className="text-sm font-normal leading-5 text-foreground-light">
         {rotulo}
       </dt>
@@ -20,65 +30,60 @@ function Linha({ rotulo, valor }: { rotulo: string; valor: string | null }) {
   )
 }
 
-/**
- * Placeholder da "Lista de GRERJ" — execução fiscal e valor associados.
- *
- * ⚠️ **Dado mockado, não a API.** Não existe hoje campo algum em `DebitoDividaAtiva`,
- * `CdaSimulacaoItemResponse` ou qualquer resposta da `api-imoveis` que traga execução fiscal
- * + valor nesta etapa — o único "Grerj" do contrato é `GuiaDamResponse.grerjs`, que pertence
- * a uma guia **já emitida**, dado completamente diferente do que esta tela mostra antes da
- * simulação. Foi pedido explicitamente pelo time de produto para a tela não ficar sem essa
- * seção enquanto a fonte real não é mapeada — mas o valor abaixo **não é do cidadão**.
- *
- * TODO(divida-ativa): substituir por dado real assim que a API expuser o campo, ou remover a
- * seção caso se confirme que esta etapa não tem GRERJ nenhum para mostrar.
- */
-const GRERJ_MOCK = {
-  numeroExecucaoFiscal: '0148951-31.3245.3.19.0001',
-  valor: 757.6,
-}
-
 interface RevisaoPagamentoProps {
-  /** CDAs escolhidas na tela anterior, já filtradas pela seleção do cidadão. */
-  cdas: DebitoDividaAtiva[]
-  /** Para onde o "Continuar"/"Requerer parcelamento" leva — a etapa de simulação (data). */
+  revisao: RevisaoOk
+  /** CDAs da seleção, como vieram em `?cdas=` — as mesmas que a revisão simulou. */
+  cdas: string[]
+  /** Etapa seguinte — a simulação, que começa pela data de vencimento. */
   rotaContinuar: string
 }
 
 /**
- * "Revise as informações de pagamento" — resumo antes de seguir para a simulação.
+ * "Revise as informações de pagamento" — entre a seleção de débitos e a simulação.
  *
- * Fica entre a seleção de débitos e a simulação: o cidadão vê os totais e o detalhe de cada
- * CDA escolhida antes de a tela seguinte perguntar a data de vencimento.
+ * Os valores são da simulação à vista (`POST /divida-ativa/avista/simular`): saldos,
+ * descontos e honorários por CDA, os totais e a GRERJ por execução fiscal. Descontos e GRERJ
+ * só existem depois de uma simulação — a consulta de débitos não os tem.
  *
- * ### Desconto sempre R$0,00
+ * **Principal e honorários seguem separados** (decisão D5), e os totais são os da API.
  *
- * `DebitoDividaAtiva` não tem campo de desconto — ele só existe depois da simulação
- * (`CdaSimulacaoItemResponse.descontoPrincipal`/`descontoHonorarios`). Mostrar a linha fixa
- * em zero segue o Figma sem inventar um valor que a API ainda não calculou nesta etapa.
+ * ### "Imprimir Guia a Vista"
  *
- * ### Sem nova chamada à API
+ * Como no portal legado: emite a guia à vista e abre o PDF dela, servido pelo DAM Internet.
+ * A emissão usa a `dataVencimento` da revisão, para a guia ter os valores desta tela.
  *
- * Os dados vêm inteiramente de `DebitoDividaAtiva[]`, a mesma forma que a tela de seleção já
- * exibe — nada daqui depende de um endpoint novo.
+ * São dois passos: o botão emite nesta tela e, com a guia pronta, vira o link "Abrir guia
+ * (PDF)". Abrir o PDF direto depois do `await` não funciona — a emissão leva de 10 a 15 s, o
+ * clique deixa de valer como gesto do cidadão e o bloqueador de pop-up barra a aba; abrir uma
+ * aba vazia no clique e preenchê-la depois deixava uma aba em branco presa quando algo falhava.
+ * O link é um clique de verdade: abre em qualquer navegador e não emite outra guia.
+ *
+ * Cada emissão cria uma guia no DAM, então o botão fica travado enquanto emite.
+ *
+ * ⚠️ Ícone Lucide (`BuildingIcon`) como fallback — o design system não tem o ícone de imóvel
+ * que o Figma usa. Ver a descrição da PR.
  */
 export function RevisaoPagamento({
+  revisao,
   cdas,
   rotaContinuar,
 }: RevisaoPagamentoProps) {
-  const router = useRouter()
+  const [emitindo, startTransition] = useTransition()
 
-  const saldoPrincipalTotal = cdas.reduce(
-    (total, cda) => total + (cda.valorPrincipal ?? 0),
-    0
-  )
-  const honorariosTotal = cdas.reduce(
-    (total, cda) => total + (cda.valorHonorarios ?? 0),
-    0
-  )
+  // Depois de emitida, a guia não é emitida de novo: o botão vira o link do PDF.
+  const [urlGuia, setUrlGuia] = useState<string | null>(null)
 
-  function requererParcelamento() {
-    router.push(rotaContinuar)
+  function imprimirGuia() {
+    startTransition(async () => {
+      const resultado = await emitirGuiaAvista(cdas, revisao.dataVencimento)
+
+      if (!resultado.success) {
+        toast.error(resultado.error)
+        return
+      }
+
+      setUrlGuia(resultado.data.urlPdf)
+    })
   }
 
   return (
@@ -87,99 +92,131 @@ export function RevisaoPagamento({
         Revise as informações de pagamento
       </h1>
 
-      <div className="flex flex-col gap-2 rounded-2xl bg-card p-4">
-        <span className="text-2xl font-medium leading-8 text-foreground">
-          {formatarValorBRL(saldoPrincipalTotal) ?? 'R$0,00'}
-        </span>
-        <span className="text-sm font-normal leading-5 text-foreground-light">
-          Saldo principal total
-        </span>
+      <section
+        aria-label="Resumo do pagamento"
+        className="flex flex-col gap-2 rounded-2xl bg-card p-4"
+      >
+        <div className="flex flex-col pb-2">
+          <span className="text-2xl font-medium leading-8 text-foreground">
+            {/* Total a pagar (principal + honorários + GRERJ − descontos), como o DAM o
+                calcula — não só o principal, que já aparece em cada CDA. */}
+            {formatarValorBRL(revisao.valorTotal) ?? '—'}
+          </span>
+          <span className="text-sm font-normal leading-5 text-foreground-light">
+            Saldo principal total
+          </span>
+        </div>
 
-        <dl className="flex flex-col gap-1 pt-3">
-          <Linha rotulo="Desconto principal total" valor="R$0,00" />
+        <dl className="flex flex-col pb-4">
+          <Linha
+            rotulo="Desconto principal total"
+            valor={formatarValorBRL(revisao.descontoPrincipalTotal)}
+          />
           <Linha
             rotulo="Honorários total"
-            valor={formatarValorBRL(honorariosTotal) ?? 'R$0,00'}
+            valor={formatarValorBRL(revisao.honorariosTotal)}
           />
-          <Linha rotulo="Desconto honorários total" valor="R$0,00" />
-        </dl>
-      </div>
-
-      <ul className="flex flex-col gap-2 pt-6">
-        {cdas.map(cda => (
-          <li
-            key={cda.numeroCda}
-            className="flex flex-col gap-3 rounded-2xl bg-card p-4"
-          >
-            <div className="flex items-center gap-2">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                <FileTextIcon className="size-4 text-foreground" aria-hidden />
-              </span>
-              {cda.natureza && (
-                <h2 className="text-base font-medium leading-6 text-foreground">
-                  {cda.natureza}
-                </h2>
-              )}
-            </div>
-
-            <dl className="flex flex-col gap-1">
-              <Linha rotulo="Certidões" valor={cda.numeroCda || null} />
-              <Linha rotulo="Contribuinte" valor={cda.contribuinte} />
-              <Linha
-                rotulo="Natureza da dívida"
-                valor={cda.receita ?? cda.natureza}
-              />
-              <Linha
-                rotulo="Saldo principal"
-                valor={formatarValorBRL(cda.valorPrincipal)}
-              />
-              <Linha rotulo="Desconto principal" valor="R$0,00" />
-              <Linha
-                rotulo="Honorários"
-                valor={formatarValorBRL(cda.valorHonorarios)}
-              />
-              <Linha rotulo="Desconto honorários" valor="R$0,00" />
-            </dl>
-          </li>
-        ))}
-      </ul>
-
-      {/* Ver aviso no componente GRERJ_MOCK acima: dado de exemplo, não da API. */}
-      <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 mt-2">
-        <h2 className="text-base font-medium leading-6 text-foreground">
-          Lista de GRERJ
-        </h2>
-
-        <dl className="flex flex-col gap-1">
           <Linha
-            rotulo="Execução fiscal"
-            valor={GRERJ_MOCK.numeroExecucaoFiscal}
+            rotulo="Desconto honorários total"
+            valor={formatarValorBRL(revisao.descontoHonorariosTotal)}
           />
-          <Linha rotulo="Valor" valor={formatarValorBRL(GRERJ_MOCK.valor)} />
         </dl>
-      </div>
 
-      <div className="mt-auto flex flex-col gap-3 pt-6">
-        {/* "Imprimir Guia a Vista" ainda não tem regra de negócio definida nesta etapa —
-            desabilitado de propósito até a próxima PR. */}
-        <CustomButton
-          type="button"
-          variant="outline"
-          size="lg"
-          fullWidth
-          disabled
-        >
-          Imprimir Guia a Vista
-        </CustomButton>
+        <ul className="flex flex-col gap-2">
+          {revisao.itens.map(item => (
+            <li
+              key={item.numeroCda}
+              className="flex flex-col gap-4 rounded-2xl bg-background p-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary">
+                  <BuildingIcon
+                    className="size-5 text-foreground"
+                    aria-hidden
+                  />
+                </span>
+                <h2 className="text-base font-normal leading-6 text-foreground">
+                  {rotuloNatureza(item.natureza) ?? 'Certidão de Dívida Ativa'}
+                </h2>
+              </div>
 
-        <CustomButton
-          type="button"
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={requererParcelamento}
-        >
-          Requerer parcelamento
+              <dl className="flex flex-col">
+                <Linha rotulo="Certidões" valor={item.numeroCda} />
+                <Linha rotulo="Contribuinte" valor={item.contribuinte} />
+                {/* Título curto ("IPTU") em cima, descrição inteira aqui, como no Figma. */}
+                <Linha rotulo="Natureza da dívida" valor={item.natureza} />
+                <Linha
+                  rotulo="Saldo principal"
+                  valor={formatarValorBRL(item.saldoPrincipal)}
+                />
+                <Linha
+                  rotulo="Desconto principal"
+                  valor={formatarValorBRL(item.descontoPrincipal)}
+                />
+                <Linha
+                  rotulo="Honorários"
+                  valor={formatarValorBRL(item.honorarios)}
+                />
+                <Linha
+                  rotulo="Desconto honorários"
+                  valor={formatarValorBRL(item.descontoHonorarios)}
+                />
+              </dl>
+            </li>
+          ))}
+        </ul>
+
+        {/* Só há GRERJ quando alguma CDA está em execução fiscal. Sem custas, sem card. */}
+        {revisao.grerjs.length > 0 && (
+          <div className="flex flex-col gap-4 rounded-2xl bg-background p-4">
+            <h2 className="text-base font-normal leading-6 text-foreground">
+              Lista de GRERJ
+            </h2>
+
+            <ul className="flex flex-col gap-3">
+              {revisao.grerjs.map(grerj => (
+                <li key={grerj.execucaoFiscal}>
+                  <dl className="flex flex-col">
+                    <Linha
+                      rotulo="Execução fiscal"
+                      valor={grerj.execucaoFiscal}
+                    />
+                    <Linha
+                      rotulo="Valor"
+                      valor={formatarValorBRL(grerj.valor)}
+                    />
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
+      {/* `mt-auto` sozinho zera quando o conteúdo passa da altura da tela; o `pt-6` garante o
+          respiro mínimo entre o resumo e os botões. */}
+      <div className="mt-auto flex flex-col gap-2 pt-6">
+        {urlGuia ? (
+          <CustomButton asChild variant="card" size="lg" fullWidth>
+            <a href={urlGuia} target="_blank" rel="noopener noreferrer">
+              Abrir guia (PDF)
+            </a>
+          </CustomButton>
+        ) : (
+          <CustomButton
+            type="button"
+            variant="card"
+            size="lg"
+            fullWidth
+            loading={emitindo}
+            onClick={imprimirGuia}
+          >
+            Imprimir Guia a Vista
+          </CustomButton>
+        )}
+
+        <CustomButton asChild variant="primary" size="lg" fullWidth>
+          <Link href={rotaContinuar}>Requerer parcelamento</Link>
         </CustomButton>
       </div>
     </div>

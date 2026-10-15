@@ -27,6 +27,8 @@ interface SelecaoParcelasProps {
   opcoes: SimulacaoOk['opcoes']
   /** Saldo devedor das CDAs escolhidas, como a simulação o devolve. Base do "Total". */
   valorTotalAvista: SimulacaoOk['valorTotalAvista']
+  /** Custas judiciais (GRERJ) já incluídas no total. Ver `ResultadoSimulacao`. */
+  valorGrerj: SimulacaoOk['valorGrerj']
   /** Parâmetros correntes da URL, para mantê-los na navegação de retorno. */
   searchParamsAtual: Record<string, string>
 }
@@ -137,6 +139,7 @@ function classesCard(selecionado: boolean) {
 export function SelecaoParcelas({
   opcoes,
   valorTotalAvista,
+  valorGrerj,
   searchParamsAtual,
 }: SelecaoParcelasProps) {
   const router = useRouter()
@@ -308,6 +311,13 @@ export function SelecaoParcelas({
           <span className="text-xl font-medium leading-7 text-foreground">
             {formatarValorBRL(total) ?? '—'}
           </span>
+          {/* A GRERJ já está no total; a linha só explica por que ele passa da soma de
+              principal e honorários. Sem custas, não há o que explicar. */}
+          {valorGrerj !== null && valorGrerj > 0 && (
+            <span className="text-xs font-normal leading-4 text-foreground-light">
+              Inclui {formatarValorBRL(valorGrerj)} de custas judiciais (GRERJ)
+            </span>
+          )}
         </div>
 
         <CustomButton

@@ -14,10 +14,13 @@ import type {
   GetDividaAtivaCertidoesParams,
   GetDividaAtivaDatasVencimentoParams,
   GetDividaAtivaRequerimentosParams,
+  GuiaDamResponse,
   ParcelamentoSimularRequest,
   PdfUrlResponse,
   RequerimentoParcelamentoRequest,
   RequerimentoParcelamentoResponse,
+  SimulacaoAvistaRequest,
+  SimulacaoAvistaResponse,
   SimulacaoParcelamentoResponse,
   ValidarSenhaRequest,
   ValidarSenhaResponse,
@@ -182,6 +185,86 @@ export const getDividaAtivaDatasVencimento = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+export type postDividaAtivaAvistaEmitirResponse200 = {
+  data: GuiaDamResponse
+  status: 200
+}
+
+export type postDividaAtivaAvistaEmitirResponse400 = {
+  data: void
+  status: 400
+}
+
+export type postDividaAtivaAvistaEmitirResponseSuccess =
+  postDividaAtivaAvistaEmitirResponse200 & {
+    headers: Headers
+  }
+export type postDividaAtivaAvistaEmitirResponseError =
+  postDividaAtivaAvistaEmitirResponse400 & {
+    headers: Headers
+  }
+
+export type postDividaAtivaAvistaEmitirResponse =
+  | postDividaAtivaAvistaEmitirResponseSuccess
+  | postDividaAtivaAvistaEmitirResponseError
+
+export const getPostDividaAtivaAvistaEmitirUrl = () => {
+  return `/divida-ativa/avista/emitir`
+}
+
+/**
+ * @summary Emite a guia a vista das CDAs e devolve a URL do PDF no DAM Internet — nao exige imovel cadastrado; use a dataVencimento devolvida pelo /avista/simular
+ */
+export const postDividaAtivaAvistaEmitir = async (
+  simulacaoAvistaRequest?: SimulacaoAvistaRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<postDividaAtivaAvistaEmitirResponse> => {
+  return customFetchDividaAtiva<postDividaAtivaAvistaEmitirResponse>(
+    getPostDividaAtivaAvistaEmitirUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(simulacaoAvistaRequest),
+    }
+  )
+}
+
+export type postDividaAtivaAvistaSimularResponse200 = {
+  data: SimulacaoAvistaResponse
+  status: 200
+}
+
+export type postDividaAtivaAvistaSimularResponseSuccess =
+  postDividaAtivaAvistaSimularResponse200 & {
+    headers: Headers
+  }
+
+export type postDividaAtivaAvistaSimularResponse =
+  postDividaAtivaAvistaSimularResponseSuccess
+
+export const getPostDividaAtivaAvistaSimularUrl = () => {
+  return `/divida-ativa/avista/simular`
+}
+
+/**
+ * @summary Simula o pagamento a vista das CDAs (revisao antes do parcelamento) — nao exige imovel cadastrado; sem dataVencimento, usa a primeira data a vista do DAM
+ */
+export const postDividaAtivaAvistaSimular = async (
+  simulacaoAvistaRequest?: SimulacaoAvistaRequest,
+  options?: Parameters<typeof customFetchDividaAtiva>[1]
+): Promise<postDividaAtivaAvistaSimularResponse> => {
+  return customFetchDividaAtiva<postDividaAtivaAvistaSimularResponse>(
+    getPostDividaAtivaAvistaSimularUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(simulacaoAvistaRequest),
     }
   )
 }
