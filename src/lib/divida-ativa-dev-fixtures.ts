@@ -32,8 +32,8 @@ export const DEV_FIXTURE_DEBITOS: DividaAtivaConsultaResponse = {
     {
       cdaId: '20240000111',
       exercicio: '2024',
-      naturezaDivida: 'IPTU',
-      receita: 'IPTU/Taxas - Predial',
+      naturezaDivida: 'IPTU/Taxas - Predial',
+      receita: '4693',
       situacaoPrincipal: 'EM ABERTO',
       situacaoHonorarios: 'EM ABERTO',
       faseCobranca: 'AJUIZADA',
@@ -46,8 +46,7 @@ export const DEV_FIXTURE_DEBITOS: DividaAtivaConsultaResponse = {
     {
       cdaId: '20230000999',
       exercicio: '2023',
-      naturezaDivida: 'TCL',
-      receita: 'TCL - Taxa de Coleta de Lixo',
+      naturezaDivida: 'TCL - Taxa de Coleta de Lixo',
       situacaoPrincipal: 'EM ABERTO',
       faseCobranca: 'COBRANÇA',
       valorSaldoPrincipal: '456,78',

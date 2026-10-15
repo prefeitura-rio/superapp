@@ -102,6 +102,13 @@ Os três primeiros foram **retirados do escopo de modernização pela diretoria*
 existindo no portal legado e não são reconstruídos aqui. A landing os oferece como link
 externo para não deixar um buraco na jornada do cidadão.
 
+**Exceção, decidida em 15/10/2026:** dentro do parcelamento, a tela "Revise as informações de
+pagamento" tem o botão "Imprimir Guia a Vista", e ele **emite no app**, como o portal legado faz
+nesse ponto: emite a guia à vista das CDAs selecionadas (`POST /divida-ativa/avista/emitir`) e
+abre o PDF servido pelo DAM Internet. A emissão usa a mesma data da revisão, para a guia sair
+com os valores da tela. O card "Emitir guia à vista ou liquidar débitos" da landing continua
+externo — a liquidação segue fora do escopo.
+
 Todo link externo passa por um bottom sheet de confirmação (`ExternalLinkDrawer`), porque o
 design exige aviso explícito sempre que o cidadão sai do ambiente nativo do app — **mesmo
 para um portal oficial da Prefeitura**. As URLs ficam em `src/constants/divida-ativa-links.ts`.

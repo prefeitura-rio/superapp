@@ -80,9 +80,11 @@ export interface DebitoDividaAtiva {
   /** `cdaId` no contrato. Identificador da CDA, e o que o parcelamento seleciona. */
   numeroCda: string
   exercicio: number | null
-  /** `naturezaDivida` — IPTU, TCL etc. */
+  /**
+   * `naturezaDivida` — a descrição longa ("IPTU/Taxas - Predial"). O título curto dos cards
+   * sai de `rotuloNatureza`. `receita` não entra no tipo: no DAM é código (`"4693"`).
+   */
   natureza: string | null
-  receita: string | null
   /** `nomeContribuinte` — o devedor inscrito, que nem sempre é quem está consultando. */
   contribuinte: string | null
   /** Texto da API, exibido como veio. */
@@ -240,6 +242,13 @@ export type ResultadoSimulacao =
        */
       valorTotalAvista: number | null
       /**
+       * Custas judiciais (GRERJ) das execuções fiscais das CDAs escolhidas, cobradas pelo
+       * TJRJ. **Já estão dentro de `valorTotalAvista`** — o sistema antigo mostra o mesmo
+       * total com a GRERJ ao lado, e os valores batem. Fica separado só para a tela explicar
+       * de onde vem a diferença sobre principal e honorários. `null` quando não há custas.
+       */
+      valorGrerj: number | null
+      /**
        * Valores já convertidos para número. A API os devolve formatados pelo DAM, com
        * moeda e espaço não separável (`"R$\u00a0848,29"`).
        */
@@ -250,6 +259,53 @@ export type ResultadoSimulacao =
         valorJuros: number | null
         valorDescontos: number | null
       }>
+    }
+  | { situacao: 'recusada'; mensagem: string }
+  | { situacao: 'indisponivel' }
+
+/** Uma CDA na revisão do pagamento, com os valores da simulação à vista. */
+export interface ItemRevisaoPagamento {
+  numeroCda: string
+  /** Descrição longa ("IPTU/Taxas - Predial"). O título curto sai de `rotuloNatureza`. */
+  natureza: string | null
+  contribuinte: string | null
+  saldoPrincipal: number | null
+  descontoPrincipal: number | null
+  honorarios: number | null
+  descontoHonorarios: number | null
+}
+
+/** Custas judiciais (GRERJ) de uma execução fiscal. */
+export interface GrerjRevisaoPagamento {
+  execucaoFiscal: string
+  valor: number | null
+}
+
+/**
+ * Desfecho da revisão do pagamento (`POST /divida-ativa/avista/simular`).
+ *
+ * Os descontos e a GRERJ só existem depois de uma simulação à vista, e o DAM não simula sem
+ * data. Como a revisão vem antes da escolha da data do parcelamento, a API simula com a
+ * primeira data à vista que o DAM oferece — `dataVencimento` diz qual foi.
+ *
+ * `recusada` e `indisponivel` têm o mesmo sentido de `ResultadoSimulacao`.
+ */
+export type ResultadoRevisaoPagamento =
+  | {
+      situacao: 'ok'
+      /** Data (dd/MM/yyyy) para a qual os descontos valem. */
+      dataVencimento: string | null
+      /**
+       * Total a pagar à vista, já calculado pelo DAM (`valorTotalPagarGuia`): principal +
+       * honorários + GRERJ − descontos. É o valor em destaque da tela.
+       */
+      valorTotal: number | null
+      saldoPrincipalTotal: number | null
+      descontoPrincipalTotal: number | null
+      honorariosTotal: number | null
+      descontoHonorariosTotal: number | null
+      itens: ItemRevisaoPagamento[]
+      grerjs: GrerjRevisaoPagamento[]
     }
   | { situacao: 'recusada'; mensagem: string }
   | { situacao: 'indisponivel' }

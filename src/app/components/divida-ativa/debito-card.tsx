@@ -1,7 +1,7 @@
 'use client'
 
 import { Checkbox } from '@/components/ui/checkbox'
-import { formatarValorBRL } from '@/lib/divida-ativa-utils'
+import { formatarValorBRL, rotuloNatureza } from '@/lib/divida-ativa-utils'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import { FileTextIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -66,7 +66,7 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
             </span>
             {debito.natureza && (
               <h2 className="text-base font-medium leading-6 text-foreground">
-                {debito.natureza}
+                {rotuloNatureza(debito.natureza)}
               </h2>
             )}
           </div>
@@ -82,12 +82,8 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
                 debito.exercicio === null ? null : String(debito.exercicio)
               }
             />
-            {/* `receita` traz a descrição longa que o Figma mostra ("IPTU/Taxas - Predial");
-                `natureza` é o fallback curto quando ela não vem. */}
-            <Linha
-              rotulo="Natureza da dívida"
-              valor={debito.receita ?? debito.natureza}
-            />
+            {/* Título curto ("IPTU") em cima, descrição inteira aqui, como no Figma. */}
+            <Linha rotulo="Natureza da dívida" valor={debito.natureza} />
             <Linha rotulo="Valor" valor={valorPrincipal} />
           </dl>
 

@@ -106,6 +106,53 @@ paths:
                 $ref: '#/components/schemas/DatasVencimentoResponse'
       security:
       - bearerAuth: []
+  /divida-ativa/avista/emitir:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: "Emite a guia a vista das CDAs e devolve a URL do PDF no DAM Internet\
+        \ — nao exige imovel cadastrado; use a dataVencimento devolvida pelo /avista/simular"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoAvistaRequest'
+      responses:
+        "200":
+          description: "Guia emitida: numero, linha digitavel e urlPdf. urlPdf vem\
+            \ vazio quando o DAM emitiu a guia mas nao gerou o PDF."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
+        "400":
+          description: "Recusa de negocio do DAM ou CDA nao elegivel, com mensagem\
+            \ exibivel."
+      security:
+      - bearerAuth: []
+  /divida-ativa/avista/simular:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: "Simula o pagamento a vista das CDAs (revisao antes do parcelamento)\
+        \ — nao exige imovel cadastrado; sem dataVencimento, usa a primeira data a vista\
+        \ do DAM"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoAvistaRequest'
+      responses:
+        "200":
+          description: "Saldos, descontos e honorarios por CDA e totais, com a lista\
+            \ de GRERJ por execucao fiscal. mensagemErro traz a recusa de negocio do\
+            \ DAM."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulacaoAvistaResponse'
+      security:
+      - bearerAuth: []
   /divida-ativa/parcelamentos/simular:
     post:
       tags:
@@ -944,6 +991,10 @@ components:
           type: string
         natureza:
           type: string
+        contribuinte:
+          description: "Nome do contribuinte da CDA, da consulta — a simulacao do DAM\
+            \ nao o devolve."
+          type: string
         situacao:
           type: string
     CertidaoDamResponse:
@@ -1518,6 +1569,56 @@ components:
           type: string
         mensagemErro:
           type: string
+    SimulacaoAvistaRequest:
+      description: "CDAs a simular para pagamento a vista, sem imovel cadastrado."
+      required:
+      - cdas
+      type: object
+      properties:
+        cdas:
+          description: CDAs selecionadas.
+          type: array
+          items:
+            type: string
+        dataVencimento:
+          description: "Data de vencimento (dd/MM/yyyy). Opcional: sem ela, vale a primeira\
+            \ data a vista oferecida pelo DAM."
+          type: string
+    SimulacaoAvistaResponse:
+      description: "Simulacao a vista das CDAs selecionadas, por CDA e com a lista\
+        \ de GRERJ."
+      type: object
+      properties:
+        mensagemErro:
+          description: "Recusa de negocio do DAM, exibivel. Quando presente, os valores\
+            \ vem vazios."
+          type: string
+        dataVencimento:
+          description: Data de vencimento usada na simulacao (dd/MM/yyyy). Os descontos
+            valem para ela.
+          type: string
+        valorTotalAvista:
+          type: string
+        valorSaldoTotalPrincipal:
+          type: string
+        valorSaldoTotalHonorario:
+          type: string
+        valorTotalDescontoPrincipal:
+          type: string
+        valorTotalDescontoHonorario:
+          type: string
+        valorTotalPagarGrerj:
+          type: string
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/CdaSimulacaoItemResponse'
+        grerjs:
+          description: Custas judiciais (GRERJ) por execucao fiscal. Ja incluidas em
+            valorTotalAvista.
+          type: array
+          items:
+            $ref: '#/components/schemas/GrerjDamResponse'
     SimulacaoParcelamentoResponse:
       type: object
       properties:

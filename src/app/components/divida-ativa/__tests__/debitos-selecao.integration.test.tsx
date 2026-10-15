@@ -27,8 +27,7 @@ beforeEach(() => {
 const CDA_2024: DebitoDividaAtiva = {
   numeroCda: '01/137861/2025-00',
   exercicio: 2024,
-  natureza: 'IPTU',
-  receita: 'IPTU/Taxas - Predial',
+  natureza: 'IPTU/Taxas - Predial',
   contribuinte: 'RONALD FREITAS CAMPOS',
   situacaoPrincipal: 'EM ABERTO',
   situacaoHonorarios: 'EM ABERTO',
@@ -65,6 +64,8 @@ describe('DebitosSelecao', () => {
     expect(screen.getByText('2023')).toBeInTheDocument()
     expect(screen.getByText('R$1.765,41')).toBeInTheDocument()
 
+    // Título curto em cima, descrição inteira na linha "Natureza da dívida".
+    expect(screen.getAllByRole('heading', { name: 'IPTU' })).toHaveLength(2)
     expect(screen.getAllByText('IPTU/Taxas - Predial')).toHaveLength(2)
   })
 
@@ -247,7 +248,6 @@ describe('DebitosSelecao', () => {
           {
             ...CDA_2024,
             exercicio: null,
-            receita: null,
             valorPrincipal: null,
           },
         ]}

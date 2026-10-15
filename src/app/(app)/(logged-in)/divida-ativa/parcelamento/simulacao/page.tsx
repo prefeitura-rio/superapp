@@ -191,6 +191,7 @@ async function EtapaParcelas({
     <SelecaoParcelas
       opcoes={simulacao.opcoes}
       valorTotalAvista={simulacao.valorTotalAvista}
+      valorGrerj={simulacao.valorGrerj}
       searchParamsAtual={searchParamsAtual}
     />
   )

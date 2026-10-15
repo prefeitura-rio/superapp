@@ -7,6 +7,7 @@ import {
   inscricaoParaApi,
   isCdaValida,
   isExecucaoFiscalValida,
+  rotuloNatureza,
   somenteDigitos,
 } from '@/lib/divida-ativa-utils'
 import { describe, expect, test } from 'vitest'
@@ -226,5 +227,22 @@ describe('cdaParaApi', () => {
   test('envia a CDA com barras e hífen, para a API achar o ano', () => {
     expect(cdaParaApi('01021580200300')).toBe('01/021580/2003-00')
     expect(cdaParaApi('010215802003')).toBe('01/021580/2003')
+  })
+})
+
+describe('rotuloNatureza', () => {
+  test('takes the part before the slash as the card title', () => {
+    expect(rotuloNatureza('IPTU/Taxas - Predial')).toBe('IPTU')
+  })
+
+  test('keeps the whole description when there is no slash', () => {
+    expect(rotuloNatureza('TCL - Taxa de Coleta de Lixo')).toBe(
+      'TCL - Taxa de Coleta de Lixo'
+    )
+  })
+
+  test('returns null when there is nothing to show', () => {
+    expect(rotuloNatureza(null)).toBeNull()
+    expect(rotuloNatureza('  ')).toBeNull()
   })
 })

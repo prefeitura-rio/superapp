@@ -13,6 +13,7 @@ import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/in
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import {
   getDividaAtivaDatasVencimento,
+  postDividaAtivaAvistaSimular,
   postDividaAtivaConsultar,
   postDividaAtivaParcelamentosSimular,
 } from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
@@ -51,6 +52,7 @@ import type {
   CriterioDebitos,
   DebitosDividaAtiva,
   ImovelDividaAtiva,
+  ResultadoRevisaoPagamento,
   ResultadoSimulacao,
 } from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
@@ -858,6 +860,99 @@ export async function getDalDividaAtivaDatasVencimento(): Promise<
 }
 
 /**
+ * Revisão do pagamento: o que as CDAs escolhidas custam à vista — saldos, descontos e
+ * honorários por CDA, os totais e as custas judiciais (GRERJ) por execução fiscal.
+ *
+ * Sem data: a API simula com a primeira data à vista do DAM, porque a revisão vem antes de o
+ * cidadão escolher o vencimento do parcelamento. Não exige imóvel cadastrado.
+ *
+ * Os totais são os da API, não somas do front — a simulação os devolve já calculados.
+ *
+ * ⚠️ Atravessa o ePortal (reconsulta das CDAs + simulação): a rota precisa do `loading.tsx`.
+ */
+export async function getDalDividaAtivaRevisaoPagamento(
+  cdas: string[],
+  cpf: string
+): Promise<ResultadoRevisaoPagamento> {
+  return withSpan('dal.getDividaAtivaRevisaoPagamento', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    span.setAttribute('revisao.cdas', cdas.length)
+
+    const result = await postDividaAtivaAvistaSimular(
+      { cdas },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.revisao.fetched', {
+      'revisao.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/avista/simular respondeu ${result.status}`
+      )
+
+      const mensagem = mapApiToMensagemErro(result.data, result.status)
+      return mensagem
+        ? { situacao: 'recusada', mensagem }
+        : { situacao: 'indisponivel' }
+    }
+
+    if (result.data.mensagemErro) {
+      return { situacao: 'recusada', mensagem: result.data.mensagemErro }
+    }
+
+    const itens = (result.data.itens ?? []).flatMap(item =>
+      item.cdaId
+        ? [
+            {
+              numeroCda: item.cdaId,
+              natureza: item.natureza || null,
+              contribuinte: item.contribuinte || null,
+              saldoPrincipal: parseValorMonetario(item.saldoPrincipal),
+              descontoPrincipal: parseValorMonetario(item.descontoPrincipal),
+              honorarios: parseValorMonetario(item.saldoHonorarios),
+              descontoHonorarios: parseValorMonetario(item.descontoHonorarios),
+            },
+          ]
+        : []
+    )
+
+    const grerjs = (result.data.grerjs ?? []).flatMap(grerj =>
+      grerj.numeroExecucaoFiscal
+        ? [
+            {
+              execucaoFiscal: grerj.numeroExecucaoFiscal,
+              valor: parseValorMonetario(grerj.valor),
+            },
+          ]
+        : []
+    )
+
+    return {
+      situacao: 'ok',
+      dataVencimento: result.data.dataVencimento || null,
+      valorTotal: parseValorMonetario(result.data.valorTotalAvista),
+      saldoPrincipalTotal: parseValorMonetario(
+        result.data.valorSaldoTotalPrincipal
+      ),
+      descontoPrincipalTotal: parseValorMonetario(
+        result.data.valorTotalDescontoPrincipal
+      ),
+      honorariosTotal: parseValorMonetario(
+        result.data.valorSaldoTotalHonorario
+      ),
+      descontoHonorariosTotal: parseValorMonetario(
+        result.data.valorTotalDescontoHonorario
+      ),
+      itens,
+      grerjs,
+    }
+  })
+}
+
+/**
  * Opções de parcelamento para as CDAs escolhidas, com a primeira parcela vencendo em
  * `dataVencimento`.
  *
@@ -925,6 +1020,7 @@ export async function getDalDividaAtivaSimulacao(
     return {
       situacao: 'ok',
       valorTotalAvista: parseValorMonetario(result.data.valorTotalAvista),
+      valorGrerj: parseValorMonetario(result.data.valorTotalPagarGrerj),
       opcoes,
     }
   })
