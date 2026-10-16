@@ -21,7 +21,7 @@ export function WalletPageClient() {
 
   if (isLoadingWallet) {
     return (
-      <section className="pb-30 relative h-full px-4">
+      <section className="pb-30 relative px-4">
         <div className="pt-6 pb-4">
           <h2 className="relative z-10 bg-background text-2xl font-bold text-foreground">
             Carteira

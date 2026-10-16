@@ -174,7 +174,7 @@ function LegalRow() {
 
 export function Footer() {
   return (
-    <footer className="w-full pb-28 bg-background">
+    <footer className="w-full mt-16 pb-28 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <div className="pt-6">
           <div className="border-t border-border" />
