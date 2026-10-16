@@ -53,6 +53,7 @@ export default async function SimulacaoPage({
   }>
 }) {
   const params = await searchParams
+  console.log('SimulacaoPage searchParams', params)
   const { data, ...outrosParams } = params
 
   // Sem critério de busca: o cidadão chegou aqui sem passar pela entrada do parcelamento.
@@ -72,7 +73,7 @@ export default async function SimulacaoPage({
   const rotaRevisao = `/divida-ativa/parcelamento/revisao?${new URLSearchParams(searchParamsAtual)}`
 
   const cdas = (params.cdas ?? '').split(',').filter(Boolean)
-
+  console.log('SimulacaoPage cdas', cdas)
   // Sem CDA selecionada não há o que simular: volta para a revisão, que por sua vez volta
   // para a seleção de débitos se também não tiver CDA.
   if (cdas.length === 0) {
@@ -156,6 +157,8 @@ async function EtapaParcelas({
 }) {
   const { cpf } = await getUserInfoFromToken()
   const simulacao = await getDalDividaAtivaSimulacao(cdas, data, cpf)
+
+  console.log('Simulação de parcelamento', simulacao)
 
   if (simulacao.situacao === 'recusada') {
     return (

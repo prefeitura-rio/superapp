@@ -9,6 +9,19 @@ const oportunidadesCariocasLegacyPaths = [
 const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['react-pdf', 'pdfjs-dist'],
+  experimental: {
+    serverActions: {
+      /**
+       * Limite aumentado para suportar o upload de documentos do requerimento de
+       * parcelamento de Dívida Ativa. Os documentos vão como base64 inline (P15 —
+       * ver `docs/divida-ativa.md`), que infla ~33%.
+       *
+       * Pior caso estimado: 4 docs × 1,5 MB × 1,33 ≈ 8 MB. Deixamos em 10 MB para
+       * folga. Revisar se outros fluxos do app passarem a usar server actions com upload.
+       */
+      bodySizeLimit: '10mb',
+    },
+  },
   async redirects() {
     return [
       {
