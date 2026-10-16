@@ -13,11 +13,11 @@ export default async function AppLayout({
   return (
     <ReactQueryProvider>
       <OnboardingWrapperClient>
-        <div>
+        <div className="min-h-screen flex flex-col">
           <RouteTracker />
           <SessionExpiredHandler />
           <CookieConsent variant="mini" />
-          {children}
+          <div className="flex-1">{children}</div>
           <FooterWrapper />
         </div>
       </OnboardingWrapperClient>
