@@ -1,9 +1,10 @@
 'use client'
 
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
-type OportunidadesType = 'cursos' | 'empregabilidade'
+type OportunidadesType = 'cursos' | 'empregabilidade' | 'mei'
 
 interface OportunidadesTypeToggleProps {
   activeType: OportunidadesType
@@ -11,23 +12,38 @@ interface OportunidadesTypeToggleProps {
 
 const TABS = [
   {
-    id: 'cursos',
-    label: 'Cursos',
-    href: '/servicos/cursos',
-  },
-  {
     id: 'empregabilidade',
     label: 'Trabalho',
     href: '/servicos/trabalho/',
+    feature: 'empregos',
+  },
+  {
+    id: 'mei',
+    label: 'MEI',
+    href: '/servicos/mei',
+    feature: 'mei',
+  },
+  {
+    id: 'cursos',
+    label: 'Cursos',
+    href: '/servicos/cursos',
+    feature: 'cursos',
   },
 ] as const
 
 export function OportunidadesTypeToggle({
   activeType,
 }: OportunidadesTypeToggleProps) {
+  const enabled = TABS.filter(tab => isFeatureEnabled(tab.feature))
+  const meiEnabled = enabled.some(tab => tab.id === 'mei')
+  const order = meiEnabled
+    ? (['empregabilidade', 'mei', 'cursos'] as const)
+    : (['cursos', 'empregabilidade'] as const)
+  const tabs = order.flatMap(id => enabled.filter(tab => tab.id === id))
+
   return (
     <div className="flex items-center gap-1 w-full">
-      {TABS.map(tab => {
+      {tabs.map(tab => {
         const isActive = activeType === tab.id
         return (
           <Link
