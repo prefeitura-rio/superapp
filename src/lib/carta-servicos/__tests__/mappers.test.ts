@@ -1,9 +1,8 @@
-import { ChannelType } from '@/http-pref-rio-carta-servicos/models/channelType'
-import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
+import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
 import { mapServiceDetailToPrefRioService } from '@/lib/carta-servicos/mappers'
 import { describe, expect, it } from 'vitest'
 
-function makeTicketFlags(detail: ServiceDetail) {
+function makeTicketFlags(detail: ClientsCartaServiceDetail) {
   const flags = detail.flags
   if (!flags?.activeCategoryConfigId) return undefined
   return {
@@ -15,7 +14,7 @@ function makeTicketFlags(detail: ServiceDetail) {
 
 describe('mapServiceDetailToPrefRioService', () => {
   it('maps nested ServiceDetail to flat ModelsPrefRioService', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'iptu-2025',
       name: 'IPTU 2025',
       serviceCatalogId: 'cat-123',
@@ -41,11 +40,11 @@ describe('mapServiceDetailToPrefRioService', () => {
       },
       channels: [
         {
-          type: ChannelType.Presencial,
+          type: 'Presencial',
           endereco: 'Rua A, 100',
         },
         {
-          type: ChannelType.Digital,
+          type: 'Digital',
           channelType: 'Site',
           value: 'https://pref.rio/iptu',
         },
@@ -87,7 +86,7 @@ describe('mapServiceDetailToPrefRioService', () => {
   })
 
   it('treats null articleStatus as published (MuleSoft runtime)', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'controle-de-roedores-1',
       name: 'Controle de roedores',
       serviceCatalogId: 'a03be00000bfHcIAAU',
@@ -100,7 +99,7 @@ describe('mapServiceDetailToPrefRioService', () => {
   })
 
   it('maps Draft articleStatus to unpublished', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'draft-service',
       name: 'Draft',
       articleStatus: 'Draft',
@@ -114,7 +113,7 @@ describe('mapServiceDetailToPrefRioService', () => {
 
 describe('ticketFlags extraction', () => {
   it('returns ticketFlags when activeCategoryConfigId is present', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'reparo-de-luminaria',
       name: 'Reparo de Luminária',
       info: {},
@@ -137,7 +136,7 @@ describe('ticketFlags extraction', () => {
   })
 
   it('returns undefined when activeCategoryConfigId is absent', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'servico-sem-formulario',
       name: 'Serviço sem formulário',
       info: {},
@@ -152,7 +151,7 @@ describe('ticketFlags extraction', () => {
   })
 
   it('returns undefined when flags are absent', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'servico-sem-flags',
       name: 'Serviço sem flags',
       info: {},
@@ -163,7 +162,7 @@ describe('ticketFlags extraction', () => {
   })
 
   it('includes allowsAnonymity true when service allows anonymous submission', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'servico-anonimo',
       name: 'Serviço anônimo',
       info: {},

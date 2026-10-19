@@ -1,5 +1,5 @@
+import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
-import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
 import { mapServiceDetailToPrefRioService } from '@/lib/carta-servicos/mappers'
 import {
   sanitizePrefRioServiceHtml,
@@ -139,7 +139,7 @@ describe('sanitizePrefRioServiceHtml', () => {
 
 describe('mapServiceDetailToPrefRioService html passthrough', () => {
   it('copies the published html through unchanged', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'avaliacao-de-risco-de-queda-da-arvore',
       name: 'Avaliação de risco de queda da árvore',
       info: {

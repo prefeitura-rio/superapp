@@ -65,23 +65,34 @@ export function PageClient({
     button: ModelsButton,
     index: number
   ) => {
-    // Prevent immediate navigation
-    event.preventDefault()
+    const destination = button.url_service
+    if (!destination) return
 
-    // Track the event
+    const opensInNewTab =
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+
+    if (!opensInNewTab) {
+      event.preventDefault()
+    }
+
     trackServiceClick({
       service_id: serviceData.id || '',
       service_name: serviceData.nome_servico,
       service_category: serviceData.tema_geral,
       button_label: button.titulo || '',
       button_index: index,
-      destination_url: button.url_service || '',
+      destination_url: destination,
     })
 
-    // Allow navigation after a short delay to ensure event is sent
-    setTimeout(() => {
-      window.open(button.url_service, '_blank', 'noopener,noreferrer')
-    }, 200)
+    if (!opensInNewTab) {
+      setTimeout(() => {
+        window.location.assign(destination)
+      }, 200)
+    }
   }
 
   // Extract data for QuickInfo
@@ -167,8 +178,6 @@ export function PageClient({
                 >
                   <a
                     href={enabledButtons[0].url_service}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
                     className="text-background text-sm leading-5 font-normal"
                   >
@@ -196,8 +205,6 @@ export function PageClient({
                         >
                           <a
                             href={button.url_service}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             onClick={e => handleButtonClick(e, button, index)}
                             className="text-background"
                           >

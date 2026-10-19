@@ -4,15 +4,14 @@ import {
   getApiPublicThemes,
   getApiPublicThemesSlugSubthemes,
 } from '@/http-app-catalogo/carta/carta'
+import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
+import type { ModelsCartaServiceSummary } from '@/http-app-catalogo/models/modelsCartaServiceSummary'
+import type { ModelsCartaSubtheme } from '@/http-app-catalogo/models/modelsCartaSubtheme'
+import type { ModelsCartaTheme } from '@/http-app-catalogo/models/modelsCartaTheme'
 import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
 import type { ModelsSubcategoryResponse } from '@/http-busca-search/models/modelsSubcategoryResponse'
 import type { ModelsSubcategoryServicesResponse } from '@/http-busca-search/models/modelsSubcategoryServicesResponse'
-import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
-import type { ServiceListItem } from '@/http-pref-rio-carta-servicos/models/serviceListItem'
-import type { Subtheme } from '@/http-pref-rio-carta-servicos/models/subtheme'
-import type { Theme } from '@/http-pref-rio-carta-servicos/models/theme'
-import type { ThemesResponse } from '@/http-pref-rio-carta-servicos/models/themesResponse'
 import {
   mapServiceDetailToPrefRioService,
   mapServiceListItemToServiceDocument,
@@ -87,8 +86,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-function getThemesFromPayload(payload: unknown): Theme[] {
-  const body = parseCartaServicosPayload<ThemesResponse>(payload)
+function getThemesFromPayload(payload: unknown): ModelsCartaTheme[] {
+  const body = parseCartaServicosPayload<{ data?: ModelsCartaTheme[] }>(payload)
   if (!body || !isRecord(body) || !Array.isArray(body.data)) {
     return []
   }
@@ -255,9 +254,9 @@ async function fetchSubthemesOnce(
     throw new Error(`subthemes_status_${response.status}`)
   }
 
-  const subthemesBody = parseCartaServicosPayload<{ data?: Subtheme[] }>(
-    response.data
-  )
+  const subthemesBody = parseCartaServicosPayload<{
+    data?: ModelsCartaSubtheme[]
+  }>(response.data)
 
   if (subthemesBody === null) {
     logSubthemesFailure({
@@ -372,7 +371,7 @@ export async function fetchCartaServicosServicesBySubcategory(
   if (response.status !== 200) return null
 
   const servicesBody = parseCartaServicosPayload<{
-    data?: ServiceListItem[]
+    data?: ModelsCartaServiceSummary[]
     meta?: { page?: number; per_page?: number; total?: number }
   }>(response.data)
   const items = servicesBody?.data ?? []
@@ -390,34 +389,26 @@ export async function fetchCartaServicosServicesBySubcategory(
 }
 
 export async function fetchCartaServicosServiceBySlug(
-  slug: string
+  slug: string,
+  depth = 0
 ): Promise<PrefRioServiceWithFlags | null> {
   const response = await getApiPublicServicesSlug(slug, {
     ...CACHE_10MIN,
+    redirect: 'manual',
     next: { ...CACHE_10MIN.next, tags: ['service', slug] },
   })
 
-  // Catalogo does not return 301 yet. The branch stays for when it does
-  // (`redirect: 'manual'` will be required so fetch does not follow it).
-  const status = response.status as number
+  if (response.status === 404) return null
 
-  if (status === 404) return null
-
-  if (status === 301) {
-    const redirectBody = parseCartaServicosPayload<{ redirect?: string }>(
-      response.data
-    )
-    const redirectSlug = redirectBody?.redirect
-    if (redirectSlug && redirectSlug !== slug) {
-      return fetchCartaServicosServiceBySlug(redirectSlug)
+  if (response.status === 301) {
+    const redirectSlug = response.data.redirect
+    if (redirectSlug && redirectSlug !== slug && depth < 3) {
+      return fetchCartaServicosServiceBySlug(redirectSlug, depth + 1)
     }
     return null
   }
 
-  const detailBody = parseCartaServicosPayload<{ data?: ServiceDetail }>(
-    response.data
-  )
-  if (response.status !== 200 || !detailBody?.data) {
+  if (response.status !== 200 || !response.data.data) {
     console.error(
       `Failed to fetch service ${slug}: Status ${response.status}`,
       response.data
@@ -425,8 +416,11 @@ export async function fetchCartaServicosServiceBySlug(
     return null
   }
 
-  const mapped = mapServiceDetailToPrefRioService(detailBody.data)
-  const flags = detailBody.data.flags
+  const detail: ClientsCartaServiceDetail = response.data.data
+  if (!detail.slug) return null
+
+  const mapped = mapServiceDetailToPrefRioService(detail)
+  const flags = detail.flags
 
   return {
     ...mapped,

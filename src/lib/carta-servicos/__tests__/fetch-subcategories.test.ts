@@ -1,9 +1,11 @@
 import {
+  getApiPublicServicesSlug,
   getApiPublicSubthemesSlugServices,
   getApiPublicThemes,
   getApiPublicThemesSlugSubthemes,
 } from '@/http-app-catalogo/carta/carta'
 import {
+  fetchCartaServicosServiceBySlug,
   fetchCartaServicosServicesByCategory,
   fetchCartaServicosSubcategoriesByCategory,
   keepNonEmptySubcategories,
@@ -21,6 +23,7 @@ vi.mock('@/http-app-catalogo/carta/carta', () => ({
 const mockGetThemes = vi.mocked(getApiPublicThemes)
 const mockGetSubthemesByTheme = vi.mocked(getApiPublicThemesSlugSubthemes)
 const mockGetServicesBySubtheme = vi.mocked(getApiPublicSubthemesSlugServices)
+const mockGetService = vi.mocked(getApiPublicServicesSlug)
 
 const getIcon = () => null
 
@@ -265,5 +268,42 @@ describe('fetchCartaServicosServicesByCategory', () => {
     expect(
       result?.filtered_category?.services?.map(service => service.title)
     ).toEqual(['Um', 'Dois', 'Três', 'Quatro'])
+  })
+})
+
+describe('fetchCartaServicosServiceBySlug', () => {
+  it('reads the 301 body and fetches the canonical slug', async () => {
+    mockGetService
+      .mockResolvedValueOnce({
+        status: 301,
+        data: { redirect: 'iptu-2026' },
+        headers: new Headers(),
+      } as Awaited<ReturnType<typeof getApiPublicServicesSlug>>)
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          data: {
+            slug: 'iptu-2026',
+            name: 'IPTU 2026',
+            themeName: 'Tributos',
+          },
+        },
+        headers: new Headers(),
+      } as Awaited<ReturnType<typeof getApiPublicServicesSlug>>)
+
+    const result = await fetchCartaServicosServiceBySlug('iptu-2025')
+
+    expect(mockGetService).toHaveBeenNthCalledWith(
+      1,
+      'iptu-2025',
+      expect.objectContaining({ redirect: 'manual' })
+    )
+    expect(mockGetService).toHaveBeenNthCalledWith(
+      2,
+      'iptu-2026',
+      expect.objectContaining({ redirect: 'manual' })
+    )
+    expect(result?.slug).toBe('iptu-2026')
+    expect(result?.nome_servico).toBe('IPTU 2026')
   })
 })

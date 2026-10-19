@@ -5,8 +5,8 @@
  * Discovery layer unificada da Prefeitura do Rio de Janeiro. Indexa serviços públicos, cursos, vagas e oportunidades MEI com busca full-text e recomendação personalizada por perfil de cidadão.
  * OpenAPI spec version: 1.0
  */
-import type { V1CartaDetailJSONData } from './v1CartaDetailJSONData'
+import type { ClientsCartaServiceDetail } from './clientsCartaServiceDetail'
 
 export interface V1CartaDetailJSON {
-  data?: V1CartaDetailJSONData
+  data?: ClientsCartaServiceDetail
 }

@@ -6,4 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type V1CartaDetailJSONData = { [key: string]: unknown }
+export interface ModelsCartaTheme {
+  name?: string
+  publishedServices?: number
+  slug?: string
+  subthemesCount?: number
+}

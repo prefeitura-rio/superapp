@@ -22,7 +22,10 @@ import type {
   GetApiPublicThemesSlugSubthemes503,
   GetApiPublicThemesSlugSubthemesParams,
   V1CartaDetailJSON,
-  V1CartaPagedJSON,
+  V1CartaServiceRedirectJSON,
+  V1CartaServicesPagedJSON,
+  V1CartaSubthemesPagedJSON,
+  V1CartaThemesPagedJSON,
 } from '../models'
 
 import { customFetchAppCatalogo } from '../../../custom-fetch-app-catalogo'
@@ -30,6 +33,11 @@ import { customFetchAppCatalogo } from '../../../custom-fetch-app-catalogo'
 export type getApiPublicServicesSlugResponse200 = {
   data: V1CartaDetailJSON
   status: 200
+}
+
+export type getApiPublicServicesSlugResponse301 = {
+  data: V1CartaServiceRedirectJSON
+  status: 301
 }
 
 export type getApiPublicServicesSlugResponse400 = {
@@ -57,6 +65,7 @@ export type getApiPublicServicesSlugResponseSuccess =
     headers: Headers
   }
 export type getApiPublicServicesSlugResponseError = (
+  | getApiPublicServicesSlugResponse301
   | getApiPublicServicesSlugResponse400
   | getApiPublicServicesSlugResponse404
   | getApiPublicServicesSlugResponse500
@@ -74,7 +83,7 @@ export const getGetApiPublicServicesSlugUrl = (slug: string) => {
 }
 
 /**
- * Retorna o payload completo do serviço a partir de catalog_items.source_data.
+ * Retorna o payload completo do serviço publicado a partir de catalog_items.source_data. Slugs antigos respondem 301 com {"redirect":"<slug-canonico>"} (sem header Location).
  * @summary Detalhe de um serviço da Carta
  */
 export const getApiPublicServicesSlug = async (
@@ -91,7 +100,7 @@ export const getApiPublicServicesSlug = async (
 }
 
 export type getApiPublicSubthemesSlugServicesResponse200 = {
-  data: V1CartaPagedJSON
+  data: V1CartaServicesPagedJSON
   status: 200
 }
 
@@ -164,7 +173,7 @@ export const getApiPublicSubthemesSlugServices = async (
 }
 
 export type getApiPublicThemesResponse200 = {
-  data: V1CartaPagedJSON
+  data: V1CartaThemesPagedJSON
   status: 200
 }
 
@@ -227,7 +236,7 @@ export const getApiPublicThemes = async (
 }
 
 export type getApiPublicThemesSlugSubthemesResponse200 = {
-  data: V1CartaPagedJSON
+  data: V1CartaSubthemesPagedJSON
   status: 200
 }
 

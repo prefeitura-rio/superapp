@@ -6,8 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 import type { ModelsCartaMeta } from './modelsCartaMeta'
+import type { ModelsCartaSubtheme } from './modelsCartaSubtheme'
 
-export interface V1CartaPagedJSON {
-  data?: unknown
+export interface V1CartaSubthemesPagedJSON {
+  data?: ModelsCartaSubtheme[]
   meta?: ModelsCartaMeta
 }
