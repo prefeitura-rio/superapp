@@ -1,7 +1,6 @@
 'use client'
 
 import { Fragment } from 'react'
-import { MeiHeaderClient } from './mei-header-client'
 import { type MeiOpportunity, MeiOpportunityCard } from './mei-opportunity-card'
 import { type MeiProposal, MeiProposalCard } from './mei-proposal-card'
 
@@ -17,25 +16,16 @@ export function MeiPageClient({
   const hasProposals = userProposals.length > 0
   const hasOpportunities = opportunities.length > 0
 
-  if (!hasOpportunities && !hasProposals) {
-    return (
-      <div className="min-h-lvh">
-        <MeiHeaderClient />
-        <main className="max-w-4xl mx-auto pb-34 px-4">
+  return (
+    <div className="min-h-lvh">
+      <main className="max-w-4xl mx-auto pb-34 px-4">
+        {!hasOpportunities && !hasProposals && (
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
               Nenhuma oportunidade encontrada
             </p>
           </div>
-        </main>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-lvh">
-      <MeiHeaderClient />
-      <main className="max-w-4xl mx-auto pb-34 px-4">
+        )}
         {/* Minhas oportunidades - só aparece se tiver propostas */}
         {hasProposals && (
           <section className="mb-8">
