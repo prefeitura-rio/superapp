@@ -3,18 +3,14 @@
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { UploadIcon, XIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
-import type { TipoSolicitante } from './escolha-tipo-solicitante'
-
-/** Um arquivo já carregado pelo cidadão. */
-interface ArquivoAnexado {
-  /** `tipo` do `DocumentoDamRequest` — o que a API espera (ex.: `"IDENTIDADE"`). */
-  tipo: string
-  nomeArquivo: string
-  conteudoBase64: string
-  /** Tamanho em bytes do arquivo original — para exibir e validar. */
-  tamanho: number
-}
+import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import {
+  type ArquivoAnexado,
+  lerDocumentos,
+  salvarDocumentos,
+} from './documentos-requerimento-storage'
+import type { TipoSolicitante } from './tipos-solicitante'
 
 /** Definição de um slot de upload mostrado na tela. */
 interface SlotDocumento {
@@ -38,77 +34,90 @@ const MB = 1024 * KB
 const LIMITE_IDENTIDADE_CPF_CNPJ = 500 * KB
 const LIMITE_GERAL = 1.5 * MB
 
-/** Slots por tipo de solicitante. */
-const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
-  PESSOA_FISICA: [
+/** Slot comum a todos os vínculos: documentos extras, nunca obrigatórios. */
+const SLOT_OUTROS: SlotDocumento = {
+  tipo: 'OUTROS',
+  titulo: 'Outros documentos',
+  descricao:
+    'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
+  limiteBytes: LIMITE_GERAL,
+  opcional: true,
+}
+
+/**
+ * Identidade e CPF de quem faz o pedido — obrigatórios em **todos** os vínculos, como no
+ * portal legado ("Obrigatórios – Requerente"). Só o rótulo muda: `quem` nomeia o requerente
+ * no vínculo escolhido (vazio quando é o próprio contribuinte).
+ */
+function slotsDoRequerente(quem: string): SlotDocumento[] {
+  return [
     {
       tipo: 'IDENTIDADE',
-      titulo: 'Identidade do requerente com foto',
+      titulo: `Identidade${quem} com foto`,
       descricao: null,
       limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
     {
       tipo: 'CPF',
-      titulo: 'CPF do requerente',
+      titulo: `CPF${quem}`,
       descricao: null,
       limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
-    {
-      tipo: 'OUTROS',
-      titulo: 'Outros documentos',
-      descricao:
-        'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
-      limiteBytes: LIMITE_GERAL,
-      opcional: true,
-    },
-  ],
+  ]
+}
 
-  PESSOA_JURIDICA: [
-    {
-      tipo: 'CNPJ',
-      titulo: 'CNPJ da empresa',
-      descricao: null,
-      limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
-      opcional: false,
-    },
-    {
-      tipo: 'CONTRATO_SOCIAL',
-      titulo: 'Registro de empresário individual, contrato ou estatuto social',
-      descricao: 'Última alteração consolidada',
-      limiteBytes: LIMITE_GERAL,
-      opcional: false,
-    },
-    {
-      tipo: 'OUTROS',
-      titulo: 'Outros documentos',
-      descricao:
-        'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
-      limiteBytes: LIMITE_GERAL,
-      opcional: true,
-    },
-  ],
+/**
+ * Slots por vínculo do solicitante.
+ *
+ * O portal legado mostra todos os campos numa tela só, em grupos ("Obrigatórios –
+ * Requerente", "caso devedor seja pessoa jurídica", "caso sociedade anônima", "caso
+ * procurador", "quando atual proprietário é diferente do constante na CDA", "outros"). Aqui
+ * o vínculo é escolhido antes, e cada um recebe os grupos que se aplicam a ele:
+ *
+ * - todos: identidade e CPF do requerente, e outros documentos (opcional);
+ * - sócio responsável: + CNPJ e contrato/estatuto social; a ata de eleição só é exigida de
+ *   sociedade anônima, por isso fica opcional, com a condição na descrição;
+ * - procurador: + procuração, identidade e CPF do outorgante;
+ * - atual proprietário/possuidor: + comprovante de propriedade ou posse.
+ */
+/** CNPJ e registro/contrato social — "Obrigatórios, caso devedor seja pessoa jurídica". */
+const SLOTS_EMPRESA: SlotDocumento[] = [
+  {
+    tipo: 'CNPJ',
+    titulo: 'CNPJ da empresa',
+    descricao: null,
+    limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
+    opcional: false,
+  },
+  {
+    tipo: 'REGISTRO_EMPRESA',
+    titulo: 'Registro de empresário individual, contrato ou estatuto social',
+    descricao: 'Última alteração consolidada',
+    limiteBytes: LIMITE_GERAL,
+    opcional: false,
+  },
+]
 
-  SOCIEDADE_ANONIMA: [
+const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
+  CONTRIBUINTE: [...slotsDoRequerente(''), SLOT_OUTROS],
+
+  SOCIO_RESPONSAVEL: [
+    ...slotsDoRequerente(' do sócio'),
+    ...SLOTS_EMPRESA,
     {
-      tipo: 'ATA_ELEICAO',
+      tipo: 'ATA',
       titulo: 'Ata de eleição da atual diretoria',
-      descricao: null,
-      limiteBytes: LIMITE_GERAL,
-      opcional: false,
-    },
-    {
-      tipo: 'OUTROS',
-      titulo: 'Outros documentos',
-      descricao:
-        'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
+      descricao: 'Obrigatória se a empresa for sociedade anônima',
       limiteBytes: LIMITE_GERAL,
       opcional: true,
     },
+    SLOT_OUTROS,
   ],
 
   PROCURADOR: [
+    ...slotsDoRequerente(' do procurador'),
     {
       tipo: 'PROCURACAO',
       titulo: 'Procuração com firma reconhecida',
@@ -118,69 +127,75 @@ const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
     },
     {
       tipo: 'IDENTIDADE_OUTORGANTE',
-      titulo: 'Identidade do Outorgante com foto',
-      descricao: null,
+      titulo: 'Identidade do outorgante com foto',
+      descricao: 'De quem concedeu a procuração',
       limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
     {
       tipo: 'CPF_OUTORGANTE',
-      titulo: 'CPF do Outorgante',
+      titulo: 'CPF do outorgante',
       descricao: null,
       limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
-    {
-      tipo: 'OUTROS',
-      titulo: 'Outros documentos',
-      descricao:
-        'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
-      limiteBytes: LIMITE_GERAL,
-      opcional: true,
-    },
+    SLOT_OUTROS,
   ],
 
-  OUTRO: [
+  PROPRIETARIO_POSSUIDOR: [
+    ...slotsDoRequerente(''),
     {
-      tipo: 'DOCUMENTOS_POSSE',
-      titulo: 'Documentos',
+      tipo: 'ESCRITURA',
+      titulo: 'Comprovante de propriedade ou posse',
       descricao:
         'Registro de Imóveis, Compra e Venda ou promessa, Sentença Judicial, Termo de Inventariança, Auto de Arrematação ou Petição Inicial de Usucapião, ou documento comprovando a posse com ânimo de dono.',
       limiteBytes: LIMITE_GERAL,
       opcional: false,
     },
-    {
-      tipo: 'OUTROS',
-      titulo: 'Outros documentos',
-      descricao:
-        'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
-      limiteBytes: LIMITE_GERAL,
-      opcional: true,
-    },
+    SLOT_OUTROS,
   ],
 }
 
-const TITULO_POR_TIPO: Record<TipoSolicitante, string> = {
-  PESSOA_FISICA: 'Pessoa Física',
-  PESSOA_JURIDICA: 'Pessoa Jurídica',
-  SOCIEDADE_ANONIMA: 'Sociedade Anônima',
-  PROCURADOR: 'Procurador',
-  OUTRO: '',
+/** Vínculos que já pedem os documentos da empresa, ou que a API dispensa deles (5). */
+const SEM_SLOTS_EMPRESA_EXTRAS: TipoSolicitante[] = [
+  'SOCIO_RESPONSAVEL',
+  'PROPRIETARIO_POSSUIDOR',
+]
+
+/**
+ * Slots do vínculo, com os documentos da empresa quando o devedor é pessoa jurídica.
+ *
+ * Regra da API (`validarDocumentos`): CDA de pessoa jurídica exige CNPJ e registro de todo
+ * vínculo, exceto do atual proprietário/possuidor. O sócio já os tem na lista; contribuinte e
+ * procurador os ganham antes de "Outros documentos".
+ */
+export function slotsDoVinculo(
+  tipo: TipoSolicitante,
+  devedorPessoaJuridica: boolean
+): SlotDocumento[] {
+  const slots = SLOTS_POR_TIPO[tipo]
+  if (!devedorPessoaJuridica || SEM_SLOTS_EMPRESA_EXTRAS.includes(tipo)) {
+    return slots
+  }
+
+  return [
+    ...slots.filter(slot => slot !== SLOT_OUTROS),
+    ...SLOTS_EMPRESA,
+    SLOT_OUTROS,
+  ]
 }
 
-/** Descrição do painel de instruções por tipo (texto do Figma). */
-const INSTRUCOES_POR_TIPO: Record<TipoSolicitante, string> = {
-  PESSOA_FISICA:
-    'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB. Se a sua identidade tiver o número de CPF, você não precisa anexá-lo.',
-  PESSOA_JURIDICA:
-    'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.',
-  SOCIEDADE_ANONIMA:
-    'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.',
-  PROCURADOR:
-    'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.',
-  OUTRO:
-    'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.',
+/** Complemento do título: "Anexe os documentos {do contribuinte}". */
+const TITULO_POR_TIPO: Record<TipoSolicitante, string> = {
+  CONTRIBUINTE: 'do contribuinte',
+  SOCIO_RESPONSAVEL: 'do sócio responsável',
+  PROCURADOR: 'do procurador',
+  PROPRIETARIO_POSSUIDOR: 'do proprietário ou possuidor',
 }
+
+/** Instruções abaixo do título — as mesmas do portal legado para todos os vínculos. */
+const INSTRUCOES =
+  'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.'
 
 /** Formata bytes para exibição amigável. */
 function formatarTamanho(bytes: number): string {
@@ -335,6 +350,8 @@ function SlotUpload({ slot, arquivo, onArquivo }: SlotUploadProps) {
 
 interface AnexarDocumentosProps {
   tipo: TipoSolicitante
+  /** Alguma CDA escolhida é de pessoa jurídica (`?pj=1`): pede CNPJ e registro da empresa. */
+  devedorPessoaJuridica?: boolean
   /** Parâmetros correntes da URL, incluindo `?tipo=`. */
   searchParamsAtual: Record<string, string>
 }
@@ -342,37 +359,59 @@ interface AnexarDocumentosProps {
 /**
  * "Anexe os documentos necessários" — segunda etapa do requerimento.
  *
- * A lista de slots muda por tipo de solicitante; tudo mais (estado, validação, serialização)
+ * A lista de slots muda por vínculo do solicitante; tudo mais (estado, validação, serialização)
  * é igual. O "Revisar envio" só libera quando todos os slots obrigatórios têm arquivo.
  *
- * Os documentos são serializados como JSON + encodeURIComponent em `?documentos=` para
- * chegarem à etapa de revisão — não há server action aqui, só navegação client-side. O
- * base64 pode inflar a URL, mas documentos pequenos (≤ 1,5 MB → base64 ≤ ~2 MB) ficam dentro
- * do limite prático dos navegadores modernos (~2 MB de URL).
+ * Os documentos ficam no `sessionStorage` (ver `documentos-requerimento-storage`) para
+ * chegarem à etapa de revisão — não há server action aqui, só navegação client-side. Eles
+ * são salvos a cada anexo ou remoção, e não só no "Revisar envio": quem volta da revisão, ou
+ * vai até a escolha do tipo e retorna com o mesmo tipo, reencontra os arquivos.
  *
- * ⚠️ **Limitação conhecida:** URLs com base64 de arquivos grandes podem ser bloqueadas por
- * proxies. Se isso se tornar problema em produção, substituir pela sessão do servidor ou
- * por `sessionStorage` — mas primeiro medir, não otimizar antecipadamente.
+ * ⚠️ **Limitação conhecida:** a cota do `sessionStorage` (~5 MB) pode não comportar o base64
+ * de vários arquivos grandes. Nesse caso o "Revisar envio" avisa em vez de seguir sem eles.
  *
  * Client Component: manipulação de arquivos (FileReader, input[type=file]).
  */
 export function AnexarDocumentos({
   tipo,
+  devedorPessoaJuridica = false,
   searchParamsAtual,
 }: AnexarDocumentosProps) {
   const router = useRouter()
-  const slots = SLOTS_POR_TIPO[tipo]
+  const slots = slotsDoVinculo(tipo, devedorPessoaJuridica)
   const titulo = TITULO_POR_TIPO[tipo]
-  const instrucoes = INSTRUCOES_POR_TIPO[tipo]
 
   // Estado: um arquivo por slot (null = não enviado).
   const [arquivos, setArquivos] = useState<
     Record<string, ArquivoAnexado | null>
   >(() => Object.fromEntries(slots.map(s => [s.tipo, null])))
 
+  // Restaura os anexos já feitos. Em efeito, não no estado inicial: `sessionStorage` não
+  // existe no servidor, e ler na renderização quebraria a hidratação.
+  useEffect(() => {
+    const salvos = lerDocumentos(tipo)
+    if (salvos.length === 0) return
+
+    setArquivos(atual => {
+      const restaurado = { ...atual }
+      for (const doc of salvos) {
+        if (doc.tipo in restaurado) restaurado[doc.tipo] = doc
+      }
+      return restaurado
+    })
+  }, [tipo])
+
+  function listarAnexados(estado: Record<string, ArquivoAnexado | null>) {
+    return slots
+      .map(s => estado[s.tipo])
+      .filter((a): a is ArquivoAnexado => a !== null)
+  }
+
   function setArquivo(tipoSlot: string) {
     return (arquivo: ArquivoAnexado | null) => {
-      setArquivos(prev => ({ ...prev, [tipoSlot]: arquivo }))
+      const proximo = { ...arquivos, [tipoSlot]: arquivo }
+      setArquivos(proximo)
+      salvarDocumentos(tipo, listarAnexados(proximo))
     }
   }
 
@@ -381,17 +420,12 @@ export function AnexarDocumentos({
     .every(s => arquivos[s.tipo] !== null)
 
   function revisarEnvio() {
-    const docs = slots
-      .map(s => arquivos[s.tipo])
-      .filter((a): a is ArquivoAnexado => a !== null)
-
-    // Documentos ficam no sessionStorage — não na URL — para evitar HTTP 431
-    // (Request Header Fields Too Large) causado por base64 nos query params.
-    // A chave é fixa: só um requerimento pode estar em andamento por vez na aba.
-    sessionStorage.setItem(
-      'divida-ativa:requerimento:documentos',
-      JSON.stringify(docs)
-    )
+    if (!salvarDocumentos(tipo, listarAnexados(arquivos))) {
+      toast.error(
+        'Não foi possível guardar os arquivos neste navegador. Tente arquivos menores.'
+      )
+      return
+    }
 
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('etapa', 'revisao')
@@ -404,13 +438,11 @@ export function AnexarDocumentos({
   return (
     <div className="flex flex-1 flex-col px-4">
       <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 text-foreground">
-        {titulo
-          ? `Anexe os documentos necessários para ${titulo}`
-          : 'Anexe os documentos necessários'}
+        Anexe os documentos {titulo}
       </h1>
 
       <p className="pb-6 text-sm font-normal leading-5 text-foreground-light">
-        {instrucoes}
+        {INSTRUCOES}
       </p>
 
       <div className="flex flex-col gap-2">
@@ -424,10 +456,12 @@ export function AnexarDocumentos({
         ))}
       </div>
 
-      <div className="mt-auto pt-6 pb-2">
+      {/* Logo abaixo da lista, como no Figma — não no rodapé da tela. Cinza enquanto faltar
+          algum obrigatório (é o desabilitado do Figma); primário quando libera. */}
+      <div className="pt-6 pb-2">
         <CustomButton
           type="button"
-          variant="primary"
+          variant={obrigatoriosPreenchidos ? 'primary' : 'secondary'}
           size="lg"
           fullWidth
           disabled={!obrigatoriosPreenchidos}

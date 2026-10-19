@@ -1,55 +1,75 @@
 import { AnexarDocumentos } from '@/app/components/divida-ativa/anexar-documentos'
+import {
+  DadosCorrespondenciaForm,
+  type EnderecoPerfil,
+} from '@/app/components/divida-ativa/dados-correspondencia-form'
+import { DadosRequerenteForm } from '@/app/components/divida-ativa/dados-requerente-form'
 import { EscolhaTipoSolicitante } from '@/app/components/divida-ativa/escolha-tipo-solicitante'
-import type { TipoSolicitante } from '@/app/components/divida-ativa/escolha-tipo-solicitante'
 import { RevisarRequerimentoShell } from '@/app/components/divida-ativa/revisar-requerimento-shell'
 import { SimulacaoAviso } from '@/app/components/divida-ativa/simulacao-aviso'
+import {
+  type TipoSolicitante,
+  isTipoSolicitante,
+} from '@/app/components/divida-ativa/tipos-solicitante'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import {
+  getDalCitizenCpf,
   getDalDividaAtivaConsultaAvulsa,
   getDalDividaAtivaSimulacao,
 } from '@/lib/dal'
-import { criterioDaUrl } from '@/lib/divida-ativa-utils'
+import { criterioDaUrl, somenteDigitos } from '@/lib/divida-ativa-utils'
+import {
+  getProvedorLogin,
+  urlContaIdentidadeCarioca,
+} from '@/lib/provedor-login'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
 
-/**
- * Conjunto de valores aceitos para `?tipo=`.
- * A page valida para não propagar lixo da URL para o componente.
- */
-const TIPOS_VALIDOS: ReadonlySet<string> = new Set([
-  'PESSOA_FISICA',
-  'PESSOA_JURIDICA',
-  'SOCIEDADE_ANONIMA',
-  'PROCURADOR',
-  'OUTRO',
-])
+const ETAPAS = [
+  'tipo',
+  'requerente',
+  'correspondencia',
+  'documentos',
+  'revisao',
+] as const
 
-type EtapaRequerimento = 'tipo' | 'documentos' | 'revisao'
+type EtapaRequerimento = (typeof ETAPAS)[number]
 
 /**
- * Requerimento de parcelamento — fluxo de três etapas na mesma rota.
+ * Requerimento de parcelamento — fluxo de cinco etapas na mesma rota.
  *
- * ### Etapa 1 — Tipo de solicitante (`?etapa=tipo` ou ausente)
+ * ### Etapa 1 — Tipo de vínculo (`?etapa=tipo` ou ausente)
  *
- * O cidadão escolhe o vínculo com o imóvel (Pessoa Física, Jurídica, Sociedade Anônima,
- * Procurador ou Outro). A escolha define quais documentos serão exigidos na etapa seguinte.
+ * O cidadão escolhe o vínculo com o débito (próprio contribuinte, sócio responsável,
+ * procurador ou atual proprietário/possuidor). A escolha define quais documentos serão
+ * exigidos na etapa seguinte. O valor de `?tipo=` é validado aqui: lixo da URL não chega
+ * ao componente.
  *
- * ### Etapa 2 — Documentos (`?etapa=documentos&tipo=PESSOA_FISICA`)
+ * ### Etapas 2 e 3 — Dados do requerente e de correspondência
+ *
+ * `?etapa=requerente` (telefone e e-mail) e `?etapa=correspondencia` (nome, CPF/CNPJ,
+ * endereço, telefone e e-mail para as comunicações). Não estão no Figma: espelham o portal
+ * legado e a validação da API, e esperam a aprovação do design. Chegam preenchidas com o
+ * perfil id.rio; o que o cidadão edita fica no `sessionStorage` — dado pessoal não vai na URL.
+ *
+ * ### Etapa 4 — Documentos (`?etapa=documentos&tipo=CONTRIBUINTE`)
  *
  * Lista de slots de upload dependente do tipo. O cidadão anexa os documentos obrigatórios
- * (e opcionalmente os extras). Os arquivos ficam em `?documentos=` como JSON + base64
- * serializado — não há server action aqui.
+ * (e opcionalmente os extras). Os arquivos ficam no `sessionStorage` da aba — não há server
+ * action aqui.
  *
- * ### Etapa 3 — Revisão e envio (`?etapa=revisao&tipo=...&documentos=...`)
+ * ### Etapa 5 — Revisão e envio (`?etapa=revisao&tipo=...&documentos=...`)
  *
  * Exibe um resumo (valor total, nº de parcelas, dados da CDA, carrossel de parcelas) e o
  * botão "Requerer parcelamento", que dispara a server action.
  *
  * ### Navegação
  *
- * - Voltar da etapa 1 → revisão de pagamento (`/parcelamento/revisao`)
- * - Voltar da etapa 2 → etapa 1 (tipo)
- * - Voltar da etapa 3 → etapa 2 (documentos)
+ * - Voltar da etapa 1 → seleção de parcelas (`/parcelamento/simulacao` com `?data=` e
+ *   `?parcelas=`), com a quantidade escolhida marcada
+ * - Cada etapa seguinte volta à imediatamente anterior: requerente → tipo (marcado),
+ *   correspondência → requerente, documentos → correspondência, revisão → documentos. Os
+ *   dados preenchidos e os arquivos anexados reaparecem (sessionStorage).
  *
  * ### Contexto da URL
  *
@@ -71,6 +91,7 @@ export default async function RequerimentoPage({
     parcelas?: string
     etapa?: string
     tipo?: string
+    pj?: string
   }>
 }) {
   const params = await searchParams
@@ -107,11 +128,19 @@ export default async function RequerimentoPage({
   )
 
   const etapa: EtapaRequerimento =
-    params.etapa === 'documentos'
-      ? 'documentos'
-      : params.etapa === 'revisao'
-        ? 'revisao'
-        : 'tipo'
+    ETAPAS.find(e => e === params.etapa) ?? 'tipo'
+
+  // Da etapa 2 em diante o vínculo é obrigatório: inválido, ausente ou de um link antigo volta
+  // para a escolha. Validado uma vez aqui, para nenhuma etapa receber lixo da URL.
+  const tipo = params.tipo
+  if (etapa !== 'tipo' && !isTipoSolicitante(tipo)) {
+    redirect(
+      `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({
+        ...searchParamsAtual,
+        etapa: 'tipo',
+      })}`
+    )
+  }
 
   // Rota de retorno para cada etapa.
   const semEtapaEtipo = new URLSearchParams(
@@ -122,17 +151,18 @@ export default async function RequerimentoPage({
     )
   )
   const rotaRevisaoPagamento = `/divida-ativa/parcelamento/revisao?${semEtapaEtipo}`
-  const rotaTipo = `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({ ...Object.fromEntries(semEtapaEtipo), etapa: 'tipo' })}`
-  const rotaDocumentos = params.tipo
-    ? `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({ ...Object.fromEntries(semEtapaEtipo), etapa: 'documentos', tipo: params.tipo })}`
-    : rotaTipo
+  // O `?tipo=` segue nas rotas de volta: a escolha do solicitante reaparece marcada.
+  const comTipo = params.tipo
+    ? { ...Object.fromEntries(semEtapaEtipo), tipo: params.tipo }
+    : Object.fromEntries(semEtapaEtipo)
+  // Etapa anterior ao requerimento: as parcelas, com `?data=` e `?parcelas=` já marcados.
+  const rotaParcelas = `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(comTipo)}`
+  const rotaEtapa = (destino: EtapaRequerimento) =>
+    `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({ ...comTipo, etapa: destino })}`
 
-  const rotaVoltar =
-    etapa === 'tipo'
-      ? rotaRevisaoPagamento
-      : etapa === 'documentos'
-        ? rotaTipo
-        : rotaDocumentos
+  // Cada etapa volta à imediatamente anterior; a primeira, às parcelas.
+  const indice = ETAPAS.indexOf(etapa)
+  const rotaVoltar = indice === 0 ? rotaParcelas : rotaEtapa(ETAPAS[indice - 1])
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -147,21 +177,28 @@ export default async function RequerimentoPage({
         <EscolhaTipoSolicitante searchParamsAtual={searchParamsAtual} />
       )}
 
-      {etapa === 'documentos' && (
-        <EtapaDocumentos
-          tipo={params.tipo}
+      {(etapa === 'requerente' || etapa === 'correspondencia') && (
+        <EtapaDados etapa={etapa} searchParamsAtual={searchParamsAtual} />
+      )}
+
+      {etapa === 'documentos' && isTipoSolicitante(tipo) && (
+        <AnexarDocumentos
+          tipo={tipo}
+          devedorPessoaJuridica={params.pj === '1'}
           searchParamsAtual={searchParamsAtual}
         />
       )}
 
-      {etapa === 'revisao' && (
+      {etapa === 'revisao' && isTipoSolicitante(tipo) && (
         <EtapaRevisao
           cdas={cdas}
           data={data}
           parcelas={parcelas}
-          tipo={params.tipo}
+          tipo={tipo}
           searchParamsAtual={searchParamsAtual}
-          rotaVoltar={rotaDocumentos}
+          rotaVoltar={rotaEtapa('documentos')}
+          rotaRequerente={rotaEtapa('requerente')}
+          rotaCorrespondencia={rotaEtapa('correspondencia')}
           rotaRevisaoPagamento={rotaRevisaoPagamento}
         />
       )}
@@ -169,35 +206,80 @@ export default async function RequerimentoPage({
   )
 }
 
-/** Etapa 2 — Documentos: valida o tipo e renderiza o componente de upload. */
-function EtapaDocumentos({
-  tipo,
+/** Só aceita o que o formulário espera: o perfil chega com `'null'`, `'Não informado'` etc. */
+function textoDoPerfil(valor: string | undefined | null): string {
+  const texto = valor?.trim() ?? ''
+  return texto === 'null' || texto === 'Não informado' ? '' : texto
+}
+
+/**
+ * Etapas 2 e 3 — dados do requerente e de correspondência, pré-preenchidos com o perfil id.rio.
+ *
+ * O perfil é só ponto de partida: se a consulta falhar ou o cadastro estiver incompleto, os
+ * campos chegam vazios e o cidadão preenche. Nome e CPF vêm do token, nunca do perfil nem da URL.
+ */
+async function EtapaDados({
+  etapa,
   searchParamsAtual,
 }: {
-  tipo: string | undefined
+  etapa: 'requerente' | 'correspondencia'
   searchParamsAtual: Record<string, string>
 }) {
-  if (!tipo || !TIPOS_VALIDOS.has(tipo)) {
-    // Tipo inválido ou ausente: volta para a escolha.
-    redirect(
-      `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({
-        ...searchParamsAtual,
-        etapa: 'tipo',
-      })}`
+  const { cpf, name } = await getUserInfoFromToken()
+
+  let perfil: Awaited<ReturnType<typeof getDalCitizenCpf>>['data'] | null = null
+  try {
+    const resposta = await getDalCitizenCpf(cpf)
+    perfil = resposta.status === 200 ? resposta.data : null
+  } catch {
+    perfil = null
+  }
+
+  if (etapa === 'requerente') {
+    const telefone = perfil?.telefone?.principal
+    return (
+      <DadosRequerenteForm
+        nome={name}
+        cpf={cpf}
+        perfil={{
+          telefone: `${textoDoPerfil(telefone?.ddd)}${textoDoPerfil(telefone?.valor)}`,
+          email: textoDoPerfil(perfil?.email?.principal?.valor),
+        }}
+        searchParamsAtual={searchParamsAtual}
+      />
     )
   }
 
+  const principal = perfil?.endereco?.principal
+  const estado = textoDoPerfil(principal?.estado)
+  const cep = somenteDigitos(textoDoPerfil(principal?.cep))
+  const endereco: EnderecoPerfil = {
+    cep: cep.length === 8 ? cep : '',
+    logradouro: [principal?.tipo_logradouro, principal?.logradouro]
+      .map(textoDoPerfil)
+      .filter(Boolean)
+      .join(' '),
+    numero: textoDoPerfil(principal?.numero),
+    complemento: textoDoPerfil(principal?.complemento),
+    bairro: textoDoPerfil(principal?.bairro),
+    municipio: textoDoPerfil(principal?.municipio),
+    // A UF vai como sigla; o perfil pode trazer o nome do estado.
+    uf: /^[A-Za-z]{2}$/.test(estado) ? estado.toUpperCase() : '',
+  }
+
   return (
-    <AnexarDocumentos
-      tipo={tipo as TipoSolicitante}
+    <DadosCorrespondenciaForm
+      nome={name}
+      cpf={cpf}
+      endereco={endereco}
       searchParamsAtual={searchParamsAtual}
     />
   )
 }
 
 /**
- * Etapa 3 — Revisão: busca dados das CDAs e simulação no servidor, depois entrega ao
- * `RevisarRequerimentoShell` que lê os documentos do `sessionStorage` no cliente.
+ * Etapa 5 — Revisão: busca dados das CDAs e simulação no servidor, depois entrega ao
+ * `RevisarRequerimentoShell`, que lê dados e documentos do `sessionStorage` no cliente.
  *
  * Os documentos não trafegam na URL (evita HTTP 431 por base64 nos headers).
  */
@@ -208,27 +290,22 @@ async function EtapaRevisao({
   tipo,
   searchParamsAtual,
   rotaVoltar,
+  rotaRequerente,
+  rotaCorrespondencia,
   rotaRevisaoPagamento,
 }: {
   cdas: string[]
   data: string
   parcelas: number
-  tipo: string | undefined
+  tipo: TipoSolicitante
   searchParamsAtual: Record<string, string>
   rotaVoltar: string
+  rotaRequerente: string
+  rotaCorrespondencia: string
   rotaRevisaoPagamento: string
 }) {
-  // Tipo inválido: volta para a escolha.
-  if (!tipo || !TIPOS_VALIDOS.has(tipo)) {
-    redirect(
-      `/divida-ativa/parcelamento/requerimento?${new URLSearchParams({
-        ...searchParamsAtual,
-        etapa: 'tipo',
-      })}`
-    )
-  }
-
-  const { cpf } = await getUserInfoFromToken()
+  const { cpf, name } = await getUserInfoFromToken()
+  const provedorLogin = await getProvedorLogin()
 
   // Busca a simulação de parcelamento para obter valor total e valor da 1ª parcela.
   const simulacao = await getDalDividaAtivaSimulacao(cdas, data, cpf)
@@ -270,25 +347,22 @@ async function EtapaRevisao({
     }
   }
 
-  // Rota de volta para o upload, usada pelo shell caso os documentos não sejam encontrados.
-  const rotaDocumentos = `/divida-ativa/parcelamento/requerimento?${new URLSearchParams(
-    {
-      ...searchParamsAtual,
-      etapa: 'documentos',
-    }
-  )}`
-
   return (
     <RevisarRequerimentoShell
+      nome={name}
+      cpf={cpf}
+      provedorLogin={provedorLogin}
+      urlContaIdentidade={urlContaIdentidadeCarioca()}
       cdas={cdas}
       qtdeParcelas={parcelas}
       dtVencimento={data}
       valor1aParcela={opcaoEscolhida?.valor1aParcela ?? null}
       valorTotal={valorTotal}
       debitosCdas={debitosCdas}
-      tipo={tipo as TipoSolicitante}
-      rotaVoltar={rotaVoltar}
-      rotaDocumentos={rotaDocumentos}
+      tipo={tipo}
+      rotaDocumentos={rotaVoltar}
+      rotaRequerente={rotaRequerente}
+      rotaCorrespondencia={rotaCorrespondencia}
     />
   )
 }

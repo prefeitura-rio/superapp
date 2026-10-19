@@ -1,8 +1,10 @@
 'use client'
 
 import {
+  type ConsultaAnterior,
   MODOS_CONSULTA,
   type ModoConsulta,
+  urlDebitos,
 } from '@/app/components/divida-ativa/modos-consulta'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
@@ -25,6 +27,8 @@ interface ConsultaParcelamentoFormProps {
    * cruzar a fronteira.
    */
   modo: ModoConsulta
+  /** Consulta de onde o cidadão voltou: o número reaparece no campo. */
+  consultaAnterior?: ConsultaAnterior
 }
 
 /**
@@ -40,13 +44,16 @@ interface ConsultaParcelamentoFormProps {
  */
 export function ConsultaParcelamentoForm({
   modo: modoId,
+  consultaAnterior,
 }: ConsultaParcelamentoFormProps) {
-  const router = useRouter()
-  const [valor, setValor] = useState('')
-  const [erro, setErro] = useState<string | null>(null)
-
   // A configuração é resolvida aqui, no cliente, a partir do id que veio do servidor.
   const modo = MODOS_CONSULTA[modoId]
+
+  const router = useRouter()
+  const [valor, setValor] = useState(() =>
+    consultaAnterior ? modo.formatar(consultaAnterior.valor) : ''
+  )
+  const [erro, setErro] = useState<string | null>(null)
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setValor(modo.formatar(event.target.value))
@@ -71,9 +78,7 @@ export function ConsultaParcelamentoForm({
       return
     }
 
-    router.push(
-      `/divida-ativa/parcelamento/debitos?${modo.parametro}=${digitos}`
-    )
+    router.push(urlDebitos(modo.parametro, digitos, consultaAnterior))
   }
 
   return (

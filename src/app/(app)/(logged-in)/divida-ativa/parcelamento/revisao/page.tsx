@@ -22,6 +22,10 @@ import { redirect } from 'next/navigation'
  *
  * O critério da consulta (`inscricao`, `cda` ou `execucaoFiscal`) segue na URL só para o Voltar
  * reconstruir a tela de débitos.
+ *
+ * Escolhas já feitas adiante (`data`, `parcelas`, `tipo`) também seguem: quem voltou até aqui
+ * e avança de novo as reencontra marcadas. O "Continuar" abre sempre a etapa da data
+ * (`?etapa=data`), mesmo com `?data=` na URL — é ela a tela seguinte.
  */
 export default async function RevisaoPage({
   searchParams,
@@ -83,7 +87,7 @@ export default async function RevisaoPage({
         <RevisaoPagamento
           revisao={revisao}
           cdas={cdas}
-          rotaContinuar={`/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`}
+          rotaContinuar={`/divida-ativa/parcelamento/simulacao?${new URLSearchParams({ ...searchParamsAtual, etapa: 'data' })}`}
         />
       )}
     </div>

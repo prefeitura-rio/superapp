@@ -101,3 +101,35 @@ export function parseModoConsulta(
 
   return MODOS_CONSULTA[valor as ModoConsulta] ?? null
 }
+
+/**
+ * A consulta de onde o cidadão voltou, ao sair da tela de débitos pelo Voltar.
+ *
+ * Só dados serializáveis: o objeto atravessa a fronteira Server → Client Component.
+ */
+export interface ConsultaAnterior {
+  /** Dígitos do número consultado — reaparece no campo, com a máscara. */
+  valor: string
+  /** O resto da URL de débitos (`cdas`, `data`, `parcelas`, `tipo`...). */
+  params: Record<string, string>
+}
+
+/**
+ * Endereço da tela de débitos para o número digitado.
+ *
+ * Se o cidadão voltou da tela de débitos e consulta **o mesmo número**, as escolhas que ele
+ * já tinha feito adiante seguem junto e reaparecem marcadas. Número diferente é consulta
+ * nova: nada do que foi escolhido para o outro número vale aqui.
+ */
+export function urlDebitos(
+  parametro: ModoConsultaConfig['parametro'],
+  digitos: string,
+  consultaAnterior?: ConsultaAnterior
+) {
+  const destino = new URLSearchParams(
+    consultaAnterior?.valor === digitos ? consultaAnterior.params : undefined
+  )
+  destino.set(parametro, digitos)
+
+  return `/divida-ativa/parcelamento/debitos?${destino}`
+}

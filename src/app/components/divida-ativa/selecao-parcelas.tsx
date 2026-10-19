@@ -155,7 +155,12 @@ export function SelecaoParcelas({
   const minimo = Math.min(...opcoes.map(opcao => opcao.qtdeParcelas))
   const maximo = Math.max(...opcoes.map(opcao => opcao.qtdeParcelas))
 
-  const daUrl = Number(searchParams.get('parcelas')) || null
+  // Só vale a quantidade que a simulação atual oferece: quem voltou e trocou a data (ou as
+  // CDAs) pode trazer na URL um ?parcelas= que deixou de existir.
+  const parcelasDaUrl = Number(searchParams.get('parcelas')) || null
+  const daUrl = opcoes.some(opcao => opcao.qtdeParcelas === parcelasDaUrl)
+    ? parcelasDaUrl
+    : null
   const daUrlEhOutra =
     daUrl !== null && !QUANTIDADES_PADRAO.includes(daUrl) && temOutras
 
@@ -212,6 +217,8 @@ export function SelecaoParcelas({
 
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('parcelas', String(parcelasSelecionadas))
+    // `?tipo=` fica, para a escolha do solicitante voltar marcada; a etapa recomeça do início.
+    destino.delete('etapa')
 
     // Próxima etapa: requerimento, com ?data= e ?parcelas= para montar o corpo da API.
     router.push(`/divida-ativa/parcelamento/requerimento?${destino}`)
@@ -219,9 +226,14 @@ export function SelecaoParcelas({
 
   return (
     <div className="flex flex-1 flex-col">
-      <h1 className="px-4 pt-2 pb-6 text-3xl font-medium leading-9 text-foreground">
+      <h1 className="px-4 pt-2 pb-2 text-3xl font-medium leading-9 text-foreground">
         Selecione em quantas parcelas você deseja pagar
       </h1>
+
+      <p className="px-4 pb-6 text-sm font-normal leading-5 text-foreground-light">
+        No caso de parcelamento, incidirá 1% ao mês de juros simples sobre as
+        parcelas, além da correção monetária anual pelo IPCA-E.
+      </p>
 
       <fieldset className="flex flex-col gap-2 px-4 pb-6">
         <legend className="sr-only">Número de parcelas</legend>

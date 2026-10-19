@@ -1,6 +1,10 @@
 'use client'
 
-import { MODOS_CONSULTA } from '@/app/components/divida-ativa/modos-consulta'
+import {
+  type ConsultaAnterior,
+  MODOS_CONSULTA,
+  urlDebitos,
+} from '@/app/components/divida-ativa/modos-consulta'
 import { SearchIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
@@ -22,6 +26,8 @@ interface ConsultaInscricaoFormProps {
    * simplesmente não aparece.
    */
   imoveis: ImovelDividaAtiva[]
+  /** Consulta de onde o cidadão voltou: a inscrição reaparece no campo. */
+  consultaAnterior?: ConsultaAnterior
 }
 
 const modo = MODOS_CONSULTA.inscricao
@@ -43,9 +49,14 @@ const modo = MODOS_CONSULTA.inscricao
  *
  * Client Component: toda a interatividade (máscara, filtro, seleção) precisa de estado.
  */
-export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
+export function ConsultaInscricaoForm({
+  imoveis,
+  consultaAnterior,
+}: ConsultaInscricaoFormProps) {
   const router = useRouter()
-  const [valor, setValor] = useState('')
+  const [valor, setValor] = useState(() =>
+    consultaAnterior ? formatarInscricaoImobiliaria(consultaAnterior.valor) : ''
+  )
   const [erro, setErro] = useState<string | null>(null)
   const [busca, setBusca] = useState('')
 
@@ -77,14 +88,12 @@ export function ConsultaInscricaoForm({ imoveis }: ConsultaInscricaoFormProps) {
       return
     }
 
-    router.push(`/divida-ativa/parcelamento/debitos?inscricao=${digitos}`)
+    router.push(urlDebitos('inscricao', digitos, consultaAnterior))
   }
 
   /** Selecionar um imóvel da lista navega direto, sem precisar clicar em "Continuar". */
   function selecionarImovel(imovel: ImovelDividaAtiva) {
-    router.push(
-      `/divida-ativa/parcelamento/debitos?inscricao=${imovel.inscricao}`
-    )
+    router.push(urlDebitos('inscricao', imovel.inscricao, consultaAnterior))
   }
 
   return (

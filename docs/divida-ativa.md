@@ -143,6 +143,13 @@ não conhece todas as regras de negócio. Duas divergências conhecidas:
 - **A consulta aceita três identificadores.** O contrato real cobre os três (e mais um, nº de
   guia de pagamento), mas exige a inscrição no path — então quem chega só com a carta de
   cobrança continua sem porta de entrada. Ver premissa P18.
+- **Dados do requerente e de correspondência não estão no Figma** (decidido em 19/10/2026).
+  O portal legado e a `api-imoveis` exigem telefone e e-mail do requerente e um endereço de
+  correspondência completo; sem eles a API recusa o requerimento. Pelo prazo, as telas foram
+  feitas pelo time e **aguardam aprovação ou ajuste do designer**. Ficam entre o vínculo e os
+  documentos — "Confirme seus dados" e "Endereço de correspondência" —, pré-preenchidas com o
+  perfil id.rio, e a revisão ganhou os blocos correspondentes com "Editar". Os dados ficam no
+  `sessionStorage`, não na URL (dado pessoal).
 
 ### Decisões de design fechadas (17/08/2026)
 
@@ -449,6 +456,24 @@ A reconciliação levantou coisas que nenhuma premissa previa:
   volta a ser problema, sem a solução em duas etapas que existia no papel.
 
 ### O passo de senha — decisão que muda o desenho da Fase 3
+
+> **Decidido em 19/10/2026: o requerimento pede a senha da conta Identidade Carioca**, como a
+> `poc_Imoveis` e o `reautenticar.jsp` do portal. "Requerer parcelamento", na revisão, abre o
+> bottom sheet "Declaração e confirmação" (`confirmacao-senha.tsx`): checkbox da declaração,
+> senha e "Assinar e enviar". A senha é pré-validada em `POST /divida-ativa/validar-senha`
+> (responde 200 também para senha errada — o resultado é `valida`) e vai no corpo do
+> requerimento, onde a API a revalida no Keycloak por password grant e **não** a repassa ao
+> DAM. A senha só atravessa o servidor Next em memória; nada dela vai para log.
+>
+> **Quem entra pelo gov.br** — em produção, todos (`kc_idp_hint=govbr`) — pode não ter senha
+> no Keycloak. A tela orienta sempre a usar a senha da Identidade Carioca e a criá-la em
+> "Minha conta" (console de conta do realm, aberto em nova aba); quando o token traz o
+> provedor, o aviso vem em destaque. ⚠️ O token só traz o provedor se o realm tiver o mapper
+> da nota de sessão `identity_provider` no client do superapp — pedir ao time do Keycloak.
+> Também é preciso **Direct Access Grants** habilitado no client da `api-imoveis`, e o realm
+> precisa permitir que o usuário vindo do gov.br defina senha pelo console de conta.
+>
+> O texto abaixo registra a análise que precedeu a decisão.
 
 Não estava em premissa nenhuma porque o contrato provisório não imaginava reautenticação.
 

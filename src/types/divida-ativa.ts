@@ -112,6 +112,12 @@ export interface DebitoDividaAtiva {
   protocoloRequerimentoAberto: string | null
   /** Inscrição a que a CDA pertence. Importa na busca por execução fiscal, que pode abranger mais de um imóvel. */
   inscricao: string | null
+  /**
+   * `tipoPessoa === '2'` no contrato: o devedor da CDA é pessoa jurídica. Com qualquer CDA PJ
+   * na seleção, a API exige CNPJ e registro/contrato social — exceto do atual
+   * proprietário/possuidor (vínculo 5). Só `'2'` tem significado confirmado; o resto é `false`.
+   */
+  devedorPessoaJuridica: boolean
 }
 
 /**

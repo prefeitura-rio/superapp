@@ -37,6 +37,7 @@ const CDA_2024: DebitoDividaAtiva = {
   parcelavel: true,
   protocoloRequerimentoAberto: null,
   inscricao: '00000018',
+  devedorPessoaJuridica: false,
 }
 
 const CDA_2023: DebitoDividaAtiva = {
@@ -201,6 +202,36 @@ describe('DebitosSelecao', () => {
     // O critério da consulta viaja junto: a tela seguinte precisa dele para repetir a consulta.
     expect(destino.searchParams.get('inscricao')).toBe('05217663')
     expect(destino.searchParams.get('cdas')).toBe('01/137861/2025-00')
+  })
+
+  test('CDA de pessoa jurídica na seleção leva ?pj=1; sem ela, o parâmetro sai', async () => {
+    const user = userEvent.setup()
+    const cdaPj = {
+      ...CDA_2023,
+      numeroCda: '01/999999/2024-00',
+      devedorPessoaJuridica: true,
+    }
+    searchParams = new URLSearchParams('inscricao=05217663&pj=1')
+    const { unmount } = render(<DebitosSelecao cdas={[CDA_2024, cdaPj]} />)
+
+    await user.click(
+      screen.getByRole('checkbox', { name: /01\/999999\/2024-00/ })
+    )
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+    expect(
+      new URL(push.mock.calls[0][0], 'https://pref.rio').searchParams.get('pj')
+    ).toBe('1')
+
+    unmount()
+    push.mockClear()
+    render(<DebitosSelecao cdas={[CDA_2024, cdaPj]} />)
+    await user.click(
+      screen.getByRole('checkbox', { name: /01\/137861\/2025-00/ })
+    )
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+    expect(
+      new URL(push.mock.calls[0][0], 'https://pref.rio').searchParams.has('pj')
+    ).toBe(false)
   })
 
   test('várias CDAs viajam separadas por vírgula, na ordem da lista', async () => {

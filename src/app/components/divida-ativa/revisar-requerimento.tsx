@@ -3,15 +3,24 @@
 import { enviarRequerimento } from '@/actions/divida-ativa/enviar-requerimento'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import {
+  formatarCep,
   formatarInscricaoImobiliaria,
   formatarValorBRL,
   rotuloNatureza,
 } from '@/lib/divida-ativa-utils'
+import type { ProvedorLogin } from '@/lib/provedor-login'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
-import toast from 'react-hot-toast'
-import type { TipoSolicitante } from './escolha-tipo-solicitante'
+import { useState } from 'react'
+import { ConfirmacaoSenhaSheet } from './confirmacao-senha'
+import type {
+  DadosCorrespondencia,
+  DadosRequerente,
+} from './dados-requerimento-schema'
+import { limparDadosRequerimento } from './dados-requerimento-storage'
+import { limparDocumentos } from './documentos-requerimento-storage'
+import type { TipoSolicitante } from './tipos-solicitante'
 
 interface ArquivoAnexado {
   tipo: string
@@ -45,8 +54,16 @@ interface RevisarRequerimentoProps {
   debitosCdas: DebitoDividaAtiva[]
   tipo: TipoSolicitante
   documentos: ArquivoAnexado[]
-  /** Rota de volta para a etapa de documentos. */
-  rotaVoltar: string
+  requerente: DadosRequerente
+  correspondencia: DadosCorrespondencia
+  /** Etapas de cada bloco de dados, para o "Editar". */
+  rotaRequerente: string
+  rotaCorrespondencia: string
+  /** Quem está logado — aparece na declaração, como no portal legado. */
+  nome: string
+  cpf: string
+  provedorLogin: ProvedorLogin
+  urlContaIdentidade: string | null
 }
 
 /**
@@ -69,6 +86,35 @@ function Linha({
   )
 }
 
+/** Card de um bloco de dados com o atalho "Editar" para a etapa onde ele foi preenchido. */
+function BlocoDados({
+  titulo,
+  rotaEditar,
+  children,
+}: {
+  titulo: string
+  rotaEditar: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mb-3 flex flex-col gap-1 rounded-2xl bg-card p-4">
+      <div className="flex items-center justify-between gap-2 pb-1">
+        <h2 className="text-sm font-medium leading-5 text-foreground">
+          {titulo}
+        </h2>
+        <Link
+          href={rotaEditar}
+          className="text-sm font-normal leading-5 text-primary"
+          aria-label={`Editar ${titulo.toLowerCase()}`}
+        >
+          Editar
+        </Link>
+      </div>
+      {children}
+    </section>
+  )
+}
+
 /**
  * "Revise sua solicitação de parcelamento" — tela 10.
  *
@@ -76,7 +122,12 @@ function Linha({
  * parcelas (CDA, parcela N/total, valor). O botão "Requerer parcelamento" dispara a server
  * action.
  *
- * O botão fica travado durante o envio para evitar requerimento duplo.
+ * Os blocos "Seus dados" e "Correspondência" não estão no Figma (as etapas que os preenchem
+ * também não): mostram o que vai no pedido, cada um com "Editar" para a sua etapa.
+ *
+ * "Requerer parcelamento" abre a declaração e a confirmação de senha (`ConfirmacaoSenhaSheet`);
+ * o envio só acontece de lá, com a senha pré-validada e o aceite marcado. O botão de envio
+ * fica travado durante a chamada para evitar requerimento duplo.
  */
 export function RevisarRequerimento({
   cdas,
@@ -87,10 +138,17 @@ export function RevisarRequerimento({
   debitosCdas,
   tipo,
   documentos,
-  rotaVoltar,
+  requerente,
+  correspondencia,
+  rotaRequerente,
+  rotaCorrespondencia,
+  nome,
+  cpf,
+  provedorLogin,
+  urlContaIdentidade,
 }: RevisarRequerimentoProps) {
   const router = useRouter()
-  const [enviando, startTransition] = useTransition()
+  const [confirmando, setConfirmando] = useState(false)
 
   // Monta os "cards" do carrossel: uma entrada por CDA × (não é parcelamento de múltiplas
   // datas, então o número de parcela é sequencial 1 → N em cada CDA).
@@ -103,32 +161,38 @@ export function RevisarRequerimento({
     valor: valor1aParcela,
   }))
 
-  function enviar() {
-    if (enviando) return
-
-    startTransition(async () => {
-      const resultado = await enviarRequerimento({
-        cdas,
-        qtdeParcelas: String(qtdeParcelas),
-        dtVencimento,
-        valor1aParcela: valor1aParcela ? String(valor1aParcela) : undefined,
-        descVinculoRequerente: tipo,
-        documentos: documentos.map(doc => ({
-          tipo: doc.tipo,
-          nomeArquivo: doc.nomeArquivo,
-          conteudoBase64: doc.conteudoBase64,
-        })),
-      })
-
-      if (!resultado.success) {
-        toast.error(resultado.error)
-        return
-      }
-
-      router.push(
-        `/divida-ativa/parcelamento/requerimento/sucesso?protocolo=${encodeURIComponent(resultado.data.protocolo)}`
-      )
+  /** Envia com a senha confirmada; devolve a mensagem de erro para o sheet, ou `null`. */
+  async function enviar(senha: string): Promise<string | null> {
+    const resultado = await enviarRequerimento({
+      cdas,
+      qtdeParcelas: String(qtdeParcelas),
+      dtVencimento,
+      valor1aParcela: valor1aParcela ? String(valor1aParcela) : undefined,
+      tipo,
+      requerente,
+      correspondencia,
+      documentos: documentos.map(doc => ({
+        tipo: doc.tipo,
+        nomeArquivo: doc.nomeArquivo,
+        conteudoBase64: doc.conteudoBase64,
+      })),
+      senha,
+      declaracaoAceita: true,
     })
+
+    if (!resultado.success) return resultado.error
+
+    // Enviado: anexos e dados não servem a outro requerimento.
+    limparDocumentos()
+    limparDadosRequerimento()
+
+    const { protocolo, prazo, urlComprovante } = resultado.data
+    const destino = new URLSearchParams({ protocolo })
+    if (prazo) destino.set('prazo', prazo)
+    if (urlComprovante) destino.set('comprovante', urlComprovante)
+    router.push(`/divida-ativa/parcelamento/requerimento/sucesso?${destino}`)
+
+    return null
   }
 
   // Dados da primeira CDA para o card de informações (o Figma mostra uma CDA de referência).
@@ -197,6 +261,35 @@ export function RevisarRequerimento({
         )}
       </div>
 
+      <div className="px-4">
+        <BlocoDados titulo="Seus dados" rotaEditar={rotaRequerente}>
+          <Linha rotulo="Telefone" valor={requerente.telefone} />
+          <Linha rotulo="E-mail" valor={requerente.email} />
+        </BlocoDados>
+
+        <BlocoDados titulo="Correspondência" rotaEditar={rotaCorrespondencia}>
+          <Linha rotulo="Nome" valor={correspondencia.nome} />
+          <Linha
+            rotulo={correspondencia.tipoPessoa === 'JURIDICA' ? 'CNPJ' : 'CPF'}
+            valor={correspondencia.documento}
+          />
+          <Linha
+            rotulo="Endereço"
+            valor={[
+              `${correspondencia.logradouro}, ${correspondencia.numero}`,
+              correspondencia.complemento,
+              correspondencia.bairro,
+              `${correspondencia.municipio}/${correspondencia.uf.toUpperCase()}`,
+              `CEP ${formatarCep(correspondencia.cep)}`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          />
+          <Linha rotulo="Telefone" valor={correspondencia.telefone} />
+          <Linha rotulo="E-mail" valor={correspondencia.email} />
+        </BlocoDados>
+      </div>
+
       {/* Carrossel de parcelas por CDA — rola na horizontal */}
       <div className="mb-3 px-4">
         <h2 className="pb-3 text-base font-medium leading-6 text-foreground">
@@ -243,12 +336,21 @@ export function RevisarRequerimento({
           variant="primary"
           size="lg"
           fullWidth
-          loading={enviando}
-          onClick={enviar}
+          onClick={() => setConfirmando(true)}
         >
           Requerer parcelamento
         </CustomButton>
       </div>
+
+      <ConfirmacaoSenhaSheet
+        aberto={confirmando}
+        onAbertoChange={setConfirmando}
+        nome={nome}
+        cpf={cpf}
+        provedorLogin={provedorLogin}
+        urlContaIdentidade={urlContaIdentidade}
+        onConfirmar={enviar}
+      />
     </div>
   )
 }

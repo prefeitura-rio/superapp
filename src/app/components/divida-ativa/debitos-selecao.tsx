@@ -9,6 +9,13 @@ import { useState } from 'react'
 /** Onde a seleção viaja na URL, aqui e na tela seguinte. */
 const PARAM_CDAS = 'cdas'
 
+/**
+ * `pj=1` quando alguma CDA escolhida é de pessoa jurídica. Só orienta a tela de documentos a
+ * pedir CNPJ e contrato social de antemão — quem decide é a API, que reconsulta as CDAs no
+ * envio. Editar a URL não burla nada; no máximo esconde campos que a API vai cobrar.
+ */
+const PARAM_PJ = 'pj'
+
 interface DebitosSelecaoProps {
   cdas: DebitoDividaAtiva[]
 }
@@ -73,6 +80,15 @@ export function DebitosSelecao({ cdas }: DebitosSelecaoProps) {
     // revisão precisa dele para repetir a consulta e chegar ao mesmo conjunto de CDAs.
     const destino = new URLSearchParams(searchParams)
     destino.set(PARAM_CDAS, escolhidas.join(','))
+    if (
+      cdas.some(
+        cda => selecionadas.has(cda.numeroCda) && cda.devedorPessoaJuridica
+      )
+    ) {
+      destino.set(PARAM_PJ, '1')
+    } else {
+      destino.delete(PARAM_PJ)
+    }
 
     // Próxima etapa: revisão das informações de pagamento, antes da simulação (data +
     // parcelas). "Continuar" aqui não simula nada ainda — só confirma a seleção.

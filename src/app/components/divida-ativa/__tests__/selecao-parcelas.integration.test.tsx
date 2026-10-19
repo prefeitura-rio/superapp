@@ -117,6 +117,57 @@ describe('SelecaoParcelas', () => {
     expect(destino.searchParams.get('cdas')).toBe('01/140646/2026-00')
   })
 
+  test('explica os juros e a correção do parcelamento, como no Figma', () => {
+    renderizar()
+
+    expect(
+      screen.getByText(
+        'No caso de parcelamento, incidirá 1% ao mês de juros simples sobre as parcelas, além da correção monetária anual pelo IPCA-E.'
+      )
+    ).toBeInTheDocument()
+  })
+
+  test('voltando do requerimento, a quantidade escolhida reaparece marcada', () => {
+    searchParams = new URLSearchParams('parcelas=2')
+    renderizar()
+
+    expect(screen.getByRole('radio', { name: /2x/ })).toBeChecked()
+    expect(screen.getByRole('button', { name: 'Continuar' })).toBeEnabled()
+  })
+
+  // Quem voltou e trocou a data pode trazer uma quantidade que a nova simulação não tem.
+  test('?parcelas= que a simulação não oferece não fica marcado', () => {
+    searchParams = new URLSearchParams('parcelas=12')
+    renderizar()
+
+    expect(screen.queryByRole('radio', { checked: true })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+  })
+
+  test('"Continuar" recomeça o requerimento na primeira etapa, mantendo o tipo escolhido', async () => {
+    const user = userEvent.setup()
+    render(
+      <SelecaoParcelas
+        opcoes={OPCOES}
+        valorTotalAvista={1696.61}
+        valorGrerj={null}
+        searchParamsAtual={{
+          ...PARAMS,
+          data: '15/10/2026',
+          etapa: 'documentos',
+          tipo: 'CONTRIBUINTE',
+        }}
+      />
+    )
+
+    await user.click(screen.getByRole('radio', { name: /2x/ }))
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+    const destino = new URL(push.mock.calls[0][0], 'http://x')
+    expect(destino.searchParams.has('etapa')).toBe(false)
+    expect(destino.searchParams.get('tipo')).toBe('CONTRIBUINTE')
+  })
+
   test('desconto só aparece quando o DAM concede algum', () => {
     renderizar([{ ...OPCOES[0], valorDescontos: 100 }, OPCOES[1]])
 

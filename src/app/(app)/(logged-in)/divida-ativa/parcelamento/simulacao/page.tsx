@@ -35,11 +35,16 @@ import { redirect } from 'next/navigation'
  * Imóveis: servem quem chegou pela inscrição, pela CDA ou pela execução fiscal. O critério
  * da consulta segue na URL só para o Voltar reconstruir a tela de revisão.
  *
- * ### Voltar vai para a revisão, não para a seleção de débitos
+ * ### Navegação e o que se preserva
  *
- * `/parcelamento/revisao` passou a ficar entre a seleção de débitos e esta simulação. O
- * "Voltar" da etapa 1 (sem `?data=`) leva para lá, e é a revisão quem decide se volta mais
- * um passo, até a seleção de débitos.
+ * - Voltar das parcelas → etapa 1 com `?data=` e `?etapa=data`: a data escolhida volta
+ *   marcada. Sem o `?etapa=data`, a presença de `?data=` mostraria as parcelas de novo.
+ * - Voltar da etapa 1 → revisão de pagamento, levando `?data=` e `?parcelas=` — quando o
+ *   cidadão avança de novo, as escolhas reaparecem.
+ * - `?parcelas=` só volta marcado se a simulação da data atual ainda o oferecer.
+ *
+ * `/parcelamento/revisao` fica entre a seleção de débitos e esta simulação; é ela quem
+ * decide se volta mais um passo, até a seleção de débitos.
  */
 export default async function SimulacaoPage({
   searchParams,
@@ -50,11 +55,15 @@ export default async function SimulacaoPage({
     execucaoFiscal?: string
     cdas?: string
     data?: string
+    parcelas?: string
+    etapa?: string
   }>
 }) {
   const params = await searchParams
-  console.log('SimulacaoPage searchParams', params)
-  const { data, ...outrosParams } = params
+  // `etapa` é desta rota (`data` reabre a etapa 1) e não segue adiante; `data` entra ou sai
+  // conforme a etapa.
+  const { data, etapa, ...outrosParams } = params
+  const etapaParcelas = Boolean(data) && etapa !== 'data'
 
   // Sem critério de busca: o cidadão chegou aqui sem passar pela entrada do parcelamento.
   const temCriterio = params.inscricao || params.cda || params.execucaoFiscal
@@ -70,10 +79,12 @@ export default async function SimulacaoPage({
   )
   // Volta para a revisão (não para a seleção de débitos): entre as duas passou a existir a
   // etapa "Revise as informações de pagamento", e é ela quem antecede a simulação agora.
-  const rotaRevisao = `/divida-ativa/parcelamento/revisao?${new URLSearchParams(searchParamsAtual)}`
+  // A data vai junto para reaparecer marcada quando o cidadão avançar de novo.
+  const rotaRevisao = `/divida-ativa/parcelamento/revisao?${new URLSearchParams(
+    data ? { ...searchParamsAtual, data } : searchParamsAtual
+  )}`
 
   const cdas = (params.cdas ?? '').split(',').filter(Boolean)
-  console.log('SimulacaoPage cdas', cdas)
   // Sem CDA selecionada não há o que simular: volta para a revisão, que por sua vez volta
   // para a seleção de débitos se também não tiver CDA.
   if (cdas.length === 0) {
@@ -81,11 +92,12 @@ export default async function SimulacaoPage({
   }
 
   // Rota de retorno:
-  // - etapa 2 (com ?data=) volta à etapa 1 (sem ?data=)
+  // - etapa 2 volta à etapa 1, com a data escolhida marcada
   // - etapa 1 volta à revisão
-  const rotaVoltar = data
-    ? `/divida-ativa/parcelamento/simulacao?${new URLSearchParams(searchParamsAtual)}`
-    : rotaRevisao
+  const rotaVoltar =
+    etapaParcelas && data
+      ? `/divida-ativa/parcelamento/simulacao?${new URLSearchParams({ ...searchParamsAtual, data, etapa: 'data' })}`
+      : rotaRevisao
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -96,7 +108,7 @@ export default async function SimulacaoPage({
         forceRoute
       />
 
-      {data ? (
+      {etapaParcelas && data ? (
         <EtapaParcelas
           cdas={cdas}
           data={data}
@@ -157,8 +169,6 @@ async function EtapaParcelas({
 }) {
   const { cpf } = await getUserInfoFromToken()
   const simulacao = await getDalDividaAtivaSimulacao(cdas, data, cpf)
-
-  console.log('Simulação de parcelamento', simulacao)
 
   if (simulacao.situacao === 'recusada') {
     return (

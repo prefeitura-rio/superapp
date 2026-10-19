@@ -272,3 +272,91 @@ export function rotuloNatureza(natureza: string | null): string | null {
 
   return rotulo || null
 }
+
+// ── Dados do requerente e de correspondência ─────────────────────────────────────────
+//
+// Como a inscrição, CPF, CNPJ, telefone e CEP trafegam **só com dígitos**; as máscaras são
+// exibição. Aplicadas a cada tecla, aceitam valor parcial sem produzir lixo.
+
+/** `000.000.000-00`, progressiva. */
+export function formatarCpf(valor: string): string {
+  return somenteDigitos(valor)
+    .slice(0, 11)
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2')
+}
+
+/** `00.000.000/0000-00`, progressiva. */
+export function formatarCnpj(valor: string): string {
+  return somenteDigitos(valor)
+    .slice(0, 14)
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+/** `(00) 0000-0000` ou `(00) 00000-0000`, progressiva. */
+export function formatarTelefone(valor: string): string {
+  const digitos = somenteDigitos(valor).slice(0, 11)
+  if (digitos.length <= 2) return digitos.replace(/^(\d+)/, '($1')
+
+  const ddd = digitos.slice(0, 2)
+  const numero = digitos.slice(2)
+  const corte = digitos.length === 11 ? 5 : 4
+  const corpo =
+    numero.length > corte
+      ? `${numero.slice(0, corte)}-${numero.slice(corte)}`
+      : numero
+
+  return `(${ddd}) ${corpo}`
+}
+
+/** `00000-000`, progressiva. */
+export function formatarCep(valor: string): string {
+  return somenteDigitos(valor)
+    .slice(0, 8)
+    .replace(/^(\d{5})(\d)/, '$1-$2')
+}
+
+/** Dígito verificador de CPF/CNPJ: soma ponderada módulo 11. */
+function digitoVerificador(digitos: string, pesos: number[]): number {
+  const soma = pesos.reduce(
+    (acc, peso, i) => acc + Number(digitos[i]) * peso,
+    0
+  )
+  const resto = soma % 11
+
+  return resto < 2 ? 0 : 11 - resto
+}
+
+/** CPF com 11 dígitos e verificadores corretos. Sequências repetidas são recusadas. */
+export function isCpfValido(valor: string): boolean {
+  const d = somenteDigitos(valor)
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false
+
+  const dv1 = digitoVerificador(d, [10, 9, 8, 7, 6, 5, 4, 3, 2])
+  const dv2 = digitoVerificador(d, [11, 10, 9, 8, 7, 6, 5, 4, 3, 2])
+
+  return dv1 === Number(d[9]) && dv2 === Number(d[10])
+}
+
+/** CNPJ com 14 dígitos e verificadores corretos. Sequências repetidas são recusadas. */
+export function isCnpjValido(valor: string): boolean {
+  const d = somenteDigitos(valor)
+  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false
+
+  const dv1 = digitoVerificador(d, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+  const dv2 = digitoVerificador(d, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+
+  return dv1 === Number(d[12]) && dv2 === Number(d[13])
+}
+
+/** Telefone brasileiro com DDD: 10 dígitos (fixo) ou 11 (celular, começando por 9). */
+export function isTelefoneValido(valor: string): boolean {
+  const d = somenteDigitos(valor)
+  if (d.length === 10) return true
+
+  return d.length === 11 && d[2] === '9'
+}

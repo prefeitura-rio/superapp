@@ -329,9 +329,8 @@ function contagemOuNull(valor: string | undefined): number | null {
  * versão anterior deste tipo traduzia para um enum nosso, o que seria reimplementar no front
  * uma classificação que é do DAM.
  *
- * `nomeContribuinte` e `tipoPessoa` existem na resposta e são descartados de propósito, pelo
- * mesmo motivo que `mapApiToImovel` descarta `cpf`: dado pessoal não atravessa a fronteira
- * sem uma tela que o exija.
+ * `tipoPessoa` vira só um booleano (`devedorPessoaJuridica`): é o que decide os documentos
+ * empresariais do requerimento, e só o código `'2'` tem significado confirmado.
  */
 export function mapApiToDebito(api: CdaResponse): DebitoDividaAtiva {
   return {
@@ -349,6 +348,7 @@ export function mapApiToDebito(api: CdaResponse): DebitoDividaAtiva {
     parcelavel: api.selecionavelParcelamento ?? false,
     protocoloRequerimentoAberto: textoOuNull(api.protocoloRequerimentoAberto),
     inscricao: textoOuNull(api.inscricaoImobiliaria),
+    devedorPessoaJuridica: api.tipoPessoa?.trim() === '2',
   }
 }
 

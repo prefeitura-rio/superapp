@@ -32,6 +32,7 @@ export default async function DebitosPage({
     inscricao?: string
     cda?: string
     execucaoFiscal?: string
+    cdas?: string
   }>
 }) {
   const params = await searchParams
@@ -43,15 +44,18 @@ export default async function DebitosPage({
     redirect('/divida-ativa/parcelamento')
   }
 
-  // Volta para o formulário do modo usado — preserva o ?modo= para o cidadão não perder
-  // o contexto (ex: voltou de débitos e ainda está na aba "Inscrição imobiliária").
-  const modoVoltar =
-    criterio.tipo === 'inscricao'
-      ? 'inscricao'
-      : criterio.tipo === 'cda'
-        ? 'cda'
-        : 'execucao-fiscal'
-  const rotaVoltar = `/divida-ativa/parcelamento?modo=${modoVoltar}`
+  // Volta para o formulário do modo usado, com o número consultado e as escolhas já feitas
+  // adiante (`cdas`, `data`...) — o campo reaparece preenchido e, se o cidadão consultar o
+  // mesmo número, a seleção volta marcada.
+  const paramsAtuais = Object.fromEntries(
+    Object.entries(params).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string'
+    )
+  )
+  const rotaVoltar = `/divida-ativa/parcelamento?${new URLSearchParams({
+    modo: criterio.tipo,
+    ...paramsAtuais,
+  })}`
 
   const { cpf } = await getUserInfoFromToken()
 

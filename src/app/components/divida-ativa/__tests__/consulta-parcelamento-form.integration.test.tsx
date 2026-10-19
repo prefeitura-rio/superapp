@@ -189,6 +189,63 @@ describe('ConsultaParcelamentoForm', () => {
     })
   })
 
+  describe('voltando da tela de débitos', () => {
+    const anterior = {
+      valor: '05217663',
+      params: { cdas: '01/140646/2026-00', data: '15/10/2026' },
+    }
+
+    test('o número consultado reaparece no campo, com a máscara', () => {
+      render(
+        <ConsultaParcelamentoForm
+          modo="inscricao"
+          consultaAnterior={anterior}
+        />
+      )
+
+      expect(screen.getByLabelText('N° da Inscrição Imobiliária')).toHaveValue(
+        '0.521.766-3'
+      )
+    })
+
+    test('consultar o mesmo número leva junto as escolhas já feitas', async () => {
+      const user = userEvent.setup()
+      render(
+        <ConsultaParcelamentoForm
+          modo="inscricao"
+          consultaAnterior={anterior}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+      const destino = new URL(push.mock.calls[0][0], 'http://x')
+      expect(destino.pathname).toBe('/divida-ativa/parcelamento/debitos')
+      expect(destino.searchParams.get('inscricao')).toBe('05217663')
+      expect(destino.searchParams.get('cdas')).toBe('01/140646/2026-00')
+      expect(destino.searchParams.get('data')).toBe('15/10/2026')
+    })
+
+    test('outro número é consulta nova, sem as escolhas anteriores', async () => {
+      const user = userEvent.setup()
+      render(
+        <ConsultaParcelamentoForm
+          modo="inscricao"
+          consultaAnterior={anterior}
+        />
+      )
+
+      const campo = screen.getByLabelText('N° da Inscrição Imobiliária')
+      await user.clear(campo)
+      await user.type(campo, '1234567')
+      await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+      expect(push).toHaveBeenCalledWith(
+        '/divida-ativa/parcelamento/debitos?inscricao=1234567'
+      )
+    })
+  })
+
   test('exige o campo preenchido antes de consultar', async () => {
     const user = userEvent.setup()
     render(<ConsultaParcelamentoForm modo="inscricao" />)

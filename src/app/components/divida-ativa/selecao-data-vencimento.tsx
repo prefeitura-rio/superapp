@@ -25,7 +25,8 @@ interface SelecaoDataVencimentoProps {
  * `ParcelamentoSimularRequest.dataVencimento`.
  *
  * O estado da URL é compartilhável: cidadão que compartilha o link reencontra a mesma
- * seleção. O botão Voltar devolve esta tela com a data já marcada.
+ * seleção. O Voltar das parcelas devolve esta tela com `?data=` e `?etapa=data`, e a data
+ * já escolhida volta marcada.
  *
  * Client Component porque `radio` precisa de `onChange`.
  */
@@ -46,6 +47,9 @@ export function SelecaoDataVencimento({
 
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('data', dataSelecionada)
+    // `?etapa=data` é o que reabre esta etapa com a data marcada; sem ele, a rota mostra as
+    // parcelas. `?parcelas=` fica: se a quantidade ainda existir na nova data, volta marcada.
+    destino.delete('etapa')
 
     // Próxima etapa: quantidade de parcelas, na mesma rota com ?data=.
     router.push(`/divida-ativa/parcelamento/simulacao?${destino}`)

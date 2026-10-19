@@ -2,19 +2,7 @@
 
 import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-/**
- * Os cinco tipos de solicitante que o DAM aceita.
- *
- * O valor string é o que vai em `descVinculoRequerente` no corpo do requerimento e em
- * `?tipo=` na URL — mantidos em inglês para não depender de copy que pode mudar.
- */
-export type TipoSolicitante =
-  | 'PESSOA_FISICA'
-  | 'PESSOA_JURIDICA'
-  | 'SOCIEDADE_ANONIMA'
-  | 'PROCURADOR'
-  | 'OUTRO'
+import type { TipoSolicitante } from './tipos-solicitante'
 
 interface OpcaoTipo {
   tipo: TipoSolicitante
@@ -24,31 +12,25 @@ interface OpcaoTipo {
 
 const OPCOES: OpcaoTipo[] = [
   {
-    tipo: 'PESSOA_FISICA',
-    titulo: 'Pessoa Física',
-    descricao:
-      'O próprio contribuinte, sócio responsável, procurador ou atual proprietário/possuidor',
+    tipo: 'CONTRIBUINTE',
+    titulo: 'O próprio contribuinte',
+    descricao: 'Você é a pessoa que consta na CDA como devedora',
   },
   {
-    tipo: 'PESSOA_JURIDICA',
-    titulo: 'Pessoa Jurídica',
-    descricao: null,
-  },
-  {
-    tipo: 'SOCIEDADE_ANONIMA',
-    titulo: 'Sociedade anônima',
-    descricao: null,
+    tipo: 'SOCIO_RESPONSAVEL',
+    titulo: 'Sócio responsável',
+    descricao: 'Você responde pela empresa que consta na CDA como devedora',
   },
   {
     tipo: 'PROCURADOR',
     titulo: 'Procurador',
-    descricao: null,
+    descricao: 'Você representa o contribuinte por meio de procuração',
   },
   {
-    tipo: 'OUTRO',
-    titulo: 'Outro',
+    tipo: 'PROPRIETARIO_POSSUIDOR',
+    titulo: 'Atual proprietário/possuidor',
     descricao:
-      'Quando o atual proprietário do imóvel é diferente do constante na CDA ou inscrição imobiliária',
+      'O imóvel é seu hoje, mas a CDA ou a inscrição imobiliária está em nome de outra pessoa',
   },
 ]
 
@@ -58,7 +40,7 @@ interface EscolhaTipoSolicitanteProps {
 }
 
 /**
- * "Escolha o tipo de solicitante" — primeira etapa do requerimento de parcelamento.
+ * "Escolha o tipo de vínculo" — primeira etapa do requerimento de parcelamento.
  *
  * A escolha define quais documentos serão exigidos na etapa seguinte. O tipo vai em
  * `?tipo=` na URL para a etapa de documentos conseguir mostrar a lista correta, e no envio
@@ -70,10 +52,12 @@ export function EscolhaTipoSolicitante({
   searchParamsAtual,
 }: EscolhaTipoSolicitanteProps) {
   const router = useRouter()
+  // Quem voltou da etapa seguinte encontra marcado o tipo que tinha escolhido.
+  const tipoAtual = searchParamsAtual.tipo
 
   function escolher(tipo: TipoSolicitante) {
     const destino = new URLSearchParams(searchParamsAtual)
-    destino.set('etapa', 'documentos')
+    destino.set('etapa', 'requerente')
     destino.set('tipo', tipo)
     router.push(`/divida-ativa/parcelamento/requerimento?${destino}`)
   }
@@ -81,14 +65,12 @@ export function EscolhaTipoSolicitante({
   return (
     <div className="flex flex-1 flex-col px-4">
       <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 text-foreground">
-        Escolha o tipo de solicitante
+        Escolha o tipo de vínculo
       </h1>
 
       <p className="pb-6 text-sm font-normal leading-5 text-foreground-light">
-        Indique quem está solicitando o parcelamento: Pessoa Física, Pessoa
-        Jurídica, Sociedade Anônima, Procurador ou Outro.
-        <br />
-        Em seguida, anexe a documentação exigida.
+        Indique qual é a sua relação com o débito que será parcelado. Em
+        seguida, anexe a documentação exigida para esse vínculo.
       </p>
 
       <ul className="flex flex-col gap-2">
@@ -97,7 +79,12 @@ export function EscolhaTipoSolicitante({
             <button
               type="button"
               onClick={() => escolher(tipo)}
-              className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl bg-card p-4 text-left transition-colors hover:bg-secondary"
+              aria-current={tipoAtual === tipo ? 'true' : undefined}
+              className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl p-4 text-left transition-colors ${
+                tipoAtual === tipo
+                  ? 'bg-primary/10 ring-2 ring-primary'
+                  : 'bg-card hover:bg-secondary'
+              }`}
             >
               <span className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium leading-5 text-foreground">

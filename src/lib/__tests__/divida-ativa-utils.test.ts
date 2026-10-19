@@ -1,12 +1,19 @@
 import {
   cdaParaApi,
   formatarCda,
+  formatarCep,
+  formatarCnpj,
+  formatarCpf,
   formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
+  formatarTelefone,
   formatarValorBRL,
   inscricaoParaApi,
   isCdaValida,
+  isCnpjValido,
+  isCpfValido,
   isExecucaoFiscalValida,
+  isTelefoneValido,
   rotuloNatureza,
   somenteDigitos,
 } from '@/lib/divida-ativa-utils'
@@ -244,5 +251,40 @@ describe('rotuloNatureza', () => {
   test('returns null when there is nothing to show', () => {
     expect(rotuloNatureza(null)).toBeNull()
     expect(rotuloNatureza('  ')).toBeNull()
+  })
+})
+
+describe('dados do requerente e de correspondência', () => {
+  test('máscaras progressivas de CPF, CNPJ, telefone e CEP', () => {
+    expect(formatarCpf('5294')).toBe('529.4')
+    expect(formatarCpf('52998224725')).toBe('529.982.247-25')
+    expect(formatarCnpj('112223')).toBe('11.222.3')
+    expect(formatarCnpj('11222333000181')).toBe('11.222.333/0001-81')
+    expect(formatarTelefone('21')).toBe('(21')
+    expect(formatarTelefone('212345')).toBe('(21) 2345')
+    expect(formatarTelefone('2123456789')).toBe('(21) 2345-6789')
+    expect(formatarTelefone('21987654321')).toBe('(21) 98765-4321')
+    expect(formatarCep('20541')).toBe('20541')
+    expect(formatarCep('20541190')).toBe('20541-190')
+  })
+
+  test('CPF: verificadores e sequências repetidas', () => {
+    expect(isCpfValido('529.982.247-25')).toBe(true)
+    expect(isCpfValido('529.982.247-24')).toBe(false)
+    expect(isCpfValido('111.111.111-11')).toBe(false)
+    expect(isCpfValido('5299822472')).toBe(false)
+  })
+
+  test('CNPJ: verificadores e sequências repetidas', () => {
+    expect(isCnpjValido('11.222.333/0001-81')).toBe(true)
+    expect(isCnpjValido('11.222.333/0001-80')).toBe(false)
+    expect(isCnpjValido('00.000.000/0000-00')).toBe(false)
+  })
+
+  test('telefone: fixo com 10 dígitos, celular com 11 começando por 9', () => {
+    expect(isTelefoneValido('(21) 2345-6789')).toBe(true)
+    expect(isTelefoneValido('(21) 98765-4321')).toBe(true)
+    expect(isTelefoneValido('(21) 88765-4321')).toBe(false)
+    expect(isTelefoneValido('(21) 2345-678')).toBe(false)
   })
 })

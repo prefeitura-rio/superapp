@@ -1,23 +1,32 @@
 'use client'
 
+import type { ProvedorLogin } from '@/lib/provedor-login'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import type { TipoSolicitante } from './escolha-tipo-solicitante'
+import {
+  type DadosCorrespondencia,
+  type DadosRequerente,
+  dadosCorrespondenciaSchema,
+  dadosRequerenteSchema,
+} from './dados-requerimento-schema'
+import {
+  lerDadosCorrespondencia,
+  lerDadosRequerente,
+} from './dados-requerimento-storage'
+import {
+  type ArquivoAnexado,
+  lerDocumentos,
+} from './documentos-requerimento-storage'
 import { RevisarRequerimento } from './revisar-requerimento'
-import { SimulacaoAviso } from './simulacao-aviso'
-
-/** Chave usada por `AnexarDocumentos` ao salvar e por este componente ao ler. */
-export const CHAVE_DOCUMENTOS_SESSION = 'divida-ativa:requerimento:documentos'
-
-interface ArquivoAnexado {
-  tipo: string
-  nomeArquivo: string
-  conteudoBase64: string
-  tamanho: number
-}
+import type { TipoSolicitante } from './tipos-solicitante'
 
 interface RevisarRequerimentoShellProps {
+  /** Quem está logado e como entrou — para a declaração e a confirmação de senha. */
+  nome: string
+  cpf: string
+  provedorLogin: ProvedorLogin
+  urlContaIdentidade: string | null
   cdas: string[]
   qtdeParcelas: number
   dtVencimento: string
@@ -25,24 +34,35 @@ interface RevisarRequerimentoShellProps {
   valorTotal: number | null
   debitosCdas: DebitoDividaAtiva[]
   tipo: TipoSolicitante
-  rotaVoltar: string
-  /** Rota para onde ir se os documentos não forem encontrados no sessionStorage. */
+  /** Etapas para onde voltar se faltar algo no `sessionStorage` — e os "Editar" da revisão. */
   rotaDocumentos: string
+  rotaRequerente: string
+  rotaCorrespondencia: string
+}
+
+interface DadosDaSessao {
+  documentos: ArquivoAnexado[]
+  requerente: DadosRequerente
+  correspondencia: DadosCorrespondencia
 }
 
 /**
  * Shell client-side da etapa de revisão.
  *
  * O Server Component da page faz as chamadas ao DAL (simulação + CDAs) e passa os dados
- * como props. Este componente lê os **documentos** do `sessionStorage` — eles não trafegam
- * na URL para evitar HTTP 431 (base64 nos query params estoura os headers do servidor).
+ * como props. Este componente lê do `sessionStorage` o que não trafega na URL: os
+ * **documentos** (base64 estouraria os headers, HTTP 431) e os **dados do requerente e de
+ * correspondência** (dado pessoal não vai em query string).
  *
- * Estados possíveis durante a montagem:
- * - `carregando` — antes do primeiro `useEffect` (SSR: `sessionStorage` não existe).
- * - `sem-documentos` — sessionStorage vazio ou expirado: redireciona de volta ao upload.
- * - `pronto` — documentos lidos, renderiza `RevisarRequerimento`.
+ * Falta algo — aba nova, sessão expirada, link compartilhado — e o cidadão volta à primeira
+ * etapa incompleta, na ordem do fluxo: requerente, correspondência, documentos. Os dados são
+ * revalidados com o schema: um registro antigo ou adulterado não chega ao envio.
  */
 export function RevisarRequerimentoShell({
+  nome,
+  cpf,
+  provedorLogin,
+  urlContaIdentidade,
   cdas,
   qtdeParcelas,
   dtVencimento,
@@ -50,30 +70,43 @@ export function RevisarRequerimentoShell({
   valorTotal,
   debitosCdas,
   tipo,
-  rotaVoltar,
   rotaDocumentos,
+  rotaRequerente,
+  rotaCorrespondencia,
 }: RevisarRequerimentoShellProps) {
   const router = useRouter()
-  const [documentos, setDocumentos] = useState<ArquivoAnexado[] | null>(null)
+  const [dados, setDados] = useState<DadosDaSessao | null>(null)
 
   useEffect(() => {
-    const raw = sessionStorage.getItem(CHAVE_DOCUMENTOS_SESSION)
-    if (!raw) {
+    const requerente = dadosRequerenteSchema.safeParse(lerDadosRequerente())
+    if (!requerente.success) {
+      router.replace(rotaRequerente)
+      return
+    }
+
+    const correspondencia = dadosCorrespondenciaSchema.safeParse(
+      lerDadosCorrespondencia()
+    )
+    if (!correspondencia.success) {
+      router.replace(rotaCorrespondencia)
+      return
+    }
+
+    const documentos = lerDocumentos(tipo)
+    if (documentos.length === 0) {
       router.replace(rotaDocumentos)
       return
     }
 
-    try {
-      const parsed: ArquivoAnexado[] = JSON.parse(raw)
-      if (parsed.length === 0) throw new Error('vazio')
-      setDocumentos(parsed)
-    } catch {
-      router.replace(rotaDocumentos)
-    }
-  }, [router, rotaDocumentos])
+    setDados({
+      documentos,
+      requerente: requerente.data,
+      correspondencia: correspondencia.data,
+    })
+  }, [router, rotaDocumentos, rotaRequerente, rotaCorrespondencia, tipo])
 
   // Durante SSR e antes do useEffect: nada — evita flash de conteúdo incorreto.
-  if (documentos === null) return null
+  if (dados === null) return null
 
   return (
     <RevisarRequerimento
@@ -84,8 +117,15 @@ export function RevisarRequerimentoShell({
       valorTotal={valorTotal}
       debitosCdas={debitosCdas}
       tipo={tipo}
-      documentos={documentos}
-      rotaVoltar={rotaVoltar}
+      documentos={dados.documentos}
+      requerente={dados.requerente}
+      correspondencia={dados.correspondencia}
+      rotaRequerente={rotaRequerente}
+      rotaCorrespondencia={rotaCorrespondencia}
+      nome={nome}
+      cpf={cpf}
+      provedorLogin={provedorLogin}
+      urlContaIdentidade={urlContaIdentidade}
     />
   )
 }
