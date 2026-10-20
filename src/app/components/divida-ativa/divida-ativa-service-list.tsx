@@ -64,7 +64,7 @@ export function DividaAtivaServiceList() {
             {servico.tipo === 'interno' ? (
               <Link href={servico.href} className={itemClassName}>
                 <span className={labelClassName}>{servico.label}</span>
-                <ChevronRightIcon className="shrink-0 text-muted-foreground" />
+                <ChevronRightIcon className="shrink-0 theme-color/background" />
               </Link>
             ) : (
               <button
@@ -73,7 +73,7 @@ export function DividaAtivaServiceList() {
                 onClick={() => setExternalUrl(servico.externalUrl)}
               >
                 <span className={labelClassName}>{servico.label}</span>
-                <ChevronRightIcon className="shrink-0 text-muted-foreground" />
+                <ChevronRightIcon className="shrink-0 theme-color/background" />
               </button>
             )}
           </li>
