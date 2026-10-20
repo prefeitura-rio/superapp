@@ -27,7 +27,7 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     menuHref: '/servicos/trabalho/menu',
     logoHref: '/servicos/trabalho',
     listingPaths: ['/servicos/trabalho'],
-    chromePaths: ['/servicos/trabalho', '/servicos/trabalho/menu'],
+    chromePaths: ['/servicos/trabalho'],
   },
   {
     id: 'mei',
@@ -49,7 +49,7 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     menuHref: '/servicos/cursos/opcoes',
     logoHref: '/servicos/cursos',
     listingPaths: ['/servicos/cursos'],
-    chromePaths: ['/servicos/cursos', '/servicos/cursos/opcoes'],
+    chromePaths: ['/servicos/cursos'],
   },
 ]
 
