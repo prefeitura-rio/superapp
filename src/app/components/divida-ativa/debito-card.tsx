@@ -1,5 +1,6 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatarValorBRL, rotuloNatureza } from '@/lib/divida-ativa-utils'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
@@ -60,7 +61,7 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
         {/* `min-w-0` deixa o número da certidão quebrar linha em vez de esticar o card e
             empurrar o checkbox para fora. */}
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
               <FileTextIcon className="size-4 text-foreground" aria-hidden />
             </span>
@@ -68,6 +69,14 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
               <h2 className="text-base font-medium leading-6 text-foreground">
                 {rotuloNatureza(debito.natureza)}
               </h2>
+            )}
+            {/* A API decide a elegibilidade (`selecionavelParcelamento`); o front só sinaliza o
+                checkbox apagado, sem inventar o motivo. Badge de status no padrão do projeto
+                (o mesmo da carteira: `bg-card-5` para "atenção"). */}
+            {!debito.parcelavel && (
+              <Badge className="bg-card-5 text-white">
+                Indisponível para parcelamento
+              </Badge>
             )}
           </div>
 
@@ -105,14 +114,6 @@ export function DebitoCard({ debito, selecionado, onToggle }: DebitoCardProps) {
           aria-label={`Selecionar certidão ${debito.numeroCda}`}
         />
       </div>
-
-      {/* A API decide a elegibilidade (`selecionavelParcelamento`); o front só explica o
-          checkbox apagado, sem inventar o motivo. */}
-      {!debito.parcelavel && (
-        <p className="pt-3 text-sm font-normal leading-5 text-foreground-light">
-          Esta certidão não está disponível para parcelamento.
-        </p>
-      )}
 
       <DebitoDetalhesDrawer
         debito={debito}

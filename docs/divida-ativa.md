@@ -329,7 +329,7 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado. Note que **
 | `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/parcelamentos`, `.../segunda-via` | fora do escopo 2026 |
 | `Divida Ativa` → `divida-ativa/` | consulta principal, `consultar`, `datas-vencimento`, `parcelamentos/simular`, `requerimentos` | Fase 3, **sem tipo** |
 | `Divida Ativa` → `divida-ativa/` | `emitir/*`, `simular/*`, `guias/*`, `certidoes/*` | fora do escopo 2026 |
-| `Divida Ativa - Requerimentos` → `divida-ativa-requerimentos/` | `GET /divida-ativa/requerimentos`, `.../cancelar`, `.../comprovante`, `validar-senha` | Fase 3, **sem tipo** |
+| `Divida Ativa - Requerimentos` → `divida-ativa-requerimentos/` | `GET /divida-ativa/requerimentos`, `.../cancelar`, `.../comprovante`, `avista/*`, `requerimentos` (POST) | Fase 3, **sem tipo** |
 | `Infra` → `infra/` | `heartbeat`, `versao` | não usadas |
 
 O client é gerado inteiro, inclusive para os fluxos fora do escopo — o Orval não sabe recortar
@@ -457,6 +457,17 @@ A reconciliação levantou coisas que nenhuma premissa previa:
 
 ### O passo de senha — decisão que muda o desenho da Fase 3
 
+> **Revertido em 20/10/2026: o requerimento não pede mais senha.** Por ordem da gestão, o
+> passo de reautenticação saiu do fluxo: o bottom sheet (`confirmacao-declaracao.tsx`) tem só a
+> declaração ("li e concordo") e "Confirmar e enviar", e a server action não manda `senha` no
+> corpo. A questão será levada aos donos do negócio; se a reautenticação voltar, o caminho é
+> step-up no Keycloak, não um campo de senha nosso. `validar-senha.ts` e `provedor-login.ts`
+> foram removidos (estão no histórico do git). A `api-imoveis` acompanhou no mesmo dia (MR 9,
+> em hom): saíram `POST /divida-ativa/validar-senha`, o campo `senha` do request e o password
+> grant no Keycloak; `divida-ativa-api.yaml` e o cliente Orval foram regenerados dessa versão.
+> Pendência: a API ainda manda `tipoAutenticacao: "senha"` ao DAM até a PGM confirmar outro
+> valor. O parágrafo abaixo registra a decisão anterior.
+>
 > **Decidido em 19/10/2026: o requerimento pede a senha da conta Identidade Carioca**, como a
 > `poc_Imoveis` e o `reautenticar.jsp` do portal. "Requerer parcelamento", na revisão, abre o
 > bottom sheet "Declaração e confirmação" (`confirmacao-senha.tsx`): checkbox da declaração,

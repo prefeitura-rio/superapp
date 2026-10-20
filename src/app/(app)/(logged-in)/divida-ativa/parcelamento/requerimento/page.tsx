@@ -18,10 +18,6 @@ import {
   getDalDividaAtivaSimulacao,
 } from '@/lib/dal'
 import { criterioDaUrl, somenteDigitos } from '@/lib/divida-ativa-utils'
-import {
-  getProvedorLogin,
-  urlContaIdentidadeCarioca,
-} from '@/lib/provedor-login'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
 
@@ -305,7 +301,6 @@ async function EtapaRevisao({
   rotaRevisaoPagamento: string
 }) {
   const { cpf, name } = await getUserInfoFromToken()
-  const provedorLogin = await getProvedorLogin()
 
   // Busca a simulação de parcelamento para obter valor total e valor da 1ª parcela.
   const simulacao = await getDalDividaAtivaSimulacao(cdas, data, cpf)
@@ -351,8 +346,6 @@ async function EtapaRevisao({
     <RevisarRequerimentoShell
       nome={name}
       cpf={cpf}
-      provedorLogin={provedorLogin}
-      urlContaIdentidade={urlContaIdentidadeCarioca()}
       cdas={cdas}
       qtdeParcelas={parcelas}
       dtVencimento={data}

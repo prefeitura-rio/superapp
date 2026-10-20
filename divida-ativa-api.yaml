@@ -5,23 +5,65 @@ info:
   description: Cadastro local de inscricoes imobiliarias e servicos de IPTU / Divida
     Ativa.
   version: 1.0.0
-servers:
-- url: http://localhost:8080
-  description: Auto generated value
-- url: http://0.0.0.0:8080
-  description: Auto generated value
 tags:
 - name: Divida Ativa
   description: "Servicos de Divida Ativa via DAM (menu integral do portlet legado),\
     \ com autorizacao por imovel cadastrado."
 - name: Divida Ativa - Requerimentos
-  description: "Acompanhamento, reauth e utilitarios de Divida Ativa."
+  description: Acompanhamento e utilitarios de Divida Ativa.
 - name: Imoveis
   description: Cadastro local de inscricoes imobiliarias e montagem das opcoes de
     IPTU no ePortal.
 - name: Infra
   description: Endpoints simples de diagnostico da API.
 paths:
+  /divida-ativa/avista/emitir:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: Emite a guia a vista das CDAs e devolve a URL do PDF no DAM Internet
+        — nao exige imovel cadastrado; use a dataVencimento devolvida pelo /avista/simular
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoAvistaRequest'
+      responses:
+        "200":
+          description: "Guia emitida: numero, linha digitavel e urlPdf. urlPdf vem\
+            \ vazio quando o DAM emitiu a guia mas nao gerou o PDF."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuiaDamResponse'
+        "400":
+          description: "Recusa de negocio do DAM ou CDA nao elegivel, com mensagem\
+            \ exibivel."
+      security:
+      - bearerAuth: []
+  /divida-ativa/avista/simular:
+    post:
+      tags:
+      - Divida Ativa - Requerimentos
+      summary: "Simula o pagamento a vista das CDAs (revisao antes do parcelamento)\
+        \ — nao exige imovel cadastrado; sem dataVencimento, usa a primeira data a\
+        \ vista do DAM"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoAvistaRequest'
+      responses:
+        "200":
+          description: "Saldos, descontos e honorarios por CDA e totais, com a lista\
+            \ de GRERJ por execucao fiscal. mensagemErro traz a recusa de negocio\
+            \ do DAM."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulacaoAvistaResponse'
+      security:
+      - bearerAuth: []
   /divida-ativa/cep/{cep}:
     get:
       tags:
@@ -106,53 +148,6 @@ paths:
                 $ref: '#/components/schemas/DatasVencimentoResponse'
       security:
       - bearerAuth: []
-  /divida-ativa/avista/emitir:
-    post:
-      tags:
-      - Divida Ativa - Requerimentos
-      summary: "Emite a guia a vista das CDAs e devolve a URL do PDF no DAM Internet\
-        \ — nao exige imovel cadastrado; use a dataVencimento devolvida pelo /avista/simular"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SimulacaoAvistaRequest'
-      responses:
-        "200":
-          description: "Guia emitida: numero, linha digitavel e urlPdf. urlPdf vem\
-            \ vazio quando o DAM emitiu a guia mas nao gerou o PDF."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GuiaDamResponse'
-        "400":
-          description: "Recusa de negocio do DAM ou CDA nao elegivel, com mensagem\
-            \ exibivel."
-      security:
-      - bearerAuth: []
-  /divida-ativa/avista/simular:
-    post:
-      tags:
-      - Divida Ativa - Requerimentos
-      summary: "Simula o pagamento a vista das CDAs (revisao antes do parcelamento)\
-        \ — nao exige imovel cadastrado; sem dataVencimento, usa a primeira data a vista\
-        \ do DAM"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SimulacaoAvistaRequest'
-      responses:
-        "200":
-          description: "Saldos, descontos e honorarios por CDA e totais, com a lista\
-            \ de GRERJ por execucao fiscal. mensagemErro traz a recusa de negocio do\
-            \ DAM."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SimulacaoAvistaResponse'
-      security:
-      - bearerAuth: []
   /divida-ativa/parcelamentos/simular:
     post:
       tags:
@@ -201,7 +196,7 @@ paths:
       tags:
       - Divida Ativa - Requerimentos
       summary: Envia requerimento de parcelamento a partir das CDAs (docs base64 +
-        reauth senha + declaracao) — nao exige imovel cadastrado
+        declaracao aceita; sem reautenticacao por senha) — nao exige imovel cadastrado
       requestBody:
         content:
           application/json:
@@ -274,26 +269,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PdfUrlResponse'
-      security:
-      - bearerAuth: []
-  /divida-ativa/validar-senha:
-    post:
-      tags:
-      - Divida Ativa - Requerimentos
-      summary: Revalida senha do usuario autenticado (INT-24 / RN-036)
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ValidarSenhaRequest'
-      responses:
-        "200":
-          description: "Resultado da revalidacao. Responde 200 tambem quando a senha\
-            \ e invalida: o campo valido carrega o resultado."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidarSenhaResponse'
       security:
       - bearerAuth: []
   /imoveis:
@@ -992,8 +967,6 @@ components:
         natureza:
           type: string
         contribuinte:
-          description: "Nome do contribuinte da CDA, da consulta — a simulacao do DAM\
-            \ nao o devolve."
           type: string
         situacao:
           type: string
@@ -1534,8 +1507,6 @@ components:
           type: string
         declaracaoAceita:
           type: boolean
-        senha:
-          type: string
         documentos:
           type: array
           items:
@@ -1581,8 +1552,8 @@ components:
           items:
             type: string
         dataVencimento:
-          description: "Data de vencimento (dd/MM/yyyy). Opcional: sem ela, vale a primeira\
-            \ data a vista oferecida pelo DAM."
+          description: "Data de vencimento (dd/MM/yyyy). Opcional: sem ela, vale a\
+            \ primeira data a vista oferecida pelo DAM."
           type: string
     SimulacaoAvistaResponse:
       description: "Simulacao a vista das CDAs selecionadas, por CDA e com a lista\
@@ -1614,8 +1585,8 @@ components:
           items:
             $ref: '#/components/schemas/CdaSimulacaoItemResponse'
         grerjs:
-          description: Custas judiciais (GRERJ) por execucao fiscal. Ja incluidas em
-            valorTotalAvista.
+          description: Custas judiciais (GRERJ) por execucao fiscal. Ja incluidas
+            em valorTotalAvista.
           type: array
           items:
             $ref: '#/components/schemas/GrerjDamResponse'
@@ -1658,18 +1629,6 @@ components:
       - ATA
       - OUTROS
       type: string
-    ValidarSenhaRequest:
-      type: object
-      properties:
-        senha:
-          type: string
-    ValidarSenhaResponse:
-      type: object
-      properties:
-        valida:
-          type: boolean
-        mensagem:
-          type: string
   securitySchemes:
     bearerAuth:
       type: http

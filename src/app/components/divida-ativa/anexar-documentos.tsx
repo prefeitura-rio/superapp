@@ -1,7 +1,8 @@
 'use client'
 
+import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { UploadIcon, XIcon } from 'lucide-react'
+import { UploadIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -213,6 +214,9 @@ interface SlotUploadProps {
 /**
  * Um card de upload — ícone de upload, título, descrição, estado do arquivo e botão de remover.
  *
+ * O card tem sempre o mesmo tamanho, com ou sem arquivo: o que muda é o canto direito, que
+ * mostra o chevron (sem arquivo) ou o "X" de remover (com arquivo), na mesma posição.
+ *
  * O `input[type=file]` real fica `sr-only`; o clique no card o ativa via `ref`. Assim o
  * estilo do card não depende do estilo nativo do input.
  */
@@ -272,13 +276,14 @@ function SlotUpload({ slot, arquivo, onArquivo }: SlotUploadProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      {/* Card + botão de remover ficam lado a lado no mesmo row — nunca aninhados,
-          pois <button> dentro de <button> é HTML inválido e causa hydration error. */}
-      <div className="flex items-center gap-2">
+      {/* O botão de remover é irmão do card, posicionado sobre o canto direito (onde fica o
+          chevron) — nunca aninhado, pois <button> dentro de <button> é HTML inválido e causa
+          hydration error. */}
+      <div className="relative">
         <button
           type="button"
           onClick={abrirSeletor}
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl bg-card p-4 text-left transition-colors hover:bg-secondary"
+          className="flex w-full items-center gap-3 rounded-2xl bg-card p-4 text-left transition-colors hover:bg-secondary"
           aria-label={
             arquivo ? `${slot.titulo} — ${arquivo.nomeArquivo}` : slot.titulo
           }
@@ -303,14 +308,15 @@ function SlotUpload({ slot, arquivo, onArquivo }: SlotUploadProps) {
             )}
           </span>
 
-          {!arquivo && (
-            <span
-              className="text-sm font-normal leading-5 text-foreground-light"
-              aria-hidden
-            >
-              &rsaquo;
-            </span>
-          )}
+          {/* Reserva o espaço do chevron também com arquivo: é onde o "X" fica. */}
+          <span
+            className="flex size-10 shrink-0 items-center justify-center"
+            aria-hidden
+          >
+            {!arquivo && (
+              <ChevronRightIcon className="size-5 text-foreground-light" />
+            )}
+          </span>
         </button>
 
         {arquivo && (
@@ -318,9 +324,9 @@ function SlotUpload({ slot, arquivo, onArquivo }: SlotUploadProps) {
             type="button"
             onClick={remover}
             aria-label={`Remover ${slot.titulo}`}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card hover:bg-secondary"
+            className="absolute top-1/2 right-4 flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-foreground-light transition-colors hover:bg-secondary hover:text-foreground"
           >
-            <XIcon className="size-4 text-foreground-light" aria-hidden />
+            <XIcon className="size-5" aria-hidden />
           </button>
         )}
       </div>

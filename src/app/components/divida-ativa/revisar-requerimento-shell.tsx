@@ -1,6 +1,5 @@
 'use client'
 
-import type { ProvedorLogin } from '@/lib/provedor-login'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -22,11 +21,9 @@ import { RevisarRequerimento } from './revisar-requerimento'
 import type { TipoSolicitante } from './tipos-solicitante'
 
 interface RevisarRequerimentoShellProps {
-  /** Quem está logado e como entrou — para a declaração e a confirmação de senha. */
+  /** Quem está logado — para a declaração. */
   nome: string
   cpf: string
-  provedorLogin: ProvedorLogin
-  urlContaIdentidade: string | null
   cdas: string[]
   qtdeParcelas: number
   dtVencimento: string
@@ -61,8 +58,6 @@ interface DadosDaSessao {
 export function RevisarRequerimentoShell({
   nome,
   cpf,
-  provedorLogin,
-  urlContaIdentidade,
   cdas,
   qtdeParcelas,
   dtVencimento,
@@ -124,8 +119,6 @@ export function RevisarRequerimentoShell({
       rotaCorrespondencia={rotaCorrespondencia}
       nome={nome}
       cpf={cpf}
-      provedorLogin={provedorLogin}
-      urlContaIdentidade={urlContaIdentidade}
     />
   )
 }

@@ -2,18 +2,18 @@
 
 import { enviarRequerimento } from '@/actions/divida-ativa/enviar-requerimento'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import { SwiperWrapper } from '@/components/ui/custom/swiper-wrapper'
 import {
   formatarCep,
   formatarInscricaoImobiliaria,
   formatarValorBRL,
   rotuloNatureza,
 } from '@/lib/divida-ativa-utils'
-import type { ProvedorLogin } from '@/lib/provedor-login'
 import type { DebitoDividaAtiva } from '@/types/divida-ativa'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { ConfirmacaoSenhaSheet } from './confirmacao-senha'
+import { type RefObject, useEffect, useRef, useState } from 'react'
+import { ConfirmacaoDeclaracaoSheet } from './confirmacao-declaracao'
 import type {
   DadosCorrespondencia,
   DadosRequerente,
@@ -27,17 +27,6 @@ interface ArquivoAnexado {
   nomeArquivo: string
   conteudoBase64: string
   tamanho: number
-}
-
-interface ParcelaCda {
-  /** Número da CDA. */
-  numeroCda: string
-  /** Número da parcela (ex.: 1). */
-  numeroParcela: number
-  /** Total de parcelas. */
-  totalParcelas: number
-  /** Valor da parcela. */
-  valor: number | null
 }
 
 interface RevisarRequerimentoProps {
@@ -62,8 +51,6 @@ interface RevisarRequerimentoProps {
   /** Quem está logado — aparece na declaração, como no portal legado. */
   nome: string
   cpf: string
-  provedorLogin: ProvedorLogin
-  urlContaIdentidade: string | null
 }
 
 /**
@@ -83,6 +70,125 @@ function Linha({
         {valor}
       </span>
     </div>
+  )
+}
+
+/** Largura mínima de um card de parcela, em px — abaixo disso o número da CDA quebra linha. */
+const LARGURA_MINIMA_CARD = 160
+/** Espaço entre os cards (`gap-3`), em px. */
+const ESPACO_ENTRE_CARDS = 12
+
+/**
+ * Largura do elemento, acompanhando redimensionamentos.
+ *
+ * `null` até a primeira medição — no servidor e no primeiro render do cliente — para a tela
+ * decidir um layout provisório sem depender de `window`.
+ */
+function useLargura(ref: RefObject<HTMLElement | null>): number | null {
+  const [largura, setLargura] = useState<number | null>(null)
+
+  useEffect(() => {
+    const elemento = ref.current
+    if (!elemento) return
+
+    const medir = () => setLargura(elemento.getBoundingClientRect().width)
+    medir()
+
+    // jsdom (testes) não tem ResizeObserver; lá basta a medição inicial.
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(medir)
+    observer.observe(elemento)
+    return () => observer.disconnect()
+  }, [ref])
+
+  return largura
+}
+
+/** Card de uma CDA na seção de parcelas: o número da certidão e o valor da parcela. */
+function ParcelaCard({
+  numeroCda,
+  valor,
+}: { numeroCda: string; valor: number | null }) {
+  return (
+    <div className="flex h-full min-w-0 flex-1 flex-col gap-1 rounded-2xl bg-card p-4">
+      <span className="text-xs font-normal leading-4 text-foreground-light">
+        CDA
+      </span>
+      <span className="text-sm font-medium leading-5 text-foreground">
+        {numeroCda}
+      </span>
+
+      <span className="mt-2 text-xs font-normal leading-4 text-foreground-light">
+        Valor da 1ª parcela
+      </span>
+      <span className="text-sm font-normal leading-5 text-foreground">
+        {formatarValorBRL(valor) ?? '—'}
+      </span>
+    </div>
+  )
+}
+
+/**
+ * Seção "Parcela(s)" — um card por CDA, em layout que se adapta à largura disponível.
+ *
+ * Os cards dividem a linha igualmente (um ocupa tudo; dois, metade cada) enquanto couberem
+ * com pelo menos `LARGURA_MINIMA_CARD`. Quando não cabem mais — iriam para uma segunda
+ * linha — a seção vira o carrossel padrão do projeto (`SwiperWrapper`), mostrando por
+ * página quantos cabem.
+ *
+ * ⚠️ A simulação devolve **um** `valor1aParcela` para o parcelamento inteiro (todas as
+ * CDAs juntas), não um por CDA — `itens` só traz saldos. Com uma CDA o valor é exatamente
+ * o da parcela dela; com várias, cada card repete o valor da parcela do conjunto. Não há
+ * "parcela N/total" aqui porque não existem N cards de parcelas: cada card é uma CDA.
+ */
+function ParcelasPorCda({
+  cdas,
+  qtdeParcelas,
+  valor1aParcela,
+}: { cdas: string[]; qtdeParcelas: number; valor1aParcela: number | null }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const largura = useLargura(containerRef)
+
+  // Quantos cards cabem numa linha. Antes da medição, assume a tela do celular: dois.
+  const cabem =
+    largura === null
+      ? 2
+      : Math.max(
+          1,
+          Math.floor(
+            (largura + ESPACO_ENTRE_CARDS) /
+              (LARGURA_MINIMA_CARD + ESPACO_ENTRE_CARDS)
+          )
+        )
+  const emCarrossel = cdas.length > cabem
+
+  const cards = cdas.map(numeroCda => (
+    <ParcelaCard key={numeroCda} numeroCda={numeroCda} valor={valor1aParcela} />
+  ))
+
+  return (
+    // `overflow-x-hidden`: as setas do carrossel ficam fora do swiper, sobre o `px-4`.
+    <section className="overflow-x-hidden px-4">
+      <h2 className="pb-3 text-base font-medium leading-6 text-foreground">
+        {qtdeParcelas === 1 ? 'Parcela' : 'Parcelas'}
+      </h2>
+
+      <div ref={containerRef}>
+        {emCarrossel ? (
+          <SwiperWrapper
+            slidesPerView={cabem}
+            slidesPerGroup={cabem}
+            spaceBetween={ESPACO_ENTRE_CARDS}
+            showArrows
+            showPagination
+          >
+            {cards}
+          </SwiperWrapper>
+        ) : (
+          <div className="flex gap-3">{cards}</div>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -118,16 +224,16 @@ function BlocoDados({
 /**
  * "Revise sua solicitação de parcelamento" — tela 10.
  *
- * Exibe valor total, número de parcelas, dados da CDA e um carrossel horizontal com as
- * parcelas (CDA, parcela N/total, valor). O botão "Requerer parcelamento" dispara a server
- * action.
+ * Exibe valor total, número de parcelas, dados da CDA e a seção de parcelas (um card por
+ * CDA com o valor da 1ª parcela — ver `ParcelasPorCda`). O botão "Requerer parcelamento"
+ * dispara a server action.
  *
  * Os blocos "Seus dados" e "Correspondência" não estão no Figma (as etapas que os preenchem
  * também não): mostram o que vai no pedido, cada um com "Editar" para a sua etapa.
  *
- * "Requerer parcelamento" abre a declaração e a confirmação de senha (`ConfirmacaoSenhaSheet`);
- * o envio só acontece de lá, com a senha pré-validada e o aceite marcado. O botão de envio
- * fica travado durante a chamada para evitar requerimento duplo.
+ * "Requerer parcelamento" abre a declaração (`ConfirmacaoDeclaracaoSheet`); o envio só
+ * acontece de lá, com o aceite marcado. O botão de envio fica travado durante a chamada para
+ * evitar requerimento duplo.
  */
 export function RevisarRequerimento({
   cdas,
@@ -144,25 +250,12 @@ export function RevisarRequerimento({
   rotaCorrespondencia,
   nome,
   cpf,
-  provedorLogin,
-  urlContaIdentidade,
 }: RevisarRequerimentoProps) {
   const router = useRouter()
   const [confirmando, setConfirmando] = useState(false)
 
-  // Monta os "cards" do carrossel: uma entrada por CDA × (não é parcelamento de múltiplas
-  // datas, então o número de parcela é sequencial 1 → N em cada CDA).
-  // Como a API não devolve parcelas por CDA na simulação, exibimos uma linha por CDA com
-  // a parcela 1/N e o valor da 1ª parcela — igual ao que o portal legado faz.
-  const parcelasPorCda: ParcelaCda[] = cdas.map((numeroCda, index) => ({
-    numeroCda,
-    numeroParcela: index + 1,
-    totalParcelas: qtdeParcelas,
-    valor: valor1aParcela,
-  }))
-
-  /** Envia com a senha confirmada; devolve a mensagem de erro para o sheet, ou `null`. */
-  async function enviar(senha: string): Promise<string | null> {
+  /** Envia com a declaração aceita; devolve a mensagem de erro para o sheet, ou `null`. */
+  async function enviar(): Promise<string | null> {
     const resultado = await enviarRequerimento({
       cdas,
       qtdeParcelas: String(qtdeParcelas),
@@ -176,7 +269,6 @@ export function RevisarRequerimento({
         nomeArquivo: doc.nomeArquivo,
         conteudoBase64: doc.conteudoBase64,
       })),
-      senha,
       declaracaoAceita: true,
     })
 
@@ -290,47 +382,14 @@ export function RevisarRequerimento({
         </BlocoDados>
       </div>
 
-      {/* Carrossel de parcelas por CDA — rola na horizontal */}
-      <div className="mb-3 px-4">
-        <h2 className="pb-3 text-base font-medium leading-6 text-foreground">
-          Parcelas {qtdeParcelas}
-        </h2>
-      </div>
+      <ParcelasPorCda
+        cdas={cdas}
+        qtdeParcelas={qtdeParcelas}
+        valor1aParcela={valor1aParcela}
+      />
 
-      <div
-        className="mb-3 flex gap-3 overflow-x-auto px-4 pb-2"
-        aria-label={`Parcelas — ${qtdeParcelas} no total`}
-      >
-        {parcelasPorCda.map(parcela => (
-          <div
-            key={parcela.numeroCda}
-            className="flex w-40 shrink-0 flex-col gap-1 rounded-2xl bg-card p-4"
-          >
-            <span className="text-xs font-normal leading-4 text-foreground-light">
-              CDA
-            </span>
-            <span className="text-sm font-medium leading-5 text-foreground">
-              {parcela.numeroCda}
-            </span>
-
-            <span className="mt-2 text-xs font-normal leading-4 text-foreground-light">
-              Parcela
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {parcela.numeroParcela}/{parcela.totalParcelas}
-            </span>
-
-            <span className="mt-2 text-xs font-normal leading-4 text-foreground-light">
-              Valor
-            </span>
-            <span className="text-sm font-normal leading-5 text-foreground">
-              {formatarValorBRL(parcela.valor) ?? '—'}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-auto px-4 pb-4">
+      {/* `pt-6 pb-2`: o mesmo respiro das outras telas do fluxo antes do botão principal. */}
+      <div className="mt-auto px-4 pt-6 pb-2">
         <CustomButton
           type="button"
           variant="primary"
@@ -342,13 +401,11 @@ export function RevisarRequerimento({
         </CustomButton>
       </div>
 
-      <ConfirmacaoSenhaSheet
+      <ConfirmacaoDeclaracaoSheet
         aberto={confirmando}
         onAbertoChange={setConfirmando}
         nome={nome}
         cpf={cpf}
-        provedorLogin={provedorLogin}
-        urlContaIdentidade={urlContaIdentidade}
         onConfirmar={enviar}
       />
     </div>

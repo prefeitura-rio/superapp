@@ -60,8 +60,6 @@ function renderizar() {
       tipo="CONTRIBUINTE"
       nome="Maria da Silva"
       cpf="52998224725"
-      provedorLogin={null}
-      urlContaIdentidade={null}
       {...ROTAS}
     />
   )
@@ -117,5 +115,25 @@ describe('RevisarRequerimentoShell', () => {
       screen.getByText(/Rua Paula Brito, 10 · Andaraí · Rio de Janeiro\/RJ/)
     ).toBeInTheDocument()
     expect(replace).not.toHaveBeenCalled()
+  })
+
+  /**
+   * A simulação devolve um único `valor1aParcela` para o conjunto de CDAs, não parcelas
+   * numeradas por CDA. Cada card é uma CDA com esse valor — sem "Parcela 1/2", que daria a
+   * impressão de que outras parcelas viriam a seguir.
+   */
+  test('a seção de parcelas mostra um card por CDA com o valor da 1ª parcela', async () => {
+    salvarDadosRequerente(REQUERENTE)
+    salvarDadosCorrespondencia(CORRESPONDENCIA)
+    salvarDocumentos('CONTRIBUINTE', [DOC])
+    renderizar()
+
+    expect(
+      await screen.findByRole('heading', { name: 'Parcelas' })
+    ).toBeInTheDocument()
+    expect(screen.getByText('01/140646/2026-00')).toBeInTheDocument()
+    expect(screen.getByText('Valor da 1ª parcela')).toBeInTheDocument()
+    expect(screen.getByText('R$848,29')).toBeInTheDocument()
+    expect(screen.queryByText(/^1\/2$/)).toBeNull()
   })
 })

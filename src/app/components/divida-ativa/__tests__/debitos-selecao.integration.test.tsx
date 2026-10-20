@@ -153,9 +153,16 @@ describe('DebitosSelecao', () => {
     expect(
       screen.getByRole('checkbox', { name: /01\/137861\/2025-00/ })
     ).toBeDisabled()
+    // O badge no título é o aviso; não há texto extra no card.
     expect(
-      screen.getByText('Esta certidão não está disponível para parcelamento.')
+      screen.getByText('Indisponível para parcelamento')
     ).toBeInTheDocument()
+  })
+
+  test('CDA parcelável não mostra o badge de indisponibilidade', () => {
+    render(<DebitosSelecao cdas={[CDA_2024]} />)
+
+    expect(screen.queryByText('Indisponível para parcelamento')).toBeNull()
   })
 
   /**

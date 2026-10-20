@@ -41,7 +41,6 @@ const DADOS = {
   documentos: [
     { tipo: 'IDENTIDADE', nomeArquivo: 'rg.pdf', conteudoBase64: 'AAAA' },
   ],
-  senha: 'senha-do-cidadao',
   declaracaoAceita: true,
 }
 
@@ -82,11 +81,11 @@ describe('enviarRequerimento', () => {
       numTelefoneCorr: '2123456789',
       txtEmailCorr: 'maria@exemplo.com',
       declaracaoAceita: true,
-      // A API revalida no Keycloak e não a repassa ao DAM.
-      senha: 'senha-do-cidadao',
     })
     // Complemento vazio não vai como string vazia.
     expect(corpo).not.toHaveProperty('txtComplementoEnderecoCorr')
+    // Decisão de 20/10/2026: sem reautenticação por senha.
+    expect(corpo).not.toHaveProperty('senha')
   })
 
   test('repassa o IP do cidadão à API, que o registra no requerimento', async () => {
@@ -133,7 +132,7 @@ describe('enviarRequerimento', () => {
     })
   })
 
-  test('sem a declaração marcada ou sem senha, nem chama a API', async () => {
+  test('sem a declaração marcada, nem chama a API', async () => {
     let chamou = false
     server.use(
       http.post(URL_REQUERIMENTO, () => {
@@ -145,9 +144,6 @@ describe('enviarRequerimento', () => {
     expect(
       (await enviarRequerimento({ ...DADOS, declaracaoAceita: false })).success
     ).toBe(false)
-    expect((await enviarRequerimento({ ...DADOS, senha: '' })).success).toBe(
-      false
-    )
     expect(chamou).toBe(false)
   })
 
@@ -209,7 +205,7 @@ describe('enviarRequerimento', () => {
     server.use(
       http.post(URL_REQUERIMENTO, () =>
         HttpResponse.json(
-          { error: 'Por favor, informe a senha.' },
+          { error: 'CDA já possui requerimento de parcelamento em aberto.' },
           { status: 400 }
         )
       )
@@ -217,7 +213,7 @@ describe('enviarRequerimento', () => {
 
     expect(await enviarRequerimento(DADOS)).toEqual({
       success: false,
-      error: 'Por favor, informe a senha.',
+      error: 'CDA já possui requerimento de parcelamento em aberto.',
       status: 400,
     })
   })

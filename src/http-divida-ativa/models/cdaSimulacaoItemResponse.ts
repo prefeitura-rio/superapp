@@ -13,7 +13,6 @@ export interface CdaSimulacaoItemResponse {
   saldoHonorarios?: string
   descontoHonorarios?: string
   natureza?: string
-  /** Nome do contribuinte da CDA, da consulta — a simulacao do DAM nao o devolve. */
   contribuinte?: string
   situacao?: string
 }

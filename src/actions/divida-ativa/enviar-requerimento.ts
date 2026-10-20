@@ -54,8 +54,6 @@ interface DadosRequerimento {
   correspondencia: DadosCorrespondencia
   /** Documentos anexados (base64 inline). */
   documentos: DocumentoRequerimento[]
-  /** Senha da conta Identidade Carioca — a API a revalida no Keycloak e não a repassa ao DAM. */
-  senha: string
   /** O cidadão marcou a declaração de autenticidade dos documentos e informações. */
   declaracaoAceita: boolean
 }
@@ -98,12 +96,13 @@ async function ipDoCidadao(): Promise<string | null> {
  * para suportar o pior caso (4 documentos × 1,5 MB × 1,33 = ~8 MB). Ajustar conforme medição
  * real em produção.
  *
- * ### Senha e declaração
+ * ### Declaração, sem senha
  *
- * A senha da conta Identidade Carioca segue para a API, que a revalida no Keycloak (password
- * grant) e **não** a repassa ao DAM — o mesmo desenho da `poc_Imoveis`. Ela atravessa este
- * servidor só em memória: nunca entra em log, nem nos erros devolvidos. `declaracaoAceita` é o
- * checkbox que o cidadão marcou; sem ele, nem chamamos a API.
+ * `declaracaoAceita` é o checkbox que o cidadão marcou; sem ele, nem chamamos a API. A
+ * reautenticação por senha na conta Identidade Carioca saiu do fluxo em 20/10/2026 — o cidadão
+ * já está autenticado pelo Keycloak. A `api-imoveis` acompanhou (MR 9): o contrato não tem
+ * mais o campo `senha` nem `POST /divida-ativa/validar-senha`, e o cliente Orval foi
+ * regenerado do swagger dessa versão.
  */
 export async function enviarRequerimento(
   dados: DadosRequerimento
@@ -128,10 +127,6 @@ export async function enviarRequerimento(
       error: 'Marque a declaração para enviar o requerimento.',
       status: 400,
     }
-  }
-
-  if (!dados.senha) {
-    return { success: false, error: 'Por favor, informe a senha.', status: 400 }
   }
 
   if (!isTipoSolicitante(dados.tipo)) {
@@ -172,7 +167,6 @@ export async function enviarRequerimento(
         nomRequerente: name || undefined,
         ...paraApi(requerente.data, correspondencia.data),
         declaracaoAceita: true,
-        senha: dados.senha,
         documentos: dados.documentos.map(doc => ({
           tipo: doc.tipo,
           nomeArquivo: doc.nomeArquivo,
