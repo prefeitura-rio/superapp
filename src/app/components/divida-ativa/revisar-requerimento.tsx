@@ -181,6 +181,13 @@ function ParcelasPorCda({
             spaceBetween={ESPACO_ENTRE_CARDS}
             showArrows
             showPagination
+            // O `.swiper-slide` nasce com `height: 100%`, o que anula o stretch do flex e
+            // deixa cada card com a própria altura. Com `h-auto` + `flex`, todos os slides
+            // da linha esticam até o mais alto e o card (`h-full`) acompanha.
+            // O `!` é necessário: o CSS do Swiper não usa cascade layer e, por isso, vence
+            // qualquer utilitário do Tailwind (que fica em `@layer utilities`), mesmo com
+            // especificidade maior.
+            className="[&_.swiper-slide]:flex! [&_.swiper-slide]:h-auto!"
           >
             {cards}
           </SwiperWrapper>

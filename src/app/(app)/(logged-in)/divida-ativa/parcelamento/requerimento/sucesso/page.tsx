@@ -46,12 +46,12 @@ export default async function RequerimentoSucessoPage({
       <SecondaryHeader title="" className="max-w-4xl" route="/divida-ativa" />
 
       <div className="flex flex-1 flex-col px-4">
-        <h1 className="pt-2 pb-4 text-3xl font-medium leading-9 text-foreground">
+        <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 text-foreground">
           Sua solicitação de parcelamento foi enviada!
         </h1>
 
         {protocolo && (
-          <p className="pb-4 text-base font-medium leading-6 text-primary">
+          <p className="pb-4 text-xl font-medium leading-7 text-primary">
             Protocolo {protocolo}
           </p>
         )}
