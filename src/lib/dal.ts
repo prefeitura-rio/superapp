@@ -13,6 +13,7 @@ import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/in
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import {
   getDividaAtivaDatasVencimento,
+  getDividaAtivaRequerimentos,
   postDividaAtivaAvistaSimular,
   postDividaAtivaConsultar,
   postDividaAtivaParcelamentosSimular,
@@ -35,9 +36,12 @@ import {
   mapApiToDebitos,
   mapApiToImovel,
   mapApiToMensagemErro,
+  mapApiToRequerimento,
   mapFazendaToImovel,
+  mensagemDaListaDeRequerimentos,
   normalizarConsultaFazenda,
   normalizarListaImoveis,
+  normalizarListaRequerimentos,
   parseValorMonetario,
 } from '@/lib/divida-ativa-mappers'
 import {
@@ -49,6 +53,7 @@ import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type {
   ConsultaDebitos,
+  ConsultaRequerimentos,
   CriterioDebitos,
   DebitosDividaAtiva,
   ImovelDividaAtiva,
@@ -1023,5 +1028,79 @@ export async function getDalDividaAtivaSimulacao(
       valorGrerj: parseValorMonetario(result.data.valorTotalPagarGrerj),
       opcoes,
     }
+  })
+}
+
+/**
+ * Requerimentos de parcelamento do cidadão — a lista do CPF ou um protocolo.
+ *
+ * Um endpoint para os dois caminhos da tela de acompanhamento: sem `protocolo`, a API
+ * lista os requerimentos do CPF do token (o DAM os devolve em ordem de chegada e a API
+ * inverte, mais recente primeiro); com `protocolo` — o número **sem o ano** —, busca um
+ * requerimento e confere se o CPF do requerente é o do token.
+ *
+ * ### "Não há" é 200
+ *
+ * Nos dois caminhos a API responde 200 mesmo sem resultado, com um item que só tem
+ * `mensagemErro`: CPF sem requerimentos, protocolo inexistente ou protocolo de outro
+ * CPF. É `vazio`, com a mensagem da API para a tela (regra de ouro nº 9: quem explica é
+ * a API). O DAM também pode devolver `[]` cru, que é `vazio` sem mensagem.
+ *
+ * `indisponivel` é o 503 do DAM fora e qualquer outra resposta que não seja 200. O 400
+ * carrega a recusa do DAM com texto (`{ error }`) e vale como `vazio` com essa mensagem:
+ * tentar de novo o mesmo protocolo não muda nada.
+ */
+export async function getDalDividaAtivaRequerimentos(
+  cpf: string,
+  protocolo?: string
+): Promise<ConsultaRequerimentos> {
+  return withSpan('dal.getDividaAtivaRequerimentos', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    // O protocolo identifica um requerimento do cidadão; só a presença entra no span.
+    span.setAttribute('requerimentos.por-protocolo', Boolean(protocolo))
+
+    const result = await getDividaAtivaRequerimentos(
+      protocolo ? { protocolo } : undefined,
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.requerimentos.fetched', {
+      'requerimentos.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      const motivo = motivoDoErro(result.data)
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /divida-ativa/requerimentos respondeu ${result.status}${motivo}`
+      )
+
+      if (result.status === 400) {
+        return {
+          situacao: 'vazio',
+          mensagem: mapApiToMensagemErro(result.data, result.status),
+        }
+      }
+
+      return { situacao: 'indisponivel' }
+    }
+
+    const lista = normalizarListaRequerimentos(result.data)
+    const requerimentos = lista
+      .map(mapApiToRequerimento)
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+
+    addSpanEvent('divida-ativa.requerimentos.mapped', {
+      'requerimentos.total': requerimentos.length,
+    })
+
+    if (requerimentos.length === 0) {
+      return {
+        situacao: 'vazio',
+        mensagem: mensagemDaListaDeRequerimentos(lista),
+      }
+    }
+
+    return { situacao: 'ok', requerimentos }
   })
 }

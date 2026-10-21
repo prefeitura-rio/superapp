@@ -1524,6 +1524,8 @@ components:
           type: string
         situacaoId:
           type: string
+        descricaoSituacao:
+          type: string
         nomeContribuinte:
           type: string
         requerimentoGuiaPagamentoId:

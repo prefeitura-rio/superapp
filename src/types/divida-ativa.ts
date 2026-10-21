@@ -20,17 +20,9 @@
  * `valorDescontos`), sem `valorEntrada`, `valorTotal` nem `vencimentoPrimeiraParcela`, e
  * com desconto em reais, não em percentual — o que confirma a decisão D4 de
  * `docs/divida-ativa.md`. Eles são reescritos junto da tela de simulação, porque decidir a
- * forma sem a tela seria trocar um palpite por outro. `RequerimentoDividaAtiva` está na
- * mesma situação, e espera a tela de acompanhamento.
+ * forma sem a tela seria trocar um palpite por outro. `RequerimentoDividaAtiva` foi
+ * reescrito em 21/10/2026, junto da tela de acompanhamento.
  */
-
-export type SituacaoRequerimento =
-  | 'em_analise'
-  | 'aguardando_documentacao'
-  | 'deferido'
-  | 'indeferido'
-  | 'cancelado'
-  | 'desconhecida'
 
 export interface ImovelDividaAtiva {
   /**
@@ -177,17 +169,46 @@ export interface SimulacaoParcelamento {
   condicoes: CondicaoParcelamento[]
 }
 
+/**
+ * Um requerimento de parcelamento, como `GET /divida-ativa/requerimentos` o devolve.
+ *
+ * Reescrito em 21/10/2026 junto da tela de acompanhamento, a partir do contrato real
+ * (`RequerimentoParcelamentoResponse`). Não há enum de situação: o DAM manda um id
+ * (`situacaoId`) e, ao lado, o texto que o legado exibia — o "Andamento" do Figma. Quem
+ * classifica é o DAM; o front só mostra.
+ */
 export interface RequerimentoDividaAtiva {
+  /** Número do protocolo **sem o ano**, como o DAM devolve (ex.: `000146679`). */
   protocolo: string
-  situacao: SituacaoRequerimento
-  inscricao: string | null
-  quantidadeParcelas: number | null
-  valorTotal: number | null
+  /** Ano do protocolo (`2026`). A API deriva de `dataSolicitacao` quando o DAM não manda. */
+  ano: string | null
+  contribuinte: string | null
+  /** ISO `YYYY-MM-DD`. */
   abertoEm: string | null
-  atualizadoEm: string | null
+  previsaoRetornoEm: string | null
+  respondidoEm: string | null
+  situacaoId: string | null
+  /** Texto do DAM para a situação (ex.: "Rejeitado por documentação"). */
+  situacao: string | null
   /** Texto institucional da API. Nunca escrever um motivo no front. */
-  motivoIndeferimento: string | null
+  motivoRejeicao: string | null
+  guiaPagamentoId: string | null
+  urlComprovante: string | null
 }
+
+/**
+ * Desfecho da consulta de requerimentos — a lista do CPF ou um protocolo.
+ *
+ * A API responde 200 nos dois caminhos, inclusive quando não há o que mostrar: nesse caso
+ * a lista traz **um item só com `mensagemErro`** ("Não existem pedidos de requerimento
+ * para o CPF logado.", "Requerimento nao encontrado.", "Requerimento não associado ao CPF
+ * do requerente."). Isso é `vazio`, com a mensagem da API para a tela — não é falha.
+ * `indisponivel` é o DAM fora (503) ou qualquer resposta inesperada.
+ */
+export type ConsultaRequerimentos =
+  | { situacao: 'ok'; requerimentos: RequerimentoDividaAtiva[] }
+  | { situacao: 'vazio'; mensagem: string | null }
+  | { situacao: 'indisponivel' }
 
 /**
  * O critério único com que a tela de débitos consulta a API.

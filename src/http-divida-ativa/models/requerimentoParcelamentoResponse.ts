@@ -12,6 +12,7 @@ export interface RequerimentoParcelamentoResponse {
   datPrevisaoEntrega?: string
   datResposta?: string
   situacaoId?: string
+  descricaoSituacao?: string
   nomeContribuinte?: string
   requerimentoGuiaPagamentoId?: string
   txtMotivoRejeicao?: string

@@ -4,6 +4,7 @@ import type {
   FazendaImovel,
   GuiaDamResponse,
   ImovelResponse,
+  RequerimentoParcelamentoResponse,
 } from '@/http-divida-ativa/models'
 import { somenteDigitos } from '@/lib/divida-ativa-utils'
 import type {
@@ -11,6 +12,7 @@ import type {
   DebitosDividaAtiva,
   GuiaParceladaDividaAtiva,
   ImovelDividaAtiva,
+  RequerimentoDividaAtiva,
 } from '@/types/divida-ativa'
 
 /**
@@ -400,4 +402,75 @@ export function mapApiToDebitos(
     totalDebitos: numeroOuNull(api.totalDebitos) ?? 0,
     mensagem: textoOuNull(api.mensagem),
   }
+}
+
+/**
+ * `GET /divida-ativa/requerimentos` devolve um **array cru** de
+ * `RequerimentoParcelamentoResponse` — a mesma armadilha de `GET /imoveis` (premissa P11),
+ * e o mesmo remédio: aceitar array, objeto único e envelope `{ data: [...] }`.
+ */
+export function normalizarListaRequerimentos(
+  data: unknown
+): RequerimentoParcelamentoResponse[] {
+  if (Array.isArray(data)) {
+    return data as RequerimentoParcelamentoResponse[]
+  }
+
+  if (typeof data !== 'object' || data === null) {
+    return []
+  }
+
+  const envelope = (data as { data?: unknown }).data
+  if (Array.isArray(envelope)) {
+    return envelope as RequerimentoParcelamentoResponse[]
+  }
+
+  return [data as RequerimentoParcelamentoResponse]
+}
+
+/**
+ * Um requerimento da API para o tipo de visão.
+ *
+ * Devolve `null` quando não há protocolo: é o item que a API usa para dizer "não há" ou
+ * "não é seu" (`mensagemErro` sozinho), e ele não é um requerimento — quem chama lê a
+ * mensagem com `mensagemDaListaDeRequerimentos`. O DAM manda o número do protocolo ora
+ * como string com zeros, ora como inteiro; aqui ele vira string sempre.
+ */
+export function mapApiToRequerimento(
+  api: RequerimentoParcelamentoResponse
+): RequerimentoDividaAtiva | null {
+  const protocolo = textoOuNull(
+    api.numProtocoloRequerimentoParcelamento == null
+      ? undefined
+      : String(api.numProtocoloRequerimentoParcelamento)
+  )
+  if (!protocolo) return null
+
+  return {
+    protocolo,
+    ano: textoOuNull(api.anoRequerimento),
+    contribuinte: textoOuNull(api.nomeContribuinte),
+    abertoEm: parseDataApi(api.dataSolicitacao),
+    previsaoRetornoEm: parseDataApi(api.datPrevisaoEntrega),
+    respondidoEm: parseDataApi(api.datResposta),
+    situacaoId: textoOuNull(api.situacaoId),
+    situacao: textoOuNull(api.descricaoSituacao),
+    motivoRejeicao: textoOuNull(api.txtMotivoRejeicao),
+    guiaPagamentoId: textoOuNull(api.requerimentoGuiaPagamentoId),
+    urlComprovante: textoOuNull(api.urlComprovante),
+  }
+}
+
+/**
+ * A mensagem com que a API explica uma lista sem requerimento — o primeiro `mensagemErro`
+ * encontrado. `null` quando não há (lista `[]` crua, que o DAM também devolve).
+ */
+export function mensagemDaListaDeRequerimentos(
+  lista: RequerimentoParcelamentoResponse[]
+): string | null {
+  for (const item of lista) {
+    const mensagem = textoOuNull(item.mensagemErro)
+    if (mensagem) return mensagem
+  }
+  return null
 }

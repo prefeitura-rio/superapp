@@ -360,3 +360,57 @@ export function isTelefoneValido(valor: string): boolean {
 
   return d.length === 11 && d[2] === '9'
 }
+
+const MESES_CURTOS = [
+  'JAN',
+  'FEV',
+  'MAR',
+  'ABR',
+  'MAI',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SET',
+  'OUT',
+  'NOV',
+  'DEZ',
+] as const
+
+/**
+ * Data curta do acompanhamento, como no Figma: `2020-03-13` → `13 MAR 2020`.
+ *
+ * Recebe o ISO que `parseDataApi` produz e monta o texto por partes, sem `Date`: a data
+ * não tem hora nem fuso, e passar por `Date` poderia voltar um dia em UTC negativo.
+ * Qualquer coisa fora de `YYYY-MM-DD` sai `null` e a linha some da tela.
+ */
+export function formatarDataCurta(iso: string | null): string | null {
+  if (!iso) return null
+
+  const partes = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!partes) return null
+
+  const [, ano, mes, dia] = partes
+  const nomeMes = MESES_CURTOS[Number(mes) - 1]
+  if (!nomeMes) return null
+
+  return `${dia} ${nomeMes} ${ano}`
+}
+
+/** Tamanho a que o DAM completa o número do protocolo com zeros (`000146679`). */
+const PROTOCOLO_DIGITOS = 9
+
+/**
+ * Protocolo para exibição: `000146679/2026`.
+ *
+ * O DAM ora manda o número com zeros à esquerda, ora como inteiro (`146679`); na tela os
+ * dois precisam ser o mesmo protocolo, por isso o preenchimento. Sem ano sai só o número.
+ */
+export function formatarProtocolo(
+  protocolo: string,
+  ano: string | null
+): string {
+  const numero = /^\d+$/.test(protocolo)
+    ? protocolo.padStart(PROTOCOLO_DIGITOS, '0')
+    : protocolo
+  return ano ? `${numero}/${ano}` : numero
+}

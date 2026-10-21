@@ -24,9 +24,11 @@ acompanhamento de requerimentos.
 > ⚠️ **Ainda em aberto:** nada da Fase 3 foi integrado. A API não liga schema de resposta às
 > operações de dívida ativa, então os oito endpoints que a fase precisa chegam sem tipo.
 >
-> Parcelamento e acompanhamento (Fase 3) já têm rota, com um estado provisório explicando que
-> o serviço está sendo construído — a landing linka para eles desde o primeiro PR e um 404
-> seria pior do que uma explicação.
+> Parcelamento e acompanhamento (Fase 3) estão integrados. O acompanhamento tem a entrada
+> (`/divida-ativa/acompanhamento`), a lista "Meus requerimentos" e a consulta por protocolo,
+> todas sobre `GET /divida-ativa/requerimentos`. O texto da situação ("Andamento") depende
+> de um campo novo da API, `descricaoSituacao`, cujo nome no DAM ainda precisa ser
+> confirmado em homologação — ver premissa P8.
 
 ## Sumário
 
@@ -275,7 +277,9 @@ src/middleware.ts                     # bloco de gating
 | `/divida-ativa/imoveis/novo` | Campo da inscrição imobiliária, com máscara |
 | `/divida-ativa/imoveis/novo/confirmar?inscricao=` | Consulta ao sistema fiscal e confirmação |
 | `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
-| `/divida-ativa/parcelamento` · `/acompanhamento` | Estado provisório até a Fase 3 |
+| `/divida-ativa/acompanhamento` | Entrada do acompanhamento: card "Meus requerimentos" + campo do n° do protocolo (sem o ano) |
+| `/divida-ativa/acompanhamento/requerimentos` | "Meus requerimentos": `GET /divida-ativa/requerimentos`, contribuinte em destaque |
+| `/divida-ativa/acompanhamento/requerimentos/[protocolo]` | Um requerimento: `GET /divida-ativa/requerimentos?protocolo=` (número sem o ano), protocolo em destaque |
 
 ### O cadastro de um imóvel são quatro telas e duas chamadas
 
@@ -389,7 +393,7 @@ resposta possível** — o spec não diz e o dado de teste não permitiu inferir
 | # | Campo | Valores assumidos | Veredito | O que a API real faz |
 |---|---|---|---|---|
 | P7 | `SituacaoCda` | 6 valores em SCREAMING_CASE | 🎨 | **Não há enum, e não há um eixo só.** `situacaoPrincipal` (texto livre do DAM, ex.: `"Concedido"`) + `codSituacaoCda` (int), mais um par paralelo `situacaoHonorarios`/`codSituacaoHonorarios`, mais um terceiro eixo `faseCobranca`/`faseCobrancaId`. Nosso tipo de visão tem **uma** `situacao` |
-| P8 | `SituacaoRequerimento` | 5 valores | ❓ | `GET /divida-ativa/requerimentos` não declara schema e devolveu `[]` (array cru) para o CPF de teste. Não há como confirmar nem refutar |
+| P8 | `SituacaoRequerimento` | 5 valores | 🎨 | **Não há enum.** O requerimento traz `situacaoId` (id cru do DAM) e, desde 21/10/2026, `descricaoSituacao` — o texto que o Figma chama de "Andamento". A `api-imoveis` lê esse texto de forma tolerante (`descricaoSituacao`, `situacaoDescricao`, `situacao.descricao`...) porque a chave real do DAM não está documentada; **confirmar em homologação** com um requerimento real. Sem o texto, a tela mostra o id. "Não há" é 200 com um item só de `mensagemErro`, e `[]` cru também acontece |
 | P9 | `TipoDocumento` | 6 valores | 🎨 | Não existe tipo **por documento**: `documentos: [{ nomeArquivo, conteudoBase64 }]`. Existe um `tipoDoc` solto no requerimento, aparentemente do correspondente |
 
 Nenhum dos três está em uso hoje: os mappers de Fase 3 foram removidos na integração, porque
