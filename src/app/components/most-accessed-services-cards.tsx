@@ -16,7 +16,7 @@ export default function MostAccessedServiceCards({
 
   if (services.length === 0) {
     return (
-      <>
+      <div className="px-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-md font-medium text-foreground">
             Mais acessados
@@ -31,12 +31,12 @@ export default function MostAccessedServiceCards({
             Ops... nenhum serviço encontrado
           </p>
         </div>
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="px-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
       </div>
@@ -73,6 +73,6 @@ export default function MostAccessedServiceCards({
           <div className="flex-shrink-0 sm:hidden w-2" />
         </div>
       </div>
-    </>
+    </div>
   )
 }

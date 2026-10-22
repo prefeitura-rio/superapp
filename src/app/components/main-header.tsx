@@ -36,7 +36,7 @@ export default function MainHeader({
         {/* Left side - Logo */}
         {logoHref ? (
           <Link href={logoHref}>
-            <PrefLogo fill="var(--primary)" className="h-8 w-20" />
+            <PrefLogo fill="var(--primary)" className="h-8 w-20 -ml-1" />
           </Link>
         ) : (
           <PrefLogo fill="var(--primary)" className="h-8 w-20" />

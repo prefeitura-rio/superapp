@@ -12,9 +12,9 @@ export default async function ServicesPage() {
   const allCategories = [...categories, ...additionalCategories]
 
   return (
-    <div className="bg-background text-foreground">
+    <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
-      <main className="flex max-w-4xl mx-auto flex-col px-4">
+      <main className="w-full max-w-4xl mx-auto flex flex-col pb-6">
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards limit={4} />
 

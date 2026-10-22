@@ -17,7 +17,7 @@ export default async function AppLayout({
           <RouteTracker />
           <SessionExpiredHandler />
           <CookieConsent variant="mini" />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 w-full">{children}</div>
           <FooterWrapper />
         </div>
       </OnboardingWrapperClient>
