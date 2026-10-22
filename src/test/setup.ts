@@ -9,6 +9,38 @@ setupTestEnv()
 // jsdom doesn't implement window.matchMedia — polyfill it for components that
 // use prefers-color-scheme (e.g. ThemeAwareVideo). Guard against node env tests.
 if (typeof window !== 'undefined') {
+  const createStorage = () => {
+    let store: Record<string, string> = {}
+    return {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, value: string) => {
+        store[key] = String(value)
+      },
+      removeItem: (key: string) => {
+        delete store[key]
+      },
+      clear: () => {
+        store = {}
+      },
+      get length() {
+        return Object.keys(store).length
+      },
+      key: (index: number) => Object.keys(store)[index] ?? null,
+    }
+  }
+
+  const storage = createStorage()
+  Object.defineProperty(window, 'localStorage', {
+    value: storage,
+    writable: true,
+    configurable: true,
+  })
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: storage,
+    writable: true,
+    configurable: true,
+  })
+
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({

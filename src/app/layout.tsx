@@ -92,6 +92,7 @@ export default async function RootLayout({
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
+          nonce={nonce}
         >
           <PWAProvider>{children}</PWAProvider>
           <LoginEventTracker />

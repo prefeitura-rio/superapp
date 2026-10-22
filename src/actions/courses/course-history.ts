@@ -18,13 +18,13 @@ export function getVisitedCourses(): VisitedCourse[] {
   if (typeof window === 'undefined') return []
 
   try {
-    const stored = localStorage.getItem(COURSE_HISTORY_KEY)
+    const stored = window.localStorage.getItem(COURSE_HISTORY_KEY)
     if (!stored) return []
     const courses = JSON.parse(stored) as VisitedCourse[]
     // Sort by most recent first
     return courses.sort((a, b) => b.visitedAt - a.visitedAt)
   } catch {
-    localStorage.removeItem(COURSE_HISTORY_KEY)
+    window.localStorage.removeItem(COURSE_HISTORY_KEY)
     return []
   }
 }
@@ -44,7 +44,7 @@ export function addVisitedCourse(course: Omit<VisitedCourse, 'visitedAt'>) {
       0,
       MAX_HISTORY_ITEMS
     )
-    localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(updated))
+    window.localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(updated))
   } catch (error) {
     console.error('Error saving visited course:', error)
   }
@@ -59,7 +59,7 @@ export function removeVisitedCourse(courseId: number) {
   try {
     const history = getVisitedCourses()
     const filtered = history.filter(c => c.id !== courseId)
-    localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(filtered))
+    window.localStorage.setItem(COURSE_HISTORY_KEY, JSON.stringify(filtered))
   } catch (error) {
     console.error('Error removing visited course:', error)
   }
@@ -70,5 +70,5 @@ export function removeVisitedCourse(courseId: number) {
  */
 export function clearVisitedCourses() {
   if (typeof window === 'undefined') return
-  localStorage.removeItem(COURSE_HISTORY_KEY)
+  window.localStorage.removeItem(COURSE_HISTORY_KEY)
 }
