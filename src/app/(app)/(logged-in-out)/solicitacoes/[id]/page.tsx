@@ -533,8 +533,10 @@ function RequestDetail({ data }: { data: DetailData }) {
             />
           )}
 
-        {/* Ouvidoria — só logado e concluído */}
-        {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
+        {/* Ouvidoria — só logado, concluído e não é LAI */}
+        {data.isLoggedIn &&
+          macroStatus === 'Concluído' &&
+          !data.isAcessoInformacao && <OuvidoriaCard />}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
