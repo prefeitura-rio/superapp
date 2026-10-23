@@ -1,3 +1,4 @@
+import { getImoveisInscricaoDividaAtiva } from '@/http-divida-ativa/divida-ativa/divida-ativa'
 import {
   getImoveis,
   getImoveisInscricaoCadastro,
@@ -5,6 +6,8 @@ import {
   postImoveis,
 } from '@/http-divida-ativa/imoveis/imoveis'
 import {
+  mapApiToDebito,
+  mapApiToGuiaParcelada,
   mapApiToImovel,
   mapFazendaToImovel,
   normalizarConsultaFazenda,
@@ -21,8 +24,9 @@ import { describe, expect, test } from 'vitest'
  * `endereco`), nunca a do payload.
  *
  * Este teste já se pagou: foi ele que acusou a troca do contrato provisório pelo real em
- * 17/08/2026. Cobre hoje só os endpoints de "Meus Imóveis" — a Fase 3 não tem fiação porque
- * a API não liga schema de resposta às operações de dívida ativa.
+ * 17/08/2026. Cobria só os endpoints de "Meus Imóveis" enquanto a API não ligava schema de
+ * resposta às operações de dívida ativa — isso mudou em 21/09/2026, e a fiação da Fase 3
+ * está no segundo bloco deste arquivo.
  */
 
 /**
@@ -119,5 +123,52 @@ describe('Dívida Ativa — fiação do contrato real', () => {
     expect(imovel.endereco).toBe('RUA EXEMPLO, 123 / LOJA A - BAIRRO')
     // O que separa esta consulta do cadastro: nada foi gravado, então não há id local.
     expect(imovel.id).toBeNull()
+  })
+})
+
+/**
+ * Fiação da Fase 3.
+ *
+ * Só passou a ser possível em 21/09/2026: até então os 24 endpoints de dívida ativa não
+ * declaravam schema de resposta, então o Orval gerava `data: void` e não havia o que
+ * atravessar. As anotações `@APIResponse` entraram na `dam-api` e o client foi regerado.
+ *
+ * O valor deste bloco é o mesmo do de cima: ele fala a linguagem do produto, nunca a do
+ * payload. Se a API trocar `valorSaldoPrincipal` de lugar, é aqui que se descobre — não na
+ * tela.
+ */
+describe('Dívida Ativa — fiação da consulta de débitos', () => {
+  test('a consulta de débitos atravessa client, mutator e mappers', async () => {
+    const { data } = assertStatus(
+      await getImoveisInscricaoDividaAtiva('00000018'),
+      200
+    )
+
+    const cdas = (data.cdas ?? []).map(mapApiToDebito)
+    const guias = (data.guiasParceladas ?? []).map(mapApiToGuiaParcelada)
+
+    expect(data.imovelCadastrado).toBe(true)
+    expect(cdas).not.toHaveLength(0)
+    expect(cdas[0].numeroCda).toBeTruthy()
+    expect(guias[0].numeroGuia).toBeTruthy()
+  })
+
+  /**
+   * A premissa P1 em forma de teste. Todos os valores monetários trafegam como string e
+   * nunca foram vistos preenchidos em homologação — o imóvel de teste não tem CDA em
+   * aberto. O que este teste garante é que, seja qual for a convenção, o que chega à tela
+   * é número ou `null`, nunca `NaN` nem a string crua.
+   */
+  test('os valores monetários chegam à tela como número ou null', async () => {
+    const { data } = assertStatus(
+      await getImoveisInscricaoDividaAtiva('00000018'),
+      200
+    )
+
+    for (const debito of (data.cdas ?? []).map(mapApiToDebito)) {
+      for (const valor of [debito.valorPrincipal, debito.valorHonorarios]) {
+        expect(valor === null || Number.isFinite(valor)).toBe(true)
+      }
+    }
   })
 })

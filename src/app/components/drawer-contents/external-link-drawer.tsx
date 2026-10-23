@@ -30,7 +30,11 @@ export function ExternalLinkDrawer({
   return (
     // Sem `title` aqui de propósito: o título/descrição do diálogo são a copy contextual
     // abaixo, via DrawerTitle/DrawerDescription — dois títulos confundiriam o leitor de tela.
-    <BottomSheet open={open} onOpenChange={onOpenChange}>
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      contentClassName="pb-8"
+    >
       <div className="flex flex-col gap-6 pt-6 px-2">
         <div className="text-left">
           <DrawerTitle className="text-xl font-medium leading-6 tracking-normal mb-3 text-popover-foreground">
@@ -41,17 +45,15 @@ export function ExternalLinkDrawer({
           </DrawerDescription>
         </div>
 
-        <div>
-          <CustomButton
-            type="button"
-            variant="primary"
-            size="lg"
-            fullWidth
-            onClick={handleConfirm}
-          >
-            Confirmar
-          </CustomButton>
-        </div>
+        <CustomButton
+          type="button"
+          variant="primary"
+          size="lg"
+          fullWidth
+          onClick={handleConfirm}
+        >
+          Confirmar
+        </CustomButton>
       </div>
     </BottomSheet>
   )

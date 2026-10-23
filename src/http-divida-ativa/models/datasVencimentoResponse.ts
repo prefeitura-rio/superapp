@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ValidarSenhaRequest {
-  senha?: string
+export interface DatasVencimentoResponse {
+  datas?: string[]
+  mensagem?: string
 }

@@ -1,7 +1,12 @@
 import {
   getDalDividaAtivaCadastroFazenda,
+  getDalDividaAtivaConsultaAvulsa,
   getDalDividaAtivaConsultaInscricao,
+  getDalDividaAtivaDatasVencimento,
+  getDalDividaAtivaDebitos,
   getDalDividaAtivaImoveis,
+  getDalDividaAtivaRevisaoPagamento,
+  getDalDividaAtivaSimulacao,
 } from '@/lib/dal'
 import { TEST_ENV } from '@/test/mocks/env'
 import { server } from '@/test/mocks/server'
@@ -249,5 +254,699 @@ describe('getDalDividaAtivaCadastroFazenda', () => {
     await getDalDividaAtivaCadastroFazenda('00000018', CPF)
 
     expect(chamadas).toBe(2)
+  })
+})
+
+describe('getDalDividaAtivaDebitos', () => {
+  const INSCRICAO = '00000018'
+
+  test('devolve CDAs, guias parceladas e totais do imóvel', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json(
+          {
+            imovel: {
+              id: 32,
+              dataInclusao: '2026-06-22T15:40:46.477',
+              endereco: 'RUA EXEMPLO, 123',
+              numInscricao: '00000018',
+              nome: 'Casa de praia',
+            },
+            imovelCadastrado: true,
+            cdas: [
+              {
+                cdaId: '111',
+                exercicio: '2024',
+                naturezaDivida: 'IPTU',
+                situacaoPrincipal: 'EM ABERTO',
+                valorSaldoPrincipal: '1.000,00',
+                valorSaldoHonorarios: '100,00',
+                selecionavelParcelamento: true,
+              },
+            ],
+            totalCdas: 1,
+            guiasParceladas: [
+              { numeroGuia: '900123', descricaoSituacaoGuia: 'EM DIA' },
+            ],
+            totalParcelado: 1,
+            totalDebitos: 2,
+            mensagem: null,
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
+
+    expect(debitos?.imovelCadastrado).toBe(true)
+    expect(debitos?.imovel?.inscricao).toBe('00000018')
+    expect(debitos?.cdas).toHaveLength(1)
+    expect(debitos?.cdas[0]).toMatchObject({
+      numeroCda: '111',
+      exercicio: 2024,
+      natureza: 'IPTU',
+      valorPrincipal: 1000,
+      valorHonorarios: 100,
+      parcelavel: true,
+    })
+    expect(debitos?.guiasParceladas).toHaveLength(1)
+    expect(debitos?.totalDebitos).toBe(2)
+  })
+
+  /**
+   * "Sem débito" é um estado de tela legítimo, não um erro — a API inclusive manda uma
+   * `mensagem` amigável junto. Devolver `null` aqui faria a tela dizer "não encontramos o
+   * imóvel" para quem simplesmente está em dia.
+   */
+  test('devolve estrutura vazia, não null, quando o imóvel não tem débito', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json(
+          {
+            imovel: { numInscricao: '00000018' },
+            imovelCadastrado: true,
+            cdas: [],
+            guiasParceladas: [],
+            totalCdas: 0,
+            totalParcelado: 0,
+            totalDebitos: 0,
+            mensagem: 'Nao ha debitos inscritos em divida ativa.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
+
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.guiasParceladas).toEqual([])
+    expect(debitos?.totalDebitos).toBe(0)
+    expect(debitos?.mensagem).toBe('Nao ha debitos inscritos em divida ativa.')
+  })
+
+  // Listas ausentes no corpo não podem virar `undefined` numa tela que faz `.map()`.
+  test('tolera listas ausentes no corpo da resposta', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json({ imovelCadastrado: true }, { status: 200 })
+      )
+    )
+
+    const resultado = await getDalDividaAtivaDebitos(INSCRICAO, CPF)
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
+
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.guiasParceladas).toEqual([])
+    expect(debitos?.totalDebitos).toBe(0)
+  })
+
+  /**
+   * 404 e 503 não podem chegar à tela como a mesma coisa. Um diz "o imóvel não está no seu
+   * cadastro" — tentar de novo não resolve, cadastrar resolve. O outro diz "o serviço está
+   * fora" — o número está certo e tentar de novo mais tarde resolve. Era isso que o `null`
+   * de antes apagava.
+   */
+  test('404 vira não-cadastrado', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json({ error: 'Nao encontrado' }, { status: 404 })
+      )
+    )
+
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+      situacao: 'nao-cadastrado',
+    })
+  })
+
+  /**
+   * O corpo é o que homologação devolveu de verdade em 22/09/2026 para uma inscrição
+   * cadastrada e válida.
+   */
+  test('503 vira indisponível', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+        HttpResponse.json(
+          { error: 'Servico de Divida Ativa indisponivel no momento.' },
+          { status: 503 }
+        )
+      )
+    )
+
+    await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+      situacao: 'indisponivel',
+    })
+  })
+
+  /** Qualquer outra falha é indisponibilidade: o cidadão não tem o que corrigir. */
+  test('401 e 500 também viram indisponível', async () => {
+    for (const status of [401, 500]) {
+      server.use(
+        http.get(`${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`, () =>
+          HttpResponse.json({}, { status })
+        )
+      )
+
+      await expect(getDalDividaAtivaDebitos(INSCRICAO, CPF)).resolves.toEqual({
+        situacao: 'indisponivel',
+      })
+    }
+  })
+
+  /**
+   * Regra de ouro nº 2 do plano: dado financeiro nunca vai para cache. Este teste vigia a
+   * inscrição normalizada no path e existe sobretudo para documentar a expectativa de que
+   * a chamada saia com `no-store` — se alguém trocar por `unstable_cache`, o CPF do cookie
+   * vazaria entre cidadãos.
+   */
+  test('normaliza a inscrição para somente dígitos no path', async () => {
+    let pathChamado = ''
+    server.use(
+      http.get(
+        `${DIVIDA_ATIVA}/imoveis/:inscricao/divida-ativa`,
+        ({ params }) => {
+          pathChamado = String(params.inscricao)
+          return HttpResponse.json({ imovelCadastrado: true }, { status: 200 })
+        }
+      )
+    )
+
+    await getDalDividaAtivaDebitos('0.000.001-8', CPF)
+
+    expect(pathChamado).toBe('00000018')
+  })
+})
+
+describe('getDalDividaAtivaConsultaAvulsa', () => {
+  /**
+   * A razão de esta função existir. `GET /imoveis/{inscricao}/divida-ativa` exige o imóvel
+   * cadastrado e só aceita inscrição no path — não há onde colocar uma CDA ou uma execução
+   * fiscal. A consulta avulsa é o único caminho para os outros dois modos da tela de entrada.
+   */
+  /**
+   * A CDA vai com barras: a API só reordena o ano quando vê a barra, e os 12 dígitos da carta
+   * (`SSNNNNNNAAAA…`) sem ela seriam lidos com o ano no lugar errado.
+   */
+  test('consulta por CDA enviando somente numCda, com barras', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '01021580200300' },
+      CPF
+    )
+
+    // Critério único: os outros campos não podem ir junto, nem como `undefined` explícito.
+    expect(corpo).toEqual({ numCda: '01/021580/2003-00' })
+  })
+
+  test('consulta por execução fiscal enviando somente numExecucaoFiscal', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'execucao-fiscal', valor: '00071070720188190001' },
+      CPF
+    )
+
+    expect(corpo).toEqual({ numExecucaoFiscal: '00071070720188190001' })
+  })
+
+  /**
+   * A máscara é exibição, nunca transporte — a mesma regra do formulário de entrada. Se o
+   * critério chegar pontuado pela URL, o que vai para a API são só os dígitos.
+   */
+  test('envia somente os dígitos do critério', async () => {
+    let corpo: unknown = null
+
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/consultar`,
+        async ({ request }) => {
+          corpo = await request.json()
+
+          return HttpResponse.json(
+            {
+              imovel: null,
+              imovelCadastrado: false,
+              cdas: [],
+              totalCdas: 0,
+              guiasParceladas: [],
+              totalParcelado: 0,
+              totalDebitos: 0,
+              mensagem: null,
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'inscricao', valor: '0.521.766-3' },
+      CPF
+    )
+
+    expect(corpo).toEqual({ numInscricao: '05217663' })
+  })
+
+  test('mapeia a resposta para o mesmo tipo de visão da consulta por inscrição', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json(
+          {
+            imovel: null,
+            imovelCadastrado: false,
+            cdas: [
+              {
+                cdaId: '20240000111',
+                exercicio: '2024',
+                // Como o DAM devolve: descrição em naturezaDivida, receita é código.
+                naturezaDivida: 'IPTU/Taxas - Predial',
+                receita: '4693',
+                situacaoPrincipal: 'EM ABERTO',
+                situacaoHonorarios: 'EM ABERTO',
+                faseCobranca: 'AJUIZADA',
+                valorSaldoPrincipal: '1.534,21',
+                valorSaldoHonorarios: '153,42',
+                inscricaoImobiliaria: '00000018',
+                selecionavelParcelamento: true,
+                protocoloRequerimentoAberto: null,
+              },
+            ],
+            totalCdas: 1,
+            guiasParceladas: [],
+            totalParcelado: 0,
+            totalDebitos: 1,
+            mensagem: null,
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const resultado = await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '20240000111' },
+      CPF
+    )
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
+
+    expect(debitos?.cdas).toHaveLength(1)
+    expect(debitos?.cdas[0]).toMatchObject({
+      numeroCda: '20240000111',
+      exercicio: 2024,
+      natureza: 'IPTU/Taxas - Predial',
+      valorPrincipal: 1534.21,
+      valorHonorarios: 153.42,
+      parcelavel: true,
+    })
+    // Consulta avulsa é somente leitura: a API sinaliza que o imóvel não está em Meus Imóveis.
+    expect(debitos?.imovelCadastrado).toBe(false)
+  })
+
+  /**
+   * "Sem débito" **não** é `null`: é 200 com listas vazias, e a tela tem estado próprio —
+   * a do Figma diz "Não encontramos nenhum débito associado ao número informado". Confundir
+   * os dois mandaria o cidadão para o error boundary em vez da tela desenhada.
+   */
+  test('resposta vazia devolve objeto com listas vazias, não null', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json(
+          {
+            imovel: null,
+            imovelCadastrado: false,
+            cdas: [],
+            totalCdas: 0,
+            guiasParceladas: [],
+            totalParcelado: 0,
+            totalDebitos: 0,
+            mensagem: 'Nao ha debitos inscritos em divida ativa.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const resultado = await getDalDividaAtivaConsultaAvulsa(
+      { tipo: 'cda', valor: '99999' },
+      CPF
+    )
+    const debitos = resultado.situacao === 'ok' ? resultado.debitos : null
+
+    expect(debitos).not.toBeNull()
+    expect(debitos?.cdas).toEqual([])
+    expect(debitos?.mensagem).toBe('Nao ha debitos inscritos em divida ativa.')
+  })
+
+  test('devolve null quando a API não responde 200', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json({}, { status: 503 })
+      )
+    )
+
+    await expect(
+      getDalDividaAtivaConsultaAvulsa(
+        { tipo: 'cda', valor: '20240000111' },
+        CPF
+      )
+    ).resolves.toEqual({ situacao: 'indisponivel' })
+  })
+
+  /**
+   * Com a rota em homologação, o 404 da consulta avulsa é do recurso: não há dívida para o
+   * número. Não é "não cadastrado" (a consulta avulsa não exige cadastro) nem
+   * indisponibilidade (tentar de novo o mesmo número não muda nada).
+   */
+  test('404 vira não-encontrado', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/consultar`, () =>
+        HttpResponse.json(
+          { error: 'Não encontramos dívida ativa para o número informado.' },
+          { status: 404 }
+        )
+      )
+    )
+
+    await expect(
+      getDalDividaAtivaConsultaAvulsa(
+        { tipo: 'cda', valor: '01021580200300' },
+        CPF
+      )
+    ).resolves.toEqual({ situacao: 'nao-encontrado' })
+  })
+})
+
+describe('getDalDividaAtivaDatasVencimento', () => {
+  test('pede as datas de parcelamento e devolve a lista do DAM', async () => {
+    let tipo: string | null = null
+    server.use(
+      http.get(
+        `${DIVIDA_ATIVA}/divida-ativa/datas-vencimento`,
+        ({ request }) => {
+          tipo = new URL(request.url).searchParams.get('tipo')
+          return HttpResponse.json(
+            { datas: ['05/10/2026', '05/11/2026'] },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    expect(await getDalDividaAtivaDatasVencimento()).toEqual([
+      '05/10/2026',
+      '05/11/2026',
+    ])
+    expect(tipo).toBe('PARCELAMENTO')
+  })
+
+  test('devolve null quando a API falha, para a tela distinguir de "sem datas"', async () => {
+    server.use(
+      http.get(`${DIVIDA_ATIVA}/divida-ativa/datas-vencimento`, () =>
+        HttpResponse.json({ error: 'indisponivel' }, { status: 503 })
+      )
+    )
+
+    expect(await getDalDividaAtivaDatasVencimento()).toBeNull()
+  })
+})
+
+describe('getDalDividaAtivaSimulacao', () => {
+  const CDAS = ['202001234567']
+  const DATA = '05/10/2026'
+
+  test('simula pelas CDAs e pela data, sem inscrição, e devolve as opções', async () => {
+    let corpo: unknown
+    server.use(
+      http.post(
+        `${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`,
+        async ({ request }) => {
+          corpo = await request.json()
+          return HttpResponse.json(
+            {
+              // Formato real do DAM em homologação: moeda e espaço não separável.
+              valorTotalAvista: 'R$ 1.696,61',
+              valorTotalPagarGrerj: 'R$\u00a0757,60',
+              opcoes: [
+                {
+                  qtdeParcelas: 1,
+                  valor1aParcela: 'R$\u00a01.696,56',
+                  valorJuros: 'R$\u00a00,00',
+                  valorDescontos: '',
+                },
+                {
+                  qtdeParcelas: 2,
+                  valor1aParcela: 'R$\u00a0848,29',
+                  valorJuros: 'R$\u00a08,48',
+                  valorDescontos: 'R$\u00a0100,00',
+                },
+                { valor1aParcela: 'R$\u00a00,00' },
+              ],
+            },
+            { status: 200 }
+          )
+        }
+      )
+    )
+
+    const simulacao = await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)
+
+    expect(corpo).toEqual({ cdas: CDAS, dataVencimento: DATA })
+    // Opção sem quantidade não é escolhível e sai da lista.
+    // Valores formatados pelo DAM chegam como número; desconto vazio vira `null`.
+    expect(simulacao).toEqual({
+      situacao: 'ok',
+      valorTotalAvista: 1696.61,
+      valorGrerj: 757.6,
+      opcoes: [
+        {
+          qtdeParcelas: 1,
+          valor1aParcela: 1696.56,
+          valorJuros: 0,
+          valorDescontos: null,
+        },
+        {
+          qtdeParcelas: 2,
+          valor1aParcela: 848.29,
+          valorJuros: 8.48,
+          valorDescontos: 100,
+        },
+      ],
+    })
+  })
+
+  test('recusa com 400 vira mensagem para o cidadão', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { error: 'Não é possível parcelar CDA suspensa.' },
+          { status: 400 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não é possível parcelar CDA suspensa.',
+    })
+  })
+
+  test('recusa do DAM com 200 e mensagemErro também é recusa, não falha', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { mensagemErro: 'Valor insuficiente para parcelamento.', opcoes: [] },
+          { status: 200 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Valor insuficiente para parcelamento.',
+    })
+  })
+
+  test('5xx é indisponibilidade, sem vazar a mensagem do sistema', async () => {
+    server.use(
+      http.post(`${DIVIDA_ATIVA}/divida-ativa/parcelamentos/simular`, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar o ePortal' },
+          { status: 503 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaSimulacao(CDAS, DATA, CPF)).toEqual({
+      situacao: 'indisponivel',
+    })
+  })
+})
+
+describe('getDalDividaAtivaRevisaoPagamento', () => {
+  const CDAS = ['01/137861/2025-00']
+  const URL = `${DIVIDA_ATIVA}/divida-ativa/avista/simular`
+
+  test('simula à vista só pelas CDAs, sem data, e devolve totais, itens e GRERJ', async () => {
+    let corpo: unknown
+    server.use(
+      http.post(URL, async ({ request }) => {
+        corpo = await request.json()
+        return HttpResponse.json(
+          {
+            dataVencimento: '20/10/2026',
+            valorTotalAvista: 'R$\u00a02.881,83',
+            valorSaldoTotalPrincipal: 'R$\u00a01.534,21',
+            valorTotalDescontoPrincipal: 'R$\u00a00,00',
+            valorSaldoTotalHonorario: 'R$\u00a0147,65',
+            valorTotalDescontoHonorario: 'R$\u00a00,00',
+            itens: [
+              {
+                cdaId: '01/137861/2025-00',
+                natureza: 'IPTU/Taxas - Predial',
+                contribuinte: 'Deusdete de Oliveira Carvalho',
+                saldoPrincipal: 'R$\u00a01.534,21',
+                descontoPrincipal: 'R$\u00a00,00',
+                saldoHonorarios: 'R$\u00a0147,65',
+                descontoHonorarios: 'R$\u00a00,00',
+              },
+              // Item sem CDA não tem como ser exibido e sai da lista.
+              { saldoPrincipal: 'R$\u00a010,00' },
+            ],
+            grerjs: [
+              {
+                numeroExecucaoFiscal: '0423680-92.2010.8.19.0001',
+                valor: 'R$\u00a01.199,97',
+              },
+              { valor: 'R$\u00a01,00' },
+            ],
+          },
+          { status: 200 }
+        )
+      })
+    )
+
+    const revisao = await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)
+
+    // Sem `dataVencimento`: quem escolhe a data à vista é a API.
+    expect(corpo).toEqual({ cdas: CDAS })
+    expect(revisao).toEqual({
+      situacao: 'ok',
+      dataVencimento: '20/10/2026',
+      valorTotal: 2881.83,
+      saldoPrincipalTotal: 1534.21,
+      descontoPrincipalTotal: 0,
+      honorariosTotal: 147.65,
+      descontoHonorariosTotal: 0,
+      itens: [
+        {
+          numeroCda: '01/137861/2025-00',
+          natureza: 'IPTU/Taxas - Predial',
+          contribuinte: 'Deusdete de Oliveira Carvalho',
+          saldoPrincipal: 1534.21,
+          descontoPrincipal: 0,
+          honorarios: 147.65,
+          descontoHonorarios: 0,
+        },
+      ],
+      grerjs: [{ execucaoFiscal: '0423680-92.2010.8.19.0001', valor: 1199.97 }],
+    })
+  })
+
+  test('recusa com 400 vira mensagem para o cidadão', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          { error: 'Não é possível parcelar CDA suspensa.' },
+          { status: 400 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não é possível parcelar CDA suspensa.',
+    })
+  })
+
+  test('recusa do DAM com 200 e mensagemErro também é recusa, não falha', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          {
+            mensagemErro: 'Não há datas de vencimento disponíveis no momento.',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
+      situacao: 'recusada',
+      mensagem: 'Não há datas de vencimento disponíveis no momento.',
+    })
+  })
+
+  test('5xx é indisponibilidade, sem vazar a mensagem do sistema', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          { error: 'Falha ao consultar o ePortal' },
+          { status: 503 }
+        )
+      )
+    )
+
+    expect(await getDalDividaAtivaRevisaoPagamento(CDAS, CPF)).toEqual({
+      situacao: 'indisponivel',
+    })
   })
 })

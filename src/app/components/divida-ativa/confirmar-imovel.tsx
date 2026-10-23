@@ -28,15 +28,11 @@ export function ConfirmarImovel({
           que vai encontrar lá depois. */}
       <ImovelResumoCard imovel={imovel} />
 
-      <CustomButton
-        asChild
-        variant="primary"
-        size="lg"
-        fullWidth
-        className="mt-auto"
-      >
-        <Link href={continuarHref}>Continuar</Link>
-      </CustomButton>
+      <div className="mt-auto pt-6">
+        <CustomButton asChild variant="primary" size="lg" fullWidth>
+          <Link href={continuarHref}>Continuar</Link>
+        </CustomButton>
+      </div>
     </div>
   )
 }

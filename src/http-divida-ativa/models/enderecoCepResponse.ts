@@ -6,9 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetImoveisInscricaoDividaAtivaDatasVencimentoParams = {
-  /**
-   * AVISTA ou PARCELAMENTO
-   */
-  tipo?: string
+export interface EnderecoCepResponse {
+  cep?: string
+  logradouro?: string
+  bairro?: string
+  cidade?: string
+  uf?: string
+  complemento?: string
+  mensagemErro?: string
 }
