@@ -54,7 +54,7 @@ Agentes invocados via Jira → GitHub em geral **não** têm `node_modules` até
 ## Regras de ouro
 
 - Preferir React Server Components; `'use client'` só quando necessário (Web APIs, interatividade).
-- Auth = cookies JWT do Keycloak (`access_token` / `refresh_token`). **Não** usar next-auth (a dependência existe, mas não é o padrão do app).
+- Auth = cookies JWT do Keycloak (`access_token` / `refresh_token`). **Não** usar next-auth.
 - Superapp **não** usa Heimdall (sem RBAC no lado do cidadão).
 - Dados de API: usar o cliente Orval certo em `src/http*` — não inventar fetch ad-hoc se o client já existe.
 - Não regenerar Orval nem editar specs OpenAPI sem necessidade explícita da tarefa.
