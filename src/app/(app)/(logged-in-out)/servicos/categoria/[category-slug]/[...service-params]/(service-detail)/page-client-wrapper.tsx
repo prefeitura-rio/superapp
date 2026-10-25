@@ -15,6 +15,7 @@ interface PageClientWrapperProps {
   categorySlug: string
   contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
+  isPreview?: boolean
 }
 
 export function PageClientWrapper({
@@ -23,6 +24,7 @@ export function PageClientWrapper({
   categorySlug,
   contentFormat = 'markdown',
   ticketFlags,
+  isPreview = false,
 }: PageClientWrapperProps) {
   return (
     <>
@@ -37,6 +39,7 @@ export function PageClientWrapper({
             orgaoGestorName={orgaoGestorName}
             contentFormat={contentFormat}
             ticketFlags={ticketFlags}
+            isPreview={isPreview}
           />
         </div>
       </div>

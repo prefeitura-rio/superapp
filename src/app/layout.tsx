@@ -50,24 +50,28 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   // Note: Nonce is generated in middleware but not enforced in current CSP policy
-  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const requestHeaders = await headers()
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const isServicePreview = requestHeaders.get('x-service-preview') === '1'
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head suppressHydrationWarning>
         <link rel="manifest" href="/manifest.json" />
 
         <meta name="theme-color" content="#ffffff" />
-        {/* Google Analytics Data Stream */}
-        <GoogleAnalytics
-          debugMode={process.env.NODE_ENV === 'development'}
-          nonce={nonce}
-          gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
-        />
-        {/* Google Tag Manager */}
-        <GoogleTagManager
-          nonce={nonce}
-          gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
-        />
+        {isServicePreview ? null : (
+          <>
+            <GoogleAnalytics
+              debugMode={process.env.NODE_ENV === 'development'}
+              nonce={nonce}
+              gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
+            />
+            <GoogleTagManager
+              nonce={nonce}
+              gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
+            />
+          </>
+        )}
         {process.env.NEXT_PUBLIC_RIO_QUEUE_URL &&
           process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
             <script

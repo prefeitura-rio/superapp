@@ -37,6 +37,7 @@ interface PageClientProps {
   orgaoGestorName: string | null
   contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
+  isPreview?: boolean
 }
 
 export function PageClient({
@@ -44,6 +45,7 @@ export function PageClient({
   orgaoGestorName,
   contentFormat = 'markdown',
   ticketFlags,
+  isPreview = false,
 }: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
   const enabledButtons = buttons.filter(btn => btn.is_enabled)
@@ -65,6 +67,11 @@ export function PageClient({
     button: ModelsButton,
     index: number
   ) => {
+    if (isPreview) {
+      event.preventDefault()
+      return
+    }
+
     const destination = button.url_service
     if (!destination) return
 
@@ -140,9 +147,12 @@ export function PageClient({
               size="lg"
             >
               <a
-                href={ticketUrl(0)}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={isPreview ? '#preview' : ticketUrl(0)}
+                target={isPreview ? undefined : '_blank'}
+                rel={isPreview ? undefined : 'noopener noreferrer'}
+                onClick={
+                  isPreview ? event => event.preventDefault() : undefined
+                }
                 className="text-background text-sm leading-5 font-normal"
               >
                 Solicitar serviço
@@ -156,9 +166,12 @@ export function PageClient({
                 size="lg"
               >
                 <a
-                  href={ticketUrl(1)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={isPreview ? '#preview' : ticketUrl(1)}
+                  target={isPreview ? undefined : '_blank'}
+                  rel={isPreview ? undefined : 'noopener noreferrer'}
+                  onClick={
+                    isPreview ? event => event.preventDefault() : undefined
+                  }
                   className="text-sm leading-5 font-normal"
                 >
                   Solicitar sem login
@@ -177,7 +190,9 @@ export function PageClient({
                   size="lg"
                 >
                   <a
-                    href={enabledButtons[0].url_service}
+                    href={
+                      isPreview ? '#preview' : enabledButtons[0].url_service
+                    }
                     onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
                     className="text-background text-sm leading-5 font-normal"
                   >
@@ -204,7 +219,7 @@ export function PageClient({
                           className="w-full rounded-full h-11 text-background"
                         >
                           <a
-                            href={button.url_service}
+                            href={isPreview ? '#preview' : button.url_service}
                             onClick={e => handleButtonClick(e, button, index)}
                             className="text-background"
                           >

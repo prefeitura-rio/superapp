@@ -1,3 +1,4 @@
+import { isPreviewCartaServicosEnabled } from '@/constants/venvs'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 import {
   type MiddlewareConfig,
@@ -275,6 +276,43 @@ export async function middleware(request: NextRequest) {
         'Content-Security-Policy',
         contentSecurityPolicyHeaderValue
       )
+
+      // Preview shell has no service payload. Keep it out of the public cache
+      // and out of search indexes. The draft arrives later via postMessage.
+      if (
+        path === '/servicos/preview' ||
+        path.startsWith('/servicos/preview/')
+      ) {
+        if (!isPreviewCartaServicosEnabled()) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/not-found'
+          const response = NextResponse.rewrite(url)
+          response.headers.set(
+            'Content-Security-Policy',
+            contentSecurityPolicyHeaderValue
+          )
+          span.setStatus({ code: SpanStatusCode.OK })
+          span.end()
+          return response
+        }
+
+        requestHeaders.set('x-service-preview', '1')
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        response.headers.set('Referrer-Policy', 'no-referrer')
+        response.headers.set('Cache-Control', 'private, no-store')
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
 
       // Special handling for wallet routes
       if (path === '/carteira') {
