@@ -1,7 +1,7 @@
 'use client'
 
 import { CustomInput } from '@/components/ui/custom/custom-input'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AreaAtuacaoViewModel } from './types'
 
@@ -53,6 +53,12 @@ export function AreaAtuacao({
   return (
     <div ref={dropdownRef} className="relative w-full space-y-1">
       <div className="relative">
+        <Search
+          className="pointer-events-none absolute top-1/2 left-5 z-10 size-6  text-theme-color-card-foreground"
+          strokeWidth={1.4}
+          aria-hidden="true"
+        />
+
         <CustomInput
           id="area-atuacao"
           label="Área de atuação"
@@ -62,21 +68,9 @@ export function AreaAtuacao({
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Digite para pesquisar área..."
-          className="pr-12"
+          placeholder="Pesquisar"
+          className="h-16 w-full rounded-xl border-[1.4px] border-theme-color-border bg-theme-color-card pl-16 text-sm placeholder:text-theme-color-muted-foreground"
         />
-        <button
-          type="button"
-          aria-label={isOpen ? 'Fechar lista de áreas' : 'Abrir lista de áreas'}
-          onClick={() => setIsOpen(open => !open)}
-          className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-4 text-primary"
-        >
-          {isOpen ? (
-            <ChevronUp className="size-5" />
-          ) : (
-            <ChevronDown className="size-5" />
-          )}
-        </button>
       </div>
 
       {isOpen && (
