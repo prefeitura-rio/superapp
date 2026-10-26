@@ -1,0 +1,108 @@
+'use client'
+
+import {
+  type ConsultaAnterior,
+  MODOS_CONSULTA,
+  type ModoConsulta,
+  urlDebitos,
+} from '@/app/components/divida-ativa/modos-consulta'
+import { CustomButton } from '@/components/ui/custom/custom-button'
+import { CustomInput } from '@/components/ui/custom/custom-input'
+import { somenteDigitos } from '@/lib/divida-ativa-utils'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+interface ConsultaParcelamentoFormProps {
+  /**
+   * Só o identificador do modo, **nunca a configuração inteira**.
+   *
+   * `ModoConsultaConfig` carrega `formatar` e `validar`, que são funções — e função não
+   * atravessa a fronteira Server → Client Component. Passar o objeto inteiro derruba a
+   * página em runtime com "Functions cannot be passed directly to Client Components", e o
+   * `error.tsx` do módulo transforma isso num redirect silencioso para `/servicos`.
+   *
+   * Uma string sempre serializa, então a prop com este tipo torna o erro impossível de
+   * reintroduzir. Nem o typecheck nem os testes em jsdom pegam essa classe de problema: o
+   * TypeScript não modela serializabilidade e o teste renderiza este componente direto, sem
+   * cruzar a fronteira.
+   */
+  modo: ModoConsulta
+  /** Consulta de onde o cidadão voltou: o número reaparece no campo. */
+  consultaAnterior?: ConsultaAnterior
+}
+
+/**
+ * Segundo passo da consulta: um campo só, com o rótulo do modo escolhido.
+ *
+ * Campo aberto com máscara aplicada a cada tecla. O que sai daqui para a URL — e depois para
+ * o DAL — são **somente os dígitos**: a máscara é exibição. Vale para os três modos, inclusive
+ * a execução fiscal, cujo número o cidadão cola já pontuado da citação. (A CDA ganha as
+ * barras de volta no DAL, ao ir para a API — ver `cdaParaApi`.)
+ *
+ * Sem React Hook Form aqui, ao contrário do formulário de cadastro: é um campo, uma regra de
+ * formato e nenhum estado de servidor. O RHF entra quando houver o que ele resolve.
+ */
+export function ConsultaParcelamentoForm({
+  modo: modoId,
+  consultaAnterior,
+}: ConsultaParcelamentoFormProps) {
+  // A configuração é resolvida aqui, no cliente, a partir do id que veio do servidor.
+  const modo = MODOS_CONSULTA[modoId]
+
+  const router = useRouter()
+  const [valor, setValor] = useState(() =>
+    consultaAnterior ? modo.formatar(consultaAnterior.valor) : ''
+  )
+  const [erro, setErro] = useState<string | null>(null)
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setValor(modo.formatar(event.target.value))
+
+    // Some com o erro assim que o cidadão volta a digitar: manter a mensagem enquanto ele
+    // corrige é ruído, e o "Continuar" revalida de qualquer forma.
+    if (erro) setErro(null)
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const digitos = somenteDigitos(valor)
+
+    if (digitos === '') {
+      setErro(modo.mensagemVazio)
+      return
+    }
+
+    if (!modo.validar(valor)) {
+      setErro(modo.mensagemFormato)
+      return
+    }
+
+    router.push(urlDebitos(modo.parametro, digitos, consultaAnterior))
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-1 flex-col px-4"
+      noValidate
+    >
+      <CustomInput
+        id={`consulta-${modo.id}`}
+        label={modo.rotuloCampo}
+        placeholder={modo.placeholder}
+        inputMode="numeric"
+        autoComplete="off"
+        value={valor}
+        onChange={handleChange}
+        error={erro ?? undefined}
+      />
+
+      <div className="mt-auto pt-6">
+        <CustomButton type="submit" variant="primary" size="lg" fullWidth>
+          Continuar
+        </CustomButton>
+      </div>
+    </form>
+  )
+}

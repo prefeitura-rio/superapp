@@ -1,6 +1,19 @@
-import type { FazendaImovel, ImovelResponse } from '@/http-divida-ativa/models'
-import { somenteDigitos } from '@/lib/divida-ativa-utils'
-import type { ImovelDividaAtiva } from '@/types/divida-ativa'
+import type {
+  CdaResponse,
+  DividaAtivaConsultaResponse,
+  FazendaImovel,
+  GuiaDamResponse,
+  ImovelResponse,
+  RequerimentoParcelamentoResponse,
+} from '@/http-divida-ativa/models'
+import { somenteDigitos, urlPdfDaPrefeitura } from '@/lib/divida-ativa-utils'
+import type {
+  DebitoDividaAtiva,
+  DebitosDividaAtiva,
+  GuiaParceladaDividaAtiva,
+  ImovelDividaAtiva,
+  RequerimentoDividaAtiva,
+} from '@/types/divida-ativa'
 
 /**
  * Camada anti-corrupção entre o contrato da API `api-imoveis` e os tipos de visão do
@@ -275,4 +288,190 @@ export function mapApiToMensagemErro(
   )
 
   return conhecida ? conhecida.exibir : mensagem
+}
+
+/**
+ * `exercicio` chega como string no contrato (`"2024"`). Devolve `null` para ausente ou não
+ * numérico — `Number('')` é 0, e um exercício zero na tela seria pior que a ausência.
+ */
+function anoOuNull(valor: string | undefined): number | null {
+  if (typeof valor !== 'string' || valor.trim() === '') {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isInteger(numero) ? numero : null
+}
+
+/** `qtdPagas` e `qtdeParcelas` são strings no contrato do DAM. */
+function contagemOuNull(valor: string | undefined): number | null {
+  if (typeof valor !== 'string' || valor.trim() === '') {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isInteger(numero) && numero >= 0 ? numero : null
+}
+
+/**
+ * Converte uma CDA do contrato para o tipo de visão.
+ *
+ * Duas decisões de `docs/divida-ativa.md` vivem aqui e não devem ser "simplificadas":
+ *
+ * - **D5** — `valorPrincipal` e `valorHonorarios` ficam separados. A tela exibe os dois para
+ *   o cidadão identificar o que é o quê; a seleção do parcelamento continua sendo por CDA,
+ *   porque `ParcelamentoSimularRequest` recebe só `cdas`.
+ * - **D9** — `parcelavel` vem exclusivamente de `selecionavelParcelamento`, e
+ *   `protocoloRequerimentoAberto` é informação, não impedimento. Se o DAM disser que pode,
+ *   pode, ainda que exista protocolo aberto.
+ *
+ * As situações (`situacaoPrincipal`, `situacaoHonorarios`) passam como texto da API. A
+ * versão anterior deste tipo traduzia para um enum nosso, o que seria reimplementar no front
+ * uma classificação que é do DAM.
+ *
+ * `tipoPessoa` vira só um booleano (`devedorPessoaJuridica`): é o que decide os documentos
+ * empresariais do requerimento, e só o código `'2'` tem significado confirmado.
+ */
+export function mapApiToDebito(api: CdaResponse): DebitoDividaAtiva {
+  return {
+    numeroCda: api.cdaId ?? '',
+    exercicio: anoOuNull(api.exercicio),
+    natureza: textoOuNull(api.naturezaDivida),
+    contribuinte: textoOuNull(api.nomeContribuinte),
+    situacaoPrincipal: textoOuNull(api.situacaoPrincipal),
+    situacaoHonorarios: textoOuNull(api.situacaoHonorarios),
+    faseCobranca: textoOuNull(api.faseCobranca),
+    valorPrincipal: parseValorMonetario(api.valorSaldoPrincipal),
+    valorHonorarios: parseValorMonetario(api.valorSaldoHonorarios),
+    // `?? false` e não `!== false`: ausência da flag significa "não sabemos", e na dúvida o
+    // front nunca oferece parcelamento por conta própria.
+    parcelavel: api.selecionavelParcelamento ?? false,
+    protocoloRequerimentoAberto: textoOuNull(api.protocoloRequerimentoAberto),
+    inscricao: textoOuNull(api.inscricaoImobiliaria),
+    devedorPessoaJuridica: api.tipoPessoa?.trim() === '2',
+  }
+}
+
+/**
+ * Converte uma guia de parcelamento existente para o tipo de visão.
+ *
+ * Mapeia só o que a tela de débitos mostra. `GuiaDamResponse` traz ainda `cotas`, `grerjs`,
+ * `itens` e a quebra de descontos por principal/honorários — entram quando existir tela que
+ * os exiba.
+ */
+export function mapApiToGuiaParcelada(
+  api: GuiaDamResponse
+): GuiaParceladaDividaAtiva {
+  return {
+    numeroGuia: api.numeroGuia ?? '',
+    situacao: textoOuNull(api.descricaoSituacaoGuia),
+    tipoPagamento: textoOuNull(api.descricaoTipoPagamento),
+    faseCobranca: textoOuNull(api.faseCobranca),
+    // O DAM devolve `dd/MM/yyyy`; `parseDataApi` já aceitava esse formato antes de sabermos.
+    vencimento: parseDataApi(api.dataVencimento),
+    parcelasPagas: contagemOuNull(api.qtdPagas),
+    totalParcelas: contagemOuNull(api.qtdeParcelas),
+    valorTotal: parseValorMonetario(api.valorTotalGuia),
+    valorSaldo: parseValorMonetario(api.valorSaldoTotal),
+    linhaDigitavel: textoOuNull(api.linhaDigitavel),
+    urlPdf: textoOuNull(api.urlPdf),
+  }
+}
+
+/**
+ * Desembrulha `DividaAtivaConsultaResponse` para o tipo de visão da tela de débitos.
+ *
+ * Os totais vêm da API em vez de `.length` de propósito: `totalParcelado` desduplica número
+ * de guia, então contar o array daria número diferente do que o legado mostra.
+ *
+ * Listas ausentes viram `[]` — uma tela que faz `.map()` sobre `undefined` quebra, e o
+ * contrato marca todos esses campos como opcionais.
+ */
+export function mapApiToDebitos(
+  api: DividaAtivaConsultaResponse
+): DebitosDividaAtiva {
+  return {
+    imovel: api.imovel ? mapApiToImovel(api.imovel) : null,
+    imovelCadastrado: api.imovelCadastrado ?? false,
+    cdas: (api.cdas ?? []).map(mapApiToDebito),
+    guiasParceladas: (api.guiasParceladas ?? []).map(mapApiToGuiaParcelada),
+    totalCdas: numeroOuNull(api.totalCdas) ?? 0,
+    totalParcelado: numeroOuNull(api.totalParcelado) ?? 0,
+    totalDebitos: numeroOuNull(api.totalDebitos) ?? 0,
+    mensagem: textoOuNull(api.mensagem),
+  }
+}
+
+/**
+ * `GET /divida-ativa/requerimentos` devolve um **array cru** de
+ * `RequerimentoParcelamentoResponse` — a mesma armadilha de `GET /imoveis` (premissa P11),
+ * e o mesmo remédio: aceitar array, objeto único e envelope `{ data: [...] }`.
+ */
+export function normalizarListaRequerimentos(
+  data: unknown
+): RequerimentoParcelamentoResponse[] {
+  if (Array.isArray(data)) {
+    return data as RequerimentoParcelamentoResponse[]
+  }
+
+  if (typeof data !== 'object' || data === null) {
+    return []
+  }
+
+  const envelope = (data as { data?: unknown }).data
+  if (Array.isArray(envelope)) {
+    return envelope as RequerimentoParcelamentoResponse[]
+  }
+
+  return [data as RequerimentoParcelamentoResponse]
+}
+
+/**
+ * Um requerimento da API para o tipo de visão.
+ *
+ * Devolve `null` quando não há protocolo: é o item que a API usa para dizer "não há" ou
+ * "não é seu" (`mensagemErro` sozinho), e ele não é um requerimento — quem chama lê a
+ * mensagem com `mensagemDaListaDeRequerimentos`. O DAM manda o número do protocolo ora
+ * como string com zeros, ora como inteiro; aqui ele vira string sempre.
+ */
+export function mapApiToRequerimento(
+  api: RequerimentoParcelamentoResponse
+): RequerimentoDividaAtiva | null {
+  const protocolo = textoOuNull(
+    api.numProtocoloRequerimentoParcelamento == null
+      ? undefined
+      : String(api.numProtocoloRequerimentoParcelamento)
+  )
+  if (!protocolo) return null
+
+  return {
+    protocolo,
+    ano: textoOuNull(api.anoRequerimento),
+    contribuinte: textoOuNull(api.nomeContribuinte),
+    abertoEm: parseDataApi(api.dataSolicitacao),
+    previsaoRetornoEm: parseDataApi(api.datPrevisaoEntrega),
+    respondidoEm: parseDataApi(api.datResposta),
+    situacaoId: textoOuNull(api.situacaoId),
+    situacao: textoOuNull(api.descricaoSituacao),
+    motivoRejeicao: textoOuNull(api.txtMotivoRejeicao),
+    guiaPagamentoId: textoOuNull(api.requerimentoGuiaPagamentoId),
+    // Vira `href` no acompanhamento e na confirmação: só com host da Prefeitura.
+    urlComprovante: urlPdfDaPrefeitura(api.urlComprovante),
+  }
+}
+
+/**
+ * A mensagem com que a API explica uma lista sem requerimento — o primeiro `mensagemErro`
+ * encontrado. `null` quando não há (lista `[]` crua, que o DAM também devolve).
+ */
+export function mensagemDaListaDeRequerimentos(
+  lista: RequerimentoParcelamentoResponse[]
+): string | null {
+  for (const item of lista) {
+    const mensagem = textoOuNull(item.mensagemErro)
+    if (mensagem) return mensagem
+  }
+  return null
 }
