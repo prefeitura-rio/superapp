@@ -12,11 +12,11 @@ export function ComportamentosAtitudes({
   onToggle,
 }: ComportamentosAtitudesProps) {
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full">
       <span className="text-primary text-sm font-normal">
         Selecione comportamentos e atitudes
       </span>
-      <div className="flex w-full flex-wrap gap-2">
+      <div className="flex w-full flex-wrap mt-3">
         {itens.map(item => (
           <button
             key={item.id}
