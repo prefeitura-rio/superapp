@@ -90,6 +90,26 @@ export function isPreviewDataMessage(
   )
 }
 
+/**
+ * Lightning Web Security wraps LWC objects in Proxy, and postMessage cannot
+ * structured-clone them. Salesforce may send the same envelope as a JSON
+ * string. Strings over the body cap are ignored without parsing.
+ */
+export function readPreviewDataMessage(
+  data: unknown
+): PreviewDataMessage | null {
+  let value = data
+  if (typeof value === 'string') {
+    if (value.length > PREVIEW_MAX_BODY_BYTES) return null
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return null
+    }
+  }
+  return isPreviewDataMessage(value) ? value : null
+}
+
 export function previewErrorMessage(
   nonce: string,
   code: PreviewErrorCode

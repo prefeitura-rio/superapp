@@ -8,8 +8,8 @@ import {
   PREVIEW_READY_TIMEOUT_MS,
   PREVIEW_READY_TYPE,
   type PreviewErrorCode,
-  isPreviewDataMessage,
   previewErrorMessage,
+  readPreviewDataMessage,
   readPreviewNonce,
 } from '@/lib/carta-servicos/preview-protocol'
 import type { ServicePreviewResponse } from '@/lib/carta-servicos/preview-service'
@@ -39,6 +39,7 @@ export function PreviewClient({ allowedOrigins }: PreviewClientProps) {
     let stopReady = false
     let interval = 0
     let timeout = 0
+    let acceptedNonce: string | null = null
 
     const detachOpener = () => {
       try {
@@ -141,6 +142,7 @@ export function PreviewClient({ allowedOrigins }: PreviewClientProps) {
     const begin = () => {
       stopPinging()
       stopReady = false
+      acceptedNonce = null
       requestId.current += 1
       const nonce = readPreviewNonce(window.location.hash)
       nonceRef.current = nonce
@@ -168,11 +170,13 @@ export function PreviewClient({ allowedOrigins }: PreviewClientProps) {
 
     const onMessage = (event: MessageEvent) => {
       if (!origins.includes(event.origin)) return
-      if (!isPreviewDataMessage(event.data)) return
-      if (event.data.nonce !== nonceRef.current) return
+      const message = readPreviewDataMessage(event.data)
+      if (!message || message.nonce !== nonceRef.current) return
+      if (acceptedNonce === message.nonce) return
+      acceptedNonce = message.nonce
 
       stopPinging()
-      void loadPreview(event.data.payload, event)
+      void loadPreview(message.payload, event)
     }
 
     window.addEventListener('hashchange', begin)

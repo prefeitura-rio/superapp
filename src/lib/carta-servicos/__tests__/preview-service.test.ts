@@ -3,6 +3,7 @@ import {
   PREVIEW_MAX_BODY_BYTES,
   isPreviewDataMessage,
   parseSalesforcePreviewOrigins,
+  readPreviewDataMessage,
   readPreviewNonce,
 } from '@/lib/carta-servicos/preview-protocol'
 import { allowPreviewRequest } from '@/lib/carta-servicos/preview-rate-limit'
@@ -49,6 +50,29 @@ describe('isPreviewDataMessage', () => {
     ).toBe(false)
     expect(isPreviewDataMessage({ type: 'prefrio-preview-ready' })).toBe(false)
     expect(isPreviewDataMessage(null)).toBe(false)
+  })
+})
+
+describe('readPreviewDataMessage', () => {
+  const envelope = {
+    type: 'prefrio-preview-data',
+    nonce: NONCE,
+    payload: { name: 'IPTU' },
+  }
+
+  it('accepts the object and the same message as a JSON string', () => {
+    expect(readPreviewDataMessage(envelope)).toEqual(envelope)
+    expect(readPreviewDataMessage(JSON.stringify(envelope))).toEqual(envelope)
+  })
+
+  it('ignores invalid JSON and strings over the body cap', () => {
+    expect(readPreviewDataMessage('{')).toBeNull()
+    expect(
+      readPreviewDataMessage('{"type":"prefrio-preview-ready"}')
+    ).toBeNull()
+    expect(
+      readPreviewDataMessage('x'.repeat(PREVIEW_MAX_BODY_BYTES + 1))
+    ).toBeNull()
   })
 })
 

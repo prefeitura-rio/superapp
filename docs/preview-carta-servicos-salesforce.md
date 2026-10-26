@@ -22,10 +22,12 @@ As duas janelas só aceitam a origem da outra. Nunca `*`. O nonce do hash é a v
 | `type` | Quem envia | Corpo |
 | --- | --- | --- |
 | `prefrio-preview-ready` | pref.rio | `{ nonce }` |
-| `prefrio-preview-data` | Lightning | `{ nonce, payload }` |
+| `prefrio-preview-data` | Lightning | `{ nonce, payload }` ou a mesma mensagem como string JSON |
 | `prefrio-preview-error` | pref.rio | `{ nonce, code }` |
 
 `code` é um destes: `payload_too_large`, `invalid_payload`, `timeout`, `rate_limited`. O erro não inclui o HTML nem o body.
+
+Sob LWS todo objeto criado no LWC é um Proxy, e `postMessage` com objeto lança `DataCloneError`. O Salesforce envia `prefrio-preview-data` como string JSON. O portal faz `JSON.parse` antes de validar, só depois de conferir a origem. String inválida ou maior que 1 MB é ignorada, sem erro de volta. O formato do objeto continua o mesmo, e o `POST` leva só o `payload`. O mesmo nonce, na mesma abertura, gera um único POST. `ready` e `error` continuam objetos.
 
 O portal devolve o erro para `event.source` (a aba que mandou os dados). O `timeout`, que ocorre antes de qualquer mensagem, vai para o `window.opener`.
 
@@ -76,6 +78,8 @@ sendPayload(payload = this.payload) {
 }
 ```
 
+No Lightning, o `postMessage` manda essa mesma mensagem como string JSON. O objeto do exemplo continua aceito.
+
 CSP Trusted Sites: testar sem. Só cadastrar a origem do pref.rio se o org bloquear o `window.open` ou o `postMessage`.
 
 ## Payload
@@ -123,7 +127,8 @@ O preview sempre renderiza HTML, com a flag de preview ligada. Ele não lê `CAR
 A origem do `postMessage` é só o host do Lightning, sem path e sem barra no fim.
 
 - Staging do Lightning: `https://prefeitura-rio--staging.sandbox.lightning.force.com`. O editor abre em `/lightning/r/Knowledge__kav/...`; isso não entra na allowlist.
-- Produção do Lightning: ainda sem domínio. `SALESFORCE_PREVIEW_ORIGINS` de produção fica vazio até existir.
+- Produção do Lightning: `https://prefeitura-rio.lightning.force.com`. `SALESFORCE_PREVIEW_ORIGINS` de produção fica vazio até o preview ser ligado.
+- QA do Lightning: `https://prefeitura-rio--qa.sandbox.lightning.force.com`. Fica de fora enquanto o preview desse ambiente estiver desligado.
 - `https://1746.staging.app.dados.rio` e `https://1746.pref.rio` ficam de fora. São o portal do 1746, não a janela do editor.
 
 A rota continua atrás da flag de preview, desligada até alguém setar `PREVIEW_CARTA_SERVICOS_ENABLED=true`. Ela ainda não está na `main`.
