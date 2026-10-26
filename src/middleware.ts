@@ -6,7 +6,7 @@ import {
   NextResponse,
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
-import { handleExpiredToken, isJwtExpired } from './lib'
+import { applySecurityHeaders, handleExpiredToken, isJwtExpired } from './lib'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -119,10 +119,7 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -139,10 +136,7 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -160,10 +154,7 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -178,10 +169,7 @@ export async function middleware(request: NextRequest) {
               : `/servicos/trabalho${path.slice(legacyPath.length)}`
 
           const response = NextResponse.redirect(url, 308)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -202,10 +190,7 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/not-found'
         const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         return response
       }
 
@@ -227,10 +212,7 @@ export async function middleware(request: NextRequest) {
         url.pathname = '/not-found'
 
         const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         return response
       }
 
@@ -243,10 +225,7 @@ export async function middleware(request: NextRequest) {
         url.pathname = '/not-found'
 
         const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         return response
       }
 
@@ -287,10 +266,7 @@ export async function middleware(request: NextRequest) {
           const url = request.nextUrl.clone()
           url.pathname = '/not-found'
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return response
@@ -302,10 +278,7 @@ export async function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         response.headers.set('Referrer-Policy', 'no-referrer')
         response.headers.set('Cache-Control', 'private, no-store')
@@ -324,10 +297,7 @@ export async function middleware(request: NextRequest) {
           redirectUrl.pathname = '/autenticacao-necessaria/carteira'
           redirectUrl.search = ''
           const response = NextResponse.redirect(redirectUrl)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return response
@@ -342,10 +312,7 @@ export async function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         // Set cache headers for public pages (2 minutes, allow stale for 5 min)
         response.headers.set(
           'Cache-Control',
@@ -374,10 +341,7 @@ export async function middleware(request: NextRequest) {
           span.setAttribute('redirect.target', '/')
         }
         const response = NextResponse.redirect(redirectUrl)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -427,10 +391,7 @@ export async function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -445,10 +406,7 @@ export async function middleware(request: NextRequest) {
         redirectUrl.href = authUrlWithReturn
         span.setAttribute('redirect.return_url', returnUrl)
         const response = NextResponse.redirect(redirectUrl)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response

@@ -6,6 +6,24 @@ import {
 } from './auth-cookie-config'
 import { refreshAccessToken } from './token-refresh'
 
+export const PERMISSIONS_POLICY =
+  'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
+
+export const CROSS_ORIGIN_RESOURCE_POLICY = 'same-site'
+
+export function applySecurityHeaders(
+  response: NextResponse,
+  contentSecurityPolicy: string
+): NextResponse {
+  response.headers.set('Content-Security-Policy', contentSecurityPolicy)
+  response.headers.set('Permissions-Policy', PERMISSIONS_POLICY)
+  response.headers.set(
+    'Cross-Origin-Resource-Policy',
+    CROSS_ORIGIN_RESOURCE_POLICY
+  )
+  return response
+}
+
 export async function handleExpiredToken(
   request: NextRequest,
   refreshToken: string | undefined,
@@ -44,10 +62,7 @@ export async function handleExpiredToken(
         )
       }
 
-      response.headers.set(
-        'Content-Security-Policy',
-        contentSecurityPolicyHeaderValue
-      )
+      applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
       return response
     }
   }
@@ -61,9 +76,6 @@ export async function handleExpiredToken(
   const redirectUrl = request.nextUrl.clone()
   redirectUrl.pathname = REDIRECT_WHEN_SESSION_EXPIRED_ROUTE
   const response = NextResponse.redirect(redirectUrl)
-  response.headers.set(
-    'Content-Security-Policy',
-    contentSecurityPolicyHeaderValue
-  )
+  applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
   return response
 }

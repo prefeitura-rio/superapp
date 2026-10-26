@@ -879,6 +879,41 @@ function parseList(
   }
 }
 
+const MARKDOWN_HREF_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:']
+
+/**
+ * Keeps http(s), mailto, tel, root-relative paths and anchors.
+ * javascript:, data: and values that would break out of the attribute
+ * are dropped so the link text is rendered without an href.
+ */
+function isUnsafeMarkdownHref(value: string): boolean {
+  for (const char of value) {
+    const code = char.charCodeAt(0)
+    if (code <= 32 || code === 127) return true
+    if ('"\'<>`\\'.includes(char)) return true
+  }
+  return false
+}
+
+function sanitizeMarkdownHref(href: string): string | null {
+  const candidate = href.trim()
+  if (candidate === '') return null
+  if (isUnsafeMarkdownHref(candidate)) return null
+
+  if (
+    candidate.startsWith('#') ||
+    (candidate.startsWith('/') && !candidate.startsWith('//'))
+  ) {
+    return candidate
+  }
+
+  const lower = candidate.toLowerCase()
+  const allowed = MARKDOWN_HREF_SCHEMES.some(scheme => lower.startsWith(scheme))
+  if (!allowed) return null
+
+  return candidate
+}
+
 /**
  * Parse inline markdown (bold, italic, links, etc.)
  * @param text - Text to parse
@@ -890,8 +925,14 @@ function parseInlineMarkdown(
 ): string {
   let result = text
 
-  // Links
-  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+  result = result.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    (_match, label: string, href: string) => {
+      const safeHref = sanitizeMarkdownHref(href)
+      if (!safeHref) return label
+      return `<a href="${escapeHtml(safeHref)}">${label}</a>`
+    }
+  )
 
   // Bold
   result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
