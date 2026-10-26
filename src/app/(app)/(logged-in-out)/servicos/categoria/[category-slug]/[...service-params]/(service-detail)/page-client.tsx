@@ -148,8 +148,6 @@ export function PageClient({
             >
               <a
                 href={isPreview ? '#preview' : ticketUrl(0)}
-                target={isPreview ? undefined : '_blank'}
-                rel={isPreview ? undefined : 'noopener noreferrer'}
                 onClick={
                   isPreview ? event => event.preventDefault() : undefined
                 }
@@ -167,8 +165,6 @@ export function PageClient({
               >
                 <a
                   href={isPreview ? '#preview' : ticketUrl(1)}
-                  target={isPreview ? undefined : '_blank'}
-                  rel={isPreview ? undefined : 'noopener noreferrer'}
                   onClick={
                     isPreview ? event => event.preventDefault() : undefined
                   }
