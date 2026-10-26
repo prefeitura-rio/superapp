@@ -19,15 +19,11 @@ import type {
   DadosRequerente,
 } from './dados-requerimento-schema'
 import { limparDadosRequerimento } from './dados-requerimento-storage'
-import { limparDocumentos } from './documentos-requerimento-storage'
+import {
+  type ArquivoAnexado,
+  useDocumentosRequerimento,
+} from './documentos-requerimento-context'
 import type { TipoSolicitante } from './tipos-solicitante'
-
-interface ArquivoAnexado {
-  tipo: string
-  nomeArquivo: string
-  conteudoBase64: string
-  tamanho: number
-}
 
 interface RevisarRequerimentoProps {
   cdas: string[]
@@ -259,15 +255,16 @@ export function RevisarRequerimento({
   cpf,
 }: RevisarRequerimentoProps) {
   const router = useRouter()
+  const { limparDocumentos } = useDocumentosRequerimento()
   const [confirmando, setConfirmando] = useState(false)
 
   /** Envia com a declaração aceita; devolve a mensagem de erro para o sheet, ou `null`. */
   async function enviar(): Promise<string | null> {
+    // Sem `valor1aParcela`: a action refaz a simulação e manda o valor dela ao DAM.
     const resultado = await enviarRequerimento({
       cdas,
       qtdeParcelas: String(qtdeParcelas),
       dtVencimento,
-      valor1aParcela: valor1aParcela ? String(valor1aParcela) : undefined,
       tipo,
       requerente,
       correspondencia,
@@ -285,10 +282,10 @@ export function RevisarRequerimento({
     limparDocumentos()
     limparDadosRequerimento()
 
-    const { protocolo, prazo, urlComprovante } = resultado.data
+    // O comprovante não vai na URL (pode levar token): a confirmação o busca pelo protocolo.
+    const { protocolo, prazo } = resultado.data
     const destino = new URLSearchParams({ protocolo })
     if (prazo) destino.set('prazo', prazo)
-    if (urlComprovante) destino.set('comprovante', urlComprovante)
     router.push(`/divida-ativa/parcelamento/requerimento/sucesso?${destino}`)
 
     return null

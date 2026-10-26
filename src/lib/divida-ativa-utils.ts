@@ -414,3 +414,38 @@ export function formatarProtocolo(
     : protocolo
   return ano ? `${numero}/${ano}` : numero
 }
+
+/** Domínio da Prefeitura; o DAM Internet responde em subdomínios dele. */
+const DOMINIO_PREFEITURA = 'rio.rj.gov.br'
+
+/**
+ * Link de PDF que pode ir para um `href`: só `https` em `rio.rj.gov.br` ou num subdomínio
+ * dele (`daminternet`, `daminternethom`). Qualquer outra coisa é `null`.
+ *
+ * A URL vem da API, que a repassa do DAM, e a tela não tem como saber se ela foi trocada no
+ * caminho — o host é a única garantia de que o cidadão baixa o PDF da Prefeitura.
+ */
+export function urlPdfDaPrefeitura(
+  valor: string | null | undefined
+): string | null {
+  if (!valor) return null
+
+  let url: URL
+  try {
+    url = new URL(valor)
+  } catch {
+    return null
+  }
+
+  const host = url.hostname
+  const daPrefeitura =
+    host === DOMINIO_PREFEITURA || host.endsWith(`.${DOMINIO_PREFEITURA}`)
+
+  if (url.protocol !== 'https:' || !daPrefeitura) return null
+  if (url.username || url.password) return null
+
+  return url.href
+}
+
+/** Protocolo de requerimento como a API o busca: o número sem o ano, só dígitos. */
+export const PROTOCOLO_REQUERIMENTO = /^\d{1,10}$/

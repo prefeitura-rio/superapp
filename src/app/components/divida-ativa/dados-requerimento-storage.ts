@@ -6,11 +6,12 @@ import type {
 /**
  * Dados do requerente e de correspondência entre as etapas do requerimento.
  *
- * Ficam no `sessionStorage`, como os documentos, e **não na URL**: telefone, e-mail, CPF/CNPJ e
- * endereço são dados pessoais, e query string acaba em log de servidor, de proxy e no
- * histórico do navegador. A aba fechada descarta tudo.
+ * Ficam no `sessionStorage` e **não na URL**: telefone, e-mail, CPF/CNPJ e endereço são dados
+ * pessoais, e query string acaba em log de servidor, de proxy e no histórico do navegador. A
+ * aba fechada descarta tudo.
  *
- * Ver `documentos-requerimento-storage` para a mesma ideia aplicada aos anexos.
+ * Os anexos não ficam aqui: são grandes demais para a cota e só vivem em memória, no layout
+ * do wizard (`documentos-requerimento-context`).
  */
 export const CHAVE_DADOS_SESSION = 'divida-ativa:requerimento:dados'
 

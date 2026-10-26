@@ -3,11 +3,9 @@ import { RequerimentosLista } from '@/app/components/divida-ativa/requerimentos-
 import { RequerimentosVazio } from '@/app/components/divida-ativa/requerimentos-vazio'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { getDalDividaAtivaRequerimentos } from '@/lib/dal'
+import { PROTOCOLO_REQUERIMENTO } from '@/lib/divida-ativa-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { redirect } from 'next/navigation'
-
-/** O protocolo na URL é o número sem o ano, só dígitos — o que o formulário produz. */
-const PROTOCOLO_VALIDO = /^\d{1,10}$/
 
 /**
  * O requerimento de um protocolo.
@@ -27,7 +25,7 @@ export default async function RequerimentoPage({
 }) {
   const { protocolo } = await params
 
-  if (!PROTOCOLO_VALIDO.test(protocolo)) {
+  if (!PROTOCOLO_REQUERIMENTO.test(protocolo)) {
     redirect('/divida-ativa/acompanhamento')
   }
 

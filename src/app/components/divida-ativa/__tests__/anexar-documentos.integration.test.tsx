@@ -1,13 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { renderNoWizard } from '@/test/documentos-requerimento'
+import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { AnexarDocumentos } from '../anexar-documentos'
-import {
-  CHAVE_DOCUMENTOS_SESSION,
-  lerDocumentos,
-  salvarDocumentos,
-} from '../documentos-requerimento-storage'
 
 const push = vi.fn()
 
@@ -36,24 +32,27 @@ const PARAMS = {
 
 beforeEach(() => {
   push.mockClear()
-  sessionStorage.clear()
 })
 
 describe('AnexarDocumentos', () => {
   test('mostra os formatos e limites de tamanho e o "Revisar envio", como no Figma', () => {
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />
+    )
 
     expect(
       screen.getByText(
-        'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.'
+        'Os arquivos devem estar em formato PDF, JPG, PNG ou GIF. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.'
       )
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Revisar envio' })).toBeDisabled()
   })
 
   test('voltando da revisão, os arquivos já anexados reaparecem', async () => {
-    salvarDocumentos('CONTRIBUINTE', [IDENTIDADE, CPF])
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />,
+      { tipo: 'CONTRIBUINTE', documentos: [IDENTIDADE, CPF] }
+    )
 
     expect(await screen.findByText(/rg\.pdf/)).toBeInTheDocument()
     expect(screen.getByText(/cpf\.pdf/)).toBeInTheDocument()
@@ -62,8 +61,10 @@ describe('AnexarDocumentos', () => {
 
   // Como no portal legado: identidade e CPF do requerente são obrigatórios.
   test('sem o CPF, o contribuinte não revisa o envio', async () => {
-    salvarDocumentos('CONTRIBUINTE', [IDENTIDADE])
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />,
+      { tipo: 'CONTRIBUINTE', documentos: [IDENTIDADE] }
+    )
 
     expect(
       screen.getByRole('heading', {
@@ -110,7 +111,7 @@ describe('AnexarDocumentos', () => {
   ] as const)(
     '%s pede os documentos do seu grupo, com identidade e CPF do requerente',
     (tipo, titulos) => {
-      render(
+      renderNoWizard(
         <AnexarDocumentos tipo={tipo} searchParamsAtual={{ ...PARAMS, tipo }} />
       )
 
@@ -122,12 +123,12 @@ describe('AnexarDocumentos', () => {
 
   // Os slots mudam por tipo: um RG anexado como contribuinte não vale para procurador.
   test('arquivos de outro vínculo não são reaproveitados', () => {
-    salvarDocumentos('CONTRIBUINTE', [IDENTIDADE, CPF])
-    render(
+    renderNoWizard(
       <AnexarDocumentos
         tipo="PROCURADOR"
         searchParamsAtual={{ ...PARAMS, tipo: 'PROCURADOR' }}
-      />
+      />,
+      { tipo: 'CONTRIBUINTE', documentos: [IDENTIDADE, CPF] }
     )
 
     expect(screen.queryByText(/rg\.pdf/)).toBeNull()
@@ -136,8 +137,10 @@ describe('AnexarDocumentos', () => {
 
   test('remover um arquivo também o tira do que fica guardado', async () => {
     const user = userEvent.setup()
-    salvarDocumentos('CONTRIBUINTE', [IDENTIDADE, CPF])
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    const { documentos } = renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />,
+      { tipo: 'CONTRIBUINTE', documentos: [IDENTIDADE, CPF] }
+    )
 
     await user.click(
       await screen.findByRole('button', {
@@ -145,13 +148,19 @@ describe('AnexarDocumentos', () => {
       })
     )
 
-    expect(lerDocumentos('CONTRIBUINTE').map(d => d.tipo)).toEqual(['CPF'])
+    expect(
+      documentos()
+        .lerDocumentos('CONTRIBUINTE')
+        .map(d => d.tipo)
+    ).toEqual(['CPF'])
   })
 
   test('"Revisar envio" guarda os arquivos e segue para a revisão', async () => {
     const user = userEvent.setup()
-    salvarDocumentos('CONTRIBUINTE', [IDENTIDADE, CPF])
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    const { documentos } = renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />,
+      { tipo: 'CONTRIBUINTE', documentos: [IDENTIDADE, CPF] }
+    )
 
     await screen.findByText(/rg\.pdf/)
     await user.click(screen.getByRole('button', { name: 'Revisar envio' }))
@@ -159,7 +168,13 @@ describe('AnexarDocumentos', () => {
     const destino = new URL(push.mock.calls[0][0], 'http://x')
     expect(destino.searchParams.get('etapa')).toBe('revisao')
     expect(destino.searchParams.get('tipo')).toBe('CONTRIBUINTE')
-    expect(sessionStorage.getItem(CHAVE_DOCUMENTOS_SESSION)).toContain('rg.pdf')
+    expect(
+      documentos()
+        .lerDocumentos('CONTRIBUINTE')
+        .map(d => d.nomeArquivo)
+    ).toEqual(['rg.pdf', 'cpf.pdf'])
+    // Nada dos anexos fica no navegador.
+    expect(sessionStorage.length).toBe(0)
   })
 
   // Regra da API: CDA de pessoa jurídica exige CNPJ e registro de todo vínculo, menos o 5.
@@ -171,7 +186,7 @@ describe('AnexarDocumentos', () => {
   ] as const)(
     'devedor PJ: %s pede os documentos da empresa? %s',
     (tipo, pede) => {
-      render(
+      renderNoWizard(
         <AnexarDocumentos
           tipo={tipo}
           devedorPessoaJuridica
@@ -189,8 +204,48 @@ describe('AnexarDocumentos', () => {
   )
 
   test('devedor pessoa física: o contribuinte não vê documentos da empresa', () => {
-    render(<AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />)
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />
+    )
 
     expect(screen.queryByText('CNPJ da empresa')).toBeNull()
   })
+
+  test.each([
+    ['image/png', 'rg.png'],
+    ['image/gif', 'rg.gif'],
+  ])('aceita %s, como o contrato', async (mime, nome) => {
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />
+    )
+
+    anexar('Identidade com foto', new File(['x'], nome, { type: mime }))
+
+    expect(await screen.findByText(new RegExp(nome))).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  test('recusa extensão fora do contrato mesmo com tipo MIME aceito', async () => {
+    renderNoWizard(
+      <AnexarDocumentos tipo="CONTRIBUINTE" searchParamsAtual={PARAMS} />
+    )
+
+    anexar(
+      'Identidade com foto',
+      new File(['x'], 'rg.webp', { type: 'image/png' })
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Formato inválido. Envie um arquivo PDF, JPG, PNG ou GIF.'
+    )
+  })
 })
+
+/** Escolhe um arquivo no input do slot (o input fica logo depois do card). */
+function anexar(tituloSlot: string, arquivo: File) {
+  const card = screen.getByRole('button', { name: tituloSlot })
+  const input = card
+    .closest('div.flex.flex-col')
+    ?.querySelector('input[type="file"]') as HTMLInputElement
+  fireEvent.change(input, { target: { files: [arquivo] } })
+}

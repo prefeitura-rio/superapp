@@ -152,6 +152,18 @@ não conhece todas as regras de negócio. Duas divergências conhecidas:
   documentos — "Confirme seus dados" e "Endereço de correspondência" —, pré-preenchidas com o
   perfil id.rio, e a revisão ganhou os blocos correspondentes com "Editar". Os dados ficam no
   `sessionStorage`, não na URL (dado pessoal).
+- **Endurecimento do envio (review da PR, 26/10/2026).**
+  - Links de PDF (guia à vista e comprovante) só viram `href` com `https` em `rio.rj.gov.br`
+    ou subdomínio (`urlPdfDaPrefeitura`). O comprovante não passa mais pela URL da
+    confirmação: a tela o busca no servidor pelo protocolo (`ComprovanteRequerimento`).
+  - `enviarRequerimento` revalida os anexos (tipo do enum, um por tipo, extensão
+    pdf/jpg/jpeg/png/gif, tamanho decodificado por tipo, base64 válido) e **refaz a
+    simulação**: o DAM recebe qtde de parcelas e valor da 1ª parcela da simulação do servidor,
+    não do cliente.
+  - IP do cidadão: `x-envoy-external-address`; sem ele, o último hop do `X-Forwarded-For`.
+    Nunca o primeiro, que o cliente controla.
+  - Anexos só em memória, no layout do wizard (`DocumentosRequerimentoProvider`): saem ao
+    deixar o fluxo e não dependem da cota do `sessionStorage`.
 
 ### Decisões de design fechadas (17/08/2026)
 

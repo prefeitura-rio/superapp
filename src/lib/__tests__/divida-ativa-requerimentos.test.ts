@@ -43,7 +43,7 @@ describe('mapApiToRequerimento', () => {
     txtMotivoRejeicao:
       'Foi criado só para testar se o serviços funciona corretamente',
     requerimentoGuiaPagamentoId: '',
-    urlComprovante: 'https://dam.example/comprovante.pdf',
+    urlComprovante: 'https://daminternethom.rio.rj.gov.br/repo/comprovante.pdf',
   }
 
   test('traduz o requerimento da API para o tipo de visão, com datas ISO', () => {
@@ -59,8 +59,17 @@ describe('mapApiToRequerimento', () => {
       motivoRejeicao:
         'Foi criado só para testar se o serviços funciona corretamente',
       guiaPagamentoId: null,
-      urlComprovante: 'https://dam.example/comprovante.pdf',
+      urlComprovante:
+        'https://daminternethom.rio.rj.gov.br/repo/comprovante.pdf',
     })
+  })
+
+  test('comprovante fora do domínio da Prefeitura some', () => {
+    const requerimento = mapApiToRequerimento({
+      ...api,
+      urlComprovante: 'https://exemplo.com/comprovante.pdf',
+    })
+    expect(requerimento?.urlComprovante).toBeNull()
   })
 
   test('aceita o protocolo como número, como o DAM às vezes manda', () => {

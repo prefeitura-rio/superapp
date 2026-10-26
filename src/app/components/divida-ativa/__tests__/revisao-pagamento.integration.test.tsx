@@ -144,7 +144,7 @@ describe('RevisaoPagamento', () => {
       const abrir = vi.spyOn(window, 'open')
       emitirGuiaAvista.mockResolvedValue({
         success: true,
-        data: { urlPdf: 'https://daminternet/guia.pdf' },
+        data: { urlPdf: 'https://daminternet.rio.rj.gov.br/guia.pdf' },
       })
       renderizar()
 
@@ -157,13 +157,34 @@ describe('RevisaoPagamento', () => {
         '20/10/2026'
       )
       const link = await screen.findByRole('link', { name: 'Abrir guia (PDF)' })
-      expect(link).toHaveAttribute('href', 'https://daminternet/guia.pdf')
+      expect(link).toHaveAttribute(
+        'href',
+        'https://daminternet.rio.rj.gov.br/guia.pdf'
+      )
       expect(link).toHaveAttribute('target', '_blank')
       expect(link).toHaveAttribute('rel', 'noopener noreferrer')
       // Nenhuma aba aberta por script: era ela que ficava em branco quando algo falhava.
       expect(abrir).not.toHaveBeenCalled()
       expect(
         screen.queryByRole('button', { name: 'Imprimir Guia a Vista' })
+      ).not.toBeInTheDocument()
+    })
+
+    test('PDF fora do domínio da Prefeitura não vira link', async () => {
+      const user = userEvent.setup()
+      emitirGuiaAvista.mockResolvedValue({
+        success: true,
+        data: { urlPdf: 'https://exemplo.com/guia.pdf' },
+      })
+      renderizar()
+
+      await user.click(
+        screen.getByRole('button', { name: 'Imprimir Guia a Vista' })
+      )
+
+      await vi.waitFor(() => expect(toast.error).toHaveBeenCalled())
+      expect(
+        screen.queryByRole('link', { name: 'Abrir guia (PDF)' })
       ).not.toBeInTheDocument()
     })
 

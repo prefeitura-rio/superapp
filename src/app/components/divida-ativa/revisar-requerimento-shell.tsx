@@ -15,8 +15,8 @@ import {
 } from './dados-requerimento-storage'
 import {
   type ArquivoAnexado,
-  lerDocumentos,
-} from './documentos-requerimento-storage'
+  useDocumentosRequerimento,
+} from './documentos-requerimento-context'
 import { RevisarRequerimento } from './revisar-requerimento'
 import type { TipoSolicitante } from './tipos-solicitante'
 
@@ -47,11 +47,11 @@ interface DadosDaSessao {
  * Shell client-side da etapa de revisão.
  *
  * O Server Component da page faz as chamadas ao DAL (simulação + CDAs) e passa os dados
- * como props. Este componente lê do `sessionStorage` o que não trafega na URL: os
- * **documentos** (base64 estouraria os headers, HTTP 431) e os **dados do requerente e de
- * correspondência** (dado pessoal não vai em query string).
+ * como props. Este componente lê o que não trafega na URL: os **documentos**, da memória do
+ * layout do wizard (`useDocumentosRequerimento`), e os **dados do requerente e de
+ * correspondência**, do `sessionStorage` (dado pessoal não vai em query string).
  *
- * Falta algo — aba nova, sessão expirada, link compartilhado — e o cidadão volta à primeira
+ * Falta algo — aba nova, página recarregada, link compartilhado — e o cidadão volta à primeira
  * etapa incompleta, na ordem do fluxo: requerente, correspondência, documentos. Os dados são
  * revalidados com o schema: um registro antigo ou adulterado não chega ao envio.
  */
@@ -70,6 +70,7 @@ export function RevisarRequerimentoShell({
   rotaCorrespondencia,
 }: RevisarRequerimentoShellProps) {
   const router = useRouter()
+  const { lerDocumentos } = useDocumentosRequerimento()
   const [dados, setDados] = useState<DadosDaSessao | null>(null)
 
   useEffect(() => {
@@ -98,7 +99,14 @@ export function RevisarRequerimentoShell({
       requerente: requerente.data,
       correspondencia: correspondencia.data,
     })
-  }, [router, rotaDocumentos, rotaRequerente, rotaCorrespondencia, tipo])
+  }, [
+    router,
+    rotaDocumentos,
+    rotaRequerente,
+    rotaCorrespondencia,
+    tipo,
+    lerDocumentos,
+  ])
 
   // Durante SSR e antes do useEffect: nada — evita flash de conteúdo incorreto.
   if (dados === null) return null

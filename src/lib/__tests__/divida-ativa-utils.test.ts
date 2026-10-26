@@ -16,6 +16,7 @@ import {
   isTelefoneValido,
   rotuloNatureza,
   somenteDigitos,
+  urlPdfDaPrefeitura,
 } from '@/lib/divida-ativa-utils'
 import { describe, expect, test } from 'vitest'
 
@@ -286,5 +287,46 @@ describe('dados do requerente e de correspondência', () => {
     expect(isTelefoneValido('(21) 98765-4321')).toBe(true)
     expect(isTelefoneValido('(21) 88765-4321')).toBe(false)
     expect(isTelefoneValido('(21) 2345-678')).toBe(false)
+  })
+})
+
+describe('urlPdfDaPrefeitura', () => {
+  test('aceita o DAM Internet de produção e de homologação', () => {
+    expect(
+      urlPdfDaPrefeitura('https://daminternet.rio.rj.gov.br/repo/guia.pdf')
+    ).toBe('https://daminternet.rio.rj.gov.br/repo/guia.pdf')
+    expect(
+      urlPdfDaPrefeitura('https://daminternethom.rio.rj.gov.br/repo/c.pdf?t=1')
+    ).toBe('https://daminternethom.rio.rj.gov.br/repo/c.pdf?t=1')
+  })
+
+  test('aceita o próprio domínio da Prefeitura', () => {
+    expect(urlPdfDaPrefeitura('https://rio.rj.gov.br/a.pdf')).toBe(
+      'https://rio.rj.gov.br/a.pdf'
+    )
+  })
+
+  test.each([
+    ['host de fora', 'https://exemplo.com/guia.pdf'],
+    ['sufixo sem ponto', 'https://evilrio.rj.gov.br/guia.pdf'],
+    [
+      'domínio da Prefeitura como prefixo',
+      'https://rio.rj.gov.br.evil.com/a.pdf',
+    ],
+    ['http', 'http://daminternet.rio.rj.gov.br/guia.pdf'],
+    ['javascript:', 'javascript:alert(1)'],
+    [
+      'credenciais na URL',
+      'https://x@evil.com@daminternet.rio.rj.gov.br/a.pdf',
+    ],
+    ['texto que não é URL', 'guia.pdf'],
+  ])('recusa %s', (_caso, url) => {
+    expect(urlPdfDaPrefeitura(url)).toBeNull()
+  })
+
+  test('vazio ou ausente é null', () => {
+    expect(urlPdfDaPrefeitura('')).toBeNull()
+    expect(urlPdfDaPrefeitura(undefined)).toBeNull()
+    expect(urlPdfDaPrefeitura(null)).toBeNull()
   })
 })

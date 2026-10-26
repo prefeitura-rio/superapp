@@ -6,7 +6,7 @@ import type {
   ImovelResponse,
   RequerimentoParcelamentoResponse,
 } from '@/http-divida-ativa/models'
-import { somenteDigitos } from '@/lib/divida-ativa-utils'
+import { somenteDigitos, urlPdfDaPrefeitura } from '@/lib/divida-ativa-utils'
 import type {
   DebitoDividaAtiva,
   DebitosDividaAtiva,
@@ -457,7 +457,8 @@ export function mapApiToRequerimento(
     situacao: textoOuNull(api.descricaoSituacao),
     motivoRejeicao: textoOuNull(api.txtMotivoRejeicao),
     guiaPagamentoId: textoOuNull(api.requerimentoGuiaPagamentoId),
-    urlComprovante: textoOuNull(api.urlComprovante),
+    // Vira `href` no acompanhamento e na confirmação: só com host da Prefeitura.
+    urlComprovante: urlPdfDaPrefeitura(api.urlComprovante),
   }
 }
 

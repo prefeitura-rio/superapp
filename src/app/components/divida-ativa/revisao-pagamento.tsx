@@ -2,7 +2,11 @@
 
 import { emitirGuiaAvista } from '@/actions/divida-ativa/emitir-guia-avista'
 import { CustomButton } from '@/components/ui/custom/custom-button'
-import { formatarValorBRL, rotuloNatureza } from '@/lib/divida-ativa-utils'
+import {
+  formatarValorBRL,
+  rotuloNatureza,
+  urlPdfDaPrefeitura,
+} from '@/lib/divida-ativa-utils'
 import type { ResultadoRevisaoPagamento } from '@/types/divida-ativa'
 import { BuildingIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -10,6 +14,9 @@ import { useState, useTransition } from 'react'
 import toast from 'react-hot-toast'
 
 type RevisaoOk = Extract<ResultadoRevisaoPagamento, { situacao: 'ok' }>
+
+const ERRO_LINK_GUIA =
+  'A guia foi emitida, mas não conseguimos abrir o PDF. Você pode obtê-la pela segunda via de guia.'
 
 /**
  * Uma linha rótulo/valor, com o valor logo depois do rótulo, como no Figma.
@@ -82,7 +89,14 @@ export function RevisaoPagamento({
         return
       }
 
-      setUrlGuia(resultado.data.urlPdf)
+      // A action já filtra o host; repetir aqui garante que nada de fora chega ao `href`.
+      const urlPdf = urlPdfDaPrefeitura(resultado.data.urlPdf)
+      if (!urlPdf) {
+        toast.error(ERRO_LINK_GUIA)
+        return
+      }
+
+      setUrlGuia(urlPdf)
     })
   }
 

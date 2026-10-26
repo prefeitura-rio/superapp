@@ -64,6 +64,25 @@ describe('emitirGuiaAvista', () => {
     expect(!resultado.success && resultado.error).toContain('2026/0980866')
   })
 
+  test('PDF fora do domínio da Prefeitura não vira link, mas informa a guia', async () => {
+    server.use(
+      http.post(URL_EMITIR, () =>
+        HttpResponse.json(
+          {
+            numeroGuia: '2026/0980866',
+            urlPdf: 'https://exemplo.com/guia.pdf',
+          },
+          { status: 200 }
+        )
+      )
+    )
+
+    const resultado = await emitirGuiaAvista(CDAS, '15/10/2026')
+
+    expect(resultado.success).toBe(false)
+    expect(!resultado.success && resultado.error).toContain('2026/0980866')
+  })
+
   test('5xx vira copy própria, sem vazar a mensagem do sistema', async () => {
     server.use(
       http.post(URL_EMITIR, () =>

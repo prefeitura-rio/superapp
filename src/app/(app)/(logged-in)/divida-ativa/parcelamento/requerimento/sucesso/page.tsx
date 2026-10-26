@@ -1,16 +1,8 @@
+import { ComprovanteRequerimento } from '@/app/components/divida-ativa/comprovante-requerimento'
 import { SecondaryHeader } from '@/app/components/secondary-header'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import Link from 'next/link'
-
-/** Só aceita o comprovante como link `https` — o endereço vem da URL e pode ser editado. */
-function comprovanteSeguro(valor: string | undefined): string | null {
-  if (!valor) return null
-  try {
-    return new URL(valor).protocol === 'https:' ? valor : null
-  } catch {
-    return null
-  }
-}
+import { Suspense } from 'react'
 
 /** `dd/MM/yyyy`, como o DAM devolve; qualquer outra coisa é descartada. */
 function prazoValido(valor: string | undefined): string | null {
@@ -25,7 +17,9 @@ function prazoValido(valor: string | undefined): string | null {
  *   cidadão o recebe por e-mail e WhatsApp de qualquer forma.
  * - `?prazo=` — `datPrevisaoEntrega`, a data até a qual a PGM responde, como no protocolo do
  *   portal legado. Sem ela, vale o texto genérico de até 10 dias úteis.
- * - `?comprovante=` — PDF do comprovante no DAM, quando já gerado.
+ *
+ * O comprovante **não** vem pela URL: a URL do DAM pode levar token. `ComprovanteRequerimento`
+ * o busca no servidor pelo protocolo, em streaming, para a confirmação não esperar o ePortal.
  */
 export default async function RequerimentoSucessoPage({
   searchParams,
@@ -33,13 +27,11 @@ export default async function RequerimentoSucessoPage({
   searchParams: Promise<{
     protocolo?: string
     prazo?: string
-    comprovante?: string
   }>
 }) {
   const params = await searchParams
   const { protocolo } = params
   const prazo = prazoValido(params.prazo)
-  const comprovante = comprovanteSeguro(params.comprovante)
 
   return (
     <div className="mx-auto flex min-h-lvh max-w-4xl flex-col pt-20 pb-4 text-foreground">
@@ -65,12 +57,10 @@ export default async function RequerimentoSucessoPage({
         </p>
 
         <div className="mt-auto flex flex-col gap-3 pt-6">
-          {comprovante && (
-            <CustomButton asChild variant="secondary" size="lg" fullWidth>
-              <a href={comprovante} target="_blank" rel="noopener noreferrer">
-                Baixar comprovante
-              </a>
-            </CustomButton>
+          {protocolo && (
+            <Suspense fallback={null}>
+              <ComprovanteRequerimento protocolo={protocolo} />
+            </Suspense>
           )}
           <CustomButton asChild variant="primary" size="lg" fullWidth>
             <Link href="/divida-ativa">Voltar para tela inicial</Link>

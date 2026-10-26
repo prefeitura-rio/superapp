@@ -2,29 +2,27 @@
 
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { CustomButton } from '@/components/ui/custom/custom-button'
+import type { TipoDocumentoDam } from '@/http-divida-ativa/models'
 import { UploadIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
 import {
   type ArquivoAnexado,
-  lerDocumentos,
-  salvarDocumentos,
-} from './documentos-requerimento-storage'
+  useDocumentosRequerimento,
+} from './documentos-requerimento-context'
+import {
+  FORMATOS_PERMITIDOS,
+  extensaoPermitida,
+  limiteDoTipo,
+} from './documentos-requerimento-regras'
 import type { TipoSolicitante } from './tipos-solicitante'
 
 /** Definição de um slot de upload mostrado na tela. */
 interface SlotDocumento {
-  /** Identificador único dentro desta tela. */
-  tipo: string
+  /** Tipo do contrato; identifica o slot e define o limite (`limiteDoTipo`). */
+  tipo: TipoDocumentoDam
   titulo: string
   descricao: string | null
-  /**
-   * Limite de tamanho em bytes.
-   *
-   * Segundo o Figma: Identidade, CPF e CNPJ → 500 KB; demais → 1,5 MB.
-   */
-  limiteBytes: number
   /** Quando `true`, o slot não bloqueia o "Revisar envio". */
   opcional: boolean
 }
@@ -32,8 +30,14 @@ interface SlotDocumento {
 const KB = 1024
 const MB = 1024 * KB
 
-const LIMITE_IDENTIDADE_CPF_CNPJ = 500 * KB
-const LIMITE_GERAL = 1.5 * MB
+/** Tipos MIME dos formatos do contrato; a extensão também é conferida. */
+const MIME_PERMITIDOS = [
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+]
 
 /** Slot comum a todos os vínculos: documentos extras, nunca obrigatórios. */
 const SLOT_OUTROS: SlotDocumento = {
@@ -41,7 +45,6 @@ const SLOT_OUTROS: SlotDocumento = {
   titulo: 'Outros documentos',
   descricao:
     'Envie documentos adicionais que possam ajudar a comprovar benefícios a que você tem direito.',
-  limiteBytes: LIMITE_GERAL,
   opcional: true,
 }
 
@@ -56,14 +59,12 @@ function slotsDoRequerente(quem: string): SlotDocumento[] {
       tipo: 'IDENTIDADE',
       titulo: `Identidade${quem} com foto`,
       descricao: null,
-      limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
     {
       tipo: 'CPF',
       titulo: `CPF${quem}`,
       descricao: null,
-      limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
   ]
@@ -89,14 +90,12 @@ const SLOTS_EMPRESA: SlotDocumento[] = [
     tipo: 'CNPJ',
     titulo: 'CNPJ da empresa',
     descricao: null,
-    limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
     opcional: false,
   },
   {
     tipo: 'REGISTRO_EMPRESA',
     titulo: 'Registro de empresário individual, contrato ou estatuto social',
     descricao: 'Última alteração consolidada',
-    limiteBytes: LIMITE_GERAL,
     opcional: false,
   },
 ]
@@ -111,7 +110,6 @@ const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
       tipo: 'ATA',
       titulo: 'Ata de eleição da atual diretoria',
       descricao: 'Obrigatória se a empresa for sociedade anônima',
-      limiteBytes: LIMITE_GERAL,
       opcional: true,
     },
     SLOT_OUTROS,
@@ -123,21 +121,18 @@ const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
       tipo: 'PROCURACAO',
       titulo: 'Procuração com firma reconhecida',
       descricao: null,
-      limiteBytes: LIMITE_GERAL,
       opcional: false,
     },
     {
       tipo: 'IDENTIDADE_OUTORGANTE',
       titulo: 'Identidade do outorgante com foto',
       descricao: 'De quem concedeu a procuração',
-      limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
     {
       tipo: 'CPF_OUTORGANTE',
       titulo: 'CPF do outorgante',
       descricao: null,
-      limiteBytes: LIMITE_IDENTIDADE_CPF_CNPJ,
       opcional: false,
     },
     SLOT_OUTROS,
@@ -150,7 +145,6 @@ const SLOTS_POR_TIPO: Record<TipoSolicitante, SlotDocumento[]> = {
       titulo: 'Comprovante de propriedade ou posse',
       descricao:
         'Registro de Imóveis, Compra e Venda ou promessa, Sentença Judicial, Termo de Inventariança, Auto de Arrematação ou Petição Inicial de Usucapião, ou documento comprovando a posse com ânimo de dono.',
-      limiteBytes: LIMITE_GERAL,
       opcional: false,
     },
     SLOT_OUTROS,
@@ -194,9 +188,11 @@ const TITULO_POR_TIPO: Record<TipoSolicitante, string> = {
   PROPRIETARIO_POSSUIDOR: 'do proprietário ou possuidor',
 }
 
-/** Instruções abaixo do título — as mesmas do portal legado para todos os vínculos. */
-const INSTRUCOES =
-  'Os arquivos devem estar em formato PDF ou JPG. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.'
+/**
+ * Instruções abaixo do título. Os formatos são os do contrato da API — o portal legado dizia
+ * só "PDF ou JPG", mas a API (e esta tela) aceitam também PNG e GIF.
+ */
+const INSTRUCOES = `Os arquivos devem estar em formato ${FORMATOS_PERMITIDOS}. Arquivos de Identidade, CPF e CNPJ não podem ultrapassar 500KB e os demais não devem ultrapassar 1,5MB.`
 
 /** Formata bytes para exibição amigável. */
 function formatarTamanho(bytes: number): string {
@@ -241,22 +237,16 @@ function SlotUpload({ slot, arquivo, onArquivo }: SlotUploadProps) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Valida tipo
-    const tipoPermitido =
-      file.type === 'application/pdf' ||
-      file.type === 'image/jpeg' ||
-      file.type === 'image/jpg' ||
-      file.type === 'image/png' ||
-      file.type === 'image/gif'
-    if (!tipoPermitido) {
-      setErro('Formato inválido. Envie um arquivo PDF, JPG ou GIF.')
+    // Tipo e extensão: a API monta o nome do arquivo no DAM pela extensão.
+    if (!MIME_PERMITIDOS.includes(file.type) || !extensaoPermitida(file.name)) {
+      setErro(`Formato inválido. Envie um arquivo ${FORMATOS_PERMITIDOS}.`)
       return
     }
 
-    // Valida tamanho
-    if (file.size > slot.limiteBytes) {
+    const limite = limiteDoTipo(slot.tipo)
+    if (file.size > limite) {
       setErro(
-        `O arquivo é muito grande. O limite para este documento é ${formatarTamanho(slot.limiteBytes)}.`
+        `O arquivo é muito grande. O limite para este documento é ${formatarTamanho(limite)}.`
       )
       return
     }
@@ -368,13 +358,11 @@ interface AnexarDocumentosProps {
  * A lista de slots muda por vínculo do solicitante; tudo mais (estado, validação, serialização)
  * é igual. O "Revisar envio" só libera quando todos os slots obrigatórios têm arquivo.
  *
- * Os documentos ficam no `sessionStorage` (ver `documentos-requerimento-storage`) para
+ * Os documentos ficam em memória, no layout do wizard (`useDocumentosRequerimento`), para
  * chegarem à etapa de revisão — não há server action aqui, só navegação client-side. Eles
  * são salvos a cada anexo ou remoção, e não só no "Revisar envio": quem volta da revisão, ou
- * vai até a escolha do tipo e retorna com o mesmo tipo, reencontra os arquivos.
- *
- * ⚠️ **Limitação conhecida:** a cota do `sessionStorage` (~5 MB) pode não comportar o base64
- * de vários arquivos grandes. Nesse caso o "Revisar envio" avisa em vez de seguir sem eles.
+ * vai até a escolha do tipo e retorna com o mesmo tipo, reencontra os arquivos. Sair do
+ * fluxo os descarta.
  *
  * Client Component: manipulação de arquivos (FileReader, input[type=file]).
  */
@@ -384,6 +372,7 @@ export function AnexarDocumentos({
   searchParamsAtual,
 }: AnexarDocumentosProps) {
   const router = useRouter()
+  const { lerDocumentos, salvarDocumentos } = useDocumentosRequerimento()
   const slots = slotsDoVinculo(tipo, devedorPessoaJuridica)
   const titulo = TITULO_POR_TIPO[tipo]
 
@@ -392,8 +381,8 @@ export function AnexarDocumentos({
     Record<string, ArquivoAnexado | null>
   >(() => Object.fromEntries(slots.map(s => [s.tipo, null])))
 
-  // Restaura os anexos já feitos. Em efeito, não no estado inicial: `sessionStorage` não
-  // existe no servidor, e ler na renderização quebraria a hidratação.
+  // Restaura os anexos já feitos. Em efeito, não no estado inicial: no servidor a memória do
+  // layout está vazia, e ler na renderização quebraria a hidratação.
   useEffect(() => {
     const salvos = lerDocumentos(tipo)
     if (salvos.length === 0) return
@@ -405,7 +394,7 @@ export function AnexarDocumentos({
       }
       return restaurado
     })
-  }, [tipo])
+  }, [tipo, lerDocumentos])
 
   function listarAnexados(estado: Record<string, ArquivoAnexado | null>) {
     return slots
@@ -426,16 +415,11 @@ export function AnexarDocumentos({
     .every(s => arquivos[s.tipo] !== null)
 
   function revisarEnvio() {
-    if (!salvarDocumentos(tipo, listarAnexados(arquivos))) {
-      toast.error(
-        'Não foi possível guardar os arquivos neste navegador. Tente arquivos menores.'
-      )
-      return
-    }
+    salvarDocumentos(tipo, listarAnexados(arquivos))
 
     const destino = new URLSearchParams(searchParamsAtual)
     destino.set('etapa', 'revisao')
-    // `?documentos=` removido da URL de propósito — os dados estão no sessionStorage.
+    // `?documentos=` removido da URL de propósito — os arquivos estão na memória do layout.
     destino.delete('documentos')
 
     router.push(`/divida-ativa/parcelamento/requerimento?${destino}`)

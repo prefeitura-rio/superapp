@@ -2,6 +2,7 @@
 
 import { postDividaAtivaAvistaEmitir } from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
 import { mapApiToMensagemErro } from '@/lib/divida-ativa-mappers'
+import { urlPdfDaPrefeitura } from '@/lib/divida-ativa-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import type { ResultadoAcaoDividaAtiva } from './resultado'
 
@@ -52,7 +53,9 @@ export async function emitirGuiaAvista(
     }
   }
 
-  const { urlPdf, numeroGuia } = response.data
+  const { numeroGuia } = response.data
+  // Link fora do domínio da Prefeitura não vai para a tela: vale como guia sem PDF.
+  const urlPdf = urlPdfDaPrefeitura(response.data.urlPdf)
 
   if (!urlPdf) {
     return {

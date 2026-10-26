@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { renderNoWizard } from '@/test/documentos-requerimento'
+import { screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   salvarDadosCorrespondencia,
   salvarDadosRequerente,
 } from '../dados-requerimento-storage'
-import { salvarDocumentos } from '../documentos-requerimento-storage'
 import { RevisarRequerimentoShell } from '../revisar-requerimento-shell'
 
 const replace = vi.fn()
@@ -48,8 +48,9 @@ const DOC = {
   tamanho: 3,
 }
 
-function renderizar() {
-  return render(
+/** Revisão dentro do layout do wizard, com os anexos que a etapa de upload guardou. */
+function renderizar(documentos: (typeof DOC)[] = []) {
+  return renderNoWizard(
     <RevisarRequerimentoShell
       cdas={['01/140646/2026-00']}
       qtdeParcelas={2}
@@ -61,7 +62,8 @@ function renderizar() {
       nome="Maria da Silva"
       cpf="52998224725"
       {...ROTAS}
-    />
+    />,
+    { tipo: 'CONTRIBUINTE', documentos }
   )
 }
 
@@ -101,8 +103,7 @@ describe('RevisarRequerimentoShell', () => {
   test('com tudo preenchido, mostra os dados com "Editar" para cada etapa', async () => {
     salvarDadosRequerente(REQUERENTE)
     salvarDadosCorrespondencia(CORRESPONDENCIA)
-    salvarDocumentos('CONTRIBUINTE', [DOC])
-    renderizar()
+    renderizar([DOC])
 
     expect(
       await screen.findByRole('link', { name: 'Editar seus dados' })
@@ -125,8 +126,7 @@ describe('RevisarRequerimentoShell', () => {
   test('a seção de parcelas mostra um card por CDA com o valor da 1ª parcela', async () => {
     salvarDadosRequerente(REQUERENTE)
     salvarDadosCorrespondencia(CORRESPONDENCIA)
-    salvarDocumentos('CONTRIBUINTE', [DOC])
-    renderizar()
+    renderizar([DOC])
 
     expect(
       await screen.findByRole('heading', { name: 'Parcelas' })
