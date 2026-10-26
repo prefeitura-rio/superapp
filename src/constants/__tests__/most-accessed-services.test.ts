@@ -1,20 +1,65 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-const CATALOGO =
-  '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610'
+const BUSCA_SEARCH = {
+  iptu: '/servicos/categoria/taxas/iptu-2025-94ff5567',
+  cadrio:
+    '/servicos/categoria/cidadania/inscricao-e-atualizacao-do-cadastro-unico-8cafda60',
+  multas:
+    '/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90',
+  alvara:
+    '/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969',
+  'licenca-sanitaria':
+    '/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857',
+  'divida-ativa':
+    '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610',
+} as const
+
+const CATALOGO = {
+  iptu: '/servicos/categoria/tributos/iptu-2026',
+  cadrio: '/servicos/categoria/saude/cadrio-agendamento',
+  multas: '/servicos/categoria/transporte/multa-de-transito-consulta-de-multa',
+  alvara: '/servicos/categoria/licencas/alvara-consulta-previa-de-local',
+  'licenca-sanitaria':
+    '/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento',
+  'divida-ativa':
+    '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa',
+} as const
+
+const OUTROS_IDS = [
+  'iptu',
+  'cadrio',
+  'multas',
+  'alvara',
+  'licenca-sanitaria',
+] as const
 
 /**
- * O destino do card é resolvido na carga do módulo, porque `NEXT_PUBLIC_*` é congelada no
- * build. Por isso cada caso precisa de `resetModules()` + import dinâmico: sem isso o
+ * O destino dos cards é resolvido na carga do módulo, porque as flags são lidas na
+ * importação. Cada caso precisa de `resetModules()` + import dinâmico: sem isso o
  * primeiro import venceria e o segundo caso testaria o valor do primeiro.
+ *
+ * `CARTA_SERVICOS_API_ENABLED` entra em todo caso. O `.env` local pode deixá-la
+ * ligada, e sem o stub esse valor vaza para o teste.
  */
-async function cardDividaAtiva(flag: string | undefined) {
+async function loadServices(flags: {
+  dividaAtiva: string | undefined
+  carta: string | undefined
+}) {
   vi.resetModules()
-  vi.stubEnv('NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA', flag)
+  vi.stubEnv('NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA', flags.dividaAtiva)
+  vi.stubEnv('CARTA_SERVICOS_API_ENABLED', flags.carta)
 
-  const { MOST_ACCESSED_SERVICES } = await import('../most-accessed-services')
+  return import('../most-accessed-services')
+}
 
-  return MOST_ACCESSED_SERVICES.find(service => service.id === 'divida-ativa')
+function hrefsPorId(
+  services: { id: string; href: string }[],
+  ids: readonly string[]
+) {
+  return ids.map(id => {
+    const service = services.find(item => item.id === id)
+    return `${id}:${service?.href}`
+  })
 }
 
 describe('MOST_ACCESSED_SERVICES — card de Dívida Ativa', () => {
@@ -23,44 +68,100 @@ describe('MOST_ACCESSED_SERVICES — card de Dívida Ativa', () => {
     vi.resetModules()
   })
 
-  test('leva ao módulo do Pref.Rio quando a flag está ligada', async () => {
-    const card = await cardDividaAtiva('true')
+  test('leva ao módulo do Pref.Rio quando a flag do módulo está ligada, com a carta ligada ou desligada', async () => {
+    const comCarta = await loadServices({ dividaAtiva: 'true', carta: 'true' })
+    const semCarta = await loadServices({ dividaAtiva: 'true', carta: 'false' })
 
-    expect(card?.href).toBe('/divida-ativa')
+    const href = (services: { id: string; href: string }[]) =>
+      services.find(service => service.id === 'divida-ativa')?.href
+
+    expect(href(comCarta.MOST_ACCESSED_SERVICES)).toBe('/divida-ativa')
+    expect(href(semCarta.MOST_ACCESSED_SERVICES)).toBe('/divida-ativa')
   })
 
-  test('segue apontando para o catálogo quando a flag está desligada', async () => {
-    const card = await cardDividaAtiva('false')
+  test('aponta para o slug da app-busca-search quando o módulo e a carta estão desligados', async () => {
+    const { MOST_ACCESSED_SERVICES } = await loadServices({
+      dividaAtiva: 'false',
+      carta: 'false',
+    })
 
-    expect(card?.href).toBe(CATALOGO)
+    expect(
+      MOST_ACCESSED_SERVICES.find(service => service.id === 'divida-ativa')
+        ?.href
+    ).toBe(BUSCA_SEARCH['divida-ativa'])
   })
 
-  test('segue apontando para o catálogo quando a flag está ausente', async () => {
-    const card = await cardDividaAtiva(undefined)
+  test('aponta para o slug da app-busca-search quando as duas flags estão ausentes', async () => {
+    const { MOST_ACCESSED_SERVICES } = await loadServices({
+      dividaAtiva: undefined,
+      carta: undefined,
+    })
 
-    expect(card?.href).toBe(CATALOGO)
+    expect(
+      MOST_ACCESSED_SERVICES.find(service => service.id === 'divida-ativa')
+        ?.href
+    ).toBe(BUSCA_SEARCH['divida-ativa'])
   })
 
-  test('nenhum outro card muda de destino por causa da flag', async () => {
-    vi.resetModules()
-    vi.stubEnv('NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA', 'true')
-    const { MOST_ACCESSED_SERVICES: comFlag } = await import(
-      '../most-accessed-services'
+  test('aponta para o slug da app-catalogo quando só a carta está ligada', async () => {
+    const { MOST_ACCESSED_SERVICES } = await loadServices({
+      dividaAtiva: 'false',
+      carta: 'true',
+    })
+
+    expect(
+      MOST_ACCESSED_SERVICES.find(service => service.id === 'divida-ativa')
+        ?.href
+    ).toBe(CATALOGO['divida-ativa'])
+  })
+
+  test('os outros cards não mudam com a flag do módulo', async () => {
+    const comModulo = await loadServices({
+      dividaAtiva: 'true',
+      carta: 'false',
+    })
+    const semModulo = await loadServices({
+      dividaAtiva: 'false',
+      carta: 'false',
+    })
+
+    expect(hrefsPorId(comModulo.MOST_ACCESSED_SERVICES, OUTROS_IDS)).toEqual(
+      hrefsPorId(semModulo.MOST_ACCESSED_SERVICES, OUTROS_IDS)
     )
-    const outrosComFlag = comFlag
-      .filter(service => service.id !== 'divida-ativa')
-      .map(service => `${service.id}:${service.href}`)
+  })
 
-    vi.resetModules()
-    vi.stubEnv('NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA', 'false')
-    const { MOST_ACCESSED_SERVICES: semFlag } = await import(
-      '../most-accessed-services'
+  test('os outros cards trocam de slug com a flag da carta', async () => {
+    const semCarta = await loadServices({
+      dividaAtiva: 'false',
+      carta: 'false',
+    })
+    const comCarta = await loadServices({
+      dividaAtiva: 'false',
+      carta: 'true',
+    })
+
+    expect(hrefsPorId(semCarta.MOST_ACCESSED_SERVICES, OUTROS_IDS)).toEqual(
+      OUTROS_IDS.map(id => `${id}:${BUSCA_SEARCH[id]}`)
     )
-    const outrosSemFlag = semFlag
-      .filter(service => service.id !== 'divida-ativa')
-      .map(service => `${service.id}:${service.href}`)
+    expect(hrefsPorId(comCarta.MOST_ACCESSED_SERVICES, OUTROS_IDS)).toEqual(
+      OUTROS_IDS.map(id => `${id}:${CATALOGO[id]}`)
+    )
+  })
+})
 
-    expect(outrosComFlag).toEqual(outrosSemFlag)
-    expect(outrosComFlag.length).toBeGreaterThan(0)
+describe('popularServiceHrefs', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  test('devolve o mapa pedido pelo argumento, sem ler a flag do ambiente', async () => {
+    const { popularServiceHrefs } = await loadServices({
+      dividaAtiva: 'true',
+      carta: 'true',
+    })
+
+    expect(popularServiceHrefs(false)).toEqual(BUSCA_SEARCH)
+    expect(popularServiceHrefs(true)).toEqual(CATALOGO)
   })
 })
