@@ -7,6 +7,10 @@ import { SearchResultSkeleton } from '@/app/components/search-result-skeleton'
 import { ChevronRightIcon, XIcon } from '@/assets/icons'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
+import {
+  type PopularServiceId,
+  popularServiceHrefs,
+} from '@/constants/most-accessed-services'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { sendGAEvent } from '@next/third-parties/google'
@@ -41,28 +45,13 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   },
 }
 
-const STATIC_POPULAR: { title: string; href: string }[] = [
-  { title: 'IPTU 2026', href: '/servicos/categoria/taxas/iptu-2025-94ff5567' },
-  {
-    title: 'CADRio Agendamento',
-    href: '/servicos/categoria/cidadania/inscricao-e-atualizacao-do-cadastro-unico-8cafda60',
-  },
-  {
-    title: 'Consulta de Multas',
-    href: '/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90',
-  },
-  {
-    title: 'Alvará: Consulta prévia de local',
-    href: '/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969',
-  },
-  {
-    title: 'Licença Sanitária de Funcionamento',
-    href: '/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857',
-  },
-  {
-    title: 'Dívida Ativa: Débitos de IPTU',
-    href: '/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610',
-  },
+const STATIC_POPULAR: { id: PopularServiceId; title: string }[] = [
+  { id: 'iptu', title: 'IPTU 2026' },
+  { id: 'cadrio', title: 'CADRio Agendamento' },
+  { id: 'multas', title: 'Consulta de Multas' },
+  { id: 'alvara', title: 'Alvará: Consulta prévia de local' },
+  { id: 'licenca-sanitaria', title: 'Licença Sanitária de Funcionamento' },
+  { id: 'divida-ativa', title: 'Dívida Ativa: Débitos de IPTU' },
 ]
 
 const DYNAMIC_CONTEXT_TYPE: Record<string, string> = {
@@ -211,6 +200,7 @@ export function SearchPage({
   const hasSecondary = secondaryResults.length > 0
 
   const showStaticPopular = context === 'servicos' || context === null
+  const popularHrefs = popularServiceHrefs(cartaServicosEnabled)
 
   const logoHref =
     context === 'empregos' ? '/servicos/trabalho' : '/servicos/cursos'
@@ -310,33 +300,36 @@ export function SearchPage({
                 {/* Static list (default / servicos) */}
                 {showStaticPopular && (
                   <ul>
-                    {STATIC_POPULAR.map(({ title, href }) => (
-                      <li
-                        key={href}
-                        className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
-                        onClick={() => {
-                          sendGAEvent('event', 'mais_pesquisados_click', {
-                            search_query: title,
-                            event_timestamp: new Date().toISOString(),
-                          })
-                          saveCatalogHistory(title)
-                          router.push(href)
-                        }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') {
+                    {STATIC_POPULAR.map(({ id, title }) => {
+                      const href = popularHrefs[id]
+                      return (
+                        <li
+                          key={href}
+                          className="text-sm text-muted-foreground flex justify-between items-center py-4 border-b border-border cursor-pointer"
+                          onClick={() => {
                             sendGAEvent('event', 'mais_pesquisados_click', {
                               search_query: title,
                               event_timestamp: new Date().toISOString(),
                             })
                             saveCatalogHistory(title)
                             router.push(href)
-                          }
-                        }}
-                      >
-                        <span>{title}</span>
-                        <ChevronRightIcon className="text-primary h-6 w-6" />
-                      </li>
-                    ))}
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              sendGAEvent('event', 'mais_pesquisados_click', {
+                                search_query: title,
+                                event_timestamp: new Date().toISOString(),
+                              })
+                              saveCatalogHistory(title)
+                              router.push(href)
+                            }
+                          }}
+                        >
+                          <span>{title}</span>
+                          <ChevronRightIcon className="text-primary h-6 w-6" />
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
 

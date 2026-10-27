@@ -540,15 +540,12 @@ function RequestDetail({ data }: { data: DetailData }) {
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
-          <SectionCard>
+          <SectionCard className="min-w-0">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light">
                 Descrição
               </span>
-              <p
-                className="text-sm font-normal leading-5 tracking-normal text-foreground"
-                style={{ whiteSpace: 'pre-wrap' }}
-              >
+              <p className="text-sm font-normal leading-5 tracking-normal text-foreground whitespace-pre-wrap wrap-break-word min-w-0">
                 {decodeHtmlEntities(data.descricao)}
               </p>
             </div>

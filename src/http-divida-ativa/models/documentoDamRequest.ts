@@ -6,7 +6,14 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Documento anexado ao requerimento de parcelamento.
+ */
 export interface DocumentoDamRequest {
-  nomeArquivo?: string
-  conteudoBase64?: string
+  /** Tipo do documento. Obrigatorio: e ele que define o campo do formulario, o limite de tamanho e o nome enviado ao DAM. */
+  tipo: string
+  /** Nome original do arquivo escolhido pelo cidadao. A API usa apenas a extensao (pdf, jpg, jpeg, png ou gif) e monta o nome que o DAM espera a partir do tipo. */
+  nomeArquivo: string
+  /** Conteudo do arquivo em base64. Aceita data URI ("data:application/pdf;base64,..."); a API remove o prefixo antes de enviar ao DAM. */
+  conteudoBase64: string
 }
