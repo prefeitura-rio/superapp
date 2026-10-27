@@ -113,6 +113,20 @@ test.describe('PREF-381 — Habilidades e Competências', () => {
     await expect(salvar).toBeVisible()
     await expect(salvar).toBeDisabled()
 
+    // Seleciona a Área A.
+    await page
+      .getByRole('textbox', {
+        name: 'Área de atuação',
+      })
+      .click()
+
+    await page
+      .getByRole('button', {
+        name: 'Área A',
+        exact: true,
+      })
+      .click()
+
     // Seleciona um conhecimento da Área A.
     await page
       .getByRole('button', {
