@@ -146,9 +146,11 @@ export function CategorySubcategoriesAccordion({
 
   if (isRefetchingList && subcategoriesWithServices.length === 0) {
     return (
-      <div className="px-4 mt-6 pb-20 space-y-2">
-        {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="rounded-2xl h-14 w-full bg-card" />
+      <div className="mt-6 pb-20 space-y-2">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div key={index} className="rounded-2xl bg-card px-4 py-4">
+            <Skeleton className="h-5 w-40" />
+          </div>
         ))}
       </div>
     )
@@ -159,7 +161,7 @@ export function CategorySubcategoriesAccordion({
   }
 
   return (
-    <div className="px-4 mt-6 pb-20">
+    <div className="mt-6 pb-20">
       <Accordion
         type="single"
         collapsible
