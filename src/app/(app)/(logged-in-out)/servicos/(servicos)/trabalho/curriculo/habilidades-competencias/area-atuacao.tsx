@@ -88,13 +88,9 @@ export function AreaAtuacao({
                 className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-muted"
               >
                 <span className="flex-1">{area.nome}</span>
-                <span
-                  className={`flex size-6 shrink-0 items-center justify-center rounded-full ${
-                    area.checked ? 'bg-primary/50' : 'bg-primary/20'
-                  }`}
-                >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[#A1A1A1]">
                   {area.checked && (
-                    <span className="size-2.5 rounded-full bg-background" />
+                    <span className="size-4 rounded-full bg-[#13335A]" />
                   )}
                 </span>
               </button>
