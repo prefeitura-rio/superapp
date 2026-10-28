@@ -1,42 +1,39 @@
-import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { buildLogoutRedirectChain } from '@/lib/govbr-logout'
+import { type NextRequest, NextResponse } from 'next/server'
 
-export async function GET() {
-  // Get refresh token from cookies
-  const cookieStore = cookies()
-  const refreshToken = (await cookieStore).get('refresh_token')?.value
+const KEYCLOAK_LOGOUT_TIMEOUT_MS = 5000
 
-  // Call Keycloak logout endpoint if refresh token exists
-  if (refreshToken) {
-    const logoutUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/logout`
-    const clientId = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
-    const clientSecret = process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET
+async function logoutFromKeycloak(refreshToken: string): Promise<void> {
+  const logoutUrl = `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/logout`
+  const clientId = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
+  const clientSecret = process.env.IDENTIDADE_CARIOCA_CLIENT_SECRET
 
-    if (!clientId || !clientSecret) {
-      console.error('Missing Keycloak client ID or secret')
-      // Optionally, return a specific error response to the client
-      // return new NextResponse('Server configuration error', { status: 500 })
-      // For now, we'll proceed to clear cookies as a fallback
-    } else {
-      const params = new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken,
-      })
-      try {
-        await fetch(logoutUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params,
-        })
-      } catch (e) {
-        console.error('Error logging out from Keycloak:', e)
-      }
-    }
+  if (!clientId || !clientSecret) {
+    console.error('Missing Keycloak client ID or secret')
+    return
   }
 
-  // Clear authentication cookies
-  const response = new NextResponse(null, { status: 204 })
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+  })
+  try {
+    const response = await fetch(logoutUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+      signal: AbortSignal.timeout(KEYCLOAK_LOGOUT_TIMEOUT_MS),
+    })
+    if (!response.ok) {
+      console.error(`Keycloak logout failed with status ${response.status}`)
+    }
+  } catch (e) {
+    console.error('Error logging out from Keycloak:', e)
+  }
+}
+
+function clearAuthCookies(response: NextResponse): NextResponse {
   response.cookies.set('access_token', '', {
     path: '/',
     httpOnly: true,
@@ -48,4 +45,34 @@ export async function GET() {
     maxAge: 0,
   })
   return response
+}
+
+function buildHomeUrl(request: NextRequest): string {
+  return process.env.NEXT_PUBLIC_HOME_URL || new URL('/', request.url).href
+}
+
+/**
+ * `GET /api/auth/logout`: encerra a sessão no Keycloak, apaga os cookies e
+ * responde 204.
+ *
+ * `GET /api/auth/logout?sso=govbr`: faz o mesmo e redireciona (303) o
+ * navegador, em navegação de primeiro nível, ao logout do Keycloak e dali ao
+ * do Gov.br; sem Gov.br configurado, a cadeia termina na home. Os cookies da
+ * aplicação são apagados em qualquer caso, mesmo com o Keycloak indisponível,
+ * para a sessão anterior nunca ficar presa na aplicação.
+ */
+export async function GET(request: NextRequest) {
+  const refreshToken = request.cookies.get('refresh_token')?.value
+  if (refreshToken) {
+    await logoutFromKeycloak(refreshToken)
+  }
+
+  if (request.nextUrl.searchParams.get('sso') !== 'govbr') {
+    return clearAuthCookies(new NextResponse(null, { status: 204 }))
+  }
+
+  const target = buildLogoutRedirectChain(buildHomeUrl(request))
+  const response = NextResponse.redirect(target, 303)
+  response.headers.set('Cache-Control', 'no-store')
+  return clearAuthCookies(response)
 }

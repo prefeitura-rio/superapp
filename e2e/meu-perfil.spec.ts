@@ -77,9 +77,15 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Perfil' })
     ).toBeVisible({ timeout: 15000 })
 
-    // Intercepta o endpoint de logout para evitar redirecionamento externo
-    await page.route('/api/auth/logout', route =>
-      route.fulfill({ status: 200 })
+    // Intercepta o endpoint de logout para evitar redirecionamento externo.
+    // 204 numa navegação mantém a página atual.
+    const logoutRequests: URL[] = []
+    await page.route(
+      url => url.pathname === '/api/auth/logout',
+      route => {
+        logoutRequests.push(new URL(route.request().url()))
+        return route.fulfill({ status: 204 })
+      }
     )
 
     const sairBtn = page.getByRole('button', { name: 'Sair' })
@@ -88,6 +94,10 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
 
     // setIsLoading(true) roda de forma síncrona: label muda para "Saindo..."
     await expect(page.getByText('Saindo...')).toBeVisible({ timeout: 5000 })
+
+    await expect.poll(() => logoutRequests.length).toBe(1)
+    expect(logoutRequests[0].searchParams.get('sso')).toBe('govbr')
+    await expect(page.locator('iframe[src*="logout"]')).toHaveCount(0)
   })
 })
 
