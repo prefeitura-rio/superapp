@@ -1,5 +1,6 @@
 'use client'
 
+import { ReactNode } from 'react'
 import type { ComportamentoAtitudeViewModel } from './types'
 
 interface ComportamentosAtitudesProps {
@@ -11,24 +12,30 @@ export function ComportamentosAtitudes({
   itens,
   onToggle,
 }: ComportamentosAtitudesProps) {
+  const obterClassName = (item: ComportamentoAtitudeViewModel) => {
+    if (item.clicked) {
+      return 'size- px-4 py-1.5 bg-[#E4E4E7] rounded-[999px] outline outline-1 outline-offset-[-1px] outline-black inline-flex justify-center items-center gap-1.5'
+    }
+
+    return 'size- px-4 py-1.5 bg-theme-color-card rounded-[999px] inline-flex justify-center items-center gap-1.5'
+  }
+
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full">
       <span className="text-primary text-sm font-normal">
         Selecione comportamentos e atitudes
       </span>
-      <div className="flex w-full flex-wrap gap-2">
+      <div className="flex w-full flex-wrap mt-3">
         {itens.map(item => (
           <button
             key={item.id}
             type="button"
             onClick={() => onToggle(item.id)}
-            className={`cursor-pointer rounded-full px-4 py-2 text-sm transition-all ${
-              item.clicked
-                ? 'border border-foreground bg-primary/20 font-medium text-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
+            className={obterClassName(item)}
           >
-            {item.nome}
+            <div className="justify-start text-theme-color-foreground text-sm font-normal font-['DM_Sans'] leading-5">
+              {item.nome}
+            </div>
           </button>
         ))}
       </div>
