@@ -6,6 +6,13 @@ const oportunidadesCariocasLegacyPaths = [
   '/oportunidades.cariocas',
 ]
 
+export const allowedImageBuckets = [
+  'rj-escritorio-dev-public',
+  'rj-superapp-prefrio',
+  'rj-superapp-staging-prefrio',
+  'portal-do-cidadao',
+] as const
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['react-pdf', 'pdfjs-dist'],
@@ -52,14 +59,18 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    /**
+     * Somente os buckets GCS que servem imagens do app passam pelo otimizador
+     * `/_next/image`; qualquer outra origem recebe 400 do próprio Next.js.
+     * Manter em sincronia com a allowlist da regra 2310 do Cloud Armor em
+     * `prefeitura-rio/infra` (`superapp/modules/gcp/security-policies.tf`).
+     */
+    remotePatterns: allowedImageBuckets.map(bucket => ({
+      protocol: 'https',
+      hostname: 'storage.googleapis.com',
+      port: '',
+      pathname: `/${bucket}/**`,
+    })),
   },
 }
 
