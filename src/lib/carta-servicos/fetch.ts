@@ -130,12 +130,41 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const THEMES_PER_PAGE = 100
+
+/** Themes mapped to categories, and whether the single page read holds all. */
+export interface CartaServicosCategoryCatalog {
+  categories: Category[]
+  complete: boolean
+}
+
+function themesPayloadIsComplete(payload: unknown, received: number): boolean {
+  const body = parseCartaServicosPayload<{
+    meta?: { total?: number; total_pages?: number }
+  }>(payload)
+  const meta = body && isRecord(body) ? body.meta : undefined
+  if (typeof meta?.total === 'number') return meta.total <= received
+  if (typeof meta?.total_pages === 'number') return meta.total_pages <= 1
+  return received < THEMES_PER_PAGE
+}
+
 export async function fetchCartaServicosCategories(
   getIconForCategory: (name: string) => ReactNode,
   options?: RequestInit
 ): Promise<Category[]> {
+  const catalog = await fetchCartaServicosCategoryCatalog(
+    getIconForCategory,
+    options
+  )
+  return catalog.categories
+}
+
+export async function fetchCartaServicosCategoryCatalog(
+  getIconForCategory: (name: string) => ReactNode,
+  options?: RequestInit
+): Promise<CartaServicosCategoryCatalog> {
   const response = await getApiPublicThemes(
-    { include_empty: false, per_page: 100 },
+    { include_empty: false, per_page: THEMES_PER_PAGE },
     {
       ...CACHE_10MIN,
       next: { ...CACHE_10MIN.next, tags: ['categories'] },
@@ -149,10 +178,15 @@ export async function fetchCartaServicosCategories(
 
   const themes = getThemesFromPayload(response.data)
 
-  return themes
+  const categories = themes
     .map(theme => mapThemeToCategory(theme, getIconForCategory))
     .filter(category => category.quantidadeServicos > 0)
     .sort((a, b) => b.quantidadeServicos - a.quantidadeServicos)
+
+  return {
+    categories,
+    complete: themesPayloadIsComplete(response.data, themes.length),
+  }
 }
 
 export async function resolveThemeSlug(
