@@ -86,9 +86,11 @@ export async function GET(request: NextRequest) {
     const body = res.data as unknown as CandidaturasListResponse
     const list = Array.isArray(body.data) ? body.data : []
     const candidaturas = list.map(candidaturaToCardData)
+    // A lista vem paginada (50); o total é o que o card da área do candidato mostra.
+    const total = body.meta?.total ?? candidaturas.length
 
     return NextResponse.json(
-      { candidaturas, hasCandidaturas: candidaturas.length > 0 },
+      { candidaturas, hasCandidaturas: candidaturas.length > 0, total },
       { headers: NO_CACHE_HEADERS }
     )
   } catch (error) {
