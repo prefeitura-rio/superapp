@@ -74,6 +74,18 @@ describe('findCategoryInList', () => {
   it('responde unavailable com catálogo vazio', () => {
     expect(findCategoryInList([], 'saude')).toEqual({ status: 'unavailable' })
   })
+
+  it('responde unavailable para slug ausente de catálogo incompleto', () => {
+    expect(findCategoryInList(catalog, 'inexistente', false)).toEqual({
+      status: 'unavailable',
+    })
+  })
+
+  it('acha a categoria mesmo em catálogo incompleto', () => {
+    expect(findCategoryInList(catalog, 'saude', false)).toMatchObject({
+      status: 'found',
+    })
+  })
 })
 
 describe('lookupCategoryBySlug', () => {
@@ -99,6 +111,48 @@ describe('lookupCategoryBySlug', () => {
     })
     await expect(lookupCategoryBySlug('saude')).resolves.toMatchObject({
       status: 'found',
+    })
+  })
+
+  it('responde unavailable quando o total passa do que veio na página', async () => {
+    getApiV1Categories.mockResolvedValue({
+      status: 200,
+      data: {
+        categories: [{ name: 'Saúde', count: 2, popularity_score: 1 }],
+        total_categories: 41,
+      },
+    })
+    await expect(lookupCategoryBySlug('inexistente-999')).resolves.toEqual({
+      status: 'unavailable',
+    })
+  })
+
+  it('responde unavailable quando a página veio cheia sem total', async () => {
+    getApiV1Categories.mockResolvedValue({
+      status: 200,
+      data: {
+        categories: Array.from({ length: 40 }, (_, i) => ({
+          name: `Categoria ${i}`,
+          count: 1,
+          popularity_score: 1,
+        })),
+      },
+    })
+    await expect(lookupCategoryBySlug('inexistente-999')).resolves.toEqual({
+      status: 'unavailable',
+    })
+  })
+
+  it('responde not_found quando o total cabe na página lida', async () => {
+    getApiV1Categories.mockResolvedValue({
+      status: 200,
+      data: {
+        categories: [{ name: 'Saúde', count: 2, popularity_score: 1 }],
+        total_categories: 1,
+      },
+    })
+    await expect(lookupCategoryBySlug('inexistente-999')).resolves.toEqual({
+      status: 'not_found',
     })
   })
 

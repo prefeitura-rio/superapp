@@ -3,7 +3,7 @@ import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import { GetApiV1CategoriesOrder } from '@/http-busca-search/models/getApiV1CategoriesOrder'
 import { GetApiV1CategoriesSortBy } from '@/http-busca-search/models/getApiV1CategoriesSortBy'
-import { fetchCartaServicosCategories } from '@/lib/carta-servicos/fetch'
+import { fetchCartaServicosCategoryCatalog } from '@/lib/carta-servicos/fetch'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
@@ -76,16 +76,24 @@ export function getIconForCategory(categoryName: string): ReactNode {
 /** Fail fast so RSC pages (home/serviços) don't stay on loading.tsx. */
 const CATEGORIES_FETCH_TIMEOUT_MS = 4_000
 
+const BUSCA_CATEGORIES_PER_PAGE = 40
+
+/** Categories read from the catalog, and whether the single page holds all. */
+interface CategoryCatalog {
+  categories: Category[]
+  complete: boolean
+}
+
 async function fetchCategoriesFromBuscaSearch(
   options?: RequestInit
-): Promise<Category[]> {
+): Promise<CategoryCatalog> {
   const response = await getApiV1Categories(
     {
       sort_by: GetApiV1CategoriesSortBy.popularity,
       order: GetApiV1CategoriesOrder.desc,
       include_inactive: false,
       include_empty: false,
-      per_page: 40,
+      per_page: BUSCA_CATEGORIES_PER_PAGE,
     },
     {
       next: {
@@ -100,7 +108,9 @@ async function fetchCategoriesFromBuscaSearch(
     throw new Error(`Failed to fetch categories: ${response.status}`)
   }
 
-  return response.data.categories
+  const received = response.data.categories.length
+  const total = response.data.total_categories
+  const categories = response.data.categories
     .map((apiCategory): Category => {
       const normalizedSlug = normalizeCategoryName(apiCategory.name || '')
       return {
@@ -113,13 +123,23 @@ async function fetchCategoriesFromBuscaSearch(
     })
     .filter(cat => cat.quantidadeServicos > 0)
     .sort((a, b) => b.relevanciaMedia - a.relevanciaMedia)
+
+  return {
+    categories,
+    complete:
+      typeof total === 'number'
+        ? total <= received
+        : received < BUSCA_CATEGORIES_PER_PAGE,
+  }
 }
 
-async function fetchCategoriesOrThrow(): Promise<Category[]> {
+async function fetchCategoryCatalog(): Promise<CategoryCatalog> {
   const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
 
   if (CARTA_SERVICOS_API_ENABLED) {
-    return await fetchCartaServicosCategories(getIconForCategory, { signal })
+    return await fetchCartaServicosCategoryCatalog(getIconForCategory, {
+      signal,
+    })
   }
 
   return await fetchCategoriesFromBuscaSearch({ signal })
@@ -127,7 +147,8 @@ async function fetchCategoriesOrThrow(): Promise<Category[]> {
 
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    return await fetchCategoriesOrThrow()
+    const catalog = await fetchCategoryCatalog()
+    return catalog.categories
   } catch (error) {
     console.error('Error fetching categories:', error)
     // Timeout / network / API errors: render page without categories
@@ -138,8 +159,9 @@ export async function fetchCategories(): Promise<Category[]> {
 
 /**
  * Result of looking a category slug up in the catalog. `unavailable` means the
- * catalog could not be read (error, timeout or empty list), so the caller
- * cannot tell whether the category exists and must not answer 404.
+ * catalog could not be read in full (error, timeout, empty list or a page
+ * shorter than the total), so the caller cannot tell whether the category
+ * exists and must not answer 404.
  */
 export type CategoryLookup =
   | { status: 'found'; category: Category }
@@ -156,7 +178,8 @@ function safeDecode(value: string): string {
 
 export function findCategoryInList(
   categories: Category[],
-  categorySlug: string
+  categorySlug: string,
+  complete = true
 ): CategoryLookup {
   if (categories.length === 0) return { status: 'unavailable' }
 
@@ -170,18 +193,19 @@ export function findCategoryInList(
       normalizeCategoryName(cat.name) === normalized
   )
 
-  return category ? { status: 'found', category } : { status: 'not_found' }
+  if (category) return { status: 'found', category }
+  return complete ? { status: 'not_found' } : { status: 'unavailable' }
 }
 
 export async function lookupCategoryBySlug(
   categorySlug: string
 ): Promise<CategoryLookup> {
-  let categories: Category[]
+  let catalog: CategoryCatalog
   try {
-    categories = await fetchCategoriesOrThrow()
+    catalog = await fetchCategoryCatalog()
   } catch (error) {
     console.error('Error looking up category:', error)
     return { status: 'unavailable' }
   }
-  return findCategoryInList(categories, categorySlug)
+  return findCategoryInList(catalog.categories, categorySlug, catalog.complete)
 }
