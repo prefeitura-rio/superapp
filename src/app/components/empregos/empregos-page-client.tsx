@@ -1,21 +1,11 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { AllVagas } from './all-vagas'
-import { CandidaturasEnviadasCtaCard } from './candidaturas-enviadas-cta-card'
-import { MeuCurriculoCtaCard } from './meu-curriculo-cta-card'
+import { AreaCandidato } from './area-candidato/area-candidato'
 import { RecentlyAddedVagas } from './recently-added-vagas'
 import type { VagaCardData } from './vaga-card'
-
-async function fetchCandidaturas() {
-  const res = await fetch('/api/user/empregos/candidaturas', {
-    cache: 'no-store',
-  })
-  if (!res.ok) return { hasCandidaturas: false }
-  return res.json()
-}
 
 function RecentlyAddedVagasOnFirstPage({ vagas }: { vagas: VagaCardData[] }) {
   const searchParams = useSearchParams()
@@ -32,19 +22,10 @@ interface EmpregosPageClientProps {
 }
 
 export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
-  const { data } = useQuery({
-    queryKey: ['candidaturas'],
-    queryFn: fetchCandidaturas,
-    staleTime: 5 * 60 * 1000,
-  })
-
-  const hasCandidaturas = data?.hasCandidaturas ?? false
-
   return (
     <>
-      <div className="flex flex-col gap-2 px-4 pb-4">
-        <MeuCurriculoCtaCard />
-        {hasCandidaturas && <CandidaturasEnviadasCtaCard />}
+      <div className="px-4 pb-4">
+        <AreaCandidato />
       </div>
       <Suspense fallback={null}>
         <RecentlyAddedVagasOnFirstPage vagas={recentVagas} />

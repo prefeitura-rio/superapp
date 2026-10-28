@@ -78,7 +78,7 @@ async function ensureActiveVagasOrSkip(page: Page): Promise<void> {
  * pula (com motivo) se o homolog não tem vaga ativa, mas falha se for bug.
  *
  * Usa o heading "Mais recentes" como âncora XPath para excluir
- * estruturalmente quaisquer links acima dele (ex.: CandidaturasEnviadasCtaCard),
+ * estruturalmente quaisquer links acima dele (ex.: cards da área do candidato),
  * sem precisar de lista de :not() hardcoded.
  * getByRole('link') garante que só elementos visíveis são retornados,
  * descartando os cards duplicados do carrossel mobile (display:none no desktop).
@@ -154,16 +154,16 @@ test.describe('Empregos — home (público)', () => {
     ).toBeVisible({ timeout: 20000 })
   })
 
-  test('não exibe card "Candidaturas enviadas" sem autenticação', async ({
+  test('deslogado exibe o banner para criar o currículo, sem o controle do banco', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    // Âncora ESTÁTICA (não depende de vaga ativa) para confirmar que a home
-    // carregou — este teste verifica ausência do card, não a seção de vagas.
-    await expect(
-      page.getByRole('heading', { name: 'Encontre seu trabalho' })
-    ).toBeVisible({ timeout: 20000 })
-    await expect(page.getByText('Candidaturas enviadas')).toHaveCount(0)
+
+    const banner = page.getByRole('link', { name: /Faça seu currículo/ })
+    await expect(banner).toBeVisible({ timeout: 20000 })
+    await expect(banner).toHaveAttribute('href', '/servicos/trabalho/curriculo')
+    await expect(page.getByText('Criar agora')).toBeVisible()
+    await expect(page.getByRole('switch')).toHaveCount(0)
   })
 
   test('ao clicar no primeiro card de vaga, navega para página da vaga', async ({
@@ -252,56 +252,65 @@ test.describe('Empregos — home (autenticado)', () => {
     await expect(faqHeaderLink).toHaveCount(0)
   })
 
-  test('card "Candidaturas enviadas" (quando presente) aponta para /minhas-candidaturas', async ({
+  test('exibe os cards "Meu Currículo" e "Minhas candidaturas" e o controle do Banco de Currículos', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+
     await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
-
-    const candidaturasCard = page.getByRole('link', {
-      name: 'Candidaturas enviadas',
+      page.getByRole('link', { name: /Meu Currículo/ })
+    ).toHaveAttribute('href', '/servicos/trabalho/curriculo', {
+      timeout: 20000,
     })
-    const isVisible = await candidaturasCard
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
-
-    if (isVisible) {
-      await expect(candidaturasCard).toHaveAttribute(
-        'href',
-        '/servicos/trabalho/minhas-candidaturas'
-      )
-      await expect(
-        page.getByText('Acompanhe aqui o andamento de suas candidaturas')
-      ).toBeVisible()
-    }
+    await expect(
+      page.getByRole('link', { name: /Minhas candidaturas/ })
+    ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
+    await expect(page.getByText('Banco de Currículos')).toBeVisible()
+    await expect(page.getByRole('switch')).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /Faça seu currículo/ })
+    ).toHaveCount(0)
   })
 
-  test('clicar no card "Candidaturas enviadas" navega para /minhas-candidaturas', async ({
+  test('desativar o Banco de Currículos pede confirmação (cancelar mantém ativo)', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+
+    const controle = page.getByRole('switch')
+    await expect(controle).toBeVisible({ timeout: 20000 })
+    // Só abre o modal; cancelar não grava nada no usuário de teste.
+    test.skip(
+      !(await controle.isChecked()) || !(await controle.isEnabled()),
+      'Usuário de teste fora do banco ou sem currículo: não há o que desativar'
+    )
+
+    await controle.click()
     await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+      page.getByRole('dialog', { name: 'Sair do Banco de Currículos?' })
+    ).toBeVisible()
+    await page.getByRole('button', { name: 'Cancelar' }).click()
+
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(controle).toBeChecked()
+  })
+
+  test('clicar no card "Minhas candidaturas" navega para /minhas-candidaturas', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
 
     const candidaturasCard = page.getByRole('link', {
-      name: 'Candidaturas enviadas',
+      name: /Minhas candidaturas/,
     })
-    const isVisible = await candidaturasCard
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
-
-    if (isVisible) {
-      await candidaturasCard.click()
-      await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
-        timeout: 15000,
-      })
-      await expect(
-        page.getByRole('heading', { name: 'Minhas candidaturas' })
-      ).toBeVisible({ timeout: 15000 })
-    }
+    await expect(candidaturasCard).toBeVisible({ timeout: 20000 })
+    await candidaturasCard.click()
+    await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
+      timeout: 15000,
+    })
+    await expect(
+      page.getByRole('heading', { name: 'Minhas candidaturas' })
+    ).toBeVisible({ timeout: 15000 })
   })
 })
 
