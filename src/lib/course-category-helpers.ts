@@ -124,3 +124,38 @@ export function getCategoryIdBySlug(
   const category = categories.find(cat => cat.value === slug)
   return category?.id
 }
+
+/**
+ * Result of looking a course category slug up in the catalog. `unavailable`
+ * means the catalog could not be read in full (error, empty list or a page
+ * shorter than the total), so the caller must not answer 404.
+ */
+export type CourseCategoryLookup =
+  | { status: 'found'; category: CategoryFilter }
+  | { status: 'not_found' }
+  | { status: 'unavailable' }
+
+export function findCourseCategoryBySlug(
+  categories: ModelsCategoria[] | undefined,
+  slug: string,
+  total?: number
+): CourseCategoryLookup {
+  if (!categories || categories.length === 0) return { status: 'unavailable' }
+
+  let decoded = slug
+  try {
+    decoded = decodeURIComponent(slug)
+  } catch {
+    // keep the raw slug
+  }
+
+  const category = transformCategoriesToFilters(categories).find(
+    cat => cat.value === slug || cat.value === decoded
+  )
+  if (category) return { status: 'found', category }
+
+  if (total !== undefined && total > categories.length) {
+    return { status: 'unavailable' }
+  }
+  return { status: 'not_found' }
+}

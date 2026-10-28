@@ -115,19 +115,73 @@ async function fetchCategoriesFromBuscaSearch(
     .sort((a, b) => b.relevanciaMedia - a.relevanciaMedia)
 }
 
+async function fetchCategoriesOrThrow(): Promise<Category[]> {
+  const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
+
+  if (CARTA_SERVICOS_API_ENABLED) {
+    return await fetchCartaServicosCategories(getIconForCategory, { signal })
+  }
+
+  return await fetchCategoriesFromBuscaSearch({ signal })
+}
+
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
-
-    if (CARTA_SERVICOS_API_ENABLED) {
-      return await fetchCartaServicosCategories(getIconForCategory, { signal })
-    }
-
-    return await fetchCategoriesFromBuscaSearch({ signal })
+    return await fetchCategoriesOrThrow()
   } catch (error) {
     console.error('Error fetching categories:', error)
     // Timeout / network / API errors: render page without categories
     // instead of keeping the user stuck on the route loading UI.
     return []
   }
+}
+
+/**
+ * Result of looking a category slug up in the catalog. `unavailable` means the
+ * catalog could not be read (error, timeout or empty list), so the caller
+ * cannot tell whether the category exists and must not answer 404.
+ */
+export type CategoryLookup =
+  | { status: 'found'; category: Category }
+  | { status: 'not_found' }
+  | { status: 'unavailable' }
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+export function findCategoryInList(
+  categories: Category[],
+  categorySlug: string
+): CategoryLookup {
+  if (categories.length === 0) return { status: 'unavailable' }
+
+  const decoded = safeDecode(categorySlug)
+  const normalized = normalizeCategoryName(decoded)
+  const category = categories.find(
+    cat =>
+      cat.categorySlug === decoded ||
+      cat.categorySlug === normalized ||
+      cat.themeSlug === decoded ||
+      normalizeCategoryName(cat.name) === normalized
+  )
+
+  return category ? { status: 'found', category } : { status: 'not_found' }
+}
+
+export async function lookupCategoryBySlug(
+  categorySlug: string
+): Promise<CategoryLookup> {
+  let categories: Category[]
+  try {
+    categories = await fetchCategoriesOrThrow()
+  } catch (error) {
+    console.error('Error looking up category:', error)
+    return { status: 'unavailable' }
+  }
+  return findCategoryInList(categories, categorySlug)
 }
