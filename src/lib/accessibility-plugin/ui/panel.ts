@@ -749,7 +749,7 @@ export function createPanel(
   ttsStopBtn.setAttribute('aria-label', 'Parar leitura')
   ttsStopBtn.innerHTML = TTS_ICON_STOP
   ttsStopBtn.addEventListener('click', () => {
-    callbacks.onTts(false)
+    if (!turnOffPanelTTS()) callbacks.onTts(false)
   })
 
   const ttsProgressPanel = document.createElement('span')
@@ -866,6 +866,22 @@ export function rebuildPanel(
   document.getElementById(PANEL_ID)?.remove()
   createPanel(state, callbacks)
   if (wasOpen) openPanel()
+}
+
+// Passa pelo handler do próprio toggle para o painel ficar igual ao desligar
+// manual (badge, sub-opções); o foco num controle que some volta ao toggle.
+export function turnOffPanelTTS(): boolean {
+  const panel = document.getElementById(PANEL_ID)
+  const toggle = panel?.querySelector<HTMLInputElement>('#a11y-toggle-tts')
+  if (!toggle?.checked) return false
+  const active = document.activeElement
+  const focusInSubRow =
+    active instanceof HTMLElement &&
+    active.closest('#a11y-acc-tts .a11y-row-sub') !== null
+  toggle.checked = false
+  toggle.dispatchEvent(new Event('change'))
+  if (focusInSubRow) toggle.focus()
+  return true
 }
 
 export function updatePanelTTSProgress(current: number, total: number): void {
