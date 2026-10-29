@@ -3,6 +3,46 @@ import type { A11yState } from '../state'
 
 export const PANEL_ID = 'a11y-panel'
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not(:disabled)',
+  'input:not(:disabled)',
+  'select:not(:disabled)',
+  'textarea:not(:disabled)',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+
+// Percorre a árvore e filtra com `matches` para garantir a ordem do documento
+// (a ordem do Tab): alguns motores de seletor devolvem uma lista de seletores
+// agrupada por seletor em vez de em ordem do documento.
+function getFocusable(panel: HTMLElement): HTMLElement[] {
+  return Array.from(panel.querySelectorAll<HTMLElement>('*')).filter(el =>
+    el.matches(FOCUSABLE_SELECTOR)
+  )
+}
+
+// Diálogo modal (WAI-ARIA APG): enquanto aberto, Tab no último focável volta
+// ao primeiro e Shift+Tab no primeiro vai ao último, sem sair do painel.
+function trapFocus(panel: HTMLElement, e: KeyboardEvent): void {
+  if (e.key !== 'Tab' || !panel.classList.contains('a11y-open')) return
+  const focusable = getFocusable(panel)
+  if (focusable.length === 0) {
+    e.preventDefault()
+    return
+  }
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  const active = document.activeElement
+  const inside = active instanceof Node && panel.contains(active)
+  if (e.shiftKey && (active === first || !inside)) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && (active === last || !inside)) {
+    e.preventDefault()
+    first.focus()
+  }
+}
+
 type PanelCallbacks = {
   onFontSize: (level: 0 | 1 | 2) => void
   onLetterSpacing: (level: 0 | 1 | 2) => void
@@ -774,6 +814,7 @@ export function createPanel(
   footer.appendChild(resetBtn)
 
   panel.append(header, body, footer)
+  panel.addEventListener('keydown', e => trapFocus(panel, e))
   document.body.appendChild(panel)
 
   document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -789,10 +830,7 @@ export function openPanel(): void {
   const panel = document.getElementById(PANEL_ID)
   if (!panel) return
   panel.classList.add('a11y-open')
-  const first = panel.querySelector<HTMLElement>(
-    'button:not(:disabled), input, [tabindex]:not([tabindex="-1"])'
-  )
-  first?.focus()
+  getFocusable(panel)[0]?.focus()
 }
 
 export function closePanel(): void {
