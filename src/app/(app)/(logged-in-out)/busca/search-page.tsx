@@ -223,7 +223,8 @@ export function SearchPage({
       ) : (
         <HeaderWrapperClient />
       )}
-      <div>
+      <main>
+        <h1 className="sr-only">Busca</h1>
         <div className="max-w-4xl px-4 mx-auto pt-6 flex flex-col pb-4">
           <SearchInput
             ref={searchInputRef}
@@ -424,7 +425,7 @@ export function SearchPage({
             externalUrl={selectedExternalUrl}
           />
         </div>
-      </div>
+      </main>
     </div>
   )
 }

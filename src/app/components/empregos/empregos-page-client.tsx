@@ -24,6 +24,7 @@ interface EmpregosPageClientProps {
 export function EmpregosPageClient({ recentVagas }: EmpregosPageClientProps) {
   return (
     <>
+      <h1 className="sr-only">Trabalho</h1>
       <div className="px-4 pb-4">
         <AreaCandidato />
       </div>

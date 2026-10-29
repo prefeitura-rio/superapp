@@ -69,6 +69,7 @@ export default function CoursePageClient({
     return (
       <div className="min-h-lvh">
         <main className="max-w-4xl mx-auto pb-20 text-white">
+          <h1 className="sr-only">Cursos</h1>
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
               Nenhum curso encontrado
@@ -82,6 +83,7 @@ export default function CoursePageClient({
   return (
     <div className="min-h-lvh">
       <main className="max-w-4xl mx-auto pb-34 text-white">
+        <h1 className="sr-only">Cursos</h1>
         {categoryFilters.length > 0 && (
           <>
             <div className="block sm:hidden">

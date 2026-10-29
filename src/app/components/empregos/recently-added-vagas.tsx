@@ -54,9 +54,9 @@ export function RecentlyAddedVagas({ vagas }: RecentlyAddedVagasProps) {
   return (
     <>
       <div className="flex items-center justify-between pb-2 px-4">
-        <h3 className="text-base font-medium text-foreground leading-5">
+        <h2 className="text-base font-medium text-foreground leading-5">
           Mais recentes
-        </h3>
+        </h2>
         {showControls && (
           <div className="flex items-center gap-1">
             <button
