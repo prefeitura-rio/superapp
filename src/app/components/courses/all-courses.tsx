@@ -73,9 +73,9 @@ export function AllCourses({
   if (isLoading) {
     return (
       <>
-        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+        <h2 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
           Todos os cursos
-        </h3>
+        </h2>
         {/* Abaixo de 896px: listagem horizontal */}
         <div className="px-4 max-[895px]:block min-[896px]:hidden">
           <div className="flex flex-col">
@@ -105,9 +105,9 @@ export function AllCourses({
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+      <h2 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Todos os cursos
-      </h3>
+      </h2>
       {/* Abaixo de 896px: listagem horizontal */}
       <div className="px-4 max-[895px]:block min-[896px]:hidden">
         <div className="flex flex-col">

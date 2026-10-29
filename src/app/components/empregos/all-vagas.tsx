@@ -66,9 +66,9 @@ export function AllVagas() {
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+      <h2 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Encontre seu trabalho
-      </h3>
+      </h2>
       <VagaFilters onFiltersChange={handleFiltersChange} />
 
       {isLoading && (

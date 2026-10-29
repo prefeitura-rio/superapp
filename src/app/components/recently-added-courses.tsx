@@ -18,9 +18,9 @@ export default function RecentlyAddedCourses({
 
   return (
     <>
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
+      <h2 className="pb-2 text-base font-medium text-foreground leading-5 px-4">
         Mais recentes
-      </h3>
+      </h2>
       {/* Scroll horizontal com cards fixos (abaixo de 896px) */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[895px]:block min-[896px]:hidden">
         <div className="flex gap-2 px-4 min-w-max">
