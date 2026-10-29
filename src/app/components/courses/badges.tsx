@@ -1,8 +1,8 @@
-import { BriefcaseIcon } from '@/assets/icons'
+import { BriefcaseIcon, PcdIcon } from '@/assets/icons'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { type AccessibilityTypes, accessibilityLabel } from '@/types/course'
-import { Accessibility, Clock, DollarSign, MapPin } from 'lucide-react'
+import { Clock, DollarSign, MapPin } from 'lucide-react'
 
 interface AccessibilityBadgeProps {
   accessibility?: AccessibilityTypes | string | undefined | ''
@@ -120,6 +120,11 @@ export function NeighborhoodBadge({
   )
 }
 
+// Decorativo: o texto do selo já descreve a acessibilidade.
+function AccessibilityIcon({ className }: { className?: string }) {
+  return <PcdIcon className={className} aria-hidden="true" />
+}
+
 export function AccessibilityPillBadge({
   accessibility,
   className,
@@ -141,6 +146,10 @@ export function AccessibilityPillBadge({
   if (!label) return null
 
   return (
-    <CoursePillBadge icon={Accessibility} label={label} className={className} />
+    <CoursePillBadge
+      icon={AccessibilityIcon}
+      label={label}
+      className={className}
+    />
   )
 }
