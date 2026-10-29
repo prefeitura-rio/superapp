@@ -7,6 +7,7 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { decodeHtmlEntities } from '@/lib/html-entities'
+import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -194,7 +195,6 @@ interface DetailData {
   isLoggedIn: boolean
   osId: string
   isAcessoInformacao: boolean
-  ouvidoriaUrl: string | null
   canOpenRecurso: {
     available: boolean
     categoryId: string | null
@@ -361,18 +361,18 @@ function PublicAndamento({ data }: { data: DetailData }) {
   )
 }
 
-function OuvidoriaCard({ href }: { href: string }) {
+function OuvidoriaCard({ protocolo }: { protocolo: string }) {
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
         Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
-      <a
-        href={href}
+      <Link
+        href={`/solicitacoes/${protocolo}/ouvidoria`}
         className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
       >
         Ouvidoria
-      </a>
+      </Link>
     </SectionCard>
   )
 }
@@ -533,11 +533,12 @@ function RequestDetail({ data }: { data: DetailData }) {
             />
           )}
 
-        {/* Ouvidoria — só logado, concluído, não é LAI e tem URL */}
+        {/* Ouvidoria — só logado e concluído e não é LAI */}
         {data.isLoggedIn &&
           macroStatus === 'Concluído' &&
-          !data.isAcessoInformacao &&
-          data.ouvidoriaUrl && <OuvidoriaCard href={data.ouvidoriaUrl} />}
+          !data.isAcessoInformacao && (
+            <OuvidoriaCard protocolo={data.protocolo} />
+          )}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
@@ -748,7 +749,6 @@ export default function RequestDetailPage() {
               isLoggedIn: true,
               osId: os?.id ?? '',
               isAcessoInformacao: os?.isAcessoInformacao ?? false,
-              ouvidoriaUrl: os?.ouvidoriaUrl ?? null,
               canOpenRecurso: os?.canOpen?.recurso ?? null,
             })
             setLoading(false)
@@ -800,7 +800,6 @@ export default function RequestDetailPage() {
             isLoggedIn: false,
             osId: '',
             isAcessoInformacao: false,
-            ouvidoriaUrl: null,
             canOpenRecurso: null,
             ultimoAndamento: ultimo,
           })
