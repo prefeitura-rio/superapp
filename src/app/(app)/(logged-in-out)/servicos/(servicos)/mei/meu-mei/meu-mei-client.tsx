@@ -11,7 +11,7 @@ interface MeuMeiClientProps {
 
 export function MeuMeiClient({ companyData }: MeuMeiClientProps) {
   return (
-    <main className="max-w-xl min-h-lvh mx-auto text-foreground">
+    <div className="max-w-xl min-h-lvh mx-auto text-foreground">
       <SecondaryHeader defaultRoute="/servicos/mei/menu" fixed={false} />
       <div className="px-4 pt-4 pb-12">
         {companyData ? (
@@ -20,6 +20,6 @@ export function MeuMeiClient({ companyData }: MeuMeiClientProps) {
           <MeiEmptyState />
         )}
       </div>
-    </main>
+    </div>
   )
 }

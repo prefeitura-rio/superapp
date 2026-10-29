@@ -27,9 +27,9 @@ export default async function EmpregosPage() {
 
   return (
     <div>
-      <main className="max-w-4xl mx-auto pb-36 text-foreground">
+      <div className="max-w-4xl mx-auto pb-36 text-foreground">
         <EmpregosPageClient recentVagas={recentVagas} />
-      </main>
+      </div>
     </div>
   )
 }
