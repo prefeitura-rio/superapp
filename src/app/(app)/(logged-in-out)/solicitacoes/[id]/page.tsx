@@ -194,6 +194,7 @@ interface DetailData {
   isLoggedIn: boolean
   osId: string
   isAcessoInformacao: boolean
+  ouvidoriaUrl: string | null
   canOpenRecurso: {
     available: boolean
     categoryId: string | null
@@ -360,18 +361,18 @@ function PublicAndamento({ data }: { data: DetailData }) {
   )
 }
 
-function OuvidoriaCard() {
+function OuvidoriaCard({ href }: { href: string }) {
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
         Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
-      <button
-        type="button"
+      <a
+        href={href}
         className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
       >
         Ouvidoria
-      </button>
+      </a>
     </SectionCard>
   )
 }
@@ -532,10 +533,11 @@ function RequestDetail({ data }: { data: DetailData }) {
             />
           )}
 
-        {/* Ouvidoria — só logado, concluído e não é LAI */}
+        {/* Ouvidoria — só logado, concluído, não é LAI e tem URL */}
         {data.isLoggedIn &&
           macroStatus === 'Concluído' &&
-          !data.isAcessoInformacao && <OuvidoriaCard />}
+          !data.isAcessoInformacao &&
+          data.ouvidoriaUrl && <OuvidoriaCard href={data.ouvidoriaUrl} />}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
@@ -746,6 +748,7 @@ export default function RequestDetailPage() {
               isLoggedIn: true,
               osId: os?.id ?? '',
               isAcessoInformacao: os?.isAcessoInformacao ?? false,
+              ouvidoriaUrl: os?.ouvidoriaUrl ?? null,
               canOpenRecurso: os?.canOpen?.recurso ?? null,
             })
             setLoading(false)
@@ -797,6 +800,7 @@ export default function RequestDetailPage() {
             isLoggedIn: false,
             osId: '',
             isAcessoInformacao: false,
+            ouvidoriaUrl: null,
             canOpenRecurso: null,
             ultimoAndamento: ultimo,
           })
