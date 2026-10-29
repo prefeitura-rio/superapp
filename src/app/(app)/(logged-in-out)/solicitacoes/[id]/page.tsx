@@ -364,8 +364,7 @@ function OuvidoriaCard() {
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
-        Sua voz é importante para melhorarmos os serviços da cidade. Acesse
-        nossa Ouvidoria e avalie seu atendimento.
+        Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
       <button
         type="button"
