@@ -64,11 +64,27 @@ vi.mock('@/app/components/pending-invite-section', () => ({
 vi.mock('@/app/components/wallet-section-client', () => ({
   default: () => null,
 }))
+// O ResponsiveWrapper escolhe a versão pela largura da janela; aqui as duas
+// versões reais dos banners de sugestão (mobile e desktop) são renderizadas,
+// para que os headings delas entrem na conferência da hierarquia.
 vi.mock('@/components/ui/custom/responsive-wrapper', () => ({
-  ResponsiveWrapper: () => null,
+  ResponsiveWrapper: ({
+    mobileComponent,
+    desktopComponent,
+  }: {
+    mobileComponent: ReactNode
+    desktopComponent: ReactNode
+  }) => (
+    <>
+      <div data-testid="responsive-mobile">{mobileComponent}</div>
+      <div data-testid="responsive-desktop">{desktopComponent}</div>
+    </>
+  ),
 }))
+// Visitante sem login (as rotas públicas são verificadas sem sessão).
 vi.mock('@/providers/auth-status-provider', () => ({
   AuthStatusProvider: ({ children }: { children: ReactNode }) => children,
+  useAuthStatus: () => ({ isLoggedIn: false, isLoading: false }),
 }))
 vi.mock('@/app/components/empregos/area-candidato/area-candidato', () => ({
   AreaCandidato: () => null,
@@ -140,6 +156,15 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
         Array.from(container.querySelectorAll('h2')).map(h => h.textContent)
       ).toContain('Serviços')
     )
+    // Os banners de sugestão (antes do H2 "Serviços") estão na árvore.
+    const mobileBanners = container.querySelector(
+      '[data-testid="responsive-mobile"]'
+    )
+    const desktopBanners = container.querySelector(
+      '[data-testid="responsive-desktop"]'
+    )
+    expect(mobileBanners).toHaveTextContent('Encontre seu trabalho')
+    expect(desktopBanners).toHaveTextContent('Encontre seu trabalho')
     expectSequentialOutline(
       container,
       'Portal de serviços da Prefeitura do Rio'
