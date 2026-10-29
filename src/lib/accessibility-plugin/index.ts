@@ -17,6 +17,7 @@ import {
   isPanelOpen,
   openPanel,
   rebuildPanel,
+  turnOffPanelTTS,
   updatePanelTTSProgress,
 } from './ui/panel'
 import { injectStyles } from './ui/styles'
@@ -56,9 +57,10 @@ function applyTTS(enabled: boolean, speed: 0 | 1 | 2): void {
         updatePanelTTSProgress(current, total)
       },
       () => {
-        // leitura terminou naturalmente
+        // leitura terminou naturalmente: o painel volta ao estado desligado
         setState({ tts: false })
         removeTTSWidget()
+        turnOffPanelTTS()
       }
     )
     if (!document.getElementById('a11y-tts-widget')) {
