@@ -491,6 +491,12 @@ html.dark #a11y-btn:hover {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: visibility 0s linear 0s;
+}
+/* Recolhido: some só depois da animação, fora do Tab e do leitor de tela */
+.a11y-accordion-body:not(.a11y-accordion-open) > .a11y-accordion-inner {
+  visibility: hidden;
+  transition: visibility 0s linear 0.22s;
 }
 
 /* ── Row ── */
@@ -527,7 +533,8 @@ html.dark #a11y-btn:hover {
   padding-left: 13px;
   background: #f0f4ff;
   border-left: 3px solid #2563eb;
-  transition: opacity 0.18s ease, max-height 0.22s ease, padding 0.18s ease;
+  transition: opacity 0.18s ease, max-height 0.22s ease, padding 0.18s ease,
+    visibility 0s linear 0s;
   overflow: hidden;
   max-height: 64px;
 }
@@ -542,6 +549,9 @@ html.dark #a11y-btn:hover {
   padding-bottom: 0 !important;
   border-bottom: none;
   pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.18s ease, max-height 0.22s ease, padding 0.18s ease,
+    visibility 0s linear 0.22s;
 }
 
 /* ── Stepper (+/-) ── */

@@ -223,6 +223,18 @@ function makeToggle(
   return toggle
 }
 
+// Conteúdo recolhido ou oculto sai da ordem do Tab e da árvore de
+// acessibilidade enquanto fechado (WCAG 2.4.3 e 2.4.7). `inert` não mexe no
+// layout, então a animação de expandir/recolher do CSS continua igual.
+function setInert(el: HTMLElement, inert: boolean): void {
+  el.toggleAttribute('inert', inert)
+}
+
+function setSubRowHidden(row: HTMLElement, hidden: boolean): void {
+  row.classList.toggle('a11y-row-sub-hidden', hidden)
+  setInert(row, hidden)
+}
+
 function countActive(values: (boolean | number)[]): number {
   return values.filter(v => (typeof v === 'boolean' ? v : v > 0)).length
 }
@@ -283,6 +295,7 @@ function makeAccordionGroup(
   body.id = `a11y-acc-${id}`
   body.className = 'a11y-accordion-body'
   if (initiallyOpen) body.classList.add('a11y-accordion-open')
+  setInert(body, !initiallyOpen)
 
   const inner = document.createElement('div')
   inner.className = 'a11y-accordion-inner'
@@ -294,10 +307,13 @@ function makeAccordionGroup(
     const panel = wrap.closest('#a11y-panel')
     if (panel) {
       panel
-        .querySelectorAll('.a11y-accordion-body.a11y-accordion-open')
+        .querySelectorAll<HTMLElement>(
+          '.a11y-accordion-body.a11y-accordion-open'
+        )
         .forEach(el => {
           if (el !== body) {
             el.classList.remove('a11y-accordion-open')
+            setInert(el, true)
             el.closest('.a11y-accordion')
               ?.querySelector('.a11y-accordion-trigger')
               ?.setAttribute('aria-expanded', 'false')
@@ -305,6 +321,7 @@ function makeAccordionGroup(
         })
     }
     body.classList.toggle('a11y-accordion-open', !isOpen)
+    setInert(body, isOpen)
     trigger.setAttribute('aria-expanded', String(!isOpen))
   })
 
@@ -429,7 +446,7 @@ export function createPanel(
   ]
   maskSubRows.forEach(r => {
     r.classList.add('a11y-row-sub')
-    if (!state.readingMask) r.classList.add('a11y-row-sub-hidden')
+    setSubRowHidden(r, !state.readingMask)
   })
 
   const textGroup = makeAccordionGroup(
@@ -691,9 +708,7 @@ export function createPanel(
           'Ativar máscara de leitura',
           v => {
             live.readingMask = v
-            maskSubRows.forEach(r =>
-              r.classList.toggle('a11y-row-sub-hidden', !v)
-            )
+            maskSubRows.forEach(r => setSubRowHidden(r, !v))
             motionGroup.updateBadge(
               countActive([live.reduceMotion, live.readingMask])
             )
@@ -709,7 +724,7 @@ export function createPanel(
   // ── TTS: sub-row de controles (play/pause/stop + progresso) ──
   const ttsControlsRow = document.createElement('div')
   ttsControlsRow.className = 'a11y-row a11y-row-sub a11y-tts-controls-row'
-  if (!state.tts) ttsControlsRow.classList.add('a11y-row-sub-hidden')
+  setSubRowHidden(ttsControlsRow, !state.tts)
 
   const ttsPlayBtn = document.createElement('button')
   ttsPlayBtn.type = 'button'
@@ -762,7 +777,7 @@ export function createPanel(
     )
   )
   ttsSpeedSubRow.classList.add('a11y-row-sub')
-  if (!state.tts) ttsSpeedSubRow.classList.add('a11y-row-sub-hidden')
+  setSubRowHidden(ttsSpeedSubRow, !state.tts)
 
   const ttsToggleRow = makeRow(
     'Leitura em voz alta',
@@ -773,8 +788,8 @@ export function createPanel(
       'Ativar leitura em voz alta',
       v => {
         live.tts = v
-        ttsControlsRow.classList.toggle('a11y-row-sub-hidden', !v)
-        ttsSpeedSubRow.classList.toggle('a11y-row-sub-hidden', !v)
+        setSubRowHidden(ttsControlsRow, !v)
+        setSubRowHidden(ttsSpeedSubRow, !v)
         if (!v) {
           ttsPlayBtn.innerHTML = TTS_ICON_PAUSE
           ttsPlayBtn.setAttribute('aria-label', 'Pausar leitura')
