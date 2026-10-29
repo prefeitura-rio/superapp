@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CoursesSearchLoading() {
   return (
-    <main className="min-h-lvh max-w-4xl mx-auto text-foreground">
+    <div className="min-h-lvh max-w-4xl mx-auto text-foreground">
       <section className="relative pt-5 px-4 flex items-center gap-2">
         <div className="flex-1 min-w-0">
           <Skeleton className="h-14 w-full rounded-full" />
@@ -42,6 +42,6 @@ export default function CoursesSearchLoading() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

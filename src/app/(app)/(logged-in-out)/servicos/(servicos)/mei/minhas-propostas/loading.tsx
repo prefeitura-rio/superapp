@@ -18,7 +18,7 @@ function ProposalCardSkeleton() {
 
 export default function MinhasPropostasLoading() {
   return (
-    <main className="max-w-xl min-h-lvh mx-auto text-foreground">
+    <div className="max-w-xl min-h-lvh mx-auto text-foreground">
       <header className="px-4 py-4 relative w-full max-w-xl mx-auto bg-background text-foreground">
         <div className="flex justify-start">
           <Skeleton className="h-10 w-10 rounded-full" />
@@ -31,6 +31,6 @@ export default function MinhasPropostasLoading() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   )
 }

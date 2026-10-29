@@ -77,7 +77,7 @@ function AllCoursesSkeleton() {
 export default function CoursesLoading() {
   return (
     <div>
-      <main className="max-w-4xl mx-auto pb-34 text-white">
+      <div className="max-w-4xl mx-auto pb-34 text-white">
         {/* Category Filters - renderizando ambos e usando classes responsivas para evitar layout shift */}
         <div className="block sm:hidden">
           <CategoryFiltersMobileSkeleton />
@@ -91,7 +91,7 @@ export default function CoursesLoading() {
         <RecentlyAddedCoursesSwipeSkeleton />
 
         <AllCoursesSkeleton />
-      </main>
+      </div>
     </div>
   )
 }

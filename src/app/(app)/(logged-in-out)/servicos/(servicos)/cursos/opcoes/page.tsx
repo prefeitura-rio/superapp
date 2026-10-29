@@ -11,7 +11,7 @@ export default async function ProfilePage() {
         menuHref="/servicos/cursos/opcoes"
         logoHref="/servicos/cursos"
       />
-      <main className="max-w-4xl mx-auto text-foreground pb-10">
+      <div className="max-w-4xl mx-auto text-foreground pb-10">
         <div className="px-4 pt-3.5">
           <h1 className="text-3xl font-medium text-foreground pb-2 pt-3">
             Menu
@@ -31,7 +31,7 @@ export default async function ProfilePage() {
             <MenuItem label="FAQ" href="/faq/cursos" />
           </nav>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

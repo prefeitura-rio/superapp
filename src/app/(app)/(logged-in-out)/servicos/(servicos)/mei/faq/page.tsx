@@ -74,7 +74,7 @@ export const dynamic = 'force-static'
 
 export default function MeiFaqPage() {
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
+    <div className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
       <SecondaryHeader title="FAQ" fixed={false} />
       <div className="p-5 pt-4 max-w-4xl mx-auto">
         <div className="space-y-8">
@@ -96,6 +96,6 @@ export default function MeiFaqPage() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   )
 }
