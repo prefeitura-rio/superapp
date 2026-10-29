@@ -195,7 +195,6 @@ interface DetailData {
   isLoggedIn: boolean
   osId: string
   isAcessoInformacao: boolean
-  ouvidoriaUrl: string | null
   canOpenRecurso: {
     available: boolean
     categoryId: string | null
@@ -535,11 +534,12 @@ function RequestDetail({ data }: { data: DetailData }) {
             />
           )}
 
-        {/* Ouvidoria — só logado, concluído, não é LAI e API sinaliza disponível */}
+        {/* Ouvidoria — só logado e concluído e não é LAI */}
         {data.isLoggedIn &&
           macroStatus === 'Concluído' &&
-          !data.isAcessoInformacao &&
-          data.ouvidoriaUrl && <OuvidoriaCard protocolo={data.protocolo} />}
+          !data.isAcessoInformacao && (
+            <OuvidoriaCard protocolo={data.protocolo} />
+          )}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
@@ -753,7 +753,6 @@ export default function RequestDetailPage() {
               isLoggedIn: true,
               osId: os?.id ?? '',
               isAcessoInformacao: os?.isAcessoInformacao ?? false,
-              ouvidoriaUrl: os?.ouvidoriaUrl ?? null,
               canOpenRecurso: os?.canOpen?.recurso ?? null,
             })
             setLoading(false)
@@ -805,7 +804,6 @@ export default function RequestDetailPage() {
             isLoggedIn: false,
             osId: '',
             isAcessoInformacao: false,
-            ouvidoriaUrl: null,
             canOpenRecurso: null,
             ultimoAndamento: ultimo,
           })
