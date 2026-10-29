@@ -78,6 +78,7 @@ jobs:
             --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://storage.googleapis.com/rio-queue" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_API_URL="https://rio-queue.dados.rio" \
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
+            --build-arg NEXT_PUBLIC_ACCESSIBILITY_ENABLED="true" \
             --build-arg NEXT_PUBLIC_USE_MOCK_CHAMADOS="false" \
             --tag $IMAGE_NAME:latest \
             --tag $IMAGE_NAME:$COMMIT_HASH \
