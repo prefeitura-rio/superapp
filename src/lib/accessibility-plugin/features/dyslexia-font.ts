@@ -2,8 +2,9 @@ const FONT_FACE_ID = 'a11y-opendyslexic-face'
 const CLASS = 'a11y-dyslexia'
 
 // jsDelivr já está liberado na CSP do projeto (font-src, script-src)
+// O pacote open-dyslexic@1.0.3 publica as fontes em otf/ (fonts/ responde 404).
 const FONT_URL =
-  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/fonts/OpenDyslexic-Regular.otf'
+  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/otf/OpenDyslexic-Regular.otf'
 
 function injectFontFace(): void {
   if (document.getElementById(FONT_FACE_ID)) return
