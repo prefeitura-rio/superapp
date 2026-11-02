@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { CourseCard } from '@/app/components/courses/courses-card'
+import type { AccessibilityTypes } from '@/types/course'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -100,12 +101,14 @@ function backgroundToken(el: Element, hover: boolean): string {
   return token
 }
 
+const ACCESSIBLE: AccessibilityTypes = 'ACESSIVEL'
+
 const baseProps = {
   courseId: 1,
   title: 'Curso de Programação',
   modality: 'PRESENCIAL',
   workload: '40h',
-  accessibility: 'ACESSIVEL',
+  accessibility: ACCESSIBLE,
   hasBolsa: true,
 }
 
