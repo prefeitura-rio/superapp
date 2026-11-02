@@ -89,8 +89,9 @@ export function CourseCard({
     ? shouldGrayscaleCourseCover(course)
     : isEnrollmentClosed
 
-  const badgeHoverClasses =
-    'group-hover:bg-terciary group-hover:text-foreground-light'
+  // DEV-162: o texto dos selos vem do CoursePillBadge (contraste AA sobre
+  // secondary e terciary); o hover só troca o fundo.
+  const badgeHoverClasses = 'group-hover:bg-terciary'
 
   // Layout horizontal: imagem à esquerda, texto à direita
   if (variant === 'horizontal') {
@@ -138,7 +139,7 @@ export function CourseCard({
             {title}
           </h3>
           {enrollmentText && (
-            <p className="text-xs text-card-2 leading-4 font-normal">
+            <p className="text-xs text-primary leading-4 font-normal">
               {enrollmentText}
             </p>
           )}
@@ -198,7 +199,7 @@ export function CourseCard({
           {title}
         </h3>
         {enrollmentText && (
-          <p className="mt-1 text-xs text-card-2 leading-4 font-normal">
+          <p className="mt-1 text-xs text-primary leading-4 font-normal">
             {enrollmentText}
           </p>
         )}
