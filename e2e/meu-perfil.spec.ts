@@ -478,7 +478,12 @@ test.describe('FAQ (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Perguntas Frequentes' })
     ).toBeVisible({ timeout: 15000 })
 
-    await expect(page.getByRole('link', { name: 'PrefRio' })).toBeVisible({
+    // Restrito ao <main> e com nome exato: os logos do cabeçalho
+    // ("PrefRio – página inicial") e do rodapé ("PrefRio") também são links
+    // com "PrefRio" no nome acessível.
+    await expect(
+      page.getByRole('main').getByRole('link', { name: 'PrefRio', exact: true })
+    ).toBeVisible({
       timeout: 10000,
     })
   })
