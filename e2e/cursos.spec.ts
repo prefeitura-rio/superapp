@@ -246,11 +246,17 @@ test.describe('Cursos — página do curso (público)', () => {
       .locator('a[href^="/servicos/cursos/confirmar-informacoes/"]')
       .first()
     const trocarTurma = page.locator('a[href$="/trocar-turma"]').first()
-    // Curso pode estar indisponível (sem CTA) — tolera ambos os estados
+    // Curso pode estar indisponível (sem CTA) — tolera ambos os estados.
+    // waitFor espera de fato (o `timeout` de isVisible() é ignorado); `.first()`
+    // porque, com os dois links na página, o `or` casaria dois elementos.
     const hasCta = await inscreverCta
       .or(trocarTurma)
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(
+        () => true,
+        () => false
+      )
     if (hasCta) {
       await expect(inscreverCta.or(trocarTurma).first()).toBeVisible()
     }
