@@ -35,8 +35,17 @@ export default function MainHeader({
       <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
         {/* Left side - Logo */}
         {logoHref ? (
-          <Link href={logoHref}>
-            <PrefLogo fill="var(--primary)" className="h-8 w-20 -ml-1" />
+          <Link
+            href={logoHref}
+            aria-label={
+              logoHref === '/' ? 'PrefRio – página inicial' : 'PrefRio'
+            }
+          >
+            <PrefLogo
+              fill="var(--primary)"
+              className="h-8 w-20 -ml-1"
+              aria-hidden="true"
+            />
           </Link>
         ) : (
           <PrefLogo fill="var(--primary)" className="h-8 w-20" />
@@ -47,6 +56,7 @@ export default function MainHeader({
           {showSearchIcon && searchUrl && (
             <Link
               href={searchUrl}
+              aria-label="Buscar"
               className="rounded-full bg-card hover:bg-secondary p-3 flex items-center justify-center"
             >
               <SearchIcon className="h-5 w-5 text-foreground" />
