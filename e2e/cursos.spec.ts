@@ -41,10 +41,15 @@ async function getFirstCourseHref(page: Page): Promise<string | null> {
     page.locator('img[alt="Oportunidades Cariocas"]').first()
   ).toBeVisible({ timeout: 15000 })
 
+  // `isVisible()` não espera (o `timeout` dele é ignorado): com os cards ainda
+  // carregando, a home parecia vazia e o teste pulava sem motivo real.
   const firstCard = page.locator(VISIBLE_COURSE_CARD).first()
   const hasCard = await firstCard
-    .isVisible({ timeout: 20000 })
-    .catch(() => false)
+    .waitFor({ state: 'visible', timeout: 20000 })
+    .then(
+      () => true,
+      () => false
+    )
   if (!hasCard) return null
 
   return firstCard.getAttribute('href')
@@ -63,8 +68,8 @@ async function collectVisibleCourseHrefs(
   await page
     .locator(VISIBLE_COURSE_CARD)
     .first()
-    .isVisible({ timeout: 20000 })
-    .catch(() => false)
+    .waitFor({ state: 'visible', timeout: 20000 })
+    .catch(() => {})
 
   const hrefs: string[] = await page
     .locator(VISIBLE_COURSE_CARD)
