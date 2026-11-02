@@ -83,21 +83,33 @@ async function collectVisibleCourseHrefs(
 /**
  * Itera cursos (da home por padrão, ou de outra URL de listagem) e retorna o
  * href do primeiro que satisfaz `isMatch` (avaliado na página do curso, após o
- * h1 aparecer). Retorna null se nenhum satisfaz — usado para exercer de fato os
- * fluxos autenticados (inscrição / troca de turma) dependentes do estado da conta.
+ * h1 e o botão de ação aparecerem). Retorna null se nenhum satisfaz — usado para
+ * exercer de fato os fluxos autenticados (inscrição / troca de turma)
+ * dependentes do estado da conta.
+ *
+ * `isMatch` deve ser uma checagem imediata (`isVisible()`): a espera pelo botão
+ * client-side já foi feita aqui, por qualquer estado dele. Esperar pelo estado
+ * procurado custaria o timeout inteiro em cada curso que não está nele — com
+ * staging sem curso inscrevível, isso estourava o timeout do teste antes do skip.
+ * `budgetMs` encerra a busca (null → skip) antes de o teste estourar.
  */
 async function findCourseHref(
   page: Page,
   isMatch: (page: Page) => Promise<boolean>,
-  opts: { url?: string; max?: number } = {}
+  opts: { url?: string; max?: number; budgetMs?: number } = {}
 ): Promise<string | null> {
+  const deadline = Date.now() + (opts.budgetMs ?? 75000)
   const hrefs = await collectVisibleCourseHrefs(page, opts)
   for (const href of hrefs) {
+    if (Date.now() > deadline) break
     await page.goto(href)
     await page
       .locator('h1')
       .first()
       .waitFor({ state: 'visible', timeout: 15000 })
+      .catch(() => {})
+    await courseActionResolvedLocator(page)
+      .waitFor({ state: 'visible', timeout: 10000 })
       .catch(() => {})
     if (await isMatch(page)) return href
   }
@@ -106,7 +118,7 @@ async function findCourseHref(
 
 // Localizadores dos estados do botão de ação da página de curso.
 // `:visible` evita pegar duplicatas ocultas; o estado é client-side
-// (useUserEnrollment), então quem consome espera com timeout generoso.
+// (useUserEnrollment): enquanto carrega, só há um skeleton.
 const enrollCtaLocator = (page: Page) =>
   page
     .locator('a[href^="/servicos/cursos/confirmar-informacoes/"]:visible')
@@ -114,19 +126,39 @@ const enrollCtaLocator = (page: Page) =>
 const trocarTurmaLocator = (page: Page) =>
   page.getByRole('link', { name: 'Trocar turma / horário' }).first()
 
-// Espera o botão de ação (client-side) resolver para o estado procurado.
-// Usa waitFor (que faz polling) — isVisible() é uma checagem imediata e não
-// aguardaria o render assíncrono do botão (useUserEnrollment).
-const isVisibleWithin = async (
-  locator: ReturnType<typeof enrollCtaLocator>
-): Promise<boolean> => {
-  try {
-    await locator.waitFor({ state: 'visible', timeout: 10000 })
-    return true
-  } catch {
-    return false
-  }
-}
+/**
+ * CTA de inscrição (link para confirmar-informacoes, ou botão "Inscreva-se" do
+ * curso de parceiro externo) ou feedback de já inscrito. Curso concluído com
+ * certificado também conta: `certificate_available` vira link e
+ * `certificate_pending` vira botão desabilitado — ver getCourseEnrollmentInfo
+ * em src/lib/course-utils.ts.
+ */
+const enrollOrEnrolledLocator = (page: Page) =>
+  page
+    .locator('a[href^="/servicos/cursos/confirmar-informacoes/"]')
+    .or(page.getByRole('button', { name: 'Inscreva-se', exact: true }))
+    .or(page.getByRole('link', { name: 'Trocar turma / horário' }))
+    .or(page.getByRole('button', { name: 'Cancelar inscrição' }))
+    .or(page.getByRole('button', { name: 'Inscrição recusada' }))
+    .or(page.getByRole('link', { name: 'Acessar certificado' }))
+    .or(page.getByRole('button', { name: 'Aguardando certificado' }))
+
+/**
+ * Qualquer estado já resolvido do botão de ação: os de `enrollOrEnrolledLocator`,
+ * os de indisponibilidade (botão desabilitado com o texto de
+ * getCourseEnrollmentInfo) ou, no curso concluído sem certificado (sem botão),
+ * o card de parabéns.
+ */
+const courseActionResolvedLocator = (page: Page) =>
+  enrollOrEnrolledLocator(page)
+    .or(
+      page.getByRole('button', {
+        name: /^(Vagas encerradas|Inscrições encerradas|Disponível em breve|Curso encerrado|Curso não está mais disponível)$/,
+      })
+    )
+    .or(page.getByText('Parabéns! Você concluiu o curso'))
+    .filter({ visible: true })
+    .first()
 
 // ---------------------------------------------------------------------------
 // HOME DE CURSOS — PÚBLICO
@@ -595,42 +627,24 @@ test.describe('Cursos — página do curso (autenticado)', () => {
   test('exibe CTA de inscrição ou feedback de já inscrito', async ({
     page,
   }) => {
-    const href = await getFirstCourseHref(page)
+    test.setTimeout(150000)
+    // Itera os cursos da home até achar um com CTA ou inscrição da conta: o 1º
+    // card pode estar legitimamente indisponível ("Vagas encerradas" etc.).
+    const href = await findCourseHref(page, p =>
+      enrollOrEnrolledLocator(p).filter({ visible: true }).first().isVisible()
+    )
     if (!href) {
-      test.skip(true, 'Home de cursos sem cards no ambiente atual')
+      test.skip(
+        true,
+        'Nenhum curso com CTA de inscrição nem inscrição desta conta no ambiente atual'
+      )
       return
     }
+
     await page.goto(href)
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
-
-    // Inscrever (link p/ confirmar-informacoes) OU já inscrito (Trocar turma /
-    // Cancelar inscrição / Inscrição recusada)
-    const inscreverCta = page.locator(
-      'a[href^="/servicos/cursos/confirmar-informacoes/"]'
-    )
-    const trocarTurma = page.getByRole('link', {
-      name: 'Trocar turma / horário',
-    })
-    const cancelar = page.getByRole('button', { name: 'Cancelar inscrição' })
-    const recusada = page.getByRole('button', { name: 'Inscrição recusada' })
-    // Curso concluído com certificado também é "feedback de já inscrito":
-    // `certificate_available` vira link e `certificate_pending` vira botão
-    // desabilitado — ver getCourseEnrollmentInfo em src/lib/course-utils.ts.
-    const acessarCertificado = page.getByRole('link', {
-      name: 'Acessar certificado',
-    })
-    const aguardandoCertificado = page.getByRole('button', {
-      name: 'Aguardando certificado',
-    })
-
     await expect(
-      inscreverCta
-        .or(trocarTurma)
-        .or(cancelar)
-        .or(recusada)
-        .or(acessarCertificado)
-        .or(aguardandoCertificado)
-        .first()
+      enrollOrEnrolledLocator(page).filter({ visible: true }).first()
     ).toBeVisible({ timeout: 20000 })
   })
 })
@@ -655,7 +669,7 @@ test.describe('Cursos — fluxo de inscrição (autenticado)', () => {
     // Itera os cursos da home até achar um inscrivível (com CTA de inscrição),
     // em vez de depender só do primeiro card (que pode já estar inscrito).
     const href = await findCourseHref(page, p =>
-      isVisibleWithin(enrollCtaLocator(p))
+      enrollCtaLocator(p).isVisible()
     )
     if (!href) {
       test.skip(
@@ -706,7 +720,7 @@ test.describe('Cursos — troca de turma (autenticado)', () => {
     // Itera os cursos até achar um em que a conta esteja inscrita
     // (approved/pending → botão "Trocar turma / horário").
     const href = await findCourseHref(page, p =>
-      isVisibleWithin(trocarTurmaLocator(p))
+      trocarTurmaLocator(p).isVisible()
     )
     if (!href) {
       test.skip(
