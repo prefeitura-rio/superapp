@@ -34,6 +34,17 @@ const candidaturaFeedbackLocator = (page: Page) =>
   )
 
 /**
+ * Card de candidatura com link para a vaga, em /minhas-candidaturas. Ancorado
+ * no h1 da página: `a[href^="/servicos/trabalho/"]` sozinho casa primeiro o
+ * link "Menu" do cabeçalho (/servicos/trabalho/menu).
+ */
+const candidaturaCardLinkLocator = (page: Page) =>
+  page
+    .getByRole('heading', { level: 1, name: 'Minhas candidaturas' })
+    .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
+    .first()
+
+/**
  * Na página da vaga (logado), espera a área de ação resolver — botão
  * "Candidatar-se à vaga", card de feedback de candidatura existente ou vaga
  * encerrada — e só então diz se o botão está na tela. Esperar apenas pelo
@@ -519,24 +530,19 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
   }) => {
     await page.goto('/servicos/trabalho/minhas-candidaturas')
 
-    const hasCandidaturas = await isVisibleWithin(
-      page.locator('a[href^="/servicos/trabalho/"]').first(),
-      10000
-    )
+    const firstCandidaturaLink = candidaturaCardLinkLocator(page)
+    const hasCandidaturas = await isVisibleWithin(firstCandidaturaLink, 10000)
 
     if (!hasCandidaturas) return
 
-    const firstCandidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
+    const vagaHref = await firstCandidaturaLink.getAttribute('href')
     await firstCandidaturaLink.click()
-    await page.waitForURL('**/servicos/trabalho/**', { timeout: 15000 })
+    await page.waitForURL(`**${vagaHref}`, { timeout: 15000 })
 
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
-    const feedbackCard = page.getByText(
-      /Sua inscrição foi enviada|Parabéns!|Não foi possível seguir|não pôde ser aprovada|Página não encontrada/,
-      { exact: false }
+    const feedbackCard = candidaturaFeedbackLocator(page).or(
+      page.getByText('Página não encontrada', { exact: false })
     )
     await expect(feedbackCard.first()).toBeVisible({ timeout: 10000 })
   })
@@ -1480,9 +1486,7 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const candidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
+    const candidaturaLink = candidaturaCardLinkLocator(page)
     const isVisible = await isVisibleWithin(candidaturaLink, 10000)
 
     if (!isVisible) return
@@ -1499,9 +1503,7 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const candidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
+    const candidaturaLink = candidaturaCardLinkLocator(page)
     const isVisible = await isVisibleWithin(candidaturaLink, 10000)
 
     if (!isVisible) return
