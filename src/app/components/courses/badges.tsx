@@ -65,7 +65,7 @@ function CoursePillBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 bg-card rounded-full px-2 py-0.5 text-xs text-foreground-light transition-colors duration-200',
+        'inline-flex items-center gap-1 bg-card rounded-full px-2 py-0.5 text-xs text-terciary-foreground dark:text-foreground-light transition-colors duration-200',
         className
       )}
     >
