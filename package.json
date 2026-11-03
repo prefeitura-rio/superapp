@@ -79,7 +79,7 @@
     "react-hook-form": "^7.57.0",
     "react-hot-toast": "^2.5.2",
     "react-markdown": "^10.1.0",
-    "react-pdf": "^10.4.1",
+    "react-pdf": "^11.0.0",
     "react-photo-view": "^1.2.7",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.3",
