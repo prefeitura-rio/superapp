@@ -1,5 +1,9 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
+import WalletLoading from '@/app/(app)/(logged-in)/carteira/(carteira)/loading'
+import Wallet from '@/app/(app)/(logged-in)/carteira/(carteira)/page'
+import { PetNotFound } from '@/app/(app)/(logged-in)/carteira/pet/[slug]/pet-not-found'
+import PrivateLayout from '@/app/(app)/(logged-in)/layout'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
@@ -42,9 +46,6 @@ vi.mock('@/app/components/float-navigation-wrapper', () => ({
 }))
 
 async function renderInLoggedInLayout(page: ReactElement) {
-  const { default: PrivateLayout } = await import(
-    '@/app/(app)/(logged-in)/layout'
-  )
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
@@ -74,9 +75,6 @@ describe('DEV-81 — um único landmark <main> em /carteira', () => {
   })
 
   it('/carteira (página real) tem um único <main> com o conteúdo dentro dele', async () => {
-    const { default: Wallet } = await import(
-      '@/app/(app)/(logged-in)/carteira/(carteira)/page'
-    )
     const { container } = await renderInLoggedInLayout(<Wallet />)
 
     expectSingleMain(container)
@@ -84,18 +82,12 @@ describe('DEV-81 — um único landmark <main> em /carteira', () => {
   })
 
   it('/carteira (loading) tem um único <main>', async () => {
-    const { default: WalletLoading } = await import(
-      '@/app/(app)/(logged-in)/carteira/(carteira)/loading'
-    )
     const { container } = await renderInLoggedInLayout(<WalletLoading />)
 
     expectSingleMain(container)
   })
 
   it('/carteira/pet/[slug] (pet não encontrado) tem um único <main>', async () => {
-    const { PetNotFound } = await import(
-      '@/app/(app)/(logged-in)/carteira/pet/[slug]/pet-not-found'
-    )
     const { container } = await renderInLoggedInLayout(<PetNotFound />)
 
     expectSingleMain(container)

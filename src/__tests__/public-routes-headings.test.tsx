@@ -1,3 +1,8 @@
+import Home from '@/app/(app)/(logged-in-out)/(home)/page'
+import { SearchPage } from '@/app/(app)/(logged-in-out)/busca/search-page'
+import ServicesPage from '@/app/(app)/(logged-in-out)/servicos/(main)/page'
+import CoursePageClient from '@/app/components/courses/courses-client'
+import { EmpregosPageClient } from '@/app/components/empregos/empregos-page-client'
 import type { VagaCardData } from '@/app/components/empregos/vaga-card'
 import type { CoursesPageResult } from '@/lib/courses-list-query'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -145,9 +150,6 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
   })
 
   it('/ tem um único H1 e a seção Serviços é H2', async () => {
-    const { default: Home } = await import(
-      '@/app/(app)/(logged-in-out)/(home)/page'
-    )
     const { container } = renderWithQuery(await Home())
 
     // HomeCategoriesGrid mostra um skeleton até montar no cliente.
@@ -178,9 +180,6 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
   })
 
   it('/busca tem landmark main e um único H1', async () => {
-    const { SearchPage } = await import(
-      '@/app/(app)/(logged-in-out)/busca/search-page'
-    )
     const { container } = renderWithQuery(
       <SearchPage cartaServicosEnabled={false} />
     )
@@ -192,18 +191,12 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
   })
 
   it('/servicos tem um único H1', async () => {
-    const { default: ServicesPage } = await import(
-      '@/app/(app)/(logged-in-out)/servicos/(main)/page'
-    )
     const { container } = renderWithQuery(await ServicesPage())
 
     expectSequentialOutline(container, 'Serviços')
   })
 
   it('/servicos/cursos tem um único H1 e as seções são H2 (cards em H3)', async () => {
-    const { default: CoursePageClient } = await import(
-      '@/app/components/courses/courses-client'
-    )
     const initialCoursesPage: CoursesPageResult = {
       courses: [{ id: 1, title: 'Curso sintético' }],
       pagination: { page: 1, limit: 12, total: 1, total_pages: 1 },
@@ -224,9 +217,6 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
   })
 
   it('/servicos/cursos sem cursos também tem o H1', async () => {
-    const { default: CoursePageClient } = await import(
-      '@/app/components/courses/courses-client'
-    )
     const { container } = renderWithQuery(
       <CoursePageClient
         initialCoursesPage={{ courses: [] }}
@@ -238,9 +228,6 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
   })
 
   it('/servicos/trabalho tem um único H1 e as seções são H2 (cards em H3)', async () => {
-    const { EmpregosPageClient } = await import(
-      '@/app/components/empregos/empregos-page-client'
-    )
     const vaga: VagaCardData = {
       id: 'vaga-1',
       titulo: 'Vaga sintética',
