@@ -377,7 +377,7 @@ select:-webkit-autofill:focus {
   --terciary: #3f3f46;
   --terciary-foreground: #737373;
   --muted: #57534d;
-  --muted-foreground: #737373;
+  --muted-foreground: #a1a1a1;
   --accent: #f1f5f9;
   --accent-foreground: #0f172b;
   --destructive: #fb2c36;
