@@ -1,5 +1,12 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
+import CoursesLoading from '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/loading'
+import CoursesPage from '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/page'
+import ServicosLayout from '@/app/(app)/(logged-in-out)/servicos/(servicos)/layout'
+import EmpregosLoading from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/loading'
+import EmpregosPage from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/page'
+import CoursePageClient from '@/app/components/courses/courses-client'
+import { EmpregosPageClient } from '@/app/components/empregos/empregos-page-client'
 import type { VagaCardData } from '@/app/components/empregos/vaga-card'
 import type { CoursesPageResult } from '@/lib/courses-list-query'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -83,11 +90,8 @@ function renderWithQuery(ui: ReactElement) {
   )
 }
 
-async function renderInServicosLayout(route: string, page: ReactElement) {
+function renderInServicosLayout(route: string, page: ReactElement) {
   pathname.current = route
-  const { default: ServicosLayout } = await import(
-    '@/app/(app)/(logged-in-out)/servicos/(servicos)/layout'
-  )
   return renderWithQuery(<ServicosLayout>{page}</ServicosLayout>)
 }
 
@@ -112,31 +116,22 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
     vi.unstubAllGlobals()
   })
 
-  // Primeiro teste do arquivo: paga o import a frio do layout e da página
-  // (~4–5 s em máquina lenta), colado no timeout padrão de 5 s do Vitest.
-  // Os demais reaproveitam os módulos e rodam em milissegundos.
   it('/servicos/cursos (página real, sem cursos) tem um único <main>', async () => {
-    const { default: CoursesPage } = await import(
-      '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/page'
-    )
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/cursos',
       await CoursesPage()
     )
 
     expect(container.querySelector('h1')).toHaveTextContent('Cursos')
     expectSingleMain(container)
-  }, 20_000)
+  })
 
   it('/servicos/cursos (com cursos) tem um único <main> e o H1 dentro dele', async () => {
-    const { default: CoursePageClient } = await import(
-      '@/app/components/courses/courses-client'
-    )
     const initialCoursesPage: CoursesPageResult = {
       courses: [{ id: 1, title: 'Curso sintético' }],
       pagination: { page: 1, limit: 12, total: 1, total_pages: 1 },
     }
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/cursos',
       <CoursePageClient
         initialCoursesPage={initialCoursesPage}
@@ -152,22 +147,16 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
   })
 
   it('/servicos/cursos (loading) tem um único <main>', async () => {
-    const { default: Loading } = await import(
-      '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/loading'
-    )
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/cursos',
-      <Loading />
+      <CoursesLoading />
     )
 
     expectSingleMain(container)
   })
 
   it('/servicos/trabalho (página real) tem um único <main> e o H1 dentro dele', async () => {
-    const { default: EmpregosPage } = await import(
-      '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/page'
-    )
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/trabalho',
       await EmpregosPage()
     )
@@ -177,16 +166,13 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
   })
 
   it('/servicos/trabalho (com vagas) tem um único <main>', async () => {
-    const { EmpregosPageClient } = await import(
-      '@/app/components/empregos/empregos-page-client'
-    )
     const vaga: VagaCardData = {
       id: 'vaga-1',
       titulo: 'Vaga sintética',
       empresaNome: 'Empresa Exemplo',
       badges: [],
     }
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/trabalho',
       <EmpregosPageClient recentVagas={[vaga, { ...vaga, id: 'vaga-2' }]} />
     )
@@ -198,12 +184,9 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
   })
 
   it('/servicos/trabalho (loading) tem um único <main>', async () => {
-    const { default: Loading } = await import(
-      '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/loading'
-    )
-    const { container } = await renderInServicosLayout(
+    const { container } = renderInServicosLayout(
       '/servicos/trabalho',
-      <Loading />
+      <EmpregosLoading />
     )
 
     expectSingleMain(container)
