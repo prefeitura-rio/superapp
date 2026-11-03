@@ -40,17 +40,33 @@ test.describe('Dívida Ativa', () => {
     ).toBeVisible()
   })
 
-  test('serviços ainda não construídos explicam a situação em vez de dar 404', async ({
+  // O parcelamento deixou de ser o estado provisório "em construção": o primeiro passo
+  // é escolher por qual número consultar. Sem `?modo=` a página não chama a API, então
+  // o teste não depende de `BASE_API_URL_DIVIDA_ATIVA`.
+  test('Parcelar débitos abre a escolha do número de consulta', async ({
     page,
   }) => {
-    await page.goto('/divida-ativa/parcelamento')
+    await page.goto('/divida-ativa')
+    await page.getByRole('link', { name: 'Parcelar débitos' }).click()
+    await page.waitForURL('**/divida-ativa/parcelamento', { timeout: 20000 })
 
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Parcelar débitos' })
+      page.getByRole('heading', {
+        level: 1,
+        name: 'Selecione uma das informações para consulta',
+      })
     ).toBeVisible({ timeout: 20000 })
-    await expect(
-      page.getByRole('link', { name: 'Voltar a página de Dívida ativa' })
-    ).toBeVisible()
+
+    for (const [nome, modo] of [
+      ['N° da Inscrição Imobiliária', 'inscricao'],
+      ['N° da Certidão de Dívida Ativa', 'cda'],
+      ['N° da Execução Fiscal', 'execucao-fiscal'],
+    ] as const) {
+      await expect(page.getByRole('link', { name: nome })).toHaveAttribute(
+        'href',
+        `/divida-ativa/parcelamento?modo=${modo}`
+      )
+    }
   })
 
   test('cidadão chega à lista de imóveis a partir da landing', async ({

@@ -9,6 +9,7 @@ import {
   UsersIcon,
 } from '@/assets/icons'
 import { cn } from '@/lib/utils'
+import { getVagaPath } from '@/lib/vaga-slug'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -27,6 +28,8 @@ export interface VagaBadge {
 
 export interface VagaCardData {
   id: string
+  /** Slug de SEO da vaga (`<titulo>-<hex>`), usado na URL de detalhe */
+  slug?: string
   titulo: string
   empresaNome: string
   empresaLogo?: string
@@ -116,7 +119,7 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
 
   return (
     <Link
-      href={`/servicos/trabalho/${vaga.id}`}
+      href={getVagaPath(vaga)}
       className={cn(
         'flex flex-col transition-opacity hover:opacity-90 overflow-hidden min-h-0',
         isRecent &&

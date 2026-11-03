@@ -54,7 +54,7 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <main className="max-w-4xl mx-auto text-foreground pb-10">
+      <div className="max-w-4xl mx-auto text-foreground pb-10">
         {showMini && (
           <>
             <div
@@ -137,7 +137,7 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
           }
         }
       `}</style>
-      </main>
+      </div>
     </>
   )
 }

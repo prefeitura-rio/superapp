@@ -1,6 +1,22 @@
 import {
+  cdaParaApi,
+  formatarCda,
+  formatarCep,
+  formatarCnpj,
+  formatarCpf,
+  formatarExecucaoFiscal,
   formatarInscricaoImobiliaria,
+  formatarTelefone,
+  formatarValorBRL,
+  inscricaoParaApi,
+  isCdaValida,
+  isCnpjValido,
+  isCpfValido,
+  isExecucaoFiscalValida,
+  isTelefoneValido,
+  rotuloNatureza,
   somenteDigitos,
+  urlPdfDaPrefeitura,
 } from '@/lib/divida-ativa-utils'
 import { describe, expect, test } from 'vitest'
 
@@ -45,5 +61,272 @@ describe('formatarInscricaoImobiliaria', () => {
 
   test('returns an empty string for an empty value', () => {
     expect(formatarInscricaoImobiliaria('')).toBe('')
+  })
+})
+
+describe('formatarExecucaoFiscal', () => {
+  /**
+   * Número único do CNJ: `NNNNNNN-DD.AAAA.J.TR.OOOO`, até 20 dígitos. É o que o cidadão copia
+   * da citação da Justiça, e ele já vem pontuado de lá — por isso a máscara precisa aceitar o
+   * valor colado inteiro sem duplicar separador.
+   */
+  test('aplica a máscara CNJ nos 20 dígitos', () => {
+    expect(formatarExecucaoFiscal('00123456720248190001')).toBe(
+      '0012345-67.2024.8.19.0001'
+    )
+  })
+
+  // O sequencial costuma vir sem os zeros à esquerda; a cauda do CNJ é que é fixa.
+  test('aplica a máscara CNJ pela direita quando faltam os zeros do sequencial', () => {
+    expect(formatarExecucaoFiscal('4236809220108190001')).toBe(
+      '423680-92.2010.8.19.0001'
+    )
+    expect(formatarExecucaoFiscal('123456720248190001')).toBe(
+      '12345-67.2024.8.19.0001'
+    )
+  })
+
+  test('aplica a máscara antiga do TJRJ nos 14 dígitos', () => {
+    expect(formatarExecucaoFiscal('20001200007061')).toBe('2000.120.000706-1')
+  })
+
+  test('deixa sem máscara enquanto não dá para saber o formato', () => {
+    expect(formatarExecucaoFiscal('0012345')).toBe('0012345')
+    expect(formatarExecucaoFiscal('0012345672024')).toBe('0012345672024')
+  })
+
+  // O número colado da citação já vem pontuado.
+  test('reaplica a máscara sobre um valor já formatado', () => {
+    expect(formatarExecucaoFiscal('0012345-67.2024.8.19.0001')).toBe(
+      '0012345-67.2024.8.19.0001'
+    )
+    expect(formatarExecucaoFiscal('2000.120.000706-1')).toBe(
+      '2000.120.000706-1'
+    )
+  })
+
+  test('descarta dígito excedente', () => {
+    expect(formatarExecucaoFiscal('001234567202481900019999')).toBe(
+      '0012345-67.2024.8.19.0001'
+    )
+  })
+})
+
+describe('isExecucaoFiscalValida', () => {
+  test('aceita o CNJ completo, com ou sem máscara', () => {
+    expect(isExecucaoFiscalValida('0012345-67.2024.8.19.0001')).toBe(true)
+    expect(isExecucaoFiscalValida('00123456720248190001')).toBe(true)
+  })
+
+  test('aceita o CNJ sem os zeros à esquerda do sequencial', () => {
+    expect(isExecucaoFiscalValida('4236809220108190001')).toBe(true)
+    expect(isExecucaoFiscalValida('423680-92.2010.8.19.0001')).toBe(true)
+  })
+
+  test('aceita o formato antigo do TJRJ, com 14 dígitos', () => {
+    expect(isExecucaoFiscalValida('20001200007061')).toBe(true)
+    expect(isExecucaoFiscalValida('2000.120.000706-1')).toBe(true)
+  })
+
+  test('recusa menos de 14 ou mais de 20 dígitos', () => {
+    expect(isExecucaoFiscalValida('2000120000706')).toBe(false)
+    expect(isExecucaoFiscalValida('001234567202481900012')).toBe(false)
+    expect(isExecucaoFiscalValida('')).toBe(false)
+  })
+})
+
+describe('isCdaValida', () => {
+  test('aceita a CDA com ou sem o sufixo depois do hífen', () => {
+    expect(isCdaValida('01/021580/2003')).toBe(true)
+    expect(isCdaValida('01/021580/2003-00')).toBe(true)
+    expect(isCdaValida('01021580200300')).toBe(true)
+  })
+
+  test('recusa o sufixo pela metade, que o DAM não acha', () => {
+    expect(isCdaValida('01/021580/2003-0')).toBe(false)
+  })
+
+  test('recusa número sem o ano completo', () => {
+    expect(isCdaValida('01/021580/200')).toBe(false)
+    expect(isCdaValida('')).toBe(false)
+    expect(isCdaValida('abc')).toBe(false)
+  })
+})
+
+describe('formatarValorBRL', () => {
+  test('formata no padrão do Figma, sem espaço depois do cifrão', () => {
+    expect(formatarValorBRL(1534.21)).toBe('R$1.534,21')
+    expect(formatarValorBRL(1765.41)).toBe('R$1.765,41')
+  })
+
+  test('sempre com duas casas decimais', () => {
+    expect(formatarValorBRL(1200)).toBe('R$1.200,00')
+    expect(formatarValorBRL(0.5)).toBe('R$0,50')
+  })
+
+  /**
+   * Zero é um saldo — a CDA quitada existe e vale R$0,00. Ausência é outra coisa, e a tela
+   * omite a linha em vez de afirmar que não há dívida (premissa P1).
+   */
+  test('distingue saldo zero de valor ausente', () => {
+    expect(formatarValorBRL(0)).toBe('R$0,00')
+    expect(formatarValorBRL(null)).toBeNull()
+  })
+
+  test('não deixa NaN chegar à tela', () => {
+    expect(formatarValorBRL(Number.NaN)).toBeNull()
+    expect(formatarValorBRL(Number.POSITIVE_INFINITY)).toBeNull()
+  })
+})
+
+describe('inscricaoParaApi', () => {
+  /**
+   * A razão de existir. O carnê traz 7 dígitos; o cadastro da API guarda 8, com o zero à
+   * esquerda (premissa P21, e é o que a decisão D7 exibe). O endpoint de débitos leva a
+   * inscrição no path e **não** documenta a normalização que o `/consulta` promete — sem
+   * completar aqui, os 7 dígitos digitados não casam com o registro de 8 e a API responde 404.
+   */
+  test('completa com zero à esquerda até as 8 posições da API', () => {
+    expect(inscricaoParaApi('5217663')).toBe('05217663')
+    expect(inscricaoParaApi('18')).toBe('00000018')
+  })
+
+  test('deixa intacta a inscrição que já tem 8 dígitos', () => {
+    expect(inscricaoParaApi('05217663')).toBe('05217663')
+    expect(inscricaoParaApi('06666929')).toBe('06666929')
+  })
+
+  /** Máscara é exibição, nunca transporte — vale aqui como no resto do módulo. */
+  test('descarta a máscara antes de completar', () => {
+    expect(inscricaoParaApi('521.766-3')).toBe('05217663')
+    expect(inscricaoParaApi('0.521.766-3')).toBe('05217663')
+  })
+
+  /**
+   * Nada de truncar: um valor longo demais é erro de quem chamou, e cortar dígitos mandaria
+   * à API uma inscrição de outro imóvel — pior que um 404 honesto.
+   */
+  test('não mexe em valor maior que 8 dígitos', () => {
+    expect(inscricaoParaApi('123456789')).toBe('123456789')
+  })
+})
+
+describe('formatarCda', () => {
+  test('aplica a máscara da carta da PGM, com o sufixo quando há', () => {
+    expect(formatarCda('01021580200300')).toBe('01/021580/2003-00')
+    expect(formatarCda('010215802003')).toBe('01/021580/2003')
+  })
+
+  test('mascara progressivamente, sem separador sobrando no fim', () => {
+    expect(formatarCda('01')).toBe('01')
+    expect(formatarCda('010')).toBe('01/0')
+    expect(formatarCda('01021580')).toBe('01/021580')
+    expect(formatarCda('010215802')).toBe('01/021580/2')
+    expect(formatarCda('0102158020030')).toBe('01/021580/2003-0')
+  })
+
+  test('tolera o número colado pontuado e corta o excesso', () => {
+    expect(formatarCda('01/021580/2003-00')).toBe('01/021580/2003-00')
+    expect(formatarCda('010215802003009')).toBe('01/021580/2003-00')
+  })
+})
+
+describe('cdaParaApi', () => {
+  test('envia a CDA com barras e hífen, para a API achar o ano', () => {
+    expect(cdaParaApi('01021580200300')).toBe('01/021580/2003-00')
+    expect(cdaParaApi('010215802003')).toBe('01/021580/2003')
+  })
+})
+
+describe('rotuloNatureza', () => {
+  test('takes the part before the slash as the card title', () => {
+    expect(rotuloNatureza('IPTU/Taxas - Predial')).toBe('IPTU')
+  })
+
+  test('keeps the whole description when there is no slash', () => {
+    expect(rotuloNatureza('TCL - Taxa de Coleta de Lixo')).toBe(
+      'TCL - Taxa de Coleta de Lixo'
+    )
+  })
+
+  test('returns null when there is nothing to show', () => {
+    expect(rotuloNatureza(null)).toBeNull()
+    expect(rotuloNatureza('  ')).toBeNull()
+  })
+})
+
+describe('dados do requerente e de correspondência', () => {
+  test('máscaras progressivas de CPF, CNPJ, telefone e CEP', () => {
+    expect(formatarCpf('5294')).toBe('529.4')
+    expect(formatarCpf('52998224725')).toBe('529.982.247-25')
+    expect(formatarCnpj('112223')).toBe('11.222.3')
+    expect(formatarCnpj('11222333000181')).toBe('11.222.333/0001-81')
+    expect(formatarTelefone('21')).toBe('(21')
+    expect(formatarTelefone('212345')).toBe('(21) 2345')
+    expect(formatarTelefone('2123456789')).toBe('(21) 2345-6789')
+    expect(formatarTelefone('21987654321')).toBe('(21) 98765-4321')
+    expect(formatarCep('20541')).toBe('20541')
+    expect(formatarCep('20541190')).toBe('20541-190')
+  })
+
+  test('CPF: verificadores e sequências repetidas', () => {
+    expect(isCpfValido('529.982.247-25')).toBe(true)
+    expect(isCpfValido('529.982.247-24')).toBe(false)
+    expect(isCpfValido('111.111.111-11')).toBe(false)
+    expect(isCpfValido('5299822472')).toBe(false)
+  })
+
+  test('CNPJ: verificadores e sequências repetidas', () => {
+    expect(isCnpjValido('11.222.333/0001-81')).toBe(true)
+    expect(isCnpjValido('11.222.333/0001-80')).toBe(false)
+    expect(isCnpjValido('00.000.000/0000-00')).toBe(false)
+  })
+
+  test('telefone: fixo com 10 dígitos, celular com 11 começando por 9', () => {
+    expect(isTelefoneValido('(21) 2345-6789')).toBe(true)
+    expect(isTelefoneValido('(21) 98765-4321')).toBe(true)
+    expect(isTelefoneValido('(21) 88765-4321')).toBe(false)
+    expect(isTelefoneValido('(21) 2345-678')).toBe(false)
+  })
+})
+
+describe('urlPdfDaPrefeitura', () => {
+  test('aceita o DAM Internet de produção e de homologação', () => {
+    expect(
+      urlPdfDaPrefeitura('https://daminternet.rio.rj.gov.br/repo/guia.pdf')
+    ).toBe('https://daminternet.rio.rj.gov.br/repo/guia.pdf')
+    expect(
+      urlPdfDaPrefeitura('https://daminternethom.rio.rj.gov.br/repo/c.pdf?t=1')
+    ).toBe('https://daminternethom.rio.rj.gov.br/repo/c.pdf?t=1')
+  })
+
+  test('aceita o próprio domínio da Prefeitura', () => {
+    expect(urlPdfDaPrefeitura('https://rio.rj.gov.br/a.pdf')).toBe(
+      'https://rio.rj.gov.br/a.pdf'
+    )
+  })
+
+  test.each([
+    ['host de fora', 'https://exemplo.com/guia.pdf'],
+    ['sufixo sem ponto', 'https://evilrio.rj.gov.br/guia.pdf'],
+    [
+      'domínio da Prefeitura como prefixo',
+      'https://rio.rj.gov.br.evil.com/a.pdf',
+    ],
+    ['http', 'http://daminternet.rio.rj.gov.br/guia.pdf'],
+    ['javascript:', 'javascript:alert(1)'],
+    [
+      'credenciais na URL',
+      'https://x@evil.com@daminternet.rio.rj.gov.br/a.pdf',
+    ],
+    ['texto que não é URL', 'guia.pdf'],
+  ])('recusa %s', (_caso, url) => {
+    expect(urlPdfDaPrefeitura(url)).toBeNull()
+  })
+
+  test('vazio ou ausente é null', () => {
+    expect(urlPdfDaPrefeitura('')).toBeNull()
+    expect(urlPdfDaPrefeitura(undefined)).toBeNull()
+    expect(urlPdfDaPrefeitura(null)).toBeNull()
   })
 })

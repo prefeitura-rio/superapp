@@ -12,10 +12,19 @@ import { getApiPublicCourses } from '@/http-courses/courses/courses'
 import { getApiV1CoursesCourseIdEnrollments } from '@/http-courses/inscricoes/inscricoes'
 import type { GetApiPublicCoursesParams } from '@/http-courses/models'
 import {
+  getDividaAtivaDatasVencimento,
+  getDividaAtivaRequerimentos,
+  postDividaAtivaAvistaSimular,
+  postDividaAtivaConsultar,
+  postDividaAtivaParcelamentosSimular,
+} from '@/http-divida-ativa/divida-ativa-requerimentos/divida-ativa-requerimentos'
+import { getImoveisInscricaoDividaAtiva } from '@/http-divida-ativa/divida-ativa/divida-ativa'
+import {
   getImoveis,
   getImoveisInscricaoCadastro,
   getImoveisInscricaoConsulta,
 } from '@/http-divida-ativa/imoveis/imoveis'
+import type { ConsultaFiltroRequest } from '@/http-divida-ativa/models'
 import { getAvatars, getCitizenCpfAvatar } from '@/http/avatars/avatars'
 import {
   getCitizenCpf,
@@ -24,16 +33,68 @@ import {
   getCitizenCpfWallet,
 } from '@/http/citizen/citizen'
 import {
+  mapApiToDebitos,
   mapApiToImovel,
+  mapApiToMensagemErro,
+  mapApiToRequerimento,
   mapFazendaToImovel,
+  mensagemDaListaDeRequerimentos,
   normalizarConsultaFazenda,
   normalizarListaImoveis,
+  normalizarListaRequerimentos,
+  parseValorMonetario,
 } from '@/lib/divida-ativa-mappers'
-import { somenteDigitos } from '@/lib/divida-ativa-utils'
+import {
+  cdaParaApi,
+  inscricaoParaApi,
+  somenteDigitos,
+} from '@/lib/divida-ativa-utils'
 import { getHealthUnitInfo, getHealthUnitRisk } from '@/lib/health-unit'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
-import type { ImovelDividaAtiva } from '@/types/divida-ativa'
+import type {
+  ConsultaDebitos,
+  ConsultaRequerimentos,
+  CriterioDebitos,
+  DebitosDividaAtiva,
+  ImovelDividaAtiva,
+  ResultadoRevisaoPagamento,
+  ResultadoSimulacao,
+} from '@/types/divida-ativa'
 import { revalidateTag, unstable_cache } from 'next/cache'
+
+/**
+ * Dados de exemplo da dívida ativa no lugar de um erro da API — **só com opt-in**.
+ *
+ * Antes a troca era automática em dev, e uma consulta que falhava em hom aparecia na tela
+ * como débitos "bonitos demais", sem nenhum sinal de erro: era impossível saber se a API
+ * respondia. Agora o erro real aparece, e quem precisa navegar o fluxo sem a API liga
+ * `DIVIDA_ATIVA_DEV_FIXTURES=true` no `.env`.
+ */
+async function fixtureDeDesenvolvimento(): Promise<ConsultaDebitos | null> {
+  if (
+    process.env.NODE_ENV !== 'development' ||
+    process.env.DIVIDA_ATIVA_DEV_FIXTURES !== 'true'
+  ) {
+    return null
+  }
+
+  const { DEV_FIXTURE_DEBITOS } = await import(
+    '@/lib/divida-ativa-dev-fixtures'
+  )
+  console.warn(
+    '[DAL_DIVIDA_ATIVA] DIVIDA_ATIVA_DEV_FIXTURES ligado — usando fixture de desenvolvimento.'
+  )
+  return { situacao: 'ok', debitos: mapApiToDebitos(DEV_FIXTURE_DEBITOS) }
+}
+
+/** Mensagem de erro da API para o log — o texto do sistema, nunca o número consultado. */
+function motivoDoErro(data: unknown): string {
+  const erro =
+    typeof data === 'object' && data !== null
+      ? (data as { error?: unknown }).error
+      : undefined
+  return typeof erro === 'string' && erro !== '' ? `: ${erro}` : ''
+}
 
 // Recommended caching strategy for high traffic (500K+ users/month)
 // 30-minute cache provides optimal balance of performance and data freshness
@@ -602,7 +663,7 @@ export async function getDalDividaAtivaConsultaInscricao(
 
     // O segundo parâmetro é o `exercicio` da query string, que não usamos aqui.
     const result = await getImoveisInscricaoConsulta(
-      somenteDigitos(inscricao),
+      inscricaoParaApi(inscricao),
       undefined,
       { cache: 'no-store' }
     )
@@ -614,5 +675,432 @@ export async function getDalDividaAtivaConsultaInscricao(
     if (result.status !== 200 || !result.data?.imovel) return null
 
     return mapApiToImovel(result.data.imovel)
+  })
+}
+
+/**
+ * Consulta os débitos de dívida ativa de um imóvel: CDAs não parceladas, guias já
+ * parceladas e os totais que o legado exibia nos dois datagrids da tela T04.
+ *
+ * ⚠️ **Exige o imóvel cadastrado em "Meus Imóveis"** — a inscrição vai no path e a API
+ * autoriza por imóvel do CPF autenticado, respondendo 404 para inscrição que o cidadão não
+ * cadastrou. Quem chega com a carta da PGM na mão e não tem cadastro passa pela consulta
+ * avulsa (`POST /divida-ativa/consultar`), que é somente leitura — outra função, outra tela.
+ *
+ * ⚠️ **Custo.** Esta chamada atravessa o ePortal; medimos 16 s na consulta por inscrição,
+ * que percorre o mesmo caminho. A rota precisa de `loading.tsx` com skeleton.
+ *
+ * Devolve `null` para qualquer resposta que não seja 200 — inscrição não cadastrada (404),
+ * 401 ou indisponibilidade do ePortal (503). "Sem débito" **não** é `null`: é uma resposta
+ * 200 com listas vazias e uma `mensagem` amigável, e a tela tem estado próprio para isso.
+ */
+export async function getDalDividaAtivaDebitos(
+  inscricao: string,
+  cpf: string
+): Promise<ConsultaDebitos> {
+  return withSpan('dal.getDividaAtivaDebitos', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getImoveisInscricaoDividaAtiva(
+      inscricaoParaApi(inscricao),
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.debitos.fetched', {
+      'debitos.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      // O span cobre produção, mas o tracing fica desligado em dev — e uma chamada de 16 s
+      // que falha em silêncio custa caro para diagnosticar. Só o status: o número consultado
+      // é dado financeiro do cidadão e não entra em log.
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /imoveis/{inscricao}/divida-ativa respondeu ${result.status} ` +
+          `(inscricao com ${inscricaoParaApi(inscricao).length} digitos)`
+      )
+
+      // Este endpoint exige o imóvel cadastrado, então o 404 dele é do **recurso**: a
+      // inscrição não está em Meus Imóveis. É acionável pelo cidadão — cadastrar resolve —
+      // ao contrário de qualquer outra falha, em que não há o que ele corrija.
+      if (result.status === 404) {
+        return { situacao: 'nao-cadastrado' }
+      }
+
+      return (await fixtureDeDesenvolvimento()) ?? { situacao: 'indisponivel' }
+    }
+
+    const debitos = mapApiToDebitos(result.data)
+
+    addSpanEvent('divida-ativa.debitos.mapped', {
+      'debitos.cdas': debitos.cdas.length,
+      'debitos.guias': debitos.guiasParceladas.length,
+      'debitos.total': debitos.totalDebitos,
+    })
+
+    return { situacao: 'ok', debitos }
+  })
+}
+
+/**
+ * Traduz o critério da tela para o corpo que `POST /divida-ativa/consultar` espera.
+ *
+ * Monta **um campo só**, e não um objeto com três opcionais: a API consulta por critério
+ * único (RN-001/RN-002), e `JSON.stringify` omitiria os `undefined` de qualquer forma — mas
+ * aí o "único" seria acidente de serialização em vez de garantia. Só dígitos, exceto a CDA,
+ * que vai com barras para a API saber onde está o ano (`cdaParaApi`).
+ */
+function criterioParaFiltro(criterio: CriterioDebitos): ConsultaFiltroRequest {
+  const digitos = somenteDigitos(criterio.valor)
+
+  switch (criterio.tipo) {
+    case 'inscricao':
+      return { numInscricao: inscricaoParaApi(criterio.valor) }
+    case 'cda':
+      return { numCda: cdaParaApi(criterio.valor) }
+    case 'execucao-fiscal':
+      return { numExecucaoFiscal: digitos }
+  }
+}
+
+/**
+ * Consulta avulsa de débitos por inscrição, CDA ou execução fiscal.
+ *
+ * Complementa `getDalDividaAtivaDebitos`, que só serve o modo inscrição **e** exige o imóvel
+ * cadastrado em Meus Imóveis: `GET /imoveis/{inscricao}/divida-ativa` leva a inscrição no
+ * path, e não há onde pôr uma CDA ou uma execução fiscal. Este endpoint é somente leitura e
+ * atende os três modos da tela de entrada, devolvendo a mesma `DividaAtivaConsultaResponse`
+ * — por isso o mesmo mapper e o mesmo tipo de visão.
+ *
+ * `imovelCadastrado: false` na resposta não é erro: é a via de quem chegou com a carta da
+ * PGM na mão e ainda não cadastrou o imóvel. A tela usa esse sinal para oferecer o cadastro,
+ * porque requerer parcelamento exige estar cadastrado.
+ *
+ * ⚠️ **Custo.** Atravessa o ePortal; medimos 16 s em chamada do mesmo caminho. A rota precisa
+ * de `loading.tsx` com skeleton.
+ *
+ * Devolve `null` só quando a API não responde 200. "Sem débito" é 200 com listas vazias e
+ * `mensagem` preenchida — estado de tela, não falha.
+ */
+export async function getDalDividaAtivaConsultaAvulsa(
+  criterio: CriterioDebitos,
+  cpf: string
+): Promise<ConsultaDebitos> {
+  return withSpan('dal.getDividaAtivaConsultaAvulsa', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    // O critério identifica dado financeiro do cidadão; só o tipo entra no span, nunca o valor.
+    span.setAttribute('consulta.criterio', criterio.tipo)
+
+    const result = await postDividaAtivaConsultar(
+      criterioParaFiltro(criterio),
+      {
+        cache: 'no-store',
+      }
+    )
+
+    addSpanEvent('divida-ativa.consulta-avulsa.fetched', {
+      'consulta.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      const motivo = motivoDoErro(result.data)
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/consultar respondeu ${result.status}${motivo}`
+      )
+
+      // Com a rota em homologação desde 02/10/2026, o 404 é do **recurso**: o DAM não tem
+      // dívida para o número informado. O cidadão pode conferir o número; tentar de novo o
+      // mesmo número não muda nada.
+      if (result.status === 404) {
+        return { situacao: 'nao-encontrado' }
+      }
+
+      return (await fixtureDeDesenvolvimento()) ?? { situacao: 'indisponivel' }
+    }
+
+    const debitos = mapApiToDebitos(result.data)
+
+    addSpanEvent('divida-ativa.consulta-avulsa.mapped', {
+      'debitos.cdas': debitos.cdas.length,
+      'debitos.guias': debitos.guiasParceladas.length,
+      'debitos.imovel-cadastrado': debitos.imovelCadastrado,
+    })
+
+    return { situacao: 'ok', debitos }
+  })
+}
+
+/**
+ * Datas de vencimento que o DAM aceita para a primeira parcela.
+ *
+ * A lista é a mesma para qualquer imóvel e qualquer CDA — o DAM não recebe nenhum dos dois
+ * nesta chamada —, por isso a função não leva parâmetro. Devolve `null` quando a API não
+ * responde 200, e lista vazia quando o DAM não tem data a oferecer, que a tela trata igual.
+ */
+export async function getDalDividaAtivaDatasVencimento(): Promise<
+  string[] | null
+> {
+  return withSpan('dal.getDividaAtivaDatasVencimento', async span => {
+    span.setAttribute('cache.strategy', 'no-store')
+
+    const result = await getDividaAtivaDatasVencimento(
+      { tipo: 'PARCELAMENTO' },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.datas-vencimento.fetched', {
+      'datas.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /divida-ativa/datas-vencimento respondeu ${result.status}`
+      )
+      return null
+    }
+
+    return result.data.datas ?? []
+  })
+}
+
+/**
+ * Revisão do pagamento: o que as CDAs escolhidas custam à vista — saldos, descontos e
+ * honorários por CDA, os totais e as custas judiciais (GRERJ) por execução fiscal.
+ *
+ * Sem data: a API simula com a primeira data à vista do DAM, porque a revisão vem antes de o
+ * cidadão escolher o vencimento do parcelamento. Não exige imóvel cadastrado.
+ *
+ * Os totais são os da API, não somas do front — a simulação os devolve já calculados.
+ *
+ * ⚠️ Atravessa o ePortal (reconsulta das CDAs + simulação): a rota precisa do `loading.tsx`.
+ */
+export async function getDalDividaAtivaRevisaoPagamento(
+  cdas: string[],
+  cpf: string
+): Promise<ResultadoRevisaoPagamento> {
+  return withSpan('dal.getDividaAtivaRevisaoPagamento', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    span.setAttribute('revisao.cdas', cdas.length)
+
+    const result = await postDividaAtivaAvistaSimular(
+      { cdas },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.revisao.fetched', {
+      'revisao.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/avista/simular respondeu ${result.status}`
+      )
+
+      const mensagem = mapApiToMensagemErro(result.data, result.status)
+      return mensagem
+        ? { situacao: 'recusada', mensagem }
+        : { situacao: 'indisponivel' }
+    }
+
+    if (result.data.mensagemErro) {
+      return { situacao: 'recusada', mensagem: result.data.mensagemErro }
+    }
+
+    const itens = (result.data.itens ?? []).flatMap(item =>
+      item.cdaId
+        ? [
+            {
+              numeroCda: item.cdaId,
+              natureza: item.natureza || null,
+              contribuinte: item.contribuinte || null,
+              saldoPrincipal: parseValorMonetario(item.saldoPrincipal),
+              descontoPrincipal: parseValorMonetario(item.descontoPrincipal),
+              honorarios: parseValorMonetario(item.saldoHonorarios),
+              descontoHonorarios: parseValorMonetario(item.descontoHonorarios),
+            },
+          ]
+        : []
+    )
+
+    const grerjs = (result.data.grerjs ?? []).flatMap(grerj =>
+      grerj.numeroExecucaoFiscal
+        ? [
+            {
+              execucaoFiscal: grerj.numeroExecucaoFiscal,
+              valor: parseValorMonetario(grerj.valor),
+            },
+          ]
+        : []
+    )
+
+    return {
+      situacao: 'ok',
+      dataVencimento: result.data.dataVencimento || null,
+      valorTotal: parseValorMonetario(result.data.valorTotalAvista),
+      saldoPrincipalTotal: parseValorMonetario(
+        result.data.valorSaldoTotalPrincipal
+      ),
+      descontoPrincipalTotal: parseValorMonetario(
+        result.data.valorTotalDescontoPrincipal
+      ),
+      honorariosTotal: parseValorMonetario(
+        result.data.valorSaldoTotalHonorario
+      ),
+      descontoHonorariosTotal: parseValorMonetario(
+        result.data.valorTotalDescontoHonorario
+      ),
+      itens,
+      grerjs,
+    }
+  })
+}
+
+/**
+ * Opções de parcelamento para as CDAs escolhidas, com a primeira parcela vencendo em
+ * `dataVencimento`.
+ *
+ * A data vem **antes** das parcelas porque o DAM calcula as opções a partir dela: juros e
+ * descontos mudam com o vencimento, e a API recusa a simulação sem data.
+ *
+ * Não exige imóvel cadastrado — a simulação é pelas CDAs, que é o que o DAM recebe. Serve
+ * quem chegou pela inscrição, pela CDA ou pela execução fiscal.
+ *
+ * ⚠️ Atravessa o ePortal, como a consulta: a rota precisa do `loading.tsx`.
+ */
+export async function getDalDividaAtivaSimulacao(
+  cdas: string[],
+  dataVencimento: string,
+  cpf: string
+): Promise<ResultadoSimulacao> {
+  return withSpan('dal.getDividaAtivaSimulacao', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    span.setAttribute('simulacao.cdas', cdas.length)
+
+    const result = await postDividaAtivaParcelamentosSimular(
+      { cdas, dataVencimento },
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.simulacao.fetched', {
+      'simulacao.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      console.error(
+        `[DAL_DIVIDA_ATIVA] POST /divida-ativa/parcelamentos/simular respondeu ${result.status}`
+      )
+
+      const mensagem = mapApiToMensagemErro(result.data, result.status)
+      return mensagem
+        ? { situacao: 'recusada', mensagem }
+        : { situacao: 'indisponivel' }
+    }
+
+    // O DAM recusa algumas simulações com 200 e `mensagemErro` (ex.: valor sem parcela
+    // possível). É recusa com motivo, não falha de serviço.
+    if (result.data.mensagemErro) {
+      return { situacao: 'recusada', mensagem: result.data.mensagemErro }
+    }
+
+    const opcoes = (result.data.opcoes ?? []).flatMap(opcao =>
+      opcao.qtdeParcelas
+        ? [
+            {
+              qtdeParcelas: opcao.qtdeParcelas,
+              valor1aParcela: parseValorMonetario(opcao.valor1aParcela),
+              valorJuros: parseValorMonetario(opcao.valorJuros),
+              valorDescontos: parseValorMonetario(opcao.valorDescontos),
+            },
+          ]
+        : []
+    )
+
+    addSpanEvent('divida-ativa.simulacao.mapped', {
+      'simulacao.opcoes': opcoes.length,
+    })
+
+    return {
+      situacao: 'ok',
+      valorTotalAvista: parseValorMonetario(result.data.valorTotalAvista),
+      valorGrerj: parseValorMonetario(result.data.valorTotalPagarGrerj),
+      opcoes,
+    }
+  })
+}
+
+/**
+ * Requerimentos de parcelamento do cidadão — a lista do CPF ou um protocolo.
+ *
+ * Um endpoint para os dois caminhos da tela de acompanhamento: sem `protocolo`, a API
+ * lista os requerimentos do CPF do token (o DAM os devolve em ordem de chegada e a API
+ * inverte, mais recente primeiro); com `protocolo` — o número **sem o ano** —, busca um
+ * requerimento e confere se o CPF do requerente é o do token.
+ *
+ * ### "Não há" é 200
+ *
+ * Nos dois caminhos a API responde 200 mesmo sem resultado, com um item que só tem
+ * `mensagemErro`: CPF sem requerimentos, protocolo inexistente ou protocolo de outro
+ * CPF. É `vazio`, com a mensagem da API para a tela (regra de ouro nº 9: quem explica é
+ * a API). O DAM também pode devolver `[]` cru, que é `vazio` sem mensagem.
+ *
+ * `indisponivel` é o 503 do DAM fora e qualquer outra resposta que não seja 200. O 400
+ * carrega a recusa do DAM com texto (`{ error }`) e vale como `vazio` com essa mensagem:
+ * tentar de novo o mesmo protocolo não muda nada.
+ */
+export async function getDalDividaAtivaRequerimentos(
+  cpf: string,
+  protocolo?: string
+): Promise<ConsultaRequerimentos> {
+  return withSpan('dal.getDividaAtivaRequerimentos', async span => {
+    span.setAttribute('cpf.masked', `***${cpf.slice(-4)}`)
+    span.setAttribute('cache.strategy', 'no-store')
+    // O protocolo identifica um requerimento do cidadão; só a presença entra no span.
+    span.setAttribute('requerimentos.por-protocolo', Boolean(protocolo))
+
+    const result = await getDividaAtivaRequerimentos(
+      protocolo ? { protocolo } : undefined,
+      { cache: 'no-store' }
+    )
+
+    addSpanEvent('divida-ativa.requerimentos.fetched', {
+      'requerimentos.status': result.status,
+    })
+
+    if (result.status !== 200) {
+      const motivo = motivoDoErro(result.data)
+      console.error(
+        `[DAL_DIVIDA_ATIVA] GET /divida-ativa/requerimentos respondeu ${result.status}${motivo}`
+      )
+
+      if (result.status === 400) {
+        return {
+          situacao: 'vazio',
+          mensagem: mapApiToMensagemErro(result.data, result.status),
+        }
+      }
+
+      return { situacao: 'indisponivel' }
+    }
+
+    const lista = normalizarListaRequerimentos(result.data)
+    const requerimentos = lista
+      .map(mapApiToRequerimento)
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+
+    addSpanEvent('divida-ativa.requerimentos.mapped', {
+      'requerimentos.total': requerimentos.length,
+    })
+
+    if (requerimentos.length === 0) {
+      return {
+        situacao: 'vazio',
+        mensagem: mensagemDaListaDeRequerimentos(lista),
+      }
+    }
+
+    return { situacao: 'ok', requerimentos }
   })
 }

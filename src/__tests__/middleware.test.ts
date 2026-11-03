@@ -77,6 +77,13 @@ describe('middleware — gating de Dívida Ativa', () => {
       expect(response?.headers.get('Content-Security-Policy')).toContain(
         "default-src 'self'"
       )
+      expect(response?.headers.get('Permissions-Policy')).toBe(
+        'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
+      )
+      expect(response?.headers.get('Cross-Origin-Resource-Policy')).toBe(
+        'same-site'
+      )
+      expect(response?.headers.get('Cross-Origin-Opener-Policy')).toBeNull()
     })
 
     test('o gating vem antes da checagem de auth: anônimo não é mandado ao login', async () => {
@@ -167,5 +174,32 @@ describe('middleware — CSP do VLibras', () => {
 
     expect(frameSrc).toContain('https://vlibras.gov.br')
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-eval'/)
+  })
+
+  test('a rota pública envia Permissions-Policy e CORP, sem COOP', async () => {
+    const response = await middleware(requestFor('/'))
+
+    expect(response?.headers.get('Permissions-Policy')).toBe(
+      'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
+    )
+    expect(response?.headers.get('Cross-Origin-Resource-Policy')).toBe(
+      'same-site'
+    )
+    expect(response?.headers.get('Cross-Origin-Opener-Policy')).toBeNull()
+  })
+
+  test('token inválido na home ainda envia os cabeçalhos', async () => {
+    const request = requestFor('/')
+    request.cookies.set('access_token', 'nao-e-jwt')
+
+    const response = await middleware(request)
+
+    expect(redirectTarget(response)).toContain('/sessao-expirada')
+    expect(response?.headers.get('Permissions-Policy')).toBe(
+      'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
+    )
+    expect(response?.headers.get('Cross-Origin-Resource-Policy')).toBe(
+      'same-site'
+    )
   })
 })

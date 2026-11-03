@@ -89,6 +89,45 @@ export const MOCK_OPCOES_IPTU_DIVIDA_ATIVA = [
   },
 ]
 
+// Dívida Ativa — consulta de débitos (Fase 3). Forma tirada do contrato real depois de a
+// `dam-api` declarar os schemas de resposta em 21/09/2026.
+//
+// Repare que **todo valor monetário é string**: é assim que o DAM devolve. Qual convenção
+// decimal ele usa segue não verificada (premissa P1) — o imóvel de teste de homologação não
+// tem CDA em aberto, então na prática só vimos `null`. O mock usa pt-BR com milhar; a outra
+// convenção é exercida nos testes de mapper.
+export const MOCK_CDA_DIVIDA_ATIVA = {
+  cdaId: '20240000111',
+  exercicio: '2024',
+  naturezaDivida: 'IPTU',
+  receita: '1112',
+  situacaoPrincipal: 'EM ABERTO',
+  situacaoHonorarios: 'EM ABERTO',
+  faseCobranca: 'AJUIZADA',
+  valorSaldoPrincipal: '1.234,56',
+  valorSaldoHonorarios: '123,45',
+  inscricaoImobiliaria: '00000018',
+  // D9: a CDA é selecionável **e** tem protocolo aberto. Não é contradição — é exatamente o
+  // caso que a tela precisa tratar como informação, não como bloqueio.
+  selecionavelParcelamento: true,
+  protocoloRequerimentoAberto: '2026000123',
+}
+
+export const MOCK_GUIA_PARCELADA_DIVIDA_ATIVA = {
+  numeroGuia: '900123',
+  descricaoSituacaoGuia: 'EM DIA',
+  descricaoTipoPagamento: 'PARCELAMENTO',
+  faseCobranca: 'AJUIZADA',
+  // `dd/MM/yyyy`: o formato que a API devolve nos campos vindos do DAM.
+  dataVencimento: '15/10/2026',
+  qtdPagas: '3',
+  qtdeParcelas: '12',
+  valorTotalGuia: '1.200,00',
+  valorSaldoTotal: '900,00',
+  linhaDigitavel: '00190000090123456789012345678901234567890123',
+  urlPdf: null,
+}
+
 export const handlers = [
   // RMI - Citizen profile
   http.get(`${RMI_BASE_URL}/v1/citizen/:cpf`, () => {
@@ -203,6 +242,45 @@ export const handlers = [
     )
   }),
 
+  // Dívida Ativa - Consulta de débitos do imóvel (CDAs + guias parceladas + totais).
+  // Exige imóvel cadastrado: a API responde 404 para inscrição que não é do CPF. Os totais
+  // vêm da API e não do tamanho dos arrays, porque `totalParcelado` desduplica número de
+  // guia — estados vazio e 404 são montados por teste com `server.use()`.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Consulta avulsa por critério único (inscrição, CDA ou execução fiscal).
+  // Somente leitura e **sem exigir imóvel cadastrado**: é o caminho da tela de débitos, que
+  // aceita qualquer número que o cidadão digite. `imovelCadastrado: false` não é erro.
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/divida-ativa/consultar`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
+      },
+      { status: 200 }
+    )
+  }),
+
   // Dívida Ativa - Consulta de um imóvel já cadastrado + opções do ePortal.
   // Não é consulta prévia à Fazenda: a API exige que o imóvel já exista (404 se não).
   http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/consulta`, () => {
@@ -214,4 +292,88 @@ export const handlers = [
       { status: 200 }
     )
   }),
+
+  // Dívida Ativa - Datas de vencimento disponíveis para parcelamento (fatia 5).
+  // `DatasVencimentoResponse`: array de strings `dd/MM/yyyy`. O query param `cdas` é
+  // ignorado aqui — o mock devolve as mesmas datas para qualquer combinação de CDAs.
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/datas-vencimento`,
+    () => {
+      return HttpResponse.json(
+        {
+          datas: [
+            '05/10/2026',
+            '05/11/2026',
+            '05/12/2026',
+            '05/01/2027',
+            '05/02/2027',
+          ],
+          mensagem: null,
+        },
+        { status: 200 }
+      )
+    }
+  ),
+
+  // Dívida Ativa - Simulação de parcelamento (fatia 6).
+  // `SimulacaoParcelamentoResponse`: opções de parcela com valor da 1ª parcela e descontos.
+  // Os valores são strings no padrão do DAM (`"1.357,89"`); o front normaliza ao exibir.
+  http.post(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/parcelamentos/simular`,
+    () => {
+      return HttpResponse.json(
+        {
+          valorTotalAvista: '1.357,89',
+          valorSaldoTotalPrincipal: '1.234,56',
+          valorSaldoTotalHonorario: '123,33',
+          valorTotalDescontoPrincipal: '100,00',
+          valorTotalDescontoHonorario: '0,00',
+          valorTotalPagarGrerj: '0,00',
+          opcoes: [
+            {
+              qtdeParcelas: 1,
+              valor1aParcela: '1.357,89',
+              valorJuros: '0,00',
+              valorDescontos: '100,00',
+              valorTotalDescontoPrinc: '100,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 3,
+              valor1aParcela: '465,30',
+              valorJuros: '38,42',
+              valorDescontos: '50,00',
+              valorTotalDescontoPrinc: '50,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 6,
+              valor1aParcela: '240,18',
+              valorJuros: '83,19',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 12,
+              valor1aParcela: '127,53',
+              valorJuros: '172,47',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 24,
+              valor1aParcela: '70,21',
+              valorJuros: '331,14',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+          ],
+        },
+        { status: 200 }
+      )
+    }
+  ),
 ]

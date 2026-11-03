@@ -155,20 +155,17 @@ Exibido quando o campo de busca está vazio (query ≤ 2 caracteres).
 
 ### Contextos `servicos` ou sem `tipo` — "Mais pesquisados"
 
-Lista estática que navega diretamente para a página do serviço (sem acionar busca):
+Lista estática que navega diretamente para a página do serviço (sem acionar busca). O destino segue `CARTA_SERVICOS_API_ENABLED`: desligada, slug da app-busca-search; ligada, slug da app-catalogo. Os caminhos vêm de `popularServiceHrefs` em `src/constants/most-accessed-services.ts`. Os títulos ficam em `STATIC_POPULAR` em [search-page.tsx](./search-page.tsx).
 
 
-| Item                               | Destino                                                                             |
-| ---------------------------------- | ----------------------------------------------------------------------------------- |
-| IPTU 2026                          | `/servicos/categoria/taxas/iptu-2025-94ff5567`                                      |
-| CADRio Agendamento                 | `/servicos/categoria/familia/inscricao-e-atualizacao-do-cadastro-unico-8cafda60`     |
-| Consulta de Multas                 | `/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90`       |
-| Alvará: Consulta prévia de local   | `/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969`             |
-| Licença Sanitária de Funcionamento | `/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857`          |
-| Dívida Ativa: Débitos de IPTU      | `/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610` |
-
-
-Para atualizar esta lista, edite a constante `STATIC_POPULAR` em [page.tsx](./page.tsx).
+| Item                               | Flag desligada (app-busca-search)                                                              | Flag ligada (app-catalogo)                                                        |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| IPTU 2026                          | `/servicos/categoria/taxas/iptu-2025-94ff5567`                                                 | `/servicos/categoria/tributos/iptu-2026`                                           |
+| CADRio Agendamento                 | `/servicos/categoria/cidadania/inscricao-e-atualizacao-do-cadastro-unico-8cafda60`             | `/servicos/categoria/saude/cadrio-agendamento`                                     |
+| Consulta de Multas                 | `/servicos/categoria/transporte/multa-de-transito-consulta-de-multa-1d76fc90`                  | `/servicos/categoria/transporte/multa-de-transito-consulta-de-multa`               |
+| Alvará: Consulta prévia de local   | `/servicos/categoria/licencas/alvara-consulta-previa-de-local-a0cf6969`                        | `/servicos/categoria/licencas/alvara-consulta-previa-de-local`                     |
+| Licença Sanitária de Funcionamento | `/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento-ffa3f857`                     | `/servicos/categoria/licencas/licenca-sanitaria-de-funcionamento`                  |
+| Dívida Ativa: Débitos de IPTU      | `/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa-4a98e610`            | `/servicos/categoria/tributos/consulta-de-debitos-de-iptu-em-divida-ativa`         |
 
 ### Contextos `empregos`, `cursos`, `mei` — "Mais recentes"
 

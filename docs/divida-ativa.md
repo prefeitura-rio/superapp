@@ -24,9 +24,11 @@ acompanhamento de requerimentos.
 > ⚠️ **Ainda em aberto:** nada da Fase 3 foi integrado. A API não liga schema de resposta às
 > operações de dívida ativa, então os oito endpoints que a fase precisa chegam sem tipo.
 >
-> Parcelamento e acompanhamento (Fase 3) já têm rota, com um estado provisório explicando que
-> o serviço está sendo construído — a landing linka para eles desde o primeiro PR e um 404
-> seria pior do que uma explicação.
+> Parcelamento e acompanhamento (Fase 3) estão integrados. O acompanhamento tem a entrada
+> (`/divida-ativa/acompanhamento`), a lista "Meus requerimentos" e a consulta por protocolo,
+> todas sobre `GET /divida-ativa/requerimentos`. O texto da situação ("Andamento") depende
+> de um campo novo da API, `descricaoSituacao`, cujo nome no DAM ainda precisa ser
+> confirmado em homologação — ver premissa P8.
 
 ## Sumário
 
@@ -102,6 +104,13 @@ Os três primeiros foram **retirados do escopo de modernização pela diretoria*
 existindo no portal legado e não são reconstruídos aqui. A landing os oferece como link
 externo para não deixar um buraco na jornada do cidadão.
 
+**Exceção, decidida em 15/10/2026:** dentro do parcelamento, a tela "Revise as informações de
+pagamento" tem o botão "Imprimir Guia a Vista", e ele **emite no app**, como o portal legado faz
+nesse ponto: emite a guia à vista das CDAs selecionadas (`POST /divida-ativa/avista/emitir`) e
+abre o PDF servido pelo DAM Internet. A emissão usa a mesma data da revisão, para a guia sair
+com os valores da tela. O card "Emitir guia à vista ou liquidar débitos" da landing continua
+externo — a liquidação segue fora do escopo.
+
 Todo link externo passa por um bottom sheet de confirmação (`ExternalLinkDrawer`), porque o
 design exige aviso explícito sempre que o cidadão sai do ambiente nativo do app — **mesmo
 para um portal oficial da Prefeitura**. As URLs ficam em `src/constants/divida-ativa-links.ts`.
@@ -136,6 +145,25 @@ não conhece todas as regras de negócio. Duas divergências conhecidas:
 - **A consulta aceita três identificadores.** O contrato real cobre os três (e mais um, nº de
   guia de pagamento), mas exige a inscrição no path — então quem chega só com a carta de
   cobrança continua sem porta de entrada. Ver premissa P18.
+- **Dados do requerente e de correspondência não estão no Figma** (decidido em 19/10/2026).
+  O portal legado e a `api-imoveis` exigem telefone e e-mail do requerente e um endereço de
+  correspondência completo; sem eles a API recusa o requerimento. Pelo prazo, as telas foram
+  feitas pelo time e **aguardam aprovação ou ajuste do designer**. Ficam entre o vínculo e os
+  documentos — "Confirme seus dados" e "Endereço de correspondência" —, pré-preenchidas com o
+  perfil id.rio, e a revisão ganhou os blocos correspondentes com "Editar". Os dados ficam no
+  `sessionStorage`, não na URL (dado pessoal).
+- **Endurecimento do envio (review da PR, 26/10/2026).**
+  - Links de PDF (guia à vista e comprovante) só viram `href` com `https` em `rio.rj.gov.br`
+    ou subdomínio (`urlPdfDaPrefeitura`). O comprovante não passa mais pela URL da
+    confirmação: a tela o busca no servidor pelo protocolo (`ComprovanteRequerimento`).
+  - `enviarRequerimento` revalida os anexos (tipo do enum, um por tipo, extensão
+    pdf/jpg/jpeg/png/gif, tamanho decodificado por tipo, base64 válido) e **refaz a
+    simulação**: o DAM recebe qtde de parcelas e valor da 1ª parcela da simulação do servidor,
+    não do cliente.
+  - IP do cidadão: `x-envoy-external-address`; sem ele, o último hop do `X-Forwarded-For`.
+    Nunca o primeiro, que o cliente controla.
+  - Anexos só em memória, no layout do wizard (`DocumentosRequerimentoProvider`): saem ao
+    deixar o fluxo e não dependem da cota do `sessionStorage`.
 
 ### Decisões de design fechadas (17/08/2026)
 
@@ -261,7 +289,9 @@ src/middleware.ts                     # bloco de gating
 | `/divida-ativa/imoveis/novo` | Campo da inscrição imobiliária, com máscara |
 | `/divida-ativa/imoveis/novo/confirmar?inscricao=` | Consulta ao sistema fiscal e confirmação |
 | `/divida-ativa/imoveis/novo/sucesso` | "Imóvel adicionado!" |
-| `/divida-ativa/parcelamento` · `/acompanhamento` | Estado provisório até a Fase 3 |
+| `/divida-ativa/acompanhamento` | Entrada do acompanhamento: card "Meus requerimentos" + campo do n° do protocolo (sem o ano) |
+| `/divida-ativa/acompanhamento/requerimentos` | "Meus requerimentos": `GET /divida-ativa/requerimentos`, contribuinte em destaque |
+| `/divida-ativa/acompanhamento/requerimentos/[protocolo]` | Um requerimento: `GET /divida-ativa/requerimentos?protocolo=` (número sem o ano), protocolo em destaque |
 
 ### O cadastro de um imóvel são quatro telas e duas chamadas
 
@@ -315,7 +345,7 @@ Recursos, agrupados pelas tags que viram as pastas do client gerado. Note que **
 | `Imoveis` → `imoveis/` | `GET /imoveis/{inscricao}/parcelamentos`, `.../segunda-via` | fora do escopo 2026 |
 | `Divida Ativa` → `divida-ativa/` | consulta principal, `consultar`, `datas-vencimento`, `parcelamentos/simular`, `requerimentos` | Fase 3, **sem tipo** |
 | `Divida Ativa` → `divida-ativa/` | `emitir/*`, `simular/*`, `guias/*`, `certidoes/*` | fora do escopo 2026 |
-| `Divida Ativa - Requerimentos` → `divida-ativa-requerimentos/` | `GET /divida-ativa/requerimentos`, `.../cancelar`, `.../comprovante`, `validar-senha` | Fase 3, **sem tipo** |
+| `Divida Ativa - Requerimentos` → `divida-ativa-requerimentos/` | `GET /divida-ativa/requerimentos`, `.../cancelar`, `.../comprovante`, `avista/*`, `requerimentos` (POST) | Fase 3, **sem tipo** |
 | `Infra` → `infra/` | `heartbeat`, `versao` | não usadas |
 
 O client é gerado inteiro, inclusive para os fluxos fora do escopo — o Orval não sabe recortar
@@ -375,7 +405,7 @@ resposta possível** — o spec não diz e o dado de teste não permitiu inferir
 | # | Campo | Valores assumidos | Veredito | O que a API real faz |
 |---|---|---|---|---|
 | P7 | `SituacaoCda` | 6 valores em SCREAMING_CASE | 🎨 | **Não há enum, e não há um eixo só.** `situacaoPrincipal` (texto livre do DAM, ex.: `"Concedido"`) + `codSituacaoCda` (int), mais um par paralelo `situacaoHonorarios`/`codSituacaoHonorarios`, mais um terceiro eixo `faseCobranca`/`faseCobrancaId`. Nosso tipo de visão tem **uma** `situacao` |
-| P8 | `SituacaoRequerimento` | 5 valores | ❓ | `GET /divida-ativa/requerimentos` não declara schema e devolveu `[]` (array cru) para o CPF de teste. Não há como confirmar nem refutar |
+| P8 | `SituacaoRequerimento` | 5 valores | 🎨 | **Não há enum.** O requerimento traz `situacaoId` (id cru do DAM) e, desde 21/10/2026, `descricaoSituacao` — o texto que o Figma chama de "Andamento". A `api-imoveis` lê esse texto de forma tolerante (`descricaoSituacao`, `situacaoDescricao`, `situacao.descricao`...) porque a chave real do DAM não está documentada; **confirmar em homologação** com um requerimento real. Sem o texto, a tela mostra o id. "Não há" é 200 com um item só de `mensagemErro`, e `[]` cru também acontece |
 | P9 | `TipoDocumento` | 6 valores | 🎨 | Não existe tipo **por documento**: `documentos: [{ nomeArquivo, conteudoBase64 }]`. Existe um `tipoDoc` solto no requerimento, aparentemente do correspondente |
 
 Nenhum dos três está em uso hoje: os mappers de Fase 3 foram removidos na integração, porque
@@ -442,6 +472,35 @@ A reconciliação levantou coisas que nenhuma premissa previa:
   volta a ser problema, sem a solução em duas etapas que existia no papel.
 
 ### O passo de senha — decisão que muda o desenho da Fase 3
+
+> **Revertido em 20/10/2026: o requerimento não pede mais senha.** Por ordem da gestão, o
+> passo de reautenticação saiu do fluxo: o bottom sheet (`confirmacao-declaracao.tsx`) tem só a
+> declaração ("li e concordo") e "Confirmar e enviar", e a server action não manda `senha` no
+> corpo. A questão será levada aos donos do negócio; se a reautenticação voltar, o caminho é
+> step-up no Keycloak, não um campo de senha nosso. `validar-senha.ts` e `provedor-login.ts`
+> foram removidos (estão no histórico do git). A `api-imoveis` acompanhou no mesmo dia (MR 9,
+> em hom): saíram `POST /divida-ativa/validar-senha`, o campo `senha` do request e o password
+> grant no Keycloak; `divida-ativa-api.yaml` e o cliente Orval foram regenerados dessa versão.
+> Pendência: a API ainda manda `tipoAutenticacao: "senha"` ao DAM até a PGM confirmar outro
+> valor. O parágrafo abaixo registra a decisão anterior.
+>
+> **Decidido em 19/10/2026: o requerimento pede a senha da conta Identidade Carioca**, como a
+> `poc_Imoveis` e o `reautenticar.jsp` do portal. "Requerer parcelamento", na revisão, abre o
+> bottom sheet "Declaração e confirmação" (`confirmacao-senha.tsx`): checkbox da declaração,
+> senha e "Assinar e enviar". A senha é pré-validada em `POST /divida-ativa/validar-senha`
+> (responde 200 também para senha errada — o resultado é `valida`) e vai no corpo do
+> requerimento, onde a API a revalida no Keycloak por password grant e **não** a repassa ao
+> DAM. A senha só atravessa o servidor Next em memória; nada dela vai para log.
+>
+> **Quem entra pelo gov.br** — em produção, todos (`kc_idp_hint=govbr`) — pode não ter senha
+> no Keycloak. A tela orienta sempre a usar a senha da Identidade Carioca e a criá-la em
+> "Minha conta" (console de conta do realm, aberto em nova aba); quando o token traz o
+> provedor, o aviso vem em destaque. ⚠️ O token só traz o provedor se o realm tiver o mapper
+> da nota de sessão `identity_provider` no client do superapp — pedir ao time do Keycloak.
+> Também é preciso **Direct Access Grants** habilitado no client da `api-imoveis`, e o realm
+> precisa permitir que o usuário vindo do gov.br defina senha pelo console de conta.
+>
+> O texto abaixo registra a análise que precedeu a decisão.
 
 Não estava em premissa nenhuma porque o contrato provisório não imaginava reautenticação.
 

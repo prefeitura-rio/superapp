@@ -11,3 +11,21 @@ export function isFeatureEnabled(feature: string): boolean {
     .map(s => s.trim())
     .includes(feature)
 }
+
+/**
+ * `NEXT_PUBLIC_ACCESSIBILITY_ENABLED` turns the accessibility plugin on only
+ * when it is exactly `'true'`. Builds receive the value as a string, so a plain
+ * truthiness check would also enable the plugin for `'false'` (production).
+ */
+export function isAccessibilityPluginEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ACCESSIBILITY_ENABLED === 'true'
+}
+
+/**
+ * `NEXT_PUBLIC_VLIBRAS_ENABLED` turns the VLibras widget on only when it is
+ * exactly `'true'`. Builds receive the value as a string, so a plain
+ * truthiness check would also enable the widget for `'false'` (production).
+ */
+export function isVLibrasEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_VLIBRAS_ENABLED === 'true'
+}

@@ -54,7 +54,7 @@ export function FaqCursosClient({ sections }: { sections: FaqSection[] }) {
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
       />
-      <main className="max-w-4xl mx-auto text-foreground pb-10">
+      <div className="max-w-4xl mx-auto text-foreground pb-10">
         {showMini && (
           <>
             <div
@@ -136,7 +136,7 @@ export function FaqCursosClient({ sections }: { sections: FaqSection[] }) {
           }
         }
       `}</style>
-      </main>
+      </div>
     </>
   )
 }

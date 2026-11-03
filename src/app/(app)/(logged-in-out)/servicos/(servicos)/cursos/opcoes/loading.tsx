@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CoursesOptionsLoading() {
   return (
-    <main className="max-w-4xl mx-auto text-foreground pb-10">
+    <div className="max-w-4xl mx-auto text-foreground pb-10">
       <div className="px-4 pt-3.5">
         <Skeleton className="h-9 w-20 mb-2 pt-3" />
         <nav className="space-y-1">
@@ -40,6 +40,6 @@ export default function CoursesOptionsLoading() {
           </div>
         </nav>
       </div>
-    </main>
+    </div>
   )
 }

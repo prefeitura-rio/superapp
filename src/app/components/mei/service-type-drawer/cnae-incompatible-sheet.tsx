@@ -41,6 +41,12 @@ export function CnaeIncompatibleSheet({
     }
   }, [open, hasFetched, loadCnaes])
 
+  // Se a consulta das descrições falhar, a lista mostra ao menos os códigos
+  // dos CNAEs aceitos pela oportunidade
+  const displayedCnaes: CnaeDisplay[] = cnaes.length
+    ? cnaes
+    : (cnaeIds || []).map(id => ({ codigo: id, descricao: '' }))
+
   return (
     <BottomSheet
       open={open}
@@ -66,7 +72,7 @@ export function CnaeIncompatibleSheet({
           </div>
         ) : (
           <div className="space-y-4">
-            {cnaes.map(cnae => (
+            {displayedCnaes.map(cnae => (
               <div key={cnae.codigo}>
                 <p className="text-sm text-foreground">
                   <span className="font-medium">{cnae.codigo}</span>

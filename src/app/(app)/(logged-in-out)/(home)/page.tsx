@@ -26,6 +26,9 @@ export default async function Home() {
   return (
     <AuthStatusProvider>
       <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-6">
+        <h1 className="sr-only">
+          Pref Rio — Portal de serviços da Prefeitura do Rio
+        </h1>
         <HeaderWrapperClient showSearchPlaceholder />
 
         {/* Requests in progress banner — only visible when logged in with recent requests */}

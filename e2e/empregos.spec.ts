@@ -1,9 +1,69 @@
-import { type Page, expect, test } from '@playwright/test'
+import { type Locator, type Page, expect, test } from '@playwright/test'
 import {
   applyE2EAuthCookies,
   applyE2ECookieConsent,
   hasE2EAuth,
 } from './fixtures/auth'
+
+/**
+ * Espera real pela visibilidade: true assim que o elemento aparece, false se
+ * não aparecer em `timeout` ms. `locator.isVisible({ timeout })` não serve —
+ * o `timeout` dele é obsoleto e ignorado, a checagem é imediata, e com o
+ * elemento ainda renderizando no cliente o teste pulava ou retornava sem
+ * verificar nada.
+ */
+async function isVisibleWithin(
+  locator: Locator,
+  timeout: number
+): Promise<boolean> {
+  return locator.waitFor({ state: 'visible', timeout }).then(
+    () => true,
+    () => false
+  )
+}
+
+/**
+ * Card de feedback da candidatura — cobre os 5 estados do
+ * CandidaturaFeedbackCard: enviada (sem/com avanço de etapa), aprovada,
+ * reprovada, vaga_congelada, vaga_descontinuada.
+ */
+const candidaturaFeedbackLocator = (page: Page) =>
+  page.getByText(
+    /está sendo avaliada|Parabéns!|não pôde ser aprovada|temporariamente suspensa|não está mais disponível/,
+    { exact: false }
+  )
+
+/**
+ * Card de candidatura com link para a vaga, em /minhas-candidaturas. Ancorado
+ * no h1 da página: `a[href^="/servicos/trabalho/"]` sozinho casa primeiro o
+ * link "Menu" do cabeçalho (/servicos/trabalho/menu).
+ */
+const candidaturaCardLinkLocator = (page: Page) =>
+  page
+    .getByRole('heading', { level: 1, name: 'Minhas candidaturas' })
+    .locator('xpath=following::a[starts-with(@href, "/servicos/trabalho/")]')
+    .first()
+
+/**
+ * Na página da vaga (logado), espera a área de ação resolver — botão
+ * "Candidatar-se à vaga", card de feedback de candidatura existente ou vaga
+ * encerrada — e só então diz se o botão está na tela. Esperar apenas pelo
+ * botão gastaria o timeout inteiro sempre que a conta já se candidatou.
+ */
+async function hasCandidatarButton(
+  page: Page,
+  candidatarBtn: Locator
+): Promise<boolean> {
+  await candidatarBtn
+    .or(candidaturaFeedbackLocator(page))
+    .or(
+      page.getByRole('button', { name: 'Inscrições encerradas para esta vaga' })
+    )
+    .first()
+    .waitFor({ state: 'visible', timeout: 20000 })
+    .catch(() => {})
+  return candidatarBtn.isVisible()
+}
 
 /**
  * Abre um drawer de ActionDiv encontrando o label pelo texto e clicando
@@ -78,7 +138,7 @@ async function ensureActiveVagasOrSkip(page: Page): Promise<void> {
  * pula (com motivo) se o homolog não tem vaga ativa, mas falha se for bug.
  *
  * Usa o heading "Mais recentes" como âncora XPath para excluir
- * estruturalmente quaisquer links acima dele (ex.: CandidaturasEnviadasCtaCard),
+ * estruturalmente quaisquer links acima dele (ex.: cards da área do candidato),
  * sem precisar de lista de :not() hardcoded.
  * getByRole('link') garante que só elementos visíveis são retornados,
  * descartando os cards duplicados do carrossel mobile (display:none no desktop).
@@ -154,16 +214,16 @@ test.describe('Empregos — home (público)', () => {
     ).toBeVisible({ timeout: 20000 })
   })
 
-  test('não exibe card "Candidaturas enviadas" sem autenticação', async ({
+  test('deslogado exibe o banner para criar o currículo, sem o controle do banco', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
-    // Âncora ESTÁTICA (não depende de vaga ativa) para confirmar que a home
-    // carregou — este teste verifica ausência do card, não a seção de vagas.
-    await expect(
-      page.getByRole('heading', { name: 'Encontre seu trabalho' })
-    ).toBeVisible({ timeout: 20000 })
-    await expect(page.getByText('Candidaturas enviadas')).toHaveCount(0)
+
+    const banner = page.getByRole('link', { name: /Faça seu currículo/ })
+    await expect(banner).toBeVisible({ timeout: 20000 })
+    await expect(banner).toHaveAttribute('href', '/servicos/trabalho/curriculo')
+    await expect(page.getByText('Criar agora')).toBeVisible()
+    await expect(page.getByRole('switch')).toHaveCount(0)
   })
 
   test('ao clicar no primeiro card de vaga, navega para página da vaga', async ({
@@ -252,56 +312,65 @@ test.describe('Empregos — home (autenticado)', () => {
     await expect(faqHeaderLink).toHaveCount(0)
   })
 
-  test('card "Candidaturas enviadas" (quando presente) aponta para /minhas-candidaturas', async ({
+  test('exibe os cards "Meu Currículo" e "Minhas candidaturas" e o controle do Banco de Currículos', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+
     await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
-
-    const candidaturasCard = page.getByRole('link', {
-      name: 'Candidaturas enviadas',
+      page.getByRole('link', { name: /Meu Currículo/ })
+    ).toHaveAttribute('href', '/servicos/trabalho/curriculo', {
+      timeout: 20000,
     })
-    const isVisible = await candidaturasCard
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
-
-    if (isVisible) {
-      await expect(candidaturasCard).toHaveAttribute(
-        'href',
-        '/servicos/trabalho/minhas-candidaturas'
-      )
-      await expect(
-        page.getByText('Acompanhe aqui o andamento de suas candidaturas')
-      ).toBeVisible()
-    }
+    await expect(
+      page.getByRole('link', { name: /Minhas candidaturas/ })
+    ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
+    await expect(page.getByText('Banco de Currículos')).toBeVisible()
+    await expect(page.getByRole('switch')).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /Faça seu currículo/ })
+    ).toHaveCount(0)
   })
 
-  test('clicar no card "Candidaturas enviadas" navega para /minhas-candidaturas', async ({
+  test('desativar o Banco de Currículos pede confirmação (cancelar mantém ativo)', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
+
+    const controle = page.getByRole('switch')
+    await expect(controle).toBeVisible({ timeout: 20000 })
+    // Só abre o modal; cancelar não grava nada no usuário de teste.
+    test.skip(
+      !(await controle.isChecked()) || !(await controle.isEnabled()),
+      'Usuário de teste fora do banco ou sem currículo: não há o que desativar'
+    )
+
+    await controle.click()
     await expect(
-      page.locator('a[href="/servicos/trabalho/menu"]').first()
-    ).toBeVisible({ timeout: 15000 })
+      page.getByRole('dialog', { name: 'Sair do Banco de Currículos?' })
+    ).toBeVisible()
+    await page.getByRole('button', { name: 'Cancelar' }).click()
+
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(controle).toBeChecked()
+  })
+
+  test('clicar no card "Minhas candidaturas" navega para /minhas-candidaturas', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
 
     const candidaturasCard = page.getByRole('link', {
-      name: 'Candidaturas enviadas',
+      name: /Minhas candidaturas/,
     })
-    const isVisible = await candidaturasCard
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
-
-    if (isVisible) {
-      await candidaturasCard.click()
-      await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
-        timeout: 15000,
-      })
-      await expect(
-        page.getByRole('heading', { name: 'Minhas candidaturas' })
-      ).toBeVisible({ timeout: 15000 })
-    }
+    await expect(candidaturasCard).toBeVisible({ timeout: 20000 })
+    await candidaturasCard.click()
+    await page.waitForURL('**/servicos/trabalho/minhas-candidaturas', {
+      timeout: 15000,
+    })
+    await expect(
+      page.getByRole('heading', { name: 'Minhas candidaturas' })
+    ).toBeVisible({ timeout: 15000 })
   })
 })
 
@@ -380,9 +449,7 @@ test.describe('Empregos — página da vaga (público)', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
     const empresaLink = page.locator('a[href^="/servicos/empresas/"]').first()
-    const hasEmpresaLink = await empresaLink
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEmpresaLink = await isVisibleWithin(empresaLink, 3000)
 
     if (hasEmpresaLink) {
       await empresaLink.click()
@@ -402,9 +469,7 @@ test.describe('Empregos — página da vaga (público)', () => {
     const etapasCard = page.getByText('Etapas do processo seletivo', {
       exact: false,
     })
-    const hasEtapas = await etapasCard
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEtapas = await isVisibleWithin(etapasCard, 3000)
     if (hasEtapas) {
       await expect(etapasCard).toBeVisible()
       await expect(
@@ -436,12 +501,7 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    // Cobre todos os 5 estados do CandidaturaFeedbackCard:
-    // enviada (sem/com avanço de etapa), aprovada, reprovada, vaga_congelada, vaga_descontinuada
-    const feedbackCard = page.getByText(
-      /está sendo avaliada|Parabéns!|não pôde ser aprovada|temporariamente suspensa|não está mais disponível/,
-      { exact: false }
-    )
+    const feedbackCard = candidaturaFeedbackLocator(page)
 
     await expect(candidatarBtn.or(feedbackCard).first()).toBeVisible({
       timeout: 20000,
@@ -457,9 +517,7 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    const isVisible = await candidatarBtn
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (isVisible) {
       const expectedUrl = `${href}/inscricao`
@@ -472,25 +530,19 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
   }) => {
     await page.goto('/servicos/trabalho/minhas-candidaturas')
 
-    const hasCandidaturas = await page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const firstCandidaturaLink = candidaturaCardLinkLocator(page)
+    const hasCandidaturas = await isVisibleWithin(firstCandidaturaLink, 10000)
 
     if (!hasCandidaturas) return
 
-    const firstCandidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
+    const vagaHref = await firstCandidaturaLink.getAttribute('href')
     await firstCandidaturaLink.click()
-    await page.waitForURL('**/servicos/trabalho/**', { timeout: 15000 })
+    await page.waitForURL(`**${vagaHref}`, { timeout: 15000 })
 
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
-    const feedbackCard = page.getByText(
-      /Sua inscrição foi enviada|Parabéns!|Não foi possível seguir|não pôde ser aprovada|Página não encontrada/,
-      { exact: false }
+    const feedbackCard = candidaturaFeedbackLocator(page).or(
+      page.getByText('Página não encontrada', { exact: false })
     )
     await expect(feedbackCard.first()).toBeVisible({ timeout: 10000 })
   })
@@ -518,9 +570,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    const isVisible = await candidatarBtn
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (!isVisible) {
       test.skip(
@@ -572,9 +622,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    const isVisible = await candidatarBtn
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (!isVisible) return
 
@@ -584,9 +632,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const bemVindo = page.getByText('Cadastro de oportunidades de', {
       exact: false,
     })
-    const isBemVindo = await bemVindo
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
+    const isBemVindo = await isVisibleWithin(bemVindo, 5000)
 
     if (!isBemVindo) return
 
@@ -604,9 +650,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    const isVisible = await candidatarBtn
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (!isVisible) return
 
@@ -616,9 +660,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const confirmarInfos = page.getByText('confirme suas informações', {
       exact: false,
     })
-    const isConfirmar = await confirmarInfos
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
+    const isConfirmar = await isVisibleWithin(confirmarInfos, 5000)
 
     if (!isConfirmar) return
 
@@ -638,9 +680,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
     const candidatarBtn = page.getByRole('link', {
       name: 'Candidatar-se à vaga',
     })
-    const isVisible = await candidatarBtn
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (!isVisible) return
 
@@ -655,9 +695,7 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       level: 1,
       name: 'Meu Currículo',
     })
-    const isCurriculo = await curriculo
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
+    const isCurriculo = await isVisibleWithin(curriculo, 5000)
 
     if (isCurriculo) {
       // O carousel mantém todos os slides no DOM. Quando o contato do cidadão
@@ -1115,9 +1153,7 @@ test.describe('Empregos — Meu Currículo (autenticado)', () => {
     const desempregadoOption = dialog
       .getByText(/desempregado|procurando/i)
       .first()
-    const hasDesempregado = await desempregadoOption
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasDesempregado = await isVisibleWithin(desempregadoOption, 3000)
 
     if (hasDesempregado) {
       await desempregadoOption.click()
@@ -1274,9 +1310,7 @@ test.describe('Empregos — página da empresa (público)', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
     const empresaLink = page.locator('a[href^="/servicos/empresas/"]').first()
-    const hasEmpresaLink = await empresaLink
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEmpresaLink = await isVisibleWithin(empresaLink, 3000)
 
     if (!hasEmpresaLink) {
       test.skip(
@@ -1305,9 +1339,7 @@ test.describe('Empregos — página da empresa (público)', () => {
     await page.goto(vagaHref)
 
     const empresaLink = page.locator('a[href^="/servicos/empresas/"]').first()
-    const hasEmpresaLink = await empresaLink
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEmpresaLink = await isVisibleWithin(empresaLink, 3000)
 
     if (!hasEmpresaLink) {
       test.skip(
@@ -1333,9 +1365,7 @@ test.describe('Empregos — página da empresa (público)', () => {
     await page.goto(vagaHref)
 
     const empresaLink = page.locator('a[href^="/servicos/empresas/"]').first()
-    const hasEmpresaLink = await empresaLink
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEmpresaLink = await isVisibleWithin(empresaLink, 3000)
 
     if (!hasEmpresaLink) {
       test.skip(
@@ -1370,9 +1400,7 @@ test.describe('Empregos — página da empresa (público)', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 })
 
     const empresaLink = page.locator('a[href^="/servicos/empresas/"]').first()
-    const hasEmpresaLink = await empresaLink
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasEmpresaLink = await isVisibleWithin(empresaLink, 3000)
 
     if (!hasEmpresaLink) {
       test.skip(
@@ -1458,12 +1486,8 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const candidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
-    const isVisible = await candidaturaLink
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const candidaturaLink = candidaturaCardLinkLocator(page)
+    const isVisible = await isVisibleWithin(candidaturaLink, 10000)
 
     if (!isVisible) return
 
@@ -1479,12 +1503,8 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const candidaturaLink = page
-      .locator('a[href^="/servicos/trabalho/"]')
-      .first()
-    const isVisible = await candidaturaLink
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const candidaturaLink = candidaturaCardLinkLocator(page)
+    const isVisible = await isVisibleWithin(candidaturaLink, 10000)
 
     if (!isVisible) return
 
@@ -1516,11 +1536,10 @@ test.describe('Empregos — minhas candidaturas (autenticado)', () => {
       page.getByRole('heading', { name: 'Minhas candidaturas' })
     ).toBeVisible({ timeout: 15000 })
 
-    const hasCandidaturas = await page
-      .locator('.rounded-3xl')
-      .first()
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
+    const hasCandidaturas = await isVisibleWithin(
+      page.locator('.rounded-3xl').first(),
+      10000
+    )
 
     if (!hasCandidaturas) return
 
@@ -1709,16 +1728,13 @@ test.describe('Empregos — busca (público)', () => {
       timeout: 5000,
     })
 
-    const hasResults = await resultados
-      .isVisible({ timeout: 1000 })
-      .catch(() => false)
+    // O estado já resolveu na asserção acima: checagem imediata basta.
+    const hasResults = await resultados.isVisible()
     if (hasResults) {
       // Badge "Trabalho" only appears when the API returns job-type items.
       // If the query returns no jobs (only secondary results), skip the assertion.
       const badge = page.getByText('Trabalho').first()
-      const hasBadge = await badge
-        .isVisible({ timeout: 3000 })
-        .catch(() => false)
+      const hasBadge = await isVisibleWithin(badge, 3000)
       if (hasBadge) {
         await expect(badge).toBeVisible()
       }
@@ -1749,9 +1765,7 @@ test.describe('Empregos — busca (público)', () => {
     const clearBtn = page
       .locator('button[aria-label*="lear"], button[aria-label*="limpar"]')
       .first()
-    const hasClearBtn = await clearBtn
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
+    const hasClearBtn = await isVisibleWithin(clearBtn, 3000)
 
     if (hasClearBtn) {
       await clearBtn.click()

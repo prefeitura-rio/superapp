@@ -31,7 +31,7 @@ test.describe('Home (público)', () => {
     ).toBeVisible()
 
     await expect(
-      page.getByRole('heading', { level: 3, name: 'Serviços' })
+      page.getByRole('heading', { level: 2, name: 'Serviços' })
     ).toBeVisible({ timeout: 20000 })
 
     await expect(
@@ -127,7 +127,7 @@ test.describe('Home (autenticado)', () => {
       page.getByRole('link', { name: 'Do que você precisa?' })
     ).toBeVisible()
     await expect(
-      page.getByRole('heading', { level: 3, name: 'Serviços' })
+      page.getByRole('heading', { level: 2, name: 'Serviços' })
     ).toBeVisible({ timeout: 20000 })
   })
 

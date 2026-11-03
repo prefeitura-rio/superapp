@@ -1,0 +1,135 @@
+import {
+  formatarCda,
+  formatarExecucaoFiscal,
+  formatarInscricaoImobiliaria,
+  isCdaValida,
+  isExecucaoFiscalValida,
+  isInscricaoImobiliariaValida,
+} from '@/lib/divida-ativa-utils'
+
+/**
+ * Os três modos de busca do parcelamento.
+ *
+ * **Não são sinônimos — são níveis diferentes.** A inscrição identifica o *imóvel*, a CDA
+ * identifica uma *dívida* inscrita, e a execução fiscal identifica um *processo judicial*
+ * que pode abranger várias CDAs. Cada um vem de um papel diferente na mão do cidadão: o
+ * carnê de IPTU, a carta de cobrança da PGM e a citação da Justiça.
+ *
+ * O desenho é em dois passos — o cidadão escolhe o modo numa lista e só então digita o
+ * número. A documentação do módulo descrevia "uma tela com três campos livres"; o Figma
+ * entregue em 21/09/2026 mostrou outra coisa.
+ */
+export type ModoConsulta = 'inscricao' | 'cda' | 'execucao-fiscal'
+
+export interface ModoConsultaConfig {
+  /** Valor de `?modo=` na URL. */
+  id: ModoConsulta
+  /** Texto do item na lista de seleção. */
+  rotuloLista: string
+  /** Rótulo acima do campo, na tela seguinte. */
+  rotuloCampo: string
+  /** Texto do campo vazio — o formato esperado, quando o número tem um. */
+  placeholder: string
+  /**
+   * Nome do parâmetro com que o critério chega à tela de débitos. A API aceita um critério
+   * único por consulta (RN-001/RN-002), então a tela recebe exatamente um destes.
+   */
+  parametro: 'inscricao' | 'cda' | 'execucaoFiscal'
+  /** Máscara de exibição. O que trafega são sempre só os dígitos. */
+  formatar: (valor: string) => string
+  /** Validação de **formato**. Existência e vínculo são regra de negócio da API. */
+  validar: (valor: string) => boolean
+  /** Mensagem de campo vazio. */
+  mensagemVazio: string
+  /** Mensagem de formato inválido. */
+  mensagemFormato: string
+}
+
+export const MODOS_CONSULTA: Record<ModoConsulta, ModoConsultaConfig> = {
+  inscricao: {
+    id: 'inscricao',
+    rotuloLista: 'N° da Inscrição Imobiliária',
+    rotuloCampo: 'N° da Inscrição Imobiliária',
+    placeholder: 'Escreva aqui',
+    parametro: 'inscricao',
+    formatar: formatarInscricaoImobiliaria,
+    validar: isInscricaoImobiliariaValida,
+    mensagemVazio: 'Digite a inscrição imobiliária.',
+    mensagemFormato: 'A inscrição imobiliária tem 7 ou 8 números.',
+  },
+  cda: {
+    id: 'cda',
+    rotuloLista: 'N° da Certidão de Dívida Ativa',
+    rotuloCampo: 'N° da Certidão de Dívida Ativa',
+    placeholder: '00/000000/0000-00',
+    parametro: 'cda',
+    formatar: formatarCda,
+    validar: isCdaValida,
+    mensagemVazio: 'Digite o número da certidão de dívida ativa.',
+    mensagemFormato:
+      'Confira o número da certidão: ele tem o formato 00/000000/0000 ou 00/000000/0000-00.',
+  },
+  'execucao-fiscal': {
+    id: 'execucao-fiscal',
+    rotuloLista: 'N° da Execução Fiscal',
+    rotuloCampo: 'N° da Execução Fiscal',
+    placeholder: '0000000-00.0000.0.00.0000',
+    parametro: 'execucaoFiscal',
+    formatar: formatarExecucaoFiscal,
+    validar: isExecucaoFiscalValida,
+    mensagemVazio: 'Digite o número da execução fiscal.',
+    mensagemFormato:
+      'Confira o número da execução fiscal: ele tem de 14 a 20 números.',
+  },
+}
+
+/** Ordem de exibição na lista, como no Figma. */
+export const ORDEM_MODOS_CONSULTA: ModoConsulta[] = [
+  'inscricao',
+  'cda',
+  'execucao-fiscal',
+]
+
+/**
+ * Converte `?modo=` em configuração. Devolve `null` para valor ausente ou desconhecido — a
+ * página usa isso para mostrar a lista de seleção em vez de um campo sem rótulo.
+ */
+export function parseModoConsulta(
+  valor: string | undefined
+): ModoConsultaConfig | null {
+  if (!valor) return null
+
+  return MODOS_CONSULTA[valor as ModoConsulta] ?? null
+}
+
+/**
+ * A consulta de onde o cidadão voltou, ao sair da tela de débitos pelo Voltar.
+ *
+ * Só dados serializáveis: o objeto atravessa a fronteira Server → Client Component.
+ */
+export interface ConsultaAnterior {
+  /** Dígitos do número consultado — reaparece no campo, com a máscara. */
+  valor: string
+  /** O resto da URL de débitos (`cdas`, `data`, `parcelas`, `tipo`...). */
+  params: Record<string, string>
+}
+
+/**
+ * Endereço da tela de débitos para o número digitado.
+ *
+ * Se o cidadão voltou da tela de débitos e consulta **o mesmo número**, as escolhas que ele
+ * já tinha feito adiante seguem junto e reaparecem marcadas. Número diferente é consulta
+ * nova: nada do que foi escolhido para o outro número vale aqui.
+ */
+export function urlDebitos(
+  parametro: ModoConsultaConfig['parametro'],
+  digitos: string,
+  consultaAnterior?: ConsultaAnterior
+) {
+  const destino = new URLSearchParams(
+    consultaAnterior?.valor === digitos ? consultaAnterior.params : undefined
+  )
+  destino.set(parametro, digitos)
+
+  return `/divida-ativa/parcelamento/debitos?${destino}`
+}

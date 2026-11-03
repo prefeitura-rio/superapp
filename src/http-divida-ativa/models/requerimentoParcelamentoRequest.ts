@@ -31,6 +31,5 @@ export interface RequerimentoParcelamentoRequest {
   ip?: string
   tipoAutenticacao?: string
   declaracaoAceita?: boolean
-  senha?: string
   documentos?: DocumentoDamRequest[]
 }

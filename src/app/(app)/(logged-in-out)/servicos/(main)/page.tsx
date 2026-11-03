@@ -15,6 +15,7 @@ export default async function ServicesPage() {
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
       <main className="w-full max-w-4xl mx-auto flex flex-col pb-6">
+        <h1 className="sr-only">Serviços</h1>
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards limit={4} />
 

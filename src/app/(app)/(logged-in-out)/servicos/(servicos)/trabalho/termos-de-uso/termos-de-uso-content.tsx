@@ -22,7 +22,7 @@ export function TermosDeUsoContent() {
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
       />
-      <main className="max-w-4xl min-h-lvh mx-auto pb-10">
+      <div className="max-w-4xl min-h-lvh mx-auto pb-10">
         <div className="px-4 pt-6">
           {/* I. TERMO DE USO */}
           <div>
@@ -767,7 +767,7 @@ export function TermosDeUsoContent() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

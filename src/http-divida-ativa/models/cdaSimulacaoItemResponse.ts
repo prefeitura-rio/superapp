@@ -13,5 +13,6 @@ export interface CdaSimulacaoItemResponse {
   saldoHonorarios?: string
   descontoHonorarios?: string
   natureza?: string
+  contribuinte?: string
   situacao?: string
 }

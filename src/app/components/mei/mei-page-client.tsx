@@ -18,7 +18,7 @@ export function MeiPageClient({
 
   return (
     <div className="min-h-lvh">
-      <main className="max-w-4xl mx-auto pb-34 px-4">
+      <div className="max-w-4xl mx-auto pb-34 px-4">
         {!hasOpportunities && !hasProposals && (
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-lg text-muted-foreground text-center">
@@ -84,7 +84,7 @@ export function MeiPageClient({
             </div>
           </section>
         )}
-      </main>
+      </div>
     </div>
   )
 }

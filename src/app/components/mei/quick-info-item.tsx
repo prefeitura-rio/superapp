@@ -18,7 +18,7 @@ export function QuickInfoItem({
 }: QuickInfoItemProps) {
   return (
     <div className={cn('flex gap-3 items-center', className)}>
-      <div className="shrink-0 mt-0.5">
+      <div className="shrink-0 flex items-center">
         <Icon className="w-5 h-5 text-foreground-light" />
       </div>
       <div className="flex flex-col min-w-0">

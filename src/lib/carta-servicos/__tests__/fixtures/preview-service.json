@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "name": "ISS - Alíquotas, Base de Cálculo e Código de Atividades",
+  "articleStatus": "Draft",
+  "themeName": "Tributos",
+  "themeSlug": "tributos",
+  "subthemeName": "ISS",
+  "subthemeSlug": "iss",
+  "responsibleOrgUnit": "Secretaria Municipal de Fazenda",
+  "responsibleOrgUnitShortName": "SMF",
+  "info": {
+    "summary": "<p>Consulta de alíquotas e código de atividades do ISS.</p>",
+    "fullDescription": "<p>Descrição completa do serviço.</p>",
+    "cost": "Gratuito",
+    "isFree": true,
+    "serviceDeadline": "Imediato",
+    "targetAudience": ["Contribuintes"]
+  },
+  "howToRequest": {
+    "instructions": "<p>Acesse o portal e informe o código da atividade.</p>",
+    "serviceResult": "<p>Consulta das alíquotas aplicáveis.</p>",
+    "exclusions": "<p>Não calcula o imposto devido.</p>",
+    "requiredDocs": ["<p>CNPJ</p>", "CPF do responsável"]
+  },
+  "channels": [
+    { "type": "Presencial", "endereco": "Rua Afonso Cavalcanti, 455" },
+    {
+      "type": "Digital",
+      "channelType": "Site",
+      "value": "https://pref.rio/iss"
+    }
+  ],
+  "buttons": [
+    {
+      "title": "Acessar serviço",
+      "description": "Portal do ISS",
+      "url": "https://pref.rio/iss",
+      "order": 1,
+      "enabled": true
+    }
+  ],
+  "legislation": [{ "titulo": "Lei Complementar 116/2003", "order": 1 }]
+}

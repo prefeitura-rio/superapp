@@ -6,21 +6,23 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
+  CertidaoDamResponse,
   ConsultaFiltroRequest,
-  GetImoveisInscricaoDividaAtivaDatasVencimentoParams,
+  CotaDamResponse,
+  DividaAtivaConsultaResponse,
   GetImoveisInscricaoDividaAtivaGuiasContinuacaoParams,
   GetImoveisInscricaoDividaAtivaGuiasNumeroGuiaPdfParams,
   GetImoveisInscricaoDividaAtivaGuiasRegularizacaoParams,
+  GuiaDamResponse,
   GuiaOperacaoRequest,
-  ParcelamentoSimularRequest,
+  PdfUrlResponse,
   RequerimentoCertidaoRequest,
-  RequerimentoParcelamentoRequest,
 } from '../models'
 
 import { customFetchDividaAtiva } from '../../../custom-fetch-divida-ativa'
 
 export type getImoveisInscricaoDividaAtivaResponse200 = {
-  data: void
+  data: DividaAtivaConsultaResponse
   status: 200
 }
 
@@ -52,13 +54,13 @@ export const getImoveisInscricaoDividaAtiva = async (
   )
 }
 
-export type postImoveisInscricaoDividaAtivaCertidoesRequerimentoResponse200 = {
-  data: void
-  status: 200
+export type postImoveisInscricaoDividaAtivaCertidoesRequerimentoResponse201 = {
+  data: CertidaoDamResponse
+  status: 201
 }
 
 export type postImoveisInscricaoDividaAtivaCertidoesRequerimentoResponseSuccess =
-  postImoveisInscricaoDividaAtivaCertidoesRequerimentoResponse200 & {
+  postImoveisInscricaoDividaAtivaCertidoesRequerimentoResponse201 & {
     headers: Headers
   }
 
@@ -91,7 +93,7 @@ export const postImoveisInscricaoDividaAtivaCertidoesRequerimento = async (
 }
 
 export type postImoveisInscricaoDividaAtivaConsultarResponse200 = {
-  data: void
+  data: DividaAtivaConsultaResponse
   status: 200
 }
 
@@ -128,57 +130,8 @@ export const postImoveisInscricaoDividaAtivaConsultar = async (
   )
 }
 
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponse200 = {
-  data: void
-  status: 200
-}
-
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponseSuccess =
-  getImoveisInscricaoDividaAtivaDatasVencimentoResponse200 & {
-    headers: Headers
-  }
-
-export type getImoveisInscricaoDividaAtivaDatasVencimentoResponse =
-  getImoveisInscricaoDividaAtivaDatasVencimentoResponseSuccess
-
-export const getGetImoveisInscricaoDividaAtivaDatasVencimentoUrl = (
-  inscricao: string,
-  params?: GetImoveisInscricaoDividaAtivaDatasVencimentoParams
-) => {
-  const normalizedParams = new URLSearchParams()
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  })
-
-  const stringifiedParams = normalizedParams.toString()
-
-  return stringifiedParams.length > 0
-    ? `/imoveis/${inscricao}/divida-ativa/datas-vencimento?${stringifiedParams}`
-    : `/imoveis/${inscricao}/divida-ativa/datas-vencimento`
-}
-
-/**
- * @summary Datas de vencimento (a vista ou parcelamento)
- */
-export const getImoveisInscricaoDividaAtivaDatasVencimento = async (
-  inscricao: string,
-  params?: GetImoveisInscricaoDividaAtivaDatasVencimentoParams,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<getImoveisInscricaoDividaAtivaDatasVencimentoResponse> => {
-  return customFetchDividaAtiva<getImoveisInscricaoDividaAtivaDatasVencimentoResponse>(
-    getGetImoveisInscricaoDividaAtivaDatasVencimentoUrl(inscricao, params),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
 export type postImoveisInscricaoDividaAtivaEmitirAvistaResponse200 = {
-  data: void
+  data: GuiaDamResponse
   status: 200
 }
 
@@ -216,7 +169,7 @@ export const postImoveisInscricaoDividaAtivaEmitirAvista = async (
 }
 
 export type postImoveisInscricaoDividaAtivaEmitirLiquidacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse
   status: 200
 }
 
@@ -254,7 +207,7 @@ export const postImoveisInscricaoDividaAtivaEmitirLiquidacao = async (
 }
 
 export type postImoveisInscricaoDividaAtivaEmitirRegularizacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse
   status: 200
 }
 
@@ -292,7 +245,7 @@ export const postImoveisInscricaoDividaAtivaEmitirRegularizacao = async (
 }
 
 export type getImoveisInscricaoDividaAtivaGuiasContinuacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse[]
   status: 200
 }
 
@@ -341,7 +294,7 @@ export const getImoveisInscricaoDividaAtivaGuiasContinuacao = async (
 }
 
 export type getImoveisInscricaoDividaAtivaGuiasLiquidacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse[]
   status: 200
 }
 
@@ -376,7 +329,7 @@ export const getImoveisInscricaoDividaAtivaGuiasLiquidacao = async (
 }
 
 export type getImoveisInscricaoDividaAtivaGuiasRegularizacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse[]
   status: 200
 }
 
@@ -425,7 +378,7 @@ export const getImoveisInscricaoDividaAtivaGuiasRegularizacao = async (
 }
 
 export type getImoveisInscricaoDividaAtivaGuiasNumeroGuiaPdfResponse200 = {
-  data: void
+  data: PdfUrlResponse
   status: 200
 }
 
@@ -479,84 +432,8 @@ export const getImoveisInscricaoDividaAtivaGuiasNumeroGuiaPdf = async (
   )
 }
 
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponse200 = {
-  data: void
-  status: 200
-}
-
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponseSuccess =
-  postImoveisInscricaoDividaAtivaParcelamentosSimularResponse200 & {
-    headers: Headers
-  }
-
-export type postImoveisInscricaoDividaAtivaParcelamentosSimularResponse =
-  postImoveisInscricaoDividaAtivaParcelamentosSimularResponseSuccess
-
-export const getPostImoveisInscricaoDividaAtivaParcelamentosSimularUrl = (
-  inscricao: string
-) => {
-  return `/imoveis/${inscricao}/divida-ativa/parcelamentos/simular`
-}
-
-/**
- * @summary Simula parcelamentos possiveis
- */
-export const postImoveisInscricaoDividaAtivaParcelamentosSimular = async (
-  inscricao: string,
-  parcelamentoSimularRequest?: ParcelamentoSimularRequest,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<postImoveisInscricaoDividaAtivaParcelamentosSimularResponse> => {
-  return customFetchDividaAtiva<postImoveisInscricaoDividaAtivaParcelamentosSimularResponse>(
-    getPostImoveisInscricaoDividaAtivaParcelamentosSimularUrl(inscricao),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(parcelamentoSimularRequest),
-    }
-  )
-}
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponse200 = {
-  data: void
-  status: 200
-}
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponseSuccess =
-  postImoveisInscricaoDividaAtivaRequerimentosResponse200 & {
-    headers: Headers
-  }
-
-export type postImoveisInscricaoDividaAtivaRequerimentosResponse =
-  postImoveisInscricaoDividaAtivaRequerimentosResponseSuccess
-
-export const getPostImoveisInscricaoDividaAtivaRequerimentosUrl = (
-  inscricao: string
-) => {
-  return `/imoveis/${inscricao}/divida-ativa/requerimentos`
-}
-
-/**
- * @summary Envia requerimento de parcelamento (docs base64 + reauth senha + declaracao)
- */
-export const postImoveisInscricaoDividaAtivaRequerimentos = async (
-  inscricao: string,
-  requerimentoParcelamentoRequest?: RequerimentoParcelamentoRequest,
-  options?: Parameters<typeof customFetchDividaAtiva>[1]
-): Promise<postImoveisInscricaoDividaAtivaRequerimentosResponse> => {
-  return customFetchDividaAtiva<postImoveisInscricaoDividaAtivaRequerimentosResponse>(
-    getPostImoveisInscricaoDividaAtivaRequerimentosUrl(inscricao),
-    {
-      ...options,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(requerimentoParcelamentoRequest),
-    }
-  )
-}
-
 export type postImoveisInscricaoDividaAtivaSimularAvistaResponse200 = {
-  data: void
+  data: GuiaDamResponse
   status: 200
 }
 
@@ -594,7 +471,7 @@ export const postImoveisInscricaoDividaAtivaSimularAvista = async (
 }
 
 export type postImoveisInscricaoDividaAtivaSimularLiquidacaoResponse200 = {
-  data: void
+  data: GuiaDamResponse
   status: 200
 }
 
@@ -632,7 +509,7 @@ export const postImoveisInscricaoDividaAtivaSimularLiquidacao = async (
 }
 
 export type postImoveisInscricaoDividaAtivaSimularRegularizacaoResponse200 = {
-  data: void
+  data: CotaDamResponse[]
   status: 200
 }
 

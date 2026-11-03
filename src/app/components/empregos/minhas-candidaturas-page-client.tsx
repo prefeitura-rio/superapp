@@ -27,7 +27,7 @@ function MinhasCandidaturasSkeleton() {
         searchUrl="/busca?tipo=empregos"
       />
       <div>
-        <main className="max-w-4xl mx-auto text-foreground pb-10">
+        <div className="max-w-4xl mx-auto text-foreground pb-10">
           <div className="px-4 pt-2 md:pt-0">
             <Skeleton className="h-9 w-52 mb-2" />
             <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
@@ -36,7 +36,7 @@ function MinhasCandidaturasSkeleton() {
               ))}
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   )

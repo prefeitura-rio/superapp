@@ -38,7 +38,7 @@ export function MeusImoveisCard({ quantidade }: MeusImoveisCardProps) {
         </span>
       )}
 
-      <ChevronRightIcon className="ml-auto shrink-0 text-muted-foreground" />
+      <ChevronRightIcon className="ml-auto shrink-0 theme-color/background" />
     </Link>
   )
 }

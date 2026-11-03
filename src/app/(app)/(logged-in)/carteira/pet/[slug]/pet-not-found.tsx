@@ -9,7 +9,7 @@ export function PetNotFound() {
     <div className="max-w-4xl mx-auto">
       <ProfileHeaderWrapper />
 
-      <main className="max-w-4xl pt-2 mx-auto px-4 pb-10">
+      <div className="max-w-4xl pt-2 mx-auto px-4 pb-10">
         <div className="flex flex-col items-center pt-6">
           <Image
             src={petsEmptyImage}
@@ -37,7 +37,7 @@ export function PetNotFound() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -396,8 +396,7 @@ function OuvidoriaCard({
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
-        Sua voz é importante para melhorarmos os serviços da cidade. Acesse
-        nossa Ouvidoria e avalie seu atendimento.
+        Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
       <Link
         href={buildOuvidoriaPageUrl(protocolo, osId, canOpenOuvidoria)}
@@ -582,15 +581,12 @@ function RequestDetail({ data }: { data: DetailData }) {
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
-          <SectionCard>
+          <SectionCard className="min-w-0">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light">
                 Descrição
               </span>
-              <p
-                className="text-sm font-normal leading-5 tracking-normal text-foreground"
-                style={{ whiteSpace: 'pre-wrap' }}
-              >
+              <p className="text-sm font-normal leading-5 tracking-normal text-foreground whitespace-pre-wrap wrap-break-word min-w-0">
                 {decodeHtmlEntities(data.descricao)}
               </p>
             </div>

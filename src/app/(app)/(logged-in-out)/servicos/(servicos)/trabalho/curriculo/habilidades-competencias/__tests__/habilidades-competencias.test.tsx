@@ -143,8 +143,8 @@ describe('HabilidadesCompetencias', () => {
     expect(salvar).toBeDisabled()
 
     await user.click(
-      screen.getByRole('button', {
-        name: 'Abrir lista de áreas',
+      screen.getByRole('textbox', {
+        name: 'Área de atuação',
       })
     )
 
@@ -180,8 +180,8 @@ describe('HabilidadesCompetencias', () => {
     })
 
     await user.click(
-      screen.getByRole('button', {
-        name: 'Abrir lista de áreas',
+      screen.getByRole('textbox', {
+        name: 'Área de atuação',
       })
     )
 
@@ -353,5 +353,234 @@ describe('HabilidadesCompetencias', () => {
     ).toBeInTheDocument()
 
     expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('habilita Salvar ao selecionar um comportamento e desabilita ao desfazer', async () => {
+    mockFetchSuccess()
+    const user = userEvent.setup()
+
+    renderHabilidadesCompetencias()
+
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
+    })
+
+    expect(salvar).toBeDisabled()
+
+    const comportamento = screen.getByRole('button', {
+      name: 'Organização',
+    })
+
+    await user.click(comportamento)
+
+    expect(salvar).toBeEnabled()
+
+    await user.click(comportamento)
+
+    expect(salvar).toBeDisabled()
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('preserva seleções de conhecimentos ao alternar entre áreas', async () => {
+    mockFetchSuccess()
+    const user = userEvent.setup()
+
+    renderHabilidadesCompetencias()
+
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
+    })
+
+    const areaInput = screen.getByRole('textbox', {
+      name: 'Área de atuação',
+    })
+
+    await user.click(areaInput)
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Área B/,
+      })
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Conhecimento A',
+      })
+    )
+
+    expect(salvar).toBeEnabled()
+
+    await user.clear(areaInput)
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Área A/,
+      })
+    )
+
+    // Desmarca o vínculo 187, sem modificar o vínculo 342.
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Conhecimento A',
+      })
+    )
+
+    await user.click(salvar)
+
+    const putCall = vi
+      .mocked(fetch)
+      .mock.calls.find(([, init]) => init?.method === 'PUT')
+
+    expect(putCall).toBeDefined()
+
+    expect(JSON.parse(String(putCall?.[1]?.body))).toEqual({
+      area_atuacao_habilidade_ids: [342],
+      comportamento_atitudes_ids: [5],
+    })
+  })
+
+  it('restaura os dados originais ao cancelar alterações', async () => {
+    mockFetchSuccess()
+    const user = userEvent.setup()
+
+    const { queryClient } = renderHabilidadesCompetencias()
+
+    await screen.findByRole('button', {
+      name: 'Salvar',
+    })
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Organização',
+      })
+    )
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Salvar',
+      })
+    ).toBeEnabled()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Cancelar',
+      })
+    )
+
+    expect(onCancel).toHaveBeenCalledTimes(1)
+
+    expect(queryClient.getQueryData(['habilidades-competencias'])).toEqual(
+      initialData
+    )
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('exibe mensagem quando a pesquisa não encontra áreas de atuação', async () => {
+    mockFetchSuccess()
+    const user = userEvent.setup()
+
+    renderHabilidadesCompetencias()
+
+    const input = await screen.findByRole('textbox', {
+      name: 'Área de atuação',
+    })
+
+    await user.type(input, 'Área inexistente')
+
+    expect(screen.getByText('Nenhuma área encontrada')).toBeInTheDocument()
+
+    expect(
+      screen.queryByRole('button', {
+        name: /Área A|Área B/,
+      })
+    ).not.toBeInTheDocument()
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('impede múltiplos salvamentos enquanto uma requisição está em andamento', async () => {
+    let resolverPut!: (response: Response) => void
+
+    const putPendente = new Promise<Response>(resolve => {
+      resolverPut = resolve
+    })
+
+    vi.mocked(fetch).mockImplementation(async (_input, init) => {
+      if (init?.method === 'PUT') {
+        return putPendente
+      }
+
+      return new Response(JSON.stringify(initialData), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    })
+
+    const user = userEvent.setup()
+
+    renderHabilidadesCompetencias()
+
+    const salvar = await screen.findByRole('button', {
+      name: 'Salvar',
+    })
+
+    // Produz uma alteração.
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Organização',
+      })
+    )
+
+    expect(salvar).toBeEnabled()
+
+    // Inicia o salvamento, mas mantém a resposta pendente.
+    await user.click(salvar)
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: 'Salvando...',
+        })
+      ).toBeDisabled()
+    })
+
+    // Confirma que somente um PUT foi enviado.
+    const contarPuts = () =>
+      vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')
+        .length
+
+    expect(contarPuts()).toBe(1)
+
+    // O botão permanece desabilitado durante a requisição.
+    expect(salvar).toBeDisabled()
+
+    // Libera a resposta da API.
+    resolverPut(
+      new Response(JSON.stringify({ message: 'Currículo atualizado' }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: 'Salvar',
+        })
+      ).toBeDisabled()
+    })
+
+    expect(contarPuts()).toBe(1)
+
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      'Habilidades e competências salvas com sucesso'
+    )
   })
 })
