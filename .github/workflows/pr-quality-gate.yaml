@@ -102,6 +102,9 @@ jobs:
       # que falta), sem gastar o build nem rodar a suíte, e sem stack trace/retries.
       #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
       #    roda só o público, sem falhar).
+      #  - PR do Dependabot → idem: o run recebe só os secrets de Dependabot, não
+      #    os de Actions. `github.actor` continua dependabot[bot] num re-run manual,
+      #    e o re-run segue sem os secrets de Actions.
       #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e exige:
       #      • Token de auth: MINTADO na hora a partir de um refresh_token (não
       #        expira) com fallback ao token estático.
@@ -118,11 +121,17 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
         run: |
           set -uo pipefail
           if [ "$IS_FORK" = "true" ]; then
             echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
             echo "PR de fork: secrets indisponíveis — E2E roda apenas testes públicos."
+            exit 0
+          fi
+          if [ "$IS_DEPENDABOT" = "true" ]; then
+            echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
+            echo "PR do Dependabot: secrets de Actions indisponíveis — E2E roda apenas testes públicos."
             exit 0
           fi
           echo "E2E_REQUIRE_AUTH=true" >> "$GITHUB_ENV"

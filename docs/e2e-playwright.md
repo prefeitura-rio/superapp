@@ -478,6 +478,9 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
    auth e valida as credenciais:
    - **PR de fork** → `E2E_REQUIRE_AUTH=false` (o GitHub não passa secrets a
      forks; roda só o público, sem falhar).
+   - **PR do Dependabot** (`github.actor == 'dependabot[bot]'`) → idem: o run
+     recebe só os secrets de Dependabot, não os de Actions. A suíte autenticada
+     volta a rodar no próximo PR same-repo depois do merge do bump.
    - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e exige:
      - **Token de auth**: `access_token` preferencialmente **mintado na hora** a
        partir de `E2E_REFRESH_TOKEN` (grant `refresh_token` no Keycloak, usando
