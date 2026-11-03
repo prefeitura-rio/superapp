@@ -200,6 +200,11 @@ interface DetailData {
     categoryId: string | null
     deadline: string | null
   } | null
+  canOpenOuvidoria: {
+    elogio: { available: boolean; categoryId: string | null } | null
+    sugestao: { available: boolean; categoryId: string | null } | null
+    reclamacao: { available: boolean; categoryId: string | null } | null
+  } | null
   // não logado
   ultimoAndamento?: {
     evento: string
@@ -361,14 +366,40 @@ function PublicAndamento({ data }: { data: DetailData }) {
   )
 }
 
-function OuvidoriaCard({ protocolo }: { protocolo: string }) {
+function buildOuvidoriaPageUrl(
+  protocolo: string,
+  osId: string,
+  canOpen: NonNullable<DetailData['canOpenOuvidoria']>
+): string {
+  const params = new URLSearchParams({ osId })
+  if (canOpen.elogio?.available && canOpen.elogio.categoryId) {
+    params.set('elogio', canOpen.elogio.categoryId)
+  }
+  if (canOpen.sugestao?.available && canOpen.sugestao.categoryId) {
+    params.set('sugestao', canOpen.sugestao.categoryId)
+  }
+  if (canOpen.reclamacao?.available && canOpen.reclamacao.categoryId) {
+    params.set('reclamacao', canOpen.reclamacao.categoryId)
+  }
+  return `/solicitacoes/${protocolo}/ouvidoria?${params.toString()}`
+}
+
+function OuvidoriaCard({
+  protocolo,
+  osId,
+  canOpenOuvidoria,
+}: {
+  protocolo: string
+  osId: string
+  canOpenOuvidoria: NonNullable<DetailData['canOpenOuvidoria']>
+}) {
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
         Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
       <Link
-        href={`/solicitacoes/${protocolo}/ouvidoria`}
+        href={buildOuvidoriaPageUrl(protocolo, osId, canOpenOuvidoria)}
         className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
       >
         Ouvidoria
@@ -533,11 +564,19 @@ function RequestDetail({ data }: { data: DetailData }) {
             />
           )}
 
-        {/* Ouvidoria — só logado e concluído e não é LAI */}
+        {/* Ouvidoria — só logado, SF liberou ao menos um tipo */}
         {data.isLoggedIn &&
-          macroStatus === 'Concluído' &&
-          !data.isAcessoInformacao && (
-            <OuvidoriaCard protocolo={data.protocolo} />
+          data.canOpenOuvidoria &&
+          [
+            data.canOpenOuvidoria.elogio,
+            data.canOpenOuvidoria.sugestao,
+            data.canOpenOuvidoria.reclamacao,
+          ].some(t => t?.available === true) && (
+            <OuvidoriaCard
+              protocolo={data.protocolo}
+              osId={data.osId}
+              canOpenOuvidoria={data.canOpenOuvidoria}
+            />
           )}
 
         {/* Description — só logado */}
@@ -750,6 +789,28 @@ export default function RequestDetailPage() {
               osId: os?.id ?? '',
               isAcessoInformacao: os?.isAcessoInformacao ?? false,
               canOpenRecurso: os?.canOpen?.recurso ?? null,
+              canOpenOuvidoria: os?.canOpen
+                ? {
+                    elogio: os.canOpen.elogio
+                      ? {
+                          available: os.canOpen.elogio.available ?? false,
+                          categoryId: os.canOpen.elogio.categoryId ?? null,
+                        }
+                      : null,
+                    sugestao: os.canOpen.sugestao
+                      ? {
+                          available: os.canOpen.sugestao.available ?? false,
+                          categoryId: os.canOpen.sugestao.categoryId ?? null,
+                        }
+                      : null,
+                    reclamacao: os.canOpen.reclamacao
+                      ? {
+                          available: os.canOpen.reclamacao.available ?? false,
+                          categoryId: os.canOpen.reclamacao.categoryId ?? null,
+                        }
+                      : null,
+                  }
+                : null,
             })
             setLoading(false)
             return
@@ -801,6 +862,7 @@ export default function RequestDetailPage() {
             osId: '',
             isAcessoInformacao: false,
             canOpenRecurso: null,
+            canOpenOuvidoria: null,
             ultimoAndamento: ultimo,
           })
         } else {
