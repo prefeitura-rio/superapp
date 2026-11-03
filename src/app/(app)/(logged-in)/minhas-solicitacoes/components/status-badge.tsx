@@ -1,14 +1,14 @@
 import type { RequestStatus } from '../types'
 
 const STATUS_BG: Record<RequestStatus, string> = {
-  Aberto: 'var(--card-2, #0084D1)',
-  'Em andamento': 'var(--card-5, #E17100)',
-  Concluído: 'var(--card-3, #096)',
-  Cancelado: 'var(--foreground-light, #71717B)',
+  Aberto: 'var(--status-badge-open, #0069a8)',
+  'Em andamento': 'var(--status-badge-in-progress, #bb4d00)',
+  Concluído: 'var(--status-badge-done, #007a55)',
+  Cancelado: 'var(--status-badge-canceled, #71717b)',
 }
 
 const badgeTextStyle: React.CSSProperties = {
-  color: '#F9FAFB',
+  color: 'var(--status-badge-foreground, #f9fafb)',
   fontFamily: 'var(--font-family-sans, "DM Sans")',
   fontSize: 'var(--font-size-xs, 12px)',
   fontWeight: 'var(--font-weight-normal, 400)',
