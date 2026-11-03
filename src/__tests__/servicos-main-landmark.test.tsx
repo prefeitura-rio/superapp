@@ -112,6 +112,9 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
     vi.unstubAllGlobals()
   })
 
+  // Primeiro teste do arquivo: paga o import a frio do layout e da página
+  // (~4–5 s em máquina lenta), colado no timeout padrão de 5 s do Vitest.
+  // Os demais reaproveitam os módulos e rodam em milissegundos.
   it('/servicos/cursos (página real, sem cursos) tem um único <main>', async () => {
     const { default: CoursesPage } = await import(
       '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/page'
@@ -123,7 +126,7 @@ describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/t
 
     expect(container.querySelector('h1')).toHaveTextContent('Cursos')
     expectSingleMain(container)
-  })
+  }, 20_000)
 
   it('/servicos/cursos (com cursos) tem um único <main> e o H1 dentro dele', async () => {
     const { default: CoursePageClient } = await import(

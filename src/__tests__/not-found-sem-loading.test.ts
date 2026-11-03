@@ -49,9 +49,10 @@ function loadingFilesAbove(pageFile: string): string[] {
   return found
 }
 
+// Caminhos sempre com `/`, para casar com as constantes abaixo também no Windows.
 const pagesWithNotFound = findPages(APP_DIR)
   .filter(file => readFileSync(file, 'utf8').includes('notFound()'))
-  .map(file => path.relative(APP_DIR, file))
+  .map(file => path.relative(APP_DIR, file).split(path.sep).join('/'))
 
 const INSCRICAO_VAGA =
   '(app)/(logged-in-out)/servicos/(servicos)/trabalho/[id]/inscricao/page.tsx'
