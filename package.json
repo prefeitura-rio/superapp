@@ -104,8 +104,6 @@
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.12",
     "@vitest/ui": "^4.1.12",
-    "eslint": "10.10.0",
-    "eslint-config-next": "16.2.10",
     "lefthook": "^2.1.4",
     "msw": "^2.12.7",
     "orval": "^8.44.0",
