@@ -92,6 +92,10 @@ describe('painel de acessibilidade — focus-trap (DEV-110)', () => {
     expect(panel().contains(document.activeElement)).toBe(true)
   })
 
+  // ~2×(total+2) Tabs, e cada `user.tab()` varre os focáveis do documento no
+  // jsdom: ~2 s sozinho, acima dos 5 s padrão com coverage e a suíte em
+  // paralelo. Estourar o timeout deixa os Tabs rodando e derruba os testes
+  // seguintes, que acham o foco fora do lugar.
   it('nenhuma sequência de Tab ou Shift+Tab tira o foco do painel aberto', async () => {
     const user = userEvent.setup()
     await openWithKeyboard(user)
@@ -105,7 +109,7 @@ describe('painel de acessibilidade — focus-trap (DEV-110)', () => {
       await user.tab({ shift: true })
       expect(panel().contains(document.activeElement)).toBe(true)
     }
-  })
+  }, 20_000)
 
   it('com o painel fechado, Tab não é interceptado', async () => {
     const user = userEvent.setup()
