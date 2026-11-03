@@ -484,7 +484,7 @@ function RequestDetail({ data }: { data: DetailData }) {
                 gap: 'var(--button-badge-spacing, 4px)',
                 borderRadius: 'var(--button-badge-radius-pill, 999px)',
                 background: 'var(--secondary, #E4E4E7)',
-                color: 'var(--zinc-900, #18181B)',
+                color: 'var(--foreground, #09090B)',
                 fontFamily: 'var(--font-family-sans, "DM Sans")',
                 fontSize: 'var(--font-size-xs, 12px)',
                 fontWeight: 'var(--font-weight-normal, 400)',
