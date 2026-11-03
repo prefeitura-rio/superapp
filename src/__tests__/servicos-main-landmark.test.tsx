@@ -5,7 +5,15 @@ import type { CoursesPageResult } from '@/lib/courses-list-query'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, waitFor } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
 /**
  * DEV-80 — o layout de /servicos/(servicos) já envolve as páginas no landmark
@@ -95,7 +103,35 @@ function expectSingleMain(container: HTMLElement) {
   expect(container.querySelectorAll('main, [role="main"]')).toHaveLength(1)
 }
 
+/**
+ * DEV-206 — o primeiro import do layout e das páginas reais transforma a frio
+ * boa parte da árvore de /servicos (segundos numa máquina lenta ou com
+ * cobertura). Esse custo fica num beforeAll com prazo próprio, e não no
+ * primeiro caso, que estourava o timeout padrão de 5 s.
+ */
+const COLD_IMPORT_TIMEOUT_MS = 60_000
+
 describe('DEV-80 — um único landmark <main> em /servicos/cursos e /servicos/trabalho', () => {
+  beforeAll(async () => {
+    await Promise.all([
+      import('@/app/(app)/(logged-in-out)/servicos/(servicos)/layout'),
+      import(
+        '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/page'
+      ),
+      import(
+        '@/app/(app)/(logged-in-out)/servicos/(servicos)/cursos/(main)/loading'
+      ),
+      import('@/app/components/courses/courses-client'),
+      import(
+        '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/page'
+      ),
+      import(
+        '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/(main)/loading'
+      ),
+      import('@/app/components/empregos/empregos-page-client'),
+    ])
+  }, COLD_IMPORT_TIMEOUT_MS)
+
   beforeEach(() => {
     // jsdom não implementa ResizeObserver (usado nos carrosséis).
     vi.stubGlobal(

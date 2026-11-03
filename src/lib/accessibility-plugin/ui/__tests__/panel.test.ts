@@ -32,6 +32,10 @@ function byLabel(label: string): HTMLElement {
   return el
 }
 
+// DEV-206 — o caso que percorre o painel inteiro com Tab e Shift+Tab leva
+// segundos com cobertura numa máquina lenta; o timeout padrão de 5 s não basta.
+const FULL_TAB_CYCLE_TIMEOUT_MS = 30_000
+
 function mountPage(): void {
   document.body.innerHTML = `
     <a href="/antes" id="link-antes">Link antes</a>
@@ -92,20 +96,24 @@ describe('painel de acessibilidade — focus-trap (DEV-110)', () => {
     expect(panel().contains(document.activeElement)).toBe(true)
   })
 
-  it('nenhuma sequência de Tab ou Shift+Tab tira o foco do painel aberto', async () => {
-    const user = userEvent.setup()
-    await openWithKeyboard(user)
-    const total = panel().querySelectorAll('button, input').length
+  it(
+    'nenhuma sequência de Tab ou Shift+Tab tira o foco do painel aberto',
+    { timeout: FULL_TAB_CYCLE_TIMEOUT_MS },
+    async () => {
+      const user = userEvent.setup()
+      await openWithKeyboard(user)
+      const total = panel().querySelectorAll('button, input').length
 
-    for (let i = 0; i < total + 2; i++) {
-      await user.tab()
-      expect(panel().contains(document.activeElement)).toBe(true)
+      for (let i = 0; i < total + 2; i++) {
+        await user.tab()
+        expect(panel().contains(document.activeElement)).toBe(true)
+      }
+      for (let i = 0; i < total + 2; i++) {
+        await user.tab({ shift: true })
+        expect(panel().contains(document.activeElement)).toBe(true)
+      }
     }
-    for (let i = 0; i < total + 2; i++) {
-      await user.tab({ shift: true })
-      expect(panel().contains(document.activeElement)).toBe(true)
-    }
-  })
+  )
 
   it('com o painel fechado, Tab não é interceptado', async () => {
     const user = userEvent.setup()
