@@ -77,7 +77,7 @@ export default async function OuvidoriaPage({
     <div className="pb-4 text-foreground flex flex-col">
       <HeaderWrapperClient />
 
-      <div className="max-w-4xl mx-auto w-full px-4 flex flex-col gap-2">
+      <main className="max-w-4xl mx-auto w-full px-4 flex flex-col gap-2">
         <h1
           className="text-3xl font-medium leading-9 text-card-foreground mb-4 pt-2"
           style={{ letterSpacing: '-0.4px' }}
@@ -106,7 +106,7 @@ export default async function OuvidoriaPage({
             </div>
           </a>
         ))}
-      </div>
+      </main>
     </div>
   )
 }
