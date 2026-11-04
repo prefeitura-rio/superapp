@@ -105,7 +105,7 @@ export default function ConsultaProtocoloPage() {
     return (
       <div className="text-foreground">
         <HeaderWrapperClient />
-        <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
+        <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
             <p className="text-sm text-foreground-light leading-5">
               Encontramos{' '}
@@ -149,7 +149,7 @@ export default function ConsultaProtocoloPage() {
               </button>
             ))}
           </div>
-        </div>
+        </main>
 
         <FloatNavigationWrapper />
       </div>
@@ -159,7 +159,7 @@ export default function ConsultaProtocoloPage() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-6 pt-4">
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-6 pt-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">
             Consulte seu protocolo
@@ -228,7 +228,7 @@ export default function ConsultaProtocoloPage() {
             {pageState === 'loading' ? 'Consultando...' : 'Consultar protocolo'}
           </button>
         </form>
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>

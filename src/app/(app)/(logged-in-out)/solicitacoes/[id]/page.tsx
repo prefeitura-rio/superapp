@@ -460,7 +460,7 @@ function RequestDetail({ data }: { data: DetailData }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-2">
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-2">
         <h1
           className="text-3xl font-medium text-card-foreground leading-9 mb-4 pt-2"
           style={{ letterSpacing: '-0.4px' }}
@@ -677,7 +677,7 @@ function RequestDetail({ data }: { data: DetailData }) {
               </SectionCard>
             )
           })()}
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>
@@ -688,7 +688,7 @@ function LoadingState() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -700,7 +700,7 @@ function LoadingState() {
 
         <Skeleton className="rounded-2xl h-40" />
         <Skeleton className="rounded-2xl h-32" />
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>
@@ -711,11 +711,11 @@ function ErrorState({ protocolo }: { protocolo: string }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-      <div className="max-w-4xl mx-auto pb-32 px-4 flex flex-col items-center justify-center text-center gap-2 pt-10">
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col items-center justify-center text-center gap-2 pt-10">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>
-      </div>
+      </main>
       <FloatNavigationWrapper />
     </div>
   )
