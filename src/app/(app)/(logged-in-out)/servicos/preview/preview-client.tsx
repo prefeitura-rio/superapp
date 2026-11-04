@@ -238,7 +238,7 @@ function PreviewShell({ children }: { children: React.ReactNode }) {
       <OfficialBanner />
       <div className="max-w-4xl mx-auto">
         <HeaderWrapperClient />
-        <div className="pb-20 px-4">{children}</div>
+        <main className="pb-20 px-4">{children}</main>
       </div>
     </>
   )

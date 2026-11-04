@@ -91,7 +91,7 @@ export default async function CategoryPage({
     <div className="text-foreground">
       <HeaderWrapperClient />
 
-      <div className="max-w-4xl mx-auto px-4 pb-4">
+      <main className="max-w-4xl mx-auto px-4 pb-4">
         <h1 className="text-4xl font-bold text-foreground pt-2 pb-4">
           {categoryName}
         </h1>
@@ -158,7 +158,7 @@ export default async function CategoryPage({
             shouldRefetch={shouldRefetchSubcategories}
           />
         )}
-      </div>
+      </main>
     </div>
   )
 }
