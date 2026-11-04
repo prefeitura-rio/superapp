@@ -5,6 +5,13 @@ on:
     branches:
       - main
 
+# Serializa os deploys: todos os runs mexem no mesmo Rollout `app` (namespace `app`) e na mesma
+# Application do ArgoCD; dois runs simultâneos promovem o preview um do outro. Sem cancelar o run
+# em andamento (um deploy pela metade deixaria o Rollout pausado em preview).
+concurrency:
+  group: deploy-staging-superapp
+  cancel-in-progress: false
+
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
@@ -134,6 +141,7 @@ jobs:
           echo "✅ ArgoCD Application updated with new image override"
 
       - name: Wait for ArgoCD sync and blue-green preview
+        id: wait-preview
         if: steps.check-k8s-only.outputs.k8s_only != 'true'
         timeout-minutes: 10
         run: |
@@ -186,6 +194,21 @@ jobs:
               echo "✅ Preview is healthy and ready to promote"
               break
             fi
+            if [ "$PHASE" = "Healthy" ]; then
+              # O Rollout pode já ter sido promovido para esta imagem (outro run, promote manual):
+              # ReplicaSet stable = active rodando a imagem esperada é sucesso, não espera por Paused.
+              STABLE_RS=$(kubectl get rollout app -n app -o jsonpath='{.status.stableRS}' 2>/dev/null || echo "")
+              ACTIVE_RS=$(kubectl get rollout app -n app -o jsonpath='{.status.blueGreen.activeSelector}' 2>/dev/null || echo "")
+              STABLE_IMAGE=""
+              if [ -n "$STABLE_RS" ] && [ "$STABLE_RS" = "$ACTIVE_RS" ]; then
+                STABLE_IMAGE=$(kubectl get rs -n app -l "rollouts-pod-template-hash=$STABLE_RS" -o jsonpath='{.items[0].spec.template.spec.containers[0].image}' 2>/dev/null || echo "")
+              fi
+              if [ "$STABLE_IMAGE" = "$IMAGE_NAME:$COMMIT_HASH@$DIGEST" ]; then
+                echo "✅ Rollout already promoted: stable/active ReplicaSet $STABLE_RS runs the expected image"
+                echo "already_promoted=true" >> "$GITHUB_OUTPUT"
+                break
+              fi
+            fi
             if [ "$PHASE" = "Degraded" ] || [ "$PHASE" = "Aborted" ]; then
               echo "❌ Rollout entered $PHASE state"
               kubectl argo rollouts get rollout app -n app
@@ -210,7 +233,7 @@ jobs:
       # - name: Clean up port forward
 
       - name: Promote to Stable
-        if: steps.check-k8s-only.outputs.k8s_only != 'true' && success()
+        if: steps.check-k8s-only.outputs.k8s_only != 'true' && steps.wait-preview.outputs.already_promoted != 'true' && success()
         run: |
           echo "✅ Tests passed! Promoting to stable..."
           kubectl argo rollouts promote app -n app
