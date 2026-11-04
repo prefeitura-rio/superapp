@@ -15,7 +15,7 @@ export const dynamic = 'force-static'
 export default function CookiesPolicy() {
   return (
     <div className="min-h-screen bg-background py-8 pb-20">
-      <div className="max-w-xl mx-auto px-4 space-y-8">
+      <main className="max-w-xl mx-auto px-4 space-y-8">
         {/* Header */}
         <div className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight flex items-center">
@@ -270,7 +270,7 @@ export default function CookiesPolicy() {
             cidadania pelas pessoas naturais.
           </p>
         </section>
-      </div>
+      </main>
     </div>
   )
 }
