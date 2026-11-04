@@ -13,7 +13,7 @@ export default function CategoryServicesLoading() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 pb-4">
+      <main className="max-w-4xl mx-auto px-4 pb-4">
         <Skeleton className="h-10 w-48 mb-4 mt-2" />
         <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-5 w-32" />
@@ -41,7 +41,7 @@ export default function CategoryServicesLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

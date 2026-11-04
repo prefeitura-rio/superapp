@@ -33,7 +33,7 @@ export function PageClientWrapper({
       <div className="max-w-4xl mx-auto">
         <HeaderWrapperClient />
 
-        <div className="pb-20 px-4">
+        <main className="pb-20 px-4">
           <PageClient
             serviceData={serviceData}
             orgaoGestorName={orgaoGestorName}
@@ -41,7 +41,7 @@ export function PageClientWrapper({
             ticketFlags={ticketFlags}
             isPreview={isPreview}
           />
-        </div>
+        </main>
       </div>
     </>
   )
