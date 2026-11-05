@@ -225,7 +225,7 @@ function HabilidadesCompetenciasEditor({
       </div>
 
       {area && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <span className="text-sm font-normal text-primary">
             Selecione conhecimentos
           </span>
@@ -243,7 +243,7 @@ function HabilidadesCompetenciasEditor({
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <span className="text-sm font-normal text-primary">
           Selecione comportamentos e atitudes
         </span>
