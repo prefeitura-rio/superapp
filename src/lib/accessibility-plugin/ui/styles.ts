@@ -341,26 +341,25 @@ html.dark #a11y-btn {
 }
 
 /* Badge de check — no botão (position:absolute) para transbordar do overflow:hidden do wrapper */
-#a11y-btn-wrapper.a11y-btn-has-active #a11y-btn::after {
-  content: '✓';
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #2563eb;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 16px;
-  text-align: center;
+/* Badge fora do wrapper (overflow:hidden cortaria) — posicionado fixo no canto
+   superior esquerdo do botão: top = 50vh-68px-6px, right = 10px+40px-14px */
+#a11y-btn-badge {
+  position: fixed;
+  top: calc(50vh - 74px);
+  right: calc(10px + 40px - 14px);
+  width: 20px;
+  height: 20px;
   pointer-events: none;
-  box-shadow: 0 0 0 2px ${LIGHT_PRIMARY};
+  display: none;
+  z-index: 9996;
 }
-html.dark #a11y-btn-wrapper.a11y-btn-has-active #a11y-btn::after {
-  box-shadow: 0 0 0 2px #1a4a80;
+#a11y-btn-badge svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+#a11y-btn-badge.a11y-badge-visible {
+  display: block;
 }
 #a11y-btn.a11y-btn-pop svg {
   animation: a11y-btn-pop 0.35s cubic-bezier(0.34, 1.6, 0.64, 1) both;

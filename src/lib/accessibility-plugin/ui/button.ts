@@ -37,8 +37,19 @@ export function createButton(onToggle: () => void): HTMLButtonElement {
   btn.setAttribute('type', 'button')
   btn.innerHTML = ICON_SVG
 
+  const badge = document.createElement('span')
+  badge.id = 'a11y-btn-badge'
+  badge.setAttribute('aria-hidden', 'true')
+  badge.innerHTML =
+    '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M9.9987 16.6663C13.6806 16.6663 16.6654 13.6816 16.6654 9.99967C16.6654 6.31778 13.6806 3.33301 9.9987 3.33301C6.3168 3.33301 3.33203 6.31778 3.33203 9.99967C3.33203 13.6816 6.3168 16.6663 9.9987 16.6663Z" fill="#0084D1"/>' +
+    '<path d="M13.3321 8.33398L9.16541 12.5005L7.08198 10.4173" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke="#F9FAFB"/>' +
+    '</svg>'
+
   wrapper.appendChild(popup)
   wrapper.appendChild(btn)
+  // badge fora do wrapper para não ser cortado pelo overflow:hidden
+  document.body.appendChild(badge)
 
   // remove aria-hidden do wrapper quando o botão recebe foco — permite leitura por SR
   btn.addEventListener('focus', () => wrapper.removeAttribute('aria-hidden'))
@@ -86,4 +97,7 @@ export function setButtonActive(active: boolean): void {
   document
     .getElementById(WRAPPER_ID)
     ?.classList.toggle('a11y-btn-has-active', active)
+  document
+    .getElementById('a11y-btn-badge')
+    ?.classList.toggle('a11y-badge-visible', active)
 }
