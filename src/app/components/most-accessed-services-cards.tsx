@@ -52,11 +52,8 @@ export default function MostAccessedServiceCards({
             >
               <div className="bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-h-[140px] w-full h-full">
                 <div className="mb-0">
-                  <img
-                    src={service.icon}
-                    alt={service.title}
-                    className="w-10 h-10"
-                  />
+                  {/* Decorativo: o título visível no <h3> já nomeia o link. */}
+                  <img src={service.icon} alt="" className="w-10 h-10" />
                 </div>
                 <div className="w-full">
                   <h3 className="text-sm font-normal break-words text-foreground leading-4.5">
