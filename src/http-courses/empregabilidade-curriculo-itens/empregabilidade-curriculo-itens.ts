@@ -6,70 +6,160 @@
  * OpenAPI spec version: 1.0
  */
 import type {
-  EmpregabilidadeCurriculoItensReplaceAll,
-  PutApiV1EmpregabilidadeCurriculo200,
-  PutApiV1EmpregabilidadeCurriculo400,
-  PutApiV1EmpregabilidadeCurriculo403,
-  PutApiV1EmpregabilidadeCurriculo500,
+  EmpregabilidadeHabilidadesCompetencias,
+  EmpregabilidadeHabilidadesCompetenciasSave,
+  ResponseErrorResponse,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch-course'
 
-export type putApiV1EmpregabilidadeCurriculoResponse200 = {
-  data: PutApiV1EmpregabilidadeCurriculo200
-  status: 200
-}
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse200 =
+  {
+    data: EmpregabilidadeHabilidadesCompetencias
+    status: 200
+  }
 
-export type putApiV1EmpregabilidadeCurriculoResponse400 = {
-  data: PutApiV1EmpregabilidadeCurriculo400
-  status: 400
-}
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse401 =
+  {
+    data: ResponseErrorResponse
+    status: 401
+  }
 
-export type putApiV1EmpregabilidadeCurriculoResponse403 = {
-  data: PutApiV1EmpregabilidadeCurriculo403
-  status: 403
-}
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse500 =
+  {
+    data: ResponseErrorResponse
+    status: 500
+  }
 
-export type putApiV1EmpregabilidadeCurriculoResponse500 = {
-  data: PutApiV1EmpregabilidadeCurriculo500
-  status: 500
-}
-
-export type putApiV1EmpregabilidadeCurriculoResponseSuccess =
-  putApiV1EmpregabilidadeCurriculoResponse200 & {
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseSuccess =
+  getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse200 & {
     headers: Headers
   }
-export type putApiV1EmpregabilidadeCurriculoResponseError = (
-  | putApiV1EmpregabilidadeCurriculoResponse400
-  | putApiV1EmpregabilidadeCurriculoResponse403
-  | putApiV1EmpregabilidadeCurriculoResponse500
-) & {
-  headers: Headers
-}
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseError =
+  (
+    | getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse401
+    | getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse500
+  ) & {
+    headers: Headers
+  }
 
-export type putApiV1EmpregabilidadeCurriculoResponse =
-  | putApiV1EmpregabilidadeCurriculoResponseSuccess
-  | putApiV1EmpregabilidadeCurriculoResponseError
+export type getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse =
+  | getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseSuccess
+  | getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseError
 
-export const getPutApiV1EmpregabilidadeCurriculoUrl = () => {
-  return `/api/v1/empregabilidade/curriculo`
-}
+export const getGetApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasUrl =
+  () => {
+    return `/api/v1/empregabilidade/curriculo/habilidades-competencias`
+  }
 
 /**
- * Remove as habilidades e comportamentos/atitudes antigos e insere os IDs informados em uma transação
- * @summary Substituir itens do curriculo por CPF
+ * Retorna a área única, os conhecimentos dessa área e os comportamentos marcados. Listas vazias não são 404
+ * @summary Obter habilidades e competências do currículo
  */
-export const putApiV1EmpregabilidadeCurriculo = async (
-  empregabilidadeCurriculoItensReplaceAll: EmpregabilidadeCurriculoItensReplaceAll,
+export const getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias = async (
   options?: Parameters<typeof customFetch>[1]
-): Promise<putApiV1EmpregabilidadeCurriculoResponse> => {
-  return customFetch<putApiV1EmpregabilidadeCurriculoResponse>(
-    getPutApiV1EmpregabilidadeCurriculoUrl(),
+): Promise<getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse> => {
+  return customFetch<getApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse>(
+    getGetApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse200 =
+  {
+    data: EmpregabilidadeHabilidadesCompetencias
+    status: 200
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse400 =
+  {
+    data: ResponseErrorResponse
+    status: 400
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse401 =
+  {
+    data: ResponseErrorResponse
+    status: 401
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse404 =
+  {
+    data: ResponseErrorResponse
+    status: 404
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse500 =
+  {
+    data: ResponseErrorResponse
+    status: 500
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseSuccess =
+  putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse200 & {
+    headers: Headers
+  }
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseError =
+  (
+    | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse400
+    | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse401
+    | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse404
+    | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse500
+  ) & {
+    headers: Headers
+  }
+
+export type putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse =
+  | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseSuccess
+  | putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponseError
+
+export const getPutApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasUrl =
+  () => {
+    return `/api/v1/empregabilidade/curriculo/habilidades-competencias`
+  }
+
+/**
+ * Substitui a área, os conhecimentos dessa área e os comportamentos. Tag fora da área responde 400 e não grava nada
+ * @summary Salvar habilidades e competências do currículo
+ */
+export const putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias = async (
+  empregabilidadeHabilidadesCompetenciasSave: EmpregabilidadeHabilidadesCompetenciasSave,
+  options?: Parameters<typeof customFetch>[1]
+): Promise<putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {}
+    if (h instanceof Headers) return Object.fromEntries(h.entries())
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          entry => Array.from(entry) as [string, string]
+        )
+      )
+    }
+    const headers: Record<string, string | readonly string[]> = {}
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value
+    }
+    return headers
+  }
+  return customFetch<putApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasResponse>(
+    getPutApiV1EmpregabilidadeCurriculoHabilidadesCompetenciasUrl(),
     {
       ...options,
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(empregabilidadeCurriculoItensReplaceAll),
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(empregabilidadeHabilidadesCompetenciasSave),
     }
   )
 }

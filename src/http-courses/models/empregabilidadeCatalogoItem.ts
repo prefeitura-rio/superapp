@@ -6,4 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PutApiV1EmpregabilidadeCurriculo200 = { [key: string]: unknown }
+export interface EmpregabilidadeCatalogoItem {
+  id?: number
+  nome?: string
+}

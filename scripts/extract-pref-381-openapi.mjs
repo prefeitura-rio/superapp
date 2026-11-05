@@ -13,7 +13,11 @@ await rm(ORVAL_OUTPUT_DIR, { recursive: true, force: true })
 const OPERATIONS = [
   {
     method: 'get',
-    path: '/api/v1/empregabilidade/habilidades/areas-atuacao-habilidades',
+    path: '/api/v1/empregabilidade/habilidades/areas-atuacao',
+  },
+  {
+    method: 'get',
+    path: '/api/v1/empregabilidade/habilidades/areas-atuacao/{id}/habilidades',
   },
   {
     method: 'get',
@@ -21,11 +25,11 @@ const OPERATIONS = [
   },
   {
     method: 'get',
-    path: '/api/v1/empregabilidade/curriculo/{cpf}',
+    path: '/api/v1/empregabilidade/curriculo/habilidades-competencias',
   },
   {
     method: 'put',
-    path: '/api/v1/empregabilidade/curriculo',
+    path: '/api/v1/empregabilidade/curriculo/habilidades-competencias',
   },
 ]
 
@@ -62,7 +66,9 @@ for (const { method, path } of OPERATIONS) {
 
   result.paths[path][method] = operation
 
-  if (method === 'put' && path === '/api/v1/empregabilidade/curriculo') {
+  // A tag empregabilidade-curriculo já tem um client gerado à parte em
+  // src/http-courses; estas operações vão para o client controlado deste script.
+  if (path === '/api/v1/empregabilidade/curriculo/habilidades-competencias') {
     result.paths[path][method] = {
       ...operation,
       tags: ['empregabilidade-curriculo-itens'],
@@ -137,7 +143,7 @@ function copyReference(ref) {
   collectReferences(value)
 }
 
-// Primeiro coletamos os refs das quatro operações.
+// Primeiro coletamos os refs das operações.
 collectReferences(result.paths)
 
 // Depois seguimos transitivamente os refs encontrados.
