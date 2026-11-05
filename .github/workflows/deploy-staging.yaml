@@ -87,7 +87,7 @@ jobs:
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --build-arg NEXT_PUBLIC_ACCESSIBILITY_ENABLED="true" \
             --build-arg NEXT_PUBLIC_USE_MOCK_CHAMADOS="false" \
-            --build-arg TICKET_FORM_BASE_URL="https://1746.staging.app.dados.rio/protocolo" \
+            --build-arg NEXT_PUBLIC_TICKET_FORM_BASE_URL="https://1746.staging.app.dados.rio/protocolo" \
             --tag $IMAGE_NAME:latest \
             --tag $IMAGE_NAME:$COMMIT_HASH \
             --push .

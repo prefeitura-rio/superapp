@@ -7,6 +7,7 @@ import {
   YoutubeIcon,
 } from '@/assets/icons'
 import prefRioLogo from '@/assets/pref-rio-logo.svg'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Footer1746Link } from './footer-1746-link'
@@ -21,12 +22,12 @@ const menuLinks = [
 const atendimentoLinks = [
   {
     label: 'Ouvidoria',
-    href: 'https://1746.staging.app.dados.rio/protocolo/ouvidoria',
+    href: `${TICKET_FORM_BASE_URL}/ouvidoria`,
     external: false,
   },
   {
     label: 'Lei de Acesso à Informação',
-    href: 'https://1746.staging.app.dados.rio/protocolo/lai',
+    href: `${TICKET_FORM_BASE_URL}/lai`,
     external: false,
   },
   { label: 'Perguntas frequentes', href: '/faq', external: false },
