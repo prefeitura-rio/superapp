@@ -66,6 +66,30 @@ async function hasCandidatarButton(
 }
 
 /**
+ * Hrefs aceitos para o botão "Candidatar-se à vaga" da página `vagaHref`.
+ *
+ * A página da vaga usa o slug (`<titulo>-<12 primeiros hex do UUID>`), mas o
+ * fluxo /inscricao continua chaveado pelo UUID da vaga (consulta e envio da
+ * candidatura, retorno do login, passos internos). Aceita `<vagaHref>/inscricao`
+ * ou `/servicos/trabalho/<uuid>/inscricao` com o UUID da mesma vaga: o que
+ * começa pelos 12 hex do sufixo do slug.
+ */
+function inscricaoHrefPattern(vagaHref: string): RegExp {
+  const escapedHref = vagaHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const segment = vagaHref.split('/').pop() ?? ''
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      segment
+    )
+  const slugHex = isUuid ? undefined : /-([0-9a-f]{12})$/.exec(segment)?.[1]
+  if (!slugHex) {
+    return new RegExp(`^${escapedHref}/inscricao$`)
+  }
+  const uuid = `${slugHex.slice(0, 8)}-${slugHex.slice(8)}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+  return new RegExp(`^(?:${escapedHref}|/servicos/trabalho/${uuid})/inscricao$`)
+}
+
+/**
  * Abre um drawer de ActionDiv encontrando o label pelo texto e clicando
  * na área interativa — mesma estrutura do DOM usada em meu-perfil.spec.ts.
  */
@@ -520,8 +544,10 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
     const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (isVisible) {
-      const expectedUrl = `${href}/inscricao`
-      await expect(candidatarBtn).toHaveAttribute('href', expectedUrl)
+      await expect(candidatarBtn).toHaveAttribute(
+        'href',
+        inscricaoHrefPattern(href)
+      )
     }
   })
 
