@@ -6,6 +6,7 @@ import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { decodeHtmlEntities } from '@/lib/html-entities'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
@@ -408,12 +409,10 @@ function OuvidoriaCard({
   )
 }
 
-const BASE_1746 = 'https://1746.staging.app.dados.rio/protocolo'
-
 function buildRecursoLaiLink(categoryId: string | null, woId: string): string {
   const params = new URLSearchParams({ woId })
   if (categoryId) params.set('id', categoryId)
-  return `${BASE_1746}/lai/?${params.toString()}`
+  return `${TICKET_FORM_BASE_URL}/lai/?${params.toString()}`
 }
 
 function RecursoCard({ href }: { href: string }) {
