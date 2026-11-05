@@ -1,5 +1,6 @@
 'use client'
 
+import { getCategoryDisplayName } from '@/lib/category-display-name'
 import { sendGAEvent } from '@next/third-parties/google'
 import type React from 'react'
 
@@ -34,6 +35,8 @@ export function CategoryButton({
   return (
     <button
       type="button"
+      // O conteúdo é só o ícone decorativo; o nome vem do rótulo exibido.
+      aria-label={getCategoryDisplayName(category.name)}
       onClick={handleClick}
       className="relative bg-card hover:bg-card/50 w-full aspect-square rounded-xl flex items-center justify-center transition cursor-pointer max-h-[90px]"
     >
