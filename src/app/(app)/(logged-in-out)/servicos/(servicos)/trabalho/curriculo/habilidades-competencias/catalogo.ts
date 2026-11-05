@@ -20,6 +20,8 @@ export type HabilidadesCompetenciasForm = {
 
 export const PAGE_SIZE = 40
 
+export const AREA_SEM_DEFINICAO = 'Sem área definida'
+
 export const HABILIDADES_VAZIO: HabilidadesCompetenciasForm = {
   area: null,
   conhecimentos: [],

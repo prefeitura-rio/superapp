@@ -4,11 +4,14 @@ import { SearchIcon } from '@/assets/icons'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { RadioList } from '@/components/ui/custom/radio-list'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { CatalogoItem } from './catalogo'
-import { areasAtuacaoQueryOptions } from './habilidades-competencias-queries'
+import {
+  areaFixaQueryOptions,
+  areasAtuacaoQueryOptions,
+} from './habilidades-competencias-queries'
 
 interface AreaAtuacaoSheetProps {
   selectedId?: number
@@ -34,11 +37,23 @@ export function AreaAtuacaoSheet({
 }: AreaAtuacaoSheetProps) {
   const [termo, setTermo] = useState('')
   const busca = useDebounced(termo, 300)
+  const buscaVazia = busca.trim() === ''
   const scrollRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { data, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteQuery(areasAtuacaoQueryOptions(busca))
-  const areas = data?.pages.flatMap(page => page.data) ?? []
+  const areaFixa = useQuery({
+    ...areaFixaQueryOptions(),
+    enabled: buscaVazia,
+  })
+  const carregadas = data?.pages.flatMap(page => page.data) ?? []
+  const fixa = buscaVazia ? (areaFixa.data ?? null) : null
+  const areas = fixa
+    ? [fixa, ...carregadas.filter(item => item.id !== fixa.id)]
+    : carregadas
+  const aguardandoLista =
+    (buscaVazia && areaFixa.isLoading) ||
+    (isFetching && carregadas.length === 0)
 
   useEffect(() => {
     const root = scrollRef.current
@@ -85,7 +100,7 @@ export function AreaAtuacaoSheet({
       />
 
       <div ref={scrollRef} className="max-h-80 overflow-y-auto">
-        {isFetching && areas.length === 0 ? (
+        {aguardandoLista ? (
           <div
             className="flex flex-col gap-4"
             aria-busy="true"

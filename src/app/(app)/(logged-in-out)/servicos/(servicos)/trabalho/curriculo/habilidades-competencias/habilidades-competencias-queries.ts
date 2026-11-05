@@ -1,5 +1,5 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
-import type { CatalogoPage } from './catalogo'
+import { AREA_SEM_DEFINICAO, type CatalogoPage } from './catalogo'
 import {
   getHabilidadesCompetenciasAction,
   listComportamentosAction,
@@ -41,5 +41,15 @@ export function areasAtuacaoQueryOptions(busca: string) {
     queryFn: ({ pageParam }) => searchAreasAtuacaoAction(busca, pageParam),
     initialPageParam: 1,
     getNextPageParam: proximaPagina,
+  })
+}
+
+export function areaFixaQueryOptions() {
+  return queryOptions({
+    queryKey: ['areas-atuacao', 'fixa', AREA_SEM_DEFINICAO],
+    queryFn: async () => {
+      const pagina = await searchAreasAtuacaoAction(AREA_SEM_DEFINICAO)
+      return pagina.data.find(item => item.nome === AREA_SEM_DEFINICAO) ?? null
+    },
   })
 }

@@ -11,6 +11,7 @@ import { HabilidadesCompetencias } from '../index'
 const areas: CatalogoItem[] = [
   { id: 10, nome: 'Engenharia Mecânica' },
   { id: 12, nome: 'Comunicação' },
+  { id: 200, nome: 'Sem área definida' },
 ]
 const conhecimentosPorArea: Record<number, CatalogoItem[]> = {
   10: [{ id: 1, nome: 'Gestão de projetos' }],
@@ -173,6 +174,37 @@ describe('HabilidadesCompetencias', () => {
     await waitFor(() => {
       expect(onDirtyChange).toHaveBeenLastCalledWith(true)
     })
+  })
+
+  it('deixa Sem área definida no topo e segue a ordem da busca', async () => {
+    const user = userEvent.setup()
+    renderSecao()
+
+    await user.click(await screen.findByRole('button', { name: /Selecionar/ }))
+
+    const radios = await screen.findAllByRole('radio')
+    expect(radios.map(radio => radio.closest('label')?.textContent)).toEqual([
+      'Sem área definida',
+      'Engenharia Mecânica',
+      'Comunicação',
+    ])
+
+    await user.type(screen.getByRole('textbox', { name: 'Pesquisar' }), 'cao')
+
+    await waitFor(
+      () => {
+        expect(
+          screen.queryByRole('radio', { name: 'Sem área definida' })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.queryByRole('radio', { name: 'Engenharia Mecânica' })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.getByRole('radio', { name: 'Comunicação' })
+        ).toBeInTheDocument()
+      },
+      { timeout: 2000 }
+    )
   })
 
   it('busca área sem acento e não deixa a lupa no gatilho', async () => {

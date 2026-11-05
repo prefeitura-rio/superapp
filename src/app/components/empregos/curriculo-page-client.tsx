@@ -2,6 +2,7 @@
 
 import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
 import {
+  areaFixaQueryOptions,
   areasAtuacaoQueryOptions,
   comportamentosQueryOptions,
   conhecimentosDaAreaQueryOptions,
@@ -78,6 +79,7 @@ export function CurriculoPageClient({ cpf }: CurriculoPageClientProps) {
   const { isPending: areasPendentes } = useInfiniteQuery(
     areasAtuacaoQueryOptions('')
   )
+  const { isPending: areaFixaPendente } = useQuery(areaFixaQueryOptions())
   const areaId = habilidades?.ok ? habilidades.data.area?.id : undefined
   const { isPending: conhecimentosPendentes } = useQuery(
     conhecimentosDaAreaQueryOptions(areaId)
@@ -88,6 +90,7 @@ export function CurriculoPageClient({ cpf }: CurriculoPageClientProps) {
     habilidadesPendentes ||
     comportamentosPendentes ||
     areasPendentes ||
+    areaFixaPendente ||
     (areaId != null && conhecimentosPendentes)
   ) {
     return <CurriculoSkeleton />
