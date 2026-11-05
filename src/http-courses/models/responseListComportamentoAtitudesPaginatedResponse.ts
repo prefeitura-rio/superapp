@@ -5,10 +5,10 @@
  * API de serviços para aplicativos da Prefeitura do Rio
  * OpenAPI spec version: 1.0
  */
-import type { EmpregabilidadeComportamentoAtitudes } from './empregabilidadeComportamentoAtitudes'
+import type { EmpregabilidadeCatalogoItem } from './empregabilidadeCatalogoItem'
 
 export interface ResponseListComportamentoAtitudesPaginatedResponse {
-  data?: EmpregabilidadeComportamentoAtitudes[]
+  data?: EmpregabilidadeCatalogoItem[]
   page?: number
   pageSize?: number
   total?: number

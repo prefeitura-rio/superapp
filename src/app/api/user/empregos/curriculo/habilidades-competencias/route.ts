@@ -1,15 +1,51 @@
 import { getApiV1EmpregabilidadeComportamentosAtitudes } from '@/http-courses/empregabilidade-comportamentos-atitudes/empregabilidade-comportamentos-atitudes'
-import { putApiV1EmpregabilidadeCurriculo } from '@/http-courses/empregabilidade-curriculo-itens/empregabilidade-curriculo-itens'
-import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
-import { getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades } from '@/http-courses/empregabilidade-habilidades/empregabilidade-habilidades'
-import type { EmpregabilidadeCurriculoItensReplaceAll } from '@/http-courses/models'
+import {
+  getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias,
+  putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias,
+} from '@/http-courses/empregabilidade-curriculo-itens/empregabilidade-curriculo-itens'
+import { getApiV1EmpregabilidadeHabilidadesAreasAtuacao } from '@/http-courses/empregabilidade-habilidades/empregabilidade-habilidades'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import {
+  CatalogoIndisponivelError,
+  type ItemCatalogo,
+  listarCatalogoCompleto,
+  normalizarItemCatalogo,
+  normalizarItensCatalogo,
+} from './catalogo'
 
 const NO_CACHE_HEADERS = {
   'Cache-Control': 'private, no-cache, no-store, must-revalidate',
   Pragma: 'no-cache',
   Expires: '0',
+}
+
+const idCatalogo = z.number().int().positive()
+
+const payloadSchema = z
+  .object({
+    id_area_atuacao: idCatalogo.nullable(),
+    habilidade_ids: z.array(idCatalogo).max(500),
+    comportamento_atitudes_ids: z.array(idCatalogo).max(500),
+  })
+  .refine(
+    payload =>
+      payload.id_area_atuacao !== null || payload.habilidade_ids.length === 0,
+    { message: 'Conhecimentos exigem uma área de atuação' }
+  )
+
+/** Comportamentos do catálogo, com os do currículo que faltarem nele. */
+function mesclarComportamentos(
+  catalogo: ItemCatalogo[],
+  doCurriculo: ItemCatalogo[]
+) {
+  const idsCurriculo = new Set(doCurriculo.map(item => item.id))
+  const idsCatalogo = new Set(catalogo.map(item => item.id))
+  return [
+    ...catalogo,
+    ...doCurriculo.filter(item => !idsCatalogo.has(item.id)),
+  ].map(item => ({ ...item, clicked: idsCurriculo.has(item.id) }))
 }
 
 export async function GET() {
@@ -19,80 +55,41 @@ export async function GET() {
   }
 
   try {
-    const cpf = userAuthInfo.cpf.replace(/\D/g, '')
-    const [areasRes, comportamentosRes, curriculoRes] = await Promise.all([
-      getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades(),
-      getApiV1EmpregabilidadeComportamentosAtitudes({ page: 1, pageSize: 20 }),
-      getApiV1EmpregabilidadeCurriculoCpf(cpf),
+    const [areas, comportamentos, curriculoRes] = await Promise.all([
+      listarCatalogoCompleto(params =>
+        getApiV1EmpregabilidadeHabilidadesAreasAtuacao(params)
+      ),
+      listarCatalogoCompleto(params =>
+        getApiV1EmpregabilidadeComportamentosAtitudes(params)
+      ),
+      getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias(),
     ])
 
-    const curriculo =
-      curriculoRes.status === 200 && curriculoRes.data
-        ? (curriculoRes.data as unknown as Record<string, unknown>)
-        : null
-
-    const idsAreasHabilidadesCurriculo = new Set(
-      (Array.isArray(curriculo?.area_atuacao_habilidade)
-        ? (curriculo.area_atuacao_habilidade as Record<string, unknown>[])
-        : []
-      ).map(item => Number(item.id_area_atuacao_habilidade ?? item.id))
-    )
-
-    const catalogoAreas =
-      areasRes.status === 200 && Array.isArray(areasRes.data)
-        ? areasRes.data
-        : []
-
-    const areasMap = new Map<
-      number,
-      {
-        nome: string
-        vinculos: { idTupla: number; nome: string; checked: boolean }[]
-        checked: boolean
-      }
-    >()
-
-    for (const item of catalogoAreas) {
-      const idArea = Number(item.id_area_atuacao ?? item.area_atuacao?.id ?? 0)
-      const idTupla = Number(item.id ?? 0)
-      if (!idArea || !idTupla) continue
-
-      const area = areasMap.get(idArea) ?? {
-        nome: item.area_atuacao?.nome ?? '',
-        vinculos: [],
-        checked: false,
-      }
-      const checked = idsAreasHabilidadesCurriculo.has(idTupla)
-      area.vinculos.push({
-        idTupla,
-        nome: item.habilidade?.nome ?? '',
-        checked,
-      })
-      area.checked ||= checked
-      areasMap.set(idArea, area)
+    // Sem a seleção atual, a tela mostraria o currículo vazio e o Salvar
+    // apagaria o que o cidadão já tinha marcado: falha em vez de seguir.
+    if (curriculoRes.status !== 200) {
+      return NextResponse.json(
+        { error: 'Erro ao carregar habilidades e competências' },
+        {
+          status: curriculoRes.status === 401 ? 401 : 502,
+          headers: NO_CACHE_HEADERS,
+        }
+      )
     }
 
-    const idsComportamentosCurriculo = new Set(
-      (Array.isArray(curriculo?.comportamento_atitudes)
-        ? (curriculo.comportamento_atitudes as Record<string, unknown>[])
-        : []
-      ).map(item => Number(item.id_comportamento_atitudes ?? item.id))
-    )
-
-    const catalogoComportamentos =
-      comportamentosRes.status === 200 &&
-      Array.isArray(comportamentosRes.data?.data)
-        ? comportamentosRes.data.data
-        : []
+    const curriculo = curriculoRes.data
 
     return NextResponse.json(
       {
-        areasAtuacao: Array.from(areasMap.values()),
-        comportamentoAtitudes: catalogoComportamentos.map(item => ({
-          id: Number(item.id ?? 0),
-          nome: item.nome ?? '',
-          clicked: idsComportamentosCurriculo.has(Number(item.id ?? 0)),
-        })),
+        areasAtuacao: areas,
+        areaAtuacaoSelecionada: normalizarItemCatalogo(curriculo.area_atuacao),
+        conhecimentosSelecionados: normalizarItensCatalogo(
+          curriculo.conhecimentos ?? null
+        ),
+        comportamentoAtitudes: mesclarComportamentos(
+          comportamentos,
+          normalizarItensCatalogo(curriculo.comportamentos_atitudes ?? null)
+        ),
       },
       { headers: NO_CACHE_HEADERS }
     )
@@ -100,7 +97,10 @@ export async function GET() {
     console.error('Erro ao carregar habilidades e competências:', error)
     return NextResponse.json(
       { error: 'Erro ao carregar habilidades e competências' },
-      { status: 500, headers: NO_CACHE_HEADERS }
+      {
+        status: error instanceof CatalogoIndisponivelError ? 502 : 500,
+        headers: NO_CACHE_HEADERS,
+      }
     )
   }
 }
@@ -111,10 +111,27 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
+  let body: unknown
   try {
-    const payload =
-      (await request.json()) as EmpregabilidadeCurriculoItensReplaceAll
-    const response = await putApiV1EmpregabilidadeCurriculo(payload)
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
+  }
+
+  const parsed = payloadSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
+  }
+
+  try {
+    const response =
+      await putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias({
+        id_area_atuacao: parsed.data.id_area_atuacao,
+        habilidade_ids: [...new Set(parsed.data.habilidade_ids)],
+        comportamento_atitudes_ids: [
+          ...new Set(parsed.data.comportamento_atitudes_ids),
+        ],
+      })
 
     if (response.status !== 200) {
       return NextResponse.json(response.data, { status: response.status })

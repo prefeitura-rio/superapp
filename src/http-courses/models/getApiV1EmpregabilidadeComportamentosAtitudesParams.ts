@@ -7,16 +7,10 @@
  */
 
 export type GetApiV1EmpregabilidadeComportamentosAtitudesParams = {
-  /**
-   * Termo de busca
-   */
+  /** Termo de busca */
   q?: string
-  /**
-   * Número da página (default: 1)
-   */
+  /** Número da página (default: 1) */
   page?: number
-  /**
-   * Tamanho da página (default: 20, max: 100)
-   */
+  /** Tamanho da página (default: 20, max: 100) */
   pageSize?: number
 }

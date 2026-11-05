@@ -6,7 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface EmpregabilidadeCurriculoItensReplaceAll {
-  area_atuacao_habilidade_ids?: number[]
+export interface EmpregabilidadeHabilidadesCompetenciasSave {
   comportamento_atitudes_ids?: number[]
+  habilidade_ids?: number[]
+  /** @nullable */
+  id_area_atuacao?: number | null
 }

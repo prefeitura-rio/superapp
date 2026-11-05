@@ -8,20 +8,27 @@ import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AreaAtuacao } from './area-atuacao'
 import { ComportamentosAtitudes } from './comportamentos-atitudes'
-import { Conhecimentos } from './conhecimentos'
+import { Conhecimentos, conhecimentosDaAreaQueryKey } from './conhecimentos'
 import type {
   AreaAtuacaoViewModel,
+  ConhecimentosDaAreaData,
   HabilidadesCompetenciasData,
   HabilidadesCompetenciasPayload,
 } from './types'
 import {
+  alternarId,
   arraysDeIdsIguais,
   extrairIdsComportamentosUnicos,
-  extrairIdsHabilidadesUnicos,
 } from './utils'
 
 interface HabilidadesCompetenciasAccordionContentProps {
   onCancel: () => void
+}
+
+interface Snapshot {
+  areaId: number | null
+  habilidadeIds: number[]
+  comportamentoIds: number[]
 }
 
 async function fetchHabilidadesCompetencias(): Promise<HabilidadesCompetenciasData> {
@@ -41,53 +48,45 @@ function HabilidadesCompetenciasEditor({
   onCancel: () => void
 }) {
   const queryClient = useQueryClient()
-  const [areasAtuacao, setAreasAtuacao] = useState(() =>
-    structuredClone(initialData.areasAtuacao)
+  const [areaSelecionada, setAreaSelecionada] =
+    useState<AreaAtuacaoViewModel | null>(initialData.areaAtuacaoSelecionada)
+  const [habilidadeIds, setHabilidadeIds] = useState<number[]>(() =>
+    initialData.conhecimentosSelecionados.map(item => item.id)
   )
   const [comportamentos, setComportamentos] = useState(() =>
     structuredClone(initialData.comportamentoAtitudes)
   )
-  const [areaSelecionadaNome, setAreaSelecionadaNome] = useState('')
   const [salvando, setSalvando] = useState(false)
 
-  const [snapshotHabilidades, setSnapshotHabilidades] = useState(() =>
-    extrairIdsHabilidadesUnicos(initialData.areasAtuacao)
-  )
-  const [snapshotComportamentos, setSnapshotComportamentos] = useState(() =>
-    extrairIdsComportamentosUnicos(initialData.comportamentoAtitudes)
-  )
+  const [snapshot, setSnapshot] = useState<Snapshot>(() => ({
+    areaId: initialData.areaAtuacaoSelecionada?.id ?? null,
+    habilidadeIds: initialData.conhecimentosSelecionados.map(item => item.id),
+    comportamentoIds: extrairIdsComportamentosUnicos(
+      initialData.comportamentoAtitudes
+    ),
+  }))
 
-  const areaSelecionada =
-    areasAtuacao.find(area => area.nome === areaSelecionadaNome) ?? null
+  const areaId = areaSelecionada?.id ?? null
 
-  const idsHabilidadesAtuais = useMemo(
-    () => extrairIdsHabilidadesUnicos(areasAtuacao),
-    [areasAtuacao]
-  )
   const idsComportamentosAtuais = useMemo(
     () => extrairIdsComportamentosUnicos(comportamentos),
     [comportamentos]
   )
 
   const houveAlteracao =
-    !arraysDeIdsIguais(snapshotHabilidades, idsHabilidadesAtuais) ||
-    !arraysDeIdsIguais(snapshotComportamentos, idsComportamentosAtuais)
+    snapshot.areaId !== areaId ||
+    !arraysDeIdsIguais(snapshot.habilidadeIds, habilidadeIds) ||
+    !arraysDeIdsIguais(snapshot.comportamentoIds, idsComportamentosAtuais)
 
-  const toggleHabilidade = (idTupla: number) => {
-    setAreasAtuacao(atuais =>
-      atuais.map(area => {
-        const vinculos = area.vinculos.map(vinculo =>
-          vinculo.idTupla === idTupla
-            ? { ...vinculo, checked: !vinculo.checked }
-            : vinculo
-        )
-        return {
-          ...area,
-          vinculos,
-          checked: vinculos.some(vinculo => vinculo.checked),
-        }
-      })
-    )
+  const selecionarArea = (area: AreaAtuacaoViewModel) => {
+    if (area.id === areaId) return
+    // O currículo guarda uma só área, e os conhecimentos precisam ser dela.
+    setAreaSelecionada(area)
+    setHabilidadeIds([])
+  }
+
+  const toggleHabilidade = (id: number) => {
+    setHabilidadeIds(atuais => alternarId(atuais, id))
   }
 
   const toggleComportamento = (id: number) => {
@@ -102,7 +101,8 @@ function HabilidadesCompetenciasEditor({
     if (!houveAlteracao || salvando) return
 
     const payload: HabilidadesCompetenciasPayload = {
-      area_atuacao_habilidade_ids: idsHabilidadesAtuais,
+      id_area_atuacao: areaId,
+      habilidade_ids: habilidadeIds,
       comportamento_atitudes_ids: idsComportamentosAtuais,
     }
 
@@ -121,12 +121,21 @@ function HabilidadesCompetenciasEditor({
 
       // O estado atual passa a ser o novo snapshot persistido. Não refazemos
       // leitura dos catálogos: eles já estão em cache na tela e não mudaram.
-      setSnapshotHabilidades([...idsHabilidadesAtuais])
-      setSnapshotComportamentos([...idsComportamentosAtuais])
+      setSnapshot({
+        areaId,
+        habilidadeIds: [...habilidadeIds],
+        comportamentoIds: [...idsComportamentosAtuais],
+      })
       queryClient.setQueryData<HabilidadesCompetenciasData>(
         ['habilidades-competencias'],
         {
-          areasAtuacao: structuredClone(areasAtuacao),
+          areasAtuacao: initialData.areasAtuacao,
+          areaAtuacaoSelecionada: areaSelecionada,
+          conhecimentosSelecionados: (
+            queryClient.getQueryData<ConhecimentosDaAreaData>(
+              conhecimentosDaAreaQueryKey(areaId)
+            )?.conhecimentos ?? []
+          ).filter(item => habilidadeIds.includes(item.id)),
           comportamentoAtitudes: structuredClone(comportamentos),
         }
       )
@@ -143,16 +152,8 @@ function HabilidadesCompetenciasEditor({
     // Desfaz todas as possíveis alterações, retornando assim ao estado anterior.
     queryClient.setQueryData<HabilidadesCompetenciasData>(
       ['habilidades-competencias'],
-      {
-        areasAtuacao: structuredClone(initialData.areasAtuacao),
-        comportamentoAtitudes: structuredClone(
-          initialData.comportamentoAtitudes
-        ),
-      }
+      structuredClone(initialData)
     )
-
-    setSnapshotHabilidades([...idsHabilidadesAtuais])
-    setSnapshotComportamentos([...idsComportamentosAtuais])
 
     onCancel()
   }
@@ -161,13 +162,16 @@ function HabilidadesCompetenciasEditor({
     <div className="space-y-6">
       <AreaAtuacao
         value={areaSelecionada?.nome}
-        areasAtuacao={areasAtuacao}
-        onSelect={(area: AreaAtuacaoViewModel) =>
-          setAreaSelecionadaNome(area.nome)
-        }
+        selecionadaId={areaSelecionada?.id}
+        areasAtuacao={initialData.areasAtuacao}
+        onSelect={selecionarArea}
       />
 
-      <Conhecimentos area={areaSelecionada} onToggle={toggleHabilidade} />
+      <Conhecimentos
+        areaId={areaId}
+        selecionados={habilidadeIds}
+        onToggle={toggleHabilidade}
+      />
 
       <ComportamentosAtitudes
         itens={comportamentos}

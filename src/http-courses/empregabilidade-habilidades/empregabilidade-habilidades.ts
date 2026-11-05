@@ -6,54 +6,152 @@
  * OpenAPI spec version: 1.0
  */
 import type {
-  EmpregabilidadeAreaAtuacaoHabilidade,
+  GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesParams,
+  GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoParams,
   ResponseErrorResponse,
+  ResponseListAreasAtuacaoPaginatedResponse,
+  ResponseListCatalogoPaginatedResponse,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch-course'
 
-export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse200 =
-  {
-    data: EmpregabilidadeAreaAtuacaoHabilidade[]
-    status: 200
-  }
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse200 = {
+  data: ResponseListAreasAtuacaoPaginatedResponse
+  status: 200
+}
 
-export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse500 =
-  {
-    data: ResponseErrorResponse
-    status: 500
-  }
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse500 = {
+  data: ResponseErrorResponse
+  status: 500
+}
 
-export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponseSuccess =
-  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse200 & {
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponseSuccess =
+  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse200 & {
     headers: Headers
   }
-export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponseError =
-  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse500 & {
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponseError =
+  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse500 & {
     headers: Headers
   }
 
-export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse =
-  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponseSuccess
-  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponseError
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse =
+  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponseSuccess
+  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponseError
 
-export const getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesUrl =
-  () => {
-    return `/api/v1/empregabilidade/habilidades/areas-atuacao-habilidades`
-  }
+export const getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoUrl = (
+  params?: GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/empregabilidade/habilidades/areas-atuacao?${stringifiedParams}`
+    : `/api/v1/empregabilidade/habilidades/areas-atuacao`
+}
 
 /**
- * Retorna todos os vínculos cadastrados entre áreas de atuação e habilidades
- * @summary Listar vínculos entre Áreas de Atuação e Habilidades
+ * Retorna uma lista paginada das áreas de atuação vinculadas às habilidades
+ * @summary Listar Áreas de Atuação
  */
-export const getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades = async (
+export const getApiV1EmpregabilidadeHabilidadesAreasAtuacao = async (
+  params?: GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoParams,
   options?: Parameters<typeof customFetch>[1]
-): Promise<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse> => {
-  return customFetch<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesResponse>(
-    getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidadesUrl(),
+): Promise<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse> => {
+  return customFetch<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoResponse>(
+    getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoUrl(params),
     {
       ...options,
       method: 'GET',
     }
   )
 }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse200 =
+  {
+    data: ResponseListCatalogoPaginatedResponse
+    status: 200
+  }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse400 =
+  {
+    data: ResponseErrorResponse
+    status: 400
+  }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse404 =
+  {
+    data: ResponseErrorResponse
+    status: 404
+  }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse500 =
+  {
+    data: ResponseErrorResponse
+    status: 500
+  }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponseSuccess =
+  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse200 & {
+    headers: Headers
+  }
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponseError =
+  (
+    | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse400
+    | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse404
+    | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse500
+  ) & {
+    headers: Headers
+  }
+
+export type getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse =
+  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponseSuccess
+  | getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponseError
+
+export const getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesUrl =
+  (
+    id: number,
+    params?: GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesParams
+  ) => {
+    const normalizedParams = new URLSearchParams()
+
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined) {
+        normalizedParams.append(key, value === null ? 'null' : String(value))
+      }
+    })
+
+    const stringifiedParams = normalizedParams.toString()
+
+    return stringifiedParams.length > 0
+      ? `/api/v1/empregabilidade/habilidades/areas-atuacao/${id}/habilidades?${stringifiedParams}`
+      : `/api/v1/empregabilidade/habilidades/areas-atuacao/${id}/habilidades`
+  }
+
+/**
+ * Retorna os conhecimentos vinculados à área, com paginação e busca sem acento
+ * @summary Listar conhecimentos de uma área
+ */
+export const getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidades =
+  async (
+    id: number,
+    params?: GetApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesParams,
+    options?: Parameters<typeof customFetch>[1]
+  ): Promise<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse> => {
+    return customFetch<getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesResponse>(
+      getGetApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesUrl(
+        id,
+        params
+      ),
+      {
+        ...options,
+        method: 'GET',
+      }
+    )
+  }

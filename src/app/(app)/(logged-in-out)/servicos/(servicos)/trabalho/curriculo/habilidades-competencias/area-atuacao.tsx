@@ -7,12 +7,14 @@ import type { AreaAtuacaoViewModel } from './types'
 
 interface AreaAtuacaoProps {
   value?: string
+  selecionadaId?: number
   areasAtuacao: AreaAtuacaoViewModel[]
   onSelect: (area: AreaAtuacaoViewModel) => void
 }
 
 export function AreaAtuacao({
   value,
+  selecionadaId,
   areasAtuacao,
   onSelect,
 }: AreaAtuacaoProps) {
@@ -37,18 +39,17 @@ export function AreaAtuacao({
   }, [])
 
   const areasFiltradas = useMemo(() => {
-    const palavras = termoBusca
-      .toLowerCase()
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
+    const campoMostraAreaSelecionada = termoBusca === value
+    const palavras = campoMostraAreaSelecionada
+      ? []
+      : termoBusca.toLowerCase().trim().split(/\s+/).filter(Boolean)
     if (palavras.length === 0) return areasAtuacao
 
     return areasAtuacao.filter(area => {
       const texto = area.nome.toLowerCase()
       return palavras.every(palavra => texto.includes(palavra))
     })
-  }, [areasAtuacao, termoBusca])
+  }, [areasAtuacao, termoBusca, value])
 
   return (
     <div ref={dropdownRef} className="relative w-full space-y-1">
@@ -78,7 +79,7 @@ export function AreaAtuacao({
           {areasFiltradas.length > 0 ? (
             areasFiltradas.map(area => (
               <button
-                key={area.nome}
+                key={area.id}
                 type="button"
                 onClick={() => {
                   onSelect(area)
@@ -89,7 +90,7 @@ export function AreaAtuacao({
               >
                 <span className="flex-1">{area.nome}</span>
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[#A1A1A1]">
-                  {area.checked && (
+                  {area.id === selecionadaId && (
                     <span className="size-4 rounded-full bg-[#13335A]" />
                   )}
                 </span>
