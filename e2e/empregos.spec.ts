@@ -606,22 +606,6 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       return
     }
 
-    await candidatarBtn.click()
-    await page.waitForURL(
-      url =>
-        url.pathname.includes('/inscricao') ||
-        url.pathname.includes('/minhas-candidaturas'),
-      { timeout: 15000 }
-    )
-
-    if (page.url().includes('/minhas-candidaturas')) {
-      test.skip(
-        true,
-        'Usuário já está inscrito nesta vaga; redirecionado para minhas-candidaturas'
-      )
-      return
-    }
-
     // A página exibe um dos 3 estados possíveis do carousel
     const bemVindo = page.getByText('Cadastro de oportunidades de', {
       exact: false,
@@ -633,10 +617,32 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       level: 1,
       name: 'Meu Currículo',
     })
+    const minhasCandidaturas = page.getByRole('heading', {
+      level: 1,
+      name: 'Minhas candidaturas',
+    })
+    const inscricaoRenderizada = bemVindo.or(confirmarInfos).or(curriculo)
 
-    await expect(bemVindo.or(confirmarInfos).or(curriculo).first()).toBeVisible(
-      { timeout: 20000 }
-    )
+    await candidatarBtn.click()
+
+    // /inscricao redireciona no servidor para Minhas candidaturas quando a conta
+    // já se candidatou à vaga, e a navegação do cliente atualiza a URL para
+    // /inscricao antes de o redirect chegar. Decidir pela URL logo após o
+    // clique pula cedo demais; espera o destino final renderizar.
+    await expect(
+      inscricaoRenderizada.or(minhasCandidaturas).first()
+    ).toBeVisible({ timeout: 20000 })
+
+    if (await minhasCandidaturas.isVisible()) {
+      test.skip(
+        true,
+        'Usuário já está inscrito nesta vaga; redirecionado para minhas-candidaturas'
+      )
+      return
+    }
+
+    await expect(page).toHaveURL(/\/inscricao(?:[/?#]|$)/)
+    await expect(inscricaoRenderizada.first()).toBeVisible()
   })
 
   test('tela de bem-vindo (quando presente) exibe título e botão Continuar', async ({
