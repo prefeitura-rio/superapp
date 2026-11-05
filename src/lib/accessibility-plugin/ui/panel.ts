@@ -356,7 +356,7 @@ export function createPanel(
 
   const title = document.createElement('p')
   title.className = 'a11y-panel-title'
-  title.textContent = 'Painel de Acessibilidade'
+  title.textContent = 'Recursos Assistivos'
 
   const closeBtn = document.createElement('button')
   closeBtn.className = 'a11y-panel-close'
@@ -409,7 +409,9 @@ export function createPanel(
         ? 'motion'
         : visionActive > 0
           ? 'vision'
-          : 'text'
+          : textActive > 0
+            ? 'text'
+            : null
 
   // ── Máscara: sub-rows condicionais ──
   const maskSubRows = [

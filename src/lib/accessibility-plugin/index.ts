@@ -10,7 +10,7 @@ import { ReduceMotion } from './features/reduce-motion'
 import { Saturation } from './features/saturation'
 import { TTS } from './features/tts'
 import { getState, resetState, setState } from './state'
-import { createButton, setButtonExpanded } from './ui/button'
+import { createButton, setButtonActive, setButtonExpanded } from './ui/button'
 import {
   closePanel,
   createPanel,
@@ -26,6 +26,23 @@ import {
   removeTTSWidget,
   updateWidgetProgress,
 } from './ui/tts-widget'
+
+function hasActiveFeature(state: ReturnType<typeof getState>): boolean {
+  return (
+    state.fontSize > 0 ||
+    state.letterSpacing > 0 ||
+    state.lineHeight > 0 ||
+    state.dyslexiaFont ||
+    state.highContrast ||
+    state.colorBlind ||
+    state.highlightLinks ||
+    state.reduceMotion ||
+    state.saturation > 0 ||
+    state.readingMask ||
+    state.hideImages ||
+    state.tts
+  )
+}
 
 function applyState(state: ReturnType<typeof getState>): void {
   FontSize.apply(state.fontSize)
@@ -45,6 +62,7 @@ function applyState(state: ReturnType<typeof getState>): void {
   )
   HideImages.apply(state.hideImages)
   applyTTS(state.tts, state.ttsSpeed)
+  setButtonActive(hasActiveFeature(state))
 }
 
 function applyTTS(enabled: boolean, speed: 0 | 1 | 2): void {
