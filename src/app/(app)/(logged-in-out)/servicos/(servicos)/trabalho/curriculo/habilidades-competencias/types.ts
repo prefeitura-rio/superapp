@@ -1,14 +1,11 @@
-export interface HabilidadeVinculoViewModel {
-  idTupla: number
+export interface ItemCatalogoViewModel {
+  id: number
   nome: string
-  checked: boolean
 }
 
-export interface AreaAtuacaoViewModel {
-  nome: string
-  vinculos: HabilidadeVinculoViewModel[]
-  checked: boolean
-}
+export type AreaAtuacaoViewModel = ItemCatalogoViewModel
+
+export type ConhecimentoViewModel = ItemCatalogoViewModel
 
 export interface ComportamentoAtitudeViewModel {
   id: number
@@ -18,10 +15,17 @@ export interface ComportamentoAtitudeViewModel {
 
 export interface HabilidadesCompetenciasData {
   areasAtuacao: AreaAtuacaoViewModel[]
+  areaAtuacaoSelecionada: AreaAtuacaoViewModel | null
+  conhecimentosSelecionados: ConhecimentoViewModel[]
   comportamentoAtitudes: ComportamentoAtitudeViewModel[]
 }
 
+export interface ConhecimentosDaAreaData {
+  conhecimentos: ConhecimentoViewModel[]
+}
+
 export interface HabilidadesCompetenciasPayload {
-  area_atuacao_habilidade_ids: number[]
+  id_area_atuacao: number | null
+  habilidade_ids: number[]
   comportamento_atitudes_ids: number[]
 }

@@ -1,7 +1,9 @@
 import { getApiV1EmpregabilidadeComportamentosAtitudes } from '@/http-courses/empregabilidade-comportamentos-atitudes/empregabilidade-comportamentos-atitudes'
-import { putApiV1EmpregabilidadeCurriculo } from '@/http-courses/empregabilidade-curriculo-itens/empregabilidade-curriculo-itens'
-import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
-import { getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades } from '@/http-courses/empregabilidade-habilidades/empregabilidade-habilidades'
+import {
+  getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias,
+  putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias,
+} from '@/http-courses/empregabilidade-curriculo-itens/empregabilidade-curriculo-itens'
+import { getApiV1EmpregabilidadeHabilidadesAreasAtuacao } from '@/http-courses/empregabilidade-habilidades/empregabilidade-habilidades'
 import { getUserInfoFromToken } from '@/lib/user-info'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { GET, PUT } from '../route'
@@ -13,7 +15,7 @@ vi.mock('@/lib/user-info', () => ({
 vi.mock(
   '@/http-courses/empregabilidade-habilidades/empregabilidade-habilidades',
   () => ({
-    getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades: vi.fn(),
+    getApiV1EmpregabilidadeHabilidadesAreasAtuacao: vi.fn(),
   })
 )
 
@@ -25,32 +27,41 @@ vi.mock(
 )
 
 vi.mock(
-  '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo',
-  () => ({
-    getApiV1EmpregabilidadeCurriculoCpf: vi.fn(),
-  })
-)
-
-vi.mock(
   '@/http-courses/empregabilidade-curriculo-itens/empregabilidade-curriculo-itens',
   () => ({
-    putApiV1EmpregabilidadeCurriculo: vi.fn(),
+    getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias: vi.fn(),
+    putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias: vi.fn(),
   })
 )
 
 const mockGetUserInfoFromToken = vi.mocked(getUserInfoFromToken)
-
-const mockGetAreasAtuacaoHabilidades = vi.mocked(
-  getApiV1EmpregabilidadeHabilidadesAreasAtuacaoHabilidades
-)
-
-const mockGetComportamentosAtitudes = vi.mocked(
+const mockGetAreas = vi.mocked(getApiV1EmpregabilidadeHabilidadesAreasAtuacao)
+const mockGetComportamentos = vi.mocked(
   getApiV1EmpregabilidadeComportamentosAtitudes
 )
+const mockGetCurriculo = vi.mocked(
+  getApiV1EmpregabilidadeCurriculoHabilidadesCompetencias
+)
+const mockPutCurriculo = vi.mocked(
+  putApiV1EmpregabilidadeCurriculoHabilidadesCompetencias
+)
 
-const mockGetCurriculo = vi.mocked(getApiV1EmpregabilidadeCurriculoCpf)
+const pagina = (data: unknown[], total = data.length) =>
+  ({ status: 200, data: { data, total, page: 1, pageSize: 100 } }) as never
 
-const mockPutCurriculo = vi.mocked(putApiV1EmpregabilidadeCurriculo)
+function logado() {
+  mockGetUserInfoFromToken.mockResolvedValue({
+    cpf: '123.456.789-01',
+  } as never)
+}
+
+function putRequest(body: unknown) {
+  return new Request('http://localhost', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+  })
+}
 
 describe('habilidades e competências route', () => {
   beforeEach(() => {
@@ -64,94 +75,76 @@ describe('habilidades e competências route', () => {
       const response = await GET()
 
       expect(response.status).toBe(401)
-
       await expect(response.json()).resolves.toEqual({
         error: 'Não autorizado',
       })
-
-      expect(mockGetAreasAtuacaoHabilidades).not.toHaveBeenCalled()
-      expect(mockGetComportamentosAtitudes).not.toHaveBeenCalled()
+      expect(mockGetAreas).not.toHaveBeenCalled()
+      expect(mockGetComportamentos).not.toHaveBeenCalled()
       expect(mockGetCurriculo).not.toHaveBeenCalled()
     })
 
-    it('compõe áreas, conhecimentos e comportamentos com as seleções do currículo', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '123.456.789-01',
-      } as never)
-
-      mockGetAreasAtuacaoHabilidades.mockResolvedValue({
-        status: 200,
-        data: [
-          {
-            id: 187,
-            id_area_atuacao: 10,
-            area_atuacao: {
-              id: 10,
-              nome: 'Área A',
-            },
-            habilidade: {
-              id: 1,
-              nome: 'Conhecimento A',
-            },
-          },
-          {
-            id: 188,
-            id_area_atuacao: 10,
-            area_atuacao: {
-              id: 10,
-              nome: 'Área A',
-            },
-            habilidade: {
-              id: 2,
-              nome: 'Conhecimento B',
-            },
-          },
-          {
-            id: 342,
-            id_area_atuacao: 20,
-            area_atuacao: {
-              id: 20,
-              nome: 'Área B',
-            },
-            habilidade: {
-              id: 1,
-              nome: 'Conhecimento A',
-            },
-          },
-        ],
-      } as never)
-
-      mockGetComportamentosAtitudes.mockResolvedValue({
-        status: 200,
-        data: {
-          data: [
-            {
-              id: 5,
-              nome: 'Colaboração',
-            },
-            {
-              id: 6,
-              nome: 'Organização',
-            },
-          ],
-        },
-      } as never)
-
+    it('compõe áreas, área e conhecimentos do currículo e comportamentos marcados', async () => {
+      logado()
+      mockGetAreas.mockResolvedValue(
+        pagina([
+          { id: 10, nome: 'Área A' },
+          { id: 20, nome: 'Área B' },
+        ])
+      )
+      mockGetComportamentos.mockResolvedValue(
+        pagina([
+          { id: 5, nome: 'Colaboração' },
+          { id: 6, nome: 'Organização' },
+        ])
+      )
       mockGetCurriculo.mockResolvedValue({
         status: 200,
         data: {
-          area_atuacao_habilidade: [
-            {
-              id: 900,
-              id_area_atuacao_habilidade: 342,
-            },
-          ],
-          comportamento_atitudes: [
-            {
-              id: 901,
-              id_comportamento_atitudes: 5,
-            },
-          ],
+          area_atuacao: { id: 20, nome: 'Área B' },
+          conhecimentos: [{ id: 1, nome: 'Conhecimento A' }],
+          comportamentos_atitudes: [{ id: 5, nome: 'Colaboração' }],
+        },
+      } as never)
+
+      const response = await GET()
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Cache-Control')).toContain('no-store')
+      expect(mockGetAreas).toHaveBeenCalledWith({ page: 1, pageSize: 100 })
+      expect(mockGetComportamentos).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 100,
+      })
+      await expect(response.json()).resolves.toEqual({
+        areasAtuacao: [
+          { id: 10, nome: 'Área A' },
+          { id: 20, nome: 'Área B' },
+        ],
+        areaAtuacaoSelecionada: { id: 20, nome: 'Área B' },
+        conhecimentosSelecionados: [{ id: 1, nome: 'Conhecimento A' }],
+        comportamentoAtitudes: [
+          { id: 5, nome: 'Colaboração', clicked: true },
+          { id: 6, nome: 'Organização', clicked: false },
+        ],
+      })
+    })
+
+    it('lê todas as páginas do catálogo de áreas', async () => {
+      logado()
+      const primeira = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1,
+        nome: `Área ${i + 1}`,
+      }))
+      mockGetAreas
+        .mockResolvedValueOnce(pagina(primeira, 101))
+        .mockResolvedValueOnce(pagina([{ id: 101, nome: 'Área 101' }], 101))
+      mockGetComportamentos.mockResolvedValue(pagina([]))
+      mockGetCurriculo.mockResolvedValue({
+        status: 200,
+        data: {
+          area_atuacao: null,
+          conhecimentos: [],
+          comportamentos_atitudes: [],
         },
       } as never)
 
@@ -159,99 +152,78 @@ describe('habilidades e competências route', () => {
       const body = await response.json()
 
       expect(response.status).toBe(200)
-
-      expect(mockGetCurriculo).toHaveBeenCalledWith('12345678901')
-
-      expect(mockGetComportamentosAtitudes).toHaveBeenCalledWith({
-        page: 1,
-        pageSize: 20,
+      expect(mockGetAreas).toHaveBeenNthCalledWith(2, {
+        page: 2,
+        pageSize: 100,
       })
+      expect(body.areasAtuacao).toHaveLength(101)
+      expect(body.areasAtuacao.at(-1)).toEqual({ id: 101, nome: 'Área 101' })
+      expect(body.areaAtuacaoSelecionada).toBeNull()
+    })
 
-      expect(body).toEqual({
-        areasAtuacao: [
-          {
-            nome: 'Área A',
-            checked: false,
-            vinculos: [
-              {
-                idTupla: 187,
-                nome: 'Conhecimento A',
-                checked: false,
-              },
-              {
-                idTupla: 188,
-                nome: 'Conhecimento B',
-                checked: false,
-              },
-            ],
-          },
-          {
-            nome: 'Área B',
-            checked: true,
-            vinculos: [
-              {
-                idTupla: 342,
-                nome: 'Conhecimento A',
-                checked: true,
-              },
-            ],
-          },
-        ],
+    it('descarta itens sem ID válido e mantém comportamento do currículo ausente no catálogo', async () => {
+      logado()
+      mockGetAreas.mockResolvedValue(
+        pagina([{ id: 0, nome: 'Sem id' }, { nome: 'Sem id' }, null])
+      )
+      mockGetComportamentos.mockResolvedValue(pagina([{ id: 6, nome: 'B' }]))
+      mockGetCurriculo.mockResolvedValue({
+        status: 200,
+        data: {
+          area_atuacao: { id: 0, nome: 'inválida' },
+          comportamentos_atitudes: [{ id: 9, nome: 'Fora do catálogo' }],
+        },
+      } as never)
+
+      const response = await GET()
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        areasAtuacao: [],
+        areaAtuacaoSelecionada: null,
+        conhecimentosSelecionados: [],
         comportamentoAtitudes: [
-          {
-            id: 5,
-            nome: 'Colaboração',
-            clicked: true,
-          },
-          {
-            id: 6,
-            nome: 'Organização',
-            clicked: false,
-          },
+          { id: 6, nome: 'B', clicked: false },
+          { id: 9, nome: 'Fora do catálogo', clicked: true },
         ],
       })
     })
 
-    it('ignora vínculos do catálogo sem IDs válidos', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '12345678901',
+    it('retorna 502 quando não consegue ler a seleção do currículo, para não apresentar um currículo vazio', async () => {
+      logado()
+      mockGetAreas.mockResolvedValue(pagina([{ id: 10, nome: 'Área A' }]))
+      mockGetComportamentos.mockResolvedValue(pagina([]))
+      mockGetCurriculo.mockResolvedValue({
+        status: 500,
+        data: { error: 'falha' },
       } as never)
 
-      mockGetAreasAtuacaoHabilidades.mockResolvedValue({
-        status: 200,
-        data: [
-          {
-            id: 0,
-            id_area_atuacao: 10,
-            area: {
-              id: 10,
-              nome: 'Sem tupla',
-            },
-            habilidade: {
-              nome: 'Conhecimento',
-            },
-          },
-          {
-            id: 100,
-            id_area_atuacao: 0,
-            area_atuacao: {
-              id: 0,
-              nome: 'Sem área',
-            },
-            habilidade: {
-              nome: 'Conhecimento',
-            },
-          },
-        ],
+      const response = await GET()
+
+      expect(response.status).toBe(502)
+      await expect(response.json()).resolves.toEqual({
+        error: 'Erro ao carregar habilidades e competências',
+      })
+    })
+
+    it('repassa 401 quando a Go API recusa o token', async () => {
+      logado()
+      mockGetAreas.mockResolvedValue(pagina([]))
+      mockGetComportamentos.mockResolvedValue(pagina([]))
+      mockGetCurriculo.mockResolvedValue({
+        status: 401,
+        data: { error: 'Usuário não autenticado' },
       } as never)
 
-      mockGetComportamentosAtitudes.mockResolvedValue({
-        status: 200,
-        data: {
-          data: [],
-        },
-      } as never)
+      const response = await GET()
 
+      expect(response.status).toBe(401)
+    })
+
+    it('retorna 502 quando um catálogo responde fora de 200', async () => {
+      logado()
+      mockGetAreas.mockResolvedValue({ status: 500, data: {} } as never)
+      mockGetComportamentos.mockResolvedValue(pagina([]))
       mockGetCurriculo.mockResolvedValue({
         status: 200,
         data: {},
@@ -259,27 +231,18 @@ describe('habilidades e competências route', () => {
 
       const response = await GET()
 
-      expect(response.status).toBe(200)
-
-      await expect(response.json()).resolves.toEqual({
-        areasAtuacao: [],
-        comportamentoAtitudes: [],
-      })
+      expect(response.status).toBe(502)
     })
 
-    it('retorna 500 quando ocorre erro ao carregar os dados', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '12345678901',
-      } as never)
-
-      mockGetAreasAtuacaoHabilidades.mockRejectedValue(
-        new Error('backend indisponível')
-      )
+    it('retorna 500 quando ocorre exceção ao carregar os dados', async () => {
+      logado()
+      mockGetAreas.mockRejectedValue(new Error('backend indisponível'))
+      mockGetComportamentos.mockResolvedValue(pagina([]))
+      mockGetCurriculo.mockResolvedValue({ status: 200, data: {} } as never)
 
       const response = await GET()
 
       expect(response.status).toBe(500)
-
       await expect(response.json()).resolves.toEqual({
         error: 'Erro ao carregar habilidades e competências',
       })
@@ -290,104 +253,132 @@ describe('habilidades e competências route', () => {
     it('retorna 401 quando o usuário autenticado não possui CPF', async () => {
       mockGetUserInfoFromToken.mockResolvedValue({} as never)
 
-      const request = new Request('http://localhost', {
-        method: 'PUT',
-        body: JSON.stringify({
-          area_atuacao_habilidade_ids: [187],
+      const response = await PUT(
+        putRequest({
+          id_area_atuacao: 10,
+          habilidade_ids: [1],
           comportamento_atitudes_ids: [5],
-        }),
-      })
-
-      const response = await PUT(request)
+        })
+      )
 
       expect(response.status).toBe(401)
       expect(mockPutCurriculo).not.toHaveBeenCalled()
     })
 
-    it('repassa exatamente o payload para atualização do currículo', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '12345678901',
-      } as never)
-
-      mockPutCurriculo.mockResolvedValue({
-        status: 200,
-        data: {
-          message: 'Currículo atualizado',
-        },
-      } as never)
-
-      const payload = {
-        area_atuacao_habilidade_ids: [187, 342],
-        comportamento_atitudes_ids: [5, 6],
+    it('envia área, conhecimentos e comportamentos sem IDs repetidos', async () => {
+      logado()
+      const salvo = {
+        area_atuacao: { id: 10, nome: 'Área A' },
+        conhecimentos: [{ id: 1, nome: 'Conhecimento A' }],
+        comportamentos_atitudes: [{ id: 5, nome: 'Colaboração' }],
       }
+      mockPutCurriculo.mockResolvedValue({ status: 200, data: salvo } as never)
 
-      const request = new Request('http://localhost', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-
-      const response = await PUT(request)
+      const response = await PUT(
+        putRequest({
+          id_area_atuacao: 10,
+          habilidade_ids: [1, 1],
+          comportamento_atitudes_ids: [5, 5, 6],
+        })
+      )
 
       expect(response.status).toBe(200)
-      expect(mockPutCurriculo).toHaveBeenCalledTimes(1)
-      expect(mockPutCurriculo).toHaveBeenCalledWith(payload)
+      expect(mockPutCurriculo).toHaveBeenCalledWith({
+        id_area_atuacao: 10,
+        habilidade_ids: [1],
+        comportamento_atitudes_ids: [5, 6],
+      })
+      await expect(response.json()).resolves.toEqual(salvo)
+    })
 
-      await expect(response.json()).resolves.toEqual({
-        message: 'Currículo atualizado',
+    it('aceita limpar a área quando nenhum conhecimento é enviado', async () => {
+      logado()
+      mockPutCurriculo.mockResolvedValue({ status: 200, data: {} } as never)
+
+      const response = await PUT(
+        putRequest({
+          id_area_atuacao: null,
+          habilidade_ids: [],
+          comportamento_atitudes_ids: [],
+        })
+      )
+
+      expect(response.status).toBe(200)
+      expect(mockPutCurriculo).toHaveBeenCalledWith({
+        id_area_atuacao: null,
+        habilidade_ids: [],
+        comportamento_atitudes_ids: [],
       })
     })
 
-    it('preserva status e corpo retornados pelo backend quando a atualização falha', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '12345678901',
-      } as never)
-
-      mockPutCurriculo.mockResolvedValue({
-        status: 422,
-        data: {
-          error: 'Dados inválidos',
-        },
-      } as never)
-
-      const request = new Request('http://localhost', {
-        method: 'PUT',
-        body: JSON.stringify({
-          area_atuacao_habilidade_ids: [999],
+    it.each([
+      ['corpo que não é JSON', '{'],
+      [
+        'formato antigo (IDs de tuplas)',
+        { area_atuacao_habilidade_ids: [187], comportamento_atitudes_ids: [5] },
+      ],
+      [
+        'conhecimentos sem área',
+        {
+          id_area_atuacao: null,
+          habilidade_ids: [1],
           comportamento_atitudes_ids: [],
-        }),
-      })
+        },
+      ],
+      [
+        'IDs que não são inteiros positivos',
+        {
+          id_area_atuacao: 10,
+          habilidade_ids: [-1, 'x'],
+          comportamento_atitudes_ids: [1.5],
+        },
+      ],
+    ])('retorna 400 sem chamar a Go API para %s', async (_caso, body) => {
+      logado()
 
-      const response = await PUT(request)
+      const response = await PUT(putRequest(body))
 
-      expect(response.status).toBe(422)
-
+      expect(response.status).toBe(400)
       await expect(response.json()).resolves.toEqual({
         error: 'Dados inválidos',
+      })
+      expect(mockPutCurriculo).not.toHaveBeenCalled()
+    })
+
+    it('preserva status e corpo retornados pela Go API quando a gravação falha', async () => {
+      logado()
+      mockPutCurriculo.mockResolvedValue({
+        status: 400,
+        data: { error: 'Conhecimento fora da área' },
+      } as never)
+
+      const response = await PUT(
+        putRequest({
+          id_area_atuacao: 10,
+          habilidade_ids: [999],
+          comportamento_atitudes_ids: [],
+        })
+      )
+
+      expect(response.status).toBe(400)
+      await expect(response.json()).resolves.toEqual({
+        error: 'Conhecimento fora da área',
       })
     })
 
     it('retorna 500 quando ocorre exceção durante a atualização', async () => {
-      mockGetUserInfoFromToken.mockResolvedValue({
-        cpf: '12345678901',
-      } as never)
-
+      logado()
       mockPutCurriculo.mockRejectedValue(new Error('backend indisponível'))
 
-      const request = new Request('http://localhost', {
-        method: 'PUT',
-        body: JSON.stringify({
-          area_atuacao_habilidade_ids: [187],
-          rtamento_atitudes_ids: [5],
-        }),
-      })
-
-      const response = await PUT(request)
+      const response = await PUT(
+        putRequest({
+          id_area_atuacao: 10,
+          habilidade_ids: [1],
+          comportamento_atitudes_ids: [5],
+        })
+      )
 
       expect(response.status).toBe(500)
-
       await expect(response.json()).resolves.toEqual({
         error: 'Erro ao atualizar habilidades e competências',
       })

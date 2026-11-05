@@ -7,12 +7,14 @@ import type { AreaAtuacaoViewModel } from './types'
 
 interface AreaAtuacaoProps {
   value?: string
+  selecionadaId?: number
   areasAtuacao: AreaAtuacaoViewModel[]
   onSelect: (area: AreaAtuacaoViewModel) => void
 }
 
 export function AreaAtuacao({
   value,
+  selecionadaId,
   areasAtuacao,
   onSelect,
 }: AreaAtuacaoProps) {
@@ -78,7 +80,7 @@ export function AreaAtuacao({
           {areasFiltradas.length > 0 ? (
             areasFiltradas.map(area => (
               <button
-                key={area.nome}
+                key={area.id}
                 type="button"
                 onClick={() => {
                   onSelect(area)
@@ -89,7 +91,7 @@ export function AreaAtuacao({
               >
                 <span className="flex-1">{area.nome}</span>
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[#A1A1A1]">
-                  {area.checked && (
+                  {area.id === selecionadaId && (
                     <span className="size-4 rounded-full bg-[#13335A]" />
                   )}
                 </span>

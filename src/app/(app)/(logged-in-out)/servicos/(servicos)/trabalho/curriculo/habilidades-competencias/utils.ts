@@ -1,21 +1,4 @@
-import type {
-  AreaAtuacaoViewModel,
-  ComportamentoAtitudeViewModel,
-} from './types'
-
-export function extrairIdsHabilidadesUnicos(
-  areasAtuacao: AreaAtuacaoViewModel[]
-): number[] {
-  return [
-    ...new Set(
-      areasAtuacao.flatMap(area =>
-        area.vinculos
-          .filter(vinculo => vinculo.checked)
-          .map(vinculo => vinculo.idTupla)
-      )
-    ),
-  ]
-}
+import type { ComportamentoAtitudeViewModel } from './types'
 
 export function extrairIdsComportamentosUnicos(
   comportamentos: ComportamentoAtitudeViewModel[]
@@ -34,4 +17,9 @@ export function arraysDeIdsIguais(a: number[], b: number[]): boolean {
   const bOrdenado = [...b].sort((x, y) => x - y)
 
   return aOrdenado.every((valor, index) => valor === bOrdenado[index])
+}
+
+/** Inclui o id quando ausente e o retira quando presente. */
+export function alternarId(ids: number[], id: number): number[] {
+  return ids.includes(id) ? ids.filter(atual => atual !== id) : [...ids, id]
 }

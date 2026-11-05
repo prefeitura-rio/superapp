@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { AreaAtuacaoViewModel } from '../types'
 import {
+  alternarId,
   arraysDeIdsIguais,
   extrairIdsComportamentosUnicos,
-  extrairIdsHabilidadesUnicos,
 } from '../utils'
 
 describe('habilidades e competências - comparação de snapshots', () => {
@@ -15,24 +14,10 @@ describe('habilidades e competências - comparação de snapshots', () => {
     expect(arraysDeIdsIguais([1, 2], [1, 2, 3])).toBe(false)
   })
 
-  it('extrai somente IDs das tuplas Área × Habilidade selecionadas, sem duplicar', () => {
-    const areas: AreaAtuacaoViewModel[] = [
-      {
-        nome: 'Área A',
-        checked: true,
-        vinculos: [
-          { idTupla: 10, nome: 'Habilidade 1', checked: true },
-          { idTupla: 11, nome: 'Habilidade 2', checked: false },
-        ],
-      },
-      {
-        nome: 'Área B',
-        checked: true,
-        vinculos: [{ idTupla: 10, nome: 'Habilidade 1', checked: true }],
-      },
-    ]
-
-    expect(extrairIdsHabilidadesUnicos(areas)).toEqual([10])
+  it('alterna um ID: inclui quando ausente e retira quando presente', () => {
+    expect(alternarId([1, 2], 3)).toEqual([1, 2, 3])
+    expect(alternarId([1, 2, 3], 2)).toEqual([1, 3])
+    expect(alternarId([], 7)).toEqual([7])
   })
 
   it('extrai somente comportamentos selecionados', () => {
