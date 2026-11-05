@@ -33,7 +33,26 @@ const OPERATIONS = [
   },
 ]
 
-const source = JSON.parse(await readFile(SOURCE_FILE, 'utf8'))
+/**
+ * Aceita o `docs/swagger.json` (Swagger 2.0) da app-go-api além do
+ * `openapi-v3.json`: o swag só atualiza o primeiro a cada mudança de contrato.
+ * O conversor vem com o Orval (`@scalar/openapi-parser`).
+ */
+async function loadOpenApi3(file) {
+  const document = JSON.parse(await readFile(file, 'utf8'))
+
+  if (document.swagger !== '2.0') {
+    return document
+  }
+
+  const { upgradeFromTwoToThree } = await import(
+    '@scalar/openapi-upgrader/2.0-to-3.0'
+  )
+
+  return upgradeFromTwoToThree(document)
+}
+
+const source = await loadOpenApi3(SOURCE_FILE)
 
 const result = {
   openapi: source.openapi,

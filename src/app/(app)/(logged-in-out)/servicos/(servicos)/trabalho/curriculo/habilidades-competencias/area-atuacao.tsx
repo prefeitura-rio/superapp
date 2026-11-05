@@ -39,18 +39,17 @@ export function AreaAtuacao({
   }, [])
 
   const areasFiltradas = useMemo(() => {
-    const palavras = termoBusca
-      .toLowerCase()
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
+    const campoMostraAreaSelecionada = termoBusca === value
+    const palavras = campoMostraAreaSelecionada
+      ? []
+      : termoBusca.toLowerCase().trim().split(/\s+/).filter(Boolean)
     if (palavras.length === 0) return areasAtuacao
 
     return areasAtuacao.filter(area => {
       const texto = area.nome.toLowerCase()
       return palavras.every(palavra => texto.includes(palavra))
     })
-  }, [areasAtuacao, termoBusca])
+  }, [areasAtuacao, termoBusca, value])
 
   return (
     <div ref={dropdownRef} className="relative w-full space-y-1">

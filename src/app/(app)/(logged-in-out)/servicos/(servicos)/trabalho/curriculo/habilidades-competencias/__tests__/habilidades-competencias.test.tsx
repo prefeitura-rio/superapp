@@ -372,6 +372,23 @@ describe('HabilidadesCompetencias', () => {
     expect(contarPuts()).toBe(0)
   })
 
+  it('com a área salva no campo, a lista abre com todas as áreas', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+
+    renderHabilidadesCompetencias()
+
+    const input = await screen.findByRole('textbox', {
+      name: 'Área de atuação',
+    })
+    expect(input).toHaveValue('Área A')
+
+    await user.click(input)
+
+    expect(screen.getByRole('button', { name: /Área A/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Área B/ })).toBeInTheDocument()
+  })
+
   it('exibe mensagem de erro quando não consegue carregar habilidades e competências', async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(null, {
