@@ -1,9 +1,15 @@
 'use client'
 
 import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
+import {
+  areasAtuacaoQueryOptions,
+  comportamentosQueryOptions,
+  conhecimentosDaAreaQueryOptions,
+  habilidadesCompetenciasQueryOptions,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/habilidades-competencias/habilidades-competencias-queries'
 import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 async function fetchCurriculoData() {
   const res = await fetch('/api/user/empregos/curriculo', { cache: 'no-store' })
@@ -63,8 +69,29 @@ export function CurriculoPageClient({ cpf }: CurriculoPageClientProps) {
     queryFn: fetchCurriculoData,
     staleTime: 5 * 60 * 1000,
   })
+  const { data: habilidades, isPending: habilidadesPendentes } = useQuery(
+    habilidadesCompetenciasQueryOptions()
+  )
+  const { isPending: comportamentosPendentes } = useQuery(
+    comportamentosQueryOptions()
+  )
+  const { isPending: areasPendentes } = useInfiniteQuery(
+    areasAtuacaoQueryOptions('')
+  )
+  const areaId = habilidades?.ok ? habilidades.data.area?.id : undefined
+  const { isPending: conhecimentosPendentes } = useQuery(
+    conhecimentosDaAreaQueryOptions(areaId)
+  )
 
-  if (isLoading) return <CurriculoSkeleton />
+  if (
+    isLoading ||
+    habilidadesPendentes ||
+    comportamentosPendentes ||
+    areasPendentes ||
+    (areaId != null && conhecimentosPendentes)
+  ) {
+    return <CurriculoSkeleton />
+  }
 
   return (
     <CurriculoContent

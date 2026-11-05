@@ -2,12 +2,38 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { CatalogoItem } from '../catalogo'
+import { HabilidadesAccordionMark } from '../habilidades-accordion-mark'
 import { HabilidadesCompetencias } from '../index'
 
-const { mockToastSuccess, mockToastError } = vi.hoisted(() => ({
+const areas: CatalogoItem[] = [
+  { id: 10, nome: 'Engenharia Mecânica' },
+  { id: 12, nome: 'Comunicação' },
+]
+const conhecimentosPorArea: Record<number, CatalogoItem[]> = {
+  10: [{ id: 1, nome: 'Gestão de projetos' }],
+  12: [{ id: 4, nome: 'Redação' }],
+}
+const comportamentos: CatalogoItem[] = [{ id: 4, nome: 'Proatividade' }]
+
+function semAcento(valor: string) {
+  return valor
+    .normalize('NFD')
+    .split('')
+    .filter(char => {
+      const codigo = char.charCodeAt(0)
+      return codigo < 0x0300 || codigo > 0x036f
+    })
+    .join('')
+    .toLowerCase()
+}
+
+const { mockToastSuccess, mockToastError, saveMock } = vi.hoisted(() => ({
   mockToastSuccess: vi.fn(),
   mockToastError: vi.fn(),
+  saveMock: vi.fn(),
 }))
 
 vi.mock('react-hot-toast', () => ({
@@ -17,49 +43,76 @@ vi.mock('react-hot-toast', () => ({
   },
 }))
 
-const initialData = {
-  areasAtuacao: [
-    { id: 10, nome: 'Área A' },
-    { id: 20, nome: 'Área B' },
-  ],
-  areaAtuacaoSelecionada: { id: 10, nome: 'Área A' },
-  conhecimentosSelecionados: [{ id: 1, nome: 'Conhecimento A' }],
-  comportamentoAtitudes: [
-    {
-      id: 5,
-      nome: 'Colaboração',
-      clicked: true,
+vi.mock('../habilidades-competencias-actions', () => ({
+  getHabilidadesCompetenciasAction: vi.fn(async () => ({
+    ok: true,
+    data: { area: null, conhecimentos: [], comportamentos: [] },
+  })),
+  searchAreasAtuacaoAction: vi.fn(async (q?: string) => {
+    const termo = semAcento(q ?? '')
+    const data = termo
+      ? areas.filter(area => semAcento(area.nome).includes(termo))
+      : areas
+    return { data, total: data.length, page: 1, pageSize: 20 }
+  }),
+  listConhecimentosDaAreaAction: vi.fn(async (areaId: number) => {
+    const data = conhecimentosPorArea[areaId] ?? []
+    return { data, total: data.length, page: 1, pageSize: 100 }
+  }),
+  listComportamentosAction: vi.fn(async () => ({
+    data: comportamentos,
+    total: comportamentos.length,
+    page: 1,
+    pageSize: 100,
+  })),
+  saveHabilidadesCompetenciasAction: saveMock,
+}))
+
+function salvo(body: {
+  id_area_atuacao?: number | null
+  comportamento_atitudes_ids?: number[]
+}) {
+  return {
+    ok: true as const,
+    data: {
+      area: areas.find(area => area.id === body.id_area_atuacao) ?? null,
+      conhecimentos: [],
+      comportamentos: comportamentos.filter(item =>
+        body.comportamento_atitudes_ids?.includes(item.id)
+      ),
     },
-    {
-      id: 6,
-      nome: 'Organização',
-      clicked: false,
-    },
-  ],
+  }
 }
 
-const conhecimentosPorArea: Record<string, { id: number; nome: string }[]> = {
-  '10': [
-    { id: 1, nome: 'Conhecimento A' },
-    { id: 2, nome: 'Conhecimento B' },
-  ],
-  '20': [
-    { id: 1, nome: 'Conhecimento A' },
-    { id: 3, nome: 'Conhecimento C' },
-  ],
+function Harness({
+  onCancel = vi.fn(),
+  onDirtyChange,
+}: {
+  onCancel?: () => void
+  onDirtyChange?: (alterado: boolean) => void
+}) {
+  const [preenchida, setPreenchida] = useState(false)
+  const [erro, setErro] = useState(false)
+
+  return (
+    <>
+      <HabilidadesAccordionMark preenchida={preenchida} erro={erro} />
+      <HabilidadesCompetencias
+        onCancel={onCancel}
+        onFilledChange={setPreenchida}
+        onAreaErrorChange={setErro}
+        onDirtyChange={onDirtyChange}
+      />
+    </>
+  )
 }
 
-const URL_BASE = '/api/user/empregos/curriculo/habilidades-competencias'
-
-const onCancel = vi.fn()
-
-function renderHabilidadesCompetencias() {
+function renderSecao(
+  onCancel = vi.fn(),
+  onDirtyChange?: (alterado: boolean) => void
+) {
   const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
+    defaultOptions: { queries: { retry: false } },
   })
 
   function Wrapper({ children }: { children: ReactNode }) {
@@ -68,453 +121,146 @@ function renderHabilidadesCompetencias() {
     )
   }
 
-  return {
-    queryClient,
-    ...render(<HabilidadesCompetencias onCancel={onCancel} />, {
-      wrapper: Wrapper,
-    }),
-  }
-}
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  return render(<Harness onCancel={onCancel} onDirtyChange={onDirtyChange} />, {
+    wrapper: Wrapper,
   })
 }
 
-/** Responde às rotas do BFF; `put` define a resposta do Salvar. */
-function mockFetch({
-  dados = initialData,
-  put = async () => jsonResponse({ area_atuacao: null }),
-  area = async (id: string) =>
-    conhecimentosPorArea[id]
-      ? jsonResponse({ conhecimentos: conhecimentosPorArea[id] })
-      : jsonResponse({ error: 'Área de atuação não encontrada' }, 404),
-}: {
-  dados?: unknown
-  put?: () => Promise<Response>
-  area?: (id: string) => Promise<Response>
-} = {}) {
-  vi.mocked(fetch).mockImplementation(async (input, init) => {
-    const url = String(input)
-    if (init?.method === 'PUT') return put()
-    const areaMatch = url.match(/\/areas\/(\d+)\/habilidades$/)
-    if (areaMatch) return area(areaMatch[1])
-    if (url === URL_BASE) return jsonResponse(dados)
-    throw new Error(`URL inesperada no teste: ${url}`)
-  })
-}
-
-const chamadas = (filtro: (url: string, init?: RequestInit) => boolean) =>
-  vi
-    .mocked(fetch)
-    .mock.calls.filter(([input, init]) => filtro(String(input), init))
-
-const contarPuts = () => chamadas((_url, init) => init?.method === 'PUT').length
-
-const corpoDoPut = () => {
-  const [put] = chamadas((_url, init) => init?.method === 'PUT')
-  expect(put).toBeDefined()
-  return JSON.parse(String(put?.[1]?.body))
-}
-
-async function selecionarArea(
-  user: ReturnType<typeof userEvent.setup>,
-  nome: RegExp
-) {
-  const input = screen.getByRole('textbox', { name: 'Área de atuação' })
-  await user.clear(input)
-  await user.click(input)
-  await user.click(screen.getByRole('button', { name: nome }))
+async function escolherArea(nome: string) {
+  const user = userEvent.setup()
+  await user.click(await screen.findByRole('button', { name: /Selecionar/ }))
+  await user.click(await screen.findByRole('radio', { name: nome }))
+  return user
 }
 
 describe('HabilidadesCompetencias', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.stubGlobal('fetch', vi.fn())
+    mockToastSuccess.mockReset()
+    mockToastError.mockReset()
+    saveMock.mockReset()
+    saveMock.mockImplementation(salvo)
   })
 
-  it('mostra a área e os conhecimentos do currículo e mantém Salvar desabilitado sem alteração', async () => {
-    mockFetch()
+  it('mostra o check só depois de escolher a área, e a lupa só dentro do sheet', async () => {
+    renderSecao()
 
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    expect(salvar).toBeDisabled()
+    expect(screen.queryByTestId('habilidades-check')).not.toBeInTheDocument()
     expect(
-      screen.getByRole('textbox', { name: 'Área de atuação' })
-    ).toHaveValue('Área A')
+      screen.queryByTestId('area-atuacao-search-icon')
+    ).not.toBeInTheDocument()
 
+    await escolherArea('Engenharia Mecânica')
+
+    expect(screen.getByTestId('habilidades-check')).toBeInTheDocument()
     expect(
-      await screen.findByRole('button', { name: 'Conhecimento A' })
-    ).toHaveAttribute('aria-pressed', 'true')
-    expect(
-      screen.getByRole('button', { name: 'Conhecimento B' })
-    ).toHaveAttribute('aria-pressed', 'false')
-
-    expect(chamadas(url => url === URL_BASE)).toHaveLength(1)
-    expect(
-      chamadas(url => url === `${URL_BASE}/areas/10/habilidades`)
-    ).toHaveLength(1)
-  })
-
-  it('habilita ao alterar um conhecimento e desabilita novamente ao desfazer a alteração', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    const conhecimento = await screen.findByRole('button', {
-      name: 'Conhecimento B',
-    })
-
-    await user.click(conhecimento)
-    expect(salvar).toBeEnabled()
-
-    await user.click(conhecimento)
-    expect(salvar).toBeDisabled()
-
-    expect(contarPuts()).toBe(0)
-  })
-
-  it('ao trocar de área limpa os conhecimentos e envia a área nova com os conhecimentos dela', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    await screen.findByRole('button', { name: 'Conhecimento A' })
-
-    await selecionarArea(user, /Área B/)
-
-    // A área nova vem sem nenhum conhecimento marcado.
-    expect(
-      await screen.findByRole('button', { name: 'Conhecimento C' })
-    ).toHaveAttribute('aria-pressed', 'false')
-    expect(
-      screen.getByRole('button', { name: 'Conhecimento A' })
-    ).toHaveAttribute('aria-pressed', 'false')
-
-    await user.click(screen.getByRole('button', { name: 'Conhecimento C' }))
-    await user.click(screen.getByRole('button', { name: 'Organização' }))
-
-    expect(salvar).toBeEnabled()
-    await user.click(salvar)
-
-    await waitFor(() => {
-      expect(contarPuts()).toBe(1)
-    })
-
-    expect(corpoDoPut()).toEqual({
-      id_area_atuacao: 20,
-      habilidade_ids: [3],
-      comportamento_atitudes_ids: [5, 6],
-    })
-
-    await waitFor(() => {
-      expect(salvar).toBeDisabled()
-    })
-
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      'Habilidades e competências salvas com sucesso'
-    )
-  })
-
-  it('selecionar de novo a área atual não apaga os conhecimentos marcados', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    await screen.findByRole('button', { name: 'Conhecimento A' })
-
-    await selecionarArea(user, /Área A/)
-
-    expect(
-      screen.getByRole('button', { name: 'Conhecimento A' })
-    ).toHaveAttribute('aria-pressed', 'true')
-    expect(salvar).toBeDisabled()
-  })
-
-  it('voltar para a área original depois de trocar exige marcar os conhecimentos de novo', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    await screen.findByRole('button', { name: 'Conhecimento A' })
-
-    await selecionarArea(user, /Área B/)
-    await screen.findByRole('button', { name: 'Conhecimento C' })
-    await selecionarArea(user, /Área A/)
-
-    expect(
-      await screen.findByRole('button', { name: 'Conhecimento B' })
+      screen.getByRole('button', { name: 'Engenharia Mecânica' })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Conhecimento A' })
-    ).toHaveAttribute('aria-pressed', 'false')
-    expect(salvar).toBeEnabled()
-
-    await user.click(screen.getByRole('button', { name: 'Conhecimento A' }))
-    expect(salvar).toBeDisabled()
+      screen.queryByTestId('area-atuacao-search-icon')
+    ).not.toBeInTheDocument()
   })
 
-  it('sem área no currículo não busca conhecimentos até uma área ser escolhida', async () => {
-    mockFetch({
-      dados: {
-        ...initialData,
-        areaAtuacaoSelecionada: null,
-        conhecimentosSelecionados: [],
+  it('avisa quando a seleção muda em relação ao que está salvo', async () => {
+    const onDirtyChange = vi.fn()
+    renderSecao(vi.fn(), onDirtyChange)
+
+    await waitFor(() => {
+      expect(onDirtyChange).toHaveBeenCalledWith(false)
+    })
+
+    await escolherArea('Engenharia Mecânica')
+
+    await waitFor(() => {
+      expect(onDirtyChange).toHaveBeenLastCalledWith(true)
+    })
+  })
+
+  it('busca área sem acento e não deixa a lupa no gatilho', async () => {
+    const user = userEvent.setup()
+    renderSecao()
+
+    await user.click(await screen.findByRole('button', { name: /Selecionar/ }))
+    expect(screen.getByTestId('area-atuacao-search-icon')).toBeInTheDocument()
+
+    await user.type(screen.getByRole('textbox', { name: 'Pesquisar' }), 'cao')
+
+    await waitFor(
+      () => {
+        expect(
+          screen.queryByRole('radio', { name: 'Engenharia Mecânica' })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.getByRole('radio', { name: 'Comunicação' })
+        ).toBeInTheDocument()
       },
-    })
+      { timeout: 2000 }
+    )
+  })
+
+  it('troca de área limpa conhecimentos e o salvar manda os ids do catálogo', async () => {
     const user = userEvent.setup()
+    const onCancel = vi.fn()
+    renderSecao(onCancel)
 
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-    expect(
-      screen.queryByText('Selecione conhecimentos')
-    ).not.toBeInTheDocument()
-    expect(chamadas(url => url.includes('/areas/'))).toHaveLength(0)
-
-    await selecionarArea(user, /Área A/)
+    await escolherArea('Engenharia Mecânica')
     await user.click(
-      await screen.findByRole('button', { name: 'Conhecimento B' })
+      await screen.findByRole('button', { name: 'Gestão de projetos' })
     )
-    await user.click(salvar)
+    expect(
+      screen.getByRole('button', { name: 'Gestão de projetos' })
+    ).toHaveAttribute('aria-pressed', 'true')
 
-    await waitFor(() => {
-      expect(contarPuts()).toBe(1)
-    })
-    expect(corpoDoPut()).toEqual({
-      id_area_atuacao: 10,
-      habilidade_ids: [2],
-      comportamento_atitudes_ids: [5],
-    })
-  })
-
-  it('exibe erro quando não consegue carregar os conhecimentos da área', async () => {
-    mockFetch({ area: async () => new Response(null, { status: 502 }) })
-
-    renderHabilidadesCompetencias()
+    await user.click(
+      screen.getByRole('button', { name: 'Engenharia Mecânica' })
+    )
+    await user.click(await screen.findByRole('radio', { name: 'Comunicação' }))
 
     expect(
-      await screen.findByText(
-        'Não foi possível carregar os conhecimentos desta área.'
-      )
-    ).toBeInTheDocument()
-  })
-
-  it('mantém a alteração pendente quando ocorre erro ao salvar', async () => {
-    mockFetch({ put: async () => new Response(null, { status: 500 }) })
-
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-
-    await user.click(screen.getByRole('button', { name: 'Organização' }))
-
-    expect(salvar).toBeEnabled()
-
-    await user.click(salvar)
-
-    await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith(
-        'Não foi possível salvar. Tente novamente.'
-      )
-    })
-
-    expect(salvar).toBeEnabled()
-    expect(contarPuts()).toBe(1)
-  })
-
-  it('abre e filtra as áreas de atuação ao interagir com o campo de busca', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const input = await screen.findByLabelText('Área de atuação')
-
-    await user.clear(input)
-    await user.click(input)
-
-    expect(screen.getByRole('button', { name: /Área A/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Área B/ })).toBeInTheDocument()
-
-    await user.type(input, 'Área B')
-
-    expect(
-      screen.queryByRole('button', { name: /Área A/ })
+      screen.queryByRole('button', { name: 'Gestão de projetos' })
     ).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Área B/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Redação' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    )
 
-    await user.click(screen.getByRole('button', { name: /Área B/ }))
+    await user.click(screen.getByRole('button', { name: 'Proatividade' }))
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
 
-    expect(input).toHaveValue('Área B')
-
-    await user.clear(input)
-    await user.type(input, 'Área')
-
-    expect(screen.getByRole('button', { name: /Área A/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Área B/ })).toBeInTheDocument()
-
-    expect(contarPuts()).toBe(0)
-  })
-
-  it('com a área salva no campo, a lista abre com todas as áreas', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const input = await screen.findByRole('textbox', {
-      name: 'Área de atuação',
-    })
-    expect(input).toHaveValue('Área A')
-
-    await user.click(input)
-
-    expect(screen.getByRole('button', { name: /Área A/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Área B/ })).toBeInTheDocument()
-  })
-
-  it('exibe mensagem de erro quando não consegue carregar habilidades e competências', async () => {
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(null, {
-        status: 500,
+    await waitFor(() => {
+      expect(saveMock).toHaveBeenCalledWith({
+        id_area_atuacao: 12,
+        habilidade_ids: [],
+        comportamento_atitudes_ids: [4],
       })
-    )
-
-    renderHabilidadesCompetencias()
-
-    expect(
-      await screen.findByText(
-        'Não foi possível carregar habilidades e competências.'
-      )
-    ).toBeInTheDocument()
-
-    expect(fetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('habilita Salvar ao selecionar um comportamento e desabilita ao desfazer', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-
-    expect(salvar).toBeDisabled()
-
-    const comportamento = screen.getByRole('button', { name: 'Organização' })
-
-    await user.click(comportamento)
-    expect(salvar).toBeEnabled()
-
-    await user.click(comportamento)
-    expect(salvar).toBeDisabled()
-
-    expect(contarPuts()).toBe(0)
-  })
-
-  it('restaura os dados originais ao cancelar alterações', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    const { queryClient } = renderHabilidadesCompetencias()
-
-    await screen.findByRole('button', { name: 'Salvar' })
-
-    await user.click(screen.getByRole('button', { name: 'Organização' }))
-
-    expect(screen.getByRole('button', { name: 'Salvar' })).toBeEnabled()
-
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
-
-    expect(onCancel).toHaveBeenCalledTimes(1)
-
-    expect(queryClient.getQueryData(['habilidades-competencias'])).toEqual(
-      initialData
-    )
-
-    expect(contarPuts()).toBe(0)
-  })
-
-  it('exibe mensagem quando a pesquisa não encontra áreas de atuação', async () => {
-    mockFetch()
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const input = await screen.findByRole('textbox', {
-      name: 'Área de atuação',
     })
-
-    await user.clear(input)
-    await user.type(input, 'Área inexistente')
-
-    expect(screen.getByText('Nenhuma área encontrada')).toBeInTheDocument()
-
-    expect(
-      screen.queryByRole('button', { name: /Área A|Área B/ })
-    ).not.toBeInTheDocument()
-  })
-
-  it('impede múltiplos salvamentos enquanto uma requisição está em andamento', async () => {
-    let resolverPut!: (response: Response) => void
-
-    const putPendente = new Promise<Response>(resolve => {
-      resolverPut = resolve
-    })
-
-    mockFetch({ put: () => putPendente })
-
-    const user = userEvent.setup()
-
-    renderHabilidadesCompetencias()
-
-    const salvar = await screen.findByRole('button', { name: 'Salvar' })
-
-    // Produz uma alteração.
-    await user.click(screen.getByRole('button', { name: 'Organização' }))
-
-    expect(salvar).toBeEnabled()
-
-    // Inicia o salvamento, mas mantém a resposta pendente.
-    await user.click(salvar)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Salvando...' })).toBeDisabled()
-    })
-
-    // Confirma que somente um PUT foi enviado.
-    expect(contarPuts()).toBe(1)
-
-    // O botão permanece desabilitado durante a requisição.
-    expect(salvar).toBeDisabled()
-
-    // Libera a resposta da API.
-    resolverPut(jsonResponse({ area_atuacao: null }))
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Salvar' })).toBeDisabled()
-    })
-
-    expect(contarPuts()).toBe(1)
-
     expect(mockToastSuccess).toHaveBeenCalledWith(
-      'Habilidades e competências salvas com sucesso'
+      'Habilidades salvas com sucesso'
     )
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('mostra o X quando o salvar responde 400 e não troca o estado salvo', async () => {
+    const user = userEvent.setup()
+    saveMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      error: 'conhecimento não pertence à área de atuação',
+    })
+    const onCancel = vi.fn()
+    renderSecao(onCancel)
+
+    await escolherArea('Engenharia Mecânica')
+    await user.click(
+      await screen.findByRole('button', { name: 'Gestão de projetos' })
+    )
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    expect(await screen.findByTestId('habilidades-error')).toBeInTheDocument()
+    expect(screen.queryByTestId('habilidades-check')).not.toBeInTheDocument()
+    expect(
+      screen.getByText('conhecimento não pertence à área de atuação')
+    ).toBeInTheDocument()
+    expect(mockToastError).toHaveBeenCalled()
+    expect(onCancel).not.toHaveBeenCalled()
   })
 })
