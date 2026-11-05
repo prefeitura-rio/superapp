@@ -97,6 +97,7 @@ html.a11y-high-contrast [style*="background-image"] {
   filter: invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
 }
 #a11y-btn,
+#a11y-btn-wrapper,
 #a11y-panel {
   filter: none !important;
 }
@@ -123,8 +124,8 @@ html.a11y-high-contrast .a11y-tts-highlight {
 /* ── TTS widget ── */
 #a11y-tts-widget {
   position: fixed;
-  right: 80px;
-  bottom: calc(50vh + 48px);
+  right: 60px;
+  top: calc(50vh - 68px);
   z-index: 9994;
   display: flex;
   align-items: center;
@@ -229,45 +230,119 @@ html.a11y-high-contrast #a11y-reading-window {
    FLOATING BUTTON
    ════════════════════════════════════ */
 
-#a11y-btn {
+/*
+  Mecânica igual ao VLibras:
+  - wrapper: ancorado right:10px, overflow hidden, cresce para a esquerda via width
+  - botão: position absolute, right:0 — nunca se move, fica "na frente"
+  - popup: no fluxo normal à esquerda do botão; fica oculto pelo overflow quando
+           wrapper tem 40px, aparece quando wrapper expande para 220px
+  - sem transform no popup — o crescimento do wrapper revela ele naturalmente
+*/
+#a11y-btn-wrapper {
+  display: flex;
+  align-items: center;
   position: fixed;
-  right: 16px;
-  bottom: calc(50vh + 48px);
   z-index: 9995;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  right: 10px;
+  top: calc(50vh - 68px);
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: width 0.5s ease;
+}
+#a11y-btn-wrapper:not(.a11y-panel-open):hover,
+#a11y-btn-wrapper:has(#a11y-btn:focus-visible) {
+  /* popup(154) + gap(10) + botão(40) = 204px */
+  width: 204px;
+}
+
+#a11y-btn-popup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 40px;
+  width: 154px;
+  flex-shrink: 0;
+  /* gap de 6px entre popup e botão — igual ao VLibras */
+  margin-right: 10px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1e5799 0%, ${LIGHT_PRIMARY} 100%);
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1.2;
+}
+.a11y-popup-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: rgba(255,255,255,0.9);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.a11y-popup-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#a11y-btn-popup .a11y-popup-sub {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.75;
+  letter-spacing: 0.01em;
+}
+#a11y-btn-popup .a11y-popup-main {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+html.dark #a11y-btn-popup {
+  background: linear-gradient(135deg, #2563a8 0%, #1a4a80 100%);
+}
+
+#a11y-btn {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: linear-gradient(135deg, #1a4a80 0%, ${LIGHT_PRIMARY} 100%);
-  box-shadow: 0 4px 14px rgba(19, 51, 90, 0.45);
-  transition: box-shadow 0.2s, transform 0.15s;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #2a6bc7 0%, ${LIGHT_PRIMARY} 60%);
+  outline: var(--a11y-btn-outline);
+  transition: filter 0.15s;
 }
-#a11y-btn:hover {
-  box-shadow: 0 6px 20px rgba(19, 51, 90, 0.55);
-  transform: translateY(-1px);
-}
-#a11y-btn:active {
-  transform: translateY(0);
+html.dark #a11y-btn {
+  background: linear-gradient(160deg, #3a7dd4 0%, #1a4a80 60%);
 }
 #a11y-btn:focus-visible {
-  outline: 3px solid #4a9fff;
-  outline-offset: 3px;
+  outline: 2px solid #fff;
+  box-shadow: 0 0 10px 4px #1351b4;
+}
+#a11y-btn-wrapper:not(.a11y-panel-open) #a11y-btn:hover {
+  filter: brightness(1.15);
 }
 #a11y-btn svg {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   color: #ffffff;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform 0.15s;
 }
 #a11y-btn.a11y-btn-pop svg {
   animation: a11y-btn-pop 0.35s cubic-bezier(0.34, 1.6, 0.64, 1) both;
@@ -278,22 +353,14 @@ html.a11y-high-contrast #a11y-reading-window {
   70%  { transform: scale(0.92) rotate(6deg); }
   100% { transform: scale(1) rotate(0deg); }
 }
-html.dark #a11y-btn {
-  background: linear-gradient(135deg, #6ba8e0 0%, ${DARK_PRIMARY} 100%);
-  box-shadow: 0 4px 14px rgba(142, 197, 255, 0.3);
-}
-html.dark #a11y-btn:hover {
-  box-shadow: 0 6px 20px rgba(142, 197, 255, 0.45);
-}
-
 /* ════════════════════════════════════
    PANEL
    ════════════════════════════════════ */
 
 #a11y-panel {
   position: fixed;
-  right: 80px;
-  bottom: calc(50vh - 180px);
+  right: 60px;
+  top: calc(50vh - 180px);
   z-index: 9999;
   width: 312px;
   max-height: 86vh;
@@ -775,6 +842,49 @@ html.dark .a11y-reset-btn {
 html.dark .a11y-reset-btn:hover {
   background: #3f3f46;
   color: #f4f4f5;
+}
+
+/* ════════════════════════════════════
+   RESPONSIVO
+   ════════════════════════════════════ */
+
+/* ── Overlay mobile ── */
+#a11y-mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.45);
+  animation: a11y-overlay-in 0.18s ease both;
+}
+#a11y-mobile-overlay.a11y-overlay-visible {
+  display: block;
+}
+@keyframes a11y-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+html.dark #a11y-mobile-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 400px) {
+  #a11y-panel {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    top: 10px;
+    max-height: calc(100vh - 20px);
+    border-radius: 14px;
+  }
+  #a11y-panel.a11y-open {
+    animation: a11y-panel-in-mobile 0.2s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+  @keyframes a11y-panel-in-mobile {
+    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
 }
 `
 
