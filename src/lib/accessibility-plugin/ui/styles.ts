@@ -125,7 +125,7 @@ html.a11y-high-contrast .a11y-tts-highlight {
 #a11y-tts-widget {
   position: fixed;
   right: 60px;
-  top: calc(50vh - 68px);
+  top: calc(50vh - 20px);
   z-index: 9994;
   display: flex;
   align-items: center;
@@ -320,6 +320,7 @@ html.dark #a11y-btn-popup {
   justify-content: center;
   padding: 0;
   flex-shrink: 0;
+  overflow: visible;
   background: linear-gradient(160deg, #2a6bc7 0%, ${LIGHT_PRIMARY} 60%);
   outline: var(--a11y-btn-outline);
   transition: filter 0.15s;
@@ -335,14 +336,30 @@ html.dark #a11y-btn {
   filter: brightness(1.15);
 }
 #a11y-btn svg {
-  width: 22px;
-  height: 22px;
-  color: #ffffff;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 26px;
+  height: 26px;
+}
+
+/* Badge de check — no botão (position:absolute) para transbordar do overflow:hidden do wrapper */
+/* Badge fora do wrapper (overflow:hidden cortaria) — posicionado fixo no canto
+   superior esquerdo do botão: top = 50vh-68px-6px, right = 10px+40px-14px */
+#a11y-btn-badge {
+  position: fixed;
+  top: calc(50vh - 74px);
+  right: calc(10px + 40px - 14px);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  display: none;
+  z-index: 9996;
+}
+#a11y-btn-badge svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+#a11y-btn-badge.a11y-badge-visible {
+  display: block;
 }
 #a11y-btn.a11y-btn-pop svg {
   animation: a11y-btn-pop 0.35s cubic-bezier(0.34, 1.6, 0.64, 1) both;
@@ -359,7 +376,7 @@ html.dark #a11y-btn {
 
 #a11y-panel {
   position: fixed;
-  right: 60px;
+  right: 10px;
   top: calc(50vh - 180px);
   z-index: 9999;
   width: 312px;
