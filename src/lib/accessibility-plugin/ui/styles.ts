@@ -125,7 +125,7 @@ html.a11y-high-contrast .a11y-tts-highlight {
 #a11y-tts-widget {
   position: fixed;
   right: 60px;
-  top: calc(50vh - 68px);
+  top: calc(50vh - 20px);
   z-index: 9994;
   display: flex;
   align-items: center;
@@ -320,6 +320,7 @@ html.dark #a11y-btn-popup {
   justify-content: center;
   padding: 0;
   flex-shrink: 0;
+  overflow: visible;
   background: linear-gradient(160deg, #2a6bc7 0%, ${LIGHT_PRIMARY} 60%);
   outline: var(--a11y-btn-outline);
   transition: filter 0.15s;
@@ -335,14 +336,31 @@ html.dark #a11y-btn {
   filter: brightness(1.15);
 }
 #a11y-btn svg {
-  width: 22px;
-  height: 22px;
-  color: #ffffff;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 26px;
+  height: 26px;
+}
+
+/* Badge de check — no botão (position:absolute) para transbordar do overflow:hidden do wrapper */
+#a11y-btn-wrapper.a11y-btn-has-active #a11y-btn::after {
+  content: '✓';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px ${LIGHT_PRIMARY};
+}
+html.dark #a11y-btn-wrapper.a11y-btn-has-active #a11y-btn::after {
+  box-shadow: 0 0 0 2px #1a4a80;
 }
 #a11y-btn.a11y-btn-pop svg {
   animation: a11y-btn-pop 0.35s cubic-bezier(0.34, 1.6, 0.64, 1) both;
@@ -359,7 +377,7 @@ html.dark #a11y-btn {
 
 #a11y-panel {
   position: fixed;
-  right: 60px;
+  right: 10px;
   top: calc(50vh - 180px);
   z-index: 9999;
   width: 312px;
