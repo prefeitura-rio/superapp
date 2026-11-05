@@ -10,8 +10,9 @@ export interface EmpregabilidadeParticipacaoBancoStatus {
   /** CurriculoAtualizadoEm é quando o cidadão salvou o currículo pela última vez. */
   curriculo_atualizado_em?: string
   /**
-   * CurriculoCompleto diz se o currículo tem o mínimo para entrar no banco (o
-   * mesmo exigido para se candidatar); Pendencias diz o que falta.
+   * CurriculoCompleto diz se o currículo tem o mínimo exigido para se
+   * candidatar; Pendencias diz o que falta. Não impede a participação no banco,
+   * que mostra o que a pessoa conseguiu salvar.
    */
   curriculo_completo?: boolean
   disponivel?: boolean

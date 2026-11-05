@@ -27,6 +27,12 @@ const variantStyles = {
     'bg-transparent text-foreground border border-foreground-light hover:bg-foreground/10',
 }
 
+export const accordionCancelButtonClassName =
+  'flex-1 gap-3 hover:bg-secondary focus-visible:bg-secondary'
+
+export const accordionSaveButtonClassName =
+  'flex-1 gap-3 hover:bg-primary-focused focus-visible:bg-primary-focused'
+
 const sizeStyles = {
   sm: 'px-3 py-1.5 text-sm h-8',
   md: 'px-4 py-2 text-sm h-10',

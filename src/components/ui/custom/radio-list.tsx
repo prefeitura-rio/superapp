@@ -28,7 +28,7 @@ export function RadioList({
 }: RadioListProps) {
   return (
     <RadioGroup
-      className={cn('space-y-1', className)}
+      className={cn('gap-4', className)}
       value={value}
       onValueChange={onValueChange}
       disabled={disabled}
@@ -46,8 +46,8 @@ export function RadioList({
           <label
             key={optionKey}
             className={cn(
-              'flex items-center justify-between cursor-pointer py-2 rounded-md transition-colors hover:bg-accent/40',
-              isItemDisabled && 'opacity-50 cursor-not-allowed'
+              'flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-accent/40',
+              isItemDisabled && 'cursor-not-allowed opacity-50'
             )}
             htmlFor={`${name}-${optionKey}`}
           >
