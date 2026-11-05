@@ -137,8 +137,37 @@ function makeCallbacks() {
     onClose() {
       closePanel()
       setButtonExpanded(false)
+      setVLibrasVisible(true)
+      setMobileOverlay(false)
       document.getElementById('a11y-btn')?.focus()
     },
+  }
+}
+
+function setVLibrasVisible(visible: boolean): void {
+  const el = document.getElementById(
+    'vlibras-access-wrapper'
+  ) as HTMLElement | null
+  if (el) el.style.visibility = visible ? '' : 'hidden'
+}
+
+function isMobile(): boolean {
+  return window.matchMedia('(max-width: 400px)').matches
+}
+
+function setMobileOverlay(visible: boolean): void {
+  const existing = document.getElementById('a11y-mobile-overlay')
+  if (visible && isMobile()) {
+    if (existing) {
+      existing.classList.add('a11y-overlay-visible')
+      return
+    }
+    const overlay = document.createElement('div')
+    overlay.id = 'a11y-mobile-overlay'
+    overlay.classList.add('a11y-overlay-visible')
+    document.body.appendChild(overlay)
+  } else {
+    existing?.classList.remove('a11y-overlay-visible')
   }
 }
 
@@ -157,9 +186,13 @@ export function init(): void {
     if (isPanelOpen()) {
       closePanel()
       setButtonExpanded(false)
+      setVLibrasVisible(true)
+      setMobileOverlay(false)
     } else {
       openPanel()
       setButtonExpanded(true)
+      setVLibrasVisible(false)
+      setMobileOverlay(true)
     }
   })
 
@@ -167,9 +200,12 @@ export function init(): void {
     if (!isPanelOpen()) return
     const target = e.target as Node
     const panel = document.getElementById('a11y-panel')
-    const btn = document.getElementById('a11y-btn')
+    const btn = document.getElementById('a11y-btn-wrapper')
+    // clique no overlay ou fora do painel/botão fecha
     if (panel?.contains(target) || btn?.contains(target)) return
     closePanel()
     setButtonExpanded(false)
+    setVLibrasVisible(true)
+    setMobileOverlay(false)
   })
 }
