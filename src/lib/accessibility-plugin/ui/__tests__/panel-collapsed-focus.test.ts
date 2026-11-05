@@ -106,8 +106,10 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
 
     expect(sequence.at(-1)).toBe(resetButton())
     expect(sequence.filter(isHiddenFromUser)).toEqual([])
-    // os cabeçalhos dos grupos recolhidos continuam alcançáveis
+    // sem recurso ativo, todos os grupos nascem recolhidos (PR #735), mas os
+    // cabeçalhos continuam alcançáveis
     for (const title of [
+      'Texto',
       'Cores / Visão',
       'Movimento / Foco',
       'Leitura em Voz',
@@ -116,6 +118,7 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     }
     // os controles de dentro dos grupos recolhidos, não
     for (const label of [
+      'Aumentar Tamanho de fonte',
       'Ativar alto contraste',
       'Parar animações da página',
       'Ativar máscara de leitura',
@@ -126,16 +129,14 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     ]) {
       expect(sequence).not.toContain(byLabel(label))
     }
-    // o grupo aberto (Texto) segue no Tab
-    expect(sequence).toContain(byLabel('Aumentar Tamanho de fonte'))
   })
 
   it('corpo do grupo é inerte enquanto recolhido e volta ao abrir', async () => {
     const user = userEvent.setup()
     await openPanel(user)
 
-    expect(accordionBody('Texto')).not.toHaveAttribute('inert')
     for (const title of [
+      'Texto',
       'Cores / Visão',
       'Movimento / Foco',
       'Leitura em Voz',
@@ -143,6 +144,13 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
       expect(trigger(title)).toHaveAttribute('aria-expanded', 'false')
       expect(accordionBody(title)).toHaveAttribute('inert')
     }
+
+    await user.click(trigger('Texto'))
+
+    expect(trigger('Texto')).toHaveAttribute('aria-expanded', 'true')
+    expect(accordionBody('Texto')).not.toHaveAttribute('inert')
+    await user.tab()
+    expect(document.activeElement).toBe(byLabel('Aumentar Tamanho de fonte'))
 
     await user.click(trigger('Cores / Visão'))
 
