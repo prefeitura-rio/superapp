@@ -108,6 +108,8 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
 
     const commonWrapperProps = {
       ref,
+      role: 'region',
+      'aria-label': 'Consentimento de cookies',
       className: cn(
         containerClasses,
         variant === 'mini'
