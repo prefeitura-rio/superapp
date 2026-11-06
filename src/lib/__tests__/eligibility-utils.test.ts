@@ -286,9 +286,10 @@ describe('checkEligibility — critério PcD', () => {
     ).toBe(true)
   })
 
-  it('soma o critério PcD aos demais bloqueios ligados', () => {
+  it('soma o critério PcD aos demais bloqueios ligados, como primeiro item (ordem do Admin)', () => {
     const result = checkEligibility({
       ...params({
+        idade_minima: 200,
         criterios_bloqueio: bloqueios('escolaridade', 'idioma', 'pcd'),
         opcao_pcd: 'exclusiva',
         tipos_pcd: TIPOS_FAV,
@@ -296,12 +297,101 @@ describe('checkEligibility — critério PcD', () => {
       deficiencia: 'Nenhuma',
     })
     expect(result.failedCriterios).toEqual([
-      { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
-      { slug: 'idioma', label: LABEL_IDIOMA },
       {
         slug: 'pcd',
         label: 'Ser pessoa com deficiência (Física, Auditiva ou Visual)',
       },
+      { slug: 'idade_minima', label: 'Ter pelo menos 200 anos' },
+      { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
+      { slug: 'idioma', label: LABEL_IDIOMA },
     ])
+  })
+})
+
+/** Catálogo de tipos PcD do Admin (`GET /api/v1/empregabilidade/tipos-pcd`). */
+const CATALOGO_PCD = [
+  { id: 't-fisica', descricao: 'Física' },
+  { id: 't-auditiva', descricao: 'Auditiva' },
+  { id: 't-intelectual', descricao: 'Intelectual' },
+  { id: 't-multipla', descricao: 'Múltipla' },
+  { id: 't-visual', descricao: 'Visual' },
+]
+
+describe('checkEligibility — PcD "Todos os tipos"', () => {
+  /** Vaga com todos os tipos do catálogo, como o Admin grava ao marcar "Todos os tipos". */
+  const todosOsTipos = (
+    deficiencia: string | null | undefined,
+    vagaExtra: Partial<Params['vaga']> = {}
+  ): Params => ({
+    ...paramsPcd({ tipos_pcd: [...CATALOGO_PCD], ...vagaExtra }, deficiencia),
+    tiposPcdCatalogo: CATALOGO_PCD,
+  })
+
+  it('deixa passar quem declarou qualquer deficiência, mesmo fora dos nomes do catálogo', () => {
+    for (const deficiencia of [
+      'Física',
+      'Reabilitado do INSS',
+      'Transtorno do espectro autista',
+    ]) {
+      expect(checkEligibility(todosOsTipos(deficiencia))).toEqual({
+        passes: true,
+        failedCriterios: [],
+      })
+    }
+  })
+
+  it('bloqueia quem não declarou deficiência com a frase sem parênteses', () => {
+    for (const semDeficiencia of [
+      undefined,
+      'Nenhuma',
+      'Não sou pessoa com deficiência',
+    ]) {
+      expect(checkEligibility(todosOsTipos(semDeficiencia))).toEqual({
+        passes: false,
+        failedCriterios: [{ slug: 'pcd', label: FRASE_PCD }],
+      })
+    }
+  })
+
+  it('vale qualquer que seja a ordem dos tipos gravados na vaga', () => {
+    const result = checkEligibility(
+      todosOsTipos('Reabilitado do INSS', {
+        tipos_pcd: [...CATALOGO_PCD].reverse(),
+      })
+    )
+    expect(result.passes).toBe(true)
+  })
+
+  it('com só parte do catálogo na vaga, continua exigindo um dos tipos e listando-os', () => {
+    const result = checkEligibility({
+      ...paramsPcd(
+        { tipos_pcd: CATALOGO_PCD.slice(0, 4) },
+        'Reabilitado do INSS'
+      ),
+      tiposPcdCatalogo: CATALOGO_PCD,
+    })
+    expect(result).toEqual({
+      passes: false,
+      failedCriterios: [
+        {
+          slug: 'pcd',
+          label:
+            'Ser pessoa com deficiência (Física, Auditiva, Intelectual ou Múltipla)',
+        },
+      ],
+    })
+  })
+
+  it('sem o catálogo (falha ao buscar), mantém a regra por tipo', () => {
+    for (const catalogo of [undefined, []]) {
+      const result = checkEligibility({
+        ...paramsPcd({ tipos_pcd: [...CATALOGO_PCD] }, 'Reabilitado do INSS'),
+        tiposPcdCatalogo: catalogo,
+      })
+      expect(result.passes).toBe(false)
+      expect(result.failedCriterios[0].label).toBe(
+        'Ser pessoa com deficiência (Física, Auditiva, Intelectual, Múltipla ou Visual)'
+      )
+    }
   })
 })

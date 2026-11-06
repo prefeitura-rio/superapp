@@ -65,6 +65,12 @@ interface EligibilityParams {
   escolaridadeRmiId: string | undefined
   /** Deficiência autodeclarada no RMI (`deficiencia` do cidadão). */
   deficiencia?: string | null
+  /**
+   * Catálogo de tipos PcD (`GET /api/v1/empregabilidade/tipos-pcd`). Vaga com todos eles é a
+   * opção "Todos os tipos" do Admin, que grava cada id: não restringe o tipo de deficiência.
+   * Ausente ou vazio (falha ao buscar): a vaga restringe aos tipos que tem.
+   */
+  tiposPcdCatalogo?: ReadonlyArray<{ id: string }>
   idiomasCurriculo: Array<{ id_idioma: string; id_nivel: string }>
   escolaridades: ReferenceItem[]
   idiomas: ReferenceItem[]
@@ -123,6 +129,15 @@ function juntarComOu(itens: string[]): string {
   return `${itens.slice(0, -1).join(', ')} ou ${itens[itens.length - 1]}`
 }
 
+function vagaComTodosOsTiposPcd(
+  tiposVaga: EmpregabilidadeVaga['tipos_pcd'],
+  catalogo: ReadonlyArray<{ id: string }> | undefined
+): boolean {
+  if (catalogo == null || catalogo.length === 0) return false
+  const idsVaga = new Set((tiposVaga ?? []).map(tipo => tipo.id))
+  return catalogo.every(tipo => idsVaga.has(tipo.id))
+}
+
 function getOrdem(items: ReferenceItem[], id: string): number {
   const idx = items.findIndex(item => item.id === id)
   if (idx === -1) return -1
@@ -136,6 +151,7 @@ export function checkEligibility({
   formacoesCurriculo,
   escolaridadeRmiId,
   deficiencia,
+  tiposPcdCatalogo,
   idiomasCurriculo,
   escolaridades,
   idiomas,
@@ -176,6 +192,32 @@ export function checkEligibility({
 
   if (!temCriterios) {
     return { passes: true, failedCriterios: [] }
+  }
+
+  // Critério PcD: primeiro da lista, na ordem do Admin.
+  if (conferirPcd) {
+    const tiposVaga = vagaComTodosOsTiposPcd(vaga.tipos_pcd, tiposPcdCatalogo)
+      ? []
+      : (vaga.tipos_pcd ?? [])
+          .map(tipo => tipo.descricao?.trim() ?? '')
+          .filter(descricao => descricao !== '')
+    const declarou = declarouDeficiencia(deficiencia)
+    const tipoEmComum =
+      tiposVaga.length === 0 ||
+      (deficiencia != null &&
+        tiposVaga.some(
+          tipo => normalizarTexto(tipo) === normalizarTexto(deficiencia)
+        ))
+
+    if (!declarou || !tipoEmComum) {
+      failedCriterios.push({
+        slug: 'pcd',
+        label:
+          tiposVaga.length > 0
+            ? `Ser pessoa com deficiência (${juntarComOu(tiposVaga)})`
+            : 'Ser pessoa com deficiência',
+      })
+    }
   }
 
   // Critério de idade
@@ -255,30 +297,6 @@ export function checkEligibility({
       failedCriterios.push({
         slug: 'idioma',
         label: `Idioma ${nomeIdioma} — nível ${nomeNivelMinimo} ou superior`,
-      })
-    }
-  }
-
-  // Critério PcD
-  if (conferirPcd) {
-    const tiposVaga = (vaga.tipos_pcd ?? [])
-      .map(tipo => tipo.descricao?.trim() ?? '')
-      .filter(descricao => descricao !== '')
-    const declarou = declarouDeficiencia(deficiencia)
-    const tipoEmComum =
-      tiposVaga.length === 0 ||
-      (deficiencia != null &&
-        tiposVaga.some(
-          tipo => normalizarTexto(tipo) === normalizarTexto(deficiencia)
-        ))
-
-    if (!declarou || !tipoEmComum) {
-      failedCriterios.push({
-        slug: 'pcd',
-        label:
-          tiposVaga.length > 0
-            ? `Ser pessoa com deficiência (${juntarComOu(tiposVaga)})`
-            : 'Ser pessoa com deficiência',
       })
     }
   }
