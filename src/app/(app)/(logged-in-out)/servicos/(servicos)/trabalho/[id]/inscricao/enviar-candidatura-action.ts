@@ -1,6 +1,9 @@
 'use server'
 
-import { getFormacaoOptions } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
+import {
+  getFormacaoOptions,
+  getTiposPcdCatalogo,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
 
 import { postApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
@@ -51,13 +54,19 @@ export async function enviarCandidatura(
     const cpfLimpo = userInfo.cpf.replace(/\D/g, '')
 
     // Busca em paralelo: currículo fresco, vaga (critérios), referências e perfil do cidadão
-    const [curriculoResponse, vagaResponse, formacaoOptions, cidadaoResponse] =
-      await Promise.all([
-        getApiV1EmpregabilidadeCurriculoCpf(cpfLimpo),
-        getApiPublicEmpregabilidadeVagasId(vagaId),
-        getFormacaoOptions(),
-        getDalCitizenCpf(userInfo.cpf),
-      ])
+    const [
+      curriculoResponse,
+      vagaResponse,
+      formacaoOptions,
+      cidadaoResponse,
+      tiposPcdCatalogo,
+    ] = await Promise.all([
+      getApiV1EmpregabilidadeCurriculoCpf(cpfLimpo),
+      getApiPublicEmpregabilidadeVagasId(vagaId),
+      getFormacaoOptions(),
+      getDalCitizenCpf(userInfo.cpf),
+      getTiposPcdCatalogo(),
+    ])
 
     if (curriculoResponse.status !== 200 || !curriculoResponse.data) {
       return {
@@ -114,6 +123,7 @@ export async function enviarCandidatura(
         formacoesCurriculo,
         escolaridadeRmiId,
         deficiencia: cidadao?.deficiencia,
+        tiposPcdCatalogo,
         idiomasCurriculo,
         escolaridades,
         idiomas: formacaoOptions.idiomas,
