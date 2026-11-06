@@ -29,7 +29,7 @@ export function CategoryFiltersMobile({
                   <div className="flex items-center justify-center w-12 h-12 relative">
                     <Image
                       src={filter.imagePath}
-                      alt={filter.label}
+                      alt=""
                       width={48}
                       height={48}
                       className="object-contain"
