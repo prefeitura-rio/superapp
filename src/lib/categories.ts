@@ -64,9 +64,10 @@ export function getIconForCategory(categoryName: string): ReactNode {
     return null
   }
 
+  // Decorativo: quem exibe o ícone mostra o nome da categoria em texto.
   return createElement(Image, {
     src: iconSrc,
-    alt: categoryName,
+    alt: '',
     width: 48,
     height: 48,
     className: 'w-12 h-12',
