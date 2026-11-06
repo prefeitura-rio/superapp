@@ -1,7 +1,15 @@
 import { TEST_ENV } from '@/test/mocks/env'
 import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import {
+  type MockInstance,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest'
 import { customFetch } from '../../custom-fetch-course'
 
 const COURSES = TEST_ENV.COURSES_BASE_API_URL
@@ -25,14 +33,14 @@ const CONSOLE_METHODS: ConsoleMethod[] = [
   'debug',
 ]
 
-const spies: ReturnType<typeof vi.spyOn>[] = []
+const spies: MockInstance<(...args: unknown[]) => void>[] = []
 
 function loggedText(): string {
   return spies
     .flatMap(spy => spy.mock.calls)
     .map(args =>
       args
-        .map(arg => {
+        .map((arg: unknown) => {
           if (typeof arg === 'string') return arg
           try {
             return JSON.stringify(arg)
