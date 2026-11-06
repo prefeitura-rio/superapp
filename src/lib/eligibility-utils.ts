@@ -1,7 +1,21 @@
+import { EmpregabilidadeAcessibilidadePCD } from '@/http-courses/models/empregabilidadeAcessibilidadePCD'
 import { EmpregabilidadeCriterioBloqueio } from '@/http-courses/models/empregabilidadeCriterioBloqueio'
 import type { EmpregabilidadeVaga } from '@/http-courses/models/empregabilidadeVaga'
 
-export type EligibilityCriterioSlug = 'idade_minima' | 'escolaridade' | 'idioma'
+export type EligibilityCriterioSlug =
+  | 'idade_minima'
+  | 'escolaridade'
+  | 'idioma'
+  | 'pcd'
+
+/**
+ * Chave do bloqueio PcD em `criterios_bloqueio` (app-go-api, DEV-407). Ainda fora do enum gerado
+ * pelo Orval (`EmpregabilidadeCriterioBloqueio`), por isso é conferida como texto.
+ */
+const CRITERIO_BLOQUEIO_PCD = 'pcd'
+
+/** Opção PcD da vaga que restringe a candidatura (`opcao_pcd` do app-go-api). */
+const OPCAO_PCD_EXCLUSIVA = 'exclusiva'
 
 export interface FailedCriterio {
   /** Slug enviado à API de bloqueios. */
@@ -25,7 +39,11 @@ interface ReferenceItem {
 interface EligibilityParams {
   vaga: Pick<
     EmpregabilidadeVaga,
-    'idade_minima' | 'id_escolaridade_minima' | 'idiomas_requisito'
+    | 'idade_minima'
+    | 'id_escolaridade_minima'
+    | 'idiomas_requisito'
+    | 'acessibilidade_pcd'
+    | 'tipos_pcd'
   > & {
     /**
      * Critérios com bloqueio de candidatura ligado no Admin (`empregabilidade.Vaga.criterios_bloqueio`
@@ -34,12 +52,19 @@ interface EligibilityParams {
      * antiga, que confere todo critério configurado na vaga.
      */
     criterios_bloqueio?: ReadonlyArray<EmpregabilidadeCriterioBloqueio> | null
+    /**
+     * Opção PcD da vaga (`aberta` | `preferencial` | `exclusiva`, app-go-api DEV-407), ainda
+     * fora do client Orval. Ausente = API anterior ao campo: vale `acessibilidade_pcd`.
+     */
+    opcao_pcd?: string | null
   }
   nascimentoData: string | undefined
   /** Formações do currículo com id_escolaridade e status. */
   formacoesCurriculo: Array<{ id_escolaridade: string; status: string }>
   /** ID da escolaridade do RMI (autodeclarado), já resolvido via resolveEscolaridadeIdByDescricao. */
   escolaridadeRmiId: string | undefined
+  /** Deficiência autodeclarada no RMI (`deficiencia` do cidadão). */
+  deficiencia?: string | null
   idiomasCurriculo: Array<{ id_idioma: string; id_nivel: string }>
   escolaridades: ReferenceItem[]
   idiomas: ReferenceItem[]
@@ -72,6 +97,32 @@ export function resolveEscolaridadeIdByDescricao(
   )?.id
 }
 
+/** Minúsculas, sem acentos e sem espaços nas pontas, para comparar textos livres. */
+function normalizarTexto(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/\p{Mn}/gu, '')
+    .trim()
+    .toLowerCase()
+}
+
+/**
+ * Se o cidadão declarou ter deficiência. Vazio, "Nenhuma" e as respostas negativas
+ * ("Não sou pessoa com deficiência") contam como não declarada.
+ */
+function declarouDeficiencia(deficiencia: string | null | undefined): boolean {
+  if (deficiencia == null) return false
+  const normalizada = normalizarTexto(deficiencia)
+  if (normalizada === '' || normalizada === 'nenhuma') return false
+  return normalizada !== 'nao' && !normalizada.startsWith('nao ')
+}
+
+/** "Física", "Física ou Auditiva", "Física, Auditiva ou Visual". */
+function juntarComOu(itens: string[]): string {
+  if (itens.length <= 1) return itens.join('')
+  return `${itens.slice(0, -1).join(', ')} ou ${itens[itens.length - 1]}`
+}
+
 function getOrdem(items: ReferenceItem[], id: string): number {
   const idx = items.findIndex(item => item.id === id)
   if (idx === -1) return -1
@@ -84,6 +135,7 @@ export function checkEligibility({
   nascimentoData,
   formacoesCurriculo,
   escolaridadeRmiId,
+  deficiencia,
   idiomasCurriculo,
   escolaridades,
   idiomas,
@@ -103,12 +155,24 @@ export function checkEligibility({
   )
     ? (vaga.idiomas_requisito ?? [])
     : []
+  // PcD: só a vaga exclusiva restringe, e só com o bloqueio ligado explicitamente no Admin.
+  // Sem a lista (API anterior ao campo) não confere: antes deste critério nenhuma vaga
+  // bloqueava por PcD, e as vagas migradas nascem com o bloqueio desligado.
+  const vagaExclusivaPcd =
+    vaga.opcao_pcd != null
+      ? vaga.opcao_pcd === OPCAO_PCD_EXCLUSIVA
+      : vaga.acessibilidade_pcd ===
+        EmpregabilidadeAcessibilidadePCD.AcessibilidadeExclusivoPCD
+  const chavesBloqueio: ReadonlyArray<string> = criteriosBloqueio ?? []
+  const conferirPcd =
+    vagaExclusivaPcd && chavesBloqueio.includes(CRITERIO_BLOQUEIO_PCD)
 
   // Nenhum critério ativo — candidato passa automaticamente
   const temCriterios =
     vaga.idade_minima != null ||
     conferirEscolaridade ||
-    idiomasRequisito.length > 0
+    idiomasRequisito.length > 0 ||
+    conferirPcd
 
   if (!temCriterios) {
     return { passes: true, failedCriterios: [] }
@@ -191,6 +255,30 @@ export function checkEligibility({
       failedCriterios.push({
         slug: 'idioma',
         label: `Idioma ${nomeIdioma} — nível ${nomeNivelMinimo} ou superior`,
+      })
+    }
+  }
+
+  // Critério PcD
+  if (conferirPcd) {
+    const tiposVaga = (vaga.tipos_pcd ?? [])
+      .map(tipo => tipo.descricao?.trim() ?? '')
+      .filter(descricao => descricao !== '')
+    const declarou = declarouDeficiencia(deficiencia)
+    const tipoEmComum =
+      tiposVaga.length === 0 ||
+      (deficiencia != null &&
+        tiposVaga.some(
+          tipo => normalizarTexto(tipo) === normalizarTexto(deficiencia)
+        ))
+
+    if (!declarou || !tipoEmComum) {
+      failedCriterios.push({
+        slug: 'pcd',
+        label:
+          tiposVaga.length > 0
+            ? `Ser pessoa com deficiência (${juntarComOu(tiposVaga)})`
+            : 'Ser pessoa com deficiência',
       })
     }
   }

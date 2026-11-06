@@ -113,6 +113,7 @@ export async function enviarCandidatura(
         nascimentoData: cidadao?.nascimento?.data,
         formacoesCurriculo,
         escolaridadeRmiId,
+        deficiencia: cidadao?.deficiencia,
         idiomasCurriculo,
         escolaridades,
         idiomas: formacaoOptions.idiomas,
