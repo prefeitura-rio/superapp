@@ -53,7 +53,7 @@ describe('BottomSheet (Drawer) — diálogo modal', () => {
 
     for (let i = 0; i < 6; i++) {
       await user.tab()
-      expect(dialog).toContainElement(document.activeElement)
+      expect(dialog.contains(document.activeElement)).toBe(true)
     }
     expect(
       screen.getByRole('button', { name: 'Atenção a detalhes', hidden: true })
@@ -65,7 +65,7 @@ describe('BottomSheet (Drawer) — diálogo modal', () => {
 
     for (let i = 0; i < 6; i++) {
       await user.tab({ shift: true })
-      expect(dialog).toContainElement(document.activeElement)
+      expect(dialog.contains(document.activeElement)).toBe(true)
     }
   })
 
