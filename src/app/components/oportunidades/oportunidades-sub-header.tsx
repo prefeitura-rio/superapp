@@ -47,8 +47,10 @@ export function OportunidadesSubHeader({
         logoHref="/"
       />
 
-      {/* Faixa 2 — Oportunidades Cariocas */}
-      <div
+      {/* Faixa 2 — Oportunidades Cariocas (landmark próprio: o <header> do
+          MainHeader já é o banner da página, e um segundo <header> duplicaria) */}
+      <nav
+        aria-label="Oportunidades Cariocas"
         className="w-full px-4 py-4"
         style={{
           background:
@@ -84,7 +86,7 @@ export function OportunidadesSubHeader({
             </Link>
           )}
         </div>
-      </div>
+      </nav>
     </div>
   )
 }
