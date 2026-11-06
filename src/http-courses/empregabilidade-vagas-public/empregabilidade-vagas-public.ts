@@ -7,7 +7,7 @@
  */
 import type {
   EmpregabilidadeVaga,
-  GetApiPublicEmpregabilidadeVagas200,
+  EmpregabilidadeVagaPublicListResponse,
   GetApiPublicEmpregabilidadeVagas400,
   GetApiPublicEmpregabilidadeVagas500,
   GetApiPublicEmpregabilidadeVagasId400,
@@ -22,7 +22,7 @@ import type {
 import { customFetch } from '../../../custom-fetch-course'
 
 export type getApiPublicEmpregabilidadeVagasResponse200 = {
-  data: GetApiPublicEmpregabilidadeVagas200
+  data: EmpregabilidadeVagaPublicListResponse
   status: 200
 }
 

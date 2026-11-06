@@ -7,20 +7,19 @@
  */
 import type {
   DeleteApiV1OportunidadesMeiId200,
-  GetApiPublicOportunidadesMei200,
   GetApiPublicOportunidadesMeiParams,
-  GetApiV1OportunidadesMei200,
   GetApiV1OportunidadesMeiDrafts200,
   GetApiV1OportunidadesMeiDraftsParams,
   GetApiV1OportunidadesMeiParams,
   ModelsErrorResponse,
   ModelsOportunidadeMEI,
+  ModelsOportunidadeMEIListResponse,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch-course'
 
 export type getApiPublicOportunidadesMeiResponse200 = {
-  data: GetApiPublicOportunidadesMei200
+  data: ModelsOportunidadeMEIListResponse
   status: 200
 }
 
@@ -135,7 +134,7 @@ export const getApiPublicOportunidadesMeiId = async (
 }
 
 export type getApiV1OportunidadesMeiResponse200 = {
-  data: GetApiV1OportunidadesMei200
+  data: ModelsOportunidadeMEIListResponse
   status: 200
 }
 

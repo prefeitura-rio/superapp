@@ -6,4 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetApiV1OportunidadesMei200 = { [key: string]: unknown }
+export interface ModelsOportunidadeMEIListMeta {
+  page?: number
+  page_size?: number
+  total?: number
+}

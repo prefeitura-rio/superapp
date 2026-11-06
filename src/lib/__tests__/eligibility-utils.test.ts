@@ -111,7 +111,14 @@ describe('checkEligibility — bloqueio ligado/desligado', () => {
   })
 
   it('ignora chave desconhecida na lista sem ligar outros critérios', () => {
-    const result = checkEligibility(params({ criterios_bloqueio: ['pcd'] }))
+    // Valor que a API pode passar a devolver antes de o client ser regenerado: está fora do
+    // enum gerado, por isso o cast simula o JSON recebido em runtime.
+    const chaveDesconhecida = [
+      'pcd',
+    ] as unknown as Params['vaga']['criterios_bloqueio']
+    const result = checkEligibility(
+      params({ criterios_bloqueio: chaveDesconhecida })
+    )
     expect(result).toEqual({ passes: true, failedCriterios: [] })
   })
 })

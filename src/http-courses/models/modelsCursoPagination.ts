@@ -6,4 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetApiPublicOportunidadesMei200 = { [key: string]: unknown }
+export interface ModelsCursoPagination {
+  limit?: number
+  page?: number
+  total?: number
+  total_pages?: number
+}
