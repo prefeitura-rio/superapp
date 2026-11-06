@@ -99,11 +99,51 @@ describe('VagaCard — contraste do "Publicada em" (WCAG AA)', () => {
     expect(contrastRatio(blended, RECENT_BG)).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('mantém a cor da variante "all"', () => {
+  // Fundo do card da listagem geral (`bg-card`): `--card` em globals.css
+  const ALL_BG_LIGHT: [number, number, number] = [0xf1, 0xf1, 0xf4]
+  const ALL_BG_DARK: [number, number, number] = [0x18, 0x18, 0x1b]
+
+  function hexClassColor(
+    className: string,
+    prefix: '' | 'dark:'
+  ): [number, number, number] | null {
+    const escaped = prefix.replace(':', '\\:')
+    const match = className.match(
+      new RegExp(`(?:^|\\s)${escaped}text-\\[#([0-9a-fA-F]{6})\\](?:\\s|$)`)
+    )
+    if (!match) return null
+    const hex = match[1]
+    return [0, 2, 4].map(i => Number.parseInt(hex.slice(i, i + 2), 16)) as [
+      number,
+      number,
+      number,
+    ]
+  }
+
+  it('usa cor de contraste ≥ 4.5:1 sobre o fundo claro do card "all"', () => {
     render(<VagaCard vaga={card} variant="all" />)
 
-    expect(screen.getByText('Publicada em 01/11/2026').className).toContain(
-      'text-[#0084D1]'
+    expect(screen.getByRole('link').className).toContain('bg-card')
+    const publicada = screen.getByText('Publicada em 01/11/2026')
+    expect(publicada.className).not.toContain('text-[#0084D1]')
+
+    const light = hexClassColor(publicada.className, '')
+    expect(light).not.toBeNull()
+    expect(
+      contrastRatio(light as [number, number, number], ALL_BG_LIGHT)
+    ).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('usa cor de contraste ≥ 4.5:1 sobre o fundo escuro do card "all"', () => {
+    render(<VagaCard vaga={card} variant="all" />)
+
+    const dark = hexClassColor(
+      screen.getByText('Publicada em 01/11/2026').className,
+      'dark:'
     )
+    expect(dark).not.toBeNull()
+    expect(
+      contrastRatio(dark as [number, number, number], ALL_BG_DARK)
+    ).toBeGreaterThanOrEqual(4.5)
   })
 })

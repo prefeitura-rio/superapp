@@ -163,7 +163,9 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
             <span
               className={cn(
                 'font-sans text-xs font-normal leading-4 tracking-normal',
-                isRecent ? 'text-white/80' : 'text-[#0084D1]'
+                isRecent
+                  ? 'text-white/80'
+                  : 'text-[#0069A8] dark:text-[#00A6F4]'
               )}
             >
               Publicada em {vaga.dataPublicacao}
