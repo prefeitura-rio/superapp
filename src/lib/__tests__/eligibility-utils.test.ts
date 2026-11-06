@@ -114,11 +114,194 @@ describe('checkEligibility — bloqueio ligado/desligado', () => {
     // Valor que a API pode passar a devolver antes de o client ser regenerado: está fora do
     // enum gerado, por isso o cast simula o JSON recebido em runtime.
     const chaveDesconhecida = [
-      'pcd',
+      'altura',
     ] as unknown as Params['vaga']['criterios_bloqueio']
     const result = checkEligibility(
       params({ criterios_bloqueio: chaveDesconhecida })
     )
     expect(result).toEqual({ passes: true, failedCriterios: [] })
+  })
+})
+
+const FRASE_PCD = 'Ser pessoa com deficiência'
+const TIPOS_FAV = [
+  { id: 't-fisica', descricao: 'Física' },
+  { id: 't-auditiva', descricao: 'Auditiva' },
+  { id: 't-visual', descricao: 'Visual' },
+]
+
+/** Vaga exclusiva PcD, com bloqueio PcD ligado e nenhum outro critério. */
+function paramsPcd(
+  vagaExtra: Partial<Params['vaga']>,
+  deficiencia: string | null | undefined
+): Params {
+  return {
+    ...params({
+      id_escolaridade_minima: undefined,
+      idiomas_requisito: [],
+      opcao_pcd: 'exclusiva',
+      criterios_bloqueio: [
+        'pcd',
+      ] as unknown as Params['vaga']['criterios_bloqueio'],
+      tipos_pcd: [],
+      ...vagaExtra,
+    }),
+    deficiencia,
+  }
+}
+
+const bloqueios = (...chaves: string[]) =>
+  chaves as unknown as Params['vaga']['criterios_bloqueio']
+
+describe('checkEligibility — critério PcD', () => {
+  it('bloqueia vaga exclusiva sem tipos quando o cidadão não declarou deficiência', () => {
+    for (const semDeficiencia of [
+      undefined,
+      null,
+      '',
+      '  ',
+      'Nenhuma',
+      'Não sou pessoa com deficiência',
+      'nao sou pessoa com deficiencia',
+    ]) {
+      const result = checkEligibility(paramsPcd({}, semDeficiencia))
+      expect(result).toEqual({
+        passes: false,
+        failedCriterios: [{ slug: 'pcd', label: FRASE_PCD }],
+      })
+    }
+  })
+
+  it('deixa passar vaga exclusiva sem tipos quando o cidadão declarou qualquer deficiência', () => {
+    for (const deficiencia of [
+      'Física',
+      'Intelectual',
+      'Reabilitado do INSS',
+    ]) {
+      expect(checkEligibility(paramsPcd({}, deficiencia))).toEqual({
+        passes: true,
+        failedCriterios: [],
+      })
+    }
+  })
+
+  it('com tipos na vaga, bloqueia quem declarou deficiência fora deles e lista os tipos na frase', () => {
+    const result = checkEligibility(
+      paramsPcd({ tipos_pcd: TIPOS_FAV }, 'Intelectual')
+    )
+    expect(result).toEqual({
+      passes: false,
+      failedCriterios: [
+        {
+          slug: 'pcd',
+          label: 'Ser pessoa com deficiência (Física, Auditiva ou Visual)',
+        },
+      ],
+    })
+  })
+
+  it('com tipos na vaga, bloqueia quem não declarou deficiência com a frase dos tipos', () => {
+    const result = checkEligibility(
+      paramsPcd({ tipos_pcd: TIPOS_FAV }, 'Não sou pessoa com deficiência')
+    )
+    expect(result.failedCriterios).toEqual([
+      {
+        slug: 'pcd',
+        label: 'Ser pessoa com deficiência (Física, Auditiva ou Visual)',
+      },
+    ])
+  })
+
+  it('com tipos na vaga, deixa passar quem tem um tipo em comum, sem diferenciar caixa nem acento', () => {
+    for (const deficiencia of ['Auditiva', 'visual', ' FISICA ']) {
+      expect(
+        checkEligibility(paramsPcd({ tipos_pcd: TIPOS_FAV }, deficiencia))
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('monta a frase com um e com dois tipos', () => {
+    expect(
+      checkEligibility(paramsPcd({ tipos_pcd: [TIPOS_FAV[0]] }, 'Visual'))
+        .failedCriterios[0].label
+    ).toBe('Ser pessoa com deficiência (Física)')
+    expect(
+      checkEligibility(
+        paramsPcd({ tipos_pcd: TIPOS_FAV.slice(0, 2) }, 'Visual')
+      ).failedCriterios[0].label
+    ).toBe('Ser pessoa com deficiência (Física ou Auditiva)')
+  })
+
+  it('não confere vaga aberta nem preferencial, mesmo com o bloqueio ligado', () => {
+    for (const opcao of ['aberta', 'preferencial']) {
+      expect(
+        checkEligibility(
+          paramsPcd({ opcao_pcd: opcao, tipos_pcd: TIPOS_FAV }, undefined)
+        )
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('não confere vaga exclusiva com o bloqueio PcD desligado ou sem a lista de bloqueios', () => {
+    for (const criterios of [
+      bloqueios(),
+      bloqueios('escolaridade', 'idioma'),
+      undefined,
+      null,
+    ]) {
+      expect(
+        checkEligibility(
+          paramsPcd({ criterios_bloqueio: criterios }, undefined)
+        )
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('sem opcao_pcd (API anterior ao campo), usa acessibilidade_pcd exclusivo_pcd', () => {
+    const result = checkEligibility(
+      paramsPcd(
+        { opcao_pcd: undefined, acessibilidade_pcd: 'exclusivo_pcd' },
+        'Nenhuma'
+      )
+    )
+    expect(result.failedCriterios).toEqual([{ slug: 'pcd', label: FRASE_PCD }])
+    expect(
+      checkEligibility(
+        paramsPcd(
+          { opcao_pcd: undefined, acessibilidade_pcd: 'preferencial_pcd' },
+          'Nenhuma'
+        )
+      ).passes
+    ).toBe(true)
+  })
+
+  it('opcao_pcd prevalece sobre acessibilidade_pcd', () => {
+    expect(
+      checkEligibility(
+        paramsPcd(
+          { opcao_pcd: 'aberta', acessibilidade_pcd: 'exclusivo_pcd' },
+          undefined
+        )
+      ).passes
+    ).toBe(true)
+  })
+
+  it('soma o critério PcD aos demais bloqueios ligados', () => {
+    const result = checkEligibility({
+      ...params({
+        criterios_bloqueio: bloqueios('escolaridade', 'idioma', 'pcd'),
+        opcao_pcd: 'exclusiva',
+        tipos_pcd: TIPOS_FAV,
+      }),
+      deficiencia: 'Nenhuma',
+    })
+    expect(result.failedCriterios).toEqual([
+      { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
+      { slug: 'idioma', label: LABEL_IDIOMA },
+      {
+        slug: 'pcd',
+        label: 'Ser pessoa com deficiência (Física, Auditiva ou Visual)',
+      },
+    ])
   })
 })
