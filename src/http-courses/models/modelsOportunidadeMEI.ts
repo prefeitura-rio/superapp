@@ -18,7 +18,8 @@ export interface ModelsOportunidadeMEI {
   created_at?: string
   data_expiracao?: string
   data_limite_execucao?: string
-  deleted_at?: string
+  /** @nullable */
+  deleted_at?: string | null
   descricao_servico?: string
   estado?: string
   /** Pagamento e prazos */

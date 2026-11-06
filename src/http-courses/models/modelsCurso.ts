@@ -14,20 +14,28 @@ import type { ModelsTurno } from './modelsTurno'
 export interface ModelsCurso {
   /** Accessibility field - free text field for frontend */
   accessibility?: string
-  /** Auto-approve enrollments - when true, new enrollments are automatically approved instead of pending */
-  auto_approve_enrollments?: boolean
+  /**
+   * Auto-approve enrollments - when true, new enrollments are automatically approved instead of pending
+   * @nullable
+   */
+  auto_approve_enrollments?: boolean | null
   carga_horaria?: number
   certificacao_oferecida?: boolean
   contato_duvidas?: string
   course_management_type?: ModelsCourseManagementType
   cover_image?: string
   created_at?: string
-  data_inicio?: string
-  data_limite_inscricoes?: string
-  data_termino?: string
+  /** @nullable */
+  data_inicio?: string | null
+  /** @nullable */
+  data_limite_inscricoes?: string | null
+  /** @nullable */
+  data_termino?: string | null
   description?: string
-  enrollment_end_date?: string
-  enrollment_start_date?: string
+  /** @nullable */
+  enrollment_end_date?: string | null
+  /** @nullable */
+  enrollment_start_date?: string | null
   expected_results?: string
   external_partner_contact?: string
   external_partner_logo_url?: string
@@ -39,15 +47,20 @@ export interface ModelsCurso {
   /** Optional fields matching specification */
   has_certificate?: boolean
   id?: number
-  instituicao_id?: number
+  /** @nullable */
+  instituicao_id?: number | null
   institutional_logo?: string
-  /** External partner fields */
-  is_external_partner?: boolean
+  /**
+   * External partner fields
+   * @nullable
+   */
+  is_external_partner?: boolean | null
   /**
    * Visibility field - controls if course appears in public listings (default: true)
    * Used for in-person courses that require manual enrollment and should not appear in public course lists
+   * @nullable
    */
-  is_visible?: boolean
+  is_visible?: boolean | null
   link_inscricao?: string
   local_realizacao?: string
   material_used?: string

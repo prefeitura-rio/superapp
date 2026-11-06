@@ -14,4 +14,5 @@ export const ModelsTurno = {
   TurnoNoite: 'NOITE',
   TurnoIntegral: 'INTEGRAL',
   TurnoLivre: 'LIVRE',
+  TurnoNaoInformado: '',
 } as const

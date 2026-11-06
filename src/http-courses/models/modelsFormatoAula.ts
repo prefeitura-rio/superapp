@@ -12,4 +12,6 @@ export type ModelsFormatoAula =
 export const ModelsFormatoAula = {
   FormatoAulaGravado: 'GRAVADO',
   FormatoAulaAoVivo: 'AO_VIVO',
+  FormatoAulaPresencial: 'PRESENCIAL',
+  FormatoAulaNaoInformado: '',
 } as const

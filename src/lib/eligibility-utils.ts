@@ -1,3 +1,4 @@
+import { EmpregabilidadeCriterioBloqueio } from '@/http-courses/models/empregabilidadeCriterioBloqueio'
 import type { EmpregabilidadeVaga } from '@/http-courses/models/empregabilidadeVaga'
 
 export type EligibilityCriterioSlug = 'idade_minima' | 'escolaridade' | 'idioma'
@@ -21,13 +22,6 @@ interface ReferenceItem {
   ordem?: number
 }
 
-/**
- * Chaves de `criterios_bloqueio` que esta validação respeita. Mesmos valores do enum
- * `empregabilidade.CriterioBloqueio` do app-go-api (`docs/swagger.json` da `main`).
- */
-const CRITERIO_BLOQUEIO_ESCOLARIDADE = 'escolaridade'
-const CRITERIO_BLOQUEIO_IDIOMA = 'idioma'
-
 interface EligibilityParams {
   vaga: Pick<
     EmpregabilidadeVaga,
@@ -38,10 +32,8 @@ interface EligibilityParams {
      * do app-go-api); os ausentes estão desligados e nunca bloqueiam. A API sempre o devolve
      * (`[]` quando nenhum). Ausente (`undefined`/`null`) = API anterior ao campo: vale a regra
      * antiga, que confere todo critério configurado na vaga.
-     *
-     * Tipado aqui porque o client Orval de `src/http-courses` ainda não foi regenerado com o campo.
      */
-    criterios_bloqueio?: ReadonlyArray<string> | null
+    criterios_bloqueio?: ReadonlyArray<EmpregabilidadeCriterioBloqueio> | null
   }
   nascimentoData: string | undefined
   /** Formações do currículo com id_escolaridade e status. */
@@ -101,12 +93,14 @@ export function checkEligibility({
 
   // Bloqueio desligado no Admin: o critério nunca é conferido.
   const criteriosBloqueio = vaga.criterios_bloqueio
-  const bloqueioLigado = (criterio: string): boolean =>
+  const bloqueioLigado = (criterio: EmpregabilidadeCriterioBloqueio): boolean =>
     criteriosBloqueio == null || criteriosBloqueio.includes(criterio)
   const conferirEscolaridade =
     vaga.id_escolaridade_minima != null &&
-    bloqueioLigado(CRITERIO_BLOQUEIO_ESCOLARIDADE)
-  const idiomasRequisito = bloqueioLigado(CRITERIO_BLOQUEIO_IDIOMA)
+    bloqueioLigado(EmpregabilidadeCriterioBloqueio.CriterioBloqueioEscolaridade)
+  const idiomasRequisito = bloqueioLigado(
+    EmpregabilidadeCriterioBloqueio.CriterioBloqueioIdioma
+  )
     ? (vaga.idiomas_requisito ?? [])
     : []
 
