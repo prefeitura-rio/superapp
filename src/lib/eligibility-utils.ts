@@ -7,6 +7,7 @@ export type EligibilityCriterioSlug =
   | 'escolaridade'
   | 'idioma'
   | 'pcd'
+  | 'experiencia_carteira'
 
 /**
  * Chave do bloqueio PcD em `criterios_bloqueio` (app-go-api, DEV-407). Ainda fora do enum gerado
@@ -14,8 +15,21 @@ export type EligibilityCriterioSlug =
  */
 const CRITERIO_BLOQUEIO_PCD = 'pcd'
 
+/**
+ * Chave do bloqueio de experiência em carteira em `criterios_bloqueio` e slug do critério em
+ * `/candidatura-bloqueios` (app-go-api, DEV-424). Ainda fora do enum gerado pelo Orval.
+ */
+const CRITERIO_BLOQUEIO_EXPERIENCIA_CARTEIRA = 'experiencia_carteira'
+
 /** Opção PcD da vaga que restringe a candidatura (`opcao_pcd` do app-go-api). */
 const OPCAO_PCD_EXCLUSIVA = 'exclusiva'
+
+/** Tempo de experiência em carteira exigido pela vaga (`experiencia_carteira` do app-go-api). */
+const EXPERIENCIA_CARTEIRA_QUALQUER_TEMPO = 'qualquer_tempo'
+const EXPERIENCIA_CARTEIRA_MINIMO_6_MESES = 'minimo_6_meses'
+
+/** Prazo fixo da opção "mínimo de 6 meses", somado entre as experiências em carteira. */
+const MESES_MINIMOS_EXPERIENCIA_CARTEIRA = 6
 
 export interface FailedCriterio {
   /** Slug enviado à API de bloqueios. */
@@ -34,6 +48,11 @@ interface ReferenceItem {
   id: string
   descricao: string
   ordem?: number
+}
+
+export interface ExperienciaCurriculo {
+  experiencia_comprovada_ct?: boolean | null
+  tempo_experiencia_meses?: number | null
 }
 
 interface EligibilityParams {
@@ -57,6 +76,12 @@ interface EligibilityParams {
      * fora do client Orval. Ausente = API anterior ao campo: vale `acessibilidade_pcd`.
      */
     opcao_pcd?: string | null
+    /**
+     * Tempo de experiência em carteira exigido (`qualquer_tempo` | `minimo_6_meses`, app-go-api
+     * DEV-424), ainda fora do client Orval. `null`/ausente = sem exigência. Só bloqueia com a chave
+     * `experiencia_carteira` em `criterios_bloqueio`.
+     */
+    experiencia_carteira?: string | null
   }
   nascimentoData: string | undefined
   /** Formações do currículo com id_escolaridade e status. */
@@ -72,6 +97,11 @@ interface EligibilityParams {
    */
   tiposPcdCatalogo?: ReadonlyArray<{ id: string }>
   idiomasCurriculo: Array<{ id_idioma: string; id_nivel: string }>
+  /**
+   * Experiências do currículo (`experiencias` do currículo do app-go-api). Só contam as
+   * comprovadas em carteira (`experiencia_comprovada_ct`). Ausente = nenhuma.
+   */
+  experienciasCurriculo?: ReadonlyArray<ExperienciaCurriculo>
   escolaridades: ReferenceItem[]
   idiomas: ReferenceItem[]
   niveisIdioma: ReferenceItem[]
@@ -138,6 +168,30 @@ function vagaComTodosOsTiposPcd(
   return catalogo.every(tipo => idsVaga.has(tipo.id))
 }
 
+/**
+ * Mesma régua do app-go-api (`ExperienciaCarteira.Atende`, DEV-424): só contam as experiências
+ * comprovadas em carteira; qualquer tempo pede ao menos uma e o mínimo de 6 meses soma
+ * `tempo_experiencia_meses` entre elas (sem tempo, ou negativo, conta zero).
+ */
+function atendeExperienciaCarteira(
+  exigencia: string,
+  experiencias: ReadonlyArray<ExperienciaCurriculo>
+): boolean {
+  const emCarteira = experiencias.filter(
+    exp => exp.experiencia_comprovada_ct === true
+  )
+  if (exigencia === EXPERIENCIA_CARTEIRA_QUALQUER_TEMPO) {
+    return emCarteira.length > 0
+  }
+  const totalMeses = emCarteira.reduce((total, exp) => {
+    const meses = exp.tempo_experiencia_meses
+    return typeof meses === 'number' && Number.isFinite(meses) && meses > 0
+      ? total + meses
+      : total
+  }, 0)
+  return totalMeses >= MESES_MINIMOS_EXPERIENCIA_CARTEIRA
+}
+
 function getOrdem(items: ReferenceItem[], id: string): number {
   const idx = items.findIndex(item => item.id === id)
   if (idx === -1) return -1
@@ -153,6 +207,7 @@ export function checkEligibility({
   deficiencia,
   tiposPcdCatalogo,
   idiomasCurriculo,
+  experienciasCurriculo = [],
   escolaridades,
   idiomas,
   niveisIdioma,
@@ -182,13 +237,21 @@ export function checkEligibility({
   const chavesBloqueio: ReadonlyArray<string> = criteriosBloqueio ?? []
   const conferirPcd =
     vagaExclusivaPcd && chavesBloqueio.includes(CRITERIO_BLOQUEIO_PCD)
+  // Experiência em carteira: como o PcD, só com o bloqueio ligado explicitamente e uma opção
+  // conhecida; opção desconhecida não bloqueia (a API a recusa com 400).
+  const exigenciaCarteira = vaga.experiencia_carteira
+  const conferirExperienciaCarteira =
+    chavesBloqueio.includes(CRITERIO_BLOQUEIO_EXPERIENCIA_CARTEIRA) &&
+    (exigenciaCarteira === EXPERIENCIA_CARTEIRA_QUALQUER_TEMPO ||
+      exigenciaCarteira === EXPERIENCIA_CARTEIRA_MINIMO_6_MESES)
 
   // Nenhum critério ativo — candidato passa automaticamente
   const temCriterios =
     vaga.idade_minima != null ||
     conferirEscolaridade ||
     idiomasRequisito.length > 0 ||
-    conferirPcd
+    conferirPcd ||
+    conferirExperienciaCarteira
 
   if (!temCriterios) {
     return { passes: true, failedCriterios: [] }
@@ -231,6 +294,21 @@ export function checkEligibility({
         label: `Ter pelo menos ${vaga.idade_minima} anos`,
       })
     }
+  }
+
+  // Critério de experiência em carteira: depois da idade, na ordem do Admin.
+  if (
+    conferirExperienciaCarteira &&
+    exigenciaCarteira != null &&
+    !atendeExperienciaCarteira(exigenciaCarteira, experienciasCurriculo)
+  ) {
+    failedCriterios.push({
+      slug: 'experiencia_carteira',
+      label:
+        exigenciaCarteira === EXPERIENCIA_CARTEIRA_MINIMO_6_MESES
+          ? `Ter pelo menos ${MESES_MINIMOS_EXPERIENCIA_CARTEIRA} meses de experiência em carteira`
+          : 'Ter experiência em carteira assinada',
+    })
   }
 
   // Critério de escolaridade

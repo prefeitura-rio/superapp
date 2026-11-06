@@ -15,7 +15,10 @@ import {
   checkEligibility,
   resolveEscolaridadeIdByDescricao,
 } from '@/lib/eligibility-utils'
-import type { FailedCriterio } from '@/lib/eligibility-utils'
+import type {
+  ExperienciaCurriculo,
+  FailedCriterio,
+} from '@/lib/eligibility-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export interface RespostaInfoComplementar {
@@ -94,6 +97,13 @@ export async function enviarCandidatura(
           }>)
         : []
 
+      const experienciasCurriculo = Array.isArray(curriculo.experiencias)
+        ? (curriculo.experiencias as unknown[]).filter(
+            (exp): exp is ExperienciaCurriculo =>
+              exp != null && typeof exp === 'object'
+          )
+        : []
+
       const escolaridades = formacaoOptions.escolaridades
 
       const cidadao =
@@ -125,6 +135,7 @@ export async function enviarCandidatura(
         deficiencia: cidadao?.deficiencia,
         tiposPcdCatalogo,
         idiomasCurriculo,
+        experienciasCurriculo,
         escolaridades,
         idiomas: formacaoOptions.idiomas,
         niveisIdioma: formacaoOptions.niveisIdioma,

@@ -257,6 +257,94 @@ describe('enviarCandidatura', () => {
     })
   })
 
+  describe('critério experiência em carteira', () => {
+    function vagaComExperienciaCarteira(
+      experienciaCarteira: string,
+      experiencias: unknown,
+      criteriosBloqueio: string[] = ['experiencia_carteira']
+    ) {
+      server.use(
+        http.get(
+          `${COURSES_BASE_URL}/api/public/empregabilidade/vagas/:id`,
+          () =>
+            HttpResponse.json(
+              {
+                id: VAGA_ID,
+                titulo: 'Vaga com experiência em carteira',
+                experiencia_carteira: experienciaCarteira,
+                criterios_bloqueio: criteriosBloqueio,
+                idiomas_requisito: [],
+              },
+              { status: 200 }
+            )
+        ),
+        http.get(
+          `${COURSES_BASE_URL}/api/v1/empregabilidade/curriculo/:cpf`,
+          () =>
+            HttpResponse.json(
+              { cpf: '12345678901', experiencias },
+              { status: 200 }
+            )
+        )
+      )
+    }
+
+    test('soma as experiências em carteira do currículo e envia a candidatura com 6 meses no total', async () => {
+      vagaComExperienciaCarteira('minimo_6_meses', [
+        { experiencia_comprovada_ct: true, tempo_experiencia_meses: 4 },
+        { experiencia_comprovada_ct: false, tempo_experiencia_meses: 24 },
+        null,
+        { experiencia_comprovada_ct: true, tempo_experiencia_meses: 2 },
+      ])
+
+      const result = await enviarCandidatura(VAGA_ID)
+
+      expect(result).toEqual({ success: true })
+    })
+
+    test('bloqueia com a frase do mínimo de 6 meses quando a soma não chega', async () => {
+      vagaComExperienciaCarteira('minimo_6_meses', [
+        { experiencia_comprovada_ct: true, tempo_experiencia_meses: 5 },
+      ])
+
+      const result = await enviarCandidatura(VAGA_ID)
+
+      expect(result).toEqual({
+        success: false,
+        failedCriterios: [
+          {
+            slug: 'experiencia_carteira',
+            label: 'Ter pelo menos 6 meses de experiência em carteira',
+          },
+        ],
+      })
+    })
+
+    test('bloqueia com a frase de qualquer tempo quando o currículo não traz experiências', async () => {
+      vagaComExperienciaCarteira('qualquer_tempo', undefined)
+
+      const result = await enviarCandidatura(VAGA_ID)
+
+      expect(result).toEqual({
+        success: false,
+        failedCriterios: [
+          {
+            slug: 'experiencia_carteira',
+            label: 'Ter experiência em carteira assinada',
+          },
+        ],
+      })
+    })
+
+    test('com o bloqueio desligado, envia a candidatura sem experiência em carteira', async () => {
+      vagaComExperienciaCarteira('minimo_6_meses', [], [])
+
+      const result = await enviarCandidatura(VAGA_ID)
+
+      expect(result).toEqual({ success: true })
+    })
+  })
+
   describe('erros de autenticação', () => {
     test('retorna error quando CPF não está presente no token', async () => {
       mockGetUserInfoFromToken.mockResolvedValue({

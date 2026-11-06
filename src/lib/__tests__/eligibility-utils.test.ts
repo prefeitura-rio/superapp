@@ -395,3 +395,180 @@ describe('checkEligibility — PcD "Todos os tipos"', () => {
     }
   })
 })
+
+const FRASE_QUALQUER_TEMPO = 'Ter experiência em carteira assinada'
+const FRASE_6_MESES = 'Ter pelo menos 6 meses de experiência em carteira'
+
+type Experiencias = NonNullable<Params['experienciasCurriculo']>
+
+/** Vaga só com o critério de experiência em carteira, com o bloqueio ligado. */
+function paramsCarteira(
+  experienciaCarteira: string | null | undefined,
+  experienciasCurriculo: Experiencias | undefined,
+  vagaExtra: Partial<Params['vaga']> = {}
+): Params {
+  return {
+    ...params({
+      id_escolaridade_minima: undefined,
+      idiomas_requisito: [],
+      experiencia_carteira: experienciaCarteira,
+      criterios_bloqueio: bloqueios('experiencia_carteira'),
+      ...vagaExtra,
+    }),
+    experienciasCurriculo,
+  }
+}
+
+const emCarteira = (meses?: number | null) => ({
+  experiencia_comprovada_ct: true,
+  tempo_experiencia_meses: meses,
+})
+const semCarteira = (meses?: number | null) => ({
+  experiencia_comprovada_ct: false,
+  tempo_experiencia_meses: meses,
+})
+
+describe('checkEligibility — critério experiência em carteira', () => {
+  it('qualquer tempo: bloqueia sem nenhuma experiência em carteira, com a frase da opção', () => {
+    for (const experiencias of [
+      undefined,
+      [],
+      [semCarteira(48)],
+      [{ tempo_experiencia_meses: 12 }],
+      [{ experiencia_comprovada_ct: null, tempo_experiencia_meses: 12 }],
+    ]) {
+      expect(
+        checkEligibility(paramsCarteira('qualquer_tempo', experiencias))
+      ).toEqual({
+        passes: false,
+        failedCriterios: [
+          { slug: 'experiencia_carteira', label: FRASE_QUALQUER_TEMPO },
+        ],
+      })
+    }
+  })
+
+  it('qualquer tempo: deixa passar com uma experiência em carteira, de qualquer duração', () => {
+    for (const experiencias of [
+      [emCarteira(1)],
+      [emCarteira(0)],
+      [emCarteira(undefined)],
+      [semCarteira(3), emCarteira(null)],
+    ]) {
+      expect(
+        checkEligibility(paramsCarteira('qualquer_tempo', experiencias))
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('mínimo de 6 meses: soma todas as experiências em carteira do currículo', () => {
+    for (const experiencias of [
+      [emCarteira(6)],
+      [emCarteira(2), emCarteira(4)],
+      [emCarteira(1), emCarteira(1), emCarteira(1), emCarteira(3)],
+      [emCarteira(3), semCarteira(10), emCarteira(3)],
+      [emCarteira(30)],
+    ]) {
+      expect(
+        checkEligibility(paramsCarteira('minimo_6_meses', experiencias))
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('mínimo de 6 meses: bloqueia quando a soma em carteira não chega a 6, com a frase da opção', () => {
+    for (const experiencias of [
+      undefined,
+      [],
+      [emCarteira(5)],
+      [emCarteira(2), emCarteira(3)],
+      [emCarteira(3), semCarteira(24)],
+      [emCarteira(undefined), emCarteira(null), emCarteira(5)],
+      [emCarteira(-10), emCarteira(5)],
+      [emCarteira(Number.NaN), emCarteira(5)],
+    ]) {
+      expect(
+        checkEligibility(paramsCarteira('minimo_6_meses', experiencias))
+      ).toEqual({
+        passes: false,
+        failedCriterios: [
+          { slug: 'experiencia_carteira', label: FRASE_6_MESES },
+        ],
+      })
+    }
+  })
+
+  it('tempo negativo não desconta das demais experiências em carteira', () => {
+    expect(
+      checkEligibility(
+        paramsCarteira('minimo_6_meses', [emCarteira(-10), emCarteira(6)])
+      ).passes
+    ).toBe(true)
+  })
+
+  it('com o bloqueio desligado, não confere a experiência em carteira', () => {
+    for (const criterios of [
+      bloqueios(),
+      bloqueios('escolaridade', 'idioma', 'pcd'),
+      undefined,
+      null,
+    ]) {
+      expect(
+        checkEligibility(
+          paramsCarteira('minimo_6_meses', [], {
+            criterios_bloqueio: criterios,
+          })
+        )
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('com o bloqueio ligado sem opção válida, não confere (a API não grava esse estado)', () => {
+    for (const opcao of [undefined, null, '', 'invalido']) {
+      expect(checkEligibility(paramsCarteira(opcao, []))).toEqual({
+        passes: true,
+        failedCriterios: [],
+      })
+    }
+  })
+
+  it('soma aos demais bloqueios na ordem do Admin: PcD, idade, experiência, formação, idioma', () => {
+    const result = checkEligibility({
+      ...params({
+        idade_minima: 200,
+        criterios_bloqueio: bloqueios(
+          'escolaridade',
+          'idioma',
+          'pcd',
+          'experiencia_carteira'
+        ),
+        opcao_pcd: 'exclusiva',
+        tipos_pcd: [],
+        experiencia_carteira: 'minimo_6_meses',
+      }),
+      deficiencia: 'Nenhuma',
+      experienciasCurriculo: [emCarteira(5)],
+    })
+    expect(result).toEqual({
+      passes: false,
+      failedCriterios: [
+        { slug: 'pcd', label: FRASE_PCD },
+        { slug: 'idade_minima', label: 'Ter pelo menos 200 anos' },
+        { slug: 'experiencia_carteira', label: FRASE_6_MESES },
+        { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
+        { slug: 'idioma', label: LABEL_IDIOMA },
+      ],
+    })
+  })
+
+  it('quem atende a experiência em carteira só vê os demais critérios que falharam', () => {
+    const result = checkEligibility({
+      ...paramsCarteira('qualquer_tempo', [emCarteira(1)], {
+        criterios_bloqueio: bloqueios('escolaridade', 'experiencia_carteira'),
+        id_escolaridade_minima: 'sup',
+      }),
+    })
+    expect(result.failedCriterios).toEqual([
+      { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
+    ])
+  })
+})
