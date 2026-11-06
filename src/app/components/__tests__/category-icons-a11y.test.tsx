@@ -1,3 +1,7 @@
+import {
+  additionalCategories,
+  aditionalCategoriesFull,
+} from '@/constants/aditional-services'
 import { type Category, getIconForCategory } from '@/lib/categories'
 import { getCategoryDisplayName } from '@/lib/category-display-name'
 import { render, screen, within } from '@testing-library/react'
@@ -82,6 +86,40 @@ describe('HomeCategoriesGrid (seção "Serviços" da home)', () => {
         expect(within(link).queryByRole('img')).toBeNull()
       }
     }
+  })
+})
+
+describe('Atalhos fixos da grade (additionalCategories)', () => {
+  // O atalho "Cursos" não vem de getIconForCategory e repetia "cursos" no alt.
+  it('mostra o ícone de Cursos como decorativo na home', async () => {
+    const { container } = render(
+      <HomeCategoriesGrid categories={aditionalCategoriesFull} />
+    )
+    await screen.findByRole('heading', { level: 2, name: 'Serviços' })
+
+    const images = container.querySelectorAll('img')
+    expect(images.length).toBeGreaterThan(0)
+    for (const image of images) {
+      expect(image).toHaveAttribute('alt', '')
+    }
+
+    const links = screen.getAllByRole('link', { name: 'Cursos' })
+    expect(links).toHaveLength(2)
+    for (const link of links) {
+      expect(link).toHaveAccessibleName('Cursos')
+      expect(within(link).queryByRole('img')).toBeNull()
+    }
+  })
+
+  it('mantém o nome do botão de Cursos em /servicos', () => {
+    const { container } = render(
+      <CategoryGrid title="Categorias" categories={additionalCategories} />
+    )
+
+    for (const image of container.querySelectorAll('img')) {
+      expect(image).toHaveAttribute('alt', '')
+    }
+    expect(screen.getByRole('button', { name: 'Cursos' })).toBeVisible()
   })
 })
 
