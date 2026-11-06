@@ -21,11 +21,28 @@ interface ReferenceItem {
   ordem?: number
 }
 
+/**
+ * Chaves de `criterios_bloqueio` que esta validação respeita. Mesmos valores do enum
+ * `empregabilidade.CriterioBloqueio` do app-go-api (`docs/swagger.json` da `main`).
+ */
+const CRITERIO_BLOQUEIO_ESCOLARIDADE = 'escolaridade'
+const CRITERIO_BLOQUEIO_IDIOMA = 'idioma'
+
 interface EligibilityParams {
   vaga: Pick<
     EmpregabilidadeVaga,
     'idade_minima' | 'id_escolaridade_minima' | 'idiomas_requisito'
-  >
+  > & {
+    /**
+     * Critérios com bloqueio de candidatura ligado no Admin (`empregabilidade.Vaga.criterios_bloqueio`
+     * do app-go-api); os ausentes estão desligados e nunca bloqueiam. A API sempre o devolve
+     * (`[]` quando nenhum). Ausente (`undefined`/`null`) = API anterior ao campo: vale a regra
+     * antiga, que confere todo critério configurado na vaga.
+     *
+     * Tipado aqui porque o client Orval de `src/http-courses` ainda não foi regenerado com o campo.
+     */
+    criterios_bloqueio?: ReadonlyArray<string> | null
+  }
   nascimentoData: string | undefined
   /** Formações do currículo com id_escolaridade e status. */
   formacoesCurriculo: Array<{ id_escolaridade: string; status: string }>
@@ -82,11 +99,22 @@ export function checkEligibility({
 }: EligibilityParams): EligibilityCheck {
   const failedCriterios: FailedCriterio[] = []
 
+  // Bloqueio desligado no Admin: o critério nunca é conferido.
+  const criteriosBloqueio = vaga.criterios_bloqueio
+  const bloqueioLigado = (criterio: string): boolean =>
+    criteriosBloqueio == null || criteriosBloqueio.includes(criterio)
+  const conferirEscolaridade =
+    vaga.id_escolaridade_minima != null &&
+    bloqueioLigado(CRITERIO_BLOQUEIO_ESCOLARIDADE)
+  const idiomasRequisito = bloqueioLigado(CRITERIO_BLOQUEIO_IDIOMA)
+    ? (vaga.idiomas_requisito ?? [])
+    : []
+
   // Nenhum critério ativo — candidato passa automaticamente
   const temCriterios =
     vaga.idade_minima != null ||
-    vaga.id_escolaridade_minima != null ||
-    (vaga.idiomas_requisito?.length ?? 0) > 0
+    conferirEscolaridade ||
+    idiomasRequisito.length > 0
 
   if (!temCriterios) {
     return { passes: true, failedCriterios: [] }
@@ -106,7 +134,7 @@ export function checkEligibility({
   }
 
   // Critério de escolaridade
-  if (vaga.id_escolaridade_minima != null) {
+  if (conferirEscolaridade && vaga.id_escolaridade_minima != null) {
     const escolaridadeVaga = escolaridades.find(
       e => e.id === vaga.id_escolaridade_minima
     )
@@ -145,7 +173,7 @@ export function checkEligibility({
   }
 
   // Critério de idiomas
-  for (const requisito of vaga.idiomas_requisito ?? []) {
+  for (const requisito of idiomasRequisito) {
     if (requisito.id_idioma == null || requisito.id_nivel_minimo == null)
       continue
 
