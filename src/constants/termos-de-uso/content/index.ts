@@ -1,26 +1,58 @@
+import type { TermosDeUsoSlug } from '../platforms'
 import type { TermosDeUsoDocument } from '../types'
-import { PREF_RIO_TERMOS_V1 } from './pref-rio-v1'
+import { PREF_RIO_V1_PARTS } from './pref-rio-v1'
 
 /**
- * Texto de cada plataforma, por slug. Para trocar o texto de uma plataforma,
- * criar o arquivo dela nesta pasta e apontar o slug para ele; a tela não muda.
+ * Termos de uso de cada plataforma: texto, versão e data de atualização.
+ *
+ * Para trocar o texto de UMA plataforma, mexa só na entrada dela:
+ * 1. crie o arquivo do texto nesta pasta (ex.: `cursos-v2.ts`, exportando um
+ *    `TermosDeUsoPart[]` como em `pref-rio-v1.ts`);
+ * 2. aponte `parts` da entrada para ele e atualize `version` e `updatedAt`.
+ * As telas (`src/app/(app)/(logged-in-out)/termos-de-uso`) não mudam.
+ *
+ * O tipo `Record<TermosDeUsoSlug, …>` obriga uma entrada para cada plataforma
+ * de `platforms.ts`: faltar ou sobrar plataforma quebra o typecheck.
  *
  * Fica fora de `platforms.ts` de propósito: a lista vai para o client e não
- * precisa carregar o texto inteiro das 5 plataformas.
+ * precisa carregar o texto das 5 plataformas.
  */
-const DOCUMENTS_BY_SLUG: Record<string, TermosDeUsoDocument> = {
-  'prefrio-site': PREF_RIO_TERMOS_V1,
-  'prefrio-central-telefonica': PREF_RIO_TERMOS_V1,
-  'prefrio-whatsapp': PREF_RIO_TERMOS_V1,
-  cursos: PREF_RIO_TERMOS_V1,
-  empregos: PREF_RIO_TERMOS_V1,
+export const TERMOS_DE_USO_CONTENT: Record<
+  TermosDeUsoSlug,
+  TermosDeUsoDocument
+> = {
+  'prefrio-site': {
+    updatedAt: 'Abril de 2026',
+    version: '1.0',
+    parts: PREF_RIO_V1_PARTS,
+  },
+  'prefrio-central-telefonica': {
+    updatedAt: 'Abril de 2026',
+    version: '1.0',
+    parts: PREF_RIO_V1_PARTS,
+  },
+  'prefrio-whatsapp': {
+    updatedAt: 'Abril de 2026',
+    version: '1.0',
+    parts: PREF_RIO_V1_PARTS,
+  },
+  cursos: {
+    updatedAt: 'Abril de 2026',
+    version: '1.0',
+    parts: PREF_RIO_V1_PARTS,
+  },
+  empregos: {
+    updatedAt: 'Abril de 2026',
+    version: '1.0',
+    parts: PREF_RIO_V1_PARTS,
+  },
 }
 
 export function getTermosDeUsoDocument(
   slug: string
 ): TermosDeUsoDocument | undefined {
-  return Object.hasOwn(DOCUMENTS_BY_SLUG, slug)
-    ? DOCUMENTS_BY_SLUG[slug]
+  return Object.hasOwn(TERMOS_DE_USO_CONTENT, slug)
+    ? TERMOS_DE_USO_CONTENT[slug as TermosDeUsoSlug]
     : undefined
 }
 

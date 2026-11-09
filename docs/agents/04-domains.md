@@ -16,8 +16,17 @@
 | FAQ / Ouvidoria | `/faq`, `/ouvidoria` | rotas mistas |
 | Auth UX | `/sessao-expirada`, `/autenticacao-necessaria/*` | `(logged-out)/` |
 | Dívida Ativa | `/divida-ativa` | `(logged-in)/divida-ativa/`, `http-divida-ativa/` |
+| Termos de uso | `/termos-de-uso`, `/termos-de-uso/[plataforma]` (públicas) | `(logged-in-out)/termos-de-uso/`, conteúdo em `src/constants/termos-de-uso/` |
 
 Redirect legado: `/oportunidadescariocas*` → trabalho (middleware).
+
+### Termos de uso: trocar o texto de uma plataforma
+
+O texto é conteúdo, não componente. As 5 plataformas (lista e slugs em `src/constants/termos-de-uso/platforms.ts`) têm cada uma uma entrada em `TERMOS_DE_USO_CONTENT` (`src/constants/termos-de-uso/content/index.ts`), com `parts` (texto), `version` e `updatedAt`. Hoje todas apontam para o texto provisório v1.0 (`content/pref-rio-v1.ts`, copiado de `/servicos/trabalho/termos-de-uso`).
+
+Para trocar o texto de uma plataforma: criar o arquivo do texto em `content/` (um `TermosDeUsoPart[]`, mesmo formato de `pref-rio-v1.ts`), apontar `parts` da entrada para ele e atualizar `version`/`updatedAt`. O subtítulo "Última atualização: … - Versão …" sai desses campos. Não mexer em `termos-de-uso-detail.tsx`. O mapa é tipado pelos slugs: plataforma sem entrada não compila.
+
+Testes: `termos-de-uso/__tests__/detail-page.test.tsx` compara o texto v1.0 com a página de Trabalho, frase a frase, e não depende de qual plataforma usa o v1.0. Já `src/constants/termos-de-uso/__tests__/content.test.ts` afirma que cada plataforma está no v1.0: ao trocar o texto de uma, atualize a expectativa dela ali (é a mudança que o teste deve flagrar).
 
 ## Feature flags
 

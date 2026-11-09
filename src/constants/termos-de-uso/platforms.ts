@@ -12,15 +12,20 @@ export interface TermosDeUsoPlatform {
  * O texto de cada uma fica separado do componente para poder ser trocado
  * por plataforma sem mexer na tela.
  */
-export const TERMOS_DE_USO_PLATFORMS: readonly TermosDeUsoPlatform[] = [
+export const TERMOS_DE_USO_PLATFORMS = [
   { slug: 'prefrio-site', name: 'PrefRio Site' },
   { slug: 'prefrio-central-telefonica', name: 'PrefRio Central Telefonica' },
   { slug: 'prefrio-whatsapp', name: 'PrefRio Whatsapp' },
   { slug: 'cursos', name: 'Cursos' },
   { slug: 'empregos', name: 'Empregos' },
-]
+] as const satisfies readonly TermosDeUsoPlatform[]
 
-export function findTermosDeUsoPlatform(slug: string) {
+/** Slug de uma plataforma cadastrada; o conteúdo é indexado por ele. */
+export type TermosDeUsoSlug = (typeof TERMOS_DE_USO_PLATFORMS)[number]['slug']
+
+export function findTermosDeUsoPlatform(
+  slug: string
+): TermosDeUsoPlatform | undefined {
   return TERMOS_DE_USO_PLATFORMS.find(platform => platform.slug === slug)
 }
 

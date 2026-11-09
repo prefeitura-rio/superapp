@@ -1,3 +1,4 @@
+import { PREF_RIO_V1_PARTS } from '@/constants/termos-de-uso/content/pref-rio-v1'
 import { TERMOS_DE_USO_PLATFORMS } from '@/constants/termos-de-uso/platforms'
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
@@ -22,6 +23,7 @@ import TermosDeUsoPlataformaPage, {
   generateMetadata,
   generateStaticParams,
 } from '../[plataforma]/page'
+import { TermosDeUsoDetail } from '../components/termos-de-uso-detail'
 
 const pageProps = (plataforma: string) => ({
   params: Promise.resolve({ plataforma }),
@@ -111,9 +113,26 @@ describe('/termos-de-uso/[plataforma]', () => {
  * Trabalho (a mesma servida em staging): todo parágrafo e item de lista dela
  * precisa aparecer aqui, na mesma ordem. Os títulos mudam só de caixa
  * (o handoff usa caixa de frase, sem dois-pontos).
+ *
+ * Renderiza o texto v1.0 direto, e não uma plataforma: o teste continua
+ * válido quando alguma plataforma ganhar texto próprio.
  */
-describe('texto do detalhe x página atual de Trabalho', () => {
+describe('texto v1.0 do detalhe x página atual de Trabalho', () => {
   const VERSION_LINE = /^(Última atualização: )?Abril de 2026 - Versão 1\.0$/
+
+  function renderV1() {
+    const { container } = render(
+      <TermosDeUsoDetail
+        platform={{ slug: 'v1', name: 'Texto v1.0' }}
+        document={{
+          updatedAt: 'Abril de 2026',
+          version: '1.0',
+          parts: PREF_RIO_V1_PARTS,
+        }}
+      />
+    )
+    return within(container).getByRole('article')
+  }
 
   function bodyTexts(root: HTMLElement) {
     return [...root.querySelectorAll('p, li')]
@@ -132,11 +151,8 @@ describe('texto do detalhe x página atual de Trabalho', () => {
     const originalTexts = bodyTexts(original.container)
     original.unmount()
 
-    const { container } = await renderDetail('prefrio-site')
-    const article = within(container).getByRole('article')
-
     expect(originalTexts.length).toBeGreaterThan(100)
-    expect(bodyTexts(article)).toEqual(originalTexts)
+    expect(bodyTexts(renderV1())).toEqual(originalTexts)
   })
 
   it('os títulos das seções são os mesmos, só em caixa de frase', async () => {
@@ -147,9 +163,7 @@ describe('texto do detalhe x página atual de Trabalho', () => {
       .map(text => text.replace(/:$/, ''))
     original.unmount()
 
-    const { container } = await renderDetail('prefrio-site')
-    const article = within(container).getByRole('article')
-    const headings = headingTexts(article, 'h2, h3').map(text =>
+    const headings = headingTexts(renderV1(), 'h2, h3').map(text =>
       text.toLocaleUpperCase('pt-BR')
     )
 

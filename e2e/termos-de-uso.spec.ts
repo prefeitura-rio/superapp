@@ -383,3 +383,88 @@ test.describe('Termos de uso — detalhe mobile 360px', () => {
     expect(scrollWidth).toBeLessThanOrEqual(360)
   })
 })
+
+/**
+ * Conteúdo provisório: as 5 plataformas exibem o texto atual (Termo de Uso +
+ * Aviso de Privacidade v1.0), igual ao de /servicos/trabalho/termos-de-uso, que
+ * é o que o staging publica. Compara com a página servida pelo mesmo app, sem
+ * depender de rede externa.
+ */
+test.describe('Termos de uso — texto atual em todas as plataformas', () => {
+  const VERSION_LINE = /^(Última atualização: )?Abril de 2026 - Versão 1\.0$/
+
+  interface DocumentTexts {
+    body: string[]
+    headings: string[]
+  }
+
+  async function readTexts(page: Page, scope: 'article' | 'trabalho') {
+    return page.evaluate(
+      ([target, versionSource]): DocumentTexts => {
+        const clean = (el: Element) =>
+          (el.textContent ?? '').replace(/\s+/g, ' ').trim()
+        let root: Element | null
+        if (target === 'article') {
+          root = document.querySelector('article')
+        } else {
+          // Menor bloco que contém o documento inteiro, do "I. TERMO DE USO" ao Foro.
+          root =
+            [...document.querySelectorAll('h1')].find(h1 =>
+              clean(h1).startsWith('I. TERMO DE USO')
+            ) ?? null
+          while (root && !clean(root).includes('15. FORO')) {
+            root = root.parentElement
+          }
+        }
+        if (!root) throw new Error(`documento não encontrado em ${target}`)
+        const version = new RegExp(versionSource)
+        return {
+          body: [...root.querySelectorAll('p, li')]
+            .map(clean)
+            .filter(text => text && !version.test(text)),
+          headings: [...root.querySelectorAll('h1, h2, h3')].map(clean),
+        }
+      },
+      [scope, VERSION_LINE.source] as const
+    )
+  }
+
+  let reference: DocumentTexts
+
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext()
+    await applyE2ECookieConsent(context)
+    const page = await context.newPage()
+    await page.goto('/servicos/trabalho/termos-de-uso')
+    await expect(
+      page.getByRole('heading', {
+        name: 'I. TERMO DE USO - PLATAFORMA PREF.RIO',
+      })
+    ).toBeVisible()
+    reference = await readTexts(page, 'trabalho')
+    await context.close()
+  })
+
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const platform of PLATFORMS) {
+    test(`${platform.name}: exibe integralmente o texto atual, v1.0 de abril de 2026`, async ({
+      page,
+    }) => {
+      await page.goto(platform.href)
+      await expect(detailHeading(page, platform.name)).toBeVisible()
+      await expect(page.getByText(LAST_UPDATE)).toBeVisible()
+
+      const texts = await readTexts(page, 'article')
+
+      expect(reference.body.length).toBeGreaterThan(100)
+      expect(texts.body).toEqual(reference.body)
+      // O 1º h1 da referência vira o título da página; os demais mudam só de caixa.
+      expect(
+        texts.headings.map(text => text.toLocaleUpperCase('pt-BR'))
+      ).toEqual(reference.headings.slice(1).map(text => text.replace(/:$/, '')))
+    })
+  }
+})
