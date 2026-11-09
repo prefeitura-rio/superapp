@@ -468,3 +468,138 @@ test.describe('Termos de uso — texto atual em todas as plataformas', () => {
     })
   }
 })
+
+/**
+ * Header Global PrefRio (PREF-525) nas duas telas: logo à esquerda, Perfil e
+ * Menu à direita, sem header próprio; o voltar do handoff fica abaixo dele.
+ */
+const SCREENS = [
+  {
+    name: 'lista',
+    path: '/termos-de-uso',
+    back: { role: 'button', name: 'Voltar' },
+  },
+  {
+    name: 'detalhe',
+    path: '/termos-de-uso/prefrio-site',
+    back: { role: 'link', name: 'Voltar para Termos de uso' },
+  },
+] as const
+
+function backControl(page: Page, screen: (typeof SCREENS)[number]) {
+  return page.getByRole(screen.back.role, {
+    name: screen.back.name,
+    exact: true,
+  })
+}
+
+async function expectBackBelowHeader(
+  page: Page,
+  screen: (typeof SCREENS)[number]
+) {
+  const header = await page.getByRole('banner').boundingBox()
+  const back = await backControl(page, screen).boundingBox()
+  expect(header && back && back.y >= header.y + header.height).toBe(true)
+}
+
+test.describe('Termos de uso — Header Global (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const screen of SCREENS) {
+    test(`${screen.name}: Header Global com logo, login e Menu; voltar abaixo dele`, async ({
+      page,
+    }) => {
+      await page.goto(screen.path)
+      await expect(page.getByRole('banner')).toHaveCount(1)
+      const banner = page.getByRole('banner')
+
+      await expect(
+        banner.getByRole('link', { name: 'PrefRio – página inicial' })
+      ).toHaveAttribute('href', '/')
+      const login = banner.getByRole('link', { name: 'Faça seu login' })
+      const menu = banner.getByRole('link', { name: 'Menu' })
+      for (const control of [login, menu]) {
+        const href = (await control.getAttribute('href')) ?? ''
+        // Visitante: Perfil e Menu levam ao login do Identidade Carioca.
+        expect(new URL(href).pathname).toMatch(/\/auth$/)
+        expect(new URL(href).origin).not.toBe(new URL(page.url()).origin)
+      }
+      // Header próprio de módulo (ex.: faixa Oportunidades Cariocas) não aparece.
+      await expect(
+        page.getByRole('navigation', { name: 'Oportunidades Cariocas' })
+      ).toHaveCount(0)
+
+      await expectBackBelowHeader(page, screen)
+    })
+
+    test(`${screen.name}: a logo do Header Global leva à home`, async ({
+      page,
+    }) => {
+      await page.goto(screen.path)
+      await page
+        .getByRole('banner')
+        .getByRole('link', { name: 'PrefRio – página inicial' })
+        .click()
+      await page.waitForURL(url => url.pathname === '/')
+    })
+  }
+
+  test('o Header Global é o mesmo na lista e no detalhe', async ({ page }) => {
+    const controlsOf = async (path: string) => {
+      await page.goto(path)
+      // Espera o fim do carregamento do Perfil (antes dele há só esqueletos).
+      await expect(
+        page.getByRole('banner').getByRole('link', { name: 'Faça seu login' })
+      ).toBeVisible()
+      return page
+        .getByRole('banner')
+        .locator('a, button')
+        .evaluateAll(elements =>
+          elements.map(el => ({
+            tag: el.tagName,
+            name: (
+              el.getAttribute('aria-label') ??
+              el.textContent ??
+              ''
+            ).trim(),
+            href: el.getAttribute('href'),
+          }))
+        )
+    }
+
+    const list = await controlsOf(SCREENS[0].path)
+    const detail = await controlsOf(SCREENS[1].path)
+    expect(list.length).toBe(3)
+    expect(detail).toEqual(list)
+  })
+})
+
+test.describe('Termos de uso — Header Global (autenticado)', () => {
+  test.beforeEach(async ({ context }) => {
+    test.skip(!hasE2EAuth(), 'E2E_ACCESS_TOKEN não configurado')
+    await applyE2EAuthCookies(context)
+  })
+
+  for (const screen of SCREENS) {
+    test(`${screen.name}: logado, o Perfil leva ao meu perfil e o Menu aparece`, async ({
+      page,
+    }) => {
+      await page.goto(screen.path)
+      const banner = page.getByRole('banner')
+
+      await expect(
+        banner.getByRole('link', { name: 'PrefRio – página inicial' })
+      ).toBeVisible()
+      await expect(banner.locator('a[href="/meu-perfil"]')).toBeVisible()
+      await expect(banner.getByText('Faça seu login')).toHaveCount(0)
+      await expect(banner.getByText('Menu', { exact: true })).toBeAttached()
+
+      await expectBackBelowHeader(page, screen)
+      await backControl(page, screen).click()
+      if (screen.name === 'detalhe') await page.waitForURL(/\/termos-de-uso$/)
+      else await page.waitForURL(url => url.pathname === '/')
+    })
+  }
+})

@@ -41,15 +41,16 @@ export function TermosDeUsoDetail({
             key={part.title ?? `parte-${partIndex}`}
             className="flex flex-col gap-6"
           >
+            {/* div, não <header>: o único banner da página é o Header Global. */}
             {part.title && (
-              <header>
+              <div>
                 <h2 className="text-xl font-medium leading-7 text-foreground">
                   {part.title}
                 </h2>
                 <p className="mt-1 text-sm leading-5 text-foreground-light">
                   {document.updatedAt} - Versão {document.version}
                 </p>
-              </header>
+              </div>
             )}
             {part.intro && <Blocks blocks={part.intro} />}
             {part.sections.map(section => (
