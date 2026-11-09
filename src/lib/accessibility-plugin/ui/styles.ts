@@ -336,8 +336,8 @@ html.dark #a11y-btn {
   filter: brightness(1.15);
 }
 #a11y-btn svg {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Badge de check — no botão (position:absolute) para transbordar do overflow:hidden do wrapper */
@@ -370,6 +370,109 @@ html.dark #a11y-btn {
   70%  { transform: scale(0.92) rotate(6deg); }
   100% { transform: scale(1) rotate(0deg); }
 }
+/* ════════════════════════════════════
+   VLIBRAS CUSTOM BUTTON
+   ════════════════════════════════════ */
+
+/*
+  Mesmo layout do botão de acessibilidade:
+  - wrapper: overflow hidden, cresce para a esquerda no hover
+  - botão: position absolute, right:0
+  - popup: revelado pelo crescimento do wrapper
+  Posição: abaixo do botão de acessibilidade (top: calc(50vh - 68px + 50px))
+*/
+#a11y-vlibras-wrapper {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  z-index: 9995;
+  right: 10px;
+  top: calc(50vh - 18px);
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: width 0.5s ease;
+}
+#a11y-vlibras-wrapper:hover {
+  /* popup(154) + gap(10) + botão(40) = 204px */
+  width: 204px;
+}
+
+#a11y-vlibras-popup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 40px;
+  width: 154px;
+  flex-shrink: 0;
+  margin-right: 10px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1e5799 0%, ${LIGHT_PRIMARY} 100%);
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1.2;
+}
+.a11y-vlibras-popup-img {
+  width: 38px;
+  height: 32px;
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+  border-radius: 3px;
+}
+.a11y-vlibras-popup-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#a11y-vlibras-popup .a11y-popup-sub {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.75;
+  letter-spacing: 0.01em;
+}
+#a11y-vlibras-popup .a11y-popup-main {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+html.dark #a11y-vlibras-popup {
+  background: linear-gradient(135deg, #2563a8 0%, #1a4a80 100%);
+}
+
+#a11y-vlibras-btn {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #2a6bc7 0%, ${LIGHT_PRIMARY} 60%);
+  transition: filter 0.15s;
+}
+html.dark #a11y-vlibras-btn {
+  background: linear-gradient(160deg, #3a7dd4 0%, #1a4a80 60%);
+}
+#a11y-vlibras-btn:hover {
+  filter: brightness(1.15);
+}
+#a11y-vlibras-btn:focus-visible {
+  outline: 2px solid #fff;
+  box-shadow: 0 0 10px 4px #1351b4;
+}
+
 /* ════════════════════════════════════
    PANEL
    ════════════════════════════════════ */
