@@ -6,4 +6,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PostApiV1AdminSyncTrigger400 = { [key: string]: string }
+export type PostApiV1AdminSyncTrigger400 = { [key: string]: unknown }

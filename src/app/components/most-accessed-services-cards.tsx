@@ -1,18 +1,21 @@
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
+import type { MostAccessedCard } from '@/lib/carta-servicos/home-featured'
 import { MostAccessedServiceLink } from './most-accessed-service-link'
 
 interface MostAccessedServiceCardsProps {
   limit?: number
+  /** Lista já resolvida (constante ou `home_featured`). Sem ela, usa a constante. */
+  services?: MostAccessedCard[]
 }
 
 export default function MostAccessedServiceCards({
   limit,
+  services: servicesProp,
 }: MostAccessedServiceCardsProps = {}) {
-  const services = limit
-    ? MOST_ACCESSED_SERVICES.slice(0, limit)
-    : MOST_ACCESSED_SERVICES
+  const source = servicesProp ?? MOST_ACCESSED_SERVICES
+  const services = limit ? source.slice(0, limit) : source
 
   if (services.length === 0) {
     return (
@@ -45,21 +48,22 @@ export default function MostAccessedServiceCards({
         <div className="flex gap-2 min-w-full">
           {services.map((service, index) => (
             <MostAccessedServiceLink
-              key={service.id}
+              key={`${service.id}-${index}`}
               service={service}
               position={index + 1}
               className="flex-1 min-w-[140px] basis-0"
             >
-              <div className="bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start justify-between min-h-[140px] w-full h-full">
-                <div className="mb-0">
-                  <img
-                    src={service.icon}
-                    alt={service.title}
-                    className="w-10 h-10"
-                  />
-                </div>
+              <div
+                className={`bg-card rounded-2xl p-4 hover:bg-card/50 transition-colors cursor-pointer flex flex-col items-start min-h-[140px] w-full h-full ${service.icon ? 'justify-between' : 'justify-end'}`}
+              >
+                {service.icon ? (
+                  <div className="mb-0">
+                    {/* Decorativo: o título visível no <h3> já nomeia o link. */}
+                    <img src={service.icon} alt="" className="w-10 h-10" />
+                  </div>
+                ) : null}
                 <div className="w-full">
-                  <h3 className="text-sm font-normal break-words text-foreground leading-4.5">
+                  <h3 className="text-sm font-normal break-words text-foreground leading-4.5 line-clamp-3">
                     {service.title}
                   </h3>
                   {/* <p className="text-foreground-light text-xs leading-4 break-words">

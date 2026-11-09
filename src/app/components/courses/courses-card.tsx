@@ -35,7 +35,7 @@ function parseDateLocal(dateString: string): Date {
   return new Date(year, month - 1, day)
 }
 
-function getEnrollmentText(enrollmentEndDate?: string): string | null {
+function getEnrollmentText(enrollmentEndDate?: string | null): string | null {
   if (!enrollmentEndDate) return null
   const endDate = parseDateLocal(enrollmentEndDate)
   const today = new Date()
@@ -60,7 +60,7 @@ interface CourseCardProps {
   variant?: 'vertical' | 'horizontal'
   /** @deprecated No longer used */
   badgesOutside?: boolean
-  enrollmentEndDate?: string
+  enrollmentEndDate?: string | null
   hasBolsa?: boolean
   /** Full course object — used to grayscale cover when enrollment is unavailable */
   course?: ModelsCurso

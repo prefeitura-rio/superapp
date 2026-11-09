@@ -68,7 +68,7 @@ export default defineConfig({
   appGoApi: {
     input: {
       target:
-        'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/refactor/empreg-hab-e-comp/docs/swagger.json',
+        'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.json',
       // Swagger 2.0 — o @scalar/openapi-upgrader (usado internamente pelo Orval >= 8.45)
       // falha ao converter alguns path items antes da validação OAS3. Remover quando o
       unsafeDisableValidation: true,

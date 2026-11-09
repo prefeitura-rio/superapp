@@ -6,4 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetApiPublicCourses200 = { [key: string]: unknown }
+export interface EmpregabilidadeVagaPublicListMeta {
+  page?: number
+  page_size?: number
+  total?: number
+}

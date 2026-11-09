@@ -8,7 +8,7 @@
 import type { PostApiV1AdminSyncTriggerMode } from './postApiV1AdminSyncTriggerMode'
 
 export type PostApiV1AdminSyncTriggerParams = {
-  /** Fonte: salesforce, app-go-api, typesense. Vazio = todas. */
+  /** Fonte registrada na API: salesforce, app-go-api (cada uma só quando configurada). Vazio = todas. */
   source?: string
   /** delta (padrão) ou full. full reprocessa todos os itens nas fontes com sync completa (Carta). */
   mode?: PostApiV1AdminSyncTriggerMode

@@ -36,7 +36,7 @@ export const additionalCategories: Category[] = [
     name: 'Cursos',
     icon: createElement(Image, {
       src: cursosIcon,
-      alt: 'cursos',
+      alt: '',
       width: 48,
       height: 48,
       className: 'w-12 h-12',

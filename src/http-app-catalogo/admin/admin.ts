@@ -130,7 +130,7 @@ export const getPostApiV1AdminSyncTriggerUrl = (
 }
 
 /**
- * Dispara sync ad-hoc em background. Retorna imediatamente. Requer role admin ou go:admin.
+ * Dispara sync ad-hoc em background. Retorna imediatamente. Requer role admin ou go:admin. Fonte não registrada na API (typesense, que só sincroniza no worker, ou desconhecida) responde 400 com available_sources.
  * @summary Dispara sincronização manual
  */
 export const postApiV1AdminSyncTrigger = async (

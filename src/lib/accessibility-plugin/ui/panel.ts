@@ -2,6 +2,7 @@ import { TTS, ttsAvailable } from '../features/tts'
 import type { A11yState } from '../state'
 
 export const PANEL_ID = 'a11y-panel'
+const PANEL_TITLE_ID = 'a11y-panel-title'
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -348,13 +349,15 @@ export function createPanel(
   panel.id = PANEL_ID
   panel.setAttribute('role', 'dialog')
   panel.setAttribute('aria-modal', 'true')
-  panel.setAttribute('aria-label', 'Painel de acessibilidade')
+  // Nome acessível = título visível (WCAG 2.5.3 Label in Name)
+  panel.setAttribute('aria-labelledby', PANEL_TITLE_ID)
 
   // ── Header ──
   const header = document.createElement('div')
   header.className = 'a11y-panel-header'
 
   const title = document.createElement('p')
+  title.id = PANEL_TITLE_ID
   title.className = 'a11y-panel-title'
   title.textContent = 'Recursos Assistivos'
 

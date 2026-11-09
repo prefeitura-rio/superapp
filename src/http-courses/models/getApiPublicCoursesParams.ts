@@ -12,7 +12,7 @@ export type GetApiPublicCoursesParams = {
   page?: number
   /** Tamanho da página (default: 10) */
   limit?: number
-  /** Filtrar por status (CSV, ex: draft,published,in_review) */
+  /** Filtrar por status públicos (CSV, ex: published,accepting_enrollments,closed). Status de curadoria são ignorados. */
   status?: string
   /** Filtrar por modalidade */
   modalidade?: string
