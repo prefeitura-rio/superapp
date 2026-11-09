@@ -59,9 +59,12 @@ describe('DownloadCartaButton', () => {
     expect(busy).toHaveAttribute('aria-busy', 'true')
     expect(fetch).toHaveBeenCalledWith(HREF)
 
+    // Corpo em string: no Node 20 (CI) o Blob do jsdom não tem `.stream()` e o
+    // interceptor do MSW quebra ao montar a Response.
     resolveFetch(
-      new Response(new Blob(['%PDF-'], { type: 'application/pdf' }), {
+      new Response('%PDF-', {
         status: 200,
+        headers: { 'Content-Type': 'application/pdf' },
       })
     )
 
