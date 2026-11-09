@@ -193,13 +193,8 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
               'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full font-sans font-normal leading-4 tracking-normal',
               isRecent
                 ? 'bg-white/10 text-white text-xs'
-                : 'bg-foreground/5 text-xs'
+                : 'bg-foreground/5 text-xs text-[#52525C] dark:text-[#D4D4D8]'
             )}
-            style={
-              !isRecent
-                ? { color: 'var(--theme-color-foreground-light, #71717B)' }
-                : undefined
-            }
           >
             {!isRecent && <BadgeIcon type={badge.type} />}
             <span>{badge.text}</span>
