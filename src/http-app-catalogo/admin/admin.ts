@@ -11,6 +11,7 @@ import type {
   GetApiV1AdminSyncStatus403,
   GetApiV1AdminSyncStatus500,
   PostApiV1AdminSyncTrigger202,
+  PostApiV1AdminSyncTrigger400,
   PostApiV1AdminSyncTrigger401,
   PostApiV1AdminSyncTrigger403,
   PostApiV1AdminSyncTriggerParams,
@@ -79,6 +80,11 @@ export type postApiV1AdminSyncTriggerResponse202 = {
   status: 202
 }
 
+export type postApiV1AdminSyncTriggerResponse400 = {
+  data: PostApiV1AdminSyncTrigger400
+  status: 400
+}
+
 export type postApiV1AdminSyncTriggerResponse401 = {
   data: PostApiV1AdminSyncTrigger401
   status: 401
@@ -94,6 +100,7 @@ export type postApiV1AdminSyncTriggerResponseSuccess =
     headers: Headers
   }
 export type postApiV1AdminSyncTriggerResponseError = (
+  | postApiV1AdminSyncTriggerResponse400
   | postApiV1AdminSyncTriggerResponse401
   | postApiV1AdminSyncTriggerResponse403
 ) & {
@@ -123,7 +130,7 @@ export const getPostApiV1AdminSyncTriggerUrl = (
 }
 
 /**
- * Dispara sync ad-hoc em background. Retorna imediatamente. Requer role admin ou go:admin.
+ * Dispara sync ad-hoc em background. Retorna imediatamente. Requer role admin ou go:admin. Fonte não registrada na API (typesense, que só sincroniza no worker, ou desconhecida) responde 400 com available_sources.
  * @summary Dispara sincronização manual
  */
 export const postApiV1AdminSyncTrigger = async (

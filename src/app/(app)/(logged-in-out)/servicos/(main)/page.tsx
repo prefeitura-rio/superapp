@@ -3,12 +3,16 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import { additionalCategories } from '@/constants/aditional-services'
+import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
 
 export const revalidate = 600
 
 export default async function ServicesPage() {
-  const categories = await fetchCategories()
+  const [categories, mostAccessed] = await Promise.all([
+    fetchCategories(),
+    resolveMostAccessedServices(),
+  ])
   const allCategories = [...categories, ...additionalCategories]
 
   return (
@@ -17,7 +21,7 @@ export default async function ServicesPage() {
       <main className="w-full max-w-4xl mx-auto flex flex-col pb-6">
         <h1 className="sr-only">Serviços</h1>
         {/* Most Accessed Service Cards*/}
-        <MostAccessedServiceCards limit={4} />
+        <MostAccessedServiceCards services={mostAccessed} limit={4} />
 
         {/* Category Grid*/}
         <CategoryGrid title="Categorias" categories={allCategories} />

@@ -8,11 +8,10 @@
 
 export type GetApiPublicSubthemesSlugServicesParams = {
   /**
-   * Página (1-based)
+   * Página (1-based, máx. 1000)
+   * @maximum 1000
    */
   page?: number
-  /**
-   * Itens por página (máx. 100)
-   */
+  /** Itens por página (máx. 100) */
   per_page?: number
 }

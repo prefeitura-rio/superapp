@@ -7,68 +7,36 @@
  */
 
 export type GetApiV1SearchParams = {
-  /**
-   * Texto livre de busca
-   */
+  /** Texto livre de busca */
   q?: string
-  /**
-   * Tipos: service, course, job, mei_opportunity
-   */
+  /** Tipos: service, course, job, mei_opportunity */
   types?: string[]
-  /**
-   * Página (default: 1)
-   */
+  /** Página (default: 1) */
   page?: number
-  /**
-   * Itens por página, máximo 100 (default: 10)
-   */
+  /** Itens por página, máximo 100 (default: 10) */
   per_page?: number
-  /**
-   * Modalidade: presencial, digital, hibrido
-   */
+  /** Modalidade: presencial, digital, hibrido */
   modalidade?: string
-  /**
-   * Bairro do Rio de Janeiro
-   */
+  /** Bairro do Rio de Janeiro */
   bairro?: string
-  /**
-   * Órgão ou secretaria responsável
-   */
+  /** Órgão ou secretaria responsável */
   orgao?: string
-  /**
-   * [course] Apenas cursos gratuitos
-   */
+  /** [course] Apenas cursos gratuitos */
   gratuito?: boolean
-  /**
-   * [course] Turno: matutino, vespertino, noturno
-   */
+  /** [course] Turno: matutino, vespertino, noturno */
   turno?: string
-  /**
-   * [job] Regime: CLT, PJ, temporario
-   */
+  /** [job] Regime: CLT, PJ, temporario */
   regime_contratacao?: string
-  /**
-   * [job] Modelo: presencial, remoto, hibrido
-   */
+  /** [job] Modelo: presencial, remoto, hibrido */
   modelo_trabalho?: string
-  /**
-   * [job] Apenas vagas exclusivas para PCD
-   */
+  /** [job] Apenas vagas exclusivas para PCD */
   pcd?: boolean
-  /**
-   * [job] Faixa salarial: ate-2sm, 2-4sm, acima-4sm
-   */
+  /** [job] Faixa salarial: ate-2sm, 2-4sm, acima-4sm */
   faixa_salarial?: string
-  /**
-   * [service] Canal: presencial, digital, telefone
-   */
+  /** [service] Canal: presencial, digital, telefone */
   canal_atendimento?: string
-  /**
-   * [service] Tema do serviço
-   */
+  /** [service] Tema do serviço */
   tema?: string
-  /**
-   * [mei_opportunity] Segmento do negócio
-   */
+  /** [mei_opportunity] Segmento do negócio */
   segmento?: string
 }

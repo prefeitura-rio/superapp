@@ -30,4 +30,54 @@ describe('MostAccessedServiceCards', () => {
       expect(within(link).queryByRole('img')).toBeNull()
     })
   })
+
+  it('mostra só o título quando o destaque não tem ícone de tema', () => {
+    const { container } = render(
+      <MostAccessedServiceCards
+        services={[
+          {
+            id: 'iptu-2026',
+            href: '/servicos/categoria/tributos/iptu-2026',
+            title: 'IPTU 2026',
+            description: 'Tributos',
+          },
+          {
+            id: 'outro',
+            href: '/servicos/categoria/tributos/outro',
+            icon: 'https://example.com/tributos.png',
+            title: 'Outro serviço',
+            description: 'Tributos',
+          },
+        ]}
+      />
+    )
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'IPTU 2026' })
+    ).toHaveClass('line-clamp-3')
+    expect(screen.getByRole('link', { name: 'IPTU 2026' })).toHaveAttribute(
+      'href',
+      '/servicos/categoria/tributos/iptu-2026'
+    )
+    expect(container.querySelectorAll('img')).toHaveLength(1)
+    expect(
+      within(screen.getByRole('link', { name: 'IPTU 2026' })).queryByRole('img')
+    ).toBeNull()
+  })
+
+  it('corta a lista injetada no mesmo limite da página de serviços', () => {
+    render(
+      <MostAccessedServiceCards
+        limit={4}
+        services={Array.from({ length: 6 }, (_, index) => ({
+          id: `servico-${index}`,
+          href: `/servicos/categoria/tributos/servico-${index}`,
+          title: `Serviço ${index}`,
+          description: 'Tributos',
+        }))}
+      />
+    )
+
+    expect(screen.getAllByRole('link')).toHaveLength(4)
+  })
 })

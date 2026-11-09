@@ -30,6 +30,15 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => searchParams.current,
 }))
 
+vi.mock('@/lib/carta-servicos/home-featured', async () => {
+  const { MOST_ACCESSED_SERVICES } = await import(
+    '@/constants/most-accessed-services'
+  )
+  return {
+    resolveMostAccessedServices: async () => MOST_ACCESSED_SERVICES,
+  }
+})
+
 vi.mock('@/lib/categories', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/categories')>()
   return {

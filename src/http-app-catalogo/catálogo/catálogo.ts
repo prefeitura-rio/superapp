@@ -8,9 +8,11 @@
 import type {
   GetApiPublicCatalogId400,
   GetApiPublicCatalogId404,
+  GetApiPublicCatalogId500,
   GetApiV1CatalogId400,
   GetApiV1CatalogId401,
   GetApiV1CatalogId404,
+  GetApiV1CatalogId500,
   ModelsCatalogItem,
   ModelsPublicCatalogItem,
 } from '../models'
@@ -32,6 +34,11 @@ export type getApiPublicCatalogIdResponse404 = {
   status: 404
 }
 
+export type getApiPublicCatalogIdResponse500 = {
+  data: GetApiPublicCatalogId500
+  status: 500
+}
+
 export type getApiPublicCatalogIdResponseSuccess =
   getApiPublicCatalogIdResponse200 & {
     headers: Headers
@@ -39,6 +46,7 @@ export type getApiPublicCatalogIdResponseSuccess =
 export type getApiPublicCatalogIdResponseError = (
   | getApiPublicCatalogIdResponse400
   | getApiPublicCatalogIdResponse404
+  | getApiPublicCatalogIdResponse500
 ) & {
   headers: Headers
 }
@@ -88,6 +96,11 @@ export type getApiV1CatalogIdResponse404 = {
   status: 404
 }
 
+export type getApiV1CatalogIdResponse500 = {
+  data: GetApiV1CatalogId500
+  status: 500
+}
+
 export type getApiV1CatalogIdResponseSuccess = getApiV1CatalogIdResponse200 & {
   headers: Headers
 }
@@ -95,6 +108,7 @@ export type getApiV1CatalogIdResponseError = (
   | getApiV1CatalogIdResponse400
   | getApiV1CatalogIdResponse401
   | getApiV1CatalogIdResponse404
+  | getApiV1CatalogIdResponse500
 ) & {
   headers: Headers
 }

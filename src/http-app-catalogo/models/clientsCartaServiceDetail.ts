@@ -29,6 +29,7 @@ export interface ClientsCartaServiceDetail {
   name?: string
   responsibleOrgUnit?: string
   responsibleOrgUnitShortName?: string
+  responsibleOrgUnitSiciCode?: string
   serviceCatalogId?: string
   servicePoints?: ClientsCartaServiceDetailServicePointsItem[]
   slug?: string
