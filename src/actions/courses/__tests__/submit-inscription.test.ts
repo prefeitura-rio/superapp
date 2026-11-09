@@ -1,7 +1,15 @@
 import { TEST_ENV } from '@/test/mocks/env'
 import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, test } from 'vitest'
+import {
+  type MockInstance,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest'
 import { submitCourseInscription } from '../submit-inscription'
 
 const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
@@ -249,6 +257,152 @@ describe('submitCourseInscription', () => {
 
       expect(result.success).toBe(false)
       expect(result.error).toBeDefined()
+    })
+  })
+
+  // LGPD: a inscrição carrega CPF, nome, e-mail, telefone, idade e respostas
+  // do cidadão. Nada disso pode chegar ao log do servidor, em nenhum caminho.
+  describe('logs sem dados pessoais', () => {
+    // Dados sintéticos, usados só para conferir que não vazam nos logs
+    const CPF = '00000000191'
+    const NOME = 'Cidadã Sintética'
+    const EMAIL = 'cidada.sintetica@example.com'
+    const TELEFONE = '21900000000'
+    const RESPOSTA_CUSTOM = 'Resposta sintética pessoal'
+    const pessoal = {
+      cpf: CPF,
+      name: NOME,
+      email: EMAIL,
+      phone: TELEFONE,
+      birthDate: '1990-05-17',
+    }
+    const customFields = [
+      { id: 'campo-1', title: 'Pergunta', value: RESPOSTA_CUSTOM },
+    ] as unknown as Parameters<
+      typeof submitCourseInscription
+    >[0]['customFields']
+
+    type ConsoleMethod = 'log' | 'info' | 'warn' | 'error' | 'debug'
+    const CONSOLE_METHODS: ConsoleMethod[] = [
+      'log',
+      'info',
+      'warn',
+      'error',
+      'debug',
+    ]
+    const spies: MockInstance<(...args: unknown[]) => void>[] = []
+
+    function loggedText(): string {
+      return spies
+        .flatMap(spy => spy.mock.calls)
+        .map(args =>
+          args
+            .map((arg: unknown) => {
+              if (typeof arg === 'string') return arg
+              if (arg instanceof Error) {
+                return `${arg.name} ${arg.message} ${arg.stack ?? ''}`
+              }
+              try {
+                return JSON.stringify(arg)
+              } catch {
+                return String(arg)
+              }
+            })
+            .join(' ')
+        )
+        .join('\n')
+    }
+
+    function expectNoPersonalData(): void {
+      const text = loggedText()
+      expect(text).not.toContain(CPF)
+      expect(text).not.toContain(NOME)
+      expect(text).not.toContain(EMAIL)
+      expect(text).not.toContain(TELEFONE)
+      expect(text).not.toContain(RESPOSTA_CUSTOM)
+      expect(text).not.toContain('1990-05-17')
+    }
+
+    function inscricao() {
+      return {
+        courseId: '123',
+        userInfo: pessoal,
+        customFields,
+        reason: 'Motivo sintético',
+      }
+    }
+
+    beforeEach(() => {
+      for (const method of CONSOLE_METHODS) {
+        spies.push(vi.spyOn(console, method).mockImplementation(() => {}))
+      }
+    })
+
+    afterEach(() => {
+      for (const spy of spies) spy.mockRestore()
+      spies.length = 0
+    })
+
+    test('não loga payload nem resposta da API em sucesso (201)', async () => {
+      server.use(
+        http.post(
+          `${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`,
+          async ({ request }) => {
+            // A API devolve a inscrição com os dados pessoais
+            const body = (await request.json()) as Record<string, unknown>
+            return HttpResponse.json(body, { status: 201 })
+          }
+        )
+      )
+
+      const result = await submitCourseInscription(inscricao())
+
+      expect(result.success).toBe(true)
+      expectNoPersonalData()
+      // Continua registrando a inscrição, só com identificadores não pessoais
+      expect(loggedText()).toContain('123')
+    })
+
+    test('não loga dados pessoais quando a API recusa (400)', async () => {
+      server.use(
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () =>
+          HttpResponse.json(
+            { error: `CPF ${CPF} já inscrito (${EMAIL})` },
+            { status: 400 }
+          )
+        )
+      )
+
+      const result = await submitCourseInscription(inscricao())
+
+      expect(result.success).toBe(false)
+      expectNoPersonalData()
+      expect(loggedText()).toContain('400')
+    })
+
+    test('não loga dados pessoais em falha de rede', async () => {
+      server.use(
+        http.post(`${COURSES_BASE_URL}/api/v1/courses/:id/enrollments`, () =>
+          HttpResponse.error()
+        )
+      )
+
+      const result = await submitCourseInscription(inscricao())
+
+      expect(result.success).toBe(false)
+      expectNoPersonalData()
+    })
+
+    test('não loga o CPF quando a revalidação do cache falha', async () => {
+      const { revalidateTag } = await import('next/cache')
+      vi.mocked(revalidateTag).mockImplementationOnce(tag => {
+        throw new Error(`falha ao revalidar ${tag}`)
+      })
+
+      const result = await submitCourseInscription(inscricao())
+
+      expect(result.success).toBe(false)
+      expectNoPersonalData()
     })
   })
 })
