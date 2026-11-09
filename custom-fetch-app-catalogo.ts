@@ -47,7 +47,10 @@ function isCartaPublicNavigationPath(url: string): boolean {
     path === '/api/public/themes' ||
     path.startsWith('/api/public/themes/') ||
     path.startsWith('/api/public/subthemes/') ||
-    path.startsWith('/api/public/services/')
+    path.startsWith('/api/public/services/') ||
+    path === '/api/public/services' ||
+    path === '/api/public/org-units' ||
+    path.startsWith('/api/public/org-units/')
   )
 }
 
