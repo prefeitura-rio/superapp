@@ -24,6 +24,8 @@ const publicRoutes = [
   { path: '/manifest.json', whenAuthenticated: 'next' },
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso/*', whenAuthenticated: 'next' },
 ] as const
 
 const oportunidadesCariocasLegacyPaths = [
