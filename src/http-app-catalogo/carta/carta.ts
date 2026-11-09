@@ -6,6 +6,16 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetApiPublicOrgUnits500,
+  GetApiPublicOrgUnits503,
+  GetApiPublicOrgUnitsParams,
+  GetApiPublicOrgUnitsSiciCodeServices400,
+  GetApiPublicOrgUnitsSiciCodeServices500,
+  GetApiPublicOrgUnitsSiciCodeServices503,
+  GetApiPublicOrgUnitsSiciCodeServicesParams,
+  GetApiPublicServices500,
+  GetApiPublicServices503,
+  GetApiPublicServicesParams,
   GetApiPublicServicesSlug400,
   GetApiPublicServicesSlug404,
   GetApiPublicServicesSlug500,
@@ -22,6 +32,8 @@ import type {
   GetApiPublicThemesSlugSubthemes503,
   GetApiPublicThemesSlugSubthemesParams,
   V1CartaDetailJSON,
+  V1CartaOrgUnitsPagedJSON,
+  V1CartaServiceDetailsPagedJSON,
   V1CartaServiceRedirectJSON,
   V1CartaServicesPagedJSON,
   V1CartaSubthemesPagedJSON,
@@ -29,6 +41,209 @@ import type {
 } from '../models'
 
 import { customFetchAppCatalogo } from '../../../custom-fetch-app-catalogo'
+
+export type getApiPublicOrgUnitsResponse200 = {
+  data: V1CartaOrgUnitsPagedJSON
+  status: 200
+}
+
+export type getApiPublicOrgUnitsResponse500 = {
+  data: GetApiPublicOrgUnits500
+  status: 500
+}
+
+export type getApiPublicOrgUnitsResponse503 = {
+  data: GetApiPublicOrgUnits503
+  status: 503
+}
+
+export type getApiPublicOrgUnitsResponseSuccess =
+  getApiPublicOrgUnitsResponse200 & {
+    headers: Headers
+  }
+export type getApiPublicOrgUnitsResponseError = (
+  | getApiPublicOrgUnitsResponse500
+  | getApiPublicOrgUnitsResponse503
+) & {
+  headers: Headers
+}
+
+export type getApiPublicOrgUnitsResponse =
+  | getApiPublicOrgUnitsResponseSuccess
+  | getApiPublicOrgUnitsResponseError
+
+export const getGetApiPublicOrgUnitsUrl = (
+  params?: GetApiPublicOrgUnitsParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/public/org-units?${stringifiedParams}`
+    : `/api/public/org-units`
+}
+
+/**
+ * Lista órgãos/secretarias com ao menos 1 serviço publicado e código SICI preenchido.
+ * @summary Lista órgãos da Carta de Serviços
+ */
+export const getApiPublicOrgUnits = async (
+  params?: GetApiPublicOrgUnitsParams,
+  options?: Parameters<typeof customFetchAppCatalogo>[1]
+): Promise<getApiPublicOrgUnitsResponse> => {
+  return customFetchAppCatalogo<getApiPublicOrgUnitsResponse>(
+    getGetApiPublicOrgUnitsUrl(params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponse200 = {
+  data: V1CartaServiceDetailsPagedJSON
+  status: 200
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponse400 = {
+  data: GetApiPublicOrgUnitsSiciCodeServices400
+  status: 400
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponse500 = {
+  data: GetApiPublicOrgUnitsSiciCodeServices500
+  status: 500
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponse503 = {
+  data: GetApiPublicOrgUnitsSiciCodeServices503
+  status: 503
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponseSuccess =
+  getApiPublicOrgUnitsSiciCodeServicesResponse200 & {
+    headers: Headers
+  }
+export type getApiPublicOrgUnitsSiciCodeServicesResponseError = (
+  | getApiPublicOrgUnitsSiciCodeServicesResponse400
+  | getApiPublicOrgUnitsSiciCodeServicesResponse500
+  | getApiPublicOrgUnitsSiciCodeServicesResponse503
+) & {
+  headers: Headers
+}
+
+export type getApiPublicOrgUnitsSiciCodeServicesResponse =
+  | getApiPublicOrgUnitsSiciCodeServicesResponseSuccess
+  | getApiPublicOrgUnitsSiciCodeServicesResponseError
+
+export const getGetApiPublicOrgUnitsSiciCodeServicesUrl = (
+  siciCode: string,
+  params?: GetApiPublicOrgUnitsSiciCodeServicesParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/public/org-units/${siciCode}/services?${stringifiedParams}`
+    : `/api/public/org-units/${siciCode}/services`
+}
+
+/**
+ * Retorna o detalhe completo dos serviços publicados filtrados por responsibleOrgUnitSiciCode (igualdade de texto).
+ * @summary Lista serviços de um órgão da Carta
+ */
+export const getApiPublicOrgUnitsSiciCodeServices = async (
+  siciCode: string,
+  params?: GetApiPublicOrgUnitsSiciCodeServicesParams,
+  options?: Parameters<typeof customFetchAppCatalogo>[1]
+): Promise<getApiPublicOrgUnitsSiciCodeServicesResponse> => {
+  return customFetchAppCatalogo<getApiPublicOrgUnitsSiciCodeServicesResponse>(
+    getGetApiPublicOrgUnitsSiciCodeServicesUrl(siciCode, params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getApiPublicServicesResponse200 = {
+  data: V1CartaServiceDetailsPagedJSON
+  status: 200
+}
+
+export type getApiPublicServicesResponse500 = {
+  data: GetApiPublicServices500
+  status: 500
+}
+
+export type getApiPublicServicesResponse503 = {
+  data: GetApiPublicServices503
+  status: 503
+}
+
+export type getApiPublicServicesResponseSuccess =
+  getApiPublicServicesResponse200 & {
+    headers: Headers
+  }
+export type getApiPublicServicesResponseError = (
+  | getApiPublicServicesResponse500
+  | getApiPublicServicesResponse503
+) & {
+  headers: Headers
+}
+
+export type getApiPublicServicesResponse =
+  | getApiPublicServicesResponseSuccess
+  | getApiPublicServicesResponseError
+
+export const getGetApiPublicServicesUrl = (
+  params?: GetApiPublicServicesParams
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `/api/public/services?${stringifiedParams}`
+    : `/api/public/services`
+}
+
+/**
+ * Retorna o detalhe completo de todos os serviços publicados, ordenados por sici_code e title. Serviços sem código SICI entram nesta lista.
+ * @summary Lista todos os serviços da Carta
+ */
+export const getApiPublicServices = async (
+  params?: GetApiPublicServicesParams,
+  options?: Parameters<typeof customFetchAppCatalogo>[1]
+): Promise<getApiPublicServicesResponse> => {
+  return customFetchAppCatalogo<getApiPublicServicesResponse>(
+    getGetApiPublicServicesUrl(params),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
 
 export type getApiPublicServicesSlugResponse200 = {
   data: V1CartaDetailJSON
@@ -155,7 +370,7 @@ export const getGetApiPublicSubthemesSlugServicesUrl = (
 }
 
 /**
- * Lista serviços ativos do catálogo local filtrados por subtema.
+ * Lista serviços ativos do catálogo local filtrados por subtema. O resumo inclui responsibleOrgUnit, responsibleOrgUnitShortName e responsibleOrgUnitSiciCode (este último é sempre presente no JSON e null quando o órgão não tem SICI).
  * @summary Lista serviços de um subtema
  */
 export const getApiPublicSubthemesSlugServices = async (
@@ -219,7 +434,7 @@ export const getGetApiPublicThemesUrl = (params?: GetApiPublicThemesParams) => {
 }
 
 /**
- * Lista temas ativos a partir da base local (sincronizada do CloudHub).
+ * Lista temas ativos a partir da base local (sincronizada do CloudHub). Com include_featured=true inclui home_featured.
  * @summary Lista temas da Carta de Serviços
  */
 export const getApiPublicThemes = async (

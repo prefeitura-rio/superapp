@@ -14,6 +14,8 @@ const publicRoutes = [
   { path: '/faq/*', whenAuthenticated: 'next' },
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos/*', whenAuthenticated: 'next' },
   { path: '/ouvidoria/*', whenAuthenticated: 'next' },
   { path: '/consulta-protocolo', whenAuthenticated: 'next' },
   { path: '/solicitacoes', whenAuthenticated: 'next' },

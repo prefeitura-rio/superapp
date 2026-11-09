@@ -16,6 +16,11 @@ export interface ModelsCartaServiceSummary {
   name?: string
   responsibleOrgUnit?: string
   responsibleOrgUnitShortName?: string
+  /**
+   * ResponsibleOrgUnitSiciCode é sempre serializado (null quando o órgão não tem SICI).
+   * @nullable
+   */
+  responsibleOrgUnitSiciCode?: string | null
   serviceCatalogId?: string
   slug?: string
   subthemeSlug?: string

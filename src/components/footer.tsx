@@ -7,6 +7,7 @@ import {
   YoutubeIcon,
 } from '@/assets/icons'
 import prefRioLogo from '@/assets/pref-rio-logo.svg'
+import { CARTA_DE_SERVICOS_FOOTER_LINK } from '@/constants/carta-de-servicos'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,6 +18,7 @@ const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
 const menuLinks = [
   { label: 'Página inicial', href: '/' },
   { label: 'Serviços', href: '/servicos' },
+  CARTA_DE_SERVICOS_FOOTER_LINK,
 ]
 
 const atendimentoLinks = [

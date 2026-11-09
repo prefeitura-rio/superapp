@@ -10,6 +10,7 @@ import type {
   PostApiWebhooksSalesforce400,
   PostApiWebhooksSalesforce401,
   PostApiWebhooksSalesforce413,
+  PostApiWebhooksSalesforce503,
   V1SfWebhookPayload,
 } from '../models'
 
@@ -35,6 +36,11 @@ export type postApiWebhooksSalesforceResponse413 = {
   status: 413
 }
 
+export type postApiWebhooksSalesforceResponse503 = {
+  data: PostApiWebhooksSalesforce503
+  status: 503
+}
+
 export type postApiWebhooksSalesforceResponseSuccess =
   postApiWebhooksSalesforceResponse200 & {
     headers: Headers
@@ -43,6 +49,7 @@ export type postApiWebhooksSalesforceResponseError = (
   | postApiWebhooksSalesforceResponse400
   | postApiWebhooksSalesforceResponse401
   | postApiWebhooksSalesforceResponse413
+  | postApiWebhooksSalesforceResponse503
 ) & {
   headers: Headers
 }
@@ -56,19 +63,43 @@ export const getPostApiWebhooksSalesforceUrl = () => {
 }
 
 /**
- * Recebe notificações de criação/atualização. Valida HMAC-SHA256 via X-Salesforce-Signature. Usa sobject.Slug (ou Id como fallback) como identificador do serviço na API CloudHub. Sem SALESFORCE_WEBHOOK_SECRET retorna 401. Payload > 64KiB retorna 413.
+ * Recebe notificações de criação/atualização. Valida HMAC-SHA256 via X-Salesforce-Signature. Usa sobject.Slug (ou Id como fallback) como identificador do serviço na API CloudHub. O evento é gravado antes da resposta (queued) e reprocessado com backoff até a sincronização dar certo; reentrega do mesmo body (com event.created) responde duplicate. Sem SALESFORCE_WEBHOOK_SECRET retorna 401. Payload > 64KiB retorna 413. Falha ao gravar o evento retorna 503 (reenviar).
  * @summary Webhook SalesForce (Carta de Serviços)
  */
 export const postApiWebhooksSalesforce = async (
   v1SfWebhookPayload: V1SfWebhookPayload,
   options?: Parameters<typeof customFetchAppCatalogo>[1]
 ): Promise<postApiWebhooksSalesforceResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {}
+    if (h instanceof Headers) return Object.fromEntries(h.entries())
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          entry => Array.from(entry) as [string, string]
+        )
+      )
+    }
+    const headers: Record<string, string | readonly string[]> = {}
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value
+    }
+    return headers
+  }
   return customFetchAppCatalogo<postApiWebhooksSalesforceResponse>(
     getPostApiWebhooksSalesforceUrl(),
     {
       ...options,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders(options?.headers),
+      },
       body: JSON.stringify(v1SfWebhookPayload),
     }
   )

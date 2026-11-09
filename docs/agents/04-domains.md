@@ -6,6 +6,7 @@
 |---------|--------------|-----------------|
 | Home | `/` | `(logged-in-out)/(home)/` |
 | Carta de serviços | `/servicos`, categorias | `(logged-in-out)/servicos/`, `http-busca-search/` |
+| Carta de serviços (Lei 13.460, PDF por órgão) | `/carta-de-servicos`, `/carta-de-servicos/[siciCode]`, `/api/carta-de-servicos/[siciCode]/pdf` | `(logged-in-out)/carta-de-servicos/`, `src/lib/carta-servicos/org-units.ts`, `src/lib/carta-servicos/pdf/`, `http-app-catalogo/` |
 | Cursos | `/servicos/cursos`, `[slug]`, `meus-cursos`, certificados, inscrição | `src/app/components/courses/`, `http-courses/` |
 | Empregos | `/servicos/trabalho`, `[id]`, currículo, candidaturas, `/servicos/empresas/[cnpj]` | componentes empregos + `http-courses/` |
 | MEI | `/servicos/mei`, proposta, minhas propostas, meu-mei | componentes mei + `http-courses/` |
@@ -39,3 +40,4 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 - CadMicro GCS upload: [`../cadmicro-gcs-upload.md`](../cadmicro-gcs-upload.md)
 - CadMicro API: [`../cadmicro-api-integration.md`](../cadmicro-api-integration.md)
 - Dívida Ativa: [`../divida-ativa.md`](../divida-ativa.md)
+- Carta de Serviços em PDF (decisão servidor × cliente, limites do react-pdf): [`../carta-de-servicos-pdf.md`](../carta-de-servicos-pdf.md)

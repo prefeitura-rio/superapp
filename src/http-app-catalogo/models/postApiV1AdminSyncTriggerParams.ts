@@ -5,10 +5,11 @@
  * Discovery layer unificada da Prefeitura do Rio de Janeiro. Indexa serviços públicos, cursos, vagas e oportunidades MEI com busca full-text e recomendação personalizada por perfil de cidadão.
  * OpenAPI spec version: 1.0
  */
+import type { PostApiV1AdminSyncTriggerMode } from './postApiV1AdminSyncTriggerMode'
 
 export type PostApiV1AdminSyncTriggerParams = {
-  /**
-   * Fonte: salesforce, app-go-api, typesense. Vazio = todas.
-   */
+  /** Fonte: salesforce, app-go-api, typesense. Vazio = todas. */
   source?: string
+  /** delta (padrão) ou full. full reprocessa todos os itens nas fontes com sync completa (Carta). */
+  mode?: PostApiV1AdminSyncTriggerMode
 }
