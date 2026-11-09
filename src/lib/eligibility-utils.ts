@@ -124,15 +124,64 @@ interface EligibilityParams {
   niveisIdioma: ReferenceItem[]
 }
 
-function calcularIdade(nascimentoData: string): number {
-  const nascimento = new Date(nascimentoData)
-  const hoje = new Date()
-  let idade = hoje.getFullYear() - nascimento.getFullYear()
-  const mesAtual = hoje.getMonth()
-  const mesNascimento = nascimento.getMonth()
+/** Fuso do dia civil em que a idade da candidatura é conferida. */
+const FUSO_IDADE = 'America/Sao_Paulo'
+
+/** `YYYY-MM-DD` no início da data de nascimento, sozinho ou seguido do horário ISO. */
+const DATA_NASCIMENTO_PATTERN = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/
+
+interface DiaCivil {
+  ano: number
+  /** 1 a 12. */
+  mes: number
+  dia: number
+}
+
+/**
+ * Ano, mês e dia da data de nascimento, sem conversão de fuso: `2008-06-16T00:00:00Z` é 16/06
+ * em qualquer servidor. `null` quando não começa por uma data de calendário válida.
+ */
+function lerDiaCivilNascimento(nascimentoData: string): DiaCivil | null {
+  const match = DATA_NASCIMENTO_PATTERN.exec(nascimentoData)
+  if (!match) return null
+  const ano = Number(match[1])
+  const mes = Number(match[2])
+  const dia = Number(match[3])
+  const data = new Date(Date.UTC(ano, mes - 1, dia))
   if (
-    mesAtual < mesNascimento ||
-    (mesAtual === mesNascimento && hoje.getDate() < nascimento.getDate())
+    data.getUTCFullYear() !== ano ||
+    data.getUTCMonth() !== mes - 1 ||
+    data.getUTCDate() !== dia
+  ) {
+    return null
+  }
+  return { ano, mes, dia }
+}
+
+function hojeNoFusoIdade(): DiaCivil {
+  const partes = new Intl.DateTimeFormat('en-US', {
+    timeZone: FUSO_IDADE,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(new Date())
+  const parte = (tipo: Intl.DateTimeFormatPartTypes): number =>
+    Number(partes.find(p => p.type === tipo)?.value)
+  return { ano: parte('year'), mes: parte('month'), dia: parte('day') }
+}
+
+/**
+ * Idade completa no dia civil de hoje em Brasília (`FUSO_IDADE`), comparando só ano, mês e dia
+ * da data de nascimento. Data inválida devolve `NaN`, que reprova qualquer limite de idade.
+ */
+function calcularIdade(nascimentoData: string): number {
+  const nascimento = lerDiaCivilNascimento(nascimentoData)
+  if (nascimento == null) return Number.NaN
+  const hoje = hojeNoFusoIdade()
+  let idade = hoje.ano - nascimento.ano
+  if (
+    hoje.mes < nascimento.mes ||
+    (hoje.mes === nascimento.mes && hoje.dia < nascimento.dia)
   ) {
     idade--
   }
