@@ -147,3 +147,113 @@ describe('VagaCard — contraste do "Publicada em" (WCAG AA)', () => {
     ).toBeGreaterThanOrEqual(4.5)
   })
 })
+
+describe('VagaCard — contraste dos badges de informação (WCAG AA)', () => {
+  // Fundo do card da listagem geral (`bg-card`) e cor do `bg-foreground/5`
+  // do badge, de `--card` e `--foreground` em globals.css
+  const CARD_LIGHT: [number, number, number] = [0xf1, 0xf1, 0xf4]
+  const CARD_DARK: [number, number, number] = [0x18, 0x18, 0x1b]
+  const FOREGROUND_LIGHT: [number, number, number] = [0x09, 0x09, 0x0b]
+  const FOREGROUND_DARK: [number, number, number] = [0xf8, 0xfa, 0xfc]
+
+  function blend(
+    top: [number, number, number],
+    alpha: number,
+    bottom: [number, number, number]
+  ): [number, number, number] {
+    return top.map((c, i) => alpha * c + (1 - alpha) * bottom[i]) as [
+      number,
+      number,
+      number,
+    ]
+  }
+
+  function hexClassColor(
+    className: string,
+    prefix: '' | 'dark:'
+  ): [number, number, number] | null {
+    const escaped = prefix.replace(':', '\\:')
+    const match = className.match(
+      new RegExp(`(?:^|\\s)${escaped}text-\\[#([0-9a-fA-F]{6})\\](?:\\s|$)`)
+    )
+    if (!match) return null
+    const hex = match[1]
+    return [0, 2, 4].map(i => Number.parseInt(hex.slice(i, i + 2), 16)) as [
+      number,
+      number,
+      number,
+    ]
+  }
+
+  const card = {
+    id: UUID,
+    slug: SLUG,
+    titulo: 'Agente de Campo',
+    empresaNome: 'Empresa Exemplo',
+    badges: [
+      { text: 'Temporário', type: 'regime' as const },
+      { text: 'Laranjeiras', type: 'bairro' as const },
+      { text: 'R$ 3.000', type: 'salary' as const },
+      { text: '20 vagas', type: 'contratacoes' as const },
+    ],
+  }
+
+  function badges(): HTMLElement[] {
+    return card.badges.map(
+      b => screen.getByText(b.text).parentElement as HTMLElement
+    )
+  }
+
+  function badgeAlpha(className: string): number {
+    const match = className.match(/(?:^|\s)bg-foreground\/(\d+)(?:\s|$)/)
+    expect(match).not.toBeNull()
+    return Number(match?.[1]) / 100
+  }
+
+  it('não usa a cor #71717B (3,83:1) nos badges do card "all"', () => {
+    render(<VagaCard vaga={card} variant="all" />)
+
+    for (const badge of badges()) {
+      expect(badge.getAttribute('style') ?? '').not.toContain('#71717B')
+    }
+  })
+
+  it('usa cor de contraste ≥ 4.5:1 sobre o fundo claro do badge', () => {
+    render(<VagaCard vaga={card} variant="all" />)
+
+    expect(screen.getByRole('link').className).toContain('bg-card')
+    for (const badge of badges()) {
+      const bg = blend(
+        FOREGROUND_LIGHT,
+        badgeAlpha(badge.className),
+        CARD_LIGHT
+      )
+      const color = hexClassColor(badge.className, '')
+      expect(color).not.toBeNull()
+      expect(
+        contrastRatio(color as [number, number, number], bg)
+      ).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('usa cor de contraste ≥ 4.5:1 sobre o fundo escuro do badge', () => {
+    render(<VagaCard vaga={card} variant="all" />)
+
+    for (const badge of badges()) {
+      const bg = blend(FOREGROUND_DARK, badgeAlpha(badge.className), CARD_DARK)
+      const color = hexClassColor(badge.className, 'dark:')
+      expect(color).not.toBeNull()
+      expect(
+        contrastRatio(color as [number, number, number], bg)
+      ).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('mantém o texto branco nos badges do card recente', () => {
+    render(<VagaCard vaga={card} variant="recent" />)
+
+    for (const badge of badges()) {
+      expect(badge.className).toContain('text-white')
+    }
+  })
+})
