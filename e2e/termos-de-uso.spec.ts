@@ -158,6 +158,9 @@ test.describe('Termos de uso — lista (público)', () => {
 
     await platformLinks(page).filter({ hasText: 'Cursos' }).click()
     await page.waitForURL('**/termos-de-uso/cursos')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Termos de uso: Cursos' })
+    ).toBeVisible()
   })
 
   test('voltar retorna à página anterior do site', async ({
@@ -209,6 +212,25 @@ test.describe('Termos de uso — lista (autenticado)', () => {
     ).toBeVisible()
     await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
   })
+
+  test('logado também abre o detalhe e volta para a lista, sem redirecionar', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso')
+    await platformLinks(page).getByText('Empregos', { exact: true }).click()
+    await page.waitForURL('**/termos-de-uso/empregos')
+
+    await expect(detailHeading(page, 'Empregos')).toBeVisible()
+    await expect(page.getByText(LAST_UPDATE)).toBeVisible()
+    // Header Global no estado logado: sem o convite de login.
+    await expect(
+      page.getByRole('banner').getByText('Faça seu login')
+    ).toHaveCount(0)
+
+    await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+    await page.waitForURL(/\/termos-de-uso$/)
+    await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
+  })
 })
 
 test.describe('Termos de uso — mobile 360px', () => {
@@ -224,6 +246,132 @@ test.describe('Termos de uso — mobile 360px', () => {
     await expect(first).toBeVisible()
 
     for (const target of [first, page.getByRole('search')]) {
+      const box = await target.boundingBox()
+      expect(box?.x).toBe(16)
+      expect(Math.round(360 - ((box?.x ?? 0) + (box?.width ?? 0)))).toBe(16)
+    }
+
+    const scrollWidth = await page.evaluate(
+      () => document.documentElement.scrollWidth
+    )
+    expect(scrollWidth).toBeLessThanOrEqual(360)
+  })
+})
+
+const LAST_UPDATE = 'Última atualização: Abril de 2026 - Versão 1.0'
+
+function detailHeading(page: Page, name: string) {
+  return page.getByRole('heading', { level: 1, name: `Termos de uso: ${name}` })
+}
+
+test.describe('Termos de uso — detalhe (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const platform of PLATFORMS) {
+    test(`${platform.name}: a lista abre o detalhe com título próprio e o voltar retorna à lista`, async ({
+      page,
+    }) => {
+      await page.goto('/termos-de-uso')
+      await platformLinks(page)
+        .getByText(platform.name, { exact: true })
+        .click()
+      await page.waitForURL(`**${platform.href}`)
+
+      await expect(page).toHaveTitle(`Termos de uso: ${platform.name}`)
+      await expect(detailHeading(page, platform.name)).toBeVisible()
+      await expect(page.getByText(LAST_UPDATE)).toBeVisible()
+      await expect(
+        page.getByRole('heading', { name: '1. Da ciência do Termo de uso' })
+      ).toBeVisible()
+
+      await page
+        .getByRole('link', { name: 'Voltar para Termos de uso' })
+        .click()
+      await page.waitForURL(/\/termos-de-uso$/)
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Termos de uso' })
+      ).toBeVisible()
+    })
+  }
+
+  test('mostra o texto completo: Termo de Uso e Aviso de Privacidade até o Foro', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/prefrio-site')
+    const article = page.getByRole('article')
+
+    await expect(article.getByRole('heading', { level: 2 })).toHaveCount(10)
+    await expect(article.getByRole('heading', { level: 3 })).toHaveCount(15)
+    await expect(
+      article.getByRole('heading', {
+        name: 'II. Aviso de Privacidade – Plataforma Pref.Rio',
+      })
+    ).toBeVisible()
+
+    const foro = article.getByRole('heading', { name: '15. Foro' })
+    await foro.scrollIntoViewIfNeeded()
+    await expect(foro).toBeVisible()
+    await expect(
+      article.getByText(/renunciando as partes desde já a qualquer outro/)
+    ).toBeVisible()
+  })
+
+  test('voltar do detalhe em acesso direto também vai para a lista', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/empregos')
+
+    await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+    await page.waitForURL(/\/termos-de-uso$/)
+  })
+
+  test('plataforma inexistente responde 404', async ({ page }) => {
+    const response = await page.goto('/termos-de-uso/ouvidoria')
+
+    expect(response?.status()).toBe(404)
+    await expect(page.getByText('Página não encontrada')).toBeVisible()
+  })
+
+  test('voltar do detalhe muda de default para focused no hover (desktop)', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/cursos')
+    const back = page.getByRole('link', { name: 'Voltar para Termos de uso' })
+    await expect(back).toBeVisible()
+    const bgOf = () => back.evaluate(el => getComputedStyle(el).backgroundColor)
+
+    await page.mouse.move(0, 0)
+    const idle = await bgOf()
+    await back.hover()
+    await expect.poll(bgOf).not.toBe(idle)
+  })
+
+  test('desktop: conteúdo limitado a 896px', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/termos-de-uso/cursos')
+    await expect(detailHeading(page, 'Cursos')).toBeVisible()
+
+    const main = await page.getByRole('main').boundingBox()
+    expect(main?.width).toBe(896)
+  })
+})
+
+test.describe('Termos de uso — detalhe mobile 360px', () => {
+  test.use({ viewport: { width: 360, height: 780 } })
+
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('margens de 16px e sem rolagem horizontal', async ({ page }) => {
+    await page.goto('/termos-de-uso/prefrio-whatsapp')
+    const heading = detailHeading(page, 'PrefRio Whatsapp')
+    await expect(heading).toBeVisible()
+
+    const firstParagraph = page.getByRole('article').locator('p').first()
+    for (const target of [heading, firstParagraph]) {
       const box = await target.boundingBox()
       expect(box?.x).toBe(16)
       expect(Math.round(360 - ((box?.x ?? 0) + (box?.width ?? 0)))).toBe(16)

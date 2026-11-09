@@ -20,6 +20,10 @@ export const TERMOS_DE_USO_PLATFORMS: readonly TermosDeUsoPlatform[] = [
   { slug: 'empregos', name: 'Empregos' },
 ]
 
+export function findTermosDeUsoPlatform(slug: string) {
+  return TERMOS_DE_USO_PLATFORMS.find(platform => platform.slug === slug)
+}
+
 export function buildTermosDeUsoHref(slug: string) {
   return `${TERMOS_DE_USO_ROUTE}/${slug}`
 }

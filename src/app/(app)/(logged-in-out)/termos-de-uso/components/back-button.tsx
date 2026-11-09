@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon } from '@/assets/icons'
 import { useRouter } from 'next/navigation'
+import { BACK_CONTROL_CLASSNAME } from './back-link'
 
 interface BackButtonProps {
   /** Destino quando não há página anterior do próprio site no histórico. */
@@ -28,7 +29,7 @@ export function BackButton({ fallbackHref }: BackButtonProps) {
       type="button"
       onClick={handleBack}
       aria-label="Voltar"
-      className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-foreground transition-colors hover:bg-secondary active:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={BACK_CONTROL_CLASSNAME}
     >
       <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
     </button>
