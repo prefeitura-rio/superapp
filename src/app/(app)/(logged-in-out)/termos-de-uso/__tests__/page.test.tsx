@@ -117,6 +117,21 @@ describe('/termos-de-uso', () => {
     )
   })
 
+  it('segue o Figma: itens em 14px com respiro antes da divisória e busca com estado focused', () => {
+    render(<TermosDeUsoPage />)
+
+    for (const link of platformLinks()) {
+      expect(link).toHaveClass('pb-6')
+      expect(within(link).getByText(link.textContent ?? '')).toHaveClass(
+        'text-sm'
+      )
+    }
+    expect(screen.getByRole('search')).toHaveClass(
+      'focus-within:ring-2',
+      'focus-within:ring-ring'
+    )
+  })
+
   it('avisa quando nenhuma plataforma bate com a busca', async () => {
     const user = userEvent.setup()
     render(<TermosDeUsoPage />)

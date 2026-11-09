@@ -19,10 +19,10 @@ export default function TermosDeUsoPage() {
       <main className="mx-auto w-full max-w-4xl px-4 pb-10">
         <BackButton fallbackHref="/" />
 
-        <h1 className="mt-4 text-3xl font-medium leading-9 tracking-tight text-foreground">
+        <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
           Termos de uso
         </h1>
-        <p className="mt-1 text-sm leading-5 text-foreground-light">
+        <p className="text-sm leading-5 text-foreground-light">
           Encontre os termos de uso das nossas plataformas e saiba mais sobre as
           condições de utilização de cada serviço
         </p>

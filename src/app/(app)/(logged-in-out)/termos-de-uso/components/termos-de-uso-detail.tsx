@@ -28,18 +28,18 @@ export function TermosDeUsoDetail({
     <>
       <BackLink href={TERMOS_DE_USO_ROUTE} label="Voltar para Termos de uso" />
 
-      <h1 className="mt-4 text-3xl font-medium leading-9 tracking-tight text-foreground">
+      <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
         Termos de uso: {platform.name}
       </h1>
-      <p className="mt-1 text-sm leading-5 text-foreground-light">
+      <p className="text-sm leading-5 text-foreground-light">
         {formatTermosDeUsoLastUpdate(document)}
       </p>
 
-      <article className="mt-6 flex flex-col gap-8">
+      <article className="mt-5 flex flex-col gap-8">
         {document.parts.map((part, partIndex) => (
           <div
             key={part.title ?? `parte-${partIndex}`}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-7"
           >
             {/* div, não <header>: o único banner da página é o Header Global. */}
             {part.title && (

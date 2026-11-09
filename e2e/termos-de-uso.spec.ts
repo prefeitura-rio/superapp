@@ -4,6 +4,7 @@ import {
   applyE2ECookieConsent,
   hasE2EAuth,
 } from './fixtures/auth'
+import { secondaryStateRules } from './fixtures/button-states'
 
 /**
  * Termos de uso — tela lista: Header Global, busca pelo nome da plataforma e os 5
@@ -602,4 +603,299 @@ test.describe('Termos de uso — Header Global (autenticado)', () => {
       else await page.waitForURL(url => url.pathname === '/')
     })
   }
+})
+
+/**
+ * Responsividade fiel ao Figma (seção Responsividade das duas telas):
+ * mobile 360px com margem de 16px e desktop com conteúdo de 896px; distâncias
+ * medidas no handoff (voltar → título 24, título colado ao subtítulo,
+ * subtítulo → busca 16, busca com 56 de altura, itens de 14px etc.).
+ */
+interface Box {
+  top: number
+  bottom: number
+  left: number
+  width: number
+  height: number
+}
+
+async function box(locator: ReturnType<Page['locator']>): Promise<Box> {
+  return locator.evaluate(el => {
+    const r = el.getBoundingClientRect()
+    return {
+      top: r.top,
+      bottom: r.bottom,
+      left: r.left,
+      width: r.width,
+      height: r.height,
+    }
+  })
+}
+
+const VIEWPORTS = [
+  {
+    name: 'mobile 360px',
+    width: 360,
+    height: 780,
+    contentLeft: 16,
+    contentWidth: 328,
+  },
+  // Mesma largura do frame desktop do Figma (1450px).
+  {
+    name: 'desktop',
+    width: 1450,
+    height: 900,
+    contentLeft: (1450 - 896) / 2 + 16,
+    contentWidth: 864,
+  },
+] as const
+
+for (const viewport of VIEWPORTS) {
+  test.describe(`Termos de uso — fiel ao Figma (${viewport.name})`, () => {
+    test.use({ viewport: { width: viewport.width, height: viewport.height } })
+
+    test.beforeEach(async ({ context }) => {
+      await applyE2ECookieConsent(context)
+    })
+
+    test('lista: margens, distâncias e tamanhos do handoff', async ({
+      page,
+    }) => {
+      await page.goto('/termos-de-uso')
+      const main = page.getByRole('main')
+      const back = await box(page.getByRole('button', { name: 'Voltar' }))
+      const h1 = await box(main.getByRole('heading', { level: 1 }))
+      const sub = await box(main.locator('h1 + p'))
+      const search = await box(page.getByRole('search'))
+      const items = page
+        .getByRole('navigation', { name: 'Plataformas' })
+        .getByRole('link')
+      await expect(items).toHaveCount(5)
+      const first = await box(items.first())
+
+      expect((await box(main)).width).toBe(Math.min(viewport.width, 896))
+      for (const b of [h1, search, first]) {
+        expect(b.left).toBe(viewport.contentLeft)
+        expect(b.width).toBe(viewport.contentWidth)
+      }
+      expect(back).toMatchObject({
+        left: viewport.contentLeft,
+        width: 44,
+        height: 44,
+      })
+      expect(h1.top - back.bottom).toBe(24)
+      expect(sub.top).toBe(h1.bottom)
+      expect(search.top - sub.bottom).toBe(16)
+      expect(search.height).toBe(56)
+      expect(first.top - search.bottom).toBe(8)
+
+      for (const item of await items.all()) {
+        const { height } = await box(item)
+        // Handoff: linha de 60px + respiro antes da divisória = 64–68px por item.
+        expect(height).toBeGreaterThanOrEqual(64)
+        expect(height).toBeLessThanOrEqual(68)
+        const label = item.getByText((await item.textContent()) ?? '', {
+          exact: true,
+        })
+        await expect(label).toHaveCSS('font-size', '14px')
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth)
+      ).toBeLessThanOrEqual(viewport.width)
+    })
+
+    test('detalhe: margens, distâncias e tipografia do handoff', async ({
+      page,
+    }) => {
+      await page.goto('/termos-de-uso/prefrio-site')
+      const main = page.getByRole('main')
+      const back = await box(
+        page.getByRole('link', { name: 'Voltar para Termos de uso' })
+      )
+      const h1 = await box(main.getByRole('heading', { level: 1 }))
+      const sub = await box(main.locator('h1 + p'))
+      const article = page.getByRole('article')
+      const sections = article.locator('section')
+      const s1 = await box(sections.nth(0))
+      const s2 = await box(sections.nth(1))
+
+      expect((await box(main)).width).toBe(Math.min(viewport.width, 896))
+      expect(h1.left).toBe(viewport.contentLeft)
+      expect(h1.width).toBe(viewport.contentWidth)
+      expect(h1.top - back.bottom).toBe(24)
+      expect(sub.top).toBe(h1.bottom)
+      expect((await box(article)).top - sub.bottom).toBe(20)
+      expect(s2.top - s1.bottom).toBe(28)
+
+      // Corpo: título da seção 16px medium; texto 14px na cor foreground-light.
+      const sectionTitle = sections.nth(0).getByRole('heading')
+      await expect(sectionTitle).toHaveCSS('font-size', '16px')
+      await expect(sectionTitle).toHaveCSS('font-weight', '500')
+      const paragraph = sections.nth(0).locator('p').first()
+      await expect(paragraph).toHaveCSS('font-size', '14px')
+      const foregroundLight = await page.evaluate(() => {
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--foreground-light)'
+        document.body.append(probe)
+        const color = getComputedStyle(probe).color
+        probe.remove()
+        return color
+      })
+      await expect(paragraph).toHaveCSS('color', foregroundLight)
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth)
+      ).toBeLessThanOrEqual(viewport.width)
+    })
+  })
+}
+
+/**
+ * Estados dos botões (seção Comportamento): default → focused no hover do
+ * desktop e enquanto pressionado no toque. O Tailwind põe `hover:` dentro de
+ * `@media (hover: hover)` e `active:` sem condição.
+ */
+const STATE_CONTROLS = [
+  {
+    screen: '/termos-de-uso',
+    name: 'voltar da lista',
+    get: (page: Page) => page.getByRole('button', { name: 'Voltar' }),
+  },
+  {
+    screen: '/termos-de-uso/cursos',
+    name: 'voltar do detalhe',
+    get: (page: Page) =>
+      page.getByRole('link', { name: 'Voltar para Termos de uso' }),
+  },
+  {
+    screen: '/termos-de-uso',
+    name: 'Menu do Header Global',
+    get: (page: Page) =>
+      page.getByRole('banner').getByRole('link', { name: 'Menu' }),
+  },
+  {
+    screen: '/termos-de-uso/cursos',
+    name: 'Perfil do Header Global',
+    get: (page: Page) =>
+      page
+        .getByRole('banner')
+        .getByRole('link', { name: 'Faça seu login' })
+        .locator('div'),
+  },
+] as const
+
+test.describe('Termos de uso — estados dos botões no desktop (hover)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const control of STATE_CONTROLS) {
+    test(`${control.name}: default → focused ao passar o mouse`, async ({
+      page,
+    }) => {
+      await page.goto(control.screen)
+      const target = control.get(page)
+      await expect(target).toBeVisible()
+      const bg = () =>
+        target.evaluate(el => getComputedStyle(el).backgroundColor)
+
+      await page.mouse.move(0, 0)
+      const idle = await bg()
+      await target.hover()
+      await expect.poll(bg).not.toBe(idle)
+      expect(await secondaryStateRules(target)).toEqual({
+        hover: true,
+        active: true,
+      })
+    })
+  }
+})
+
+test.describe('Termos de uso — estados dos botões no toque (mobile)', () => {
+  test.use({
+    viewport: { width: 360, height: 780 },
+    hasTouch: true,
+    isMobile: true,
+  })
+
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const control of STATE_CONTROLS) {
+    test(`${control.name}: sem hover no toque; focused enquanto pressionado`, async ({
+      page,
+    }) => {
+      await page.goto(control.screen)
+      const target = control.get(page)
+      await expect(target).toBeVisible()
+
+      expect(
+        await page.evaluate(() => matchMedia('(hover: hover)').matches)
+      ).toBe(false)
+      expect(await secondaryStateRules(target)).toEqual({
+        hover: false,
+        active: true,
+      })
+
+      const bg = () =>
+        target.evaluate(el => getComputedStyle(el).backgroundColor)
+      const idle = await bg()
+      const box = await target.boundingBox()
+      if (!box) throw new Error(`${control.name} sem bounding box`)
+
+      // Ponteiro em cima sem pressionar: no toque não existe hover, nada muda.
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.waitForTimeout(400)
+      expect(await bg()).toBe(idle)
+
+      // Pressionado: focused. (O toque emulado do headless não aplica :active;
+      // o mouse.down aplica, e com hover desligado isola o estado pressionado.)
+      // Sem mouse.up: soltar navegaria para outra página.
+      await page.mouse.down()
+      await expect.poll(bg).not.toBe(idle)
+    })
+  }
+})
+
+test.describe('Termos de uso — busca com estado focused', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('tocar/clicar na busca abre a digitação e destaca o campo', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso')
+    const field = page.getByRole('search')
+    const ring = () => field.evaluate(el => getComputedStyle(el).boxShadow)
+
+    expect(await ring()).toBe('none')
+    await searchBox(page).click()
+    await expect(searchBox(page)).toBeFocused()
+    await expect.poll(ring).not.toBe('none')
+
+    await page.keyboard.press('Tab')
+    await expect.poll(ring).toBe('none')
+  })
+})
+
+test.describe('Termos de uso — Menu logado (desktop)', () => {
+  test.beforeEach(async ({ context }) => {
+    test.skip(!hasE2EAuth(), 'E2E_ACCESS_TOKEN não configurado')
+    await applyE2EAuthCookies(context)
+  })
+
+  test('o botão Menu logado também muda para focused no hover', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso')
+    const menu = page.getByRole('banner').getByRole('button', { name: 'Menu' })
+    await expect(menu).toBeVisible()
+    const bg = () => menu.evaluate(el => getComputedStyle(el).backgroundColor)
+
+    await page.mouse.move(0, 0)
+    const idle = await bg()
+    await menu.hover()
+    await expect.poll(bg).not.toBe(idle)
+  })
 })

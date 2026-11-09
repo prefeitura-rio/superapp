@@ -28,7 +28,7 @@ export function PlatformList({ platforms }: PlatformListProps) {
     <>
       <div
         role="search"
-        className="mt-6 flex h-14 items-center gap-4 rounded-full bg-card px-4"
+        className="mt-4 flex h-14 items-center gap-4 rounded-full bg-card px-4 focus-within:ring-2 focus-within:ring-ring"
       >
         <SearchIcon
           className="h-6 w-6 shrink-0 text-card-foreground"
@@ -70,6 +70,8 @@ export function PlatformList({ platforms }: PlatformListProps) {
                 <MenuItem
                   icon={null}
                   label={platform.name}
+                  // Figma: linha de 60px + spacing-xs antes da divisória (64–68px).
+                  className="pb-6"
                   href={buildTermosDeUsoHref(platform.slug)}
                   isLast={index === visiblePlatforms.length - 1}
                 />

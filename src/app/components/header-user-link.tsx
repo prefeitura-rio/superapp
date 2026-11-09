@@ -67,7 +67,7 @@ export default function HeaderUserLink({
               Faça seu login
             </span>
           )}
-          <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors w-11 h-11 flex items-center justify-center overflow-hidden shrink-0">
             {isLoggedIn && userAvatarUrl ? (
               <Image
                 src={userAvatarUrl}
@@ -85,7 +85,7 @@ export default function HeaderUserLink({
       {resolvedMenuHref ? (
         <Link
           href={resolvedMenuHref}
-          className="rounded-full bg-card hover:bg-secondary p-3 flex items-center justify-center"
+          className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors p-3 flex items-center justify-center"
         >
           <MenuIcon className="h-5 w-5 text-foreground" />
           <span className="sr-only">Menu</span>
@@ -93,7 +93,7 @@ export default function HeaderUserLink({
       ) : (
         <button
           type="button"
-          className="rounded-full bg-card p-3 flex items-center justify-center"
+          className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors p-3 flex items-center justify-center"
         >
           <MenuIcon className="h-5 w-5 text-foreground" />
           <span className="sr-only">Menu</span>
