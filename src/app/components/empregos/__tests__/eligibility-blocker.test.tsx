@@ -47,4 +47,30 @@ describe('EligibilityBlocker', () => {
       'Ser pessoa com deficiência'
     )
   })
+
+  it('mostra as frases da idade mínima e do Jovem Aprendiz juntas dos demais critérios, na ordem recebida', () => {
+    render(
+      <EligibilityBlocker
+        failedCriterios={[
+          { slug: 'pcd', label: 'Ser pessoa com deficiência' },
+          { slug: 'idade_minima', label: 'Ter pelo menos 18 anos' },
+          {
+            slug: 'jovem_aprendiz',
+            label: 'Ter entre 14 e 24 anos (Jovem Aprendiz)',
+          },
+          {
+            slug: 'escolaridade',
+            label: 'Formação mínima — Ensino Médio',
+          },
+        ]}
+      />
+    )
+    const itens = screen.getAllByRole('listitem').map(li => li.textContent)
+    expect(itens).toEqual([
+      'Ser pessoa com deficiência',
+      'Ter pelo menos 18 anos',
+      'Ter entre 14 e 24 anos (Jovem Aprendiz)',
+      'Formação mínima — Ensino Médio',
+    ])
+  })
 })

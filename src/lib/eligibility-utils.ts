@@ -4,6 +4,7 @@ import type { EmpregabilidadeVaga } from '@/http-courses/models/empregabilidadeV
 
 export type EligibilityCriterioSlug =
   | 'idade_minima'
+  | 'jovem_aprendiz'
   | 'escolaridade'
   | 'idioma'
   | 'pcd'
@@ -20,6 +21,16 @@ const CRITERIO_BLOQUEIO_PCD = 'pcd'
  * `/candidatura-bloqueios` (app-go-api, DEV-424). Ainda fora do enum gerado pelo Orval.
  */
 const CRITERIO_BLOQUEIO_EXPERIENCIA_CARTEIRA = 'experiencia_carteira'
+
+/**
+ * Chave do bloqueio Jovem Aprendiz em `criterios_bloqueio` e slug do critério em
+ * `/candidatura-bloqueios` (app-go-api, DEV-428). Ainda fora do enum gerado pelo Orval.
+ */
+const CRITERIO_BLOQUEIO_JOVEM_APRENDIZ = 'jovem_aprendiz'
+
+/** Faixa fixa de idade do Jovem Aprendiz (inclusive nas duas pontas), sem número livre. */
+const IDADE_MINIMA_JOVEM_APRENDIZ = 14
+const IDADE_MAXIMA_JOVEM_APRENDIZ = 24
 
 /** Opção PcD da vaga que restringe a candidatura (`opcao_pcd` do app-go-api). */
 const OPCAO_PCD_EXCLUSIVA = 'exclusiva'
@@ -82,6 +93,12 @@ interface EligibilityParams {
      * `experiencia_carteira` em `criterios_bloqueio`.
      */
     experiencia_carteira?: string | null
+    /**
+     * Vaga marcada como Jovem Aprendiz na seção Idade do Admin (faixa fixa de 14 a 24 anos,
+     * app-go-api DEV-428), ainda fora do client Orval. Só bloqueia com a chave `jovem_aprendiz`
+     * em `criterios_bloqueio`.
+     */
+    jovem_aprendiz?: boolean | null
   }
   nascimentoData: string | undefined
   /** Formações do currículo com id_escolaridade e status. */
@@ -244,10 +261,16 @@ export function checkEligibility({
     chavesBloqueio.includes(CRITERIO_BLOQUEIO_EXPERIENCIA_CARTEIRA) &&
     (exigenciaCarteira === EXPERIENCIA_CARTEIRA_QUALQUER_TEMPO ||
       exigenciaCarteira === EXPERIENCIA_CARTEIRA_MINIMO_6_MESES)
+  // Jovem Aprendiz: como o PcD, só com o bloqueio ligado explicitamente e a vaga marcada; nasce
+  // desligado em toda vaga existente e sem a lista (API anterior ao campo) não confere.
+  const conferirJovemAprendiz =
+    vaga.jovem_aprendiz === true &&
+    chavesBloqueio.includes(CRITERIO_BLOQUEIO_JOVEM_APRENDIZ)
 
   // Nenhum critério ativo — candidato passa automaticamente
   const temCriterios =
     vaga.idade_minima != null ||
+    conferirJovemAprendiz ||
     conferirEscolaridade ||
     idiomasRequisito.length > 0 ||
     conferirPcd ||
@@ -292,6 +315,22 @@ export function checkEligibility({
       failedCriterios.push({
         slug: 'idade_minima',
         label: `Ter pelo menos ${vaga.idade_minima} anos`,
+      })
+    }
+  }
+
+  // Critério Jovem Aprendiz: na seção Idade, logo depois da idade mínima (ordem do Admin).
+  // Sem data de nascimento (ou com data inválida) não passa.
+  if (conferirJovemAprendiz) {
+    const idade =
+      nascimentoData != null ? calcularIdade(nascimentoData) : Number.NaN
+    const passou =
+      idade >= IDADE_MINIMA_JOVEM_APRENDIZ &&
+      idade <= IDADE_MAXIMA_JOVEM_APRENDIZ
+    if (!passou) {
+      failedCriterios.push({
+        slug: 'jovem_aprendiz',
+        label: `Ter entre ${IDADE_MINIMA_JOVEM_APRENDIZ} e ${IDADE_MAXIMA_JOVEM_APRENDIZ} anos (Jovem Aprendiz)`,
       })
     }
   }
