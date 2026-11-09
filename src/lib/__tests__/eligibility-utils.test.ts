@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { checkEligibility } from '../eligibility-utils'
 
 type Params = Parameters<typeof checkEligibility>[0]
@@ -570,5 +570,176 @@ describe('checkEligibility — critério experiência em carteira', () => {
     expect(result.failedCriterios).toEqual([
       { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
     ])
+  })
+})
+
+const FRASE_JOVEM_APRENDIZ = 'Ter entre 14 e 24 anos (Jovem Aprendiz)'
+
+/** "Hoje" fixo dos testes de idade: 15/06/2026, meio-dia no fuso local. */
+const HOJE = new Date(2026, 5, 15, 12, 0, 0)
+
+/**
+ * Data de nascimento de quem faz `anos` anos `deslocamentoDias` depois de HOJE (negativo = já
+ * fez). Construída no fuso local e serializada em ISO, para que o cálculo da idade leia o mesmo
+ * dia civil em qualquer fuso em que a suíte rode.
+ */
+function nascimentoCom(anos: number, deslocamentoDias = 0): string {
+  return new Date(
+    HOJE.getFullYear() - anos,
+    HOJE.getMonth(),
+    HOJE.getDate() + deslocamentoDias
+  ).toISOString()
+}
+
+/** Vaga só com o critério Jovem Aprendiz, com o bloqueio ligado. */
+function paramsJovemAprendiz(
+  nascimentoData: string | undefined,
+  vagaExtra: Partial<Params['vaga']> = {}
+): Params {
+  return {
+    ...params({
+      id_escolaridade_minima: undefined,
+      idiomas_requisito: [],
+      jovem_aprendiz: true,
+      criterios_bloqueio: bloqueios('jovem_aprendiz'),
+      ...vagaExtra,
+    }),
+    nascimentoData,
+  }
+}
+
+describe('checkEligibility — critério Jovem Aprendiz', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(HOJE)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('deixa passar quem tem de 14 a 24 anos, inclusive nas duas pontas', () => {
+    for (const nascimento of [
+      nascimentoCom(14),
+      nascimentoCom(14, -1),
+      nascimentoCom(18),
+      nascimentoCom(24),
+      nascimentoCom(25, 1),
+    ]) {
+      expect(checkEligibility(paramsJovemAprendiz(nascimento))).toEqual({
+        passes: true,
+        failedCriterios: [],
+      })
+    }
+  })
+
+  it('bloqueia quem está fora de 14 a 24 anos, com a frase do Jovem Aprendiz', () => {
+    for (const nascimento of [
+      nascimentoCom(14, 1),
+      nascimentoCom(13),
+      nascimentoCom(25),
+      nascimentoCom(25, -1),
+      nascimentoCom(40),
+    ]) {
+      expect(checkEligibility(paramsJovemAprendiz(nascimento))).toEqual({
+        passes: false,
+        failedCriterios: [
+          { slug: 'jovem_aprendiz', label: FRASE_JOVEM_APRENDIZ },
+        ],
+      })
+    }
+  })
+
+  it('bloqueia quem não tem data de nascimento no cadastro (ou tem data inválida)', () => {
+    for (const nascimento of [undefined, '', 'data-invalida']) {
+      expect(checkEligibility(paramsJovemAprendiz(nascimento))).toEqual({
+        passes: false,
+        failedCriterios: [
+          { slug: 'jovem_aprendiz', label: FRASE_JOVEM_APRENDIZ },
+        ],
+      })
+    }
+  })
+
+  it('com o bloqueio desligado, nunca bloqueia', () => {
+    for (const criterios of [
+      bloqueios(),
+      bloqueios('escolaridade', 'idioma', 'pcd', 'experiencia_carteira'),
+      undefined,
+      null,
+    ]) {
+      expect(
+        checkEligibility(
+          paramsJovemAprendiz(undefined, { criterios_bloqueio: criterios })
+        )
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('com o bloqueio ligado e a vaga sem Jovem Aprendiz, não confere (a API não grava esse estado)', () => {
+    for (const jovemAprendiz of [false, null, undefined]) {
+      expect(
+        checkEligibility(
+          paramsJovemAprendiz(nascimentoCom(40), {
+            jovem_aprendiz: jovemAprendiz,
+          })
+        )
+      ).toEqual({ passes: true, failedCriterios: [] })
+    }
+  })
+
+  it('mantém a frase da idade mínima atual ao lado da frase do Jovem Aprendiz', () => {
+    const result = checkEligibility(
+      paramsJovemAprendiz(nascimentoCom(16), { idade_minima: 18 })
+    )
+    expect(result).toEqual({
+      passes: false,
+      failedCriterios: [
+        { slug: 'idade_minima', label: 'Ter pelo menos 18 anos' },
+      ],
+    })
+  })
+
+  it('sem data de nascimento, mostra as duas frases da seção Idade, na ordem do Admin', () => {
+    const result = checkEligibility(
+      paramsJovemAprendiz(undefined, { idade_minima: 18 })
+    )
+    expect(result.failedCriterios).toEqual([
+      { slug: 'idade_minima', label: 'Ter pelo menos 18 anos' },
+      { slug: 'jovem_aprendiz', label: FRASE_JOVEM_APRENDIZ },
+    ])
+  })
+
+  it('soma aos demais bloqueios na ordem do Admin: PcD, idade, Jovem Aprendiz, experiência, formação, idioma', () => {
+    const result = checkEligibility({
+      ...params({
+        idade_minima: 200,
+        jovem_aprendiz: true,
+        criterios_bloqueio: bloqueios(
+          'escolaridade',
+          'idioma',
+          'pcd',
+          'experiencia_carteira',
+          'jovem_aprendiz'
+        ),
+        opcao_pcd: 'exclusiva',
+        tipos_pcd: [],
+        experiencia_carteira: 'minimo_6_meses',
+      }),
+      nascimentoData: nascimentoCom(30),
+      deficiencia: 'Nenhuma',
+      experienciasCurriculo: [emCarteira(5)],
+    })
+    expect(result).toEqual({
+      passes: false,
+      failedCriterios: [
+        { slug: 'pcd', label: FRASE_PCD },
+        { slug: 'idade_minima', label: 'Ter pelo menos 200 anos' },
+        { slug: 'jovem_aprendiz', label: FRASE_JOVEM_APRENDIZ },
+        { slug: 'experiencia_carteira', label: FRASE_6_MESES },
+        { slug: 'escolaridade', label: LABEL_ESCOLARIDADE },
+        { slug: 'idioma', label: LABEL_IDIOMA },
+      ],
+    })
   })
 })
