@@ -575,20 +575,16 @@ describe('checkEligibility — critério experiência em carteira', () => {
 
 const FRASE_JOVEM_APRENDIZ = 'Ter entre 14 e 24 anos (Jovem Aprendiz)'
 
-/** "Hoje" fixo dos testes de idade: 15/06/2026, meio-dia no fuso local. */
-const HOJE = new Date(2026, 5, 15, 12, 0, 0)
+/** "Hoje" fixo dos testes de idade: 15/06/2026, meio-dia em Brasília (15h em UTC). */
+const HOJE = new Date('2026-06-15T15:00:00Z')
 
 /**
- * Data de nascimento de quem faz `anos` anos `deslocamentoDias` depois de HOJE (negativo = já
- * fez). Construída no fuso local e serializada em ISO, para que o cálculo da idade leia o mesmo
- * dia civil em qualquer fuso em que a suíte rode.
+ * Data de nascimento de quem faz `anos` anos `deslocamentoDias` depois de 15/06/2026 (negativo =
+ * já fez), em ISO à meia-noite UTC como a API devolve. Calculada em UTC, para valer em qualquer
+ * fuso em que a suíte rode.
  */
 function nascimentoCom(anos: number, deslocamentoDias = 0): string {
-  return new Date(
-    HOJE.getFullYear() - anos,
-    HOJE.getMonth(),
-    HOJE.getDate() + deslocamentoDias
-  ).toISOString()
+  return new Date(Date.UTC(2026 - anos, 5, 15 + deslocamentoDias)).toISOString()
 }
 
 /** Vaga só com o critério Jovem Aprendiz, com o bloqueio ligado. */
@@ -742,4 +738,120 @@ describe('checkEligibility — critério Jovem Aprendiz', () => {
       ],
     })
   })
+})
+
+describe('checkEligibility — idade no dia civil de Brasília, em qualquer fuso do servidor', () => {
+  /** 15/06/2026 às 23h30 em Brasília: em UTC (e em Tóquio) já é 16/06. */
+  const NOITE_EM_BRASILIA = new Date('2026-06-16T02:30:00Z')
+  /** 16/06/2026 às 0h em Brasília: em Honolulu ainda é 15/06. */
+  const MEIA_NOITE_EM_BRASILIA = new Date('2026-06-16T03:00:00Z')
+
+  const FUSOS_DO_SERVIDOR = [
+    { fuso: 'UTC', diaLocalNaNoite: 16 },
+    { fuso: 'America/Sao_Paulo', diaLocalNaNoite: 15 },
+    { fuso: 'Asia/Tokyo', diaLocalNaNoite: 16 },
+    { fuso: 'Pacific/Honolulu', diaLocalNaNoite: 15 },
+  ] as const
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllEnvs()
+  })
+
+  function paramsIdadeMinima18(nascimentoData: string): Params {
+    return {
+      ...params({
+        id_escolaridade_minima: undefined,
+        idiomas_requisito: [],
+        idade_minima: 18,
+      }),
+      nascimentoData,
+    }
+  }
+
+  const FRASE_IDADE_18 = {
+    slug: 'idade_minima',
+    label: 'Ter pelo menos 18 anos',
+  }
+  const BLOQUEIO_JOVEM_APRENDIZ = {
+    passes: false,
+    failedCriterios: [{ slug: 'jovem_aprendiz', label: FRASE_JOVEM_APRENDIZ }],
+  }
+  const PASSA = { passes: true, failedCriterios: [] }
+
+  describe.each(FUSOS_DO_SERVIDOR)(
+    'servidor em $fuso',
+    ({ fuso, diaLocalNaNoite }) => {
+      function noInstante(instante: Date) {
+        vi.stubEnv('TZ', fuso)
+        vi.useFakeTimers()
+        vi.setSystemTime(instante)
+      }
+
+      it('o processo usa o fuso do cenário', () => {
+        noInstante(NOITE_EM_BRASILIA)
+        expect(new Date().getDate()).toBe(diaLocalNaNoite)
+      })
+
+      it('às 23h30 em Brasília, quem faz 18 anos amanhã ainda não tem a idade mínima', () => {
+        noInstante(NOITE_EM_BRASILIA)
+        for (const nascimento of [
+          '2008-06-16',
+          '2008-06-16T00:00:00Z',
+          '2008-06-16T00:00:00.000Z',
+        ]) {
+          expect(checkEligibility(paramsIdadeMinima18(nascimento))).toEqual({
+            passes: false,
+            failedCriterios: [FRASE_IDADE_18],
+          })
+        }
+      })
+
+      it('às 23h30 em Brasília, quem faz 18 anos hoje tem a idade mínima', () => {
+        noInstante(NOITE_EM_BRASILIA)
+        for (const nascimento of ['2008-06-15', '2008-06-15T00:00:00Z']) {
+          expect(checkEligibility(paramsIdadeMinima18(nascimento))).toEqual(
+            PASSA
+          )
+        }
+      })
+
+      it('à meia-noite em Brasília, quem faz 18 anos nesse dia já tem a idade mínima', () => {
+        noInstante(MEIA_NOITE_EM_BRASILIA)
+        expect(checkEligibility(paramsIdadeMinima18('2008-06-16'))).toEqual(
+          PASSA
+        )
+      })
+
+      it('às 23h30 em Brasília, confere os limites de 14 e 24 anos do Jovem Aprendiz no dia de Brasília', () => {
+        noInstante(NOITE_EM_BRASILIA)
+        // faz 14 amanhã: ainda tem 13
+        expect(checkEligibility(paramsJovemAprendiz('2012-06-16'))).toEqual(
+          BLOQUEIO_JOVEM_APRENDIZ
+        )
+        // fez 14 hoje
+        expect(checkEligibility(paramsJovemAprendiz('2012-06-15'))).toEqual(
+          PASSA
+        )
+        // faz 25 amanhã: ainda tem 24
+        expect(
+          checkEligibility(paramsJovemAprendiz('2001-06-16T00:00:00Z'))
+        ).toEqual(PASSA)
+        // fez 25 hoje
+        expect(checkEligibility(paramsJovemAprendiz('2001-06-15'))).toEqual(
+          BLOQUEIO_JOVEM_APRENDIZ
+        )
+      })
+
+      it('data de nascimento fora do calendário não passa', () => {
+        noInstante(NOITE_EM_BRASILIA)
+        for (const nascimento of ['2008-02-30', '2008-13-01', '15/06/2008']) {
+          expect(checkEligibility(paramsIdadeMinima18(nascimento))).toEqual({
+            passes: false,
+            failedCriterios: [FRASE_IDADE_18],
+          })
+        }
+      })
+    }
+  )
 })
