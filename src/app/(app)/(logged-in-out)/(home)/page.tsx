@@ -13,13 +13,17 @@ import {
 import WalletSectionClient from '@/app/components/wallet-section-client'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
+import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
 import { AuthStatusProvider } from '@/providers/auth-status-provider'
 
 const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
 
 export default async function Home() {
-  const categories = await fetchCategories()
+  const [categories, mostAccessed] = await Promise.all([
+    fetchCategories(),
+    resolveMostAccessedServices(),
+  ])
   const categoriesSlice = categories.slice(0, 14)
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
@@ -50,7 +54,7 @@ export default async function Home() {
         {isChamadosEnabled && <RequestsSectionCards />}
 
         {/* Most Accessed Service Cards*/}
-        <MostAccessedServiceCards />
+        <MostAccessedServiceCards services={mostAccessed} />
 
         {/* Carteira section - fetched client-side to avoid cache issues */}
         <WalletSectionClient />

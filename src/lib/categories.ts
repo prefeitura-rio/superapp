@@ -56,9 +56,13 @@ const iconMap: Record<string, string> = {
   transporte: serviceIcon.transporteIcon,
 }
 
+/** URL do ícone de tema, quando o nome normalizado está no mapa. */
+export function getCategoryIconSrc(categoryName: string): string | undefined {
+  return iconMap[normalizeCategoryName(categoryName)]
+}
+
 export function getIconForCategory(categoryName: string): ReactNode {
-  const normalized = normalizeCategoryName(categoryName)
-  const iconSrc = iconMap[normalized]
+  const iconSrc = getCategoryIconSrc(categoryName)
 
   if (!iconSrc) {
     return null

@@ -7,7 +7,7 @@ import type React from 'react'
 interface MostAccessedService {
   id: string
   href: string
-  icon: string
+  icon?: string
   title: string
   description: string
 }

@@ -14,7 +14,7 @@ O comparativo histórico busca-search → MuleSoft está em [`migration-carta-se
 | Subcategorias de uma categoria | `GET /api/public/themes/{slug}/subthemes` |
 | Serviços de uma subcategoria | `GET /api/public/subthemes/{slug}/services` |
 | Detalhe do serviço | `GET /api/public/services/{slug}` |
-| Cards “Mais acessados” | Composição no frontend (ver dívida abaixo). A app-catalogo não tem `filter_category`. |
+| Cards “Mais acessados” (home e `/servicos`) | `GET /api/public/themes?include_featured=true` (`home_featured`). Home: 5 da API e, por último, o card fixo de Dívida Ativa. `/servicos`: os 4 primeiros. A página de categoria continua com a composição local (dívida 2). |
 
 Os payloads de lista e detalhe são lidos com os models da spec MuleSoft (`Theme`, `Subtheme`, `ServiceListItem`, `ServiceDetail`). O client gerado da app-catalogo tipa `data` como `unknown`.
 

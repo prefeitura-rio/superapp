@@ -21,6 +21,7 @@ export interface ModelsCatalogItem {
   modalidade?: string
   organization?: string
   short_desc?: string
+  sici_code?: string
   source?: ModelsItemSource
   source_data?: ModelsCatalogItemSourceData
   source_updated_at?: string
