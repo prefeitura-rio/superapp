@@ -1,6 +1,7 @@
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
+import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { RequestsList } from './components/requests-list'
 import { formatDate, mapCategoria, normalizeStatus } from './helpers'
@@ -9,10 +10,7 @@ export const revalidate = 0
 
 export default async function MyRequestsPage() {
   const response = await listChamados()
-  const apiData =
-    typeof response.data === 'string'
-      ? JSON.parse(response.data)
-      : response.data
+  const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
 
   const protocolos = [
     ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
