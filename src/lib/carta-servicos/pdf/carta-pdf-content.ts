@@ -36,7 +36,7 @@ export function displayUrl(href: string): string {
 
 function safeDecodeUri(value: string): string {
   try {
-    return decodeURIComponent(value)
+    return decodeURIComponent(value).replace(/[\s\p{Cc}]+/gu, ' ')
   } catch {
     return value
   }

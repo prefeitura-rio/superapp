@@ -150,6 +150,12 @@ describe('displayUrl', () => {
     expect(emoji).toBe(`x.rio/${'a'.repeat(56)}😀…`)
   })
 
+  it('quebra de linha e controle decodificados viram um espaço só', () => {
+    expect(displayUrl('https://wa.me/55?text=Oi%0D%0A%09Tchau')).toBe(
+      'wa.me/55?text=Oi Tchau'
+    )
+  })
+
   it('escape malformado mantém o valor original', () => {
     expect(displayUrl('https://sei.rio/busca?q=100%')).toBe(
       'sei.rio/busca?q=100%'
