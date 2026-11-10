@@ -122,6 +122,40 @@ describe('displayUrl', () => {
     expect(shown.length).toBe(64)
     expect(shown.endsWith('…')).toBe(true)
   })
+
+  it('decodifica percent-encoding para o texto ficar legível', () => {
+    expect(
+      displayUrl(
+        'https://www.1746.rio/hc/pt-br/articles/123-Solicita%C3%A7%C3%A3o'
+      )
+    ).toBe('1746.rio/hc/pt-br/articles/123-Solicitação')
+    expect(displayUrl('https://wa.me/552100000000?text=Ol%C3%A1!%20Oi')).toBe(
+      'wa.me/552100000000?text=Olá! Oi'
+    )
+  })
+
+  it('corta depois de decodificar, sem sobrar escape pela metade', () => {
+    const href = `https://www.1746.rio/hc/pt-br/articles/10733579762971-Informa%C3%A7%C3%B5es-sobre-${'a'.repeat(40)}`
+    const shown = displayUrl(href)
+    expect(shown).toContain('Informações')
+    expect(shown).not.toContain('%')
+    expect(Array.from(shown).length).toBe(64)
+    expect(shown.endsWith('…')).toBe(true)
+  })
+
+  it('não parte caractere fora do BMP no corte', () => {
+    const shown = displayUrl(`https://x.rio/${'a'.repeat(61)}%F0%9F%98%80bbb`)
+    expect(shown).toBe(`x.rio/${'a'.repeat(57)}…`)
+    const emoji = displayUrl(`https://x.rio/${'a'.repeat(56)}%F0%9F%98%80bbb`)
+    expect(emoji).toBe(`x.rio/${'a'.repeat(56)}😀…`)
+  })
+
+  it('escape malformado mantém o valor original', () => {
+    expect(displayUrl('https://sei.rio/busca?q=100%')).toBe(
+      'sei.rio/busca?q=100%'
+    )
+    expect(displayUrl('https://sei.rio/a%E0%A4%A')).toBe('sei.rio/a%E0%A4%A')
+  })
 })
 
 describe('splitMarkdownLinks', () => {
