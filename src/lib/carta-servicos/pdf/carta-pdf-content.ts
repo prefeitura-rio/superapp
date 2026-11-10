@@ -14,19 +14,32 @@ export type ChannelEntry = { text: string; href?: string; showUrl?: boolean }
 const MAX_URL_CHARS = 64
 
 /**
- * URL legível para o papel: sem protocolo/`www.` e cortada com "…" quando passa de
- * {@link MAX_URL_CHARS} (query strings de SSO chegam a 300+ caracteres, sem espaço
- * para quebrar a linha). O link clicável continua com a URL completa.
+ * URL legível para o papel: sem protocolo/`www.`, com o percent-encoding decodificado
+ * (`Informa%C3%A7%C3%B5es` → `Informações`) e cortada com "…" quando passa de
+ * {@link MAX_URL_CHARS} caracteres (query strings de SSO chegam a 300+, sem espaço
+ * para quebrar a linha). O corte vem depois da decodificação e conta por caractere,
+ * para não partir um escape nem um emoji. O link clicável continua com a URL completa.
  */
 export function displayUrl(href: string): string {
-  const bare = href
-    .replace(/^https?:\/\//i, '')
-    .replace(/^www\./i, '')
-    .replace(/^mailto:|^tel:/i, '')
-    .replace(/\/$/, '')
-  return bare.length > MAX_URL_CHARS
-    ? `${bare.slice(0, MAX_URL_CHARS - 1)}…`
+  const bare = safeDecodeUri(
+    href
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .replace(/^mailto:|^tel:/i, '')
+      .replace(/\/$/, '')
+  )
+  const chars = Array.from(bare)
+  return chars.length > MAX_URL_CHARS
+    ? `${chars.slice(0, MAX_URL_CHARS - 1).join('')}…`
     : bare
+}
+
+function safeDecodeUri(value: string): string {
+  try {
+    return decodeURIComponent(value).replace(/[\s\p{Cc}]+/gu, ' ')
+  } catch {
+    return value
+  }
 }
 export type ChannelGroup = {
   key: 'online' | 'whatsapp' | 'telefone' | 'presencial'
