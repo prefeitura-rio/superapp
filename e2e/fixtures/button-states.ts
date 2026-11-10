@@ -8,9 +8,31 @@ import type { Locator } from '@playwright/test'
  *
  * Diz quais regras `:hover`/`:active` com fundo `--secondary` valem para o
  * elemento NESTE aparelho (as @media em volta precisam casar).
+ *
+ * No build de produção o CSS minificado junta regras com a mesma declaração
+ * numa lista (`.active\:bg-secondary:active,.active\:bg-secondary\/70:active`),
+ * então cada seletor da lista é verificado separadamente.
  */
 export function secondaryStateRules(locator: Locator) {
   return locator.evaluate(element => {
+    // Separa "a, b" respeitando vírgulas dentro de :is()/:where()/[attr].
+    const splitSelectorList = (text: string) => {
+      const parts: string[] = []
+      let depth = 0
+      let current = ''
+      for (const char of text) {
+        if (char === '(' || char === '[') depth++
+        if (char === ')' || char === ']') depth--
+        if (char === ',' && depth === 0) {
+          parts.push(current.trim())
+          current = ''
+        } else {
+          current += char
+        }
+      }
+      parts.push(current.trim())
+      return parts
+    }
     const flatten = (rule: CSSRule): CSSRule[] => [
       rule,
       ...('cssRules' in rule
@@ -41,14 +63,16 @@ export function secondaryStateRules(locator: Locator) {
           !rule.style.backgroundColor.includes('--secondary')
         )
           continue
-        for (const state of ['hover', 'active'] as const) {
-          const suffix = `:${state}`
-          if (
-            rule.selectorText.endsWith(suffix) &&
-            element.matches(rule.selectorText.slice(0, -suffix.length)) &&
-            applies(rule)
-          ) {
-            found[state] = true
+        if (!applies(rule)) continue
+        for (const selector of splitSelectorList(rule.selectorText)) {
+          for (const state of ['hover', 'active'] as const) {
+            const suffix = `:${state}`
+            if (
+              selector.endsWith(suffix) &&
+              element.matches(selector.slice(0, -suffix.length))
+            ) {
+              found[state] = true
+            }
           }
         }
       }
