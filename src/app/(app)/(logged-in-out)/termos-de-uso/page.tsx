@@ -4,8 +4,9 @@ import type { Metadata } from 'next'
 import { BackButton } from './components/back-button'
 import { PlatformList } from './components/platform-list'
 
-export const dynamic = 'force-static'
-
+// Sem `dynamic = 'force-static'`: página estática sai sem o nonce da CSP
+// (que o middleware gera por requisição) e o navegador bloqueia o script da
+// fila de acesso (rio-queue) carregado no layout raiz.
 export const metadata: Metadata = {
   title: 'Termos de uso',
   description:
