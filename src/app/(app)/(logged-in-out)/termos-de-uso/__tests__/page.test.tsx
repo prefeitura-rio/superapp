@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, back }),
 }))
 
+import * as listPageModule from '../page'
 import TermosDeUsoPage from '../page'
 
 function platformLinks() {
@@ -25,6 +26,10 @@ beforeEach(() => {
 })
 
 describe('/termos-de-uso', () => {
+  it('não é force-static: precisa do nonce da CSP por requisição para a fila (rio-queue) rodar', () => {
+    expect(listPageModule).not.toHaveProperty('dynamic', 'force-static')
+  })
+
   it('mostra o Header Global, título, subtítulo e campo de busca', () => {
     render(<TermosDeUsoPage />)
 

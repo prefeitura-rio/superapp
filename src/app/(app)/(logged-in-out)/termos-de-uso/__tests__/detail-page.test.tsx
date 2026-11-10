@@ -23,6 +23,7 @@ import TermosDeUsoPlataformaPage, {
   generateMetadata,
   generateStaticParams,
 } from '../[plataforma]/page'
+import * as detailPageModule from '../[plataforma]/page'
 import { TermosDeUsoDetail } from '../components/termos-de-uso-detail'
 
 const pageProps = (plataforma: string) => ({
@@ -39,6 +40,10 @@ describe('/termos-de-uso/[plataforma]', () => {
       TERMOS_DE_USO_PLATFORMS.map(({ slug }) => ({ plataforma: slug }))
     )
     expect(dynamicParams).toBe(false)
+  })
+
+  it('não é force-static: precisa do nonce da CSP por requisição para a fila (rio-queue) rodar', () => {
+    expect(detailPageModule).not.toHaveProperty('dynamic', 'force-static')
   })
 
   it.each(
