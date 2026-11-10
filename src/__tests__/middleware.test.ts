@@ -164,6 +164,34 @@ describe('middleware — gating de Dívida Ativa', () => {
   })
 })
 
+describe('middleware — Termos de uso', () => {
+  beforeEach(() => {
+    // Se a rota caísse no login, o `buildAuthUrl` precisaria destas variáveis.
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL',
+      'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'
+    )
+    vi.stubEnv('NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID', 'test-client')
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
+      'http://localhost:3000/auth/callback'
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test.each(['/termos-de-uso', '/termos-de-uso/prefrio-site'])(
+    '%s abre sem login',
+    async path => {
+      const response = await middleware(requestFor(path))
+
+      expect(redirectTarget(response)).toBeNull()
+    }
+  )
+})
+
 describe('middleware — CSP do VLibras', () => {
   test('a rota pública libera o iframe do widget em frame-src', async () => {
     const response = await middleware(requestFor('/'))
