@@ -33,7 +33,9 @@ Testes: `termos-de-uso/__tests__/detail-page.test.tsx` compara o texto v1.0 com 
 Controladas principalmente em `src/middleware.ts` e banners (`src/constants/banners.ts`):
 
 - `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `cadmicro`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`cadmicro` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/cadmicro`.
-- `NEXT_PUBLIC_FEATURE_CHAMADOS` / `NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA` — booleanos (`=== 'true'`). Ausente ou diferente de `'true'` esconde o módulo inteiro, inclusive em staging. Padrão para superfície que não pode aparecer até a homologação.
+- `NEXT_PUBLIC_FEATURE_SALESFORCE` — booleano estrito (`=== 'true'`) para as superfícies Salesforce/MuleSoft: solicitações, consulta de protocolo, ouvidoria e Carta de Serviços exclusiva do app-catalogo. Ausente ou diferente de `'true'` reescreve essas rotas para `/not-found`; busca e Carta que possuem fallback no app-busca-search continuam usando o caminho legado.
+- `NEXT_PUBLIC_FEATURE_CHAMADOS` — legado, sem uso no runtime; manter apenas durante a migração de configuração.
+- `NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA` — booleano (`=== 'true'`). Ausente ou diferente de `'true'` esconde o módulo inteiro, inclusive em staging. Padrão para superfície que não pode aparecer até a homologação.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
 
 Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos banners.

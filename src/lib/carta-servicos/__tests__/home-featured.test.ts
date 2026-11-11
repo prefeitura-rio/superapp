@@ -25,7 +25,7 @@ function item(
 
 async function loadResolver(carta: 'true' | 'false') {
   vi.resetModules()
-  vi.stubEnv('CARTA_SERVICOS_API_ENABLED', carta)
+  vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', carta)
   return import('../home-featured')
 }
 

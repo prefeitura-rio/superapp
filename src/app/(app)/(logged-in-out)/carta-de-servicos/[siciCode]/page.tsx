@@ -1,6 +1,5 @@
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { ArrowUpRight } from '@/assets/icons/arrow-up-right'
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import {
   cartaPdfFileName,
   cartaPdfHref,
@@ -10,6 +9,7 @@ import {
   formatOrgUnitLabel,
   isValidSiciCode,
 } from '@/lib/carta-servicos/org-units'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -70,7 +70,7 @@ export default async function CartaDeServicosOrgaoPage({
             {services.map(service => {
               // A tela do serviço só resolve slugs da app-catalogo com a flag ligada;
               // com ela desligada (busca-search, outros slugs) o link daria 404.
-              const href = CARTA_SERVICOS_API_ENABLED
+              const href = isSalesforceServicesEnabled()
                 ? cartaServiceHref(service)
                 : null
               const key = service.slug ?? service.articleId ?? service.name

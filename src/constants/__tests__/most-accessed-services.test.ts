@@ -38,7 +38,7 @@ const OUTROS_IDS = [
  * importação. Cada caso precisa de `resetModules()` + import dinâmico: sem isso o
  * primeiro import venceria e o segundo caso testaria o valor do primeiro.
  *
- * `CARTA_SERVICOS_API_ENABLED` entra em todo caso. O `.env` local pode deixá-la
+ * `NEXT_PUBLIC_FEATURE_SALESFORCE` entra em todo caso. O `.env` local pode deixá-la
  * ligada, e sem o stub esse valor vaza para o teste.
  */
 async function loadServices(flags: {
@@ -47,7 +47,7 @@ async function loadServices(flags: {
 }) {
   vi.resetModules()
   vi.stubEnv('NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA', flags.dividaAtiva)
-  vi.stubEnv('CARTA_SERVICOS_API_ENABLED', flags.carta)
+  vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', flags.carta)
 
   return import('../most-accessed-services')
 }

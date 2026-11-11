@@ -80,7 +80,7 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --build-arg NEXT_PUBLIC_FEATURE_CHAMADOS="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_SALESFORCE="true" \
             --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="true" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_URL="https://storage.googleapis.com/rio-queue" \
             --build-arg NEXT_PUBLIC_RIO_QUEUE_API_URL="https://rio-queue.dados.rio" \

@@ -15,11 +15,11 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { AuthStatusProvider } from '@/providers/auth-status-provider'
 
-const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
-
 export default async function Home() {
+  const isSalesforceEnabled = isSalesforceServicesEnabled()
   const [categories, mostAccessed] = await Promise.all([
     fetchCategories(),
     resolveMostAccessedServices(),
@@ -36,7 +36,7 @@ export default async function Home() {
         <HeaderWrapperClient showSearchPlaceholder />
 
         {/* Requests in progress banner — only visible when logged in with recent requests */}
-        {isChamadosEnabled && <RequestsInProgressBanner />}
+        {isSalesforceEnabled && <RequestsInProgressBanner />}
 
         <PendingInviteSection />
 
@@ -51,7 +51,7 @@ export default async function Home() {
         <HomeCategoriesGrid categories={allCategories} />
 
         {/* Requests Section Cards */}
-        {isChamadosEnabled && <RequestsSectionCards />}
+        {isSalesforceEnabled && <RequestsSectionCards />}
 
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards services={mostAccessed} />

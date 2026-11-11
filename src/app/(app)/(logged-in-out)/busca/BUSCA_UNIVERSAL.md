@@ -155,7 +155,7 @@ Exibido quando o campo de busca está vazio (query ≤ 2 caracteres).
 
 ### Contextos `servicos` ou sem `tipo` — "Mais pesquisados"
 
-Lista estática que navega diretamente para a página do serviço (sem acionar busca). O destino segue `CARTA_SERVICOS_API_ENABLED`: desligada, slug da app-busca-search; ligada, slug da app-catalogo. Os caminhos vêm de `popularServiceHrefs` em `src/constants/most-accessed-services.ts`. Os títulos ficam em `STATIC_POPULAR` em [search-page.tsx](./search-page.tsx).
+Lista estática que navega diretamente para a página do serviço (sem acionar busca). O destino segue `NEXT_PUBLIC_FEATURE_SALESFORCE`: desligada, slug da app-busca-search; ligada, slug da app-catalogo. Os caminhos vêm de `popularServiceHrefs` em `src/constants/most-accessed-services.ts`. Os títulos ficam em `STATIC_POPULAR` em [search-page.tsx](./search-page.tsx).
 
 
 | Item                               | Flag desligada (app-busca-search)                                                              | Flag ligada (app-catalogo)                                                        |

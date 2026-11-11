@@ -178,6 +178,46 @@ describe('middleware — Termos de uso', () => {
     )
   })
 
+  describe('middleware — superfícies Salesforce', () => {
+    beforeEach(() => {
+      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'false')
+    })
+
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    test.each([
+      '/minhas-solicitacoes',
+      '/consulta-protocolo',
+      '/solicitacoes',
+      '/solicitacoes/RIO-123',
+      '/ouvidoria',
+      '/ouvidoria/reclamacao',
+      '/carta-de-servicos',
+      '/carta-de-servicos/2951',
+    ])('%s reescreve para /not-found quando desabilitada', async path => {
+      const response = await middleware(requestFor(path))
+
+      expect(rewriteTarget(response)).toContain('/not-found')
+      expect(redirectTarget(response)).toBeNull()
+    })
+
+    test('/servicos permanece acessível pelo fallback legado', async () => {
+      const response = await middleware(requestFor('/servicos'))
+
+      expect(rewriteTarget(response)).toBeNull()
+    })
+
+    test('as rotas Salesforce ficam acessíveis quando habilitada', async () => {
+      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+
+      const response = await middleware(requestFor('/ouvidoria'))
+
+      expect(rewriteTarget(response)).toBeNull()
+    })
+  })
+
   afterEach(() => {
     vi.unstubAllEnvs()
   })

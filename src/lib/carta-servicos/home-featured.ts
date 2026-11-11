@@ -1,10 +1,10 @@
 import { iptuIcon, multasIcon } from '@/constants/bucket'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiPublicThemes } from '@/http-app-catalogo/carta/carta'
 import type { ModelsCartaHomeFeatured } from '@/http-app-catalogo/models/modelsCartaHomeFeatured'
 import { parseCartaServicosPayload } from '@/lib/carta-servicos/fetch'
 import { getCategoryIconSrc } from '@/lib/categories'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 
 const CACHE_10MIN = {
   next: { revalidate: 600, tags: ['home-featured'] },
@@ -153,7 +153,7 @@ function withHardcodedDividaAtiva(
 export async function resolveMostAccessedServices(): Promise<
   MostAccessedCard[]
 > {
-  if (!CARTA_SERVICOS_API_ENABLED) {
+  if (!isSalesforceServicesEnabled()) {
     return MOST_ACCESSED_SERVICES
   }
 

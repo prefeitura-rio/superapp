@@ -93,6 +93,6 @@ completa. Endereços presenciais são link para o Maps, sem imprimir a URL.
 
 ## Pendências
 
-- **Link para a tela do serviço** depende de `CARTA_SERVICOS_API_ENABLED=true`. Com a flag
+- **Link para a tela do serviço** depende de `NEXT_PUBLIC_FEATURE_SALESFORCE=true`. Com a flag
   desligada, a tela do serviço usa a busca-search, que tem outros slugs, então os itens
   aparecem sem link em vez de levar a um 404.
