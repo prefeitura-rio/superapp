@@ -50,14 +50,6 @@ function maskSubRows(): HTMLElement[] {
     .filter((row): row is HTMLElement => row !== null)
 }
 
-function ttsSubRows(): HTMLElement[] {
-  const controls = panel().querySelector<HTMLElement>('.a11y-tts-controls-row')
-  const speed = byLabel('Velocidade da leitura').closest<HTMLElement>(
-    '.a11y-row-sub'
-  )
-  return [controls, speed].filter((row): row is HTMLElement => row !== null)
-}
-
 function isHiddenFromUser(el: Element): boolean {
   return el.closest('[inert]') !== null
 }
@@ -108,12 +100,7 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     expect(sequence.filter(isHiddenFromUser)).toEqual([])
     // sem recurso ativo, todos os grupos nascem recolhidos (PR #735), mas os
     // cabeçalhos continuam alcançáveis
-    for (const title of [
-      'Texto',
-      'Cores / Visão',
-      'Movimento / Foco',
-      'Leitura em Voz',
-    ]) {
+    for (const title of ['Texto', 'Cores / Visão', 'Movimento / Foco']) {
       expect(sequence).toContain(trigger(title))
     }
     // os controles de dentro dos grupos recolhidos, não
@@ -123,9 +110,6 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
       'Parar animações da página',
       'Ativar máscara de leitura',
       'Diminuir Intensidade da máscara',
-      'Pausar leitura',
-      'Parar leitura',
-      'Diminuir Velocidade da leitura',
     ]) {
       expect(sequence).not.toContain(byLabel(label))
     }
@@ -135,12 +119,7 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     const user = userEvent.setup()
     await openPanel(user)
 
-    for (const title of [
-      'Texto',
-      'Cores / Visão',
-      'Movimento / Foco',
-      'Leitura em Voz',
-    ]) {
+    for (const title of ['Texto', 'Cores / Visão', 'Movimento / Foco']) {
       expect(trigger(title)).toHaveAttribute('aria-expanded', 'false')
       expect(accordionBody(title)).toHaveAttribute('inert')
     }
@@ -189,7 +168,9 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     }
     byLabel('Ativar máscara de leitura').focus()
     await user.tab()
-    expect(document.activeElement).toBe(trigger('Leitura em Voz'))
+    // "Movimento / Foco" é o último grupo: o próximo controle visível depois
+    // da máscara desligada é o rodapé, sem passar pelas sub-opções ocultas
+    expect(document.activeElement).toBe(resetButton())
 
     await user.click(byLabel('Ativar máscara de leitura'))
 
@@ -209,23 +190,6 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
       expect(row).toHaveClass('a11y-row-sub-hidden')
       expect(row).toHaveAttribute('inert')
     }
-  })
-
-  it('controles e velocidade da leitura em voz ficam fora do Tab com o recurso desligado', async () => {
-    const user = userEvent.setup()
-    await openPanel(user)
-    await user.click(trigger('Leitura em Voz'))
-
-    for (const row of ttsSubRows()) {
-      expect(row).toHaveClass('a11y-row-sub-hidden')
-      expect(row).toHaveAttribute('inert')
-    }
-    trigger('Leitura em Voz').focus()
-    const sequence = await tabSequence(user)
-
-    expect(sequence.filter(isHiddenFromUser)).toEqual([])
-    expect(sequence).not.toContain(byLabel('Pausar leitura'))
-    expect(sequence).not.toContain(byLabel('Diminuir Velocidade da leitura'))
   })
 
   it('preferências salvas com a máscara ligada abrem o grupo com as sub-opções no Tab', async () => {
