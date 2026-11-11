@@ -1,4 +1,3 @@
-import { TTS, ttsAvailable } from '../features/tts'
 import type { A11yState } from '../state'
 
 export const PANEL_ID = 'a11y-panel'
@@ -50,7 +49,7 @@ type PanelCallbacks = {
   onLineHeight: (level: 0 | 1 | 2) => void
   onDyslexiaFont: (enabled: boolean) => void
   onHighContrast: (enabled: boolean) => void
-  onColorBlind: (enabled: boolean) => void
+  onColorBlind: (type: 0 | 1 | 2 | 3) => void
   onHighlightLinks: (enabled: boolean) => void
   onReduceMotion: (enabled: boolean) => void
   onSaturation: (level: 0 | 1 | 2) => void
@@ -59,8 +58,6 @@ type PanelCallbacks = {
   onMaskWidth: (level: 0 | 1 | 2) => void
   onMaskIntensity: (level: 0 | 1 | 2) => void
   onHideImages: (enabled: boolean) => void
-  onTts: (enabled: boolean) => void
-  onTtsSpeed: (level: 0 | 1 | 2) => void
   onReset: () => void
   onClose: () => void
 }
@@ -87,7 +84,7 @@ const SATURATION_LABELS = ['Normal', 'Baixa', 'Cinza']
 const MASK_HEIGHT_LABELS = ['Estreita', 'Média', 'Ampla']
 const MASK_WIDTH_LABELS = ['Coluna', 'Média', 'Total']
 const MASK_INTENSITY_LABELS = ['Suave', 'Média', 'Total']
-const TTS_SPEED_LABELS = ['Lenta', 'Normal', 'Rápida']
+const COLOR_BLIND_TYPE_LABELS = ['Deuteranopia', 'Protanopia', 'Tritanopia']
 
 const CLOSE_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <line x1="18" y1="6" x2="6" y2="18"/>
@@ -114,15 +111,6 @@ const ICON_VISION = `<svg viewBox="0 0 24 24" aria-hidden="true">
 </svg>`
 const ICON_MOTION = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <path d="M5 3l14 9-14 9V3z"/>
-</svg>`
-const TTS_ICON_PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
-const TTS_ICON_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
-const TTS_ICON_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`
-
-const ICON_TTS = `<svg viewBox="0 0 24 24" aria-hidden="true">
-  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
 </svg>`
 
 function makeStepper(
@@ -387,7 +375,6 @@ export function createPanel(
     hideImages: state.hideImages,
     reduceMotion: state.reduceMotion,
     readingMask: state.readingMask,
-    tts: state.tts,
   }
 
   const textActive = countActive([
@@ -404,17 +391,14 @@ export function createPanel(
     state.hideImages,
   ])
   const motionActive = countActive([state.reduceMotion, state.readingMask])
-  const ttsActive = countActive([state.tts])
   const firstOpen =
-    ttsActive > 0
-      ? 'tts'
-      : motionActive > 0
-        ? 'motion'
-        : visionActive > 0
-          ? 'vision'
-          : textActive > 0
-            ? 'text'
-            : null
+    motionActive > 0
+      ? 'motion'
+      : visionActive > 0
+        ? 'vision'
+        : textActive > 0
+          ? 'text'
+          : null
 
   // ── Máscara: sub-rows condicionais ──
   const maskSubRows = [
@@ -562,6 +546,41 @@ export function createPanel(
   // suprimir unused warning
   void textStepperRows
 
+  // ── Daltonismo: sub-row condicional de tipo ──
+  const cbSelect = document.createElement('select')
+  cbSelect.className = 'a11y-cb-select'
+  cbSelect.setAttribute('aria-label', 'Tipo de daltonismo')
+  const cbOptions: [string, 1 | 2 | 3][] = [
+    ['Deuteranopia', 1],
+    ['Protanopia', 2],
+    ['Tritanopia', 3],
+  ]
+  for (const [label, val] of cbOptions) {
+    const opt = document.createElement('option')
+    opt.value = String(val)
+    opt.textContent = label
+    opt.selected = state.colorBlind === val
+    cbSelect.appendChild(opt)
+  }
+  cbSelect.addEventListener('change', () => {
+    const type = Number(cbSelect.value) as 1 | 2 | 3
+    live.colorBlind = type
+    visionGroup.updateBadge(
+      countActive([
+        live.highContrast,
+        live.colorBlind,
+        live.saturation,
+        live.highlightLinks,
+        live.hideImages,
+      ])
+    )
+    callbacks.onColorBlind(type)
+  })
+
+  const colorBlindTypeSubRow = makeRow('Tipo', null, cbSelect)
+  colorBlindTypeSubRow.classList.add('a11y-row-sub')
+  setSubRowHidden(colorBlindTypeSubRow, state.colorBlind === 0)
+
   const visionGroup = makeAccordionGroup(
     'vision',
     ICON_VISION,
@@ -592,13 +611,15 @@ export function createPanel(
       ),
       makeRow(
         'Modo daltônico',
-        'Filtro para deuteranopia',
+        'Simula déficit de visão de cor',
         makeToggle(
-          state.colorBlind,
+          state.colorBlind > 0,
           'a11y-toggle-colorblind',
           'Ativar modo daltônico',
           v => {
-            live.colorBlind = v
+            const next = v ? (Number(cbSelect.value) as 1 | 2 | 3) : 0
+            live.colorBlind = next
+            setSubRowHidden(colorBlindTypeSubRow, !v)
             visionGroup.updateBadge(
               countActive([
                 live.highContrast,
@@ -608,10 +629,11 @@ export function createPanel(
                 live.hideImages,
               ])
             )
-            callbacks.onColorBlind(v)
+            callbacks.onColorBlind(next)
           }
         )
       ),
+      colorBlindTypeSubRow,
       makeRow(
         'Saturação de cores',
         null,
@@ -726,100 +748,7 @@ export function createPanel(
     firstOpen === 'motion'
   )
 
-  // ── TTS: sub-row de controles (play/pause/stop + progresso) ──
-  const ttsControlsRow = document.createElement('div')
-  ttsControlsRow.className = 'a11y-row a11y-row-sub a11y-tts-controls-row'
-  setSubRowHidden(ttsControlsRow, !state.tts)
-
-  const ttsPlayBtn = document.createElement('button')
-  ttsPlayBtn.type = 'button'
-  ttsPlayBtn.className = 'a11y-tts-btn'
-  ttsPlayBtn.setAttribute('aria-label', 'Pausar leitura')
-  ttsPlayBtn.innerHTML = TTS_ICON_PAUSE
-  ttsPlayBtn.addEventListener('click', () => {
-    if (TTS.isPaused()) {
-      TTS.resume()
-      ttsPlayBtn.innerHTML = TTS_ICON_PAUSE
-      ttsPlayBtn.setAttribute('aria-label', 'Pausar leitura')
-    } else {
-      TTS.pause()
-      ttsPlayBtn.innerHTML = TTS_ICON_PLAY
-      ttsPlayBtn.setAttribute('aria-label', 'Retomar leitura')
-    }
-  })
-
-  const ttsStopBtn = document.createElement('button')
-  ttsStopBtn.type = 'button'
-  ttsStopBtn.className = 'a11y-tts-btn'
-  ttsStopBtn.setAttribute('aria-label', 'Parar leitura')
-  ttsStopBtn.innerHTML = TTS_ICON_STOP
-  ttsStopBtn.addEventListener('click', () => {
-    if (!turnOffPanelTTS()) callbacks.onTts(false)
-  })
-
-  const ttsProgressPanel = document.createElement('span')
-  ttsProgressPanel.id = 'a11y-tts-progress-panel'
-  ttsProgressPanel.className = 'a11y-tts-progress'
-  ttsProgressPanel.setAttribute('aria-live', 'polite')
-  ttsProgressPanel.setAttribute('aria-atomic', 'true')
-
-  const ttsControlsInner = document.createElement('div')
-  ttsControlsInner.className = 'a11y-tts-controls-inner'
-  ttsControlsInner.append(ttsPlayBtn, ttsStopBtn, ttsProgressPanel)
-  ttsControlsRow.appendChild(ttsControlsInner)
-
-  // ── TTS: sub-row condicional para velocidade ──
-  const ttsSpeedSubRow = makeRow(
-    'Velocidade',
-    null,
-    makeStepper(
-      state.ttsSpeed,
-      TTS_SPEED_LABELS,
-      'Velocidade da leitura',
-      v => {
-        callbacks.onTtsSpeed(v)
-      }
-    )
-  )
-  ttsSpeedSubRow.classList.add('a11y-row-sub')
-  setSubRowHidden(ttsSpeedSubRow, !state.tts)
-
-  const ttsToggleRow = makeRow(
-    'Leitura em voz alta',
-    ttsAvailable ? 'Lê o conteúdo da página' : 'Não suportado neste navegador',
-    makeToggle(
-      state.tts,
-      'a11y-toggle-tts',
-      'Ativar leitura em voz alta',
-      v => {
-        live.tts = v
-        setSubRowHidden(ttsControlsRow, !v)
-        setSubRowHidden(ttsSpeedSubRow, !v)
-        if (!v) {
-          ttsPlayBtn.innerHTML = TTS_ICON_PAUSE
-          ttsPlayBtn.setAttribute('aria-label', 'Pausar leitura')
-          ttsProgressPanel.textContent = ''
-        }
-        ttsGroup.updateBadge(countActive([live.tts]))
-        callbacks.onTts(v)
-      }
-    )
-  )
-  if (!ttsAvailable) {
-    const input = ttsToggleRow.querySelector<HTMLInputElement>('input')
-    if (input) input.disabled = true
-  }
-
-  const ttsGroup = makeAccordionGroup(
-    'tts',
-    ICON_TTS,
-    'Leitura em Voz',
-    ttsActive,
-    [ttsToggleRow, ttsControlsRow, ttsSpeedSubRow],
-    firstOpen === 'tts'
-  )
-
-  body.append(textGroup.el, visionGroup.el, motionGroup.el, ttsGroup.el)
+  body.append(textGroup.el, visionGroup.el, motionGroup.el)
 
   // ── Footer ──
   const footer = document.createElement('div')
@@ -871,25 +800,4 @@ export function rebuildPanel(
   document.getElementById(PANEL_ID)?.remove()
   createPanel(state, callbacks)
   if (wasOpen) openPanel()
-}
-
-// Passa pelo handler do próprio toggle para o painel ficar igual ao desligar
-// manual (badge, sub-opções); o foco num controle que some volta ao toggle.
-export function turnOffPanelTTS(): boolean {
-  const panel = document.getElementById(PANEL_ID)
-  const toggle = panel?.querySelector<HTMLInputElement>('#a11y-toggle-tts')
-  if (!toggle?.checked) return false
-  const active = document.activeElement
-  const focusInSubRow =
-    active instanceof HTMLElement &&
-    active.closest('#a11y-acc-tts .a11y-row-sub') !== null
-  toggle.checked = false
-  toggle.dispatchEvent(new Event('change'))
-  if (focusInSubRow) toggle.focus()
-  return true
-}
-
-export function updatePanelTTSProgress(current: number, total: number): void {
-  const el = document.getElementById('a11y-tts-progress-panel')
-  if (el) el.textContent = `${current} / ${total}`
 }
