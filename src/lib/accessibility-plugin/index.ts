@@ -8,7 +8,6 @@ import { LetterSpacing } from './features/letter-spacing'
 import { ReadingMask } from './features/reading-mask'
 import { ReduceMotion } from './features/reduce-motion'
 import { Saturation } from './features/saturation'
-import { TTS } from './features/tts'
 import { getState, resetState, setState } from './state'
 import { createButton, setButtonActive, setButtonExpanded } from './ui/button'
 import {
@@ -17,15 +16,8 @@ import {
   isPanelOpen,
   openPanel,
   rebuildPanel,
-  turnOffPanelTTS,
-  updatePanelTTSProgress,
 } from './ui/panel'
 import { injectStyles } from './ui/styles'
-import {
-  createTTSWidget,
-  removeTTSWidget,
-  updateWidgetProgress,
-} from './ui/tts-widget'
 
 function hasActiveFeature(state: ReturnType<typeof getState>): boolean {
   return (
@@ -34,13 +26,12 @@ function hasActiveFeature(state: ReturnType<typeof getState>): boolean {
     state.lineHeight > 0 ||
     state.dyslexiaFont ||
     state.highContrast ||
-    state.colorBlind ||
+    state.colorBlind > 0 ||
     state.highlightLinks ||
     state.reduceMotion ||
     state.saturation > 0 ||
     state.readingMask ||
-    state.hideImages ||
-    state.tts
+    state.hideImages
   )
 }
 
@@ -61,40 +52,7 @@ function applyState(state: ReturnType<typeof getState>): void {
     state.maskIntensity
   )
   HideImages.apply(state.hideImages)
-  applyTTS(state.tts, state.ttsSpeed)
   setButtonActive(hasActiveFeature(state))
-}
-
-function applyTTS(enabled: boolean, speed: 0 | 1 | 2): void {
-  if (enabled) {
-    TTS.apply(
-      true,
-      speed,
-      (current, total) => {
-        updateWidgetProgress(current, total)
-        updatePanelTTSProgress(current, total)
-      },
-      () => {
-        // leitura terminou naturalmente: o painel volta ao estado desligado
-        setState({ tts: false })
-        removeTTSWidget()
-        turnOffPanelTTS()
-      }
-    )
-    if (!document.getElementById('a11y-tts-widget')) {
-      createTTSWidget({
-        onStop: () => {
-          TTS.stop()
-          setState({ tts: false })
-          removeTTSWidget()
-          rebuildPanel(getState(), makeCallbacks())
-        },
-      })
-    }
-  } else {
-    TTS.reset()
-    removeTTSWidget()
-  }
 }
 
 function makeCallbacks() {
@@ -114,8 +72,8 @@ function makeCallbacks() {
     onHighContrast(enabled: boolean) {
       applyState(setState({ highContrast: enabled }))
     },
-    onColorBlind(enabled: boolean) {
-      applyState(setState({ colorBlind: enabled }))
+    onColorBlind(type: 0 | 1 | 2 | 3) {
+      applyState(setState({ colorBlind: type }))
     },
     onHighlightLinks(enabled: boolean) {
       applyState(setState({ highlightLinks: enabled }))
@@ -140,12 +98,6 @@ function makeCallbacks() {
     },
     onHideImages(enabled: boolean) {
       applyState(setState({ hideImages: enabled }))
-    },
-    onTts(enabled: boolean) {
-      applyState(setState({ tts: enabled }))
-    },
-    onTtsSpeed(level: 0 | 1 | 2) {
-      applyState(setState({ ttsSpeed: level }))
     },
     onReset() {
       const next = resetState()
