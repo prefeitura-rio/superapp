@@ -34,6 +34,21 @@ const DEFAULT_STATE: A11yState = {
   hideImages: false,
 }
 
+const COLOR_BLIND_TYPES: readonly A11yState['colorBlind'][] = [0, 1, 2, 3]
+
+function isColorBlindType(value: unknown): value is A11yState['colorBlind'] {
+  return COLOR_BLIND_TYPES.some(type => type === value)
+}
+
+// Antes do PR #769, `colorBlind` era boolean (um único filtro). Preferência
+// salva nesse formato vira Deuteranopia (1), o tipo padrão do painel, para o
+// recurso seguir ativo; `false` ou qualquer valor inválido vira desligado (0).
+function normalizeColorBlind(value: unknown): A11yState['colorBlind'] {
+  if (value === true) return 1
+  if (isColorBlindType(value)) return value
+  return 0
+}
+
 export function getState(): A11yState {
   if (typeof window === 'undefined') return { ...DEFAULT_STATE }
 
@@ -41,7 +56,16 @@ export function getState(): A11yState {
   if (!saved) return { ...DEFAULT_STATE }
 
   try {
-    return { ...DEFAULT_STATE, ...JSON.parse(saved) }
+    const {
+      colorBlind,
+      ...rest
+    }: Omit<Partial<A11yState>, 'colorBlind'> & { colorBlind?: unknown } =
+      JSON.parse(saved)
+    return {
+      ...DEFAULT_STATE,
+      ...rest,
+      colorBlind: normalizeColorBlind(colorBlind),
+    }
   } catch {
     localStorage.removeItem(STORAGE_KEY)
     return { ...DEFAULT_STATE }
