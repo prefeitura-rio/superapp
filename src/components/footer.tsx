@@ -8,6 +8,7 @@ import {
 } from '@/assets/icons'
 import prefRioLogo from '@/assets/pref-rio-logo.svg'
 import { CARTA_DE_SERVICOS_FOOTER_LINK } from '@/constants/carta-de-servicos'
+import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import Image from 'next/image'
@@ -163,15 +164,14 @@ function LegalRow() {
         ©2026 PrefRio. Todos os direitos reservados.
       </p>
       <span className="hidden sm:inline text-sm text-foreground-light">•</span>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light cursor-default select-none">
-          Termos de uso
-        </span>
-        <span className="text-sm text-foreground-light">•</span>
-        <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light cursor-default select-none">
-          Política de Privacidade
-        </span>
-      </div>
+      {/* Termo de Uso e Aviso de Privacidade são um documento só: um link,
+          para a lista de Termos de uso por plataforma. */}
+      <Link
+        href={TERMOS_DE_USO_ROUTE}
+        className="self-start text-sm font-normal leading-5 tracking-normal text-foreground-light hover:underline sm:self-auto"
+      >
+        Termos de uso e Política de Privacidade
+      </Link>
     </div>
   )
 }
