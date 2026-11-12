@@ -1112,16 +1112,16 @@ export function injectStyles(): void {
     svg.innerHTML = `<defs>
       <filter id="a11y-cb-deuteranopia" color-interpolation-filters="linearRGB">
         <feColorMatrix type="matrix" values="
-          0.79507  0.20492  0        0  0
-          0        1        0        0  0
-         -0.20492  0.20492  1        0  0
+          1        0        0        0  0
+          0.4      0.6      0        0  0
+          0        0.1      0.9      0  0
           0        0        0        1  0"/>
       </filter>
       <filter id="a11y-cb-protanopia" color-interpolation-filters="linearRGB">
         <feColorMatrix type="matrix" values="
-          0.43     0.57     0        0  0
-          0.34     0.66     0        0  0
-          0        0.20     0.80     0  0
+          0.56     0.44     0        0  0
+          0.28     0.72     0        0  0
+          0        0.14     0.86     0  0
           0        0        0        1  0"/>
       </filter>
       <filter id="a11y-cb-tritanopia" color-interpolation-filters="linearRGB">
