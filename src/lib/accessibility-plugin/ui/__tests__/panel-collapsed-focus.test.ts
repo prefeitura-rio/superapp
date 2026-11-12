@@ -168,9 +168,9 @@ describe('painel de acessibilidade — conteúdo recolhido fora do Tab (DEV-111)
     }
     byLabel('Ativar máscara de leitura').focus()
     await user.tab()
-    // "Movimento / Foco" é o último grupo: o próximo controle visível depois
-    // da máscara desligada é o rodapé, sem passar pelas sub-opções ocultas
-    expect(document.activeElement).toBe(resetButton())
+    // O grupo "Leitura em Voz" vem após "Movimento / Foco"; o Tab vai ao seu
+    // trigger sem passar pelas sub-opções ocultas da máscara
+    expect(document.activeElement).toBe(trigger('Leitura em Voz'))
 
     await user.click(byLabel('Ativar máscara de leitura'))
 
