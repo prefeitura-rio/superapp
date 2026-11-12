@@ -187,7 +187,7 @@ describe.each(SCREENS)('Menu global na tela $name', s => {
     ['visitante', VISITOR],
     ['cidadão logado', CITIZEN],
   ])(
-    '%s: Menu → Outros → Termos de uso leva à lista e fecha o menu',
+    '%s: Menu → Termos de uso e política de privacidade leva à lista e fecha o menu',
     async (_state, body) => {
       const user = userEvent.setup()
       respondHeader(body)
@@ -199,13 +199,13 @@ describe.each(SCREENS)('Menu global na tela $name', s => {
         })
       )
       const menu = await screen.findByRole('dialog', { name: 'Menu' })
-      await user.click(within(menu).getByRole('button', { name: 'Outros' }))
-
-      const termos = within(menu).getByRole('link', { name: 'Termos de uso' })
+      const termos = within(menu).getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
       expect(termos).toHaveAttribute('href', '/termos-de-uso')
-      // Termos e Política de Privacidade são um documento só.
+      // Termos e Política de Privacidade são um documento só: um item só.
       expect(
-        within(menu).queryByRole('link', { name: 'Política de Privacidade' })
+        within(menu).queryByRole('link', { name: /^Política de Privacidade/ })
       ).not.toBeInTheDocument()
 
       await user.click(termos)

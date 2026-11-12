@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import type { GlobalMenuEntry } from '../global-menu'
+import type { GlobalMenuEntry, GlobalMenuLink } from '../global-menu'
 
 /**
  * `ENTRIES` é avaliado na carga do módulo (as feature flags são constantes de
@@ -7,6 +7,11 @@ import type { GlobalMenuEntry } from '../global-menu'
  */
 async function carregarMenu(env: Record<string, string> = {}) {
   vi.resetModules()
+  vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+  vi.stubEnv(
+    'NEXT_PUBLIC_TICKET_FORM_BASE_URL',
+    'https://1746.example/protocolo'
+  )
   for (const [chave, valor] of Object.entries(env)) {
     vi.stubEnv(chave, valor)
   }
@@ -24,152 +29,182 @@ function itensDaSecao(entradas: GlobalMenuEntry[], id: string) {
   return secao.items.map(i => i.id)
 }
 
+function item(
+  entradas: GlobalMenuEntry[],
+  id: string
+): GlobalMenuLink | undefined {
+  for (const entrada of entradas) {
+    if (entrada.id === id) return entrada
+    if (entrada.kind === 'section') {
+      const achado = entrada.items.find(i => i.id === id)
+      if (achado) return achado
+    }
+  }
+  return undefined
+}
+
 afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('buildGlobalMenu', () => {
-  describe('menu deslogado', () => {
-    test('remove os itens que exigem login em vez de desabilitá-los', async () => {
-      const buildGlobalMenu = await carregarMenu()
-      const entradas = buildGlobalMenu(false)
+/** Ordem e hierarquia do "Handoff - fluxo de menu" (Figma SuperApp). */
+describe('buildGlobalMenu — fiel ao handoff', () => {
+  test('deslogado: itens e ordem do handoff', async () => {
+    const entradas = (await carregarMenu())(false)
 
-      expect(itensDaSecao(entradas, 'oportunidades-cariocas')).toEqual([
-        'ver-cursos',
-        'ver-vagas',
-      ])
-      expect(itensDaSecao(entradas, 'outros')).not.toContain('autorizacoes')
-    })
-
-    test('Documentos continua visível, apontando para a tela de login', async () => {
-      const buildGlobalMenu = await carregarMenu()
-      const entradas = buildGlobalMenu(false)
-
-      const documentos = entradas.find(e => e.id === 'documentos')
-      expect(documentos).toBeDefined()
-      expect(documentos?.kind === 'link' && documentos.href).toBe(
-        '/autenticacao-necessaria/carteira'
-      )
-    })
-
-    test('mantém os acessos públicos', async () => {
-      const buildGlobalMenu = await carregarMenu()
-      const entradas = buildGlobalMenu(false)
-
-      expect(idsDe(entradas)).toEqual(
-        expect.arrayContaining(['home', 'servicos', 'atendimentos', 'outros'])
-      )
-      expect(itensDaSecao(entradas, 'atendimentos')).toEqual(
-        expect.arrayContaining(['consulta-protocolo', 'ouvidoria'])
-      )
-    })
+    expect(idsDe(entradas)).toEqual([
+      'servicos',
+      'documentos',
+      'oportunidades-cariocas',
+      'atendimentos',
+      'termos-de-uso',
+      'carta-de-servicos',
+      'faq',
+    ])
+    expect(itensDaSecao(entradas, 'oportunidades-cariocas')).toEqual([
+      'ver-cursos',
+      'ver-vagas',
+    ])
+    expect(itensDaSecao(entradas, 'atendimentos')).toEqual([
+      'consulta-protocolo',
+      'ouvidoria',
+      'lai',
+    ])
   })
 
-  describe('menu logado', () => {
-    test('inclui os itens restritos', async () => {
-      const buildGlobalMenu = await carregarMenu()
-      const entradas = buildGlobalMenu(true)
+  test('logado: itens e ordem do handoff', async () => {
+    const entradas = (await carregarMenu())(true)
 
-      const documentos = entradas.find(e => e.id === 'documentos')
-      expect(documentos?.kind === 'link' && documentos.href).toBe('/carteira')
-      expect(itensDaSecao(entradas, 'oportunidades-cariocas')).toEqual([
-        'ver-cursos',
-        'meus-cursos',
-        'certificados',
-        'ver-vagas',
-        'minhas-candidaturas',
-        'meu-curriculo',
-      ])
-      expect(itensDaSecao(entradas, 'outros')).toContain('autorizacoes')
-    })
+    expect(idsDe(entradas)).toEqual([
+      'servicos',
+      'documentos',
+      'oportunidades-cariocas',
+      'atendimentos',
+      'termos-de-uso',
+      'carta-de-servicos',
+      'faq',
+      'meu-perfil',
+    ])
+    expect(itensDaSecao(entradas, 'oportunidades-cariocas')).toEqual([
+      'ver-cursos',
+      'meus-cursos',
+      'certificados',
+      'ver-vagas',
+      'minhas-candidaturas',
+      'meu-curriculo',
+    ])
+    expect(itensDaSecao(entradas, 'atendimentos')).toEqual([
+      'minhas-solicitacoes',
+      'ouvidoria',
+      'lai',
+    ])
   })
 
-  describe('destinos ainda não definidos pelo produto', () => {
-    test('não renderiza itens sem href, logado ou não', async () => {
-      const buildGlobalMenu = await carregarMenu()
+  test('Meus cursos/certificados ficam abaixo de Ver cursos e Minhas candidaturas/currículo abaixo de Ver vagas', async () => {
+    const entradas = (await carregarMenu())(true)
 
-      for (const logado of [true, false]) {
-        const entradas = buildGlobalMenu(logado)
-        expect(itensDaSecao(entradas, 'atendimentos')).not.toContain('lai')
-        expect(itensDaSecao(entradas, 'outros')).not.toContain(
-          'carta-de-servicos'
-        )
-      }
-    })
-
-    test('mantém os destinos que já existem', async () => {
-      const buildGlobalMenu = await carregarMenu()
-      const entradas = buildGlobalMenu(false)
-
-      expect(itensDaSecao(entradas, 'outros')).toEqual(
-        expect.arrayContaining(['termos-de-uso', 'faq'])
-      )
-    })
-
-    test('Termos de uso leva à lista de Termos de uso, logado ou não', async () => {
-      const buildGlobalMenu = await carregarMenu()
-
-      for (const logado of [true, false]) {
-        const outros = buildGlobalMenu(logado).find(e => e.id === 'outros')
-        const termos =
-          outros?.kind === 'section'
-            ? outros.items.find(item => item.id === 'termos-de-uso')
-            : undefined
-        expect(termos).toMatchObject({
-          label: 'Termos de uso',
-          href: '/termos-de-uso',
-        })
-      }
-    })
-
-    test('Política de Privacidade não tem item próprio: virou parte dos Termos de uso', async () => {
-      const buildGlobalMenu = await carregarMenu()
-
-      for (const logado of [true, false]) {
-        expect(itensDaSecao(buildGlobalMenu(logado), 'outros')).not.toContain(
-          'politica-de-privacidade'
-        )
-      }
-    })
+    expect(item(entradas, 'ver-cursos')?.level ?? 1).toBe(1)
+    expect(item(entradas, 'ver-vagas')?.level ?? 1).toBe(1)
+    for (const id of [
+      'meus-cursos',
+      'certificados',
+      'minhas-candidaturas',
+      'meu-curriculo',
+    ]) {
+      expect(item(entradas, id)?.level).toBe(2)
+    }
+    expect(item(entradas, 'certificados')?.label).toBe('Meus certificados')
   })
 
-  describe('feature flags', () => {
-    test('esconde os itens de Empregos quando só Cursos está ligado', async () => {
-      const buildGlobalMenu = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_FLAG: 'cursos',
-      })
-      const entradas = buildGlobalMenu(true)
+  test('não há Página inicial, Outros nem Autorizações', async () => {
+    const buildGlobalMenu = await carregarMenu()
 
-      expect(itensDaSecao(entradas, 'oportunidades-cariocas')).toEqual([
-        'ver-cursos',
-        'meus-cursos',
-        'certificados',
-      ])
+    for (const logado of [true, false]) {
+      const ids = idsDe(buildGlobalMenu(logado))
+      expect(ids).not.toContain('home')
+      expect(ids).not.toContain('outros')
+      expect(item(buildGlobalMenu(logado), 'autorizacoes')).toBeUndefined()
+    }
+  })
+})
+
+describe('destinos', () => {
+  test('Termos de uso e política de privacidade leva à lista de Termos de uso', async () => {
+    const buildGlobalMenu = await carregarMenu()
+
+    for (const logado of [true, false]) {
+      expect(item(buildGlobalMenu(logado), 'termos-de-uso')).toMatchObject({
+        label: 'Termos de uso e política de privacidade',
+        href: '/termos-de-uso',
+      })
+      expect(
+        item(buildGlobalMenu(logado), 'politica-de-privacidade')
+      ).toBeUndefined()
+    }
+  })
+
+  test('Documentos: carteira logado, autenticação necessária deslogado', async () => {
+    const buildGlobalMenu = await carregarMenu()
+
+    expect(item(buildGlobalMenu(true), 'documentos')?.href).toBe('/carteira')
+    expect(item(buildGlobalMenu(false), 'documentos')?.href).toBe(
+      '/autenticacao-necessaria/carteira'
+    )
+  })
+
+  test('Ouvidoria e LAI: aba de Minhas solicitações logado, formulário deslogado', async () => {
+    const buildGlobalMenu = await carregarMenu()
+
+    expect(item(buildGlobalMenu(true), 'ouvidoria')?.href).toBe(
+      '/minhas-solicitacoes?filtro=ouvidoria'
+    )
+    expect(item(buildGlobalMenu(true), 'lai')?.href).toBe(
+      '/minhas-solicitacoes?filtro=acesso-a-informacao'
+    )
+    expect(item(buildGlobalMenu(false), 'ouvidoria')?.href).toBe(
+      'https://1746.example/protocolo/ouvidoria'
+    )
+    expect(item(buildGlobalMenu(false), 'lai')?.href).toBe(
+      'https://1746.example/protocolo/lai'
+    )
+  })
+
+  test('Carta de serviços e Perguntas frequentes', async () => {
+    const entradas = (await carregarMenu())(false)
+
+    expect(item(entradas, 'carta-de-servicos')?.href).toBe('/carta-de-servicos')
+    expect(item(entradas, 'faq')?.href).toBe('/faq')
+  })
+})
+
+describe('feature flags', () => {
+  test('sem Salesforce: some Atendimentos e Carta de serviços (rotas bloqueadas no middleware)', async () => {
+    const buildGlobalMenu = await carregarMenu({
+      NEXT_PUBLIC_FEATURE_SALESFORCE: 'false',
     })
 
-    test('remove a seção inteira quando nenhum serviço dela está ligado', async () => {
-      const buildGlobalMenu = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_FLAG: 'mei',
-      })
-      const entradas = buildGlobalMenu(true)
+    for (const logado of [true, false]) {
+      const ids = idsDe(buildGlobalMenu(logado))
+      expect(ids).not.toContain('atendimentos')
+      expect(ids).not.toContain('carta-de-servicos')
+    }
+  })
 
-      expect(idsDe(entradas)).not.toContain('oportunidades-cariocas')
+  test('esconde os itens de Empregos quando só Cursos está ligado', async () => {
+    const buildGlobalMenu = await carregarMenu({
+      NEXT_PUBLIC_FEATURE_FLAG: 'cursos',
     })
 
-    test('Minhas solicitações depende da flag do Salesforce', async () => {
-      const semChamados = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_SALESFORCE: 'false',
-      })
-      expect(itensDaSecao(semChamados(true), 'atendimentos')).not.toContain(
-        'minhas-solicitacoes'
-      )
+    expect(
+      itensDaSecao(buildGlobalMenu(true), 'oportunidades-cariocas')
+    ).toEqual(['ver-cursos', 'meus-cursos', 'certificados'])
+  })
 
-      const comChamados = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_SALESFORCE: 'true',
-      })
-      expect(itensDaSecao(comChamados(true), 'atendimentos')).toContain(
-        'minhas-solicitacoes'
-      )
+  test('remove a seção inteira quando nenhum serviço dela está ligado', async () => {
+    const buildGlobalMenu = await carregarMenu({
+      NEXT_PUBLIC_FEATURE_FLAG: 'mei',
     })
+
+    expect(idsDe(buildGlobalMenu(true))).not.toContain('oportunidades-cariocas')
   })
 })

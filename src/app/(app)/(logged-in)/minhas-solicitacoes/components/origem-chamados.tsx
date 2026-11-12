@@ -40,7 +40,13 @@ function itensDe(protocolos: ProtocoloLista[]): RequestItem[] {
   )
 }
 
-export function OrigemChamados({ salesforce }: { salesforce: RequestItem[] }) {
+export function OrigemChamados({
+  salesforce,
+  filtroInicial,
+}: {
+  salesforce: RequestItem[]
+  filtroInicial?: string
+}) {
   const [origem, setOrigem] = useState<Origem>('salesforce')
   const [sgrc, setSgrc] = useState<RequestItem[] | null>(null)
   const [carregando, setCarregando] = useState(false)
@@ -88,6 +94,7 @@ export function OrigemChamados({ salesforce }: { salesforce: RequestItem[] }) {
           key={origem}
           items={itens}
           filtros={origem === 'sgrc' ? ['Todos'] : undefined}
+          filtroInicial={filtroInicial}
         />
       )}
     </div>

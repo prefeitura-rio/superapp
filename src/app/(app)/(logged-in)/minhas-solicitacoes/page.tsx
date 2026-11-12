@@ -4,11 +4,23 @@ import { listChamados } from '@/http-pref-rio-cidadao/default/default'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { OrigemChamados } from './components/origem-chamados'
-import { formatDate, mapCategoria, normalizeStatus } from './helpers'
+import {
+  filterTabFromParam,
+  formatDate,
+  mapCategoria,
+  normalizeStatus,
+} from './helpers'
 
 export const revalidate = 0
 
-export default async function MyRequestsPage() {
+interface MyRequestsPageProps {
+  searchParams?: Promise<{ filtro?: string | string[] }>
+}
+
+export default async function MyRequestsPage({
+  searchParams,
+}: MyRequestsPageProps) {
+  const filtroInicial = filterTabFromParam((await searchParams)?.filtro)
   const response = await listChamados()
   const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
 
@@ -36,7 +48,7 @@ export default async function MyRequestsPage() {
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações
         </h1>
-        <OrigemChamados salesforce={items} />
+        <OrigemChamados salesforce={items} filtroInicial={filtroInicial} />
       </div>
       <FloatNavigationWrapper />
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { EditIcon, LogoutIcon, UserIcon, XIcon } from '@/assets/icons'
+import { EditIcon, LogoutIcon, SunIcon, UserIcon, XIcon } from '@/assets/icons'
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
-import { buildGlobalMenu } from '@/constants/global-menu'
+import { type GlobalMenuLink, buildGlobalMenu } from '@/constants/global-menu'
 import { buildAuthUrl } from '@/constants/url'
 import { useHeaderData } from '@/hooks/use-header-data'
 import { useLogout } from '@/hooks/use-logout'
@@ -21,8 +21,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
+/**
+ * Medidas do handoff (componente list-item): linha de 60px, texto
+ * text/body/base (14px/20px), ícone de 24px a 12px do texto e divisória
+ * embaixo. Itens de seção têm 52px e recuo de 36px (nível 1) ou 56px
+ * (nível 2, filhos de outro item).
+ */
 const rowClassName =
-  'flex w-full items-center gap-4 border-b border-border py-5 text-left text-base font-normal text-foreground transition-colors hover:bg-secondary/60'
+  'flex w-full items-center gap-3 border-b border-border py-5 text-left text-sm leading-5 font-normal text-foreground transition-colors hover:bg-secondary/60 active:bg-secondary/60'
+
+const subRowClassName: Record<NonNullable<GlobalMenuLink['level']>, string> = {
+  1: 'py-4 pl-9',
+  2: 'py-4 pl-14',
+}
 
 interface GlobalMenuProps {
   open: boolean
@@ -76,7 +87,7 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
                 className="flex items-center gap-4 pb-6"
               >
                 <div className="relative">
-                  <Avatar className="h-16 w-16 border-2 border-white/20 bg-card">
+                  <Avatar className="size-15 border-2 border-white/20 bg-card">
                     {userAvatarUrl ? (
                       <AvatarImage
                         src={userAvatarUrl}
@@ -93,7 +104,9 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-xl text-white">{userName}</p>
+                  <p className="truncate text-xl leading-6 font-medium text-white">
+                    {userName}
+                  </p>
                   <p className="text-sm text-white/60">{formatCpf(userCpf)}</p>
                 </div>
               </Link>
@@ -117,10 +130,13 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
                   ) : (
                     <AccordionItem key={entry.id} value={entry.id}>
                       <AccordionTrigger
-                        className={cn(rowClassName, 'hover:no-underline')}
+                        className={cn(
+                          rowClassName,
+                          'rounded-none hover:no-underline'
+                        )}
                         chevronClassName="size-5 shrink-0 translate-y-0 text-primary"
                       >
-                        <span className="flex items-center gap-4">
+                        <span className="flex items-center gap-3">
                           {entry.icon}
                           {entry.label}
                         </span>
@@ -132,18 +148,21 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
                             key={item.id}
                             href={item.href ?? '#'}
                             onClick={close}
-                            className={cn(rowClassName, 'pl-10')}
+                            className={cn(
+                              rowClassName,
+                              subRowClassName[item.level ?? 1]
+                            )}
                           >
                             {item.label}
                           </Link>
                         ))}
-                        {entry.id === 'outros' && <ThemeToggleRow />}
                       </AccordionContent>
                     </AccordionItem>
                   )
                 )}
               </Accordion>
 
+              <ThemeToggleRow />
               {isLoggedIn && <LogoutRow />}
             </nav>
           </div>
@@ -161,9 +180,16 @@ function ThemeToggleRow() {
 
   return (
     <div
-      className={cn(rowClassName, 'justify-between pl-10 hover:bg-transparent')}
+      className={cn(
+        rowClassName,
+        'justify-between hover:bg-transparent active:bg-transparent'
+      )}
     >
-      <label htmlFor="global-menu-theme" className="cursor-pointer select-none">
+      <label
+        htmlFor="global-menu-theme"
+        className="flex cursor-pointer select-none items-center gap-3"
+      >
+        <SunIcon className="h-6 w-6 shrink-0 text-foreground" />
         Tema claro
       </label>
       <Switch

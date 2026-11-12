@@ -1,35 +1,43 @@
-import { PhoneIcon, ServicesIcon, WalletIcon } from '@/assets/icons'
-import { Home2Icon } from '@/assets/icons/home2-icon'
+import { PhoneIcon, ServicesIcon, UserIcon, WalletIcon } from '@/assets/icons'
+import { MessageCircleIcon } from '@/assets/icons/message-circle'
+import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import {
   isFeatureEnabled,
   isSalesforceServicesEnabled,
 } from '@/lib/feature-flags'
-import { GraduationCapIcon, StarIcon } from 'lucide-react'
+// Sem equivalente em src/assets/icons (falta no design system).
+import { FileTextIcon, GraduationCapIcon, LayersIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 /**
- * Destinos ainda não definidos pelo produto. O item só é renderizado quando
- * `href` existe, então nenhum ponto de entrada aponta para 404.
+ * Menu global (PREF-418), fiel ao handoff "Handoff - fluxo de menu" do Figma
+ * SuperApp (oficial). Um item só aparece quando tem destino para o estado de
+ * login atual, então nenhum ponto de entrada aponta para 404.
  *
- * - LAI: redirecionamento do Salesforce, PM confirmando com o Patrick.
- * - Carta de Serviços: marcada como "não desenvolver - v1" no handoff;
- *   proposta é apontar para /servicos (o catálogo já é servido pela API da
- *   Carta de Serviços), aguardando confirmação.
+ * Atendimentos e Carta de serviços seguem a flag do Salesforce, a mesma que o
+ * middleware usa para liberar essas rotas e o footer para os seus links.
  */
-const PENDING_DESTINATION = undefined
-
 export interface GlobalMenuLink {
   id: string
   label: string
-  /** Item é omitido do menu quando o destino ainda não está definido. */
+  /** Destino com login. Item é omitido quando não há destino. */
   href?: string
+  /** Exige login: some do menu deslogado (salvo `hrefWhenLoggedOut`). */
   requiresAuth?: boolean
   /**
-   * Destino alternativo para visitante. Quando presente, o item continua no
-   * menu deslogado apontando para cá, em vez de ser removido.
+   * Destino para visitante. Quando presente, o item continua no menu
+   * deslogado apontando para cá, em vez de ser removido.
    */
   hrefWhenLoggedOut?: string
+  /** Só no menu deslogado (ex.: Consulta de protocolo). */
+  onlyLoggedOut?: boolean
+  /**
+   * Recuo dentro da seção: 1 = item da seção (Ver cursos); 2 = filho de um
+   * item (Meus cursos, abaixo de Ver cursos).
+   */
+  level?: 1 | 2
 }
 
 interface GlobalMenuLeaf extends GlobalMenuLink {
@@ -49,14 +57,11 @@ export type GlobalMenuEntry = GlobalMenuLeaf | GlobalMenuSection
 
 const iconClassName = 'h-6 w-6 shrink-0 text-foreground'
 
+const cursos = isFeatureEnabled('cursos')
+const empregos = isFeatureEnabled('empregos')
+const salesforce = isSalesforceServicesEnabled()
+
 const ENTRIES: GlobalMenuEntry[] = [
-  {
-    kind: 'link',
-    id: 'home',
-    label: 'Página inicial',
-    href: '/',
-    icon: <Home2Icon className={iconClassName} />,
-  },
   {
     kind: 'link',
     id: 'servicos',
@@ -82,44 +87,40 @@ const ENTRIES: GlobalMenuEntry[] = [
       {
         id: 'ver-cursos',
         label: 'Ver cursos',
-        href: isFeatureEnabled('cursos') ? '/servicos/cursos' : undefined,
+        href: cursos ? '/servicos/cursos' : undefined,
       },
       {
         id: 'meus-cursos',
         label: 'Meus cursos',
-        href: isFeatureEnabled('cursos')
-          ? '/servicos/cursos/meus-cursos'
-          : undefined,
+        href: cursos ? '/servicos/cursos/meus-cursos' : undefined,
         requiresAuth: true,
+        level: 2,
       },
       {
         id: 'certificados',
-        label: 'Certificados',
-        href: isFeatureEnabled('cursos')
-          ? '/servicos/cursos/certificados'
-          : undefined,
+        label: 'Meus certificados',
+        href: cursos ? '/servicos/cursos/certificados' : undefined,
         requiresAuth: true,
+        level: 2,
       },
       {
         id: 'ver-vagas',
         label: 'Ver vagas',
-        href: isFeatureEnabled('empregos') ? '/servicos/trabalho' : undefined,
+        href: empregos ? '/servicos/trabalho' : undefined,
       },
       {
         id: 'minhas-candidaturas',
         label: 'Minhas candidaturas',
-        href: isFeatureEnabled('empregos')
-          ? '/servicos/trabalho/minhas-candidaturas'
-          : undefined,
+        href: empregos ? '/servicos/trabalho/minhas-candidaturas' : undefined,
         requiresAuth: true,
+        level: 2,
       },
       {
         id: 'meu-curriculo',
         label: 'Meu currículo',
-        href: isFeatureEnabled('empregos')
-          ? '/servicos/trabalho/curriculo'
-          : undefined,
+        href: empregos ? '/servicos/trabalho/curriculo' : undefined,
         requiresAuth: true,
+        level: 2,
       },
     ],
   },
@@ -129,71 +130,89 @@ const ENTRIES: GlobalMenuEntry[] = [
     label: 'Atendimentos',
     icon: <PhoneIcon className={iconClassName} />,
     items: [
+      // Logado: tudo vive em Minhas solicitações (Ouvidoria e LAI abrem a aba
+      // correspondente). Deslogado: consulta por protocolo e os formulários.
       {
         id: 'minhas-solicitacoes',
         label: 'Minhas solicitações',
-        href: isSalesforceServicesEnabled()
-          ? '/minhas-solicitacoes'
-          : undefined,
+        href: salesforce ? '/minhas-solicitacoes' : undefined,
         requiresAuth: true,
       },
       {
         id: 'consulta-protocolo',
         label: 'Consulta de protocolo',
-        href: '/consulta-protocolo',
+        href: salesforce ? '/consulta-protocolo' : undefined,
+        onlyLoggedOut: true,
       },
-      { id: 'ouvidoria', label: 'Ouvidoria', href: '/ouvidoria' },
+      {
+        id: 'ouvidoria',
+        label: 'Ouvidoria',
+        href: salesforce ? '/minhas-solicitacoes?filtro=ouvidoria' : undefined,
+        requiresAuth: true,
+        hrefWhenLoggedOut: salesforce
+          ? `${TICKET_FORM_BASE_URL}/ouvidoria`
+          : undefined,
+      },
       {
         id: 'lai',
-        label: 'Lei de Acesso a Informação',
-        href: PENDING_DESTINATION,
+        label: 'Lei de Acesso à Informação',
+        href: salesforce
+          ? '/minhas-solicitacoes?filtro=acesso-a-informacao'
+          : undefined,
+        requiresAuth: true,
+        hrefWhenLoggedOut: salesforce
+          ? `${TICKET_FORM_BASE_URL}/lai`
+          : undefined,
       },
     ],
   },
   {
-    kind: 'section',
-    id: 'outros',
-    label: 'Outros',
-    icon: <StarIcon className={iconClassName} />,
-    items: [
-      // Termos de uso e Política de Privacidade são um documento só: a lista
-      // de Termos de uso por plataforma (PREF-653).
-      {
-        id: 'termos-de-uso',
-        label: 'Termos de uso',
-        href: TERMOS_DE_USO_ROUTE,
-      },
-      {
-        id: 'carta-de-servicos',
-        label: 'Carta de Serviços',
-        href: PENDING_DESTINATION,
-      },
-      { id: 'faq', label: 'Perguntas frequentes', href: '/faq' },
-      {
-        id: 'autorizacoes',
-        label: 'Autorizações',
-        href: '/meu-perfil/autorizacoes',
-        requiresAuth: true,
-      },
-    ],
+    kind: 'link',
+    id: 'termos-de-uso',
+    // Termos de uso e Política de Privacidade são um documento só (PREF-653).
+    label: 'Termos de uso e política de privacidade',
+    href: TERMOS_DE_USO_ROUTE,
+    icon: <FileTextIcon className={iconClassName} />,
+  },
+  {
+    kind: 'link',
+    id: 'carta-de-servicos',
+    label: 'Carta de serviços',
+    href: salesforce ? CARTA_DE_SERVICOS_ROUTE : undefined,
+    icon: <LayersIcon className={iconClassName} />,
+  },
+  {
+    kind: 'link',
+    id: 'faq',
+    label: 'Perguntas frequentes',
+    href: '/faq',
+    icon: <MessageCircleIcon className={iconClassName} />,
+  },
+  {
+    kind: 'link',
+    id: 'meu-perfil',
+    label: 'Meu perfil',
+    href: '/meu-perfil',
+    requiresAuth: true,
+    icon: <UserIcon className={iconClassName} />,
   },
 ]
 
 /**
  * Destino efetivo do item para o estado de autenticação atual. Retorna
- * `undefined` quando o item não deve aparecer — seja porque o produto ainda não
- * definiu o destino, seja porque exige login e não há alternativa para visitante.
+ * `undefined` quando o item não deve aparecer — seja porque não há destino,
+ * seja porque não se aplica a quem está (ou não está) logado.
  */
 function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
-  if (isLoggedIn) return item.href
+  if (isLoggedIn) return item.onlyLoggedOut ? undefined : item.href
   if (item.hrefWhenLoggedOut) return item.hrefWhenLoggedOut
   return item.requiresAuth ? undefined : item.href
 }
 
 /**
- * Menu deslogado só contém o que o usuário consegue acessar sem login: os itens
- * restritos são removidos (não desabilitados), conforme o handoff. A exceção é
- * Documentos, que continua visível e leva à tela de autenticação necessária.
+ * Menu deslogado só contém o que o visitante consegue acessar: os itens
+ * restritos são removidos (não desabilitados), conforme o handoff. Documentos,
+ * Ouvidoria e LAI continuam, com o destino próprio para visitante.
  */
 export function buildGlobalMenu(isLoggedIn: boolean): GlobalMenuEntry[] {
   return ENTRIES.reduce<GlobalMenuEntry[]>((entries, entry) => {

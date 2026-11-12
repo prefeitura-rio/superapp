@@ -114,13 +114,40 @@ describe('GlobalMenu', () => {
     ).toBeDisabled()
   })
 
-  it('Outros → Termos de uso aponta para a lista de Termos de uso', async () => {
+  it('Termos de uso e política de privacidade é item de primeiro nível e leva à lista', async () => {
     respondHeader(VISITOR)
-    const { user, menu } = await openMenu()
+    const { menu } = await openMenu()
 
-    await user.click(within(menu).getByRole('button', { name: 'Outros' }))
     expect(
-      within(menu).getByRole('link', { name: 'Termos de uso' })
+      within(menu).getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
     ).toHaveAttribute('href', '/termos-de-uso')
+  })
+
+  it('logado: subitens com o recuo do handoff (36px e 56px) e Tema claro + Sair no fim', async () => {
+    respondHeader(CITIZEN)
+    const { user, menu } = await openMenu()
+    await within(menu).findByText('Maria da Silva')
+
+    await user.click(
+      within(menu).getByRole('button', { name: 'Oportunidades Cariocas' })
+    )
+    expect(within(menu).getByRole('link', { name: 'Ver cursos' })).toHaveClass(
+      'pl-9'
+    )
+    expect(within(menu).getByRole('link', { name: 'Meus cursos' })).toHaveClass(
+      'pl-14'
+    )
+    expect(
+      within(menu).getByRole('link', { name: 'Meus certificados' })
+    ).toHaveClass('pl-14')
+
+    const rows = within(menu).getAllByRole('link')
+    expect(rows.at(-1)).toHaveTextContent('Meu perfil')
+    expect(within(menu).getByLabelText('Tema claro')).toBeInTheDocument()
+    expect(
+      within(menu).getByRole('button', { name: 'Sair' })
+    ).toBeInTheDocument()
   })
 })

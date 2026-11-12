@@ -58,11 +58,15 @@ function EmptyState({ filtered }: { filtered: boolean }) {
 export function RequestsList({
   items,
   filtros = FILTER_TABS,
+  filtroInicial,
 }: {
   items: RequestItem[]
   filtros?: readonly string[]
+  filtroInicial?: string
 }) {
-  const [activeFilter, setActiveFilter] = useState('Todos')
+  const [activeFilter, setActiveFilter] = useState(
+    filtroInicial && filtros.includes(filtroInicial) ? filtroInicial : 'Todos'
+  )
   const [search, setSearch] = useState('')
 
   const filtered = items.filter(r => {

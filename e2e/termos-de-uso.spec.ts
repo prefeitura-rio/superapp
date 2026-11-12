@@ -918,12 +918,14 @@ async function openTermosFromGlobalMenu(page: Page) {
     .click()
   const menu = page.getByRole('dialog', { name: 'Menu' })
   await expect(menu).toBeVisible()
-  await menu.getByRole('button', { name: 'Outros' }).click()
-  const termos = menu.getByRole('link', { name: 'Termos de uso' })
+  // Item de primeiro nível no handoff: Termos de uso e Política de
+  // Privacidade são um documento só.
+  const termos = menu.getByRole('link', {
+    name: 'Termos de uso e política de privacidade',
+  })
   await expect(termos).toHaveAttribute('href', '/termos-de-uso')
-  // Termos de uso e Política de Privacidade são um documento só.
   await expect(
-    menu.getByRole('link', { name: 'Política de Privacidade' })
+    menu.getByRole('link', { name: /^Política de Privacidade/ })
   ).toHaveCount(0)
   await termos.click()
   await page.waitForURL(url => url.pathname === '/termos-de-uso')

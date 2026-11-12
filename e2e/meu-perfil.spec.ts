@@ -60,7 +60,8 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       '/meu-perfil/endereco'
     )
 
-    // Autorizações, Configurações, FAQ e Sair migraram para o menu global
+    // Handoff: Dados pessoais só tem Meus dados e Endereço; FAQ e Sair
+    // migraram para o menu global, Configurações virou o toggle de tema.
     await expect(page.getByRole('link', { name: 'Autorizações' })).toHaveCount(
       0
     )
@@ -70,17 +71,16 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await expect(page.getByRole('link', { name: 'FAQ' })).toHaveCount(0)
   })
 
-  test('Autorizações e Sair vivem no menu global', async ({ page }) => {
+  test('Meu perfil e Sair vivem no menu global', async ({ page }) => {
     await page.goto('/meu-perfil')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
-    await page.getByRole('button', { name: 'Outros' }).click()
     await expect(
-      page.getByRole('link', { name: 'Autorizações' })
-    ).toHaveAttribute('href', '/meu-perfil/autorizacoes')
+      page.getByRole('dialog').getByRole('link', { name: 'Meu perfil' })
+    ).toHaveAttribute('href', '/meu-perfil')
 
     // Intercepta o endpoint de logout para evitar redirecionamento externo.
     // 204 numa navegação mantém a página atual.

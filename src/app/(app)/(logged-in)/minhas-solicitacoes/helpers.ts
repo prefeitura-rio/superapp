@@ -40,3 +40,22 @@ export function formatDate(iso: string | undefined | null): string {
   const year = String(d.getFullYear()).slice(-2)
   return `${day} ${month} ${year}`
 }
+
+/**
+ * Aba aberta por `?filtro=` (o menu global leva Ouvidoria e Lei de Acesso à
+ * Informação direto para a aba correspondente).
+ */
+const FILTRO_PARAM_TO_TAB: Record<string, string> = {
+  servicos: 'Serviços',
+  ouvidoria: 'Ouvidoria',
+  'acesso-a-informacao': 'Acesso à informação',
+}
+
+export function filterTabFromParam(
+  value: string | string[] | undefined
+): string | undefined {
+  const param = Array.isArray(value) ? value[0] : value
+  return param && Object.hasOwn(FILTRO_PARAM_TO_TAB, param)
+    ? FILTRO_PARAM_TO_TAB[param]
+    : undefined
+}

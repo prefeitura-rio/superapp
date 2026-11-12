@@ -480,7 +480,7 @@ test.describe('Cursos — menu global (autenticado)', () => {
       page.getByRole('link', { name: 'Meus cursos' })
     ).toHaveAttribute('href', '/servicos/cursos/meus-cursos')
     await expect(
-      page.getByRole('link', { name: 'Certificados' })
+      page.getByRole('link', { name: 'Meus certificados' })
     ).toHaveAttribute('href', '/servicos/cursos/certificados')
   })
 
