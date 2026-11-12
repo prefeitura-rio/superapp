@@ -1,6 +1,9 @@
 import { getChamadoPublico } from '@/http-pref-rio-chamados-publico/default/default'
 import { detalheSgrcMock, ehProtocoloSgrcMock } from '@/lib/chamados/mock-sgrc'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import {
+  isSalesforceServicesEnabled,
+  isSgrcHistoryMockEnabled,
+} from '@/lib/feature-flags'
 import { IS_MOCK_ENABLED, MOCK_PROTOCOLS, MOCK_PUBLIC } from '@/mocks/chamados'
 import { NextResponse } from 'next/server'
 
@@ -14,7 +17,7 @@ export async function GET(
 
   const { protocolo } = await params
 
-  if (ehProtocoloSgrcMock(protocolo)) {
+  if (isSgrcHistoryMockEnabled() && ehProtocoloSgrcMock(protocolo)) {
     const detalhe = detalheSgrcMock(protocolo, 'publico')
     const resposta = NextResponse.json(detalhe ?? {}, {
       status: detalhe ? 200 : 404,

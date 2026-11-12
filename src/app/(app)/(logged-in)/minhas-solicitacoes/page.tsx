@@ -1,6 +1,7 @@
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
+import { isSgrcHistoryMockEnabled } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { OrigemChamados } from './components/origem-chamados'
@@ -36,7 +37,10 @@ export default async function MyRequestsPage() {
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações
         </h1>
-        <OrigemChamados salesforce={items} />
+        <OrigemChamados
+          salesforce={items}
+          historicoSgrc={isSgrcHistoryMockEnabled()}
+        />
       </div>
       <FloatNavigationWrapper />
     </div>
