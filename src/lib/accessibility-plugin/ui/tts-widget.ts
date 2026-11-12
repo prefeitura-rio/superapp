@@ -1,9 +1,15 @@
-import { TTS } from '../features/tts'
+import {
+  TTS_PAUSE_ATTR,
+  renderTTSPauseButton,
+  toggleTTSPause,
+  ttsLabel,
+} from './tts-controls'
 
 export const WIDGET_ID = 'a11y-tts-widget'
 
-const ICON_PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
-const ICON_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+/** Diferencia os nomes acessíveis dos botões do widget dos do painel. */
+const WIDGET_CONTEXT = 'controle flutuante'
+
 const ICON_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`
 
 type WidgetCallbacks = {
@@ -20,14 +26,14 @@ export function createTTSWidget(callbacks: WidgetCallbacks): HTMLElement {
   playBtn.id = 'a11y-tts-play'
   playBtn.className = 'a11y-tts-btn'
   playBtn.type = 'button'
-  playBtn.setAttribute('aria-label', 'Pausar leitura')
-  playBtn.innerHTML = ICON_PAUSE
+  playBtn.setAttribute(TTS_PAUSE_ATTR, WIDGET_CONTEXT)
+  renderTTSPauseButton(playBtn)
 
   const stopBtn = document.createElement('button')
   stopBtn.id = 'a11y-tts-stop'
   stopBtn.className = 'a11y-tts-btn'
   stopBtn.type = 'button'
-  stopBtn.setAttribute('aria-label', 'Parar leitura')
+  stopBtn.setAttribute('aria-label', ttsLabel('Parar leitura', WIDGET_CONTEXT))
   stopBtn.innerHTML = ICON_STOP
 
   const progress = document.createElement('span')
@@ -37,15 +43,7 @@ export function createTTSWidget(callbacks: WidgetCallbacks): HTMLElement {
   progress.setAttribute('aria-atomic', 'true')
 
   playBtn.addEventListener('click', () => {
-    if (TTS.isPaused()) {
-      TTS.resume()
-      playBtn.innerHTML = ICON_PAUSE
-      playBtn.setAttribute('aria-label', 'Pausar leitura')
-    } else {
-      TTS.pause()
-      playBtn.innerHTML = ICON_PLAY
-      playBtn.setAttribute('aria-label', 'Retomar leitura')
-    }
+    toggleTTSPause()
   })
 
   stopBtn.addEventListener('click', () => {
