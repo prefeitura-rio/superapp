@@ -26,6 +26,7 @@ async function fetchBancoCurriculos(): Promise<BancoCurriculosStatus> {
 async function fetchCandidaturas(): Promise<{
   hasCandidaturas: boolean
   total?: number
+  atualizacoes?: number
 }> {
   const res = await fetch('/api/user/empregos/candidaturas', {
     cache: 'no-store',
@@ -50,8 +51,8 @@ function AreaCandidatoSkeleton() {
   return (
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-2 gap-2">
-        <Skeleton className="h-28 rounded-2xl" />
-        <Skeleton className="h-28 rounded-2xl" />
+        <Skeleton className="h-27 rounded-2xl" />
+        <Skeleton className="h-27 rounded-2xl" />
       </div>
       <Skeleton className="h-16 rounded-2xl" />
     </div>
@@ -107,10 +108,13 @@ export function AreaCandidato() {
             status ? subtituloMeuCurriculo(status) : 'Termine de preencher'
           }
         />
-        <MinhasCandidaturasCard total={candidaturas.data?.total ?? 0} />
+        <MinhasCandidaturasCard
+          total={candidaturas.data?.total ?? 0}
+          atualizacoes={candidaturas.data?.atualizacoes ?? 0}
+        />
       </div>
       <BancoCurriculosCard
-        temCurriculo={status?.temCurriculo ?? false}
+        curriculoCompleto={status?.curriculoCompleto ?? false}
         disponivel={status?.disponivel ?? false}
         salvando={alterar.isPending}
         onAlterar={disponivel => alterar.mutate(disponivel)}

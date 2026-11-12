@@ -1,7 +1,6 @@
 'use client'
 
 import MainHeader from '@/app/components/main-header'
-import { SearchIcon } from '@/assets/icons'
 import { useAuthHeader } from '@/providers/auth-header-provider'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,8 +16,6 @@ interface OportunidadesSubHeaderProps {
   logoHref: string
   showSearchIcon?: boolean
   searchUrl?: string
-  /** Botão de busca ao lado do logo do Oportunidades Cariocas. */
-  searchButtonUrl?: string
 }
 
 export function OportunidadesSubHeader({
@@ -26,7 +23,6 @@ export function OportunidadesSubHeader({
   logoHref,
   showSearchIcon,
   searchUrl,
-  searchButtonUrl,
 }: OportunidadesSubHeaderProps) {
   const { data, isLoading } = useAuthHeader()
   const pathname = usePathname()
@@ -57,7 +53,7 @@ export function OportunidadesSubHeader({
             'linear-gradient(180deg, var(--card) 0%, var(--card) 100%)',
         }}
       >
-        <div className="mx-auto flex max-w-4xl items-center justify-between md:px-4">
+        <div className="mx-auto md:px-4 max-w-4xl">
           <Link href={logoHref}>
             <Image
               src={LOGO_LIGHT}
@@ -76,15 +72,6 @@ export function OportunidadesSubHeader({
               priority
             />
           </Link>
-          {searchButtonUrl && (
-            <Link
-              href={searchButtonUrl}
-              aria-label="Buscar oportunidades"
-              className="flex size-12 shrink-0 items-center justify-center rounded-full bg-background transition-colors hover:bg-secondary"
-            >
-              <SearchIcon className="size-6 text-foreground" />
-            </Link>
-          )}
         </div>
       </nav>
     </div>

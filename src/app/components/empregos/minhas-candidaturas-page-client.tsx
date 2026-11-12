@@ -4,17 +4,29 @@ import { MinhasCandidaturasContent } from '@/app/(app)/(logged-in-out)/servicos/
 import type { CandidaturaCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-utils'
 import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
-async function fetchCandidaturas(): Promise<{
+interface CandidaturasResponse {
   candidaturas: CandidaturaCardData[]
   hasCandidaturas: boolean
-}> {
+  /** Candidaturas com mudança de status ou de etapa ainda não vista. */
+  atualizacoes?: number
+}
+
+async function fetchCandidaturas(): Promise<CandidaturasResponse> {
   const res = await fetch('/api/user/empregos/candidaturas', {
     cache: 'no-store',
   })
   if (!res.ok) throw new Error('Failed to fetch candidaturas')
   return res.json()
+}
+
+async function marcarAtualizacoesVistas(): Promise<void> {
+  const res = await fetch('/api/user/empregos/candidaturas/visualizar', {
+    method: 'PUT',
+  })
+  if (!res.ok) throw new Error('Failed to mark candidaturas as seen')
 }
 
 function MinhasCandidaturasSkeleton() {
@@ -43,11 +55,27 @@ function MinhasCandidaturasSkeleton() {
 }
 
 export function MinhasCandidaturasPageClient() {
+  const queryClient = useQueryClient()
   const { data, isLoading, isError } = useQuery({
     queryKey: ['candidaturas'],
     queryFn: fetchCandidaturas,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Abrir a lista é ver as atualizações: zera a contagem do card "Minhas
+  // candidaturas". Se falhar, a contagem só continua lá até a próxima visita.
+  const { mutate: marcarVistas } = useMutation({
+    mutationFn: marcarAtualizacoesVistas,
+    onSuccess: () => {
+      queryClient.setQueryData<CandidaturasResponse>(['candidaturas'], atual =>
+        atual ? { ...atual, atualizacoes: 0 } : atual
+      )
+    },
+  })
+  const atualizacoes = data?.atualizacoes ?? 0
+  useEffect(() => {
+    if (atualizacoes > 0) marcarVistas()
+  }, [atualizacoes, marcarVistas])
 
   if (isLoading) return <MinhasCandidaturasSkeleton />
 

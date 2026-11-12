@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   subtituloBancoCurriculos,
   subtituloMeuCurriculo,
+  subtituloMinhasCandidaturas,
 } from '../area-candidato-utils'
 
 const agora = new Date(2026, 9, 22, 12, 0)
@@ -66,22 +67,33 @@ describe('subtituloMeuCurriculo', () => {
 })
 
 describe('subtituloBancoCurriculos', () => {
-  test('sem currículo', () => {
+  // O banco segue a regra das vagas: só entra o currículo com o mínimo,
+  // mesmo que a escolha salva seja ficar disponível.
+  test('currículo sem o mínimo', () => {
     expect(
-      subtituloBancoCurriculos({ temCurriculo: false, disponivel: false })
-    ).toBe('Disponível depois de criar o currículo')
+      subtituloBancoCurriculos({ curriculoCompleto: false, disponivel: true })
+    ).toBe('Disponível com o currículo atualizado')
   })
 
   test('desativado', () => {
     expect(
-      subtituloBancoCurriculos({ temCurriculo: true, disponivel: false })
-    ).toBe('Recrutadores não podem ver seu currículo')
+      subtituloBancoCurriculos({ curriculoCompleto: true, disponivel: false })
+    ).toBe('Recrutadores não podem consultar seu currículo')
   })
 
-  // O banco mostra o que a pessoa conseguiu salvar, completo ou não.
   test('ativado', () => {
     expect(
-      subtituloBancoCurriculos({ temCurriculo: true, disponivel: true })
-    ).toBe('Recrutadores podem ver seu currículo')
+      subtituloBancoCurriculos({ curriculoCompleto: true, disponivel: true })
+    ).toBe('Recrutadores podem consultar seu currículo')
+  })
+})
+
+describe('subtituloMinhasCandidaturas', () => {
+  test.each([
+    [0, 'Sem atualizações'],
+    [1, '1 atualização'],
+    [3, '3 atualizações'],
+  ])('%i → %s', (atualizacoes, esperado) => {
+    expect(subtituloMinhasCandidaturas(atualizacoes)).toBe(esperado)
   })
 })

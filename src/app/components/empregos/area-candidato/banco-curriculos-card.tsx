@@ -8,18 +8,20 @@ import { useState } from 'react'
 import { subtituloBancoCurriculos } from './area-candidato-utils'
 
 interface BancoCurriculosCardProps {
-  temCurriculo: boolean
+  /** Currículo com o mínimo para se candidatar, que libera o banco. */
+  curriculoCompleto: boolean
   disponivel: boolean
   salvando: boolean
   onAlterar: (disponivel: boolean) => void
 }
 
 /**
- * Controle do banco de currículos: quem já salvou alguma parte do currículo
- * escolhe se os recrutadores podem consultá-lo. Desativar pede confirmação.
+ * Controle do banco de currículos. Segue a regra das vagas: só quem tem o
+ * currículo mínimo escolhe se os recrutadores podem consultá-lo; sem ele, o
+ * controle fica bloqueado e desligado. Desativar pede confirmação.
  */
 export function BancoCurriculosCard({
-  temCurriculo,
+  curriculoCompleto,
   disponivel,
   salvando,
   onAlterar,
@@ -41,26 +43,33 @@ export function BancoCurriculosCard({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 rounded-2xl bg-background px-4 py-4">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4">
         <label htmlFor="banco-curriculos-switch" className="min-w-0 flex-1">
           <span
             className={cn(
-              'block text-sm font-medium',
-              temCurriculo ? 'text-foreground' : 'text-foreground-light'
+              'block text-sm font-medium leading-4',
+              curriculoCompleto ? 'text-foreground' : 'text-muted-foreground'
             )}
           >
             Banco de Currículos
           </span>
-          <span className="mt-0.5 block text-xs leading-4 text-foreground-light">
-            {subtituloBancoCurriculos({ temCurriculo, disponivel })}
+          <span
+            className={cn(
+              'block text-xs leading-4',
+              curriculoCompleto
+                ? 'text-foreground-light'
+                : 'text-muted-foreground'
+            )}
+          >
+            {subtituloBancoCurriculos({ curriculoCompleto, disponivel })}
           </span>
         </label>
         <Switch
           id="banco-curriculos-switch"
-          checked={temCurriculo && disponivel}
+          checked={curriculoCompleto && disponivel}
           onCheckedChange={handleChange}
-          disabled={!temCurriculo || salvando}
-          className="large-switch data-[state=checked]:bg-primary data-[state=unchecked]:bg-foreground-light/40"
+          disabled={!curriculoCompleto || salvando}
+          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-foreground-light/60"
         />
       </div>
 

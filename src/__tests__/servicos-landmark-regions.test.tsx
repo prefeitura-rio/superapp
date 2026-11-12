@@ -119,32 +119,21 @@ describe('DEV-402 — conteúdo de /servicos/(cursos|trabalho) dentro de landmar
     }
   )
 
-  it('/servicos/cursos põe a busca e o seletor de tipo dentro do <main>', () => {
-    renderListing('/servicos/cursos')
+  it.each(['/servicos/cursos', '/servicos/trabalho'])(
+    '%s põe a busca e o seletor de tipo dentro do <main>',
+    route => {
+      renderListing(route)
 
-    const main = screen.getByRole('main')
-    expect(within(main).getByText('O que você precisa?')).toBeInTheDocument()
-    expect(
-      within(main).getByRole('link', { name: 'Cursos' })
-    ).toBeInTheDocument()
-    expect(
-      within(main).getByRole('link', { name: 'Trabalho' })
-    ).toBeInTheDocument()
-  })
-
-  it('/servicos/trabalho põe o seletor no <main> e a lupa no nav da Faixa 2', () => {
-    renderListing('/servicos/trabalho')
-
-    const main = screen.getByRole('main')
-    expect(
-      within(main).getByRole('link', { name: 'Cursos' })
-    ).toBeInTheDocument()
-    expect(
-      within(
-        screen.getByRole('navigation', { name: 'Oportunidades Cariocas' })
-      ).getByRole('link', { name: 'Buscar oportunidades' })
-    ).toHaveAttribute('href', '/busca?tipo=empregos')
-  })
+      const main = screen.getByRole('main')
+      expect(within(main).getByText('O que você precisa?')).toBeInTheDocument()
+      expect(
+        within(main).getByRole('link', { name: 'Cursos' })
+      ).toBeInTheDocument()
+      expect(
+        within(main).getByRole('link', { name: 'Trabalho' })
+      ).toBeInTheDocument()
+    }
+  )
 
   it.each(['/servicos/cursos', '/servicos/trabalho'])(
     '%s mantém um único <main> e um único banner',
