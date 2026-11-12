@@ -81,7 +81,11 @@ test.describe('Home (público)', () => {
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
     await expect(page.getByText('IPTU 2026')).toBeVisible()
-    await expect(page.getByText('CADRio Agendamento')).toBeVisible()
+    // Com NEXT_PUBLIC_FEATURE_SALESFORCE os demais cards vêm da curadoria da
+    // app-catalogo; o de Dívida Ativa é fixo nos dois modos.
+    await expect(
+      page.getByRole('heading', { name: 'Dívida Ativa: Débitos de IPTU' })
+    ).toBeVisible()
   })
 
   test('exibe múltiplas categorias na grade de serviços', async ({ page }) => {
