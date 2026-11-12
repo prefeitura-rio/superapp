@@ -6,7 +6,7 @@ import { useState } from 'react'
 import type { RequestStatus } from '../types'
 import { StatusBadge } from './status-badge'
 
-interface RequestItem {
+export interface RequestItem {
   protocolo: string
   codigoOs: string
   servico: string
@@ -55,7 +55,13 @@ function EmptyState({ filtered }: { filtered: boolean }) {
   )
 }
 
-export function RequestsList({ items }: { items: RequestItem[] }) {
+export function RequestsList({
+  items,
+  filtros = FILTER_TABS,
+}: {
+  items: RequestItem[]
+  filtros?: readonly string[]
+}) {
   const [activeFilter, setActiveFilter] = useState('Todos')
   const [search, setSearch] = useState('')
 
@@ -80,7 +86,7 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
       <div className="flex flex-col gap-2">
         <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
           <div className="flex gap-2 w-max">
-            {FILTER_TABS.map(tab => (
+            {filtros.map(tab => (
               <button
                 key={tab}
                 type="button"
