@@ -104,7 +104,9 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
   test('GET /api/chamados repassa o status sem lançar quando o corpo vem vazio', async () => {
     server.use(http.get(CHAMADOS_URL, () => emptyJsonResponse(401)))
 
-    const response = await listChamadosRoute()
+    const response = await listChamadosRoute(
+      new Request('http://localhost/api/chamados')
+    )
 
     expect(response.status).toBe(401)
     expect(await response.json()).toBeNull()
@@ -115,7 +117,9 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
       http.get(CHAMADOS_URL, () => new HttpResponse('', { status: 500 }))
     )
 
-    const response = await listChamadosRoute()
+    const response = await listChamadosRoute(
+      new Request('http://localhost/api/chamados')
+    )
 
     expect(response.status).toBe(500)
     expect(await response.json()).toBeNull()
