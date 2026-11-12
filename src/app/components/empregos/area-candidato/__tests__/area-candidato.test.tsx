@@ -119,7 +119,11 @@ describe('AreaCandidato', () => {
     expect(
       screen.getByRole('link', { name: /Minhas candidaturas/ })
     ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
-    expect(await screen.findByLabelText('3 candidaturas')).toBeInTheDocument()
+    // A contagem usa o Badge do design system.
+    expect(await screen.findByLabelText('3 candidaturas')).toHaveAttribute(
+      'data-slot',
+      'badge'
+    )
     expect(screen.getByText('Sem atualizações')).toBeInTheDocument()
   })
 

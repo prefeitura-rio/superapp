@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -32,13 +33,13 @@ export function MinhasCandidaturasCard({
           className="h-8.5 w-9.5"
         />
         {total > 0 && (
-          <span
+          <Badge
             role="img"
             aria-label={`${total} ${total === 1 ? 'candidatura' : 'candidaturas'}`}
-            className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#3E5782] px-1.5 text-xs leading-4 text-background dark:text-white"
+            className="h-5 min-w-5 bg-[#3E5782] px-1.5 py-0 leading-4 text-background dark:text-white"
           >
             {total}
-          </span>
+          </Badge>
         )}
       </div>
       <div>
