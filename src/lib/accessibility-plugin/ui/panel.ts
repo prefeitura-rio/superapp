@@ -1,4 +1,9 @@
 import type { A11yState } from '../state'
+import {
+  TTS_PAUSE_ATTR,
+  renderTTSPauseButton,
+  syncTTSPauseButtons,
+} from './tts-controls'
 
 export const PANEL_ID = 'a11y-panel'
 const PANEL_TITLE_ID = 'a11y-panel-title'
@@ -122,15 +127,8 @@ const ICON_TTS = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
 </svg>`
 
-const ICON_TTS_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true">
-  <rect x="6" y="4" width="4" height="16"/>
-  <rect x="14" y="4" width="4" height="16"/>
-</svg>`
 const ICON_TTS_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <rect x="3" y="3" width="18" height="18" rx="2"/>
-</svg>`
-const ICON_TTS_PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true">
-  <polygon points="5 3 19 12 5 21 5 3"/>
 </svg>`
 
 function makeStepper(
@@ -781,17 +779,13 @@ export function createPanel(
   const ttsPauseBtn = document.createElement('button')
   ttsPauseBtn.type = 'button'
   ttsPauseBtn.className = 'a11y-tts-btn'
-  ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
-  ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
+  // Ícone e rótulo vêm do estado real (TTS.isPaused()), sincronizados com o
+  // botão do widget flutuante.
+  ttsPauseBtn.setAttribute(TTS_PAUSE_ATTR, '')
+  renderTTSPauseButton(ttsPauseBtn)
   ttsPauseBtn.addEventListener('click', () => {
     callbacks.onTtsPauseToggle()
-    if (ttsPauseBtn.getAttribute('aria-label') === 'Pausar leitura') {
-      ttsPauseBtn.innerHTML = ICON_TTS_PLAY
-      ttsPauseBtn.setAttribute('aria-label', 'Retomar leitura')
-    } else {
-      ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
-      ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
-    }
+    syncTTSPauseButtons()
   })
 
   const ttsStopBtn = document.createElement('button')
@@ -862,9 +856,6 @@ export function createPanel(
         setInert(accBody, false)
       }
       if (accTrigger) accTrigger.setAttribute('aria-expanded', 'true')
-      // Reset estado do botão de pausa
-      ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
-      ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
     } else {
       ttsGroup.updateBadge(0)
       ttsProgressPanel.textContent = ''
@@ -872,6 +863,8 @@ export function createPanel(
       ttsToggleInput.focus()
     }
     callbacks.onTts(v)
+    // Ligar/desligar zera a pausa: alinha os botões ao estado real
+    syncTTSPauseButtons()
   })
 
   body.append(textGroup.el, visionGroup.el, motionGroup.el, ttsGroup.el)

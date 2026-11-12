@@ -19,6 +19,7 @@ import {
   rebuildPanel,
 } from './ui/panel'
 import { injectStyles } from './ui/styles'
+import { toggleTTSPause } from './ui/tts-controls'
 import {
   createTTSWidget,
   removeTTSWidget,
@@ -153,11 +154,7 @@ function makeCallbacks() {
     },
     onTtsPauseToggle() {
       if (!ttsAvailable) return
-      if (TTS.isPaused()) {
-        TTS.resume()
-      } else {
-        TTS.pause()
-      }
+      toggleTTSPause()
     },
     onReset() {
       const next = resetState()
