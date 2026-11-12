@@ -569,9 +569,9 @@ export function createPanel(
   cbSelect.className = 'a11y-cb-select'
   cbSelect.setAttribute('aria-label', 'Tipo de daltonismo')
   const cbOptions: [string, 1 | 2 | 3][] = [
-    ['Deuteranopia', 1],
-    ['Protanopia', 2],
-    ['Tritanopia', 3],
+    ['Deuteranopia (vermelho-verde)', 1],
+    ['Protanopia (vermelho)', 2],
+    ['Tritanopia (azul-amarelo)', 3],
   ]
   for (const [label, val] of cbOptions) {
     const opt = document.createElement('option')
