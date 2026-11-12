@@ -7,6 +7,7 @@ import type {
 } from '@/http/models'
 import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
@@ -181,7 +182,7 @@ export function buildHomeWalletCards({
     )
   }
 
-  if (maintenanceStats.total > 0) {
+  if (maintenanceStats.total > 0 && !isSalesforceServicesEnabled()) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.CARETAKER,
       walletData,

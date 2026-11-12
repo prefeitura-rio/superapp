@@ -1,10 +1,10 @@
 import serviceIcon from '@/constants/bucket'
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import { GetApiV1CategoriesOrder } from '@/http-busca-search/models/getApiV1CategoriesOrder'
 import { GetApiV1CategoriesSortBy } from '@/http-busca-search/models/getApiV1CategoriesSortBy'
 import { fetchCartaServicosCategoryCatalog } from '@/lib/carta-servicos/fetch'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
 
@@ -18,7 +18,7 @@ export interface Category {
   relevanciaMedia: number
   quantidadeServicos: number
   tag?: string
-  /** Theme slug from Carta de Serviços API (when CARTA_SERVICOS_API_ENABLED). */
+  /** Theme slug from the Salesforce-backed Carta de Serviços API. */
   themeSlug?: string
 }
 
@@ -141,7 +141,7 @@ async function fetchCategoriesFromBuscaSearch(
 async function fetchCategoryCatalog(): Promise<CategoryCatalog> {
   const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
 
-  if (CARTA_SERVICOS_API_ENABLED) {
+  if (isSalesforceServicesEnabled()) {
     return await fetchCartaServicosCategoryCatalog(getIconForCategory, {
       signal,
     })

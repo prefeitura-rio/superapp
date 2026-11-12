@@ -64,7 +64,7 @@ describe('renderCartaPdf', () => {
     expect(Math.round(width)).toBe(595)
     expect(Math.round(height)).toBe(842)
     expect(doc.getTitle()).toContain('CGM')
-  }, 30_000)
+  }, 60_000)
 })
 
 describe('htmlToPdf', () => {

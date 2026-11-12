@@ -192,6 +192,7 @@ jobs:
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
+          NEXT_PUBLIC_FEATURE_SALESFORCE: "true"
           NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA: "true"
           NEXT_PUBLIC_VLIBRAS_ENABLED: "true"
 
@@ -246,6 +247,7 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
+            --build-arg NEXT_PUBLIC_FEATURE_SALESFORCE="true" \
             --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="true" \
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \

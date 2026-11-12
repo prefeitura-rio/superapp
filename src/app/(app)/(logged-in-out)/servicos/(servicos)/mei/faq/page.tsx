@@ -70,8 +70,6 @@ const MEI_FAQ_SECTIONS: FaqSection[] = [
   },
 ]
 
-export const dynamic = 'force-static'
-
 export default function MeiFaqPage() {
   return (
     <div className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">

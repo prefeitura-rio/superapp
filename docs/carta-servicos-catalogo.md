@@ -1,8 +1,15 @@
 # Carta de Serviços — app-catalogo
 
-Decisões e dívidas da navegação de serviços quando `CARTA_SERVICOS_API_ENABLED=true`.
+Decisões e dívidas da navegação de serviços quando
+`NEXT_PUBLIC_FEATURE_SALESFORCE=true`.
 
-Com a flag desligada (padrão), o portal continua em `app-busca-search`. Com a flag ligada, categorias, subcategorias, listagem e detalhe saem da app-catalogo (`BASE_API_URL_APP_CATALOGO`), não mais da API MuleSoft/Salesforce. O client `src/http-pref-rio-carta-servicos/` permanece no repositório; o caminho da flag não o chama.
+Com a flag desligada (padrão), o portal continua em `app-busca-search` nas rotas
+que têm fallback. Com a flag ligada, categorias, subcategorias, listagem e
+detalhe saem da app-catalogo (`BASE_API_URL_APP_CATALOGO`), o caminho
+MuleSoft/Salesforce. O client `src/http-pref-rio-carta-servicos/` permanece no
+repositório; o caminho da flag não o chama. A Carta dedicada em
+`/carta-de-servicos` e as superfícies de atendimento Salesforce-only são
+barradas para `/not-found` quando a flag está desligada.
 
 O comparativo histórico busca-search → MuleSoft está em [`migration-carta-servicos-service-detail.md`](./migration-carta-servicos-service-detail.md).
 

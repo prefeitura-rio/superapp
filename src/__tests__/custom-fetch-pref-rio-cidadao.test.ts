@@ -4,7 +4,7 @@ import { GET as listChamadosRoute } from '@/app/api/chamados/route'
 import { TEST_ENV } from '@/test/mocks/env'
 import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { customFetchPrefRioCidadao } from '../../custom-fetch-pref-rio-cidadao'
 
 const BASE = TEST_ENV.BASE_API_URL_PREF_RIO_CIDADAO
@@ -93,10 +93,20 @@ describe('customFetchPrefRioCidadao: corpo da resposta', () => {
 })
 
 describe('rotas /api/chamados com resposta vazia do upstream', () => {
+  beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   test('GET /api/chamados repassa o status sem lançar quando o corpo vem vazio', async () => {
     server.use(http.get(CHAMADOS_URL, () => emptyJsonResponse(401)))
 
-    const response = await listChamadosRoute()
+    const response = await listChamadosRoute(
+      new Request('http://localhost/api/chamados')
+    )
 
     expect(response.status).toBe(401)
     expect(await response.json()).toBeNull()
@@ -107,7 +117,9 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
       http.get(CHAMADOS_URL, () => new HttpResponse('', { status: 500 }))
     )
 
-    const response = await listChamadosRoute()
+    const response = await listChamadosRoute(
+      new Request('http://localhost/api/chamados')
+    )
 
     expect(response.status).toBe(500)
     expect(await response.json()).toBeNull()

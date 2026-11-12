@@ -49,21 +49,31 @@ html.a11y-dyslexia h6 {
   line-height: var(--a11y-line-height, 1.7);
 }
 
-/* ── Color blind — definição do SVG filter inline ──
-   O filter real é aplicado abaixo junto com saturação para evitar conflito. */
+/* ── Color blind — definição dos SVG filters inline ──
+   Os filters reais são aplicados abaixo junto com saturação para evitar conflito. */
 #a11y-cb-filter-def { display: none; }
 
-/* ── Highlight links ── */
+/* ── Highlight links ──
+   Fundo amarelo + texto preto = alto contraste garantido em qualquer cor de
+   texto original, incluindo branco (WCAG AA 4.5:1+).
+   Borda sutil reforça o marcador sem depender só da cor. */
 html.a11y-highlight-links a:not(:has(> img:only-child)) {
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
   text-decoration-thickness: 2px !important;
-  text-decoration-color: currentColor !important;
+  text-decoration-color: #7a6800 !important;
+  background-color: #f5e642 !important;
+  color: #1a1a1a !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+  padding: 0 3px !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 html.a11y-highlight-links a:focus-visible {
-  outline: 2px solid currentColor !important;
+  outline: 2px solid #1a1a1a !important;
   outline-offset: 2px !important;
-  border-radius: 2px;
+  border-radius: 4px !important;
 }
 
 /* ── Reduce motion ── */
@@ -76,20 +86,34 @@ html.a11y-reduce-motion *:not(#a11y-btn):not(#a11y-panel):not(#a11y-panel *) {
 
 /* ── Filter unificado: saturation + color-blind + high-contrast ──
    IMPORTANTE: filter em html cria stacking context e quebra position:fixed
-   de toda a página. Por isso só aplicamos quando uma feature está de fato ativa
-   (saturação < 1, ou color-blind, ou high-contrast). O caso "nenhuma ativa"
-   não recebe regra — sem filter, sem stacking context, sem side-effects. */
+   de toda a página. Por isso só aplicamos quando uma feature está de fato ativa.
+   Cada tipo de daltonismo referencia seu próprio filter SVG injetado no DOM. */
 html.a11y-saturation-active:not(.a11y-high-contrast):not(.a11y-color-blind) {
   filter: saturate(var(--a11y-saturation, 1));
 }
-html.a11y-color-blind:not(.a11y-high-contrast) {
-  filter: url(#a11y-cb-filter) saturate(var(--a11y-saturation, 1));
+/* deuteranopia (tipo 1) */
+html.a11y-cb-1:not(.a11y-high-contrast) {
+  filter: url(#a11y-cb-deuteranopia) saturate(var(--a11y-saturation, 1));
+}
+/* protanopia (tipo 2) */
+html.a11y-cb-2:not(.a11y-high-contrast) {
+  filter: url(#a11y-cb-protanopia) saturate(var(--a11y-saturation, 1));
+}
+/* tritanopia (tipo 3) */
+html.a11y-cb-3:not(.a11y-high-contrast) {
+  filter: url(#a11y-cb-tritanopia) saturate(var(--a11y-saturation, 1));
 }
 html.a11y-high-contrast:not(.a11y-color-blind) {
   filter: invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
 }
-html.a11y-high-contrast.a11y-color-blind {
-  filter: url(#a11y-cb-filter) invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
+html.a11y-high-contrast.a11y-cb-1 {
+  filter: url(#a11y-cb-deuteranopia) invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
+}
+html.a11y-high-contrast.a11y-cb-2 {
+  filter: url(#a11y-cb-protanopia) invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
+}
+html.a11y-high-contrast.a11y-cb-3 {
+  filter: url(#a11y-cb-tritanopia) invert(1) hue-rotate(180deg) saturate(var(--a11y-saturation, 1));
 }
 html.a11y-high-contrast img,
 html.a11y-high-contrast video,
@@ -100,6 +124,37 @@ html.a11y-high-contrast [style*="background-image"] {
 #a11y-btn-wrapper,
 #a11y-panel {
   filter: none !important;
+}
+
+/* ── Color blind — tokens Okabe-Ito ──
+   Sobrescreve as variáveis semânticas do pref.rio (e qualquer sistema que use
+   os mesmos tokens CSS) com a paleta Okabe-Ito. Complementa o SVG filter:
+   o filter corrige pixels arbitrários em qualquer site; os tokens garantem
+   precisão exata nas cores semânticas do design system.
+   Paleta: #000000 · #E69F00 · #56B4E9 · #009E73 · #F0E442 · #0072B2 · #D55E00 · #CC79A7 */
+html.a11y-color-blind {
+  --primary: #0072B2;
+  --primary-foreground: #ffffff;
+  --primary-focused: #005a8e;
+  --destructive: #D55E00;
+  --destructive-foreground: #ffffff;
+  --success: #009E73;
+  --success-secondary: #d0f0e6;
+  --status-badge-open: #0072B2;
+  --status-badge-in-progress: #D55E00;
+  --status-badge-done: #009E73;
+  --chart-1: #E69F00;
+  --chart-2: #56B4E9;
+  --chart-3: #009E73;
+  --chart-4: #F0E442;
+  --chart-5: #CC79A7;
+  --green-100: #d0f0e6;
+  --green-200: #009E73;
+  --red-100: #f5ddd0;
+  --red-200: #D55E00;
+  --blue-100: #d5eaf8;
+  --yellow-100: #fdf6d0;
+  --yellow-200: #F0E442;
 }
 
 /* ── Hide images ── */
@@ -140,6 +195,7 @@ html.a11y-high-contrast .a11y-tts-highlight {
 .a11y-tts-btn {
   width: 32px;
   height: 32px;
+  padding: 0;
   border-radius: 8px;
   border: none;
   background: #f0f4ff;
@@ -184,16 +240,14 @@ html.dark .a11y-tts-btn {
 html.dark .a11y-tts-btn:hover { background: #263d5a; }
 html.dark .a11y-tts-progress { color: #a1a1aa; }
 
-/* ── Controles TTS inline no painel ── */
+/* ── Controles TTS inline no painel ──
+   A linha não usa .a11y-row, então define o próprio layout flex. */
 .a11y-tts-controls-row {
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
   gap: 8px;
   padding: 8px 13px;
-}
-.a11y-tts-controls-inner {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* ── Reading mask ──
@@ -204,6 +258,7 @@ html.dark .a11y-tts-progress { color: #a1a1aa; }
 /* z-index stack do plugin:
    9990 overlay da máscara (desfoque ao redor)
    9991 janela da máscara (borda suave da área visível)
+   9994 widget flutuante da leitura em voz
    9995 botão flutuante (sempre acima da máscara)
    9999 painel (sempre no topo) */
 #a11y-reading-overlay {
@@ -644,7 +699,7 @@ html.dark #a11y-vlibras-btn {
   font-size: 10px;
   font-weight: 700;
   color: #ffffff;
-  background: #2563eb;
+  background: ${LIGHT_PRIMARY};
   border-radius: 20px;
   padding: 1px 7px;
   line-height: 16px;
@@ -719,7 +774,7 @@ html.dark #a11y-vlibras-btn {
 .a11y-row-sub {
   padding-left: 13px;
   background: #f0f4ff;
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid ${LIGHT_PRIMARY};
   transition: opacity 0.18s ease, max-height 0.22s ease, padding 0.18s ease,
     visibility 0s linear 0s;
   overflow: hidden;
@@ -789,6 +844,34 @@ html.dark #a11y-vlibras-btn {
   flex-shrink: 0;
 }
 
+/* ── Select (modo daltônico) ── */
+.a11y-cb-select {
+  font-size: 12px;
+  font-weight: 500;
+  color: ${LIGHT_PRIMARY};
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 5px 28px 5px 10px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  flex-shrink: 0;
+}
+.a11y-cb-select:focus-visible {
+  outline: 2px solid #4a9fff;
+  outline-offset: 2px;
+}
+html.dark .a11y-cb-select {
+  background-color: #27272a;
+  border-color: #3f3f46;
+  color: ${DARK_PRIMARY};
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
 /* ── Toggle ── */
 .a11y-toggle {
   position: relative;
@@ -811,7 +894,7 @@ html.dark #a11y-vlibras-btn {
   transition: background 0.2s;
 }
 .a11y-toggle input:checked + .a11y-toggle-track {
-  background: #2563eb;
+  background: ${LIGHT_PRIMARY};
 }
 .a11y-toggle-track::after {
   content: '';
@@ -1018,13 +1101,37 @@ export function injectStyles(): void {
   style.textContent = CSS
   document.head.appendChild(style)
 
-  // SVG filter para deuteranopia — referenciado pelo CSS via url(#a11y-cb-filter)
+  // SVG filters para daltonismo — matrizes de daltonização (correção), não simulação.
+  // Derivadas de Viénot 1999 e rgblind daltonize generator. color-interpolation-filters="linearRGB"
+  // é obrigatório — sem ele o browser aplica a matriz em gamma-encoded sRGB e o resultado fica errado.
   if (!document.getElementById(SVG_FILTER_ID)) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.id = SVG_FILTER_ID
     svg.setAttribute('aria-hidden', 'true')
     svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'
-    svg.innerHTML = `<defs><filter id="a11y-cb-filter"><feColorMatrix type="matrix" values="0.625 0.375 0 0 0  0.7 0.3 0 0 0  0 0.3 0.7 0 0  0 0 0 1 0"/></filter></defs>`
+    svg.innerHTML = `<defs>
+      <filter id="a11y-cb-deuteranopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          1        0        0        0  0
+          0.4      0.6      0        0  0
+          0        0.1      0.9      0  0
+          0        0        0        1  0"/>
+      </filter>
+      <filter id="a11y-cb-protanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          0.56     0.44     0        0  0
+          0.28     0.72     0        0  0
+          0        0.14     0.86     0  0
+          0        0        0        1  0"/>
+      </filter>
+      <filter id="a11y-cb-tritanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          0.97     0.03     0        0  0
+          0        0.77     0.23     0  0
+          0        0.13     0.87     0  0
+          0        0        0        1  0"/>
+      </filter>
+    </defs>`
     document.body.appendChild(svg)
   }
 }

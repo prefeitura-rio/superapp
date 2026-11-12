@@ -62,59 +62,70 @@ export function FaqPrefRioClient({ sections }: { sections: FAQSection[] }) {
         )}
 
         <div className="p-4 pt-10 max-w-4xl mx-auto">
-          {sections.map((section, sIdx) => (
-            <section
-              key={section.id}
-              id={section.id}
-              ref={el => {
-                registerSection(section.id)(el)
-                if (sIdx === 0) {
-                  ;(
-                    firstAnchorRef as React.MutableRefObject<HTMLElement | null>
-                  ).current = el
-                }
-              }}
-              className={sIdx > 0 ? 'mt-14' : ''}
-            >
-              {section.title && (
-                <h2 className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10">
-                  {section.title}
-                </h2>
-              )}
+          {sections.map((section, sIdx) => {
+            // Seção sem título: as perguntas ficam logo abaixo do h1, então
+            // são h2 (h1 → h3 pula um nível).
+            const QuestionHeading = section.title ? 'h3' : 'h2'
+            return (
+              <section
+                key={section.id}
+                id={section.id}
+                ref={el => {
+                  registerSection(section.id)(el)
+                  if (sIdx === 0) {
+                    ;(
+                      firstAnchorRef as React.MutableRefObject<HTMLElement | null>
+                    ).current = el
+                  }
+                }}
+                className={sIdx > 0 ? 'mt-14' : ''}
+              >
+                {section.title && (
+                  <h2 className="font-medium text-primary tracking-tight text-4xl leading-10 min-h-10">
+                    {section.title}
+                  </h2>
+                )}
 
-              <div className="space-y-8 mt-6">
-                {section.items.map((item, index) => (
-                  <div key={index}>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-medium tracking-normal leading-5">
-                        <Highlighted text={item.title} query={highlightQuery} />
-                      </h3>
+                <div className="space-y-8 mt-6">
+                  {section.items.map((item, index) => (
+                    <div key={index}>
+                      <div className="space-y-2">
+                        <QuestionHeading className="text-lg font-medium tracking-normal leading-5">
+                          <Highlighted
+                            text={item.title}
+                            query={highlightQuery}
+                          />
+                        </QuestionHeading>
 
-                      {Array.isArray(item.content) ? (
-                        <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed space-y-1">
-                          {item.content.map((line, i) => (
-                            <li key={i}>
-                              <Highlighted text={line} query={highlightQuery} />
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <FormattedContent
-                          content={item.content}
-                          query={highlightQuery}
-                          className="text-foreground-light opacity-100"
-                        />
+                        {Array.isArray(item.content) ? (
+                          <ul className="list-disc pl-5 text-foreground-light text-sm leading-relaxed space-y-1">
+                            {item.content.map((line, i) => (
+                              <li key={i}>
+                                <Highlighted
+                                  text={line}
+                                  query={highlightQuery}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <FormattedContent
+                            content={item.content}
+                            query={highlightQuery}
+                            className="text-foreground-light opacity-100"
+                          />
+                        )}
+                      </div>
+
+                      {index < section.items.length - 1 && (
+                        <div className="mt-8 border-t border-border" />
                       )}
                     </div>
-
-                    {index < section.items.length - 1 && (
-                      <div className="mt-8 border-t border-border" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
+                  ))}
+                </div>
+              </section>
+            )
+          })}
         </div>
 
         <style jsx>{`

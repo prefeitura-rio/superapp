@@ -10,8 +10,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-export const dynamic = 'force-static'
-
 export default function CookiesPolicy() {
   return (
     <div className="min-h-screen bg-background py-8 pb-20">
@@ -73,7 +71,7 @@ export default function CookiesPolicy() {
                 </Badge>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-sm">Cookies Essenciais</h4>
+                <h3 className="font-medium text-sm">Cookies Essenciais</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Essenciais para o funcionamento básico do site. Incluem
                   autenticação, segurança e funcionalidades essenciais.
@@ -88,7 +86,7 @@ export default function CookiesPolicy() {
                 </Badge>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-sm">Cookies de Análise</h4>
+                <h3 className="font-medium text-sm">Cookies de Análise</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Nos ajudam a entender como os usuários interagem com o site,
                   permitindo melhorias contínuas na experiência.
@@ -103,7 +101,7 @@ export default function CookiesPolicy() {
                 </Badge>
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-sm">Cookies Funcionais</h4>
+                <h3 className="font-medium text-sm">Cookies Funcionais</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Lembram suas preferências e configurações para uma experiência
                   mais personalizada.
@@ -159,9 +157,9 @@ export default function CookiesPolicy() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Como Gerenciar Cookies</h2>
           <div className="space-y-4">
-            <h4 className="font-medium text-sm mb-2">
+            <h3 className="font-medium text-sm mb-2">
               Configurações do Navegador
-            </h4>
+            </h3>
             <p className="text-xs text-muted-foreground mb-3">
               A maioria dos navegadores permite controlar cookies através das
               configurações de privacidade.

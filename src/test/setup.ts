@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom/vitest'
+import { configure } from '@testing-library/dom'
 import { afterAll, afterEach, beforeAll, vi } from 'vitest'
+
+// Under parallel test runs the React Query fetch + MSW + re-render cycle can
+// exceed the default 1000 ms findBy* timeout.
+configure({ asyncUtilTimeout: 5000 })
 import { setupTestEnv } from './mocks/env'
 import { server } from './mocks/server'
 

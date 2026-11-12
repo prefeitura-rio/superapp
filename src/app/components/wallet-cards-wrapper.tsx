@@ -5,6 +5,7 @@ import type {
   ModelsMaintenanceRequest,
 } from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
@@ -58,12 +59,13 @@ export function WalletCardsWrapper({
     walletData?.assistencia_social?.cadunico?.indicador
   )
   const hasCaretakerData = maintenanceStats.total > 0
+  const showCaretakerCard = hasCaretakerData && !isSalesforceServicesEnabled()
 
   const hasAnyCard =
     hasHealthData ||
     hasEducationData ||
     hasSocialAssistanceData ||
-    hasCaretakerData
+    showCaretakerCard
 
   // Only use health unit API for operating hours and risk status
   let healthStatusValue = 'Não informado'
@@ -224,7 +226,7 @@ export function WalletCardsWrapper({
       )}
 
       {/* Card 4: Cuidados com a Cidade (1746) */}
-      {hasCaretakerData && (
+      {showCaretakerCard && (
         <div>
           <CaretakerCard
             title="CUIDADOS COM A CIDADE"

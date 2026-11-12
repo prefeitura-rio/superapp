@@ -206,6 +206,7 @@ interface DetailData {
     sugestao: { available: boolean; categoryId: string | null } | null
     reclamacao: { available: boolean; categoryId: string | null } | null
   } | null
+  loadedAt?: string
   // não logado
   ultimoAndamento?: {
     evento: string
@@ -466,6 +467,11 @@ function RequestDetail({ data }: { data: DetailData }) {
         >
           {data.servico}
         </h1>
+        {data.loadedAt && (
+          <p className="text-sm text-foreground-light -mt-2 mb-2">
+            Dados atualizados em {data.loadedAt}
+          </p>
+        )}
 
         {/* Status + timeline */}
         <SectionCard>
@@ -764,9 +770,11 @@ export default function RequestDetailPage() {
               protocolo: json.protocolo,
               servico: os?.servico ?? os?.subtema ?? '—',
               macroStatus: normalizeStatus(os?.status ?? json.status),
-              dataAbertura: json.dataAbertura
-                ? formatDateTime(json.dataAbertura)
-                : '',
+              dataAbertura: os?.dataAbertura
+                ? formatDateTime(os.dataAbertura)
+                : json.dataAbertura
+                  ? formatDateTime(json.dataAbertura)
+                  : '',
               dataUltimaAtualizacao: json.dataUltimaAtualizacao
                 ? formatDateTime(json.dataUltimaAtualizacao)
                 : '',
@@ -788,6 +796,9 @@ export default function RequestDetailPage() {
               osId: os?.id ?? '',
               isAcessoInformacao: os?.isAcessoInformacao ?? false,
               canOpenRecurso: os?.canOpen?.recurso ?? null,
+              loadedAt: json.loaded_at
+                ? formatDateTime(json.loaded_at)
+                : undefined,
               canOpenOuvidoria: os?.canOpen
                 ? {
                     elogio: os.canOpen.elogio
@@ -844,9 +855,11 @@ export default function RequestDetailPage() {
             protocolo: json.protocolo,
             servico: os?.servico ?? '—',
             macroStatus: normalizeStatus(os?.status ?? json.status),
-            dataAbertura: json.dataAbertura
-              ? formatDateTime(json.dataAbertura)
-              : '',
+            dataAbertura: os?.dataAbertura
+              ? formatDateTime(os.dataAbertura)
+              : json.dataAbertura
+                ? formatDateTime(json.dataAbertura)
+                : '',
             dataUltimaAtualizacao: '',
             previsaoSLA: '',
             motivoFechamento: '',
@@ -862,6 +875,9 @@ export default function RequestDetailPage() {
             isAcessoInformacao: false,
             canOpenRecurso: null,
             canOpenOuvidoria: null,
+            loadedAt: json.loaded_at
+              ? formatDateTime(json.loaded_at)
+              : undefined,
             ultimoAndamento: ultimo,
           })
         } else {

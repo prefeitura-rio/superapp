@@ -16,6 +16,20 @@ let onProgressCb: OnProgress | null = null
 let onEndCb: OnEnd | null = null
 let lastHighlighted: Element | null = null
 let paused = false
+let voicesWaitTimer: ReturnType<typeof setTimeout> | null = null
+
+// Alguns navegadores (ou ambientes sem voz instalada) nunca disparam
+// `voiceschanged`: passado este prazo, a leitura começa com a voz padrão
+// (se ela falhar, `onerror` avança a fila até o fim e o toggle desliga).
+const VOICES_TIMEOUT_MS = 3000
+
+function clearVoicesWait(): void {
+  if (voicesWaitTimer !== null) {
+    clearTimeout(voicesWaitTimer)
+    voicesWaitTimer = null
+  }
+  window.speechSynthesis.onvoiceschanged = null
+}
 
 function getVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices()
@@ -135,12 +149,15 @@ export const TTS = {
       window.speechSynthesis.cancel()
       queue = buildQueue()
       queueIndex = 0
+      clearVoicesWait()
       // getVoices() pode ser async na primeira chamada — espera evento se vazio
       if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          window.speechSynthesis.onvoiceschanged = null
+        const start = () => {
+          clearVoicesWait()
           speakNode(0)
         }
+        window.speechSynthesis.onvoiceschanged = start
+        voicesWaitTimer = setTimeout(start, VOICES_TIMEOUT_MS)
       } else {
         speakNode(0)
       }
@@ -166,6 +183,7 @@ export const TTS = {
   stop(): void {
     if (!ttsAvailable) return
     paused = false
+    clearVoicesWait()
     window.speechSynthesis.cancel()
     clearHighlight()
     queue = []

@@ -191,9 +191,9 @@ export function TermosDeUsoContent() {
                 '5.4. Proteção de suas informações pessoais, nos termos da Lei nº 12.527, de 18 de novembro de 2011;',
                 '5.5. Atuação integrada e sistêmica na expedição de atestados, certidões e documentos comprobatórios de regularidade;',
               ].map((text, i) => (
-                <p key={i} className={bodyCn}>
+                <li key={i} className={bodyCn}>
                   {text}
-                </p>
+                </li>
               ))}
             </ul>
             <p className={bodyCn}>

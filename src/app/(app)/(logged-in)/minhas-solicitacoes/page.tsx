@@ -3,7 +3,7 @@ import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
-import { RequestsList } from './components/requests-list'
+import { OrigemChamados } from './components/origem-chamados'
 import { formatDate, mapCategoria, normalizeStatus } from './helpers'
 
 export const revalidate = 0
@@ -36,7 +36,7 @@ export default async function MyRequestsPage() {
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações
         </h1>
-        <RequestsList items={items} />
+        <OrigemChamados salesforce={items} />
       </div>
       <FloatNavigationWrapper />
     </div>

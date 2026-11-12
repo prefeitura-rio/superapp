@@ -6,6 +6,7 @@ import {
   SettingsIcon,
   UserIcon,
 } from '@/assets/icons'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -15,7 +16,7 @@ interface UserProfileMenuItemsData {
   variant?: 'default' | 'danger'
 }
 
-const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
+const isSalesforceEnabled = isSalesforceServicesEnabled()
 
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
@@ -36,7 +37,7 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   //   label: 'Trabalho',
   //   href: '/meu-perfil/user-job-info',
   // },
-  ...(isChamadosEnabled
+  ...(isSalesforceEnabled
     ? [
         {
           id: 'solicitacoes',

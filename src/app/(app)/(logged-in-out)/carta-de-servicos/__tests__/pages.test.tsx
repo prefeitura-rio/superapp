@@ -2,16 +2,14 @@ import type { CartaOrgUnit } from '@/lib/carta-servicos/org-units'
 import { render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const flags = vi.hoisted(() => ({ cartaApi: true }))
+const flags = vi.hoisted(() => ({ salesforce: true }))
 const fetchCartaOrgUnits = vi.fn()
 const fetchCartaOrgUnit = vi.fn()
 const fetchCartaOrgUnitServices = vi.fn()
 
-vi.mock('@/constants/venvs', async importOriginal => ({
+vi.mock('@/lib/feature-flags', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  get CARTA_SERVICOS_API_ENABLED() {
-    return flags.cartaApi
-  },
+  isSalesforceServicesEnabled: () => flags.salesforce,
 }))
 vi.mock('@/lib/carta-servicos/org-units', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -52,7 +50,7 @@ const orgParams = (siciCode: string) => ({
 })
 
 beforeEach(() => {
-  flags.cartaApi = true
+  flags.salesforce = true
   fetchCartaOrgUnits.mockReset()
   fetchCartaOrgUnit.mockReset()
   fetchCartaOrgUnitServices.mockReset()
@@ -139,8 +137,8 @@ describe('/carta-de-servicos/[siciCode]', () => {
     expect(within(list).getByText('Serviço sem tema').closest('a')).toBeNull()
   })
 
-  it('com CARTA_SERVICOS_API_ENABLED desligada, serviços aparecem sem link (evita 404)', async () => {
-    flags.cartaApi = false
+  it('com Salesforce desligado, serviços aparecem sem link (evita 404)', async () => {
+    flags.salesforce = false
     fetchCartaOrgUnit.mockResolvedValue(CET)
     fetchCartaOrgUnitServices.mockResolvedValue(services)
 
