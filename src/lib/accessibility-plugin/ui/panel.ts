@@ -83,7 +83,6 @@ const SATURATION_LABELS = ['Normal', 'Baixa', 'Cinza']
 const MASK_HEIGHT_LABELS = ['Estreita', 'Média', 'Ampla']
 const MASK_WIDTH_LABELS = ['Coluna', 'Média', 'Total']
 const MASK_INTENSITY_LABELS = ['Suave', 'Média', 'Total']
-const COLOR_BLIND_TYPE_LABELS = ['Deuteranopia', 'Protanopia', 'Tritanopia']
 
 const CLOSE_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <line x1="18" y1="6" x2="6" y2="18"/>
@@ -548,9 +547,9 @@ export function createPanel(
   cbSelect.className = 'a11y-cb-select'
   cbSelect.setAttribute('aria-label', 'Tipo de daltonismo')
   const cbOptions: [string, 1 | 2 | 3][] = [
-    ['Deuteranopia', 1],
-    ['Protanopia', 2],
-    ['Tritanopia', 3],
+    ['Deuteranopia (vermelho-verde)', 1],
+    ['Protanopia (vermelho)', 2],
+    ['Tritanopia (azul-amarelo)', 3],
   ]
   for (const [label, val] of cbOptions) {
     const opt = document.createElement('option')

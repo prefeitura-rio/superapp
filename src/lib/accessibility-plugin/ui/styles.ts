@@ -126,6 +126,37 @@ html.a11y-high-contrast [style*="background-image"] {
   filter: none !important;
 }
 
+/* ── Color blind — tokens Okabe-Ito ──
+   Sobrescreve as variáveis semânticas do pref.rio (e qualquer sistema que use
+   os mesmos tokens CSS) com a paleta Okabe-Ito. Complementa o SVG filter:
+   o filter corrige pixels arbitrários em qualquer site; os tokens garantem
+   precisão exata nas cores semânticas do design system.
+   Paleta: #000000 · #E69F00 · #56B4E9 · #009E73 · #F0E442 · #0072B2 · #D55E00 · #CC79A7 */
+html.a11y-color-blind {
+  --primary: #0072B2;
+  --primary-foreground: #ffffff;
+  --primary-focused: #005a8e;
+  --destructive: #D55E00;
+  --destructive-foreground: #ffffff;
+  --success: #009E73;
+  --success-secondary: #d0f0e6;
+  --status-badge-open: #0072B2;
+  --status-badge-in-progress: #D55E00;
+  --status-badge-done: #009E73;
+  --chart-1: #E69F00;
+  --chart-2: #56B4E9;
+  --chart-3: #009E73;
+  --chart-4: #F0E442;
+  --chart-5: #CC79A7;
+  --green-100: #d0f0e6;
+  --green-200: #009E73;
+  --red-100: #f5ddd0;
+  --red-200: #D55E00;
+  --blue-100: #d5eaf8;
+  --yellow-100: #fdf6d0;
+  --yellow-200: #F0E442;
+}
+
 /* ── Hide images ── */
 html.a11y-hide-images img { visibility: hidden; }
 
@@ -980,22 +1011,35 @@ export function injectStyles(): void {
   style.textContent = CSS
   document.head.appendChild(style)
 
-  // SVG filters para daltonismo — 3 tipos, cada um com sua matriz calibrada.
-  // Matrizes baseadas em Machado et al. (2009) e validadas contra Coblis simulator.
+  // SVG filters para daltonismo — matrizes de daltonização (correção), não simulação.
+  // Derivadas de Viénot 1999 e rgblind daltonize generator. color-interpolation-filters="linearRGB"
+  // é obrigatório — sem ele o browser aplica a matriz em gamma-encoded sRGB e o resultado fica errado.
   if (!document.getElementById(SVG_FILTER_ID)) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.id = SVG_FILTER_ID
     svg.setAttribute('aria-hidden', 'true')
     svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'
     svg.innerHTML = `<defs>
-      <filter id="a11y-cb-deuteranopia">
-        <feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673  0.047 0 0  -0.012 0.043  0.969 0 0  0 0 0 1 0"/>
+      <filter id="a11y-cb-deuteranopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          0.79507  0.20492  0        0  0
+          0        1        0        0  0
+         -0.20492  0.20492  1        0  0
+          0        0        0        1  0"/>
       </filter>
-      <filter id="a11y-cb-protanopia">
-        <feColorMatrix type="matrix" values="0.152 1.053 -0.205 0 0  0.115 0.786  0.099 0 0  -0.004 -0.048 1.052 0 0  0 0 0 1 0"/>
+      <filter id="a11y-cb-protanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          0.43     0.57     0        0  0
+          0.34     0.66     0        0  0
+          0        0.20     0.80     0  0
+          0        0        0        1  0"/>
       </filter>
-      <filter id="a11y-cb-tritanopia">
-        <feColorMatrix type="matrix" values="1.256 -0.077 -0.179 0 0  -0.078  0.931  0.148 0 0  0.005  0.691  0.304 0 0  0 0 0 1 0"/>
+      <filter id="a11y-cb-tritanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="
+          0.97     0.03     0        0  0
+          0        0.77     0.23     0  0
+          0        0.13     0.87     0  0
+          0        0        0        1  0"/>
       </filter>
     </defs>`
     document.body.appendChild(svg)

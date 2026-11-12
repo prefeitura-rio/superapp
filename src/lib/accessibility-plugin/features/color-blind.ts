@@ -1,7 +1,6 @@
 // 0 = off, 1 = deuteranopia, 2 = protanopia, 3 = tritanopia
-// Matrizes calibradas baseadas nas referências:
-// Machado et al. (2009) "A Physiologically-based Model for Simulation of Color Vision Deficiency"
-// e implementação do Coblis color-blindness simulator.
+// Matrizes de daltonização (correção) baseadas em Viénot 1999 e rgblind daltonize generator.
+// Aplicadas com color-interpolation-filters="linearRGB" para precisão perceptual correta.
 const FILTER_IDS: Record<1 | 2 | 3, string> = {
   1: 'a11y-cb-deuteranopia',
   2: 'a11y-cb-protanopia',
