@@ -40,7 +40,15 @@ function itensDe(protocolos: ProtocoloLista[]): RequestItem[] {
   )
 }
 
-export function OrigemChamados({ salesforce }: { salesforce: RequestItem[] }) {
+interface OrigemChamadosProps {
+  salesforce: RequestItem[]
+  historicoSgrc: boolean
+}
+
+export function OrigemChamados({
+  salesforce,
+  historicoSgrc,
+}: OrigemChamadosProps) {
   const [origem, setOrigem] = useState<Origem>('salesforce')
   const [sgrc, setSgrc] = useState<RequestItem[] | null>(null)
   const [carregando, setCarregando] = useState(false)
@@ -60,6 +68,8 @@ export function OrigemChamados({ salesforce }: { salesforce: RequestItem[] }) {
       setCarregando(false)
     }
   }
+
+  if (!historicoSgrc) return <RequestsList items={salesforce} />
 
   const itens = origem === 'sgrc' ? (sgrc ?? []) : salesforce
 
