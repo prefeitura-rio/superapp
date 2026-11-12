@@ -15,6 +15,7 @@ vi.mock('next/navigation', () => ({
   notFound: () => {
     throw notFoundError
   },
+  useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
 }))
 
 import { TermosDeUsoContent } from '../../servicos/(servicos)/trabalho/termos-de-uso/termos-de-uso-content'
@@ -26,12 +27,19 @@ import TermosDeUsoPlataformaPage, {
 import * as detailPageModule from '../[plataforma]/page'
 import { TermosDeUsoDetail } from '../components/termos-de-uso-detail'
 
-const pageProps = (plataforma: string) => ({
+const pageProps = (
+  plataforma: string,
+  search: Record<string, string | string[]> = {}
+) => ({
   params: Promise.resolve({ plataforma }),
+  searchParams: Promise.resolve(search),
 })
 
-async function renderDetail(slug: string) {
-  return render(await TermosDeUsoPlataformaPage(pageProps(slug)))
+async function renderDetail(
+  slug: string,
+  search: Record<string, string | string[]> = {}
+) {
+  return render(await TermosDeUsoPlataformaPage(pageProps(slug, search)))
 }
 
 describe('/termos-de-uso/[plataforma]', () => {
@@ -95,6 +103,34 @@ describe('/termos-de-uso/[plataforma]', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: '1. Definições' })
     ).toBeInTheDocument()
+  })
+
+  it('aberto pelo currículo (?origem=curriculo), o voltar leva de volta ao currículo', async () => {
+    await renderDetail('empregos', { origem: 'curriculo' })
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Termos de uso: Empregos' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: '15. Foro' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Voltar para o currículo' })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Voltar para Termos de uso' })
+    ).not.toBeInTheDocument()
+  })
+
+  it('origem desconhecida é ignorada: o voltar continua levando à lista', async () => {
+    await renderDetail('empregos', { origem: 'https://evil.example' })
+
+    expect(
+      screen.getByRole('link', { name: 'Voltar para Termos de uso' })
+    ).toHaveAttribute('href', '/termos-de-uso')
+    expect(
+      screen.queryByRole('button', { name: 'Voltar para o currículo' })
+    ).not.toBeInTheDocument()
   })
 
   it('slug desconhecido vira 404', async () => {
