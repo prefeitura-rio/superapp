@@ -12,8 +12,6 @@ export interface OportunidadesSection {
   logoHref: string
   listingPaths: readonly string[]
   chromePaths: readonly string[]
-  /** Busca como botão ao lado do logo, em vez da barra acima das abas. */
-  searchButton?: boolean
 }
 
 const WITH_MEI_ORDER = ['empregabilidade', 'mei', 'cursos'] as const
@@ -30,7 +28,6 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     logoHref: '/servicos/trabalho',
     listingPaths: ['/servicos/trabalho'],
     chromePaths: ['/servicos/trabalho'],
-    searchButton: true,
   },
   {
     id: 'mei',

@@ -14,6 +14,8 @@ const NO_CACHE_HEADERS = {
 interface CandidaturasListResponse {
   data: EmpregabilidadeCandidatura[]
   meta: { page: number; page_size: number; total: number }
+  /** Candidaturas com mudança de status ou de etapa que o cidadão não viu. */
+  atualizacoes?: number
 }
 
 export async function GET(request: NextRequest) {
@@ -88,9 +90,16 @@ export async function GET(request: NextRequest) {
     const candidaturas = list.map(candidaturaToCardData)
     // A lista vem paginada (50); o total é o que o card da área do candidato mostra.
     const total = body.meta?.total ?? candidaturas.length
+    const atualizacoes =
+      typeof body.atualizacoes === 'number' ? body.atualizacoes : 0
 
     return NextResponse.json(
-      { candidaturas, hasCandidaturas: candidaturas.length > 0, total },
+      {
+        candidaturas,
+        hasCandidaturas: candidaturas.length > 0,
+        total,
+        atualizacoes,
+      },
       { headers: NO_CACHE_HEADERS }
     )
   } catch (error) {

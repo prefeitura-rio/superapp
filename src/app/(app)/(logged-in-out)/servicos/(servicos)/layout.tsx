@@ -23,7 +23,6 @@ export default function ServicosLayout({
   if (section) {
     const showListingChrome = isOportunidadesListing(pathname)
     const hasMultipleTabs = getVisibleOportunidadesTabs().length > 1
-    const searchInHeader = showListingChrome && Boolean(section.searchButton)
 
     return (
       <AuthHeaderProvider>
@@ -31,7 +30,6 @@ export default function ServicosLayout({
           <OportunidadesSubHeader
             menuHref={section.menuHref}
             logoHref={section.logoHref}
-            searchButtonUrl={searchInHeader ? section.searchUrl : undefined}
           />
           <div
             style={{
@@ -47,11 +45,9 @@ export default function ServicosLayout({
               {showListingChrome &&
                 (hasMultipleTabs ? (
                   <div className="max-w-4xl mx-auto pb-0">
-                    {!searchInHeader && (
-                      <OportunidadesSearchPlaceholder
-                        searchUrl={section.searchUrl}
-                      />
-                    )}
+                    <OportunidadesSearchPlaceholder
+                      searchUrl={section.searchUrl}
+                    />
                     <div className="mb-5 mt-5 px-4">
                       <OportunidadesTypeToggle activeType={section.id} />
                     </div>

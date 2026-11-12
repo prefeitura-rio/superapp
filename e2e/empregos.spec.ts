@@ -192,7 +192,9 @@ test.describe('Empregos — home (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('exibe logo Oportunidades Cariocas e ícone de busca', async ({
+  // Homologação PREF-574: Trabalho usa a mesma barra de busca de Cursos e MEI,
+  // no lugar do botão de lupa ao lado do logo.
+  test('exibe logo Oportunidades Cariocas e a barra de busca', async ({
     page,
   }) => {
     await page.goto('/servicos/trabalho')
@@ -201,9 +203,11 @@ test.describe('Empregos — home (público)', () => {
       page.locator('img[alt="Oportunidades Cariocas"]').first()
     ).toBeVisible({ timeout: 15000 })
 
-    await expect(
-      page.locator('a[href="/busca?tipo=empregos"]').first()
-    ).toBeVisible({ timeout: 15000 })
+    const busca = page
+      .getByRole('main')
+      .getByRole('link', { name: /O que você precisa\?/ })
+    await expect(busca).toBeVisible({ timeout: 15000 })
+    await expect(busca).toHaveAttribute('href', '/busca?tipo=empregos')
   })
 
   test('header deslogado exibe link para login', async ({ page }) => {
@@ -356,6 +360,62 @@ test.describe('Empregos — home (autenticado)', () => {
     ).toHaveCount(0)
   })
 
+  // O card mostra quantas candidaturas mudaram de status ou de etapa desde a
+  // última visita à lista, ou "Sem atualizações".
+  test('card "Minhas candidaturas" mostra as atualizações não vistas', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
+
+    await expect(
+      page
+        .getByRole('link', { name: /Minhas candidaturas/ })
+        .getByText(/^(Sem atualizações|\d+ atualizaç(ão|ões))$/)
+    ).toBeVisible({ timeout: 20000 })
+  })
+
+  // Abrir a lista marca as atualizações como vistas (grava no usuário de
+  // teste, sem efeito além de zerar a contagem).
+  test('abrir "Minhas candidaturas" zera as atualizações do card', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho/minhas-candidaturas')
+    await expect(
+      page.getByRole('heading', { name: 'Minhas candidaturas' })
+    ).toBeVisible({ timeout: 20000 })
+    await page.waitForLoadState('networkidle')
+
+    await page.goto('/servicos/trabalho')
+    await expect(
+      page
+        .getByRole('link', { name: /Minhas candidaturas/ })
+        .getByText('Sem atualizações')
+    ).toBeVisible({ timeout: 20000 })
+  })
+
+  // O banco segue a regra das vagas: sem o currículo mínimo, o controle fica
+  // bloqueado e desligado; com ele, o texto acompanha a escolha.
+  test('controle do Banco de Currículos segue o currículo mínimo', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
+
+    const controle = page.getByRole('switch')
+    await expect(controle).toBeVisible({ timeout: 20000 })
+
+    if (!(await controle.isEnabled())) {
+      await expect(controle).not.toBeChecked()
+      await expect(
+        page.getByText('Disponível com o currículo atualizado')
+      ).toBeVisible()
+      return
+    }
+    const texto = (await controle.isChecked())
+      ? 'Recrutadores podem consultar seu currículo'
+      : 'Recrutadores não podem consultar seu currículo'
+    await expect(page.getByText(texto)).toBeVisible()
+  })
+
   test('desativar o Banco de Currículos pede confirmação (cancelar mantém ativo)', async ({
     page,
   }) => {
@@ -366,7 +426,7 @@ test.describe('Empregos — home (autenticado)', () => {
     // Só abre o modal; cancelar não grava nada no usuário de teste.
     test.skip(
       !(await controle.isChecked()) || !(await controle.isEnabled()),
-      'Usuário de teste fora do banco ou sem currículo: não há o que desativar'
+      'Usuário de teste fora do banco ou sem o currículo mínimo: não há o que desativar'
     )
 
     await controle.click()

@@ -38,15 +38,24 @@ export function subtituloMeuCurriculo(
 }
 
 /**
- * Subtítulo do controle do banco de currículos. O banco mostra o que a pessoa
- * conseguiu salvar, então o controle vale para qualquer currículo, completo ou
- * não.
+ * Subtítulo do controle do banco de currículos. O banco segue a regra das
+ * vagas: só entra o currículo com o mínimo para se candidatar (escolaridade,
+ * situação atual e termos de uso aceitos).
  */
 export function subtituloBancoCurriculos(
-  status: Pick<BancoCurriculosStatus, 'temCurriculo' | 'disponivel'>
+  status: Pick<BancoCurriculosStatus, 'curriculoCompleto' | 'disponivel'>
 ): string {
-  if (!status.temCurriculo) return 'Disponível depois de criar o currículo'
+  if (!status.curriculoCompleto) return 'Disponível com o currículo atualizado'
   return status.disponivel
-    ? 'Recrutadores podem ver seu currículo'
-    : 'Recrutadores não podem ver seu currículo'
+    ? 'Recrutadores podem consultar seu currículo'
+    : 'Recrutadores não podem consultar seu currículo'
+}
+
+/**
+ * Subtítulo do card "Minhas candidaturas": quantas candidaturas mudaram de
+ * status ou de etapa desde a última vez que a pessoa abriu a lista.
+ */
+export function subtituloMinhasCandidaturas(atualizacoes: number): string {
+  if (atualizacoes <= 0) return 'Sem atualizações'
+  return `${atualizacoes} ${atualizacoes === 1 ? 'atualização' : 'atualizações'}`
 }

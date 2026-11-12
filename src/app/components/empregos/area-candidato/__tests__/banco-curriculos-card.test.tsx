@@ -9,7 +9,7 @@ function renderCard(
   const onAlterar = vi.fn()
   render(
     <BancoCurriculosCard
-      temCurriculo
+      curriculoCompleto
       disponivel
       salvando={false}
       onAlterar={onAlterar}
@@ -20,22 +20,23 @@ function renderCard(
 }
 
 describe('BancoCurriculosCard', () => {
-  it('sem currículo, o controle fica bloqueado', () => {
-    const { controle } = renderCard({ temCurriculo: false, disponivel: false })
+  it('sem o currículo mínimo, o controle fica bloqueado e desligado', () => {
+    const { controle } = renderCard({ curriculoCompleto: false })
 
     expect(controle).toBeDisabled()
+    expect(controle).not.toBeChecked()
     expect(
-      screen.getByText('Disponível depois de criar o currículo')
+      screen.getByText('Disponível com o currículo atualizado')
     ).toBeInTheDocument()
   })
 
-  it('com currículo, o controle fica liberado e mostra a escolha', () => {
+  it('com o currículo mínimo, o controle fica liberado e mostra a escolha', () => {
     const { controle } = renderCard()
 
     expect(controle).toBeEnabled()
     expect(controle).toBeChecked()
     expect(
-      screen.getByText('Recrutadores podem ver seu currículo')
+      screen.getByText('Recrutadores podem consultar seu currículo')
     ).toBeInTheDocument()
   })
 
@@ -72,7 +73,7 @@ describe('BancoCurriculosCard', () => {
     const { onAlterar, controle } = renderCard({ disponivel: false })
 
     expect(
-      screen.getByText('Recrutadores não podem ver seu currículo')
+      screen.getByText('Recrutadores não podem consultar seu currículo')
     ).toBeInTheDocument()
 
     await user.click(controle)

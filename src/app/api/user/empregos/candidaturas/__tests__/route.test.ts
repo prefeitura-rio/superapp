@@ -48,4 +48,26 @@ describe('candidaturas route — lista completa', () => {
     expect(body.total).toBe(0)
     expect(body.hasCandidaturas).toBe(false)
   })
+
+  it('devolve as atualizações não vistas que a API conta', async () => {
+    mockList.mockResolvedValue({
+      status: 200,
+      data: { data: [], meta: { total: 3 }, atualizacoes: 2 },
+    } as never)
+
+    const body = await (await GET(request())).json()
+
+    expect(body.atualizacoes).toBe(2)
+  })
+
+  it('API sem o campo atualizacoes conta zero', async () => {
+    mockList.mockResolvedValue({
+      status: 200,
+      data: { data: [], meta: { total: 3 } },
+    } as never)
+
+    const body = await (await GET(request())).json()
+
+    expect(body.atualizacoes).toBe(0)
+  })
 })

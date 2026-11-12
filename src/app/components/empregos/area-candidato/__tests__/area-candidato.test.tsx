@@ -32,6 +32,12 @@ const incompletoVisivel: BancoCurriculosStatus = {
   disponivel: true,
 }
 
+const completoVisivel: BancoCurriculosStatus = {
+  ...incompletoVisivel,
+  curriculoCompleto: true,
+  pendencias: [],
+}
+
 function logado(isLoggedIn: boolean) {
   mockUseAuthHeader.mockReturnValue({
     data: { isLoggedIn },
@@ -39,7 +45,11 @@ function logado(isLoggedIn: boolean) {
   })
 }
 
-function responder(status: BancoCurriculosStatus, totalCandidaturas = 0) {
+function responder(
+  status: BancoCurriculosStatus,
+  totalCandidaturas = 0,
+  atualizacoes = 0
+) {
   const puts: unknown[] = []
   server.use(
     http.get(BANCO_URL, () => HttpResponse.json(status)),
@@ -53,6 +63,7 @@ function responder(status: BancoCurriculosStatus, totalCandidaturas = 0) {
         candidaturas: [],
         hasCandidaturas: totalCandidaturas > 0,
         total: totalCandidaturas,
+        atualizacoes,
       })
     )
   )
@@ -86,15 +97,20 @@ describe('AreaCandidato', () => {
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
   })
 
-  it('logado vê os cards e o controle liberado mesmo com o currículo incompleto', async () => {
+  // O banco segue a regra das vagas: sem o currículo mínimo, o controle fica
+  // bloqueado e desligado, mesmo que a escolha salva seja ficar disponível.
+  it('logado com o currículo incompleto vê os cards e o controle bloqueado', async () => {
     logado(true)
     responder(incompletoVisivel, 3)
 
     renderArea()
 
     const controle = await screen.findByRole('switch')
-    expect(controle).toBeEnabled()
-    expect(controle).toBeChecked()
+    expect(controle).toBeDisabled()
+    expect(controle).not.toBeChecked()
+    expect(
+      screen.getByText('Disponível com o currículo atualizado')
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Meu Currículo/ })).toHaveAttribute(
       'href',
       '/servicos/trabalho/curriculo'
@@ -104,19 +120,29 @@ describe('AreaCandidato', () => {
       screen.getByRole('link', { name: /Minhas candidaturas/ })
     ).toHaveAttribute('href', '/servicos/trabalho/minhas-candidaturas')
     expect(await screen.findByLabelText('3 candidaturas')).toBeInTheDocument()
+    expect(screen.getByText('Sem atualizações')).toBeInTheDocument()
+  })
+
+  it('mostra quantas candidaturas têm atualização não vista', async () => {
+    logado(true)
+    responder(incompletoVisivel, 3, 2)
+
+    renderArea()
+
+    expect(await screen.findByText('2 atualizações')).toHaveClass('text-card-2')
   })
 
   it('desativar confirmado grava a escolha e atualiza o card', async () => {
     const user = userEvent.setup()
     logado(true)
-    const puts = responder(incompletoVisivel)
+    const puts = responder(completoVisivel)
 
     renderArea()
     await user.click(await screen.findByRole('switch'))
     await user.click(screen.getByRole('button', { name: 'Desativar' }))
 
     expect(
-      await screen.findByText('Recrutadores não podem ver seu currículo')
+      await screen.findByText('Recrutadores não podem consultar seu currículo')
     ).toBeInTheDocument()
     expect(screen.getByRole('switch')).not.toBeChecked()
     expect(puts).toEqual([{ disponivel: false }])
@@ -125,7 +151,7 @@ describe('AreaCandidato', () => {
   it('avisa quando não consegue gravar a escolha', async () => {
     const user = userEvent.setup()
     logado(true)
-    responder({ ...incompletoVisivel, disponivel: false })
+    responder({ ...completoVisivel, disponivel: false })
     server.use(
       http.put(BANCO_URL, () =>
         HttpResponse.json({ error: 'falhou' }, { status: 502 })
