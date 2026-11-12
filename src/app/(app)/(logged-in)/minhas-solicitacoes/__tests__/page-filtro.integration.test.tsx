@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
  * Integração da página: `?filtro=` da URL → página (server) → OrigemChamados →
@@ -120,5 +120,26 @@ describe('/minhas-solicitacoes?filtro= (destino do menu global)', () => {
 
     expect(activeTab()).toBe('Todos')
     expect(screen.getByText('Remoção de entulho')).toBeInTheDocument()
+  })
+})
+
+describe('/minhas-solicitacoes?filtro= com o histórico SGRC (modo mock)', () => {
+  beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('as abas de origem aparecem e o filtro do menu continua valendo', async () => {
+    await renderPage('ouvidoria')
+
+    expect(
+      screen.getByRole('button', { name: 'Chamados recentes' })
+    ).toBeInTheDocument()
+    expect(activeTab()).toBe('Ouvidoria')
+    expect(screen.getByText('Reclamação de atendimento')).toBeInTheDocument()
+    expect(screen.queryByText('Remoção de entulho')).not.toBeInTheDocument()
   })
 })
