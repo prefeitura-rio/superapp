@@ -478,6 +478,9 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
    auth e valida as credenciais:
    - **PR de fork** → `E2E_REQUIRE_AUTH=false` (o GitHub não passa secrets a
      forks; roda só o público, sem falhar).
+   - **PR do Dependabot** (`github.actor == 'dependabot[bot]'`) → idem: o run
+     recebe só os secrets de Dependabot, não os de Actions. A suíte autenticada
+     volta a rodar no próximo PR same-repo depois do merge do bump.
    - **Push / PR same-repo** → `E2E_REQUIRE_AUTH=true` e exige:
      - **Token de auth**: `access_token` preferencialmente **mintado na hora** a
        partir de `E2E_REFRESH_TOKEN` (grant `refresh_token` no Keycloak, usando
@@ -534,6 +537,7 @@ entra no resumo final do gate (linha "E2E Tests"). Não há mais um workflow
 | `empregos.spec.ts` — testes dependentes de vaga ("Mais recentes", página da vaga/empresa) | skip **discriminante** em runtime | Homolog sem vaga `publicado_ativo` (dado do ambiente). **Só pula** se a API confirmar 0 vagas ativas; **falha** se houver vagas e a home não renderizar (bug) ou a API cair. Um **canário** não pula. |
 | `empregos.spec.ts` — inscrição / candidatura | skip em runtime | Conta já possui candidatura para a 1ª vaga (estado dinâmico da conta) |
 | `empregos.spec.ts` — página da empresa (2 testes) | skip em runtime | 1ª vaga sem CNPJ de empresa vinculado (estado dinâmico dos dados) |
+| `divida-ativa.spec.ts` — lista de imóveis | skip sem `BASE_API_URL_DIVIDA_ATIVA` | A lista é buscada no servidor (`page.route()` não intercepta); sem a API a página cai no error boundary. A URL de homolog ainda não está provisionada para o CI |
 
 Os demais `test.skip(!hasE2EAuth(), …)` são **gates de autenticação**: só pulam
 quando `E2E_ACCESS_TOKEN` não está definido (ex.: PRs de fork sem secrets).

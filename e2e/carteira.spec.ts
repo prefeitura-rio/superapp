@@ -65,11 +65,15 @@ test.describe('Carteira', () => {
       }
     )
 
+    // Com pet: cartão "REGISTRO GERAL DE ANIMAIS" (pet-wallet.tsx).
+    // Sem pet: estado vazio com o link do SISBICHO (wallet-content.tsx).
+    const cartaoPet = page.getByText('REGISTRO GERAL DE ANIMAIS', {
+      exact: true,
+    })
     const semPet = page.getByText('Você ainda não tem um animal cadastrado', {
       exact: false,
     })
-    const conhecaSisbicho = page.getByText('SISBICHO', { exact: false })
-    await expect(semPet.or(conhecaSisbicho).first()).toBeVisible({
+    await expect(cartaoPet.or(semPet).first()).toBeVisible({
       timeout: 20000,
     })
   })

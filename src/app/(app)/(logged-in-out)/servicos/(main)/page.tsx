@@ -1,32 +1,33 @@
 import { CategoryGrid } from '@/app/components/category-grid'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
-import { SearchButton } from '@/app/components/search-button'
 import { additionalCategories } from '@/constants/aditional-services'
+import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
 
 export const revalidate = 600
 
 export default async function ServicesPage() {
-  const categories = await fetchCategories()
+  const [categories, mostAccessed] = await Promise.all([
+    fetchCategories(),
+    resolveMostAccessedServices(),
+  ])
   const allCategories = [...categories, ...additionalCategories]
 
   return (
-    <main className="flex max-w-4xl mx-auto flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="px-4 py-6 flex justify-between items-start">
-        <h1 className="text-2xl font-bold">Serviços</h1>
+    <div className="w-full bg-background text-foreground">
+      <HeaderWrapperClient />
+      <main className="w-full max-w-4xl mx-auto flex flex-col pb-6">
+        <h1 className="sr-only">Serviços</h1>
+        {/* Most Accessed Service Cards*/}
+        <MostAccessedServiceCards services={mostAccessed} limit={4} />
 
-        <SearchButton href="/busca?tipo=servicos" />
-      </header>
+        {/* Category Grid*/}
+        <CategoryGrid title="Categorias" categories={allCategories} />
 
-      {/* Most Accessed Service Cards*/}
-      <MostAccessedServiceCards limit={4} />
-
-      {/* Category Grid*/}
-      <CategoryGrid title="Categorias" categories={allCategories} />
-
-      <FloatNavigationWrapper />
-    </main>
+        <FloatNavigationWrapper />
+      </main>
+    </div>
   )
 }

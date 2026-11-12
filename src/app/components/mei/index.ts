@@ -5,8 +5,6 @@ export {
   type ProposalStatus,
 } from './mei-proposal-card'
 export { MeiPageClient } from './mei-page-client'
-export { ServiceTypeToggle } from './service-type-toggle'
-export { ServiceTypeToggleSkeleton } from './service-type-toggle-skeleton'
 
 // Detail page components
 export {

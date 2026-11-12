@@ -1,3 +1,4 @@
+import { isPreviewCartaServicosEnabled } from '@/constants/venvs'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 import {
   type MiddlewareConfig,
@@ -5,7 +6,8 @@ import {
   NextResponse,
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
-import { handleExpiredToken, isJwtExpired } from './lib'
+import { applySecurityHeaders, handleExpiredToken, isJwtExpired } from './lib'
+import { isSalesforceServicesEnabled } from './lib/feature-flags'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -13,6 +15,8 @@ const publicRoutes = [
   { path: '/faq/*', whenAuthenticated: 'next' },
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos/*', whenAuthenticated: 'next' },
   { path: '/ouvidoria/*', whenAuthenticated: 'next' },
   { path: '/consulta-protocolo', whenAuthenticated: 'next' },
   { path: '/solicitacoes', whenAuthenticated: 'next' },
@@ -22,16 +26,14 @@ const publicRoutes = [
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
   { path: '/termos-de-uso', whenAuthenticated: 'next' },
-  { path: '/politica-de-privacidade', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso/*', whenAuthenticated: 'next' },
 ] as const
 
 /**
- * Rotas antigas que foram promovidas a documentos institucionais globais.
- * Mantidas com 308 porque são divulgadas externamente.
+ * Rotas antigas que deixaram de existir. 308 porque podem estar salvas ou
+ * divulgadas: os menus por módulo foram absorvidos pelo menu global.
  */
 const legacyRedirects: Record<string, string> = {
-  '/servicos/trabalho/termos-de-uso': '/termos-de-uso',
-  // Menus por módulo foram absorvidos pelo menu global
   '/servicos/cursos/opcoes': '/servicos/cursos',
   '/servicos/trabalho/menu': '/servicos/trabalho',
 }
@@ -92,13 +94,13 @@ export async function middleware(request: NextRequest) {
 
       const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
-  script-src ${scriptSrcDirectives.join(' ')} https://plugin.handtalk.me https://storage.googleapis.com https://cdn.equalweb.com https://access.equalweb.com https://*.pertoplugin.link;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
-  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://*.handtalk.me https://rio-queue.dados.rio https://*.equalweb.com https://*.pertoplugin.link https://us-central1-pertodigital-fe5e0.cloudfunctions.net https://cdn.jsdelivr.net https://glosa.pertodigital.com.br/ https://transcricao.pertodigital.com.br:3001/ https://simplificador.pertodigital.com.br:3001/;
-  frame-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net https://plugin.handtalk.me https://*.equalweb.com;
-  media-src 'self' https://storage.googleapis.com data: blob: https://*.handtalk.me https://*.equalweb.com https://*.pertoplugin.link;
+  script-src ${scriptSrcDirectives.join(' ')} https://storage.googleapis.com https://vlibras.gov.br https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://vlibras.gov.br https://cdn.jsdelivr.net;
+  font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://vlibras.gov.br https://cdn.jsdelivr.net;
+  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://rio-queue.dados.rio https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br;
+  frame-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net https://vlibras.gov.br;
+  media-src 'self' https://storage.googleapis.com data: blob:;
 
   object-src 'none';
   base-uri 'self';
@@ -131,10 +133,7 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -151,10 +150,7 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
@@ -172,15 +168,12 @@ export async function middleware(request: NextRequest) {
           url.pathname = '/not-found'
 
           const response = NextResponse.rewrite(url)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
 
-      // Legacy URLs: documentos institucionais que saíram de um módulo
+      // Legacy URLs: telas que deixaram de existir (menus por módulo)
       const legacyRedirect = legacyRedirects[path]
       if (legacyRedirect) {
         const url = request.nextUrl.clone()
@@ -204,17 +197,13 @@ export async function middleware(request: NextRequest) {
               : `/servicos/trabalho${path.slice(legacyPath.length)}`
 
           const response = NextResponse.redirect(url, 308)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
       }
 
       // Block chamados routes when feature flag is disabled
-      const isChamadosEnabled =
-        process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
+      const isSalesforceEnabled = isSalesforceServicesEnabled()
       const chamadosRoutes = [
         '/minhas-solicitacoes',
         '/consulta-protocolo',
@@ -224,14 +213,38 @@ export async function middleware(request: NextRequest) {
         r => path === r || path.startsWith(`${r}/`)
       )
 
-      if (!isChamadosEnabled && isChamadosRoute) {
+      const cartaRoutes = ['/carta-de-servicos']
+      const isCartaRoute = cartaRoutes.some(
+        r => path === r || path.startsWith(`${r}/`)
+      )
+
+      if (!isSalesforceEnabled && (isChamadosRoute || isCartaRoute)) {
         const url = request.nextUrl.clone()
         url.pathname = '/not-found'
         const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
+        return response
+      }
+
+      // Block Dívida Ativa routes when the feature flag is disabled.
+      // Boolean flag (not the NEXT_PUBLIC_FEATURE_FLAG allowlist) because the allowlist means
+      // "everything visible" when it is 'false', which is its value in dev and staging.
+      //
+      // The module lives at /divida-ativa (not under /servicos) on purpose: /servicos/* is in
+      // publicRoutes, so anything below it is public regardless of the folder it sits in.
+      // Outside the allowlist the middleware forces login for the whole module.
+      const isDividaAtivaEnabled =
+        process.env.NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA === 'true'
+      const dividaAtivaRoute = '/divida-ativa'
+      const isDividaAtivaRoute =
+        path === dividaAtivaRoute || path.startsWith(`${dividaAtivaRoute}/`)
+
+      if (!isDividaAtivaEnabled && isDividaAtivaRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/not-found'
+
+        const response = NextResponse.rewrite(url)
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         return response
       }
 
@@ -244,10 +257,7 @@ export async function middleware(request: NextRequest) {
         url.pathname = '/not-found'
 
         const response = NextResponse.rewrite(url)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         return response
       }
 
@@ -278,6 +288,37 @@ export async function middleware(request: NextRequest) {
         contentSecurityPolicyHeaderValue
       )
 
+      // Preview shell has no service payload. Keep it out of the public cache
+      // and out of search indexes. The draft arrives later via postMessage.
+      if (
+        path === '/servicos/preview' ||
+        path.startsWith('/servicos/preview/')
+      ) {
+        if (!isPreviewCartaServicosEnabled()) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/not-found'
+          const response = NextResponse.rewrite(url)
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
+          span.setStatus({ code: SpanStatusCode.OK })
+          span.end()
+          return response
+        }
+
+        requestHeaders.set('x-service-preview', '1')
+        const response = NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        })
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        response.headers.set('Referrer-Policy', 'no-referrer')
+        response.headers.set('Cache-Control', 'private, no-store')
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end()
+        return response
+      }
+
       // Special handling for wallet routes
       if (path === '/carteira') {
         span.addEvent('wallet.route.check')
@@ -288,10 +329,7 @@ export async function middleware(request: NextRequest) {
           redirectUrl.pathname = '/autenticacao-necessaria/carteira'
           redirectUrl.search = ''
           const response = NextResponse.redirect(redirectUrl)
-          response.headers.set(
-            'Content-Security-Policy',
-            contentSecurityPolicyHeaderValue
-          )
+          applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return response
@@ -306,10 +344,7 @@ export async function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         // Set cache headers for public pages (2 minutes, allow stale for 5 min)
         response.headers.set(
           'Cache-Control',
@@ -338,10 +373,7 @@ export async function middleware(request: NextRequest) {
           span.setAttribute('redirect.target', '/')
         }
         const response = NextResponse.redirect(redirectUrl)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -391,10 +423,7 @@ export async function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         })
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response
@@ -409,10 +438,7 @@ export async function middleware(request: NextRequest) {
         redirectUrl.href = authUrlWithReturn
         span.setAttribute('redirect.return_url', returnUrl)
         const response = NextResponse.redirect(redirectUrl)
-        response.headers.set(
-          'Content-Security-Policy',
-          contentSecurityPolicyHeaderValue
-        )
+        applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
         span.setStatus({ code: SpanStatusCode.OK })
         span.end()
         return response

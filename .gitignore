@@ -68,3 +68,7 @@ k6/analysis-*/
 
 # tmp
 /tmp/
+/.tmp/
+
+# VSCODE
+.vscode/launch.json

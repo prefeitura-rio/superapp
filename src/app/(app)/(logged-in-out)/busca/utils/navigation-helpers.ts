@@ -114,6 +114,16 @@ export function handleSearchItemClick(
   }
 }
 
+function metadataText(
+  metadata: Record<string, unknown> | undefined,
+  key: string
+): string | undefined {
+  const value = metadata?.[key]
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed || undefined
+}
+
 /**
  * Handles click on a universal catalog search result item (ModelsSearchItem)
  */
@@ -121,7 +131,8 @@ export function handleCatalogItemClick(
   item: ModelsSearchItem,
   query: string,
   router: AppRouterInstance,
-  onExternalLinkClick: (url: string) => void
+  onExternalLinkClick: (url: string) => void,
+  options?: { cartaServicosEnabled?: boolean }
 ): void {
   sendGAEvent('event', 'universal_search_result_click', {
     search_query: query,
@@ -133,8 +144,23 @@ export function handleCatalogItemClick(
   const metadata = item.metadata as Record<string, unknown> | undefined
 
   if (item.type === 'service') {
-    const slug = metadata?.slug as string | undefined
-    const temaGeral = metadata?.tema_geral as string | undefined
+    const slug = metadataText(metadata, 'slug')
+    if (options?.cartaServicosEnabled && slug) {
+      const themeSlug = metadataText(metadata, 'themeSlug')
+      const themeName =
+        metadataText(metadata, 'themeName') ??
+        metadataText(metadata, 'tema_geral')
+      const categorySlug =
+        themeSlug ?? (themeName ? normalizeCategorySlug(themeName) : undefined)
+      if (categorySlug) {
+        router.push(
+          `/servicos/categoria/${encodeURIComponent(categorySlug)}/${slug}`
+        )
+        return
+      }
+    }
+
+    const temaGeral = metadataText(metadata, 'tema_geral')
     if (slug && temaGeral) {
       const categorySlug = normalizeCategorySlug(temaGeral)
       router.push(

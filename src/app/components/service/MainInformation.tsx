@@ -1,16 +1,19 @@
 'use client'
 
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import type { ServiceContentFormat } from '@/lib/carta-servicos/types'
 import { TextBlock } from './TextBlocks'
 
 interface MainInformationProps {
   serviceData: ModelsPrefRioService
-  renderMarkdown: (content: string) => React.ReactNode
+  contentFormat?: ServiceContentFormat
+  renderContent: (content: string) => React.ReactNode
 }
 
 export function MainInformation({
   serviceData,
-  renderMarkdown,
+  contentFormat = 'markdown',
+  renderContent,
 }: MainInformationProps) {
   // Prepare text blocks from service data
   const blocks = [
@@ -61,7 +64,8 @@ export function MainInformation({
             key={index}
             title={block.title}
             content={block.content!}
-            renderMarkdown={renderMarkdown}
+            contentFormat={contentFormat}
+            renderContent={renderContent}
           />
         ))}
       </div>

@@ -863,6 +863,62 @@ components:
                   tipoEndereco:
                     type: string
                     example: "Residencial"
+              id:
+                type: string
+                description: ID da WorkOrder no Salesforce (usado como woId nos deep links).
+                example: "0WObe000005jXubGAE"
+              motivoFechamento:
+                type: string
+                nullable: true
+                description: Motivo de fechamento da OS.
+                example: "Fechado com solução"
+              isAcessoInformacao:
+                type: boolean
+                description: true quando a OS é um pedido LAI.
+                example: false
+              canOpen:
+                type: object
+                nullable: true
+                description: Manifestações disponíveis para este chamado.
+                properties:
+                  elogio:
+                    type: object
+                    properties:
+                      available:
+                        type: boolean
+                      categoryId:
+                        type: string
+                        nullable: true
+                  sugestao:
+                    type: object
+                    properties:
+                      available:
+                        type: boolean
+                      categoryId:
+                        type: string
+                        nullable: true
+                  reclamacao:
+                    type: object
+                    properties:
+                      available:
+                        type: boolean
+                      categoryId:
+                        type: string
+                        nullable: true
+                  recurso:
+                    type: object
+                    nullable: true
+                    properties:
+                      available:
+                        type: boolean
+                      categoryId:
+                        type: string
+                        nullable: true
+                      deadline:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: Prazo-limite ISO-8601 para abrir recurso.
               status:
                 type: string
                 example: "Em andamento"

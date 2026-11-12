@@ -1,6 +1,10 @@
 import { PhoneIcon, ServicesIcon, WalletIcon } from '@/assets/icons'
 import { Home2Icon } from '@/assets/icons/home2-icon'
-import { isFeatureEnabled } from '@/lib/feature-flags'
+import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
+import {
+  isFeatureEnabled,
+  isSalesforceServicesEnabled,
+} from '@/lib/feature-flags'
 import { GraduationCapIcon, StarIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
@@ -9,7 +13,6 @@ import type { ReactNode } from 'react'
  * `href` existe, então nenhum ponto de entrada aponta para 404.
  *
  * - LAI: redirecionamento do Salesforce, PM confirmando com o Patrick.
- * - Política de Privacidade: fora da lista do card, aguardando decisão.
  * - Carta de Serviços: marcada como "não desenvolver - v1" no handoff;
  *   proposta é apontar para /servicos (o catálogo já é servido pela API da
  *   Carta de Serviços), aguardando confirmação.
@@ -129,10 +132,9 @@ const ENTRIES: GlobalMenuEntry[] = [
       {
         id: 'minhas-solicitacoes',
         label: 'Minhas solicitações',
-        href:
-          process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
-            ? '/minhas-solicitacoes'
-            : undefined,
+        href: isSalesforceServicesEnabled()
+          ? '/minhas-solicitacoes'
+          : undefined,
         requiresAuth: true,
       },
       {
@@ -154,15 +156,12 @@ const ENTRIES: GlobalMenuEntry[] = [
     label: 'Outros',
     icon: <StarIcon className={iconClassName} />,
     items: [
+      // Termos de uso e Política de Privacidade são um documento só: a lista
+      // de Termos de uso por plataforma (PREF-653).
       {
         id: 'termos-de-uso',
         label: 'Termos de uso',
-        href: '/termos-de-uso',
-      },
-      {
-        id: 'politica-de-privacidade',
-        label: 'Política de Privacidade',
-        href: PENDING_DESTINATION,
+        href: TERMOS_DE_USO_ROUTE,
       },
       {
         id: 'carta-de-servicos',

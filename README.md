@@ -2,7 +2,7 @@
 
 **PrefRio** is the main web application of the Rio de Janeiro City Hall's digital ecosystem, digital wallets, courses and customer service.
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.3.5-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -16,7 +16,7 @@
 
 | Category       | Technology                    |
 | -------------- | ----------------------------- |
-| Framework      | Next.js 15.4.6 + React 19     |
+| Framework      | Next.js 16.3.5 + React 19     |
 | Language       | TypeScript                    |
 | Styling        | TailwindCSS 4 + shadcn/ui     |
 | Authentication | Keycloak (Identidade Carioca) |

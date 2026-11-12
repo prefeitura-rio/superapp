@@ -1,32 +1,26 @@
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function UserAuthorizationsLoading() {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto pt-28 flex flex-col space-y-4">
-      {/* Fixed header skeleton mimicking SecondaryHeader */}
-      <header className="p-4 pt-6 fixed top-0 flex items-center w-full justify-start max-w-4xl mx-auto z-50 bg-background text-foreground h-16">
-        <Skeleton className="h-12 w-12 rounded-full" />
-      </header>
+    <div className="max-w-4xl mx-auto flex flex-col space-y-6">
+      <ProfileHeaderWrapper />
 
-      <div className="space-y-4 mx-4">
-        {/* Main heading skeleton */}
+      <div className="mx-4 flex flex-col gap-2">
+        {/* Heading skeleton */}
         <div className="space-y-2">
-          <Skeleton className="h-6 w-full" />
-          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-3/4" />
         </div>
 
-        {/* First paragraph skeleton */}
-        <div className="space-y-2">
+        {/* Paragraphs skeleton — no gap between them, matches page */}
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-2/3" />
-        </div>
-
-        {/* Second paragraph skeleton */}
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-4/5" />
         </div>
       </div>
 

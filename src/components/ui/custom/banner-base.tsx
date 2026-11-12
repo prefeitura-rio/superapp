@@ -105,9 +105,11 @@ export const BannerBase: React.FC<BannerBaseProps> = ({
         </div>
 
         <div className="flex flex-col gap-0">
-          <h3 className="text-xl font-semibold leading-6 text-white">
-            {title}
-          </h3>
+          {title && (
+            <p className="text-xl font-semibold leading-6 text-white">
+              {title}
+            </p>
+          )}
           {subtitle && (
             <p className="text-sm text-white/60 leading-4">{subtitle}</p>
           )}

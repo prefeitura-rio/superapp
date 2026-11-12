@@ -92,9 +92,6 @@ describe('buildGlobalMenu', () => {
         const entradas = buildGlobalMenu(logado)
         expect(itensDaSecao(entradas, 'atendimentos')).not.toContain('lai')
         expect(itensDaSecao(entradas, 'outros')).not.toContain(
-          'politica-de-privacidade'
-        )
-        expect(itensDaSecao(entradas, 'outros')).not.toContain(
           'carta-de-servicos'
         )
       }
@@ -107,6 +104,32 @@ describe('buildGlobalMenu', () => {
       expect(itensDaSecao(entradas, 'outros')).toEqual(
         expect.arrayContaining(['termos-de-uso', 'faq'])
       )
+    })
+
+    test('Termos de uso leva à lista de Termos de uso, logado ou não', async () => {
+      const buildGlobalMenu = await carregarMenu()
+
+      for (const logado of [true, false]) {
+        const outros = buildGlobalMenu(logado).find(e => e.id === 'outros')
+        const termos =
+          outros?.kind === 'section'
+            ? outros.items.find(item => item.id === 'termos-de-uso')
+            : undefined
+        expect(termos).toMatchObject({
+          label: 'Termos de uso',
+          href: '/termos-de-uso',
+        })
+      }
+    })
+
+    test('Política de Privacidade não tem item próprio: virou parte dos Termos de uso', async () => {
+      const buildGlobalMenu = await carregarMenu()
+
+      for (const logado of [true, false]) {
+        expect(itensDaSecao(buildGlobalMenu(logado), 'outros')).not.toContain(
+          'politica-de-privacidade'
+        )
+      }
     })
   })
 
@@ -133,16 +156,16 @@ describe('buildGlobalMenu', () => {
       expect(idsDe(entradas)).not.toContain('oportunidades-cariocas')
     })
 
-    test('Minhas solicitações depende da flag de chamados', async () => {
+    test('Minhas solicitações depende da flag do Salesforce', async () => {
       const semChamados = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_CHAMADOS: 'false',
+        NEXT_PUBLIC_FEATURE_SALESFORCE: 'false',
       })
       expect(itensDaSecao(semChamados(true), 'atendimentos')).not.toContain(
         'minhas-solicitacoes'
       )
 
       const comChamados = await carregarMenu({
-        NEXT_PUBLIC_FEATURE_CHAMADOS: 'true',
+        NEXT_PUBLIC_FEATURE_SALESFORCE: 'true',
       })
       expect(itensDaSecao(comChamados(true), 'atendimentos')).toContain(
         'minhas-solicitacoes'

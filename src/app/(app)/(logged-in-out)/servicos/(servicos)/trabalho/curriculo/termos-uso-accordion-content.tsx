@@ -1,7 +1,11 @@
 'use client'
 
 import { Checkbox } from '@/components/ui/checkbox'
-import { CustomButton } from '@/components/ui/custom/custom-button'
+import {
+  CustomButton,
+  accordionCancelButtonClassName,
+  accordionSaveButtonClassName,
+} from '@/components/ui/custom/custom-button'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -60,12 +64,8 @@ export function TermosUsoAccordionContent({
       <p className="text-primary text-sm font-normal leading-5">
         Ao preencher e enviar este formulário, você declara que leu e concorda
         com nossos{' '}
-        <Link href="/termos-de-uso" className="underline">
-          Termos de Uso
-        </Link>{' '}
-        e nosso{' '}
-        <Link href="/politica-de-privacidade" className="underline">
-          Aviso de Privacidade
+        <Link href="/servicos/trabalho/termos-de-uso" className="underline">
+          Termos de Uso e nosso Aviso de Privacidade
         </Link>
         . Seus dados serão compartilhados com a instituição responsável por esta
         vaga para fins de recrutamento e seleção.
@@ -101,9 +101,9 @@ export function TermosUsoAccordionContent({
       <div className="flex gap-3">
         <CustomButton
           type="button"
-          variant="secondary"
+          variant="card"
           size="lg"
-          className="flex-1"
+          className={accordionCancelButtonClassName}
           onClick={handleCancel}
         >
           Cancelar
@@ -112,12 +112,11 @@ export function TermosUsoAccordionContent({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1"
+          className={accordionSaveButtonClassName}
           onClick={handleSave}
           disabled={isSaving || alreadyAccepted}
-          loading={isSaving}
         >
-          Salvar
+          {isSaving ? 'Salvando...' : 'Salvar'}
         </CustomButton>
       </div>
     </div>

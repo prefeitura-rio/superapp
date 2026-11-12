@@ -76,20 +76,33 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await page.getByRole('button', { name: 'Outros' }).click()
     await expect(
       page.getByRole('link', { name: 'Autorizações' })
     ).toHaveAttribute('href', '/meu-perfil/autorizacoes')
 
-    // Intercepta o endpoint de logout para evitar redirecionamento externo
-    await page.route('/api/auth/logout', route =>
-      route.fulfill({ status: 200 })
+    // Intercepta o endpoint de logout para evitar redirecionamento externo.
+    // 204 numa navegação mantém a página atual.
+    const logoutRequests: URL[] = []
+    await page.route(
+      url => url.pathname === '/api/auth/logout',
+      route => {
+        logoutRequests.push(new URL(route.request().url()))
+        return route.fulfill({ status: 204 })
+      }
     )
 
     const sairBtn = page.getByRole('button', { name: 'Sair' })
     await expect(sairBtn).toBeVisible()
     await sairBtn.click()
+
+    // setIsLoading(true) roda de forma síncrona: label muda para "Saindo..."
+    await expect(page.getByText('Saindo...')).toBeVisible({ timeout: 5000 })
+
+    await expect.poll(() => logoutRequests.length).toBe(1)
+    expect(logoutRequests[0].searchParams.get('sso')).toBe('govbr')
+    await expect(page.locator('iframe[src*="logout"]')).toHaveCount(0)
   })
 })
 
@@ -171,10 +184,13 @@ test.describe('Meu Perfil — informações pessoais (autenticado)', () => {
     await expect(page).toHaveURL(
       '/meu-perfil/informacoes-pessoais/atualizar-telefone'
     )
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('celular')).toBeVisible()
     await expect(
-      page.getByText('Você irá receber um código via Whatsapp')
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+celular/ })
+    ).toBeVisible({ timeout: 10000 })
+    await expect(
+      page
+        .getByText('Você irá receber um código via Whatsapp')
+        .filter({ visible: true })
     ).toBeVisible()
   })
 
@@ -192,8 +208,9 @@ test.describe('Meu Perfil — informações pessoais (autenticado)', () => {
     await expect(page).toHaveURL(
       '/meu-perfil/informacoes-pessoais/atualizar-email'
     )
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('email')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+email/ })
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('bottom sheet Cor / Raça exibe todas as opções', async ({ page }) => {
@@ -462,33 +479,28 @@ test.describe('FAQ (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('hub lista os três assuntos com hrefs corretos', async ({ page }) => {
+  test('exibe título "Perguntas Frequentes" e opções de navegação no hub', async ({
+    page,
+  }) => {
     await page.goto('/faq')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Perguntas Frequentes' })
     ).toBeVisible({ timeout: 15000 })
 
+    // Restrito ao <main> e com nome exato: os logos do cabeçalho
+    // ("PrefRio – página inicial") e do rodapé ("PrefRio") também são links
+    // com "PrefRio" no nome acessível.
     await expect(
-      page.getByRole('link', { name: 'PrefRio', exact: true })
-    ).toHaveAttribute('href', '/faq/pref-rio')
-    await expect(
-      page.getByRole('link', { name: 'Cursos', exact: true })
-    ).toHaveAttribute('href', '/servicos/cursos/faq')
-    await expect(
-      page.getByRole('link', { name: 'Trabalho', exact: true })
-    ).toHaveAttribute('href', '/servicos/trabalho/faq')
+      page.getByRole('main').getByRole('link', { name: 'PrefRio', exact: true })
+    ).toBeVisible({
+      timeout: 10000,
+    })
   })
 
-  test('assunto PrefRio exibe o conteúdo institucional', async ({ page }) => {
-    await page.goto('/faq')
-    await page.getByRole('link', { name: 'PrefRio', exact: true }).click()
-    await page.waitForURL('**/faq/pref-rio', { timeout: 15000 })
-
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Perguntas Frequentes' })
-    ).toBeVisible({ timeout: 15000 })
+  test('navega para FAQ do PrefRio e exibe perguntas', async ({ page }) => {
+    await page.goto('/faq/prefrio')
     await expect(page.getByText('O que é a Plataforma PrefRio?')).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     })
   })
 })

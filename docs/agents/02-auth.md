@@ -7,7 +7,7 @@ Auth **custom** OAuth2/OIDC contra Identidade Carioca (Keycloak). Cookies httpOn
 - `access_token`
 - `refresh_token`
 
-**Não use next-auth** para features novas. A dependência `next-auth` no `package.json` **não** é o padrão do app (não há uso em `src/`).
+**Não use next-auth.** Auth é o fluxo Keycloak em cookies; não há camada Auth.js.
 
 Heimdall **não** entra no fluxo do cidadão neste portal.
 

@@ -16,9 +16,9 @@ export function MyCoursesHome({ courses }: MyCoursesHomeProps) {
   return (
     <>
       <Link href="/servicos/cursos/meus-cursos">
-        <h3 className="pb-2 text-base font-medium text-foreground leading-5 px-4 cursor-pointer hover:opacity-80 transition-opacity">
+        <h2 className="pb-2 text-base font-medium text-foreground leading-5 px-4 cursor-pointer hover:opacity-80 transition-opacity">
           Meus Cursos
-        </h3>
+        </h2>
       </Link>
       {/* Mobile: 4 cards em linha com scroll horizontal invisível (até max-w-xl = 576px) */}
       <div className="relative w-full overflow-x-auto pb-6 no-scrollbar max-[895px]:block min-[896px]:hidden">

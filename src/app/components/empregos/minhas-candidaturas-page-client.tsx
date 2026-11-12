@@ -2,20 +2,19 @@
 
 import { MinhasCandidaturasContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-content'
 import type { CandidaturaCardData } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/minhas-candidaturas/minhas-candidaturas-utils'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  oportunidadesCariocasLogo,
-  oportunidadesCariocasLogoDark,
-} from '@/constants/bucket'
-import { useQuery } from '@tanstack/react-query'
-import Image from 'next/image'
-import Link from 'next/link'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
-async function fetchCandidaturas(): Promise<{
+interface CandidaturasResponse {
   candidaturas: CandidaturaCardData[]
   hasCandidaturas: boolean
-}> {
+  /** Candidaturas com mudança de status ou de etapa ainda não vista. */
+  atualizacoes?: number
+}
+
+async function fetchCandidaturas(): Promise<CandidaturasResponse> {
   const res = await fetch('/api/user/empregos/candidaturas', {
     cache: 'no-store',
   })
@@ -23,53 +22,59 @@ async function fetchCandidaturas(): Promise<{
   return res.json()
 }
 
+async function marcarAtualizacoesVistas(): Promise<void> {
+  const res = await fetch('/api/user/empregos/candidaturas/visualizar', {
+    method: 'PUT',
+  })
+  if (!res.ok) throw new Error('Failed to mark candidaturas as seen')
+}
+
 function MinhasCandidaturasSkeleton() {
   return (
-    <main className="max-w-4xl min-h-lvh mx-auto text-foreground pb-10">
-      <SecondaryHeader
-        fixed={false}
-        route="/servicos/trabalho"
-        logo={
-          <Link href="/servicos/trabalho">
-            <Image
-              src={oportunidadesCariocasLogoDark}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:block hidden"
-            />
-            <Image
-              src={oportunidadesCariocasLogo}
-              alt="Oportunidades Cariocas"
-              width={170}
-              height={38}
-              priority
-              className="dark:hidden block"
-            />
-          </Link>
-        }
+    <div>
+      <OportunidadesSubHeader
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
       />
-      <div className="px-4 pt-2 md:pt-0">
-        <h1 className="text-3xl font-medium text-foreground pb-2">
-          Minhas candidaturas
-        </h1>
-        <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-36 rounded-3xl" />
-          ))}
+      <div>
+        <div className="max-w-4xl mx-auto text-foreground pb-10">
+          <div className="px-4 pt-2 md:pt-0">
+            <Skeleton className="h-9 w-52 mb-2" />
+            <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-36 rounded-3xl" />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }
 
 export function MinhasCandidaturasPageClient() {
+  const queryClient = useQueryClient()
   const { data, isLoading, isError } = useQuery({
     queryKey: ['candidaturas'],
     queryFn: fetchCandidaturas,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Abrir a lista é ver as atualizações: zera a contagem do card "Minhas
+  // candidaturas". Se falhar, a contagem só continua lá até a próxima visita.
+  const { mutate: marcarVistas } = useMutation({
+    mutationFn: marcarAtualizacoesVistas,
+    onSuccess: () => {
+      queryClient.setQueryData<CandidaturasResponse>(['candidaturas'], atual =>
+        atual ? { ...atual, atualizacoes: 0 } : atual
+      )
+    },
+  })
+  const atualizacoes = data?.atualizacoes ?? 0
+  useEffect(() => {
+    if (atualizacoes > 0) marcarVistas()
+  }, [atualizacoes, marcarVistas])
 
   if (isLoading) return <MinhasCandidaturasSkeleton />
 

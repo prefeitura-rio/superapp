@@ -1,9 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { LoginEventTracker } from '@/app/components/login-event-tracker'
-import { EqualWebPlugin } from '@/components/equalweb-plugin'
-import { HandTalkPlugin } from '@/components/hand-talk-plugin'
-import { PertoDigitalPlugin } from '@/components/perto-digital-plugin'
+import { AccessibilityPlugin } from '@/components/accessibility-plugin'
+import { VLibrasPlugin } from '@/components/vlibras-plugin'
+import {
+  isAccessibilityPluginEnabled,
+  isVLibrasEnabled,
+} from '@/lib/feature-flags'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -52,29 +55,27 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   // Note: Nonce is generated in middleware but not enforced in current CSP policy
-  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const requestHeaders = await headers()
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const isServicePreview = requestHeaders.get('x-service-preview') === '1'
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head suppressHydrationWarning>
         <link rel="manifest" href="/manifest.json" />
 
         <meta name="theme-color" content="#ffffff" />
-        {/* Google Analytics Data Stream */}
-        <GoogleAnalytics
-          debugMode={process.env.NODE_ENV === 'development'}
-          nonce={nonce}
-          gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
-        />
-        {/* Google Tag Manager */}
-        <GoogleTagManager
-          nonce={nonce}
-          gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
-        />
-        {process.env.NEXT_PUBLIC_HAND_TALK_TOKEN && (
-          <HandTalkPlugin
-            token={process.env.NEXT_PUBLIC_HAND_TALK_TOKEN}
-            nonce={nonce}
-          />
+        {isServicePreview ? null : (
+          <>
+            <GoogleAnalytics
+              debugMode={process.env.NODE_ENV === 'development'}
+              nonce={nonce}
+              gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
+            />
+            <GoogleTagManager
+              nonce={nonce}
+              gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || ''}
+            />
+          </>
         )}
         {process.env.NEXT_PUBLIC_RIO_QUEUE_URL &&
           process.env.NEXT_PUBLIC_RIO_QUEUE_API_URL && (
@@ -87,15 +88,8 @@ export default async function RootLayout({
               async
             />
           )}
-        {process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY && (
-          <EqualWebPlugin
-            sitekey={process.env.NEXT_PUBLIC_EQUALWEB_SITEKEY}
-            nonce={nonce}
-          />
-        )}
-        {process.env.NEXT_PUBLIC_PERTO_DIGITAL_ENABLED && (
-          <PertoDigitalPlugin nonce={nonce} />
-        )}
+        {isVLibrasEnabled() && <VLibrasPlugin nonce={nonce} />}
+        {isAccessibilityPluginEnabled() && <AccessibilityPlugin />}
       </head>
       <body
         className={`${dmSans.className} ${montserrat.variable} antialiased`}
@@ -106,6 +100,7 @@ export default async function RootLayout({
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
+          nonce={nonce}
         >
           <PWAProvider>{children}</PWAProvider>
           <LoginEventTracker />

@@ -4,6 +4,7 @@ import { TEST_ENV } from './env'
 // API base URLs for handlers
 const RMI_BASE_URL = TEST_ENV.BASE_API_URL_RMI
 const COURSES_BASE_URL = TEST_ENV.COURSES_BASE_API_URL
+const DIVIDA_ATIVA_BASE_URL = TEST_ENV.BASE_API_URL_DIVIDA_ATIVA
 
 // Default success responses
 const DEFAULT_SUCCESS_RESPONSE = { message: 'Success' }
@@ -44,12 +45,98 @@ const MOCK_NIVEIS_IDIOMA = {
   meta: { page: 1, page_size: 100, total: 3 },
 }
 
+export const MOCK_TIPOS_PCD = {
+  data: [
+    { id: 'pcd-fisica', descricao: 'Física' },
+    { id: 'pcd-auditiva', descricao: 'Auditiva' },
+    { id: 'pcd-intelectual', descricao: 'Intelectual' },
+    { id: 'pcd-multipla', descricao: 'Múltipla' },
+    { id: 'pcd-visual', descricao: 'Visual' },
+  ],
+  meta: { page: 1, page_size: 1000, total: 5 },
+}
+
 export const MOCK_VAGA_SEM_CRITERIOS = {
   id: 'vaga-abc-123',
   titulo: 'Vaga Teste',
   idade_minima: null,
   id_escolaridade_minima: null,
   idiomas_requisito: [],
+}
+
+// Dívida Ativa — payloads na forma real da API `api-imoveis`, verificada por chamada ao
+// vivo contra a instância de homologação em 17/08/2026. As divergências contra o antigo
+// contrato provisório estão em `docs/divida-ativa.md`. Estes mocks são o caminho feliz;
+// estados vazio, de erro e de borda são montados por teste com `server.use()`.
+//
+// Note o que a API **não** devolve: proprietário, bairro separado e indicador de débito.
+// Não acrescente esses campos aqui — são premissas em aberto (P19, P22, P12), e um mock
+// mais generoso que a API faria a suíte validar ficção.
+//
+// Os **valores** são fictícios de propósito. A primeira versão destes mocks copiou CPF e
+// endereço reais dos exemplos do spec; a própria API os substituiu por dado fictício em
+// 31/08/2026 e o repositório acompanhou. A *forma* é que precisa ser fiel — nunca o dado.
+export const MOCK_IMOVEL_DIVIDA_ATIVA = {
+  id: 32,
+  cpf: '12345678909',
+  dataInclusao: '2026-06-22T15:40:46.477',
+  endereco: 'RUA EXEMPLO, 123 / LOJA A - BAIRRO',
+  numInscricao: '00000018',
+  // Entrou no contrato em 08/09/2026. Vem `null` para registro gravado antes disso e para
+  // quem pulou o passo do nome — os dois casos são exercidos por teste com `server.use()`.
+  nome: 'Casa de praia',
+}
+
+// Opções do ePortal que acompanham a consulta de um imóvel já cadastrado. No dado real de
+// homologação as duas vêm indisponíveis, com `url: null`.
+export const MOCK_OPCOES_IPTU_DIVIDA_ATIVA = [
+  {
+    tipo: 'PARCELAMENTO',
+    titulo: 'Parcelamento',
+    descricao: 'Requerimento de parcelamento de debitos de IPTU.',
+    url: null,
+    disponivel: false,
+    mensagem: 'Parcelamento indisponivel para esta inscricao.',
+  },
+]
+
+// Dívida Ativa — consulta de débitos (Fase 3). Forma tirada do contrato real depois de a
+// `dam-api` declarar os schemas de resposta em 21/09/2026.
+//
+// Repare que **todo valor monetário é string**: é assim que o DAM devolve. Qual convenção
+// decimal ele usa segue não verificada (premissa P1) — o imóvel de teste de homologação não
+// tem CDA em aberto, então na prática só vimos `null`. O mock usa pt-BR com milhar; a outra
+// convenção é exercida nos testes de mapper.
+export const MOCK_CDA_DIVIDA_ATIVA = {
+  cdaId: '20240000111',
+  exercicio: '2024',
+  naturezaDivida: 'IPTU',
+  receita: '1112',
+  situacaoPrincipal: 'EM ABERTO',
+  situacaoHonorarios: 'EM ABERTO',
+  faseCobranca: 'AJUIZADA',
+  valorSaldoPrincipal: '1.234,56',
+  valorSaldoHonorarios: '123,45',
+  inscricaoImobiliaria: '00000018',
+  // D9: a CDA é selecionável **e** tem protocolo aberto. Não é contradição — é exatamente o
+  // caso que a tela precisa tratar como informação, não como bloqueio.
+  selecionavelParcelamento: true,
+  protocoloRequerimentoAberto: '2026000123',
+}
+
+export const MOCK_GUIA_PARCELADA_DIVIDA_ATIVA = {
+  numeroGuia: '900123',
+  descricaoSituacaoGuia: 'EM DIA',
+  descricaoTipoPagamento: 'PARCELAMENTO',
+  faseCobranca: 'AJUIZADA',
+  // `dd/MM/yyyy`: o formato que a API devolve nos campos vindos do DAM.
+  dataVencimento: '15/10/2026',
+  qtdPagas: '3',
+  qtdeParcelas: '12',
+  valorTotalGuia: '1.200,00',
+  valorSaldoTotal: '900,00',
+  linhaDigitavel: '00190000090123456789012345678901234567890123',
+  urlPdf: null,
 }
 
 export const handlers = [
@@ -78,6 +165,11 @@ export const handlers = [
 
   // RMI - Update address
   http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/address`, () => {
+    return HttpResponse.json(DEFAULT_SUCCESS_RESPONSE, { status: 200 })
+  }),
+
+  // RMI - Update birth date (self-declared)
+  http.put(`${RMI_BASE_URL}/v1/citizen/:cpf/birth-date`, () => {
     return HttpResponse.json(DEFAULT_SUCCESS_RESPONSE, { status: 200 })
   }),
 
@@ -125,8 +217,179 @@ export const handlers = [
     return HttpResponse.json(MOCK_NIVEIS_IDIOMA, { status: 200 })
   }),
 
+  // Empregabilidade - Tipos PcD
+  http.get(`${COURSES_BASE_URL}/api/v1/empregabilidade/tipos-pcd`, () => {
+    return HttpResponse.json(MOCK_TIPOS_PCD, { status: 200 })
+  }),
+
   // Empregabilidade - Criar candidatura
   http.post(`${COURSES_BASE_URL}/api/v1/empregabilidade/candidaturas`, () => {
     return HttpResponse.json({ id: 'candidatura-123' }, { status: 201 })
   }),
+
+  // Dívida Ativa - Listar imóveis do cidadão.
+  // Array cru, sem envelope: é o que a API devolve de verdade. O spec do Quarkus tipa
+  // objeto singular, e é essa divergência que `normalizarListaImoveis` absorve.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis`, () => {
+    return HttpResponse.json([MOCK_IMOVEL_DIVIDA_ATIVA], { status: 200 })
+  }),
+
+  // Dívida Ativa - Cadastrar imóvel (consulta a Fazenda e grava no mesmo passo)
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/imoveis`, () => {
+    return HttpResponse.json(MOCK_IMOVEL_DIVIDA_ATIVA, { status: 201 })
+  }),
+
+  // Dívida Ativa - Excluir imóvel pelo id local do cadastro
+  http.delete(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:id`, () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // Dívida Ativa - Consulta prévia à Fazenda, sem gravar. É esta que a tela "Confirme sua
+  // inscrição" usa. O schema do spec declara um objeto, mas a descrição do endpoint fala
+  // em "lista vazia" para inscrição sem registro — o mock segue o schema, e a forma de
+  // array é exercida por teste com `server.use()`.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/cadastro`, () => {
+    return HttpResponse.json(
+      {
+        endereco: MOCK_IMOVEL_DIVIDA_ATIVA.endereco,
+        numInscricao: MOCK_IMOVEL_DIVIDA_ATIVA.numInscricao,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Consulta de débitos do imóvel (CDAs + guias parceladas + totais).
+  // Exige imóvel cadastrado: a API responde 404 para inscrição que não é do CPF. Os totais
+  // vêm da API e não do tamanho dos arrays, porque `totalParcelado` desduplica número de
+  // guia — estados vazio e 404 são montados por teste com `server.use()`.
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Consulta avulsa por critério único (inscrição, CDA ou execução fiscal).
+  // Somente leitura e **sem exigir imóvel cadastrado**: é o caminho da tela de débitos, que
+  // aceita qualquer número que o cidadão digite. `imovelCadastrado: false` não é erro.
+  http.post(`${DIVIDA_ATIVA_BASE_URL}/divida-ativa/consultar`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        imovelCadastrado: true,
+        cdas: [MOCK_CDA_DIVIDA_ATIVA],
+        totalCdas: 1,
+        guiasParceladas: [MOCK_GUIA_PARCELADA_DIVIDA_ATIVA],
+        totalParcelado: 1,
+        totalDebitos: 2,
+        mensagem: null,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Consulta de um imóvel já cadastrado + opções do ePortal.
+  // Não é consulta prévia à Fazenda: a API exige que o imóvel já exista (404 se não).
+  http.get(`${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/consulta`, () => {
+    return HttpResponse.json(
+      {
+        imovel: MOCK_IMOVEL_DIVIDA_ATIVA,
+        opcoes: MOCK_OPCOES_IPTU_DIVIDA_ATIVA,
+      },
+      { status: 200 }
+    )
+  }),
+
+  // Dívida Ativa - Datas de vencimento disponíveis para parcelamento (fatia 5).
+  // `DatasVencimentoResponse`: array de strings `dd/MM/yyyy`. O query param `cdas` é
+  // ignorado aqui — o mock devolve as mesmas datas para qualquer combinação de CDAs.
+  http.get(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/datas-vencimento`,
+    () => {
+      return HttpResponse.json(
+        {
+          datas: [
+            '05/10/2026',
+            '05/11/2026',
+            '05/12/2026',
+            '05/01/2027',
+            '05/02/2027',
+          ],
+          mensagem: null,
+        },
+        { status: 200 }
+      )
+    }
+  ),
+
+  // Dívida Ativa - Simulação de parcelamento (fatia 6).
+  // `SimulacaoParcelamentoResponse`: opções de parcela com valor da 1ª parcela e descontos.
+  // Os valores são strings no padrão do DAM (`"1.357,89"`); o front normaliza ao exibir.
+  http.post(
+    `${DIVIDA_ATIVA_BASE_URL}/imoveis/:inscricao/divida-ativa/parcelamentos/simular`,
+    () => {
+      return HttpResponse.json(
+        {
+          valorTotalAvista: '1.357,89',
+          valorSaldoTotalPrincipal: '1.234,56',
+          valorSaldoTotalHonorario: '123,33',
+          valorTotalDescontoPrincipal: '100,00',
+          valorTotalDescontoHonorario: '0,00',
+          valorTotalPagarGrerj: '0,00',
+          opcoes: [
+            {
+              qtdeParcelas: 1,
+              valor1aParcela: '1.357,89',
+              valorJuros: '0,00',
+              valorDescontos: '100,00',
+              valorTotalDescontoPrinc: '100,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 3,
+              valor1aParcela: '465,30',
+              valorJuros: '38,42',
+              valorDescontos: '50,00',
+              valorTotalDescontoPrinc: '50,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 6,
+              valor1aParcela: '240,18',
+              valorJuros: '83,19',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 12,
+              valor1aParcela: '127,53',
+              valorJuros: '172,47',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+            {
+              qtdeParcelas: 24,
+              valor1aParcela: '70,21',
+              valorJuros: '331,14',
+              valorDescontos: '0,00',
+              valorTotalDescontoPrinc: '0,00',
+              valorTotalDescontoHonor: '0,00',
+            },
+          ],
+        },
+        { status: 200 }
+      )
+    }
+  ),
 ]

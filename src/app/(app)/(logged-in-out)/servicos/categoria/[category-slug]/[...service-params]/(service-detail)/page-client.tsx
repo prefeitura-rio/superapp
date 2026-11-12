@@ -11,6 +11,7 @@ import {
   QuickInfoDepartment,
   QuickInfoTime,
 } from '@/app/components/service'
+import { ServiceHtmlContent } from '@/app/components/service/service-html-content'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,9 +19,14 @@ import {
   CardDescription,
   CardHeader,
 } from '@/components/ui/card'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import type {
+  ServiceContentFormat,
+  ServiceTicketFlags,
+} from '@/lib/carta-servicos/types'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
 import { Clock } from 'lucide-react'
@@ -29,11 +35,28 @@ import { MarkdownRenderer } from './components/markdown-renderer'
 interface PageClientProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
+  contentFormat?: ServiceContentFormat
+  ticketFlags?: ServiceTicketFlags
+  isPreview?: boolean
 }
 
-export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
+export function PageClient({
+  serviceData,
+  orgaoGestorName,
+  contentFormat = 'markdown',
+  ticketFlags,
+  isPreview = false,
+}: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
   const enabledButtons = buttons.filter(btn => btn.is_enabled)
+
+  const canSubmitTicket =
+    ticketFlags?.allowTicketSubmission === true &&
+    !!ticketFlags?.activeCategoryConfigId &&
+    !!TICKET_FORM_BASE_URL
+
+  const ticketUrl = (a: 0 | 1) =>
+    `${TICKET_FORM_BASE_URL}?a=${a}&id=${ticketFlags?.activeCategoryConfigId}`
 
   // Analytics tracking
   const { trackServiceClick } = useAnalytics()
@@ -44,23 +67,39 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
     button: ModelsButton,
     index: number
   ) => {
-    // Prevent immediate navigation
-    event.preventDefault()
+    if (isPreview) {
+      event.preventDefault()
+      return
+    }
 
-    // Track the event
+    const destination = button.url_service
+    if (!destination) return
+
+    const opensInNewTab =
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+
+    if (!opensInNewTab) {
+      event.preventDefault()
+    }
+
     trackServiceClick({
       service_id: serviceData.id || '',
       service_name: serviceData.nome_servico,
       service_category: serviceData.tema_geral,
       button_label: button.titulo || '',
       button_index: index,
-      destination_url: button.url_service || '',
+      destination_url: destination,
     })
 
-    // Allow navigation after a short delay to ensure event is sent
-    setTimeout(() => {
-      window.open(button.url_service, '_blank', 'noopener,noreferrer')
-    }, 200)
+    if (!opensInNewTab) {
+      setTimeout(() => {
+        window.location.assign(destination)
+      }, 200)
+    }
   }
 
   // Extract data for QuickInfo
@@ -73,10 +112,12 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
   const digitalChannels: string[] = serviceData?.canais_digitais || []
   const legislation: string[] = serviceData?.legislacao_relacionada || []
 
-  // Function to render markdown
-  const renderMarkdown = (content: string) => (
-    <MarkdownRenderer content={content} />
-  )
+  const renderContent = (content: string, className?: string) =>
+    contentFormat === 'html' ? (
+      <ServiceHtmlContent content={content} className={className} />
+    ) : (
+      <MarkdownRenderer content={content} className={className} />
+    )
 
   // Format last_update date (timestamp in seconds)
   const updatedAtFormatted = serviceData?.last_update
@@ -91,66 +132,103 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
           <h1 className="text-4xl text-foreground leading-10 mb-2 font-medium">
             {serviceData.nome_servico}
           </h1>
-          <MarkdownRenderer
-            content={serviceData.resumo}
-            className="text-sm font-normal text-foreground-light leading-5"
-          />
+          {renderContent(
+            serviceData.resumo,
+            'text-sm font-normal text-foreground-light leading-5'
+          )}
         </div>
 
-        {/* Buttons - One Button or Multiple Buttons */}
-        {enabledButtons.length > 0 && (
-          <div>
-            {enabledButtons.length === 1 ? (
+        {/* Ticket submission buttons (SF-linked services) take priority over generic buttons */}
+        {canSubmitTicket ? (
+          <div className="flex flex-col gap-3">
+            <Button
+              asChild
+              className="w-full rounded-full text-background py-4 h-[52px]"
+              size="lg"
+            >
+              <a
+                href={isPreview ? '#preview' : ticketUrl(0)}
+                onClick={
+                  isPreview ? event => event.preventDefault() : undefined
+                }
+                className="text-background text-sm leading-5 font-normal"
+              >
+                Solicitar serviço
+              </a>
+            </Button>
+            {ticketFlags?.allowsAnonymity && (
               <Button
                 asChild
-                className="w-full rounded-full text-background py-4 h-[52px]"
+                variant="outline"
+                className="w-full rounded-full py-4 h-[52px] text-foreground hover:text-foreground hover:bg-foreground/10"
                 size="lg"
               >
                 <a
-                  href={enabledButtons[0].url_service}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
-                  className="text-background text-sm leading-5 font-normal"
+                  href={isPreview ? '#preview' : ticketUrl(1)}
+                  onClick={
+                    isPreview ? event => event.preventDefault() : undefined
+                  }
+                  className="text-sm leading-5 font-normal"
                 >
-                  {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
+                  Solicitar sem login
                 </a>
               </Button>
-            ) : (
-              <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-left">
-                {enabledButtons.map((button, index) => (
-                  <Card
-                    key={index}
-                    className="min-w-[268px] w-[268px] md:w-[268px] min-h-[128px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col gap-2"
-                  >
-                    <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
-                      {button.descricao && (
-                        <CardDescription className="text-sm text-foreground-light line-clamp-2">
-                          {button.descricao}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent className="p-6 py-0 mt-auto">
-                      <Button
-                        asChild
-                        className="w-full rounded-full h-11 text-background"
-                      >
-                        <a
-                          href={button.url_service}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => handleButtonClick(e, button, index)}
-                          className="text-background"
-                        >
-                          {button.titulo}
-                        </a>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
             )}
           </div>
+        ) : (
+          /* Fallback: generic buttons from API */
+          enabledButtons.length > 0 && (
+            <div>
+              {enabledButtons.length === 1 ? (
+                <Button
+                  asChild
+                  className="w-full rounded-full text-background py-4 h-[52px]"
+                  size="lg"
+                >
+                  <a
+                    href={
+                      isPreview ? '#preview' : enabledButtons[0].url_service
+                    }
+                    onClick={e => handleButtonClick(e, enabledButtons[0], 0)}
+                    className="text-background text-sm leading-5 font-normal"
+                  >
+                    {formatTitleCase(enabledButtons[0].titulo || '', 'first')}
+                  </a>
+                </Button>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto md:flex-wrap pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide md:justify-left">
+                  {enabledButtons.map((button, index) => (
+                    <Card
+                      key={index}
+                      className="min-w-[268px] w-[268px] md:w-[268px] min-h-[128px] flex-shrink-0 border-0 shadow-none bg-card flex flex-col gap-2"
+                    >
+                      <CardHeader className="p-6 py-0 min-w-0 overflow-hidden">
+                        {button.descricao && (
+                          <CardDescription className="text-sm text-foreground-light line-clamp-2">
+                            {button.descricao}
+                          </CardDescription>
+                        )}
+                      </CardHeader>
+                      <CardContent className="p-6 py-0 mt-auto">
+                        <Button
+                          asChild
+                          className="w-full rounded-full h-11 text-background"
+                        >
+                          <a
+                            href={isPreview ? '#preview' : button.url_service}
+                            onClick={e => handleButtonClick(e, button, index)}
+                            className="text-background"
+                          >
+                            {button.titulo}
+                          </a>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
         )}
       </div>
 
@@ -169,7 +247,8 @@ export function PageClient({ serviceData, orgaoGestorName }: PageClientProps) {
       <div className="mb-8">
         <MainInformation
           serviceData={serviceData}
-          renderMarkdown={renderMarkdown}
+          contentFormat={contentFormat}
+          renderContent={renderContent}
         />
       </div>
 

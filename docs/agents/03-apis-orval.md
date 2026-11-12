@@ -12,23 +12,34 @@
 | `src/http-pref-rio-carta-servicos/` | Spec local `pref-rio-carta-servicos-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-carta-servicos.ts` | `BASE_API_URL_PREF_RIO_CARTA_SERVICOS` |
 | `src/http-pref-rio-cidadao/` | Spec local `pref-rio-cidadao-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-cidadao.ts` | `BASE_API_URL_PREF_RIO_CIDADAO` |
 | `src/http-pref-rio-chamados-publico/` | Spec local `pref-rio-chamados-publico-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-chamados-publico.ts` | `BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO` |
+| `src/http-divida-ativa/` | Spec local `divida-ativa-api.yaml` (`api-imoveis`, Quarkus) | `custom-fetch-divida-ativa.ts` | `BASE_API_URL_DIVIDA_ATIVA` |
 
 A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. As exceções são **Carta de Serviços** e **Chamados Público** — APIs públicas sem Bearer do cidadão (auth M2M na camada Mule).
 
-## Orval — config ativa única
+## Orval — config multi-projeto
 
-[`orval.config.ts`](../../orval.config.ts) aponta para **um** target por vez (hoje: app-go-api → `src/http-courses/`).
+[`orval.config.ts`](../../orval.config.ts) tem **um projeto nomeado por API**. Regenere sempre um client por vez:
 
-Para regenerar outro client: copiar o bloco da API desejada de [`../orval-apis.md`](../orval-apis.md) para o `api:` em `orval.config.ts`, rodar `npx orval`, e **não** commititar mudanças de config “trocada” sem combinar com o time.
+```bash
+npx orval --project dividaAtiva
+```
 
-Specs Pref.Rio (`pref-rio-carta-servicos-api.yaml`, `pref-rio-cidadao-api.yaml`, `pref-rio-chamados-publico-api.yaml`) ficam na raiz do repo — não há URL GitHub externa.
+Projetos configurados hoje: `prefRioChamadosPublico` e `dividaAtiva`.
+
+⚠️ `npx orval` **sem** `--project` regenera todos os projetos do arquivo, misturando no diff clients que a sua tarefa não tocou. Use sempre `--project`.
+
+As APIs que ainda não têm projeto no arquivo seguem com a receita antiga: copiar o bloco de [`../orval-apis.md`](../orval-apis.md) para uma entrada nova em `orval.config.ts`, rodar `npx orval --project <nome>` e commitar a entrada junto — ela é permanente, não descartável.
+
+Specs locais (`pref-rio-carta-servicos-api.yaml`, `pref-rio-cidadao-api.yaml`, `pref-rio-chamados-publico-api.yaml`, `divida-ativa-api.yaml`) ficam na raiz do repo — não há URL GitHub externa.
+
+O `divida-ativa-api.yaml` é cópia manual do spec servido pela homologação da `api-imoveis` (`https://api-appimoveishom.apps.ocp.rio.gov.br/swagger`). É cópia de propósito: aquilo é endpoint de runtime, não spec versionado, e gerar client não pode depender de a homologação estar no ar. Atualizar = copiar de novo, para que a mudança de contrato apareça no diff do PR.
 
 ## Regras
 
 - Preferir funções geradas em `src/http*` em vez de `fetch` manual.
 - Não editar arquivos gerados à mão; regenere a partir da OpenAPI.
 - Spec OpenAPI do `app-go-api` vive no repo Go (`docs/swagger.yaml`); mudanças de contrato = PR em [app-go-api](https://github.com/prefeitura-rio/app-go-api), depois regenerar o client aqui.
-- Specs Pref.Rio: editar o YAML correspondente na raiz (`pref-rio-carta-servicos-api.yaml`, `pref-rio-cidadao-api.yaml` ou `pref-rio-chamados-publico-api.yaml`), copiar o bloco em `orval-apis.md` para `orval.config.ts` e rodar `npx orval`.
+- Specs locais: editar (ou recopiar) o YAML correspondente na raiz e rodar `npx orval --project <nome>`. Se a API ainda não tiver projeto no `orval.config.ts`, copie o bloco de `orval-apis.md` para uma entrada nomeada nova e commite-a junto.
 - Caching server-side: ver `src/lib/dal.ts`.
 - Proxies browser-facing: `src/app/api/`.
 

@@ -3,7 +3,7 @@
 import { SerialPhotosFields } from '@/app/(app)/(logged-in)/carteira/cadmicro/adicionar-veiculo/components/serial-photos-fields'
 import { VehicleInfoFields } from '@/app/(app)/(logged-in)/carteira/cadmicro/adicionar-veiculo/components/vehicle-info-fields'
 import type { VehicleFormData } from '@/app/(app)/(logged-in)/carteira/cadmicro/adicionar-veiculo/schema'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useUpdateVehicleMutation } from '@/hooks/cadmicro/use-cadmicro-mutations'
 import type { VehicleDetail } from '@/lib/cadmicro/types'
@@ -67,12 +67,8 @@ export function VehicleEditForm({ vehicle, ownerInfo }: VehicleEditFormProps) {
   })
 
   return (
-    <div className="mx-auto min-h-lvh w-full max-w-[896px] bg-background pb-10">
-      <SecondaryHeader
-        route={detailPath}
-        className="max-w-[896px]"
-        fixed={false}
-      />
+    <div className="mx-auto min-h-lvh w-full max-w-4xl bg-background pb-10">
+      <ProfileHeaderWrapper />
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-2 pb-4">
         <VehicleInfoFields

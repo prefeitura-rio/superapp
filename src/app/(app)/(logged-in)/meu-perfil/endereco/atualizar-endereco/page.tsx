@@ -2,7 +2,7 @@
 
 import { updateAddress } from '@/actions/update-user-address'
 import { AddressDetailsDrawerContent } from '@/app/components/drawer-contents/address-details-drawer-content'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { SearchInput } from '@/components/ui/custom/search-input'
 import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
@@ -316,9 +316,9 @@ export default function AddressForm() {
   }
 
   return (
-    <div className="max-w-4xl h-[70lvh] mx-auto pt-24 flex flex-col space-y-6">
+    <div className="max-w-4xl h-[70lvh] mx-auto flex flex-col space-y-6">
       <div className={headerAnim}>
-        <SecondaryHeader title="" route="/meu-perfil" />
+        <ProfileHeaderWrapper />
         <section className="relative">
           <h2 className="text-5xl px-4 font-normal leading-11 mb-2 pt-1 text-foreground bg-background z-10 pb-3">
             Escreva seu <br /> endereço

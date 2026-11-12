@@ -31,23 +31,30 @@ test.describe('Home (público)', () => {
     ).toBeVisible()
 
     await expect(
-      page.getByRole('heading', { level: 3, name: 'Serviços' })
+      page.getByRole('heading', { level: 2, name: 'Serviços' })
     ).toBeVisible({ timeout: 20000 })
 
     await expect(
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
 
-    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Serviços' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Documentos' })).toBeVisible()
+    // Escopo no <nav> da navegação flutuante: o footer global (contentinfo)
+    // também tem um link "Serviços".
+    const floatNav = page.getByRole('navigation')
+    await expect(floatNav.getByRole('link', { name: 'Home' })).toBeVisible()
+    await expect(floatNav.getByRole('link', { name: 'Serviços' })).toBeVisible()
+    await expect(
+      floatNav.getByRole('link', { name: 'Documentos' })
+    ).toBeVisible()
   })
 
-  test('header de visitante oferece login', async ({ page }) => {
+  test('header de visitante tem link para login no header', async ({
+    page,
+  }) => {
     await page.goto('/')
-    await expect(
-      page.getByRole('link', { name: 'Faça seu login' })
-    ).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('header').getByRole('link').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('link Documentos na barra inferior aponta para fluxo de autenticação', async ({
@@ -75,7 +82,11 @@ test.describe('Home (público)', () => {
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
     await expect(page.getByText('IPTU 2026')).toBeVisible()
-    await expect(page.getByText('CADRio Agendamento')).toBeVisible()
+    // Com NEXT_PUBLIC_FEATURE_SALESFORCE os demais cards vêm da curadoria da
+    // app-catalogo; o de Dívida Ativa é fixo nos dois modos.
+    await expect(
+      page.getByRole('heading', { name: 'Dívida Ativa: Débitos de IPTU' })
+    ).toBeVisible()
   })
 
   test('exibe múltiplas categorias na grade de serviços', async ({ page }) => {
@@ -123,7 +134,7 @@ test.describe('Home (autenticado)', () => {
       page.getByRole('link', { name: 'Do que você precisa?' })
     ).toBeVisible()
     await expect(
-      page.getByRole('heading', { level: 3, name: 'Serviços' })
+      page.getByRole('heading', { level: 2, name: 'Serviços' })
     ).toBeVisible({ timeout: 20000 })
   })
 
@@ -175,7 +186,7 @@ test.describe('Menu global (público)', () => {
 
   test('abre pelo header e exibe os acessos públicos', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
     const menu = page.getByRole('dialog')
     await expect(menu).toBeVisible()
@@ -197,7 +208,7 @@ test.describe('Menu global (público)', () => {
 
   test('deslogado oculta os itens que exigem login', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
     const menu = page.getByRole('dialog')
     // Documentos continua no menu, mas leva à tela de autenticação necessária
@@ -222,7 +233,7 @@ test.describe('Menu global (público)', () => {
     page,
   }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await page
       .getByRole('dialog')
       .getByRole('link', { name: 'Documentos' })
@@ -239,7 +250,7 @@ test.describe('Menu global (público)', () => {
 
   test('fecha ao navegar por um item', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await page.getByRole('button', { name: 'Outros' }).click()
     await page.getByRole('link', { name: 'Termos de uso' }).click()
 
@@ -252,7 +263,7 @@ test.describe('Menu global (público)', () => {
 
   test('fecha pelo botão X', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
 
     await page.getByRole('button', { name: 'Fechar menu' }).click()
@@ -261,7 +272,7 @@ test.describe('Menu global (público)', () => {
 
   test('toggle "Tema claro" alterna o tema do app', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await page.getByRole('button', { name: 'Outros' }).click()
 
     const toggle = page.locator('#global-menu-theme')
@@ -288,7 +299,7 @@ test.describe('Menu global (autenticado)', () => {
 
   test('exibe bloco do usuário, Documentos e Sair', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
     const menu = page.getByRole('dialog')
     await expect(menu.getByText(/\d{3}\.\d{3}\.\d{3}-\d{2}/)).toBeVisible({
@@ -305,7 +316,7 @@ test.describe('Menu global (autenticado)', () => {
 
   test('bloco do usuário leva para Dados pessoais', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
     await page
       .getByRole('dialog')

@@ -1,9 +1,16 @@
 'use client'
 
 import { CurriculoContent } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/curriculo-content'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import {
+  areaFixaQueryOptions,
+  areasAtuacaoQueryOptions,
+  comportamentosQueryOptions,
+  conhecimentosDaAreaQueryOptions,
+  habilidadesCompetenciasQueryOptions,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/habilidades-competencias/habilidades-competencias-queries'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 async function fetchCurriculoData() {
   const res = await fetch('/api/user/empregos/curriculo', { cache: 'no-store' })
@@ -30,24 +37,25 @@ function AccordionItemSkeleton({ titleWidth }: { titleWidth: string }) {
 
 function CurriculoSkeleton() {
   return (
-    <>
-      <div className="max-w-4xl mx-auto">
-        <SecondaryHeader
-          fixed={false}
-          className="max-w-4xl mx-auto"
-          route="/servicos/trabalho"
-        />
-      </div>
-      <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
-        <Skeleton className="h-9 w-48 mt-2 mb-6" />
-        <div className="w-full">
-          <AccordionItemSkeleton titleWidth="h-5 w-24" />
-          <AccordionItemSkeleton titleWidth="h-5 w-44" />
-          <AccordionItemSkeleton titleWidth="h-5 w-28" />
-          <AccordionItemSkeleton titleWidth="h-5 w-28" />
+    <div>
+      <OportunidadesSubHeader
+        logoHref="/servicos/trabalho"
+        showSearchIcon
+        searchUrl="/busca?tipo=empregos"
+      />
+      <div>
+        <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
+          <Skeleton className="h-9 w-48 mt-2 mb-6" />
+          <div className="w-full">
+            <AccordionItemSkeleton titleWidth="h-5 w-24" />
+            <AccordionItemSkeleton titleWidth="h-5 w-44" />
+            <AccordionItemSkeleton titleWidth="h-5 w-28" />
+            <AccordionItemSkeleton titleWidth="h-5 w-52" />
+            <AccordionItemSkeleton titleWidth="h-5 w-28" />
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -61,8 +69,31 @@ export function CurriculoPageClient({ cpf }: CurriculoPageClientProps) {
     queryFn: fetchCurriculoData,
     staleTime: 5 * 60 * 1000,
   })
+  const { data: habilidades, isPending: habilidadesPendentes } = useQuery(
+    habilidadesCompetenciasQueryOptions()
+  )
+  const { isPending: comportamentosPendentes } = useQuery(
+    comportamentosQueryOptions()
+  )
+  const { isPending: areasPendentes } = useInfiniteQuery(
+    areasAtuacaoQueryOptions('')
+  )
+  const { isPending: areaFixaPendente } = useQuery(areaFixaQueryOptions())
+  const areaId = habilidades?.ok ? habilidades.data.area?.id : undefined
+  const { isPending: conhecimentosPendentes } = useQuery(
+    conhecimentosDaAreaQueryOptions(areaId)
+  )
 
-  if (isLoading) return <CurriculoSkeleton />
+  if (
+    isLoading ||
+    habilidadesPendentes ||
+    comportamentosPendentes ||
+    areasPendentes ||
+    areaFixaPendente ||
+    (areaId != null && conhecimentosPendentes)
+  ) {
+    return <CurriculoSkeleton />
+  }
 
   return (
     <CurriculoContent

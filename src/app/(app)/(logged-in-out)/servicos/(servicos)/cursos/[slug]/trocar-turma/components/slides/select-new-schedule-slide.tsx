@@ -1,7 +1,11 @@
 'use client'
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import type { UserEnrollmentExtended } from '@/lib/course-utils'
+import {
+  type UserEnrollmentExtended,
+  getScheduleUnavailableLabel,
+  isScheduleSelectable,
+} from '@/lib/course-utils'
 import { formatDate, formatTimeRange } from '@/lib/date'
 import { useEffect, useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
@@ -54,14 +58,9 @@ export const SelectNewScheduleSlide = ({
     ? onlineClasses
     : selectedUnit?.schedules || []
 
-  // Check if a schedule is available (has remaining_vacancies > 0)
-  const isScheduleAvailable = (schedule: Schedule) => {
-    return (
-      schedule.remaining_vacancies !== undefined &&
-      schedule.remaining_vacancies !== null &&
-      schedule.remaining_vacancies > 0
-    )
-  }
+  // A turma is pickable only inside its own enrollment window and with seats
+  const isScheduleAvailable = (schedule: Schedule) =>
+    isScheduleSelectable(schedule)
 
   // Handle schedule selection with validation
   const handleScheduleChange = async (value: string) => {
@@ -143,7 +142,8 @@ export const SelectNewScheduleSlide = ({
             className="w-full"
           >
             {schedulesToShow.map((schedule, index) => {
-              const isAvailable = isScheduleAvailable(schedule)
+              const unavailableLabel = getScheduleUnavailableLabel(schedule)
+              const isAvailable = unavailableLabel === null
               const isCurrentSchedule = schedule.id === currentScheduleId
               // Only disable current schedule if user is in their current unit (or online course)
               const shouldDisableCurrentSchedule =
@@ -168,9 +168,9 @@ export const SelectNewScheduleSlide = ({
                           (Seu horário atual)
                         </span>
                       )}
-                      {!isAvailable && !shouldDisableCurrentSchedule && (
+                      {unavailableLabel && !shouldDisableCurrentSchedule && (
                         <span className="text-muted-foreground text-xs ml-2">
-                          (Sem vagas disponíveis)
+                          ({unavailableLabel})
                         </span>
                       )}
                     </h3>

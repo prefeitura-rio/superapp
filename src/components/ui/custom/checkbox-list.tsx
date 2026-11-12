@@ -32,7 +32,7 @@ export function CheckboxList({
   }
 
   return (
-    <div className={cn('space-y-1', className)}>
+    <div className={cn('flex flex-col gap-4', className)}>
       {options.map(option => {
         const optionValue = typeof option === 'string' ? option : option.value
         const optionLabel = typeof option === 'string' ? option : option.label
@@ -45,7 +45,7 @@ export function CheckboxList({
           <label
             key={optionKey}
             className={cn(
-              'flex items-center justify-between cursor-pointer py-2 rounded-md transition-colors hover:bg-accent/40',
+              'flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-accent/40',
               disabled && 'opacity-50 cursor-not-allowed'
             )}
             htmlFor={`${name}-${optionKey}`}

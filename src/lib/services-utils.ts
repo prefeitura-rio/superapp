@@ -1,4 +1,3 @@
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import type { ModelsFilteredCategoryResult } from '@/http-busca-search/models/modelsFilteredCategoryResult'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
@@ -11,10 +10,12 @@ import {
   fetchCartaServicosServicesBySubcategory,
   fetchCartaServicosSubcategoriesByCategory,
 } from '@/lib/carta-servicos/fetch'
+import type { PrefRioServiceWithFlags } from '@/lib/carta-servicos/types'
 import {
   getDalCategoriesCategorySubcategories,
   getDalSubcategoriesSubcategoryServices,
 } from '@/lib/dal'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { fetchCategories, getIconForCategory } from './categories'
 
 export async function getCategoryNameBySlug(
@@ -55,7 +56,7 @@ export async function fetchServicesByCategory(
       decodedSlug = categorySlug
     }
 
-    if (CARTA_SERVICOS_API_ENABLED) {
+    if (isSalesforceServicesEnabled()) {
       return fetchCartaServicosServicesByCategory(
         decodedSlug,
         getIconForCategory
@@ -124,9 +125,9 @@ export async function fetchServiceById(
 
 export async function fetchServiceBySlug(
   slug: string
-): Promise<ModelsPrefRioService | null> {
+): Promise<PrefRioServiceWithFlags | null> {
   try {
-    if (CARTA_SERVICOS_API_ENABLED) {
+    if (isSalesforceServicesEnabled()) {
       return fetchCartaServicosServiceBySlug(slug)
     }
 
@@ -165,7 +166,7 @@ export async function fetchSubcategoriesByCategory(
   categorySlugOrName: string
 ): Promise<SubcategoriesFetchResult> {
   try {
-    if (CARTA_SERVICOS_API_ENABLED) {
+    if (isSalesforceServicesEnabled()) {
       return fetchCartaServicosSubcategoriesByCategory(
         categorySlugOrName,
         getIconForCategory
@@ -206,7 +207,7 @@ export async function fetchServicesBySubcategory(
   category?: string
 ) {
   try {
-    if (CARTA_SERVICOS_API_ENABLED) {
+    if (isSalesforceServicesEnabled()) {
       return fetchCartaServicosServicesBySubcategory(
         subcategorySlugOrName,
         page,

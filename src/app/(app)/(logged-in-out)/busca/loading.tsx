@@ -3,6 +3,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function SearchLoading() {
   return (
     <>
+      <header className="relative w-full z-50 bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="rounded-full h-11 w-11" />
+            <Skeleton className="rounded-full h-11 w-11" />
+          </div>
+        </div>
+      </header>
       <div className="max-w-4xl px-4 mx-auto pt-5 flex flex-col space-y-6 pb-4">
         {/* Search Input Skeleton - matching the actual SearchInput component */}
         <div className="flex h-14 items-center rounded-full bg-card px-4">

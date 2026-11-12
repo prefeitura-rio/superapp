@@ -175,6 +175,131 @@ export function shouldShowCourse({
   return true
 }
 
+// A turma (schedule) is the unit the citizen actually enrolls into, and the
+// backend validates its own enrollment window on POST /enrollments. The
+// course-level window is the union [earliest start, latest end] across turmas,
+// so it stays "open" over gaps where no turma accepts enrollments — never use it
+// to decide whether a citizen can enroll.
+export interface ScheduleEnrollmentFields {
+  enrollment_start_date?: string | null
+  enrollment_end_date?: string | null
+  accepting_enrollments?: boolean | null
+  remaining_vacancies?: number | null
+}
+
+export type ScheduleAvailability =
+  | 'available'
+  | 'enrollment_not_started'
+  | 'enrollment_closed'
+  | 'no_vacancies'
+
+const SCHEDULE_UNAVAILABLE_LABELS: Record<
+  Exclude<ScheduleAvailability, 'available'>,
+  string
+> = {
+  enrollment_not_started: 'Inscrições ainda não abertas',
+  enrollment_closed: 'Inscrições encerradas',
+  no_vacancies: 'Sem vagas disponíveis',
+}
+
+// Dates arrive as ISO strings with an explicit offset ("Z" or "-03:00"), so
+// comparing instants is timezone-safe. Never compare the YYYY-MM-DD portion.
+function toTime(value?: string | null): number | null {
+  if (!value) return null
+  const time = new Date(value).getTime()
+  return Number.isNaN(time) ? null : time
+}
+
+/**
+ * Why a turma cannot be picked right now, or 'available' when it can.
+ * The enrollment window takes precedence over vacancies: a turma whose window
+ * closed reads as "Inscrições encerradas" even when seats remain.
+ */
+export function getScheduleAvailability(
+  schedule: ScheduleEnrollmentFields | null | undefined,
+  now: Date = new Date()
+): ScheduleAvailability {
+  if (!schedule) return 'no_vacancies'
+
+  if (schedule.accepting_enrollments === false) return 'enrollment_closed'
+
+  const nowTime = now.getTime()
+  const start = toTime(schedule.enrollment_start_date)
+  if (start !== null && nowTime < start) return 'enrollment_not_started'
+
+  const end = toTime(schedule.enrollment_end_date)
+  if (end !== null && nowTime > end) return 'enrollment_closed'
+
+  const remaining = schedule.remaining_vacancies
+  if (remaining === undefined || remaining === null || remaining <= 0) {
+    return 'no_vacancies'
+  }
+
+  return 'available'
+}
+
+/** Whether the citizen can enroll into this turma right now. */
+export function isScheduleSelectable(
+  schedule: ScheduleEnrollmentFields | null | undefined,
+  now?: Date
+): boolean {
+  return getScheduleAvailability(schedule, now) === 'available'
+}
+
+/** Marker shown next to an unavailable turma, or null when it is available. */
+export function getScheduleUnavailableLabel(
+  schedule: ScheduleEnrollmentFields | null | undefined,
+  now?: Date
+): string | null {
+  const availability = getScheduleAvailability(schedule, now)
+  if (availability === 'available') return null
+  return SCHEDULE_UNAVAILABLE_LABELS[availability]
+}
+
+/**
+ * Marker for a group of turmas (e.g. all turmas of a unidade), or null when at
+ * least one is selectable. Reports the least final reason among them, so a
+ * unidade with one closed turma and one that has not opened yet reads as
+ * "ainda não abertas" rather than "encerradas".
+ */
+export function getSchedulesUnavailableLabel(
+  schedules: ScheduleEnrollmentFields[] | null | undefined,
+  now?: Date
+): string | null {
+  const list = schedules ?? []
+  if (list.length === 0) return SCHEDULE_UNAVAILABLE_LABELS.no_vacancies
+
+  const availabilities = list.map(schedule =>
+    getScheduleAvailability(schedule, now)
+  )
+  if (availabilities.includes('available')) return null
+
+  for (const reason of [
+    'enrollment_not_started',
+    'no_vacancies',
+    'enrollment_closed',
+  ] as const) {
+    if (availabilities.includes(reason)) {
+      return SCHEDULE_UNAVAILABLE_LABELS[reason]
+    }
+  }
+
+  return SCHEDULE_UNAVAILABLE_LABELS.no_vacancies
+}
+
+/** Every turma of a course, across locations and the remote class. */
+export function collectCourseSchedules(course: {
+  locations?: Array<{ schedules?: ScheduleEnrollmentFields[] }> | null
+  remote_class?: { schedules?: ScheduleEnrollmentFields[] } | null
+}): ScheduleEnrollmentFields[] {
+  const schedules: ScheduleEnrollmentFields[] = []
+  for (const location of course.locations ?? []) {
+    schedules.push(...(location?.schedules ?? []))
+  }
+  schedules.push(...(course.remote_class?.schedules ?? []))
+  return schedules
+}
+
 /**
  * Check if all online classes have no available vacancies
  * Returns true if there are no available classes (all have remaining_vacancies = 0 or undefined)
@@ -198,15 +323,12 @@ function hasNoAvailableOnlineClasses(course: ModelsCurso): boolean {
       return true // No schedules means no available classes
     }
 
-    // Check if all schedules have no available vacancies
-    const hasAnyAvailable = schedules.some(
-      (schedule: any) =>
-        schedule.remaining_vacancies !== undefined &&
-        schedule.remaining_vacancies !== null &&
-        schedule.remaining_vacancies > 0
+    // A turma only counts when it has seats AND its own enrollment window is open
+    const hasAnyAvailable = schedules.some((schedule: any) =>
+      isScheduleSelectable(schedule)
     )
 
-    return !hasAnyAvailable // If no schedule has available vacancies, return true
+    return !hasAnyAvailable // If no schedule is open for enrollment, return true
   }
 
   // Legacy structure: single remote_class
@@ -244,15 +366,12 @@ function hasNoAvailableInPersonClasses(course: ModelsCurso): boolean {
     return true // No locations means no available classes
   }
 
-  // Check if any location has any schedule with available vacancies
+  // Check if any location has any schedule open for enrollment (window + seats)
   const hasAnyAvailable = courseAny.locations.some((location: any) => {
     // New structure: check schedules array
     if (location?.schedules && Array.isArray(location.schedules)) {
-      return location.schedules.some(
-        (schedule: any) =>
-          schedule.remaining_vacancies !== undefined &&
-          schedule.remaining_vacancies !== null &&
-          schedule.remaining_vacancies > 0
+      return location.schedules.some((schedule: any) =>
+        isScheduleSelectable(schedule)
       )
     }
     // Legacy structure: check location directly
@@ -271,14 +390,6 @@ function hasNoAvailableInPersonClasses(course: ModelsCurso): boolean {
 /**
  * Get enrollment status and button configuration for a course
  */
-// Returns true when a turma's own enrollment period has already ended.
-export function isScheduleEnrollmentClosed(schedule: {
-  enrollment_end_date?: string | null
-}): boolean {
-  if (!schedule?.enrollment_end_date) return false
-  return new Date() > new Date(schedule.enrollment_end_date)
-}
-
 // Course-level "Inscrições até": the latest enrollment closing date among the
 // turmas that are still OPEN (enrollment_end_date >= now). Falls back to the
 // course-level enrollment_end_date when no open turma dates are available
@@ -364,7 +475,43 @@ export function getCourseEnrollmentInfo(
     }
   }
 
-  // Backend explicitly says enrollment is open — skip date-based checks, go straight to vacancies
+  // Per-turma enrollment window. This runs even for accepting_enrollments: the
+  // backend derives that status from the course-level window, which is the union
+  // [earliest start, latest end] across turmas and therefore stays open over gaps
+  // where every individual turma is already closed or has not opened yet. The
+  // POST /enrollments endpoint validates the turma window, so trusting the
+  // course-level status here is what let citizens reach a guaranteed failure.
+  const schedules = collectCourseSchedules(course as any)
+  if (schedules.length > 0) {
+    const availabilities = schedules.map(schedule =>
+      getScheduleAvailability(schedule, now)
+    )
+
+    if (!availabilities.includes('available')) {
+      // A turma that has not opened yet will become enrollable later; one that
+      // only ran out of seats is still within its window.
+      if (availabilities.includes('enrollment_not_started')) {
+        return {
+          status: 'coming_soon',
+          buttonText: 'Disponível em breve',
+          isDisabled: true,
+          canEnroll: false,
+        }
+      }
+      if (!availabilities.includes('no_vacancies')) {
+        return {
+          status: 'enrollment_closed',
+          buttonText: 'Inscrições encerradas',
+          isDisabled: true,
+          canEnroll: false,
+        }
+      }
+    }
+  }
+
+  // Course-level dates, for courses with no turmas of their own (the per-turma
+  // check above already covers the rest). Skipped when the backend derived
+  // accepting_enrollments, which it only does inside the course-level window.
   if (courseStatus !== 'accepting_enrollments') {
     // Check if enrollment start date is in the future
     if (course.enrollment_start_date) {

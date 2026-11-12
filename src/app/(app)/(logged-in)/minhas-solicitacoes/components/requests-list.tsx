@@ -6,13 +6,14 @@ import { useState } from 'react'
 import type { RequestStatus } from '../types'
 import { StatusBadge } from './status-badge'
 
-interface RequestItem {
+export interface RequestItem {
   protocolo: string
   codigoOs: string
   servico: string
   categoria: string
   status: RequestStatus
   dataAbertura: string
+  isAcessoInformacao: boolean
 }
 
 const FILTER_TABS = ['Todos', 'Serviços', 'Ouvidoria', 'Acesso à informação']
@@ -33,7 +34,8 @@ function RequestCard({ item }: { item: RequestItem }) {
             {item.servico}
           </h3>
           <p className="text-xs font-normal text-foreground-light leading-4 tracking-normal truncate">
-            Protocolo {item.protocolo} • {item.categoria}
+            Protocolo {item.protocolo} •{' '}
+            {item.isAcessoInformacao ? 'LAI' : item.categoria}
           </p>
         </div>
       </div>
@@ -53,14 +55,22 @@ function EmptyState({ filtered }: { filtered: boolean }) {
   )
 }
 
-export function RequestsList({ items }: { items: RequestItem[] }) {
+export function RequestsList({
+  items,
+  filtros = FILTER_TABS,
+}: {
+  items: RequestItem[]
+  filtros?: readonly string[]
+}) {
   const [activeFilter, setActiveFilter] = useState('Todos')
   const [search, setSearch] = useState('')
 
   const filtered = items.filter(r => {
     const matchesFilter =
       activeFilter === 'Todos' ||
-      r.categoria?.toLowerCase() === activeFilter.toLowerCase()
+      (activeFilter === 'Acesso à informação'
+        ? r.isAcessoInformacao === true
+        : r.categoria?.toLowerCase() === activeFilter.toLowerCase())
 
     const matchesSearch =
       search.length < 2 ||
@@ -71,12 +81,12 @@ export function RequestsList({ items }: { items: RequestItem[] }) {
   })
 
   return (
-    <div className="pt-23 pb-32 flex flex-col gap-4 px-4">
+    <div className="flex flex-col gap-4">
       {/* Filter chips + Search — gap-2 entre eles */}
       <div className="flex flex-col gap-2">
         <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
           <div className="flex gap-2 w-max">
-            {FILTER_TABS.map(tab => (
+            {filtros.map(tab => (
               <button
                 key={tab}
                 type="button"

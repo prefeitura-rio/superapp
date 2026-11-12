@@ -36,13 +36,13 @@ export function MinhasPropostasClient({
   }
 
   return (
-    <main className="max-w-xl min-h-lvh mx-auto text-foreground">
+    <div className="max-w-xl min-h-lvh mx-auto text-foreground">
       <header className="px-4 py-4 relative w-full max-w-xl mx-auto bg-background text-foreground">
         <div className="flex justify-start">
           <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
         </div>
       </header>
       <div className="px-4 pb-12">{renderContent()}</div>
-    </main>
+    </div>
   )
 }

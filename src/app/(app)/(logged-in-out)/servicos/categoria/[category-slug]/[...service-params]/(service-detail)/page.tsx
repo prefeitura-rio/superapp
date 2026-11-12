@@ -1,5 +1,10 @@
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getDepartmentsCdUa } from '@/http/departments/departments'
+import { sanitizePrefRioServiceHtml } from '@/lib/carta-servicos/sanitize-service-html'
+import type {
+  ServiceContentFormat,
+  ServiceTicketFlags,
+} from '@/lib/carta-servicos/types'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { fetchServiceBySlug, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
 import { PageClientWrapper } from './page-client-wrapper'
@@ -42,7 +47,7 @@ export default async function ServicePage({
   // Publication guard for app-busca-search (Typesense status + whitelist).
   // Carta de Serviços only returns public services — trust the API response.
   if (
-    !CARTA_SERVICOS_API_ENABLED &&
+    !isSalesforceServicesEnabled() &&
     serviceData.id &&
     !SERVICE_WHITELIST.includes(serviceData.id) &&
     (serviceData.status !== 1 || serviceData.awaiting_approval === true)
@@ -87,11 +92,22 @@ export default async function ServicePage({
     }
   }
 
+  const ticketFlags: ServiceTicketFlags | undefined = serviceData.ticketFlags
+  const contentFormat: ServiceContentFormat = isSalesforceServicesEnabled()
+    ? 'html'
+    : 'markdown'
+  const serviceForPage =
+    contentFormat === 'html'
+      ? sanitizePrefRioServiceHtml(serviceData)
+      : serviceData
+
   return (
     <PageClientWrapper
-      serviceData={serviceData}
+      serviceData={serviceForPage}
       orgaoGestorName={orgaoGestorName}
       categorySlug={categorySlug}
+      contentFormat={contentFormat}
+      ticketFlags={ticketFlags}
     />
   )
 }

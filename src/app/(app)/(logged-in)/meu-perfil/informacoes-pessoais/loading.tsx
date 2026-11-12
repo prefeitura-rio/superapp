@@ -1,10 +1,10 @@
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function UserPersonalInfoLoading() {
   return (
-    <div className="min-h-screen max-w-4xl mx-auto pt-24 pb-10 bg-background">
-      <SecondaryHeader title="Informações pessoais" route="/meu-perfil" />
+    <div className="max-w-4xl mx-auto pb-10 bg-background">
+      <ProfileHeaderWrapper />
       <div className="space-y-6 p-4">
         {/* CPF Field Skeleton */}
         <div className="space-y-2">

@@ -1,18 +1,16 @@
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
+import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
-import { RequestsList } from './components/requests-list'
+import { OrigemChamados } from './components/origem-chamados'
 import { formatDate, mapCategoria, normalizeStatus } from './helpers'
 
 export const revalidate = 0
 
 export default async function MyRequestsPage() {
   const response = await listChamados()
-  const apiData =
-    typeof response.data === 'string'
-      ? JSON.parse(response.data)
-      : response.data
+  const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
 
   const protocolos = [
     ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
@@ -27,31 +25,19 @@ export default async function MyRequestsPage() {
       categoria: mapCategoria(os.categoria),
       status: normalizeStatus(os.status ?? protocolo.status),
       dataAbertura: formatDate(os.dataAbertura ?? protocolo.dataAbertura),
+      isAcessoInformacao: os.isAcessoInformacao ?? false,
     }))
   )
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-        logo={
-          <span
-            style={{
-              color: 'var(--theme-color-foreground, #09090B)',
-              fontFamily: 'var(--font-family-sans, "DM Sans")',
-              fontSize: 'var(--font-size-lg, 18px)',
-              fontWeight: 'var(--font-weight-medium, 500)',
-              lineHeight: 'var(--font-leading-5, 20px)',
-              letterSpacing: 'var(--font-tracking-normal, 0)',
-              textAlign: 'center',
-            }}
-          >
-            Minhas Solicitações
-          </span>
-        }
-      />
-      <RequestsList items={items} />
+    <div className="text-foreground">
+      <ProfileHeaderWrapper />
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
+          Minhas Solicitações
+        </h1>
+        <OrigemChamados salesforce={items} />
+      </div>
       <FloatNavigationWrapper />
     </div>
   )

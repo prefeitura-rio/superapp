@@ -55,6 +55,11 @@ const SAMPLE_ORGS: SampleOrg[] = [
     orgao_id: '2600',
     issuingOrganization: 'Secretaria Municipal de Trabalho e Renda',
   },
+  {
+    template: 'sma',
+    orgao_id: '1300',
+    issuingOrganization: 'Secretaria Municipal de Administração',
+  },
 ]
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'lib', 'templates')

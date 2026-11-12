@@ -9,8 +9,11 @@ import { ConfirmInscriptionClient } from '../confirm-inscription-client'
 import { basicCourseInfo, courseId, courseSlug } from './fixtures/course-info'
 import {
   emptyUnits,
+  nearbyUnitsMixedWindows,
   nearbyUnitsSingle,
+  onlineClassesMixedWindows,
   onlineClassesSingle,
+  unitWithClosedAndOpenSchedules,
 } from './fixtures/nearby-units'
 import {
   completeUserInfo,
@@ -25,6 +28,7 @@ const mockPush = vi.fn()
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
+    refresh: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
 }))
@@ -33,8 +37,13 @@ vi.mock('next/navigation', () => ({
 const mockToastError = vi.fn()
 
 vi.mock('react-hot-toast', () => ({
+  default: {
+    success: vi.fn(),
+    error: (message: string) => mockToastError(message),
+  },
   toast: {
     error: (message: string) => mockToastError(message),
+    success: vi.fn(),
   },
 }))
 
@@ -64,6 +73,10 @@ vi.mock('@/actions/courses/submit-inscription', () => ({
   submitCourseInscription: vi.fn(),
 }))
 
+vi.mock('@/actions/update-user-birth-date', () => ({
+  updateUserBirthDate: vi.fn(),
+}))
+
 // Mock ThemeAwareVideo
 vi.mock('@/components/ui/custom/theme-aware-video', () => ({
   ThemeAwareVideo: () => <div data-testid="theme-aware-video" />,
@@ -71,8 +84,10 @@ vi.mock('@/components/ui/custom/theme-aware-video', () => ({
 
 // Import mocked server action
 import { submitCourseInscription } from '@/actions/courses/submit-inscription'
+import { updateUserBirthDate } from '@/actions/update-user-birth-date'
 
 const mockSubmitCourseInscription = vi.mocked(submitCourseInscription)
+const mockUpdateUserBirthDate = vi.mocked(updateUserBirthDate)
 
 function wrapper({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient({
@@ -123,6 +138,9 @@ describe('ConfirmInscriptionClient', () => {
       expect(screen.getByText(/Informe seu celular/i)).toBeInTheDocument()
       expect(screen.getByText(/Informe seu e-mail/i)).toBeInTheDocument()
       expect(screen.getByText(/Informe seu endereço/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Informe sua data de nascimento/i)
+      ).toBeInTheDocument()
     })
 
     test('renders required fields message when user data is incomplete', () => {
@@ -181,6 +199,69 @@ describe('ConfirmInscriptionClient', () => {
         name: /Confirmar inscrição/i,
       })
       expect(continueButton).not.toBeDisabled()
+    })
+
+    test('disables continue button when birth date is missing', () => {
+      render(
+        <ConfirmInscriptionClient
+          userInfo={{ ...completeUserInfo, nascimento: undefined }}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnitsSingle}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      expect(
+        screen.getByText(/Informe sua data de nascimento/i)
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Continuar/i })).toBeDisabled()
+    })
+
+    test('enables continue button after saving missing birth date in drawer', async () => {
+      const user = userEvent.setup()
+      mockUpdateUserBirthDate.mockResolvedValue({
+        success: true,
+        message: 'Data de nascimento atualizada com sucesso.',
+      })
+
+      render(
+        <ConfirmInscriptionClient
+          userInfo={{ ...completeUserInfo, nascimento: undefined }}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnitsSingle}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      expect(screen.getByRole('button', { name: /Continuar/i })).toBeDisabled()
+
+      await user.click(screen.getByText(/Informe sua data de nascimento/i))
+
+      const dateInput = await waitFor(() => {
+        const input = document.querySelector('#birth-date-input')
+        expect(input).toBeTruthy()
+        return input as HTMLInputElement
+      })
+
+      await user.clear(dateInput)
+      await user.type(dateInput, '1990-05-15')
+
+      const saveButton = await screen.findByRole('button', { name: 'Salvar' })
+      await waitFor(() => expect(saveButton).not.toBeDisabled())
+      await user.click(saveButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('15/05/1990')).toBeInTheDocument()
+      })
+      expect(
+        screen.getByRole('button', { name: /Confirmar inscrição/i })
+      ).not.toBeDisabled()
     })
   })
 
@@ -366,6 +447,95 @@ describe('ConfirmInscriptionClient', () => {
       )
 
       expect(screen.getByText(/confirme suas informações/i)).toBeInTheDocument()
+    })
+  })
+
+  // Regressão: a seleção de unidade/turma só considerava vagas restantes, então
+  // uma turma com vaga porém fora do período de inscrição aparecia disponível e
+  // a recusa só vinha da API, no último passo.
+  describe('período de inscrição por turma', () => {
+    function renderFlow(
+      nearbyUnits: typeof nearbyUnitsMixedWindows,
+      extraProps: Record<string, unknown> = {}
+    ) {
+      return render(
+        <ConfirmInscriptionClient
+          userInfo={completeUserInfo}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={nearbyUnits}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+          shouldShowConfirmationScreen={false}
+          {...extraProps}
+        />,
+        { wrapper }
+      )
+    }
+
+    test('desabilita unidade cuja turma perdeu o prazo, mesmo com vaga', () => {
+      renderFlow(nearbyUnitsMixedWindows)
+
+      expect(screen.getByRole('radio', { name: /Rua Aberta/ })).toBeEnabled()
+      expect(
+        screen.getByRole('radio', { name: /Rua Encerrada/ })
+      ).toBeDisabled()
+    })
+
+    test('mostra o motivo de cada unidade indisponível, não só "sem vagas"', () => {
+      renderFlow(nearbyUnitsMixedWindows)
+
+      expect(screen.getByText('(Inscrições encerradas)')).toBeInTheDocument()
+      expect(screen.getByText('(Sem vagas disponíveis)')).toBeInTheDocument()
+      expect(
+        screen.getByText('(Inscrições ainda não abertas)')
+      ).toBeInTheDocument()
+    })
+
+    test('ignora unidade fora do prazo indicada na URL', () => {
+      renderFlow(nearbyUnitsMixedWindows, {
+        preselectedLocationId: 'unit-closed',
+      })
+
+      expect(
+        screen.getByRole('radio', { name: /Rua Encerrada/ })
+      ).not.toBeChecked()
+    })
+
+    test('desabilita a turma fora do prazo dentro da unidade', () => {
+      renderFlow(unitWithClosedAndOpenSchedules)
+
+      expect(screen.getByRole('radio', { name: /Turma 1/ })).toBeEnabled()
+      expect(screen.getByRole('radio', { name: /Turma 2/ })).toBeDisabled()
+      expect(screen.getByText('(Inscrições encerradas)')).toBeInTheDocument()
+    })
+
+    test('curso online: submete a turma no prazo, nunca a encerrada', async () => {
+      const user = userEvent.setup()
+      mockSubmitCourseInscription.mockResolvedValue({ success: true })
+
+      render(
+        <ConfirmInscriptionClient
+          userInfo={completeUserInfo}
+          userAuthInfo={userAuthInfo}
+          nearbyUnits={emptyUnits}
+          onlineClasses={onlineClassesMixedWindows}
+          courseInfo={basicCourseInfo}
+          courseId={courseId}
+          courseSlug={courseSlug}
+        />,
+        { wrapper }
+      )
+
+      await user.click(
+        screen.getByRole('button', { name: /Confirmar inscrição/i })
+      )
+
+      await waitFor(() => {
+        expect(mockSubmitCourseInscription).toHaveBeenCalledWith(
+          expect.objectContaining({ scheduleId: 'online-open' })
+        )
+      })
     })
   })
 })

@@ -102,6 +102,9 @@ jobs:
       # que falta), sem gastar o build nem rodar a suíte, e sem stack trace/retries.
       #  - PR de fork  → E2E_REQUIRE_AUTH=false (GitHub não passa secrets a forks;
       #    roda só o público, sem falhar).
+      #  - PR do Dependabot → idem: o run recebe só os secrets de Dependabot, não
+      #    os de Actions. `github.actor` continua dependabot[bot] num re-run manual,
+      #    e o re-run segue sem os secrets de Actions.
       #  - Push / PR same-repo → E2E_REQUIRE_AUTH=true e exige:
       #      • Token de auth: MINTADO na hora a partir de um refresh_token (não
       #        expira) com fallback ao token estático.
@@ -118,11 +121,17 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
         run: |
           set -uo pipefail
           if [ "$IS_FORK" = "true" ]; then
             echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
             echo "PR de fork: secrets indisponíveis — E2E roda apenas testes públicos."
+            exit 0
+          fi
+          if [ "$IS_DEPENDABOT" = "true" ]; then
+            echo "E2E_REQUIRE_AUTH=false" >> "$GITHUB_ENV"
+            echo "PR do Dependabot: secrets de Actions indisponíveis — E2E roda apenas testes públicos."
             exit 0
           fi
           echo "E2E_REQUIRE_AUTH=true" >> "$GITHUB_ENV"
@@ -183,9 +192,9 @@ jobs:
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
-          NEXT_PUBLIC_HAND_TALK_TOKEN: "c84d3e127f66af2cee4bfe289c58537a"
-          NEXT_PUBLIC_EQUALWEB_SITEKEY: "f010fd59983a9d10102605f5740d45fd"
-          NEXT_PUBLIC_PERTO_DIGITAL_ENABLED: "true"
+          NEXT_PUBLIC_FEATURE_SALESFORCE: "true"
+          NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA: "true"
+          NEXT_PUBLIC_VLIBRAS_ENABLED: "true"
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -238,9 +247,9 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --build-arg NEXT_PUBLIC_HAND_TALK_TOKEN="17a931fe38db57f3f3db2f9d8745f29b" \
-            --build-arg NEXT_PUBLIC_EQUALWEB_SITEKEY="f010fd59983a9d10102605f5740d45fd" \
-            --build-arg NEXT_PUBLIC_PERTO_DIGITAL_ENABLED="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_SALESFORCE="true" \
+            --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="true" \
+            --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
             --load \
             .

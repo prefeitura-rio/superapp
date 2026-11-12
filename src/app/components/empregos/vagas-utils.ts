@@ -96,6 +96,7 @@ export function transformVagaToCardData(
 
   return {
     id: vaga.id || '',
+    slug: vaga.slug,
     titulo: vaga.titulo || 'Título não disponível',
     empresaNome: toTitleCase(
       vaga.contratante?.nome_fantasia ||

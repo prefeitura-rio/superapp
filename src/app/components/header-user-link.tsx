@@ -6,6 +6,7 @@ import { buildAuthUrl } from '@/constants/url'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
+import { GlobalMenuTrigger } from './global-menu/global-menu-trigger'
 
 interface HeaderUserLinkProps {
   userName: string
@@ -13,6 +14,8 @@ interface HeaderUserLinkProps {
   userAvatarUrl?: string | null
   userAvatarName?: string | null
   isLoading?: boolean
+  returnUrl?: string
+  hideAvatar?: boolean
 }
 
 export default function HeaderUserLink({
@@ -21,6 +24,8 @@ export default function HeaderUserLink({
   userAvatarUrl,
   userAvatarName,
   isLoading = false,
+  returnUrl = '/',
+  hideAvatar = false,
 }: HeaderUserLinkProps) {
   const handleClick = () => {
     if (isLoggedIn) {
@@ -36,40 +41,45 @@ export default function HeaderUserLink({
 
   if (isLoading) {
     return (
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2">
+        {!hideAvatar && <Skeleton className="rounded-full h-11 w-11" />}
         <Skeleton className="rounded-full h-11 w-11" />
       </div>
     )
   }
 
-  // When not logged in, redirect to auth with home as return URL
-  // When logged in, go to profile page
-  const href = isLoggedIn ? '/meu-perfil' : buildAuthUrl('/')
+  const profileHref = isLoggedIn ? '/meu-perfil' : buildAuthUrl(returnUrl)
 
   return (
-    <Link
-      href={href}
-      className="flex items-center space-x-3"
-      onClick={handleClick}
-    >
-      {!isLoggedIn && (
-        <span className="text-sm font-normal text-muted-foreground">
-          Faça seu login
-        </span>
+    <div className="flex items-center space-x-2">
+      {!hideAvatar && (
+        <Link
+          href={profileHref}
+          className="flex items-center space-x-3"
+          onClick={handleClick}
+        >
+          {!isLoggedIn && (
+            <span className="text-sm font-normal text-muted-foreground">
+              Faça seu login
+            </span>
+          )}
+          <div className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors w-11 h-11 flex items-center justify-center overflow-hidden shrink-0">
+            {isLoggedIn && userAvatarUrl ? (
+              <Image
+                src={userAvatarUrl}
+                alt={userAvatarName || 'Avatar do usuário'}
+                width={48}
+                height={48}
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <UserIcon className="h-5 w-5" />
+            )}
+          </div>
+        </Link>
       )}
-      <div className="rounded-full bg-card w-11 h-11 flex items-center justify-center overflow-hidden">
-        {isLoggedIn && userAvatarUrl ? (
-          <Image
-            src={userAvatarUrl}
-            alt={userAvatarName || 'Avatar do usuário'}
-            width={48}
-            height={48}
-            className="w-full h-full rounded-full object-cover"
-          />
-        ) : (
-          <UserIcon className="h-5 w-5" />
-        )}
-      </div>
-    </Link>
+      {/* Menu global: o mesmo em todas as telas, logado ou não. */}
+      <GlobalMenuTrigger />
+    </div>
   )
 }

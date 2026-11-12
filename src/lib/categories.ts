@@ -1,10 +1,10 @@
 import serviceIcon from '@/constants/bucket'
-import { CARTA_SERVICOS_API_ENABLED } from '@/constants/venvs'
 import { getApiV1Categories } from '@/http-busca-search/categories/categories'
 import { GetApiV1CategoriesOrder } from '@/http-busca-search/models/getApiV1CategoriesOrder'
 import { GetApiV1CategoriesSortBy } from '@/http-busca-search/models/getApiV1CategoriesSortBy'
-import { fetchCartaServicosCategories } from '@/lib/carta-servicos/fetch'
+import { fetchCartaServicosCategoryCatalog } from '@/lib/carta-servicos/fetch'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import Image from 'next/image'
 import { type ReactNode, createElement } from 'react'
 
@@ -18,7 +18,7 @@ export interface Category {
   relevanciaMedia: number
   quantidadeServicos: number
   tag?: string
-  /** Theme slug from Carta de Serviços API (when CARTA_SERVICOS_API_ENABLED). */
+  /** Theme slug from the Salesforce-backed Carta de Serviços API. */
   themeSlug?: string
 }
 
@@ -56,17 +56,22 @@ const iconMap: Record<string, string> = {
   transporte: serviceIcon.transporteIcon,
 }
 
+/** URL do ícone de tema, quando o nome normalizado está no mapa. */
+export function getCategoryIconSrc(categoryName: string): string | undefined {
+  return iconMap[normalizeCategoryName(categoryName)]
+}
+
 export function getIconForCategory(categoryName: string): ReactNode {
-  const normalized = normalizeCategoryName(categoryName)
-  const iconSrc = iconMap[normalized]
+  const iconSrc = getCategoryIconSrc(categoryName)
 
   if (!iconSrc) {
     return null
   }
 
+  // Decorativo: quem exibe o ícone mostra o nome da categoria em texto.
   return createElement(Image, {
     src: iconSrc,
-    alt: categoryName,
+    alt: '',
     width: 48,
     height: 48,
     className: 'w-12 h-12',
@@ -76,16 +81,24 @@ export function getIconForCategory(categoryName: string): ReactNode {
 /** Fail fast so RSC pages (home/serviços) don't stay on loading.tsx. */
 const CATEGORIES_FETCH_TIMEOUT_MS = 4_000
 
+const BUSCA_CATEGORIES_PER_PAGE = 40
+
+/** Categories read from the catalog, and whether the single page holds all. */
+interface CategoryCatalog {
+  categories: Category[]
+  complete: boolean
+}
+
 async function fetchCategoriesFromBuscaSearch(
   options?: RequestInit
-): Promise<Category[]> {
+): Promise<CategoryCatalog> {
   const response = await getApiV1Categories(
     {
       sort_by: GetApiV1CategoriesSortBy.popularity,
       order: GetApiV1CategoriesOrder.desc,
       include_inactive: false,
       include_empty: false,
-      per_page: 40,
+      per_page: BUSCA_CATEGORIES_PER_PAGE,
     },
     {
       next: {
@@ -100,7 +113,9 @@ async function fetchCategoriesFromBuscaSearch(
     throw new Error(`Failed to fetch categories: ${response.status}`)
   }
 
-  return response.data.categories
+  const received = response.data.categories.length
+  const total = response.data.total_categories
+  const categories = response.data.categories
     .map((apiCategory): Category => {
       const normalizedSlug = normalizeCategoryName(apiCategory.name || '')
       return {
@@ -113,21 +128,89 @@ async function fetchCategoriesFromBuscaSearch(
     })
     .filter(cat => cat.quantidadeServicos > 0)
     .sort((a, b) => b.relevanciaMedia - a.relevanciaMedia)
+
+  return {
+    categories,
+    complete:
+      typeof total === 'number'
+        ? total <= received
+        : received < BUSCA_CATEGORIES_PER_PAGE,
+  }
+}
+
+async function fetchCategoryCatalog(): Promise<CategoryCatalog> {
+  const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
+
+  if (isSalesforceServicesEnabled()) {
+    return await fetchCartaServicosCategoryCatalog(getIconForCategory, {
+      signal,
+    })
+  }
+
+  return await fetchCategoriesFromBuscaSearch({ signal })
 }
 
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    const signal = AbortSignal.timeout(CATEGORIES_FETCH_TIMEOUT_MS)
-
-    if (CARTA_SERVICOS_API_ENABLED) {
-      return await fetchCartaServicosCategories(getIconForCategory, { signal })
-    }
-
-    return await fetchCategoriesFromBuscaSearch({ signal })
+    const catalog = await fetchCategoryCatalog()
+    return catalog.categories
   } catch (error) {
     console.error('Error fetching categories:', error)
     // Timeout / network / API errors: render page without categories
     // instead of keeping the user stuck on the route loading UI.
     return []
   }
+}
+
+/**
+ * Result of looking a category slug up in the catalog. `unavailable` means the
+ * catalog could not be read in full (error, timeout, empty list or a page
+ * shorter than the total), so the caller cannot tell whether the category
+ * exists and must not answer 404.
+ */
+export type CategoryLookup =
+  | { status: 'found'; category: Category }
+  | { status: 'not_found' }
+  | { status: 'unavailable' }
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+export function findCategoryInList(
+  categories: Category[],
+  categorySlug: string,
+  complete = true
+): CategoryLookup {
+  if (categories.length === 0) return { status: 'unavailable' }
+
+  const decoded = safeDecode(categorySlug)
+  const normalized = normalizeCategoryName(decoded)
+  const category = categories.find(
+    cat =>
+      cat.categorySlug === decoded ||
+      cat.categorySlug === normalized ||
+      cat.themeSlug === decoded ||
+      normalizeCategoryName(cat.name) === normalized
+  )
+
+  if (category) return { status: 'found', category }
+  return complete ? { status: 'not_found' } : { status: 'unavailable' }
+}
+
+export async function lookupCategoryBySlug(
+  categorySlug: string
+): Promise<CategoryLookup> {
+  let catalog: CategoryCatalog
+  try {
+    catalog = await fetchCategoryCatalog()
+  } catch (error) {
+    console.error('Error looking up category:', error)
+    return { status: 'unavailable' }
+  }
+  return findCategoryInList(catalog.categories, categorySlug, catalog.complete)
 }

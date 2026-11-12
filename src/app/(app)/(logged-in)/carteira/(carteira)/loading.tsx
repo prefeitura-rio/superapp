@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function WalletLoading() {
   return (
     <>
-      <main className="pb-30 mx-auto h-full w-full max-w-[896px] text-white">
+      <div className="pb-30 mx-auto h-full w-full max-w-[896px] text-white">
         <section className="relative h-full px-4">
           <div className="flex items-center justify-between pt-6 pb-4">
             <Skeleton className="h-8 w-32" />
@@ -15,7 +15,7 @@ export default function WalletLoading() {
           <WalletContentLoadingSkeleton />
         </section>
         <FloatNavigationWrapper />
-      </main>
+      </div>
     </>
   )
 }

@@ -1,35 +1,36 @@
+import type { ClientsCartaChannel } from '@/http-app-catalogo/models/clientsCartaChannel'
+import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
+import type { ModelsCartaServiceSummary } from '@/http-app-catalogo/models/modelsCartaServiceSummary'
+import type { ModelsCartaSubtheme } from '@/http-app-catalogo/models/modelsCartaSubtheme'
+import type { ModelsCartaTheme } from '@/http-app-catalogo/models/modelsCartaTheme'
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
-import type { Channel } from '@/http-pref-rio-carta-servicos/models/channel'
-import { ChannelType } from '@/http-pref-rio-carta-servicos/models/channelType'
-import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
-import type { ServiceFilteredItem } from '@/http-pref-rio-carta-servicos/models/serviceFilteredItem'
-import type { ServiceListItem } from '@/http-pref-rio-carta-servicos/models/serviceListItem'
-import type { Subtheme } from '@/http-pref-rio-carta-servicos/models/subtheme'
-import type { Theme } from '@/http-pref-rio-carta-servicos/models/theme'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
 import type { AppSubcategory } from '@/lib/carta-servicos/types'
 import type { Category } from '@/lib/categories'
 import type { ReactNode } from 'react'
 
-function mapChannelsToPresenciais(channels?: Channel[]): string[] {
+function isChannelType(channel: ClientsCartaChannel, type: string): boolean {
+  return channel.type?.toLowerCase() === type.toLowerCase()
+}
+
+function mapChannelsToPresenciais(channels?: ClientsCartaChannel[]): string[] {
   if (!channels) return []
 
   return channels
-    .filter(channel => channel.type === ChannelType.Presencial)
+    .filter(channel => isChannelType(channel, 'Presencial'))
     .map(channel => channel.endereco ?? channel.titulo ?? '')
     .filter(Boolean)
 }
 
-function mapChannelsToDigitais(channels?: Channel[]): string[] {
+function mapChannelsToDigitais(channels?: ClientsCartaChannel[]): string[] {
   if (!channels) return []
 
   return channels
     .filter(
       channel =>
-        channel.type === ChannelType.Digital ||
-        channel.type === ChannelType.Telefone
+        isChannelType(channel, 'Digital') || isChannelType(channel, 'Telefone')
     )
     .map(channel => {
       if (channel.whatsappLink) return channel.whatsappLink
@@ -41,9 +42,7 @@ function mapChannelsToDigitais(channels?: Channel[]): string[] {
     .filter(Boolean)
 }
 
-function mapArticleStatusToPublished(
-  articleStatus?: ServiceDetail['articleStatus']
-): number {
+function mapArticleStatusToPublished(articleStatus?: string): number {
   if (articleStatus === 'Draft') return 0
   // MuleSoft often returns null for published services exposed on the public API
   return 1
@@ -56,21 +55,7 @@ function isoToUnixSeconds(iso?: string): number | undefined {
 }
 
 export function mapServiceListItemToServiceDocument(
-  item: ServiceListItem,
-  categoryName?: string
-): ModelsServiceDocument {
-  return {
-    id: item.serviceCatalogId ?? item.articleId ?? item.slug,
-    slug: item.slug,
-    title: item.name,
-    description: item.summary ?? '',
-    category: categoryName,
-    status: item.articleStatus === 'Draft' ? 0 : 1,
-  }
-}
-
-export function mapServiceFilteredItemToServiceDocument(
-  item: ServiceFilteredItem,
+  item: ModelsCartaServiceSummary,
   categoryName?: string
 ): ModelsServiceDocument {
   return {
@@ -84,7 +69,7 @@ export function mapServiceFilteredItemToServiceDocument(
 }
 
 export function mapSubthemeToSubcategory(
-  subtheme: Subtheme,
+  subtheme: ModelsCartaSubtheme,
   categoryName?: string
 ): AppSubcategory {
   return {
@@ -97,7 +82,7 @@ export function mapSubthemeToSubcategory(
 }
 
 export function mapThemeToCategory(
-  theme: Theme,
+  theme: ModelsCartaTheme,
   getIconForCategory: (name: string) => ReactNode
 ): Category {
   const name = theme.name ?? ''
@@ -114,7 +99,7 @@ export function mapThemeToCategory(
 }
 
 export function mapServiceDetailToPrefRioService(
-  detail: ServiceDetail
+  detail: ClientsCartaServiceDetail
 ): ModelsPrefRioService {
   const orgUnit = detail.responsibleOrgUnitShortName
     ? `${detail.responsibleOrgUnit ?? ''} (${detail.responsibleOrgUnitShortName})`.trim()
@@ -125,7 +110,7 @@ export function mapServiceDetailToPrefRioService(
     descricao: button.description,
     url_service: button.url,
     ordem: button.order,
-    is_enabled: true,
+    is_enabled: button.enabled !== false,
   }))
 
   return {

@@ -18,6 +18,7 @@ import { formatCpf } from '@/lib/format-cpf'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 const rowClassName =
@@ -32,6 +33,7 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
   const { data } = useHeaderData()
   const { isLoggedIn, userName, userCpf, userAvatarUrl, userAvatarName } = data
 
+  const pathname = usePathname()
   const entries = useMemo(() => buildGlobalMenu(isLoggedIn), [isLoggedIn])
   const close = () => onOpenChange(false)
 
@@ -50,7 +52,7 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
                 <span />
               ) : (
                 <a
-                  href={buildAuthUrl('/')}
+                  href={buildAuthUrl(pathname ?? '/')}
                   className="rounded-full bg-white/10 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/20"
                 >
                   Faça seu login
@@ -188,7 +190,7 @@ function LogoutRow() {
       )}
     >
       <LogoutIcon className="h-6 w-6 shrink-0 text-foreground" />
-      Sair
+      {isLoading ? 'Saindo...' : 'Sair'}
     </button>
   )
 }

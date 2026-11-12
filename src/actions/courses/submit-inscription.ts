@@ -86,7 +86,15 @@ export async function submitCourseInscription(
         data.scheduleId.trim() !== '' && { schedule_id: data.scheduleId }),
     }
 
-    console.log('Submitting inscription with payload:', inscriptionPayload)
+    // LGPD: o payload e a resposta da API trazem CPF, nome, e-mail, telefone,
+    // idade e respostas do cidadão. O log fica só com identificadores não
+    // pessoais (curso, id da inscrição e status HTTP).
+    const logContext = {
+      course_id: inscriptionPayload.course_id,
+      inscription_id: inscriptionPayload.id,
+    }
+
+    console.log('Submitting course inscription:', logContext)
 
     // Submit to the API
     const response = await postApiV1CoursesCourseIdEnrollments(
@@ -95,7 +103,10 @@ export async function submitCourseInscription(
     )
 
     if (response.status === 201) {
-      console.log('Inscription submitted successfully:', response.data)
+      console.log('Course inscription submitted:', {
+        ...logContext,
+        status: response.status,
+      })
 
       // Revalidate the enrollment cache for this user and course
       // This ensures the UI updates automatically when the user returns to the course page
@@ -110,26 +121,33 @@ export async function submitCourseInscription(
       }
     }
 
-    // Extract error message from API response
+    // Extract error message from API response. The courses API reports business
+    // rules ("as inscrições desta turma já encerraram") under `error`, not
+    // `message` — reading only `message` reduced every rejection to a generic
+    // toast that told the citizen nothing.
     let errorMessage = 'Erro ao inscrever-se no curso'
-    if (
-      response.status === 400 ||
-      response.status === 409 ||
-      response.status === 500
-    ) {
-      const errorData = 'data' in response ? response.data : null
-      if (errorData && 'message' in errorData && errorData.message) {
-        errorMessage = errorData.message
-      }
+    const errorData = 'data' in response ? (response.data as any) : null
+    const apiMessage = errorData?.error ?? errorData?.message
+    if (typeof apiMessage === 'string' && apiMessage.trim() !== '') {
+      errorMessage = apiMessage
     }
 
-    console.error(`API returned status ${response.status}:`, errorMessage)
+    // A mensagem da API não vai ao log: ela pode repetir dados do cidadão.
+    console.error('Course inscription rejected by API:', {
+      ...logContext,
+      status: response.status,
+    })
     return {
       success: false,
       error: errorMessage,
     }
   } catch (error) {
-    console.error('Error submitting inscription:', error)
+    // Só o tipo do erro: a mensagem pode trazer o CPF (ex.: a tag de cache
+    // revalidada) e o objeto inteiro pode carregar o payload da requisição.
+    console.error('Error submitting course inscription:', {
+      course_id: Number.parseInt(data.courseId),
+      error: error instanceof Error ? error.name : typeof error,
+    })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

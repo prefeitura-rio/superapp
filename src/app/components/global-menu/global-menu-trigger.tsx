@@ -9,26 +9,36 @@ interface GlobalMenuTriggerProps {
   className?: string
 }
 
+/**
+ * Botão "Menu" do Header Global: abre o menu global em qualquer tela.
+ * Estado focused no hover (desktop) e enquanto pressionado (toque).
+ */
 export function GlobalMenuTrigger({ className }: GlobalMenuTriggerProps) {
   const [open, setOpen] = useState(false)
+  // O menu só é montado no primeiro clique (e fica montado para a animação de
+  // fechar): o header aparece em todas as telas e não precisa carregar o menu.
+  const [mounted, setMounted] = useState(false)
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setMounted(true)
+          setOpen(true)
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
         className={cn(
-          'flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-card transition-colors hover:bg-secondary',
+          'flex shrink-0 cursor-pointer items-center justify-center rounded-full bg-card p-3 transition-colors hover:bg-secondary active:bg-secondary',
           className
         )}
       >
         <MenuIcon className="h-5 w-5 text-foreground" />
-        <span className="sr-only">Abrir menu</span>
+        <span className="sr-only">Menu</span>
       </button>
 
-      <GlobalMenu open={open} onOpenChange={setOpen} />
+      {mounted && <GlobalMenu open={open} onOpenChange={setOpen} />}
     </>
   )
 }

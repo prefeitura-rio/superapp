@@ -9,6 +9,7 @@ import {
   UsersIcon,
 } from '@/assets/icons'
 import { cn } from '@/lib/utils'
+import { getVagaPath } from '@/lib/vaga-slug'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -27,6 +28,8 @@ export interface VagaBadge {
 
 export interface VagaCardData {
   id: string
+  /** Slug de SEO da vaga (`<titulo>-<hex>`), usado na URL de detalhe */
+  slug?: string
   titulo: string
   empresaNome: string
   empresaLogo?: string
@@ -116,7 +119,7 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
 
   return (
     <Link
-      href={`/servicos/trabalho/${vaga.id}`}
+      href={getVagaPath(vaga)}
       className={cn(
         'flex flex-col transition-opacity hover:opacity-90 overflow-hidden min-h-0',
         isRecent &&
@@ -160,7 +163,9 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
             <span
               className={cn(
                 'font-sans text-xs font-normal leading-4 tracking-normal',
-                isRecent ? 'text-[rgba(255,255,255,0.60)]' : 'text-[#0084D1]'
+                isRecent
+                  ? 'text-white/80'
+                  : 'text-[#0069A8] dark:text-[#00A6F4]'
               )}
             >
               Publicada em {vaga.dataPublicacao}
@@ -188,13 +193,8 @@ export function VagaCard({ vaga, variant, className }: VagaCardProps) {
               'inline-flex items-center justify-center gap-1 py-0.5 px-3 rounded-full font-sans font-normal leading-4 tracking-normal',
               isRecent
                 ? 'bg-white/10 text-white text-xs'
-                : 'bg-foreground/5 text-xs'
+                : 'bg-foreground/5 text-xs text-[#52525C] dark:text-[#D4D4D8]'
             )}
-            style={
-              !isRecent
-                ? { color: 'var(--theme-color-foreground-light, #71717B)' }
-                : undefined
-            }
           >
             {!isRecent && <BadgeIcon type={badge.type} />}
             <span>{badge.text}</span>

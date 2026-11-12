@@ -1,11 +1,20 @@
-import { ChannelType } from '@/http-pref-rio-carta-servicos/models/channelType'
-import type { ServiceDetail } from '@/http-pref-rio-carta-servicos/models/serviceDetail'
+import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
 import { mapServiceDetailToPrefRioService } from '@/lib/carta-servicos/mappers'
 import { describe, expect, it } from 'vitest'
 
+function makeTicketFlags(detail: ClientsCartaServiceDetail) {
+  const flags = detail.flags
+  if (!flags?.activeCategoryConfigId) return undefined
+  return {
+    allowTicketSubmission: flags.allowTicketSubmission,
+    allowsAnonymity: flags.allowsAnonymity,
+    activeCategoryConfigId: flags.activeCategoryConfigId,
+  }
+}
+
 describe('mapServiceDetailToPrefRioService', () => {
   it('maps nested ServiceDetail to flat ModelsPrefRioService', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'iptu-2025',
       name: 'IPTU 2025',
       serviceCatalogId: 'cat-123',
@@ -31,11 +40,11 @@ describe('mapServiceDetailToPrefRioService', () => {
       },
       channels: [
         {
-          type: ChannelType.Presencial,
+          type: 'Presencial',
           endereco: 'Rua A, 100',
         },
         {
-          type: ChannelType.Digital,
+          type: 'Digital',
           channelType: 'Site',
           value: 'https://pref.rio/iptu',
         },
@@ -77,7 +86,7 @@ describe('mapServiceDetailToPrefRioService', () => {
   })
 
   it('treats null articleStatus as published (MuleSoft runtime)', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'controle-de-roedores-1',
       name: 'Controle de roedores',
       serviceCatalogId: 'a03be00000bfHcIAAU',
@@ -90,7 +99,7 @@ describe('mapServiceDetailToPrefRioService', () => {
   })
 
   it('maps Draft articleStatus to unpublished', () => {
-    const detail: ServiceDetail = {
+    const detail: ClientsCartaServiceDetail = {
       slug: 'draft-service',
       name: 'Draft',
       articleStatus: 'Draft',
@@ -99,5 +108,75 @@ describe('mapServiceDetailToPrefRioService', () => {
     }
 
     expect(mapServiceDetailToPrefRioService(detail).status).toBe(0)
+  })
+})
+
+describe('ticketFlags extraction', () => {
+  it('returns ticketFlags when activeCategoryConfigId is present', () => {
+    const detail: ClientsCartaServiceDetail = {
+      slug: 'reparo-de-luminaria',
+      name: 'Reparo de Luminária',
+      info: {},
+      howToRequest: {},
+      flags: {
+        allowTicketSubmission: true,
+        allowsAnonymity: false,
+        activeCategoryConfigId: 'a09be00000A7trdAAB',
+        activeCategoryName: 'Solicitação',
+      },
+    }
+
+    const flags = makeTicketFlags(detail)
+
+    expect(flags).toEqual({
+      allowTicketSubmission: true,
+      allowsAnonymity: false,
+      activeCategoryConfigId: 'a09be00000A7trdAAB',
+    })
+  })
+
+  it('returns undefined when activeCategoryConfigId is absent', () => {
+    const detail: ClientsCartaServiceDetail = {
+      slug: 'servico-sem-formulario',
+      name: 'Serviço sem formulário',
+      info: {},
+      howToRequest: {},
+      flags: {
+        allowTicketSubmission: false,
+        allowsAnonymity: false,
+      },
+    }
+
+    expect(makeTicketFlags(detail)).toBeUndefined()
+  })
+
+  it('returns undefined when flags are absent', () => {
+    const detail: ClientsCartaServiceDetail = {
+      slug: 'servico-sem-flags',
+      name: 'Serviço sem flags',
+      info: {},
+      howToRequest: {},
+    }
+
+    expect(makeTicketFlags(detail)).toBeUndefined()
+  })
+
+  it('includes allowsAnonymity true when service allows anonymous submission', () => {
+    const detail: ClientsCartaServiceDetail = {
+      slug: 'servico-anonimo',
+      name: 'Serviço anônimo',
+      info: {},
+      howToRequest: {},
+      flags: {
+        allowTicketSubmission: true,
+        allowsAnonymity: true,
+        activeCategoryConfigId: 'a09be00000A3p0HAAR',
+      },
+    }
+
+    const flags = makeTicketFlags(detail)
+
+    expect(flags?.allowsAnonymity).toBe(true)
+    expect(flags?.activeCategoryConfigId).toBe('a09be00000A3p0HAAR')
   })
 })

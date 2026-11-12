@@ -21,6 +21,7 @@ import type {
   ModelsPetStatsResponse,
   ModelsPhoneVerificationValidateRequest,
   ModelsSelfDeclaredAddressInput,
+  ModelsSelfDeclaredBirthDateInput,
   ModelsSelfDeclaredDeficienciaInput,
   ModelsSelfDeclaredEmailInput,
   ModelsSelfDeclaredEscolaridadeInput,
@@ -34,6 +35,221 @@ import type {
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch'
+
+export type getCitizenDisabilityOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenDisabilityOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenDisabilityOptionsResponseSuccess =
+  getCitizenDisabilityOptionsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenDisabilityOptionsResponseError =
+  getCitizenDisabilityOptionsResponse500 & {
+    headers: Headers
+  }
+
+export type getCitizenDisabilityOptionsResponse =
+  | getCitizenDisabilityOptionsResponseSuccess
+  | getCitizenDisabilityOptionsResponseError
+
+export const getGetCitizenDisabilityOptionsUrl = () => {
+  return `/citizen/disability/options`
+}
+
+/**
+ * Retorna a lista de opções válidas de condições de deficiência para autodeclaração.
+ * @summary Listar opções de deficiência
+ */
+export const getCitizenDisabilityOptions = async (
+  options?: RequestInit
+): Promise<getCitizenDisabilityOptionsResponse> => {
+  return customFetch<getCitizenDisabilityOptionsResponse>(
+    getGetCitizenDisabilityOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getCitizenEducationOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenEducationOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenEducationOptionsResponseSuccess =
+  getCitizenEducationOptionsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenEducationOptionsResponseError =
+  getCitizenEducationOptionsResponse500 & {
+    headers: Headers
+  }
+
+export type getCitizenEducationOptionsResponse =
+  | getCitizenEducationOptionsResponseSuccess
+  | getCitizenEducationOptionsResponseError
+
+export const getGetCitizenEducationOptionsUrl = () => {
+  return `/citizen/education/options`
+}
+
+/**
+ * Retorna a lista de opções válidas de níveis de escolaridade para autodeclaração.
+ * @summary Listar opções de escolaridade
+ */
+export const getCitizenEducationOptions = async (
+  options?: RequestInit
+): Promise<getCitizenEducationOptionsResponse> => {
+  return customFetch<getCitizenEducationOptionsResponse>(
+    getGetCitizenEducationOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getCitizenEthnicityOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenEthnicityOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenEthnicityOptionsResponseSuccess =
+  getCitizenEthnicityOptionsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenEthnicityOptionsResponseError =
+  getCitizenEthnicityOptionsResponse500 & {
+    headers: Headers
+  }
+
+export type getCitizenEthnicityOptionsResponse =
+  | getCitizenEthnicityOptionsResponseSuccess
+  | getCitizenEthnicityOptionsResponseError
+
+export const getGetCitizenEthnicityOptionsUrl = () => {
+  return `/citizen/ethnicity/options`
+}
+
+/**
+ * Retorna a lista de opções válidas de etnia para autodeclaração. Esta lista é usada para validar as atualizações de etnia autodeclarada.
+ * @summary Listar opções de etnia
+ */
+export const getCitizenEthnicityOptions = async (
+  options?: RequestInit
+): Promise<getCitizenEthnicityOptionsResponse> => {
+  return customFetch<getCitizenEthnicityOptionsResponse>(
+    getGetCitizenEthnicityOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getCitizenFamilyIncomeOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenFamilyIncomeOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenFamilyIncomeOptionsResponseSuccess =
+  getCitizenFamilyIncomeOptionsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenFamilyIncomeOptionsResponseError =
+  getCitizenFamilyIncomeOptionsResponse500 & {
+    headers: Headers
+  }
+
+export type getCitizenFamilyIncomeOptionsResponse =
+  | getCitizenFamilyIncomeOptionsResponseSuccess
+  | getCitizenFamilyIncomeOptionsResponseError
+
+export const getGetCitizenFamilyIncomeOptionsUrl = () => {
+  return `/citizen/family-income/options`
+}
+
+/**
+ * Retorna a lista de opções válidas de faixas de renda familiar mensal para autodeclaração.
+ * @summary Listar opções de renda familiar
+ */
+export const getCitizenFamilyIncomeOptions = async (
+  options?: RequestInit
+): Promise<getCitizenFamilyIncomeOptionsResponse> => {
+  return customFetch<getCitizenFamilyIncomeOptionsResponse>(
+    getGetCitizenFamilyIncomeOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type getCitizenGenderOptionsResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type getCitizenGenderOptionsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenGenderOptionsResponseSuccess =
+  getCitizenGenderOptionsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenGenderOptionsResponseError =
+  getCitizenGenderOptionsResponse500 & {
+    headers: Headers
+  }
+
+export type getCitizenGenderOptionsResponse =
+  | getCitizenGenderOptionsResponseSuccess
+  | getCitizenGenderOptionsResponseError
+
+export const getGetCitizenGenderOptionsUrl = () => {
+  return `/citizen/gender/options`
+}
+
+/**
+ * Retorna a lista de opções sugeridas de gênero para autodeclaração. Nota: Este campo aceita qualquer texto livre para a opção "Outro".
+ * @summary Listar opções de gênero
+ */
+export const getCitizenGenderOptions = async (
+  options?: RequestInit
+): Promise<getCitizenGenderOptionsResponse> => {
+  return customFetch<getCitizenGenderOptionsResponse>(
+    getGetCitizenGenderOptionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
 
 export type getCitizenCpfResponse200 = {
   data: ModelsCitizen
@@ -186,6 +402,78 @@ export const putCitizenCpfAddress = async (
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       body: JSON.stringify(modelsSelfDeclaredAddressInput),
+    }
+  )
+}
+
+export type putCitizenCpfBirthDateResponse200 = {
+  data: HandlersSuccessResponse
+  status: 200
+}
+
+export type putCitizenCpfBirthDateResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type putCitizenCpfBirthDateResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type putCitizenCpfBirthDateResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type putCitizenCpfBirthDateResponse422 = {
+  data: HandlersErrorResponse
+  status: 422
+}
+
+export type putCitizenCpfBirthDateResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type putCitizenCpfBirthDateResponseSuccess =
+  putCitizenCpfBirthDateResponse200 & {
+    headers: Headers
+  }
+export type putCitizenCpfBirthDateResponseError = (
+  | putCitizenCpfBirthDateResponse400
+  | putCitizenCpfBirthDateResponse401
+  | putCitizenCpfBirthDateResponse403
+  | putCitizenCpfBirthDateResponse422
+  | putCitizenCpfBirthDateResponse500
+) & {
+  headers: Headers
+}
+
+export type putCitizenCpfBirthDateResponse =
+  | putCitizenCpfBirthDateResponseSuccess
+  | putCitizenCpfBirthDateResponseError
+
+export const getPutCitizenCpfBirthDateUrl = (cpf: string) => {
+  return `/citizen/${cpf}/birth-date`
+}
+
+/**
+ * Atualiza ou define a data de nascimento autodeclarada do cidadão. Bloqueado se já houver data oficial.
+ * @summary Atualizar data de nascimento autodeclarada
+ */
+export const putCitizenCpfBirthDate = async (
+  cpf: string,
+  modelsSelfDeclaredBirthDateInput: ModelsSelfDeclaredBirthDateInput,
+  options?: RequestInit
+): Promise<putCitizenCpfBirthDateResponse> => {
+  return customFetch<putCitizenCpfBirthDateResponse>(
+    getPutCitizenCpfBirthDateUrl(cpf),
+    {
+      ...options,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(modelsSelfDeclaredBirthDateInput),
     }
   )
 }
@@ -1341,6 +1629,75 @@ export const postCitizenCpfPets = async (
   )
 }
 
+export type getCitizenCpfPetsStatsResponse200 = {
+  data: ModelsPetStatsResponse
+  status: 200
+}
+
+export type getCitizenCpfPetsStatsResponse400 = {
+  data: HandlersErrorResponse
+  status: 400
+}
+
+export type getCitizenCpfPetsStatsResponse401 = {
+  data: HandlersErrorResponse
+  status: 401
+}
+
+export type getCitizenCpfPetsStatsResponse403 = {
+  data: HandlersErrorResponse
+  status: 403
+}
+
+export type getCitizenCpfPetsStatsResponse429 = {
+  data: HandlersErrorResponse
+  status: 429
+}
+
+export type getCitizenCpfPetsStatsResponse500 = {
+  data: HandlersErrorResponse
+  status: 500
+}
+
+export type getCitizenCpfPetsStatsResponseSuccess =
+  getCitizenCpfPetsStatsResponse200 & {
+    headers: Headers
+  }
+export type getCitizenCpfPetsStatsResponseError = (
+  | getCitizenCpfPetsStatsResponse400
+  | getCitizenCpfPetsStatsResponse401
+  | getCitizenCpfPetsStatsResponse403
+  | getCitizenCpfPetsStatsResponse429
+  | getCitizenCpfPetsStatsResponse500
+) & {
+  headers: Headers
+}
+
+export type getCitizenCpfPetsStatsResponse =
+  | getCitizenCpfPetsStatsResponseSuccess
+  | getCitizenCpfPetsStatsResponseError
+
+export const getGetCitizenCpfPetsStatsUrl = (cpf: string) => {
+  return `/citizen/${cpf}/pets/stats`
+}
+
+/**
+ * Recupera as estatísticas de quantidade de pets por tipo associadas ao CPF do cidadão.
+ * @summary Obter estatísticas de pets do CPF
+ */
+export const getCitizenCpfPetsStats = async (
+  cpf: string,
+  options?: RequestInit
+): Promise<getCitizenCpfPetsStatsResponse> => {
+  return customFetch<getCitizenCpfPetsStatsResponse>(
+    getGetCitizenCpfPetsStatsUrl(cpf),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
 export type getCitizenCpfPetsPetIdResponse200 = {
   data: ModelsPet
   status: 200
@@ -1410,75 +1767,6 @@ export const getCitizenCpfPetsPetId = async (
 ): Promise<getCitizenCpfPetsPetIdResponse> => {
   return customFetch<getCitizenCpfPetsPetIdResponse>(
     getGetCitizenCpfPetsPetIdUrl(cpf, petId),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenCpfPetsStatsResponse200 = {
-  data: ModelsPetStatsResponse
-  status: 200
-}
-
-export type getCitizenCpfPetsStatsResponse400 = {
-  data: HandlersErrorResponse
-  status: 400
-}
-
-export type getCitizenCpfPetsStatsResponse401 = {
-  data: HandlersErrorResponse
-  status: 401
-}
-
-export type getCitizenCpfPetsStatsResponse403 = {
-  data: HandlersErrorResponse
-  status: 403
-}
-
-export type getCitizenCpfPetsStatsResponse429 = {
-  data: HandlersErrorResponse
-  status: 429
-}
-
-export type getCitizenCpfPetsStatsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenCpfPetsStatsResponseSuccess =
-  getCitizenCpfPetsStatsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenCpfPetsStatsResponseError = (
-  | getCitizenCpfPetsStatsResponse400
-  | getCitizenCpfPetsStatsResponse401
-  | getCitizenCpfPetsStatsResponse403
-  | getCitizenCpfPetsStatsResponse429
-  | getCitizenCpfPetsStatsResponse500
-) & {
-  headers: Headers
-}
-
-export type getCitizenCpfPetsStatsResponse =
-  | getCitizenCpfPetsStatsResponseSuccess
-  | getCitizenCpfPetsStatsResponseError
-
-export const getGetCitizenCpfPetsStatsUrl = (cpf: string) => {
-  return `/citizen/${cpf}/pets/stats`
-}
-
-/**
- * Recupera as estatísticas de quantidade de pets por tipo associadas ao CPF do cidadão.
- * @summary Obter estatísticas de pets do CPF
- */
-export const getCitizenCpfPetsStats = async (
-  cpf: string,
-  options?: RequestInit
-): Promise<getCitizenCpfPetsStatsResponse> => {
-  return customFetch<getCitizenCpfPetsStatsResponse>(
-    getGetCitizenCpfPetsStatsUrl(cpf),
     {
       ...options,
       method: 'GET',
@@ -1728,221 +2016,6 @@ export const getCitizenCpfWallet = async (
 ): Promise<getCitizenCpfWalletResponse> => {
   return customFetch<getCitizenCpfWalletResponse>(
     getGetCitizenCpfWalletUrl(cpf),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenDisabilityOptionsResponse200 = {
-  data: string[]
-  status: 200
-}
-
-export type getCitizenDisabilityOptionsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenDisabilityOptionsResponseSuccess =
-  getCitizenDisabilityOptionsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenDisabilityOptionsResponseError =
-  getCitizenDisabilityOptionsResponse500 & {
-    headers: Headers
-  }
-
-export type getCitizenDisabilityOptionsResponse =
-  | getCitizenDisabilityOptionsResponseSuccess
-  | getCitizenDisabilityOptionsResponseError
-
-export const getGetCitizenDisabilityOptionsUrl = () => {
-  return `/citizen/disability/options`
-}
-
-/**
- * Retorna a lista de opções válidas de condições de deficiência para autodeclaração.
- * @summary Listar opções de deficiência
- */
-export const getCitizenDisabilityOptions = async (
-  options?: RequestInit
-): Promise<getCitizenDisabilityOptionsResponse> => {
-  return customFetch<getCitizenDisabilityOptionsResponse>(
-    getGetCitizenDisabilityOptionsUrl(),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenEducationOptionsResponse200 = {
-  data: string[]
-  status: 200
-}
-
-export type getCitizenEducationOptionsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenEducationOptionsResponseSuccess =
-  getCitizenEducationOptionsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenEducationOptionsResponseError =
-  getCitizenEducationOptionsResponse500 & {
-    headers: Headers
-  }
-
-export type getCitizenEducationOptionsResponse =
-  | getCitizenEducationOptionsResponseSuccess
-  | getCitizenEducationOptionsResponseError
-
-export const getGetCitizenEducationOptionsUrl = () => {
-  return `/citizen/education/options`
-}
-
-/**
- * Retorna a lista de opções válidas de níveis de escolaridade para autodeclaração.
- * @summary Listar opções de escolaridade
- */
-export const getCitizenEducationOptions = async (
-  options?: RequestInit
-): Promise<getCitizenEducationOptionsResponse> => {
-  return customFetch<getCitizenEducationOptionsResponse>(
-    getGetCitizenEducationOptionsUrl(),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenEthnicityOptionsResponse200 = {
-  data: string[]
-  status: 200
-}
-
-export type getCitizenEthnicityOptionsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenEthnicityOptionsResponseSuccess =
-  getCitizenEthnicityOptionsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenEthnicityOptionsResponseError =
-  getCitizenEthnicityOptionsResponse500 & {
-    headers: Headers
-  }
-
-export type getCitizenEthnicityOptionsResponse =
-  | getCitizenEthnicityOptionsResponseSuccess
-  | getCitizenEthnicityOptionsResponseError
-
-export const getGetCitizenEthnicityOptionsUrl = () => {
-  return `/citizen/ethnicity/options`
-}
-
-/**
- * Retorna a lista de opções válidas de etnia para autodeclaração. Esta lista é usada para validar as atualizações de etnia autodeclarada.
- * @summary Listar opções de etnia
- */
-export const getCitizenEthnicityOptions = async (
-  options?: RequestInit
-): Promise<getCitizenEthnicityOptionsResponse> => {
-  return customFetch<getCitizenEthnicityOptionsResponse>(
-    getGetCitizenEthnicityOptionsUrl(),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenFamilyIncomeOptionsResponse200 = {
-  data: string[]
-  status: 200
-}
-
-export type getCitizenFamilyIncomeOptionsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenFamilyIncomeOptionsResponseSuccess =
-  getCitizenFamilyIncomeOptionsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenFamilyIncomeOptionsResponseError =
-  getCitizenFamilyIncomeOptionsResponse500 & {
-    headers: Headers
-  }
-
-export type getCitizenFamilyIncomeOptionsResponse =
-  | getCitizenFamilyIncomeOptionsResponseSuccess
-  | getCitizenFamilyIncomeOptionsResponseError
-
-export const getGetCitizenFamilyIncomeOptionsUrl = () => {
-  return `/citizen/family-income/options`
-}
-
-/**
- * Retorna a lista de opções válidas de faixas de renda familiar mensal para autodeclaração.
- * @summary Listar opções de renda familiar
- */
-export const getCitizenFamilyIncomeOptions = async (
-  options?: RequestInit
-): Promise<getCitizenFamilyIncomeOptionsResponse> => {
-  return customFetch<getCitizenFamilyIncomeOptionsResponse>(
-    getGetCitizenFamilyIncomeOptionsUrl(),
-    {
-      ...options,
-      method: 'GET',
-    }
-  )
-}
-
-export type getCitizenGenderOptionsResponse200 = {
-  data: string[]
-  status: 200
-}
-
-export type getCitizenGenderOptionsResponse500 = {
-  data: HandlersErrorResponse
-  status: 500
-}
-
-export type getCitizenGenderOptionsResponseSuccess =
-  getCitizenGenderOptionsResponse200 & {
-    headers: Headers
-  }
-export type getCitizenGenderOptionsResponseError =
-  getCitizenGenderOptionsResponse500 & {
-    headers: Headers
-  }
-
-export type getCitizenGenderOptionsResponse =
-  | getCitizenGenderOptionsResponseSuccess
-  | getCitizenGenderOptionsResponseError
-
-export const getGetCitizenGenderOptionsUrl = () => {
-  return `/citizen/gender/options`
-}
-
-/**
- * Retorna a lista de opções sugeridas de gênero para autodeclaração. Nota: Este campo aceita qualquer texto livre para a opção "Outro".
- * @summary Listar opções de gênero
- */
-export const getCitizenGenderOptions = async (
-  options?: RequestInit
-): Promise<getCitizenGenderOptionsResponse> => {
-  return customFetch<getCitizenGenderOptionsResponse>(
-    getGetCitizenGenderOptionsUrl(),
     {
       ...options,
       method: 'GET',

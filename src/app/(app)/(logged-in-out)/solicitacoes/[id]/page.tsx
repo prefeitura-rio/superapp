@@ -4,9 +4,11 @@ import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/compone
 import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { decodeHtmlEntities } from '@/lib/html-entities'
+import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -192,6 +194,19 @@ interface DetailData {
   origem: string
   andamentos: { evento: string; dataInsercao: string; descricao: string }[]
   isLoggedIn: boolean
+  osId: string
+  isAcessoInformacao: boolean
+  canOpenRecurso: {
+    available: boolean
+    categoryId: string | null
+    deadline: string | null
+  } | null
+  canOpenOuvidoria: {
+    elogio: { available: boolean; categoryId: string | null } | null
+    sugestao: { available: boolean; categoryId: string | null } | null
+    reclamacao: { available: boolean; categoryId: string | null } | null
+  } | null
+  loadedAt?: string
   // não logado
   ultimoAndamento?: {
     evento: string
@@ -353,19 +368,70 @@ function PublicAndamento({ data }: { data: DetailData }) {
   )
 }
 
-function OuvidoriaCard() {
+function buildOuvidoriaPageUrl(
+  protocolo: string,
+  osId: string,
+  canOpen: NonNullable<DetailData['canOpenOuvidoria']>
+): string {
+  const params = new URLSearchParams({ osId })
+  if (canOpen.elogio?.available && canOpen.elogio.categoryId) {
+    params.set('elogio', canOpen.elogio.categoryId)
+  }
+  if (canOpen.sugestao?.available && canOpen.sugestao.categoryId) {
+    params.set('sugestao', canOpen.sugestao.categoryId)
+  }
+  if (canOpen.reclamacao?.available && canOpen.reclamacao.categoryId) {
+    params.set('reclamacao', canOpen.reclamacao.categoryId)
+  }
+  return `/solicitacoes/${protocolo}/ouvidoria?${params.toString()}`
+}
+
+function OuvidoriaCard({
+  protocolo,
+  osId,
+  canOpenOuvidoria,
+}: {
+  protocolo: string
+  osId: string
+  canOpenOuvidoria: NonNullable<DetailData['canOpenOuvidoria']>
+}) {
   return (
     <SectionCard>
       <p className="text-sm text-foreground-light leading-5">
-        Sua voz é importante para melhorarmos os serviços da cidade. Acesse
-        nossa Ouvidoria e avalie seu atendimento.
+        Acesse nossa Ouvidoria para falar como foi o seu atendimento.
       </p>
-      <button
-        type="button"
+      <Link
+        href={buildOuvidoriaPageUrl(protocolo, osId, canOpenOuvidoria)}
         className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
       >
         Ouvidoria
-      </button>
+      </Link>
+    </SectionCard>
+  )
+}
+
+function buildRecursoLaiLink(categoryId: string | null, woId: string): string {
+  const params = new URLSearchParams({ woId })
+  if (categoryId) params.set('id', categoryId)
+  return `${TICKET_FORM_BASE_URL}/lai/?${params.toString()}`
+}
+
+function RecursoCard({ href }: { href: string }) {
+  return (
+    <SectionCard>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-medium text-foreground">Recurso</p>
+        <p className="text-sm text-foreground-light leading-5">
+          Conteste uma resposta negativa, a falta de resposta ou uma resposta
+          insatisfatória.
+        </p>
+      </div>
+      <a
+        href={href}
+        className="w-full rounded-full text-sm font-medium text-foreground cursor-pointer flex items-center justify-center px-6 py-4 bg-secondary hover:opacity-80 transition-opacity"
+      >
+        Solicitar Recurso
+      </a>
     </SectionCard>
   )
 }
@@ -392,19 +458,20 @@ function RequestDetail({ data }: { data: DetailData }) {
   }
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-
-      <div className="pt-25 pb-32 px-4 flex flex-col gap-2">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-2">
         <h1
-          className="text-3xl font-medium text-card-foreground leading-9 mb-4"
+          className="text-3xl font-medium text-card-foreground leading-9 mb-4 pt-2"
           style={{ letterSpacing: '-0.4px' }}
         >
           {data.servico}
         </h1>
+        {data.loadedAt && (
+          <p className="text-sm text-foreground-light -mt-2 mb-2">
+            Dados atualizados em {data.loadedAt}
+          </p>
+        )}
 
         {/* Status + timeline */}
         <SectionCard>
@@ -422,7 +489,7 @@ function RequestDetail({ data }: { data: DetailData }) {
                 gap: 'var(--button-badge-spacing, 4px)',
                 borderRadius: 'var(--button-badge-radius-pill, 999px)',
                 background: 'var(--secondary, #E4E4E7)',
-                color: 'var(--zinc-900, #18181B)',
+                color: 'var(--foreground, #09090B)',
                 fontFamily: 'var(--font-family-sans, "DM Sans")',
                 fontSize: 'var(--font-size-xs, 12px)',
                 fontWeight: 'var(--font-weight-normal, 400)',
@@ -490,20 +557,41 @@ function RequestDetail({ data }: { data: DetailData }) {
           </div>
         )}
 
-        {/* Ouvidoria — só logado e concluído */}
-        {data.isLoggedIn && macroStatus === 'Concluído' && <OuvidoriaCard />}
+        {/* Recurso LAI — só logado, pedido LAI elegível */}
+        {data.isLoggedIn &&
+          data.isAcessoInformacao &&
+          data.canOpenRecurso?.available === true && (
+            <RecursoCard
+              href={buildRecursoLaiLink(
+                data.canOpenRecurso.categoryId,
+                data.osId
+              )}
+            />
+          )}
+
+        {/* Ouvidoria — só logado, SF liberou ao menos um tipo */}
+        {data.isLoggedIn &&
+          data.canOpenOuvidoria &&
+          [
+            data.canOpenOuvidoria.elogio,
+            data.canOpenOuvidoria.sugestao,
+            data.canOpenOuvidoria.reclamacao,
+          ].some(t => t?.available === true) && (
+            <OuvidoriaCard
+              protocolo={data.protocolo}
+              osId={data.osId}
+              canOpenOuvidoria={data.canOpenOuvidoria}
+            />
+          )}
 
         {/* Description — só logado */}
         {data.isLoggedIn && data.descricao && (
-          <SectionCard>
+          <SectionCard className="min-w-0">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-normal leading-5 tracking-normal text-foreground-light">
                 Descrição
               </span>
-              <p
-                className="text-sm font-normal leading-5 tracking-normal text-foreground"
-                style={{ whiteSpace: 'pre-wrap' }}
-              >
+              <p className="text-sm font-normal leading-5 tracking-normal text-foreground whitespace-pre-wrap wrap-break-word min-w-0">
                 {decodeHtmlEntities(data.descricao)}
               </p>
             </div>
@@ -594,7 +682,7 @@ function RequestDetail({ data }: { data: DetailData }) {
               </SectionCard>
             )
           })()}
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>
@@ -603,13 +691,9 @@ function RequestDetail({ data }: { data: DetailData }) {
 
 function LoadingState() {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-
-      <div className="pt-25 pb-32 px-4 flex flex-col gap-4">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
         <Skeleton className="rounded-2xl h-48" />
@@ -621,7 +705,7 @@ function LoadingState() {
 
         <Skeleton className="rounded-2xl h-40" />
         <Skeleton className="rounded-2xl h-32" />
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>
@@ -630,16 +714,13 @@ function LoadingState() {
 
 function ErrorState({ protocolo }: { protocolo: string }) {
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/minhas-solicitacoes"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-      <div className="pt-25 pb-32 px-4 flex flex-col items-center justify-center text-center gap-2">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col items-center justify-center text-center gap-2 pt-10">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.
         </p>
-      </div>
+      </main>
       <FloatNavigationWrapper />
     </div>
   )
@@ -689,9 +770,11 @@ export default function RequestDetailPage() {
               protocolo: json.protocolo,
               servico: os?.servico ?? os?.subtema ?? '—',
               macroStatus: normalizeStatus(os?.status ?? json.status),
-              dataAbertura: json.dataAbertura
-                ? formatDateTime(json.dataAbertura)
-                : '',
+              dataAbertura: os?.dataAbertura
+                ? formatDateTime(os.dataAbertura)
+                : json.dataAbertura
+                  ? formatDateTime(json.dataAbertura)
+                  : '',
               dataUltimaAtualizacao: json.dataUltimaAtualizacao
                 ? formatDateTime(json.dataUltimaAtualizacao)
                 : '',
@@ -710,6 +793,34 @@ export default function RequestDetailPage() {
               origem: json.origem ?? '',
               andamentos,
               isLoggedIn: true,
+              osId: os?.id ?? '',
+              isAcessoInformacao: os?.isAcessoInformacao ?? false,
+              canOpenRecurso: os?.canOpen?.recurso ?? null,
+              loadedAt: json.loaded_at
+                ? formatDateTime(json.loaded_at)
+                : undefined,
+              canOpenOuvidoria: os?.canOpen
+                ? {
+                    elogio: os.canOpen.elogio
+                      ? {
+                          available: os.canOpen.elogio.available ?? false,
+                          categoryId: os.canOpen.elogio.categoryId ?? null,
+                        }
+                      : null,
+                    sugestao: os.canOpen.sugestao
+                      ? {
+                          available: os.canOpen.sugestao.available ?? false,
+                          categoryId: os.canOpen.sugestao.categoryId ?? null,
+                        }
+                      : null,
+                    reclamacao: os.canOpen.reclamacao
+                      ? {
+                          available: os.canOpen.reclamacao.available ?? false,
+                          categoryId: os.canOpen.reclamacao.categoryId ?? null,
+                        }
+                      : null,
+                  }
+                : null,
             })
             setLoading(false)
             return
@@ -744,9 +855,11 @@ export default function RequestDetailPage() {
             protocolo: json.protocolo,
             servico: os?.servico ?? '—',
             macroStatus: normalizeStatus(os?.status ?? json.status),
-            dataAbertura: json.dataAbertura
-              ? formatDateTime(json.dataAbertura)
-              : '',
+            dataAbertura: os?.dataAbertura
+              ? formatDateTime(os.dataAbertura)
+              : json.dataAbertura
+                ? formatDateTime(json.dataAbertura)
+                : '',
             dataUltimaAtualizacao: '',
             previsaoSLA: '',
             motivoFechamento: '',
@@ -758,6 +871,13 @@ export default function RequestDetailPage() {
             origem: '',
             andamentos: [],
             isLoggedIn: false,
+            osId: '',
+            isAcessoInformacao: false,
+            canOpenRecurso: null,
+            canOpenOuvidoria: null,
+            loadedAt: json.loaded_at
+              ? formatDateTime(json.loaded_at)
+              : undefined,
             ultimoAndamento: ultimo,
           })
         } else {

@@ -104,9 +104,9 @@ export default function HomeCategoriesGrid({
 
   return (
     <div className="px-4 pb-4 overflow-x-hidden">
-      <h3 className="pb-2 text-base font-medium text-foreground leading-5">
+      <h2 className="pb-2 text-base font-medium text-foreground leading-5">
         Serviços
-      </h3>
+      </h2>
 
       {/* Mobile/Tablet: Swiper with grid-cols-4 - below max-w-4xl */}
       <div className="pb-0 lg:hidden">

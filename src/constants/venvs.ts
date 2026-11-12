@@ -7,10 +7,11 @@ export const ENABLE_HARDCODED_SEARCH_LINKS =
   process.env.NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS === 'true'
 
 /**
- * Uses Pref.Rio Carta de Serviços API (MuleSoft/Salesforce) instead of
- * app-busca-search for categories, subcategories and service detail.
- * Default: disabled — production stays on busca-search until explicitly enabled.
- * Set CARTA_SERVICOS_API_ENABLED=true to enable (server-only).
+ * Preview of a Carta de Serviços draft opened from Salesforce Lightning.
+ * Default: disabled. Set PREVIEW_CARTA_SERVICOS_ENABLED=true to expose
+ * /servicos/preview and POST /api/preview/servicos. Server-only.
+ * Independent of NEXT_PUBLIC_FEATURE_SALESFORCE.
  */
-export const CARTA_SERVICOS_API_ENABLED =
-  process.env.CARTA_SERVICOS_API_ENABLED === 'true'
+export function isPreviewCartaServicosEnabled(): boolean {
+  return process.env.PREVIEW_CARTA_SERVICOS_ENABLED === 'true'
+}

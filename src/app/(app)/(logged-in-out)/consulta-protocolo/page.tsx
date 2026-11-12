@@ -7,9 +7,7 @@ import {
   normalizeStatus,
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
-import { SecondaryHeader } from '@/app/components/secondary-header'
-import { ChevronLeftIcon } from '@/assets/icons/chevron-left-icon'
-import { IconButton } from '@/components/ui/custom/icon-button'
+import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -20,6 +18,7 @@ interface OsItem {
   status: string
   dataAbertura: string
   protocolo: string
+  isAcessoInformacao: boolean
 }
 
 type PageState = 'form' | 'loading' | 'results' | 'error'
@@ -85,6 +84,7 @@ export default function ConsultaProtocoloPage() {
         status: os.status ?? '',
         dataAbertura: data.dataAbertura ?? '',
         protocolo: trimmed,
+        isAcessoInformacao: os.isAcessoInformacao ?? false,
       }))
 
       setResults(items)
@@ -103,15 +103,9 @@ export default function ConsultaProtocoloPage() {
 
   if (pageState === 'results') {
     return (
-      <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-        <header
-          className="px-4 fixed w-full max-w-4xl mx-auto z-50 bg-background"
-          style={{ paddingTop: '24px', paddingBottom: '24px', top: 0 }}
-        >
-          <IconButton icon={ChevronLeftIcon} onClick={handleBack} />
-        </header>
-
-        <div className="pt-23 pb-32 px-4 flex flex-col gap-4">
+      <div className="text-foreground">
+        <HeaderWrapperClient />
+        <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
             <p className="text-sm text-foreground-light leading-5">
               Encontramos{' '}
@@ -148,13 +142,14 @@ export default function ConsultaProtocoloPage() {
                     {item.servico}
                   </h3>
                   <p className="text-xs text-foreground-light truncate">
-                    Protocolo {item.protocolo} • {item.categoria}
+                    Protocolo {item.protocolo} •{' '}
+                    {item.isAcessoInformacao ? 'LAI' : item.categoria}
                   </p>
                 </div>
               </button>
             ))}
           </div>
-        </div>
+        </main>
 
         <FloatNavigationWrapper />
       </div>
@@ -162,13 +157,9 @@ export default function ConsultaProtocoloPage() {
   }
 
   return (
-    <div className="max-w-4xl min-h-lvh mx-auto text-foreground">
-      <SecondaryHeader
-        route="/"
-        style={{ paddingTop: '24px', paddingBottom: '24px' }}
-      />
-
-      <div className="pt-25 pb-32 px-4 flex flex-col gap-6">
+    <div className="text-foreground">
+      <HeaderWrapperClient />
+      <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-6 pt-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">
             Consulte seu protocolo
@@ -237,7 +228,7 @@ export default function ConsultaProtocoloPage() {
             {pageState === 'loading' ? 'Consultando...' : 'Consultar protocolo'}
           </button>
         </form>
-      </div>
+      </main>
 
       <FloatNavigationWrapper />
     </div>

@@ -158,4 +158,62 @@ describe('ChangeScheduleClient (integração)', () => {
       { timeout: 5000 }
     )
   }, 15000)
+
+  // A troca de turma tinha o mesmo furo do fluxo de inscrição: só olhava vagas.
+  // O backend não valida a janela no ChangeSchedule, então uma turma vencida
+  // oferecida aqui vira uma troca indevida — não só um erro no final.
+  describe('período de inscrição por turma', () => {
+    const janelaAberta = {
+      enrollment_start_date: '2020-01-01T00:00:00Z',
+      enrollment_end_date: '2099-12-31T23:59:59Z',
+    }
+    const janelaEncerrada = {
+      enrollment_start_date: '2020-01-01T00:00:00Z',
+      enrollment_end_date: '2021-01-01T00:00:00Z',
+    }
+
+    function renderComTurmas(extra: Record<string, unknown>[]) {
+      return render(
+        <ChangeScheduleClient
+          course={course}
+          userEnrollment={userEnrollment}
+          nearbyUnits={[]}
+          onlineClasses={extra as never}
+          courseSlug={courseSlug}
+          isOnlineCourse={true}
+        />
+      )
+    }
+
+    test('não oferece turma com vaga porém fora do prazo', () => {
+      renderComTurmas([
+        { ...onlineSchedule, id: 'sch-aberta', ...janelaAberta },
+        { ...onlineSchedule, id: 'sch-encerrada', ...janelaEncerrada },
+      ])
+
+      // Só a turma dentro do prazo é ofertada; a vencida some da seleção
+      expect(screen.getAllByRole('radio')).toHaveLength(1)
+    })
+
+    test('confirma a troca com a turma que está no prazo', async () => {
+      const user = userEvent.setup()
+      renderComTurmas([
+        { ...onlineSchedule, id: 'sch-encerrada', ...janelaEncerrada },
+        { ...onlineSchedule, id: 'sch-aberta', ...janelaAberta },
+      ])
+
+      // Só há um radio (a vencida foi filtrada): tem de ser a que está no prazo
+      await user.click(screen.getByRole('radio'))
+      await user.click(screen.getByRole('button', { name: /Confirmar troca/i }))
+
+      await waitFor(
+        () => {
+          expect(mockChangeSchedule).toHaveBeenCalledWith(
+            expect.objectContaining({ scheduleId: 'sch-aberta' })
+          )
+        },
+        { timeout: 5000 }
+      )
+    }, 15000)
+  })
 })

@@ -13,23 +13,30 @@ import {
 import WalletSectionClient from '@/app/components/wallet-section-client'
 import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
+import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { AuthStatusProvider } from '@/providers/auth-status-provider'
 
-const isChamadosEnabled = process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
-
 export default async function Home() {
-  const categories = await fetchCategories()
+  const isSalesforceEnabled = isSalesforceServicesEnabled()
+  const [categories, mostAccessed] = await Promise.all([
+    fetchCategories(),
+    resolveMostAccessedServices(),
+  ])
   const categoriesSlice = categories.slice(0, 14)
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   return (
     <AuthStatusProvider>
-      <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-30">
-        <HeaderWrapperClient />
+      <main className="flex w-full mx-auto max-w-4xl flex-col bg-background text-foreground pb-6">
+        <h1 className="sr-only">
+          Pref Rio — Portal de serviços da Prefeitura do Rio
+        </h1>
+        <HeaderWrapperClient showSearchPlaceholder />
 
         {/* Requests in progress banner — only visible when logged in with recent requests */}
-        {isChamadosEnabled && <RequestsInProgressBanner />}
+        {isSalesforceEnabled && <RequestsInProgressBanner />}
 
         <PendingInviteSection />
 
@@ -44,10 +51,10 @@ export default async function Home() {
         <HomeCategoriesGrid categories={allCategories} />
 
         {/* Requests Section Cards */}
-        {isChamadosEnabled && <RequestsSectionCards />}
+        {isSalesforceEnabled && <RequestsSectionCards />}
 
         {/* Most Accessed Service Cards*/}
-        <MostAccessedServiceCards />
+        <MostAccessedServiceCards services={mostAccessed} />
 
         {/* Carteira section - fetched client-side to avoid cache issues */}
         <WalletSectionClient />

@@ -4,11 +4,16 @@ import { improveResumoProfissionalAction } from '@/actions/improve-text-with-ai'
 import { ActionDiv } from '@/app/components/action-div'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AiImproveTextarea } from '@/components/ui/custom/ai-improve-textarea'
-import { CustomButton } from '@/components/ui/custom/custom-button'
+import {
+  CustomButton,
+  accordionCancelButtonClassName,
+  accordionSaveButtonClassName,
+} from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { ChevronDownIcon, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { curriculoExperienciaSchema } from './curriculo-experiencia-schema'
@@ -177,7 +182,10 @@ function ExperienciaProfissionalAccordionContentInner({
     name: 'conquistas',
   })
 
+  const [salvando, setSalvando] = useState(false)
+
   const handleExperienciaSave = async () => {
+    if (salvando) return
     // Always trigger validation to show errors
     const isValid = await trigger([...EXPERIENCIA_FIELD_NAMES])
 
@@ -202,12 +210,17 @@ function ExperienciaProfissionalAccordionContentInner({
       return
     }
     const data = getExperienciaSnapshot(getValues())
-    const result = await saveExperienciaAction(cpf, data)
-    if (result.success) {
-      toast.success('Experiência profissional salva com sucesso')
-      onSaveSuccess(data)
-    } else {
-      toast.error(result.error ?? 'Erro ao salvar. Tente novamente.')
+    setSalvando(true)
+    try {
+      const result = await saveExperienciaAction(cpf, data)
+      if (result.success) {
+        toast.success('Experiência profissional salva com sucesso')
+        onSaveSuccess(data)
+      } else {
+        toast.error(result.error ?? 'Erro ao salvar. Tente novamente.')
+      }
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -620,9 +633,9 @@ function ExperienciaProfissionalAccordionContentInner({
       <div className="flex gap-3">
         <CustomButton
           type="button"
-          variant="secondary"
+          variant="card"
           size="lg"
-          className="flex-1"
+          className={accordionCancelButtonClassName}
           onClick={onCancel}
         >
           Cancelar
@@ -631,10 +644,11 @@ function ExperienciaProfissionalAccordionContentInner({
           type="button"
           variant="primary"
           size="lg"
-          className={cn('flex-1', !canSave && 'opacity-50')}
+          className={cn(accordionSaveButtonClassName, !canSave && 'opacity-50')}
           onClick={() => handleExperienciaSave()}
+          disabled={salvando}
         >
-          Salvar
+          {salvando ? 'Salvando...' : 'Salvar'}
         </CustomButton>
       </div>
     </div>

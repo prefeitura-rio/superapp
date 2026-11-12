@@ -11,6 +11,7 @@ export type CertificateTemplate =
   | 'sesrio'
   | 'spmrio'
   | 'smte'
+  | 'sma'
 
 export interface OrganizationTemplateMapping {
   orgao_id: string // cd_ua do departamento
@@ -29,6 +30,7 @@ const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
   'sesrio',
   'spmrio',
   'smte',
+  'sma',
 ])
 
 /**
@@ -43,6 +45,7 @@ const NEW_LAYOUT_TEMPLATES: ReadonlySet<CertificateTemplate> = new Set([
  * - sesrio.pdf: SES-RIO (layout v2)
  * - spmrio.pdf: Secretaria Especial de Políticas para Mulheres - SPM-RIO (layout v2)
  * - smte.pdf: Secretaria Municipal de Trabalho e Renda - SMTE (layout v2)
+ * - sma.pdf: Secretaria Municipal de Administração - SMA (layout v2)
  *
  * NOTA: Os orgao_id devem ser os valores de cd_ua retornados pela API de departamentos.
  * Para adicionar um novo mapeamento, consulte a API para obter o cd_ua correto.
@@ -79,6 +82,10 @@ const TEMPLATE_MAPPINGS: OrganizationTemplateMapping[] = [
   {
     orgao_id: '2600',
     template: 'smte',
+  },
+  {
+    orgao_id: '1300',
+    template: 'sma',
   },
 ]
 

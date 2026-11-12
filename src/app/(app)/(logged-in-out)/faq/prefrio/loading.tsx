@@ -1,0 +1,44 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
+export default function FaqPrefRioLoading() {
+  return (
+    <div className="text-foreground">
+      {/* MainHeader skeleton */}
+      <div className="w-full bg-background py-4">
+        <div className="mx-auto px-4 flex max-w-4xl items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-11 rounded-full" />
+            <Skeleton className="h-11 w-11 rounded-full" />
+          </div>
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 pt-4 pb-10">
+        <div className="space-y-14">
+          {Array.from({ length: 3 }).map((_, sIdx) => (
+            <div key={sIdx}>
+              <Skeleton className="h-10 w-48 mb-6" />
+              <div className="space-y-8">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index}>
+                    <div className="space-y-2">
+                      <Skeleton className="h-6 w-full max-w-md" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </div>
+                    </div>
+                    {index < 2 && (
+                      <div className="mt-8 border-t border-border" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,24 +1,16 @@
 'use client'
 
-import { deleteUserAddress } from '@/actions/delete-user-address'
-import {
-  EditIcon,
-  MapPinIcon,
-  MoreVerticalIcon,
-  TrashIcon,
-} from '@/assets/icons'
+import { EditIcon, MapPinIcon, MoreVerticalIcon } from '@/assets/icons'
 import { Badge } from '@/components/ui/badge'
 import { BottomSheet } from '@/components/ui/custom/bottom-sheet'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import type { ModelsEnderecoPrincipal } from '@/http/models/modelsEnderecoPrincipal'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface AddressInfoCardProps {
   address: ModelsEnderecoPrincipal
   onEdit?: (address: ModelsEnderecoPrincipal) => void
-  onDelete?: (address: ModelsEnderecoPrincipal) => void
   showBadge?: boolean
   badgeText?: string
 }
@@ -26,12 +18,10 @@ interface AddressInfoCardProps {
 export function AddressInfoCard({
   address,
   onEdit,
-  onDelete,
   showBadge = false,
   badgeText = 'Atualizar',
 }: AddressInfoCardProps) {
   const [open, setOpen] = useState(false)
-  const router = useRouter()
 
   // Helper to format address string
   let mainLine = 'Endereço não disponível'
@@ -62,19 +52,6 @@ export function AddressInfoCard({
     if (address && onEdit) {
       onEdit(address)
       setOpen(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (address) {
-      try {
-        console.log('Deleting address:', address)
-        await deleteUserAddress()
-        setOpen(false)
-      } catch (error: any) {
-        // Redirect to session expired page on any error
-        router.push('/sessao-expirada')
-      }
     }
   }
 
@@ -129,7 +106,10 @@ export function AddressInfoCard({
         <div className="text-center p-4">
           <h2 className="text-md">{displayAddress}</h2>
         </div>
-        <div className="grid w-full grid-cols-2 gap-2 max-w-4xl mx-auto">
+        {/* Sem opção de excluir: o endereço é obrigatório para a inscrição em
+            cursos e vagas, então o único endereço do cidadão só pode ser
+            editado. */}
+        <div className="grid w-full grid-cols-1 gap-2 max-w-4xl mx-auto">
           <Link href="/meu-perfil/endereco/atualizar-endereco">
             <CustomButton
               variant="primary"
@@ -141,16 +121,6 @@ export function AddressInfoCard({
               Editar
             </CustomButton>
           </Link>
-
-          <CustomButton
-            variant="secondary"
-            size="lg"
-            icon={TrashIcon}
-            className="py-6"
-            onClick={handleDelete}
-          >
-            Excluir
-          </CustomButton>
         </div>
       </BottomSheet>
     </div>

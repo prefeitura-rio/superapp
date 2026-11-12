@@ -47,7 +47,7 @@ export default function AlertsPage() {
     { key: 'costura' as const, label: 'Cursos de Costura', status: 'Ligado' },
   ]
   return (
-    <main className="max-w-md min-h-lvh mx-auto pt-15 text-white">
+    <div className="max-w-md min-h-lvh mx-auto pt-15 text-white">
       <ServicesHeader title="Alerts" />
       <div className=" text-white p-6">
         <div className="max-w-md mx-auto space-y-6">
@@ -97,6 +97,6 @@ export default function AlertsPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

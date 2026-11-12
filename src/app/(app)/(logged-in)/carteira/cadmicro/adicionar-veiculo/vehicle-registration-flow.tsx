@@ -1,6 +1,6 @@
 'use client'
 
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { CustomButton } from '@/components/ui/custom/custom-button'
 import { useCreateVehicleMutation } from '@/hooks/cadmicro/use-cadmicro-mutations'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -153,12 +153,7 @@ export function VehicleRegistrationFlow({
   return (
     <div className="min-h-screen w-full bg-background">
       <div className="w-full max-w-4xl mx-auto pb-12">
-        <SecondaryHeader
-          fixed={false}
-          onBack={goToPrev}
-          disabled={isPending}
-          className="max-w-4xl mb-2 md:mb-0"
-        />
+        <ProfileHeaderWrapper />
 
         <Swiper
           allowTouchMove={false}

@@ -1,8 +1,14 @@
 'use client'
 
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
-import { ServiceTypeToggle } from '@/app/components/mei/service-type-toggle'
-import SearchPlaceholder from '@/app/components/search-placeholder'
+import { OportunidadesSearchPlaceholder } from '@/app/components/oportunidades/oportunidades-search-placeholder'
+import {
+  getVisibleOportunidadesTabs,
+  isOportunidadesListing,
+  resolveOportunidadesSection,
+} from '@/app/components/oportunidades/oportunidades-sections'
+import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
+import { OportunidadesTypeToggle } from '@/app/components/oportunidades/oportunidades-type-toggle'
 import { AuthHeaderProvider } from '@/providers/auth-header-provider'
 import { usePathname } from 'next/navigation'
 
@@ -12,53 +18,53 @@ export default function ServicosLayout({
   children: React.ReactNode
 }>) {
   const pathname = usePathname()
+  const section = resolveOportunidadesSection(pathname)
 
-  // Determina qual tipo está ativo baseado na rota
-  const activeType = pathname?.includes('/servicos/cursos')
-    ? 'cursos'
-    : pathname?.includes('/servicos/trabalho')
-      ? 'empregabilidade'
-      : 'mei'
+  if (section) {
+    const showListingChrome = isOportunidadesListing(pathname)
+    const hasMultipleTabs = getVisibleOportunidadesTabs().length > 1
 
-  // Só mostra o toggle e o float nav nas homes dos serviços
-  const shouldShowToggle =
-    pathname === '/servicos/cursos' ||
-    pathname === '/servicos/mei' ||
-    pathname === '/servicos/trabalho' ||
-    pathname === '/servicos/trabalho/'
-
-  // Determina se o toggle terá mais de 1 aba visível (staging sempre sim; produção
-  // depende de quantos serviços estão listados na flag)
-  const flag = process.env.NEXT_PUBLIC_FEATURE_FLAG ?? 'false'
-  const isProduction = flag !== 'false'
-  const enabledServicesCount = isProduction
-    ? flag.split(',').filter(Boolean).length
-    : 3
-  const toggleHasMultipleTabs = enabledServicesCount > 1
-
-  const searchUrl =
-    activeType === 'cursos'
-      ? '/servicos/cursos/busca'
-      : activeType === 'mei'
-        ? '/busca?tipo=mei'
-        : '/busca?tipo=empregos'
+    return (
+      <AuthHeaderProvider>
+        <div>
+          <OportunidadesSubHeader logoHref={section.logoHref} />
+          <div
+            style={{
+              background:
+                'linear-gradient(180deg, var(--card) 0%, var(--background) 100%)',
+              backgroundSize: '100% 210px',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
+            {/* A busca e o seletor de tipo ficam dentro do <main> para não
+                ficarem fora de qualquer landmark (axe region). */}
+            <main>
+              {showListingChrome &&
+                (hasMultipleTabs ? (
+                  <div className="max-w-4xl mx-auto pb-0">
+                    <OportunidadesSearchPlaceholder
+                      searchUrl={section.searchUrl}
+                    />
+                    <div className="mb-5 mt-5 px-4">
+                      <OportunidadesTypeToggle activeType={section.id} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-20 sm:h-24" />
+                ))}
+              {children}
+            </main>
+            {showListingChrome && <FloatNavigationWrapper />}
+          </div>
+        </div>
+      </AuthHeaderProvider>
+    )
+  }
 
   return (
     <AuthHeaderProvider>
       <div>
-        {shouldShowToggle &&
-          (toggleHasMultipleTabs ? (
-            <div className="max-w-4xl mx-auto pt-[74px] pb-0">
-              <SearchPlaceholder searchUrl={searchUrl} />
-              <div className="mb-5 mt-2 px-4">
-                <ServiceTypeToggle activeType={activeType} />
-              </div>
-            </div>
-          ) : (
-            <div className="h-20 sm:h-24" />
-          ))}
         <main>{children}</main>
-        {shouldShowToggle && <FloatNavigationWrapper />}
       </div>
     </AuthHeaderProvider>
   )

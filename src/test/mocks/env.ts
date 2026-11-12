@@ -6,9 +6,11 @@ export const TEST_ENV = {
   COURSES_BASE_API_URL: 'http://localhost:3002',
   BASE_API_URL_APP_BUSCA_SEARCH: 'http://localhost:3003',
   BASE_API_URL_SUBPAV_OSA_API: 'http://localhost:3004',
+  API_KEY_SUBPAV_OSA_SMS: 'test-subpav-osa-sms-key',
   BASE_API_URL_PREF_RIO_CARTA_SERVICOS: 'http://localhost:3008/api/',
   BASE_API_URL_PREF_RIO_CIDADAO: 'http://localhost:3006/api/private/',
   BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO: 'http://localhost:3007/api/',
+  BASE_API_URL_DIVIDA_ATIVA: 'http://localhost:3009',
   NODE_ENV: 'test',
 } as const
 

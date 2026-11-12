@@ -1,8 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-import { GlobalMenuTrigger } from '@/app/components/global-menu/global-menu-trigger'
 import InstallPWAButtonClient from '@/app/components/install-pwa-button-client'
-import { SecondaryHeader } from '@/app/components/secondary-header'
+import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { EditIcon, UserIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
 import { USER_PROFILE_MENU_ITEMS } from '@/constants/user-profile-menu-items'
@@ -49,14 +48,8 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="min-h-lvh max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
-      {/* Header */}
-      <SecondaryHeader
-        title="Dados pessoais"
-        route="/"
-        fixed={false}
-        rightSlot={<GlobalMenuTrigger />}
-      />
+    <div className="max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
+      <ProfileHeaderWrapper hideAvatar title="Dados pessoais" />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
