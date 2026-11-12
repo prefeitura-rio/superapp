@@ -1,3 +1,4 @@
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import {
   alvaraIcon,
   cadrioIcon,
@@ -6,7 +7,6 @@ import {
   licencaSanitariaIcon,
   multasIcon,
 } from './bucket'
-import { CARTA_SERVICOS_API_ENABLED } from './venvs'
 
 export type PopularServiceId =
   | 'iptu'
@@ -17,7 +17,7 @@ export type PopularServiceId =
   | 'divida-ativa'
 
 /**
- * Slugs da app-busca-search (sufixo de id). Vale com `CARTA_SERVICOS_API_ENABLED`
+ * Slugs da app-busca-search (sufixo de id). Vale com a flag Salesforce
  * desligada — o caso de produção enquanto a migração não sobe.
  */
 const BUSCA_SEARCH_HREFS: Record<PopularServiceId, string> = {
@@ -35,7 +35,7 @@ const BUSCA_SEARCH_HREFS: Record<PopularServiceId, string> = {
 }
 
 /**
- * Slugs canônicos da app-catalogo. Vale com `CARTA_SERVICOS_API_ENABLED` ligada.
+ * Slugs canônicos da app-catalogo. Vale com a flag Salesforce ligada.
  */
 const CATALOGO_HREFS: Record<PopularServiceId, string> = {
   iptu: '/servicos/categoria/tributos/iptu-2026',
@@ -60,14 +60,14 @@ export function popularServiceHrefs(
   return cartaServicosEnabled ? CATALOGO_HREFS : BUSCA_SEARCH_HREFS
 }
 
-const catalogHrefs = popularServiceHrefs(CARTA_SERVICOS_API_ENABLED)
+const catalogHrefs = popularServiceHrefs(isSalesforceServicesEnabled())
 
 /**
  * Destino do card de Dívida Ativa.
  *
  * Com a flag do módulo ligada (homologação), o card leva a `/divida-ativa`. Com ela
  * desligada — staging e produção hoje — aponta para a ficha no catálogo, no slug da
- * app-busca-search ou da app-catalogo conforme `CARTA_SERVICOS_API_ENABLED`. Sem o
+ * app-busca-search ou da app-catalogo conforme a flag Salesforce. Sem o
  * atalho o módulo fica inalcançável quando a flag é ligada: o middleware libera a
  * rota, mas nada no app leva até ela.
  *

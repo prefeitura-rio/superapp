@@ -7,16 +7,10 @@
  */
 
 export type GetApiV1RecommendationsParams = {
-  /**
-   * Tipos: service, course, job, mei_opportunity
-   */
+  /** Tipos: service, course, job, mei_opportunity */
   types?: string[]
-  /**
-   * Máximo de itens, max 50 (default: 10)
-   */
+  /** Máximo de itens, max 50 (default: 10) */
   limit?: number
-  /**
-   * Contexto: homepage, after_search, profile
-   */
+  /** Contexto: homepage, after_search, profile */
   context?: string
 }

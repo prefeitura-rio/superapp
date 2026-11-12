@@ -66,10 +66,16 @@ export default defineConfig({
     },
   },
   appGoApi: {
-    input: './.tmp/pref-381-openapi.json',
+    input: {
+      target:
+        'https://raw.githubusercontent.com/prefeitura-rio/app-go-api/refs/heads/main/docs/swagger.json',
+      // Swagger 2.0 — o @scalar/openapi-upgrader (usado internamente pelo Orval >= 8.45)
+      // falha ao converter alguns path items antes da validação OAS3. Remover quando o
+      unsafeDisableValidation: true,
+    },
     output: {
-      target: './.tmp/orval-pref-381/api.ts',
-      schemas: './.tmp/orval-pref-381/models',
+      target: './src/http-courses/api.ts',
+      schemas: './src/http-courses/models',
       mode: 'tags-split',
       client: 'fetch',
       formatter: 'biome',

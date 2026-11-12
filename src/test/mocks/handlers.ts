@@ -45,6 +45,17 @@ const MOCK_NIVEIS_IDIOMA = {
   meta: { page: 1, page_size: 100, total: 3 },
 }
 
+export const MOCK_TIPOS_PCD = {
+  data: [
+    { id: 'pcd-fisica', descricao: 'Física' },
+    { id: 'pcd-auditiva', descricao: 'Auditiva' },
+    { id: 'pcd-intelectual', descricao: 'Intelectual' },
+    { id: 'pcd-multipla', descricao: 'Múltipla' },
+    { id: 'pcd-visual', descricao: 'Visual' },
+  ],
+  meta: { page: 1, page_size: 1000, total: 5 },
+}
+
 export const MOCK_VAGA_SEM_CRITERIOS = {
   id: 'vaga-abc-123',
   titulo: 'Vaga Teste',
@@ -204,6 +215,11 @@ export const handlers = [
   // Empregabilidade - Níveis de idioma
   http.get(`${COURSES_BASE_URL}/api/v1/empregabilidade/niveis-idioma`, () => {
     return HttpResponse.json(MOCK_NIVEIS_IDIOMA, { status: 200 })
+  }),
+
+  // Empregabilidade - Tipos PcD
+  http.get(`${COURSES_BASE_URL}/api/v1/empregabilidade/tipos-pcd`, () => {
+    return HttpResponse.json(MOCK_TIPOS_PCD, { status: 200 })
   }),
 
   // Empregabilidade - Criar candidatura

@@ -179,10 +179,13 @@ test.describe('Meu Perfil — informações pessoais (autenticado)', () => {
     await expect(page).toHaveURL(
       '/meu-perfil/informacoes-pessoais/atualizar-telefone'
     )
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('celular')).toBeVisible()
     await expect(
-      page.getByText('Você irá receber um código via Whatsapp')
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+celular/ })
+    ).toBeVisible({ timeout: 10000 })
+    await expect(
+      page
+        .getByText('Você irá receber um código via Whatsapp')
+        .filter({ visible: true })
     ).toBeVisible()
   })
 
@@ -200,8 +203,9 @@ test.describe('Meu Perfil — informações pessoais (autenticado)', () => {
     await expect(page).toHaveURL(
       '/meu-perfil/informacoes-pessoais/atualizar-email'
     )
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('email')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+email/ })
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('bottom sheet Cor / Raça exibe todas as opções', async ({ page }) => {

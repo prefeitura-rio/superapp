@@ -66,6 +66,30 @@ async function hasCandidatarButton(
 }
 
 /**
+ * Hrefs aceitos para o botão "Candidatar-se à vaga" da página `vagaHref`.
+ *
+ * A página da vaga usa o slug (`<titulo>-<12 primeiros hex do UUID>`), mas o
+ * fluxo /inscricao continua chaveado pelo UUID da vaga (consulta e envio da
+ * candidatura, retorno do login, passos internos). Aceita `<vagaHref>/inscricao`
+ * ou `/servicos/trabalho/<uuid>/inscricao` com o UUID da mesma vaga: o que
+ * começa pelos 12 hex do sufixo do slug.
+ */
+function inscricaoHrefPattern(vagaHref: string): RegExp {
+  const escapedHref = vagaHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const segment = vagaHref.split('/').pop() ?? ''
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      segment
+    )
+  const slugHex = isUuid ? undefined : /-([0-9a-f]{12})$/.exec(segment)?.[1]
+  if (!slugHex) {
+    return new RegExp(`^${escapedHref}/inscricao$`)
+  }
+  const uuid = `${slugHex.slice(0, 8)}-${slugHex.slice(8)}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+  return new RegExp(`^(?:${escapedHref}|/servicos/trabalho/${uuid})/inscricao$`)
+}
+
+/**
  * Abre um drawer de ActionDiv encontrando o label pelo texto e clicando
  * na área interativa — mesma estrutura do DOM usada em meu-perfil.spec.ts.
  */
@@ -520,8 +544,10 @@ test.describe('Empregos — página da vaga (autenticado)', () => {
     const isVisible = await hasCandidatarButton(page, candidatarBtn)
 
     if (isVisible) {
-      const expectedUrl = `${href}/inscricao`
-      await expect(candidatarBtn).toHaveAttribute('href', expectedUrl)
+      await expect(candidatarBtn).toHaveAttribute(
+        'href',
+        inscricaoHrefPattern(href)
+      )
     }
   })
 
@@ -580,22 +606,6 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       return
     }
 
-    await candidatarBtn.click()
-    await page.waitForURL(
-      url =>
-        url.pathname.includes('/inscricao') ||
-        url.pathname.includes('/minhas-candidaturas'),
-      { timeout: 15000 }
-    )
-
-    if (page.url().includes('/minhas-candidaturas')) {
-      test.skip(
-        true,
-        'Usuário já está inscrito nesta vaga; redirecionado para minhas-candidaturas'
-      )
-      return
-    }
-
     // A página exibe um dos 3 estados possíveis do carousel
     const bemVindo = page.getByText('Cadastro de oportunidades de', {
       exact: false,
@@ -607,10 +617,32 @@ test.describe('Empregos — fluxo de candidatura (autenticado)', () => {
       level: 1,
       name: 'Meu Currículo',
     })
+    const minhasCandidaturas = page.getByRole('heading', {
+      level: 1,
+      name: 'Minhas candidaturas',
+    })
+    const inscricaoRenderizada = bemVindo.or(confirmarInfos).or(curriculo)
 
-    await expect(bemVindo.or(confirmarInfos).or(curriculo).first()).toBeVisible(
-      { timeout: 20000 }
-    )
+    await candidatarBtn.click()
+
+    // /inscricao redireciona no servidor para Minhas candidaturas quando a conta
+    // já se candidatou à vaga, e a navegação do cliente atualiza a URL para
+    // /inscricao antes de o redirect chegar. Decidir pela URL logo após o
+    // clique pula cedo demais; espera o destino final renderizar.
+    await expect(
+      inscricaoRenderizada.or(minhasCandidaturas).first()
+    ).toBeVisible({ timeout: 20000 })
+
+    if (await minhasCandidaturas.isVisible()) {
+      test.skip(
+        true,
+        'Usuário já está inscrito nesta vaga; redirecionado para minhas-candidaturas'
+      )
+      return
+    }
+
+    await expect(page).toHaveURL(/\/inscricao(?:[/?#]|$)/)
+    await expect(inscricaoRenderizada.first()).toBeVisible()
   })
 
   test('tela de bem-vindo (quando presente) exibe título e botão Continuar', async ({

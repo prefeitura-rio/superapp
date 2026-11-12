@@ -7,7 +7,9 @@ import {
   YoutubeIcon,
 } from '@/assets/icons'
 import prefRioLogo from '@/assets/pref-rio-logo.svg'
+import { CARTA_DE_SERVICOS_FOOTER_LINK } from '@/constants/carta-de-servicos'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Footer1746Link } from './footer-1746-link'
@@ -17,6 +19,7 @@ const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
 const menuLinks = [
   { label: 'Página inicial', href: '/' },
   { label: 'Serviços', href: '/servicos' },
+  CARTA_DE_SERVICOS_FOOTER_LINK,
 ]
 
 const atendimentoLinks = [
@@ -174,6 +177,11 @@ function LegalRow() {
 }
 
 export function Footer() {
+  const atendimentoLinksEnabled = isSalesforceServicesEnabled()
+  const visibleAtendimentoLinks = atendimentoLinksEnabled
+    ? atendimentoLinks
+    : atendimentoLinks.filter(link => link.label === 'Perguntas frequentes')
+
   return (
     <footer className="w-full mt-16 pb-28 bg-background">
       <div className="max-w-4xl mx-auto px-4">
@@ -189,7 +197,7 @@ export function Footer() {
             <NavSection title="Menu" links={menuLinks} />
             <NavSection
               title="Atendimento"
-              links={atendimentoLinks}
+              links={visibleAtendimentoLinks}
               firstItem={<Footer1746Link />}
             />
           </div>
@@ -213,7 +221,7 @@ export function Footer() {
               <NavSection title="Menu" links={menuLinks} />
               <NavSection
                 title="Atendimento"
-                links={atendimentoLinks}
+                links={visibleAtendimentoLinks}
                 firstItem={<Footer1746Link />}
               />
               <SocialLinks />

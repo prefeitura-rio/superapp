@@ -8,15 +8,14 @@
 
 export type GetApiPublicThemesParams = {
   /**
-   * Página (1-based)
+   * Página (1-based, máx. 1000)
+   * @maximum 1000
    */
   page?: number
-  /**
-   * Itens por página (máx. 100)
-   */
+  /** Itens por página (máx. 100) */
   per_page?: number
-  /**
-   * Inclui temas sem serviços publicados
-   */
+  /** Inclui temas sem serviços publicados */
   include_empty?: boolean
+  /** Inclui lista editorial home_featured */
+  include_featured?: boolean
 }

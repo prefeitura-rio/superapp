@@ -9,7 +9,6 @@ const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
 export function createButton(onToggle: () => void): HTMLButtonElement {
   const wrapper = document.createElement('div')
   wrapper.id = WRAPPER_ID
-  wrapper.setAttribute('aria-hidden', 'true')
 
   const popup = document.createElement('span')
   popup.id = 'a11y-btn-popup'
@@ -50,12 +49,6 @@ export function createButton(onToggle: () => void): HTMLButtonElement {
   wrapper.appendChild(btn)
   // badge fora do wrapper para não ser cortado pelo overflow:hidden
   document.body.appendChild(badge)
-
-  // remove aria-hidden do wrapper quando o botão recebe foco — permite leitura por SR
-  btn.addEventListener('focus', () => wrapper.removeAttribute('aria-hidden'))
-  btn.addEventListener('blur', () =>
-    wrapper.setAttribute('aria-hidden', 'true')
-  )
 
   function triggerPop() {
     btn.classList.remove('a11y-btn-pop')

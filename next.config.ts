@@ -18,7 +18,9 @@ const nextConfig: NextConfig = {
   transpilePackages: ['react-pdf', 'pdfjs-dist'],
   // jsdom backs HTML sanitization during server render. Bundling it pulls
   // optional native deps and breaks the client build.
-  serverExternalPackages: ['jsdom'],
+  // @react-pdf/renderer gera o PDF da Carta de Serviços no Route Handler; fica fora
+  // do bundle para carregar yoga/fontkit como módulos Node normais.
+  serverExternalPackages: ['jsdom', '@react-pdf/renderer'],
   experimental: {
     serverActions: {
       /**

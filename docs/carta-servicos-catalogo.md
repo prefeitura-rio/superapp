@@ -1,8 +1,15 @@
 # Carta de Serviços — app-catalogo
 
-Decisões e dívidas da navegação de serviços quando `CARTA_SERVICOS_API_ENABLED=true`.
+Decisões e dívidas da navegação de serviços quando
+`NEXT_PUBLIC_FEATURE_SALESFORCE=true`.
 
-Com a flag desligada (padrão), o portal continua em `app-busca-search`. Com a flag ligada, categorias, subcategorias, listagem e detalhe saem da app-catalogo (`BASE_API_URL_APP_CATALOGO`), não mais da API MuleSoft/Salesforce. O client `src/http-pref-rio-carta-servicos/` permanece no repositório; o caminho da flag não o chama.
+Com a flag desligada (padrão), o portal continua em `app-busca-search` nas rotas
+que têm fallback. Com a flag ligada, categorias, subcategorias, listagem e
+detalhe saem da app-catalogo (`BASE_API_URL_APP_CATALOGO`), o caminho
+MuleSoft/Salesforce. O client `src/http-pref-rio-carta-servicos/` permanece no
+repositório; o caminho da flag não o chama. A Carta dedicada em
+`/carta-de-servicos` e as superfícies de atendimento Salesforce-only são
+barradas para `/not-found` quando a flag está desligada.
 
 O comparativo histórico busca-search → MuleSoft está em [`migration-carta-servicos-service-detail.md`](./migration-carta-servicos-service-detail.md).
 
@@ -14,7 +21,7 @@ O comparativo histórico busca-search → MuleSoft está em [`migration-carta-se
 | Subcategorias de uma categoria | `GET /api/public/themes/{slug}/subthemes` |
 | Serviços de uma subcategoria | `GET /api/public/subthemes/{slug}/services` |
 | Detalhe do serviço | `GET /api/public/services/{slug}` |
-| Cards “Mais acessados” | Composição no frontend (ver dívida abaixo). A app-catalogo não tem `filter_category`. |
+| Cards “Mais acessados” (home e `/servicos`) | `GET /api/public/themes?include_featured=true` (`home_featured`). Home: 5 da API e, por último, o card fixo de Dívida Ativa. `/servicos`: os 4 primeiros. A página de categoria continua com a composição local (dívida 2). |
 
 Os payloads de lista e detalhe são lidos com os models da spec MuleSoft (`Theme`, `Subtheme`, `ServiceListItem`, `ServiceDetail`). O client gerado da app-catalogo tipa `data` como `unknown`.
 

@@ -41,22 +41,26 @@ export default function ServicosLayout({
               backgroundRepeat: 'no-repeat',
             }}
           >
-            {showListingChrome &&
-              (hasMultipleTabs ? (
-                <div className="max-w-4xl mx-auto pb-0">
-                  {!searchInHeader && (
-                    <OportunidadesSearchPlaceholder
-                      searchUrl={section.searchUrl}
-                    />
-                  )}
-                  <div className="mb-5 mt-5 px-4">
-                    <OportunidadesTypeToggle activeType={section.id} />
+            {/* A busca e o seletor de tipo ficam dentro do <main> para não
+                ficarem fora de qualquer landmark (axe region). */}
+            <main>
+              {showListingChrome &&
+                (hasMultipleTabs ? (
+                  <div className="max-w-4xl mx-auto pb-0">
+                    {!searchInHeader && (
+                      <OportunidadesSearchPlaceholder
+                        searchUrl={section.searchUrl}
+                      />
+                    )}
+                    <div className="mb-5 mt-5 px-4">
+                      <OportunidadesTypeToggle activeType={section.id} />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="h-20 sm:h-24" />
-              ))}
-            <main>{children}</main>
+                ) : (
+                  <div className="h-20 sm:h-24" />
+                ))}
+              {children}
+            </main>
             {showListingChrome && <FloatNavigationWrapper />}
           </div>
         </div>

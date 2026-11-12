@@ -1,6 +1,13 @@
 import { spawnSync } from 'node:child_process'
 import { constants } from 'node:fs'
-import { access, copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
+import {
+  access,
+  copyFile,
+  mkdir,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 const STAGING = '.tmp/orval-pref-381'
@@ -14,18 +21,30 @@ const CLIENTS = [
 ]
 
 const MODELS = [
+  'empregabilidadeCatalogoItem.ts',
+  'empregabilidadeHabilidadesCompetencias.ts',
+  'empregabilidadeHabilidadesCompetenciasSave.ts',
+  'getApiV1EmpregabilidadeComportamentosAtitudesParams.ts',
+  'getApiV1EmpregabilidadeHabilidadesAreasAtuacaoIdHabilidadesParams.ts',
+  'getApiV1EmpregabilidadeHabilidadesAreasAtuacaoParams.ts',
+  'responseErrorResponse.ts',
+  'responseListAreasAtuacaoPaginatedResponse.ts',
+  'responseListCatalogoPaginatedResponse.ts',
+  'responseListComportamentoAtitudesPaginatedResponse.ts',
+]
+
+// Models que este script promovia e que o contrato de habilidades e
+// competências da app-go-api (PR #252) deixou sem uso.
+const OBSOLETE_MODELS = [
   'empregabilidadeAreaAtuacao.ts',
   'empregabilidadeAreaAtuacaoHabilidade.ts',
   'empregabilidadeComportamentoAtitudes.ts',
   'empregabilidadeCurriculoItensReplaceAll.ts',
   'empregabilidadeHabilidade.ts',
-  'getApiV1EmpregabilidadeComportamentosAtitudesParams.ts',
   'putApiV1EmpregabilidadeCurriculo200.ts',
   'putApiV1EmpregabilidadeCurriculo400.ts',
   'putApiV1EmpregabilidadeCurriculo403.ts',
   'putApiV1EmpregabilidadeCurriculo500.ts',
-  'responseErrorResponse.ts',
-  'responseListComportamentoAtitudesPaginatedResponse.ts',
 ]
 
 function run(command, args) {
@@ -91,8 +110,29 @@ async function promoteModels() {
   }
 }
 
+async function removeObsoleteModels() {
+  for (const model of OBSOLETE_MODELS) {
+    const path = join(DESTINATION, 'models', model)
+
+    if (await exists(path)) {
+      await rm(path)
+      console.log(`✓ removed model: ${path}`)
+    }
+  }
+}
+
 async function updateModelsIndex() {
   let index = await readFile(MODELS_INDEX, 'utf8')
+
+  const obsoleteExports = new Set(
+    OBSOLETE_MODELS.map(
+      model => `export * from './${model.replace(/\.ts$/, '')}'`
+    )
+  )
+  index = index
+    .split(/\r?\n/)
+    .filter(line => !obsoleteExports.has(line))
+    .join('\n')
 
   for (const model of MODELS) {
     const name = model.replace(/\.ts$/, '')
@@ -127,6 +167,9 @@ await promoteClients()
 
 console.log('\n📦 Promoting authorized models...')
 await promoteModels()
+
+console.log('\n🗑️ Removing obsolete models...')
+await removeObsoleteModels()
 
 console.log('\n📚 Updating models barrel...')
 await updateModelsIndex()

@@ -164,6 +164,72 @@ describe('middleware — gating de Dívida Ativa', () => {
   })
 })
 
+describe('middleware — Termos de uso', () => {
+  beforeEach(() => {
+    // Se a rota caísse no login, o `buildAuthUrl` precisaria destas variáveis.
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL',
+      'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'
+    )
+    vi.stubEnv('NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID', 'test-client')
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
+      'http://localhost:3000/auth/callback'
+    )
+  })
+
+  describe('middleware — superfícies Salesforce', () => {
+    beforeEach(() => {
+      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'false')
+    })
+
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    test.each([
+      '/minhas-solicitacoes',
+      '/consulta-protocolo',
+      '/solicitacoes',
+      '/solicitacoes/RIO-123',
+      '/carta-de-servicos',
+      '/carta-de-servicos/2951',
+    ])('%s reescreve para /not-found quando desabilitada', async path => {
+      const response = await middleware(requestFor(path))
+
+      expect(rewriteTarget(response)).toContain('/not-found')
+      expect(redirectTarget(response)).toBeNull()
+    })
+
+    test('/servicos permanece acessível pelo fallback legado', async () => {
+      const response = await middleware(requestFor('/servicos'))
+
+      expect(rewriteTarget(response)).toBeNull()
+    })
+
+    test('as rotas Salesforce ficam acessíveis quando habilitada', async () => {
+      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+
+      const response = await middleware(requestFor('/ouvidoria'))
+
+      expect(rewriteTarget(response)).toBeNull()
+    })
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test.each(['/termos-de-uso', '/termos-de-uso/prefrio-site'])(
+    '%s abre sem login',
+    async path => {
+      const response = await middleware(requestFor(path))
+
+      expect(redirectTarget(response)).toBeNull()
+    }
+  )
+})
+
 describe('middleware — CSP do VLibras', () => {
   test('a rota pública libera o iframe do widget em frame-src', async () => {
     const response = await middleware(requestFor('/'))

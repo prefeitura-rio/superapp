@@ -1,18 +1,31 @@
 import { cookies } from 'next/headers'
 
-// NOTE: Supports cases where `content-type` is other than `json`
-const getBody = <T>(c: Response | Request): Promise<T> => {
+// NOTE: Supports cases where `content-type` is other than `json`.
+// An empty body (204, or an upstream error without payload) resolves to `null`
+// instead of throwing `SyntaxError: Unexpected end of JSON input`, and a body
+// labelled as JSON that does not parse is returned as text.
+const getBody = async <T>(c: Response | Request): Promise<T> => {
   const contentType = c.headers.get('content-type')
-
-  if (contentType?.includes('application/json')) {
-    return c.json()
-  }
 
   if (contentType?.includes('application/pdf')) {
     return c.blob() as Promise<T>
   }
 
-  return c.text() as Promise<T>
+  const text = await c.text()
+
+  if (text.trim() === '') {
+    return null as T
+  }
+
+  if (contentType?.includes('application/json')) {
+    try {
+      return JSON.parse(text) as T
+    } catch {
+      return text as T
+    }
+  }
+
+  return text as T
 }
 
 // NOTE: Update just base url

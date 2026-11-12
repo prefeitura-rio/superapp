@@ -160,6 +160,95 @@ html.a11y-color-blind {
 /* ── Hide images ── */
 html.a11y-hide-images img { visibility: hidden; }
 
+/* ── TTS highlight ── */
+.a11y-tts-highlight {
+  background: rgba(255, 220, 0, 0.45);
+  border-radius: 2px;
+  outline: 2px solid rgba(255, 180, 0, 0.6);
+  outline-offset: 1px;
+}
+html.dark .a11y-tts-highlight {
+  background: rgba(255, 200, 0, 0.3);
+  outline-color: rgba(255, 200, 0, 0.5);
+}
+html.a11y-high-contrast .a11y-tts-highlight {
+  background: rgba(255, 255, 0, 0.7);
+  outline-color: #000;
+}
+
+/* ── TTS widget ── */
+#a11y-tts-widget {
+  position: fixed;
+  right: 60px;
+  top: calc(50vh - 20px);
+  z-index: 9994;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.07);
+  padding: 8px 10px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.a11y-tts-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: none;
+  background: #f0f4ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${LIGHT_PRIMARY};
+  transition: background 0.13s;
+  flex-shrink: 0;
+}
+.a11y-tts-btn:hover { background: #dce8ff; }
+.a11y-tts-btn:focus-visible {
+  outline: 2px solid #4a9fff;
+  outline-offset: 2px;
+}
+.a11y-tts-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.a11y-tts-progress {
+  font-size: 12px;
+  font-weight: 600;
+  color: #52525c;
+  min-width: 36px;
+  text-align: center;
+}
+html.dark #a11y-tts-widget {
+  background: #18181b;
+  border-color: #27272a;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.25);
+}
+html.dark .a11y-tts-btn {
+  background: #1e2d45;
+  color: ${DARK_PRIMARY};
+}
+html.dark .a11y-tts-btn:hover { background: #263d5a; }
+html.dark .a11y-tts-progress { color: #a1a1aa; }
+
+/* ── Controles TTS inline no painel ──
+   A linha não usa .a11y-row, então define o próprio layout flex. */
+.a11y-tts-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 13px;
+}
 
 /* ── Reading mask ──
    Dois elementos: overlay (cobre tudo com blur+brightness, tem buraco via polygon)
@@ -169,6 +258,7 @@ html.a11y-hide-images img { visibility: hidden; }
 /* z-index stack do plugin:
    9990 overlay da máscara (desfoque ao redor)
    9991 janela da máscara (borda suave da área visível)
+   9994 widget flutuante da leitura em voz
    9995 botão flutuante (sempre acima da máscara)
    9999 painel (sempre no topo) */
 #a11y-reading-overlay {

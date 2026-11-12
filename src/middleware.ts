@@ -7,6 +7,7 @@ import {
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
 import { applySecurityHeaders, handleExpiredToken, isJwtExpired } from './lib'
+import { isSalesforceServicesEnabled } from './lib/feature-flags'
 
 const publicRoutes = [
   { path: '/', whenAuthenticated: 'next' },
@@ -14,6 +15,8 @@ const publicRoutes = [
   { path: '/faq/*', whenAuthenticated: 'next' },
   { path: '/busca/*', whenAuthenticated: 'next' },
   { path: '/servicos/*', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos', whenAuthenticated: 'next' },
+  { path: '/carta-de-servicos/*', whenAuthenticated: 'next' },
   { path: '/ouvidoria/*', whenAuthenticated: 'next' },
   { path: '/consulta-protocolo', whenAuthenticated: 'next' },
   { path: '/solicitacoes', whenAuthenticated: 'next' },
@@ -22,6 +25,8 @@ const publicRoutes = [
   { path: '/manifest.json', whenAuthenticated: 'next' },
   { path: '/sessao-expirada', whenAuthenticated: 'next' },
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso', whenAuthenticated: 'next' },
+  { path: '/termos-de-uso/*', whenAuthenticated: 'next' },
 ] as const
 
 const oportunidadesCariocasLegacyPaths = [
@@ -175,8 +180,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Block chamados routes when feature flag is disabled
-      const isChamadosEnabled =
-        process.env.NEXT_PUBLIC_FEATURE_CHAMADOS === 'true'
+      const isSalesforceEnabled = isSalesforceServicesEnabled()
       const chamadosRoutes = [
         '/minhas-solicitacoes',
         '/consulta-protocolo',
@@ -186,7 +190,12 @@ export async function middleware(request: NextRequest) {
         r => path === r || path.startsWith(`${r}/`)
       )
 
-      if (!isChamadosEnabled && isChamadosRoute) {
+      const cartaRoutes = ['/carta-de-servicos']
+      const isCartaRoute = cartaRoutes.some(
+        r => path === r || path.startsWith(`${r}/`)
+      )
+
+      if (!isSalesforceEnabled && (isChamadosRoute || isCartaRoute)) {
         const url = request.nextUrl.clone()
         url.pathname = '/not-found'
         const response = NextResponse.rewrite(url)

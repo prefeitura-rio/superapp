@@ -6,8 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetApiPublicRecommendations400,
   GetApiPublicRecommendations500,
   GetApiPublicRecommendationsParams,
+  GetApiV1Recommendations400,
   GetApiV1Recommendations401,
   GetApiV1Recommendations500,
   GetApiV1RecommendationsParams,
@@ -21,6 +23,11 @@ export type getApiPublicRecommendationsResponse200 = {
   status: 200
 }
 
+export type getApiPublicRecommendationsResponse400 = {
+  data: GetApiPublicRecommendations400
+  status: 400
+}
+
 export type getApiPublicRecommendationsResponse500 = {
   data: GetApiPublicRecommendations500
   status: 500
@@ -30,10 +37,12 @@ export type getApiPublicRecommendationsResponseSuccess =
   getApiPublicRecommendationsResponse200 & {
     headers: Headers
   }
-export type getApiPublicRecommendationsResponseError =
-  getApiPublicRecommendationsResponse500 & {
-    headers: Headers
-  }
+export type getApiPublicRecommendationsResponseError = (
+  | getApiPublicRecommendationsResponse400
+  | getApiPublicRecommendationsResponse500
+) & {
+  headers: Headers
+}
 
 export type getApiPublicRecommendationsResponse =
   | getApiPublicRecommendationsResponseSuccess
@@ -88,6 +97,11 @@ export type getApiV1RecommendationsResponse200 = {
   status: 200
 }
 
+export type getApiV1RecommendationsResponse400 = {
+  data: GetApiV1Recommendations400
+  status: 400
+}
+
 export type getApiV1RecommendationsResponse401 = {
   data: GetApiV1Recommendations401
   status: 401
@@ -103,6 +117,7 @@ export type getApiV1RecommendationsResponseSuccess =
     headers: Headers
   }
 export type getApiV1RecommendationsResponseError = (
+  | getApiV1RecommendationsResponse400
   | getApiV1RecommendationsResponse401
   | getApiV1RecommendationsResponse500
 ) & {

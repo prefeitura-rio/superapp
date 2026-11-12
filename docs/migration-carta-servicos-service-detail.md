@@ -6,7 +6,7 @@ Comparação entre `app-busca-search` (`ModelsPrefRioService`) e a API Pref.Rio 
 
 ```env
 # Default: false — produção permanece em app-busca-search
-CARTA_SERVICOS_API_ENABLED=true
+NEXT_PUBLIC_FEATURE_SALESFORCE=true
 ```
 
 Quando `false` (padrão), o superapp usa `app-busca-search` como antes. Quando `true`, categorias, subcategorias, listagens e detalhe de serviço usam a app-catalogo, com os mesmos mappers em `src/lib/carta-servicos/`. Ver [`carta-servicos-catalogo.md`](./carta-servicos-catalogo.md).
@@ -45,7 +45,7 @@ Quando `false` (padrão), o superapp usa `app-busca-search` como antes. Quando `
 
 | Arquivo | Papel |
 |---|---|
-| `src/constants/venvs.ts` | `CARTA_SERVICOS_API_ENABLED` |
+| `src/lib/feature-flags.ts` | `isSalesforceServicesEnabled()` |
 | `src/lib/carta-servicos/mappers.ts` | `ServiceDetail` → `ModelsPrefRioService` |
 | `src/lib/carta-servicos/fetch.ts` | Chamadas à nova API |
 | `src/lib/categories.ts` | Branch por flag |

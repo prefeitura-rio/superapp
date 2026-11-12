@@ -9,14 +9,18 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { CustomButton } from '@/components/ui/custom/custom-button'
+import {
+  CustomButton,
+  accordionCancelButtonClassName,
+  accordionSaveButtonClassName,
+} from '@/components/ui/custom/custom-button'
 import { CustomInput } from '@/components/ui/custom/custom-input'
 import { Separator } from '@/components/ui/separator'
 import type { EmpregabilidadeFormacaoAccordionRequest } from '@/http-courses/models'
 import { formatEducation } from '@/lib/format-education'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { Check, ChevronDownIcon, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -54,6 +58,8 @@ import type {
 } from './get-curriculo-formacao-data'
 import type { InitialSituacaoData } from './get-curriculo-situacao-data'
 import { HabilidadesCompetencias } from './habilidades-competencias'
+import { HabilidadesAccordionMark } from './habilidades-competencias/habilidades-accordion-mark'
+import { habilidadesCompetenciasQueryOptions } from './habilidades-competencias/habilidades-competencias-queries'
 import { useFormDirtyState } from './hooks/use-form-dirty-state'
 import { IdiomaDrawerContent } from './idioma-drawer-content'
 import { NivelIdiomaDrawerContent } from './nivel-idioma-drawer-content'
@@ -249,8 +255,10 @@ function FormacaoAccordionContent({
   })
 
   const canSave = hasFormacaoRequiredFields(formValues)
+  const [salvando, setSalvando] = useState(false)
 
   const handleFormacaoSave = async () => {
+    if (salvando) return
     console.log('🚀 [handleFormacaoSave] INICIANDO SALVAMENTO')
 
     const isValid = await trigger([...FORMACAO_FIELD_NAMES])
@@ -279,6 +287,7 @@ function FormacaoAccordionContent({
     const apiPayload = getFormacaoApiPayload(values)
     console.log('📦 [handleFormacaoSave] API PAYLOAD FINAL:', apiPayload)
 
+    setSalvando(true)
     try {
       console.log('🌐 [handleFormacaoSave] ENVIANDO PARA API com CPF:', cpf)
       const result = await saveFormacaoAccordion(cpf, apiPayload)
@@ -296,6 +305,8 @@ function FormacaoAccordionContent({
     } catch (error) {
       console.error('💥 [handleFormacaoSave] EXCEÇÃO:', error)
       toast.error('Erro ao salvar formação. Tente novamente.')
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -538,9 +549,9 @@ function FormacaoAccordionContent({
       <div className="flex gap-3">
         <CustomButton
           type="button"
-          variant="secondary"
+          variant="card"
           size="lg"
-          className="flex-1"
+          className={accordionCancelButtonClassName}
           onClick={onCancel}
         >
           Cancelar
@@ -549,11 +560,11 @@ function FormacaoAccordionContent({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1"
+          className={accordionSaveButtonClassName}
           onClick={() => handleFormacaoSave()}
-          disabled={!canSave}
+          disabled={!canSave || salvando}
         >
-          Salvar
+          {salvando ? 'Salvando...' : 'Salvar'}
         </CustomButton>
       </div>
     </div>
@@ -1055,7 +1066,10 @@ function SituacaoAtualAccordionContent({
       hasSituacaoRequiredFields(values, situacaoLabel),
   })
 
+  const [salvando, setSalvando] = useState(false)
+
   const handleSituacaoSave = async () => {
+    if (salvando) return
     const isValid = await trigger([...SITUACAO_FIELD_NAMES])
     if (!isValid) {
       toast.error('Por favor, revise todos os campos.')
@@ -1068,6 +1082,7 @@ function SituacaoAtualAccordionContent({
       return
     }
     const data = getSituacaoSnapshot(getValues())
+    setSalvando(true)
     try {
       const result = await saveSituacaoAction(cpf, data)
       if (result.success) {
@@ -1079,6 +1094,8 @@ function SituacaoAtualAccordionContent({
       }
     } catch {
       toast.error('Erro ao salvar situação. Tente novamente.')
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -1097,7 +1114,7 @@ function SituacaoAtualAccordionContent({
                 hasSituacaoAtualSelection ? (
                   situacaoLabel
                 ) : (
-                  <span className="text-foreground-light">Selecionar</span>
+                  <span className="text-foreground-light">Selecionar a</span>
                 )
               }
               disabled
@@ -1239,9 +1256,9 @@ function SituacaoAtualAccordionContent({
       <div className="flex gap-3">
         <CustomButton
           type="button"
-          variant="secondary"
+          variant="card"
           size="lg"
-          className="flex-1"
+          className={accordionCancelButtonClassName}
           onClick={onCancel}
         >
           Cancelar
@@ -1250,11 +1267,11 @@ function SituacaoAtualAccordionContent({
           type="button"
           variant="primary"
           size="lg"
-          className="flex-1"
+          className={accordionSaveButtonClassName}
           onClick={handleSituacaoSave}
-          disabled={!canSave}
+          disabled={!canSave || salvando}
         >
-          Salvar
+          {salvando ? 'Salvando...' : 'Salvar'}
         </CustomButton>
       </div>
     </div>
@@ -1331,6 +1348,21 @@ export function CurriculoContent({
   onEnviarCandidatura,
 }: CurriculoContentProps = {}) {
   const [accordionValue, setAccordionValue] = useState<string>('')
+  const [habilidadesRascunho, setHabilidadesPreenchida] = useState<
+    boolean | null
+  >(null)
+  const [habilidadesAreaErro, setHabilidadesAreaErro] = useState(false)
+  const [habilidadesAlteradas, setHabilidadesAlteradas] = useState(false)
+  const { data: habilidadesSalvas } = useQuery(
+    habilidadesCompetenciasQueryOptions()
+  )
+  const areaSalva =
+    habilidadesSalvas?.ok === true && habilidadesSalvas.data.area?.id != null
+  const habilidadesAbertas = accordionValue === 'habilidades-competencias'
+  const habilidadesPreenchida =
+    habilidadesAbertas && habilidadesRascunho != null
+      ? habilidadesRascunho
+      : areaSalva
   const [successSheetOpen, setSuccessSheetOpen] = useState(false)
   const [isEnviandoCandidatura, setIsEnviandoCandidatura] = useState(false)
   const router = useRouter()
@@ -1347,7 +1379,7 @@ export function CurriculoContent({
   // Estados para controle do modal de confirmação
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
   const [pendingAccordionClose, setPendingAccordionClose] = useState<
-    'formacao' | 'experiencia' | 'situacao' | null
+    'formacao' | 'experiencia' | 'situacao' | 'habilidades-competencias' | null
   >(null)
 
   const defaultFormacaoAcademica =
@@ -1475,18 +1507,22 @@ export function CurriculoContent({
     const isClosing = value === '' && accordionValue !== ''
 
     if (isClosing) {
-      // Determinar qual accordion está fechando
-      const closingAccordion = accordionValue as
-        | 'formacao'
-        | 'experiencia'
-        | 'situacao'
-
-      // Verificar se há mudanças não salvas
-      if (hasUnsavedChanges(closingAccordion)) {
-        // Bloquear fechamento e abrir modal
-        setPendingAccordionClose(closingAccordion)
+      if (accordionValue === 'habilidades-competencias') {
+        if (habilidadesAlteradas) {
+          setPendingAccordionClose('habilidades-competencias')
+          setShowDiscardDialog(true)
+          return
+        }
+      } else if (
+        hasUnsavedChanges(
+          accordionValue as 'formacao' | 'experiencia' | 'situacao'
+        )
+      ) {
+        setPendingAccordionClose(
+          accordionValue as 'formacao' | 'experiencia' | 'situacao'
+        )
         setShowDiscardDialog(true)
-        return // NÃO fecha o accordion ainda
+        return
       }
     }
 
@@ -1609,6 +1645,9 @@ export function CurriculoContent({
       handleExperienciaCancel()
     } else if (pendingAccordionClose === 'situacao') {
       handleSituacaoCancel()
+    } else if (pendingAccordionClose === 'habilidades-competencias') {
+      setHabilidadesAlteradas(false)
+      setAccordionValue('')
     }
 
     // Fechar modal e accordion
@@ -1817,14 +1856,18 @@ export function CurriculoContent({
                       >
                         <span className="flex items-center gap-2.5">
                           Habilidades e Competências
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-wallet-2b">
-                            <Check className="size-3.5 text-white stroke-3" />
-                          </span>
+                          <HabilidadesAccordionMark
+                            preenchida={habilidadesPreenchida}
+                            erro={habilidadesAbertas && habilidadesAreaErro}
+                          />
                         </span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-5 pb-4">
                         <HabilidadesCompetencias
                           onCancel={() => setAccordionValue('')}
+                          onFilledChange={setHabilidadesPreenchida}
+                          onAreaErrorChange={setHabilidadesAreaErro}
+                          onDirtyChange={setHabilidadesAlteradas}
                         />
                       </AccordionContent>
                     </AccordionItem>

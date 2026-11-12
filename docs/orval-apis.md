@@ -74,7 +74,6 @@ seguem como receita a migrar quando alguém precisar tocar naquele client.
       },
     },
   },
-
 ```
 
 > ## API HEIMDALL

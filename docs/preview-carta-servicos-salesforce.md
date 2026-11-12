@@ -104,7 +104,10 @@ O fixture que passa no schema está em `src/lib/carta-servicos/__tests__/fixture
 
 HTML que permanece: parágrafo, quebra de linha, `h2` a `h4`, negrito, itálico, sublinhado, listas e link `https`, `http`, `mailto` ou `tel`. `div`, `style`, `span`, imagem, tabela, script e link `javascript:` ou `data:` saem. O texto de dentro de uma tag removida permanece. A página publicada já perde a mesma formatação.
 
-O preview sempre renderiza HTML, com a flag de preview ligada. Ele não lê `CARTA_SERVICOS_API_ENABLED`. Essa flag da carta publicada está ligada em Staging e desligada em produção: em produção a ficha no ar ainda é markdown, e o preview, quando ligado, já é HTML.
+O preview sempre renderiza HTML, com a flag de preview ligada. Ele não lê
+`NEXT_PUBLIC_FEATURE_SALESFORCE`. A flag da carta publicada pode estar ligada
+em staging e desligada em produção: em produção a ficha no ar ainda é
+markdown, e o preview, quando ligado, já é HTML.
 
 `PREVIEW_CARTA_SERVICOS_ENABLED` é outra flag, só do servidor. Ausente ou diferente de `true` deixa `/servicos/preview` e `POST /api/preview/servicos` em 404, sem validar e sem contar no limite. O padrão é desligada. A flag da carta publicada não liga esta rota.
 
@@ -120,7 +123,7 @@ O preview sempre renderiza HTML, com a flag de preview ligada. Ele não lê `CAR
 
 | Salesforce | pref.rio | Carta publicada | Preview |
 | --- | --- | --- | --- |
-| Produção | `https://pref.rio` | `CARTA_SERVICOS_API_ENABLED` desligada (markdown) | só com `PREVIEW_CARTA_SERVICOS_ENABLED=true` |
+| Produção | `https://pref.rio` | `NEXT_PUBLIC_FEATURE_SALESFORCE` desligada (markdown/fallback) | só com `PREVIEW_CARTA_SERVICOS_ENABLED=true` |
 | Staging | `https://staging.app.dados.rio` | flag da carta ligada (HTML) | só com a flag de preview |
 | QA | sem conexão | — | botão oculto |
 

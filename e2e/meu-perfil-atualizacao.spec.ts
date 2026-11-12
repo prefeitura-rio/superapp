@@ -84,10 +84,15 @@ test.describe('Meu Perfil — atualizar celular (autenticado)', () => {
     page,
   }) => {
     await page.goto('/meu-perfil/informacoes-pessoais/atualizar-telefone')
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 15000 })
-    await expect(page.getByText('celular')).toBeVisible()
+    // getByRole ignora a cópia oculta do conteúdo que o streaming/transição
+    // deixa no DOM por um instante; getByText casava os dois h2 (strict mode).
     await expect(
-      page.getByText('Você irá receber um código via Whatsapp')
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+celular/ })
+    ).toBeVisible({ timeout: 15000 })
+    await expect(
+      page
+        .getByText('Você irá receber um código via Whatsapp')
+        .filter({ visible: true })
     ).toBeVisible()
     await expect(page.getByRole('button', { name: 'Enviar' })).toBeVisible()
   })
@@ -158,8 +163,9 @@ test.describe('Meu Perfil — atualizar e-mail (autenticado)', () => {
     page,
   }) => {
     await page.goto('/meu-perfil/informacoes-pessoais/atualizar-email')
-    await expect(page.getByText('Escreva seu')).toBeVisible({ timeout: 15000 })
-    await expect(page.getByText('email')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 2, name: /Escreva seu\s+email/ })
+    ).toBeVisible({ timeout: 15000 })
     await expect(page.getByPlaceholder('Digite seu email')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Salvar' })).toBeVisible()
   })

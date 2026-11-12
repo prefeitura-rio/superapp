@@ -6,8 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  GetApiPublicSearch400,
   GetApiPublicSearch500,
   GetApiPublicSearchParams,
+  GetApiV1Search400,
   GetApiV1Search500,
   GetApiV1SearchParams,
   ModelsSearchResponse,
@@ -20,6 +22,11 @@ export type getApiPublicSearchResponse200 = {
   status: 200
 }
 
+export type getApiPublicSearchResponse400 = {
+  data: GetApiPublicSearch400
+  status: 400
+}
+
 export type getApiPublicSearchResponse500 = {
   data: GetApiPublicSearch500
   status: 500
@@ -29,7 +36,10 @@ export type getApiPublicSearchResponseSuccess =
   getApiPublicSearchResponse200 & {
     headers: Headers
   }
-export type getApiPublicSearchResponseError = getApiPublicSearchResponse500 & {
+export type getApiPublicSearchResponseError = (
+  | getApiPublicSearchResponse400
+  | getApiPublicSearchResponse500
+) & {
   headers: Headers
 }
 
@@ -84,6 +94,11 @@ export type getApiV1SearchResponse200 = {
   status: 200
 }
 
+export type getApiV1SearchResponse400 = {
+  data: GetApiV1Search400
+  status: 400
+}
+
 export type getApiV1SearchResponse500 = {
   data: GetApiV1Search500
   status: 500
@@ -92,7 +107,10 @@ export type getApiV1SearchResponse500 = {
 export type getApiV1SearchResponseSuccess = getApiV1SearchResponse200 & {
   headers: Headers
 }
-export type getApiV1SearchResponseError = getApiV1SearchResponse500 & {
+export type getApiV1SearchResponseError = (
+  | getApiV1SearchResponse400
+  | getApiV1SearchResponse500
+) & {
   headers: Headers
 }
 

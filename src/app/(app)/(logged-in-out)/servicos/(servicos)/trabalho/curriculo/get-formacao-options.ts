@@ -1,6 +1,7 @@
 import { getApiV1EmpregabilidadeEscolaridades } from '@/http-courses/empregabilidade-escolaridades/empregabilidade-escolaridades'
 import { getApiV1EmpregabilidadeIdiomas } from '@/http-courses/empregabilidade-idiomas/empregabilidade-idiomas'
 import { getApiV1EmpregabilidadeNiveisIdioma } from '@/http-courses/empregabilidade-niveis-idioma/empregabilidade-niveis-idioma'
+import { getApiV1EmpregabilidadeTiposPcd } from '@/http-courses/empregabilidade-tipos-pcd/empregabilidade-tipos-pcd'
 import type { FormacaoApiItem, FormacaoOptions } from './formacao-options-types'
 import { sortLanguageLevels } from './utils/language-sorting'
 
@@ -46,5 +47,19 @@ export async function getFormacaoOptions(): Promise<FormacaoOptions> {
       niveisRes.status === 200 && niveisRes.data
         ? sortLanguageLevels(parseListResponse(niveisRes.data))
         : [],
+  }
+}
+
+/**
+ * Busca o catálogo de tipos PcD no server. Falha na API devolve lista vazia, que mantém a
+ * restrição por tipo da vaga (ver `tiposPcdCatalogo` em `checkEligibility`).
+ */
+export async function getTiposPcdCatalogo(): Promise<FormacaoApiItem[]> {
+  try {
+    const res = await getApiV1EmpregabilidadeTiposPcd({ pageSize: 1000 })
+    return res.status === 200 && res.data ? parseListResponse(res.data) : []
+  } catch (error) {
+    console.error('Erro ao buscar tipos PcD:', error)
+    return []
   }
 }

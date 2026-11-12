@@ -13,7 +13,11 @@ await rm(ORVAL_OUTPUT_DIR, { recursive: true, force: true })
 const OPERATIONS = [
   {
     method: 'get',
-    path: '/api/v1/empregabilidade/habilidades/areas-atuacao-habilidades',
+    path: '/api/v1/empregabilidade/habilidades/areas-atuacao',
+  },
+  {
+    method: 'get',
+    path: '/api/v1/empregabilidade/habilidades/areas-atuacao/{id}/habilidades',
   },
   {
     method: 'get',
@@ -21,15 +25,34 @@ const OPERATIONS = [
   },
   {
     method: 'get',
-    path: '/api/v1/empregabilidade/curriculo/{cpf}',
+    path: '/api/v1/empregabilidade/curriculo/habilidades-competencias',
   },
   {
     method: 'put',
-    path: '/api/v1/empregabilidade/curriculo',
+    path: '/api/v1/empregabilidade/curriculo/habilidades-competencias',
   },
 ]
 
-const source = JSON.parse(await readFile(SOURCE_FILE, 'utf8'))
+/**
+ * Aceita o `docs/swagger.json` (Swagger 2.0) da app-go-api além do
+ * `openapi-v3.json`: o swag só atualiza o primeiro a cada mudança de contrato.
+ * O conversor vem com o Orval (`@scalar/openapi-parser`).
+ */
+async function loadOpenApi3(file) {
+  const document = JSON.parse(await readFile(file, 'utf8'))
+
+  if (document.swagger !== '2.0') {
+    return document
+  }
+
+  const { upgradeFromTwoToThree } = await import(
+    '@scalar/openapi-upgrader/2.0-to-3.0'
+  )
+
+  return upgradeFromTwoToThree(document)
+}
+
+const source = await loadOpenApi3(SOURCE_FILE)
 
 const result = {
   openapi: source.openapi,
@@ -62,7 +85,9 @@ for (const { method, path } of OPERATIONS) {
 
   result.paths[path][method] = operation
 
-  if (method === 'put' && path === '/api/v1/empregabilidade/curriculo') {
+  // A tag empregabilidade-curriculo já tem um client gerado à parte em
+  // src/http-courses; estas operações vão para o client controlado deste script.
+  if (path === '/api/v1/empregabilidade/curriculo/habilidades-competencias') {
     result.paths[path][method] = {
       ...operation,
       tags: ['empregabilidade-curriculo-itens'],
@@ -137,7 +162,7 @@ function copyReference(ref) {
   collectReferences(value)
 }
 
-// Primeiro coletamos os refs das quatro operações.
+// Primeiro coletamos os refs das operações.
 collectReferences(result.paths)
 
 // Depois seguimos transitivamente os refs encontrados.

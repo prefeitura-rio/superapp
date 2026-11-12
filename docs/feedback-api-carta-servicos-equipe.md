@@ -7,7 +7,10 @@
 
 ## 1. Contexto
 
-Estamos migrando a navegação de **Serviços** do pref.rio da API legada `app-busca-search` para a nova **API Carta de Serviços**. A integração está implementada atrás da feature flag `CARTA_SERVICOS_API_ENABLED` (desligada em produção até validação completa).
+Estamos migrando a navegação de **Serviços** do pref.rio da API legada
+`app-busca-search` para a nova **API Carta de Serviços**. A integração está
+implementada atrás da feature flag `NEXT_PUBLIC_FEATURE_SALESFORCE` (desligada
+em produção até validação completa).
 
 **Telas impactadas:**
 
@@ -294,7 +297,7 @@ Para transparência, estes pontos **já temos tratamento temporário** — mas i
 - Spec OpenAPI local: `pref-rio-carta-servicos-api.yaml`
 - Mappers: `src/lib/carta-servicos/mappers.ts`
 - Comparativo detalhe: `docs/migration-carta-servicos-service-detail.md`
-- Feature flag: `CARTA_SERVICOS_API_ENABLED` (`.env.example`)
+- Feature flag: `NEXT_PUBLIC_FEATURE_SALESFORCE` (`.env.example`)
 
 ---
 
@@ -303,7 +306,7 @@ Para transparência, estes pontos **já temos tratamento temporário** — mas i
 1. API confirma contrato final de `GET /themes?filter_category=` (shape oficial).
 2. API corrige slugs nulos e `articleStatus` em staging.
 3. Repetimos teste de paridade visual nas 3 rotas (`/`, categoria, detalhe) com amostra de ~10 serviços.
-4. Frontend liga `CARTA_SERVICOS_API_ENABLED=true` em staging → homologação → produção.
+4. Frontend liga `NEXT_PUBLIC_FEATURE_SALESFORCE=true` em staging → homologação → produção.
 
 ---
 

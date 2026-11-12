@@ -49,7 +49,7 @@ function formatSalary(value: number): string {
   return `R$${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 }
 
-function formatDateBr(isoDate: string | undefined): string {
+function formatDateBr(isoDate: string | null | undefined): string {
   if (!isoDate) return '—'
   try {
     const d = new Date(isoDate)
@@ -65,7 +65,7 @@ function formatDateBr(isoDate: string | undefined): string {
   }
 }
 
-function formatDateLong(isoDate: string | undefined): string {
+function formatDateLong(isoDate: string | null | undefined): string {
   if (!isoDate) return '—'
   try {
     const d = new Date(isoDate)

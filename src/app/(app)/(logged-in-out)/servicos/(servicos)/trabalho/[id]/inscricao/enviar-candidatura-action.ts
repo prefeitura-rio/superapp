@@ -1,6 +1,9 @@
 'use server'
 
-import { getFormacaoOptions } from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
+import {
+  getFormacaoOptions,
+  getTiposPcdCatalogo,
+} from '@/app/(app)/(logged-in-out)/servicos/(servicos)/trabalho/curriculo/get-formacao-options'
 
 import { postApiV1EmpregabilidadeCandidaturas } from '@/http-courses/empregabilidade-candidaturas/empregabilidade-candidaturas'
 import { getApiV1EmpregabilidadeCurriculoCpf } from '@/http-courses/empregabilidade-curriculo/empregabilidade-curriculo'
@@ -12,7 +15,10 @@ import {
   checkEligibility,
   resolveEscolaridadeIdByDescricao,
 } from '@/lib/eligibility-utils'
-import type { FailedCriterio } from '@/lib/eligibility-utils'
+import type {
+  ExperienciaCurriculo,
+  FailedCriterio,
+} from '@/lib/eligibility-utils'
 import { getUserInfoFromToken } from '@/lib/user-info'
 
 export interface RespostaInfoComplementar {
@@ -51,13 +57,19 @@ export async function enviarCandidatura(
     const cpfLimpo = userInfo.cpf.replace(/\D/g, '')
 
     // Busca em paralelo: currículo fresco, vaga (critérios), referências e perfil do cidadão
-    const [curriculoResponse, vagaResponse, formacaoOptions, cidadaoResponse] =
-      await Promise.all([
-        getApiV1EmpregabilidadeCurriculoCpf(cpfLimpo),
-        getApiPublicEmpregabilidadeVagasId(vagaId),
-        getFormacaoOptions(),
-        getDalCitizenCpf(userInfo.cpf),
-      ])
+    const [
+      curriculoResponse,
+      vagaResponse,
+      formacaoOptions,
+      cidadaoResponse,
+      tiposPcdCatalogo,
+    ] = await Promise.all([
+      getApiV1EmpregabilidadeCurriculoCpf(cpfLimpo),
+      getApiPublicEmpregabilidadeVagasId(vagaId),
+      getFormacaoOptions(),
+      getDalCitizenCpf(userInfo.cpf),
+      getTiposPcdCatalogo(),
+    ])
 
     if (curriculoResponse.status !== 200 || !curriculoResponse.data) {
       return {
@@ -83,6 +95,13 @@ export async function enviarCandidatura(
             id_idioma?: string
             id_nivel?: string
           }>)
+        : []
+
+      const experienciasCurriculo = Array.isArray(curriculo.experiencias)
+        ? (curriculo.experiencias as unknown[]).filter(
+            (exp): exp is ExperienciaCurriculo =>
+              exp != null && typeof exp === 'object'
+          )
         : []
 
       const escolaridades = formacaoOptions.escolaridades
@@ -113,7 +132,10 @@ export async function enviarCandidatura(
         nascimentoData: cidadao?.nascimento?.data,
         formacoesCurriculo,
         escolaridadeRmiId,
+        deficiencia: cidadao?.deficiencia,
+        tiposPcdCatalogo,
         idiomasCurriculo,
+        experienciasCurriculo,
         escolaridades,
         idiomas: formacaoOptions.idiomas,
         niveisIdioma: formacaoOptions.niveisIdioma,

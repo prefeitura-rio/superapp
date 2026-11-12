@@ -6,8 +6,6 @@ import lampada from '@/assets/lampada.png'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export const dynamic = 'force-static'
-
 export default function OuvidoriaPage() {
   return (
     <div className="pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
@@ -20,12 +18,12 @@ export default function OuvidoriaPage() {
               Bem-vindo à Ouvidoria
             </span>
 
-            <h2 className="text-3xl px-4 font-medium leading-9 text-foreground bg-background z-10">
+            <h1 className="text-3xl px-4 font-medium leading-9 text-foreground bg-background z-10">
               Sua voz é importante <br /> para{' '}
               <span className="text-primary">
                 melhorarmos os serviços da cidade{' '}
               </span>
-            </h2>
+            </h1>
           </div>
         </section>
 
@@ -42,9 +40,9 @@ export default function OuvidoriaPage() {
               <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
                 <Image src={joia} alt="Elogio" width={40} height={40} />
                 <div className="text-left">
-                  <h3 className="font-normal leading-5 text-sm text-foreground">
+                  <h2 className="font-normal leading-5 text-sm text-foreground">
                     Elogio
-                  </h3>
+                  </h2>
                   <p className="text-xs text-muted-foreground">
                     Conte para gente o que lhe agradou em nossos serviços
                   </p>
@@ -67,9 +65,9 @@ export default function OuvidoriaPage() {
               <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
                 <Image src={lampada} alt="Sugestão" width={40} height={40} />
                 <div className="text-left">
-                  <h3 className="font-normal leading-5 text-sm text-foreground">
+                  <h2 className="font-normal leading-5 text-sm text-foreground">
                     Sugestão
-                  </h3>
+                  </h2>
                   <p className="text-xs text-muted-foreground">
                     Queremos sua contribuição para melhorar nossos serviços e
                     políticas públicas.
@@ -93,9 +91,9 @@ export default function OuvidoriaPage() {
                   height={40}
                 />
                 <div className="text-left">
-                  <h3 className="font-normal leading-5 text-sm text-foreground">
+                  <h2 className="font-normal leading-5 text-sm text-foreground">
                     Reclamação
-                  </h3>
+                  </h2>
                   <p className="text-xs text-muted-foreground">
                     Diga o que não funcionou bem para buscarmos uma solução
                   </p>

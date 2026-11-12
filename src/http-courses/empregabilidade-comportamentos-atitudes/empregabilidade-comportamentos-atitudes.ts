@@ -6,9 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  EmpregabilidadeCatalogoItem,
+  EmpregabilidadeCreateComportamentoAtitudesRequest,
+  EmpregabilidadeUpdateComportamentoAtitudesRequest,
   GetApiV1EmpregabilidadeComportamentosAtitudesParams,
+  PostApiV1EmpregabilidadeComportamentosAtitudes201,
   ResponseErrorResponse,
   ResponseListComportamentoAtitudesPaginatedResponse,
+  ResponseSuccessResponse,
 } from '../models'
 
 import { customFetch } from '../../../custom-fetch-course'
@@ -67,6 +72,317 @@ export const getApiV1EmpregabilidadeComportamentosAtitudes = async (
     {
       ...options,
       method: 'GET',
+    }
+  )
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse201 = {
+  data: PostApiV1EmpregabilidadeComportamentosAtitudes201
+  status: 201
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse400 = {
+  data: ResponseErrorResponse
+  status: 400
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse403 = {
+  data: ResponseErrorResponse
+  status: 403
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse409 = {
+  data: ResponseErrorResponse
+  status: 409
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse500 = {
+  data: ResponseErrorResponse
+  status: 500
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponseSuccess =
+  postApiV1EmpregabilidadeComportamentosAtitudesResponse201 & {
+    headers: Headers
+  }
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponseError = (
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponse400
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponse403
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponse409
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponse500
+) & {
+  headers: Headers
+}
+
+export type postApiV1EmpregabilidadeComportamentosAtitudesResponse =
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponseSuccess
+  | postApiV1EmpregabilidadeComportamentosAtitudesResponseError
+
+export const getPostApiV1EmpregabilidadeComportamentosAtitudesUrl = () => {
+  return `/api/v1/empregabilidade/comportamentos-atitudes`
+}
+
+/**
+ * Cadastra um novo comportamento e atitude global no sistema
+ * @summary Criar Comportamento e Atitude
+ */
+export const postApiV1EmpregabilidadeComportamentosAtitudes = async (
+  empregabilidadeCreateComportamentoAtitudesRequest: EmpregabilidadeCreateComportamentoAtitudesRequest,
+  options?: Parameters<typeof customFetch>[1]
+): Promise<postApiV1EmpregabilidadeComportamentosAtitudesResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {}
+    if (h instanceof Headers) return Object.fromEntries(h.entries())
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          entry => Array.from(entry) as [string, string]
+        )
+      )
+    }
+    const headers: Record<string, string | readonly string[]> = {}
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value
+    }
+    return headers
+  }
+  return customFetch<postApiV1EmpregabilidadeComportamentosAtitudesResponse>(
+    getPostApiV1EmpregabilidadeComportamentosAtitudesUrl(),
+    {
+      ...options,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(empregabilidadeCreateComportamentoAtitudesRequest),
+    }
+  )
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 = {
+  data: EmpregabilidadeCatalogoItem
+  status: 200
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponse400 = {
+  data: ResponseErrorResponse
+  status: 400
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponse404 = {
+  data: ResponseErrorResponse
+  status: 404
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponse500 = {
+  data: ResponseErrorResponse
+  status: 500
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess =
+  getApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 & {
+    headers: Headers
+  }
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponseError = (
+  | getApiV1EmpregabilidadeComportamentosAtitudesIdResponse400
+  | getApiV1EmpregabilidadeComportamentosAtitudesIdResponse404
+  | getApiV1EmpregabilidadeComportamentosAtitudesIdResponse500
+) & {
+  headers: Headers
+}
+
+export type getApiV1EmpregabilidadeComportamentosAtitudesIdResponse =
+  | getApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess
+  | getApiV1EmpregabilidadeComportamentosAtitudesIdResponseError
+
+export const getGetApiV1EmpregabilidadeComportamentosAtitudesIdUrl = (
+  id: number
+) => {
+  return `/api/v1/empregabilidade/comportamentos-atitudes/${id}`
+}
+
+/**
+ * Retorna os detalhes de um comportamento/atitude global cadastrado pelo ID
+ * @summary Buscar Comportamento e Atitude por ID
+ */
+export const getApiV1EmpregabilidadeComportamentosAtitudesId = async (
+  id: number,
+  options?: Parameters<typeof customFetch>[1]
+): Promise<getApiV1EmpregabilidadeComportamentosAtitudesIdResponse> => {
+  return customFetch<getApiV1EmpregabilidadeComportamentosAtitudesIdResponse>(
+    getGetApiV1EmpregabilidadeComportamentosAtitudesIdUrl(id),
+    {
+      ...options,
+      method: 'GET',
+    }
+  )
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 = {
+  data: ResponseSuccessResponse
+  status: 200
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse400 = {
+  data: ResponseErrorResponse
+  status: 400
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse403 = {
+  data: ResponseErrorResponse
+  status: 403
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse404 = {
+  data: ResponseErrorResponse
+  status: 404
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse409 = {
+  data: ResponseErrorResponse
+  status: 409
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse500 = {
+  data: ResponseErrorResponse
+  status: 500
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess =
+  putApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 & {
+    headers: Headers
+  }
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponseError = (
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponse400
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponse403
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponse404
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponse409
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponse500
+) & {
+  headers: Headers
+}
+
+export type putApiV1EmpregabilidadeComportamentosAtitudesIdResponse =
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess
+  | putApiV1EmpregabilidadeComportamentosAtitudesIdResponseError
+
+export const getPutApiV1EmpregabilidadeComportamentosAtitudesIdUrl = (
+  id: number
+) => {
+  return `/api/v1/empregabilidade/comportamentos-atitudes/${id}`
+}
+
+/**
+ * Atualiza os dados de um comportamento/atitude existente no sistema
+ * @summary Atualizar Comportamento e Atitude
+ */
+export const putApiV1EmpregabilidadeComportamentosAtitudesId = async (
+  id: number,
+  empregabilidadeUpdateComportamentoAtitudesRequest: EmpregabilidadeUpdateComportamentoAtitudesRequest,
+  options?: Parameters<typeof customFetch>[1]
+): Promise<putApiV1EmpregabilidadeComportamentosAtitudesIdResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {}
+    if (h instanceof Headers) return Object.fromEntries(h.entries())
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          entry => Array.from(entry) as [string, string]
+        )
+      )
+    }
+    const headers: Record<string, string | readonly string[]> = {}
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value
+    }
+    return headers
+  }
+  return customFetch<putApiV1EmpregabilidadeComportamentosAtitudesIdResponse>(
+    getPutApiV1EmpregabilidadeComportamentosAtitudesIdUrl(id),
+    {
+      ...options,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(empregabilidadeUpdateComportamentoAtitudesRequest),
+    }
+  )
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 = {
+  data: ResponseSuccessResponse
+  status: 200
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse400 = {
+  data: ResponseErrorResponse
+  status: 400
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse403 = {
+  data: ResponseErrorResponse
+  status: 403
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse404 = {
+  data: ResponseErrorResponse
+  status: 404
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse500 = {
+  data: ResponseErrorResponse
+  status: 500
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess =
+  deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse200 & {
+    headers: Headers
+  }
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponseError = (
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse400
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse403
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse404
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse500
+) & {
+  headers: Headers
+}
+
+export type deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse =
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponseSuccess
+  | deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponseError
+
+export const getDeleteApiV1EmpregabilidadeComportamentosAtitudesIdUrl = (
+  id: number
+) => {
+  return `/api/v1/empregabilidade/comportamentos-atitudes/${id}`
+}
+
+/**
+ * Remove um comportamento/atitude global cadastrado pelo ID
+ * @summary Excluir Comportamento e Atitude Global
+ */
+export const deleteApiV1EmpregabilidadeComportamentosAtitudesId = async (
+  id: number,
+  options?: Parameters<typeof customFetch>[1]
+): Promise<deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse> => {
+  return customFetch<deleteApiV1EmpregabilidadeComportamentosAtitudesIdResponse>(
+    getDeleteApiV1EmpregabilidadeComportamentosAtitudesIdUrl(id),
+    {
+      ...options,
+      method: 'DELETE',
     }
   )
 }
