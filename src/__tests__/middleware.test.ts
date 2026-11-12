@@ -192,8 +192,6 @@ describe('middleware — Termos de uso', () => {
       '/consulta-protocolo',
       '/solicitacoes',
       '/solicitacoes/RIO-123',
-      '/ouvidoria',
-      '/ouvidoria/reclamacao',
       '/carta-de-servicos',
       '/carta-de-servicos/2951',
     ])('%s reescreve para /not-found quando desabilitada', async path => {

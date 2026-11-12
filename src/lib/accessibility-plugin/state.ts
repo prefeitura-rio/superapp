@@ -13,6 +13,8 @@ export type A11yState = {
   maskWidth: 0 | 1 | 2
   maskIntensity: 0 | 1 | 2
   hideImages: boolean
+  tts: boolean
+  ttsSpeed: 0 | 1 | 2
 }
 
 const STORAGE_KEY = 'a11y-preferences'
@@ -32,6 +34,8 @@ const DEFAULT_STATE: A11yState = {
   maskWidth: 2,
   maskIntensity: 1,
   hideImages: false,
+  tts: false,
+  ttsSpeed: 1,
 }
 
 const COLOR_BLIND_TYPES: readonly A11yState['colorBlind'][] = [0, 1, 2, 3]

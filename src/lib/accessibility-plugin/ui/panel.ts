@@ -58,6 +58,9 @@ type PanelCallbacks = {
   onMaskWidth: (level: 0 | 1 | 2) => void
   onMaskIntensity: (level: 0 | 1 | 2) => void
   onHideImages: (enabled: boolean) => void
+  onTts: (enabled: boolean) => void
+  onTtsSpeed: (speed: 0 | 1 | 2) => void
+  onTtsPauseToggle: () => void
   onReset: () => void
   onClose: () => void
 }
@@ -84,6 +87,7 @@ const SATURATION_LABELS = ['Normal', 'Baixa', 'Cinza']
 const MASK_HEIGHT_LABELS = ['Estreita', 'Média', 'Ampla']
 const MASK_WIDTH_LABELS = ['Coluna', 'Média', 'Total']
 const MASK_INTENSITY_LABELS = ['Suave', 'Média', 'Total']
+const TTS_SPEED_LABELS = ['Lenta', 'Normal', 'Rápida']
 const COLOR_BLIND_TYPE_LABELS = ['Deuteranopia', 'Protanopia', 'Tritanopia']
 
 const CLOSE_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -111,6 +115,22 @@ const ICON_VISION = `<svg viewBox="0 0 24 24" aria-hidden="true">
 </svg>`
 const ICON_MOTION = `<svg viewBox="0 0 24 24" aria-hidden="true">
   <path d="M5 3l14 9-14 9V3z"/>
+</svg>`
+const ICON_TTS = `<svg viewBox="0 0 24 24" aria-hidden="true">
+  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+</svg>`
+
+const ICON_TTS_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true">
+  <rect x="6" y="4" width="4" height="16"/>
+  <rect x="14" y="4" width="4" height="16"/>
+</svg>`
+const ICON_TTS_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true">
+  <rect x="3" y="3" width="18" height="18" rx="2"/>
+</svg>`
+const ICON_TTS_PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true">
+  <polygon points="5 3 19 12 5 21 5 3"/>
 </svg>`
 
 function makeStepper(
@@ -748,7 +768,113 @@ export function createPanel(
     firstOpen === 'motion'
   )
 
-  body.append(textGroup.el, visionGroup.el, motionGroup.el)
+  // ── Leitura em Voz (TTS) ──
+  const ttsActive = state.tts ? 1 : 0
+
+  // Painel de progresso (dentro do accordion body)
+  const ttsProgressPanel = document.createElement('span')
+  ttsProgressPanel.id = 'a11y-tts-progress-panel'
+  ttsProgressPanel.setAttribute('aria-live', 'polite')
+  ttsProgressPanel.setAttribute('aria-atomic', 'true')
+
+  // Botões de controle: Pausar/Retomar e Parar
+  const ttsPauseBtn = document.createElement('button')
+  ttsPauseBtn.type = 'button'
+  ttsPauseBtn.className = 'a11y-tts-btn'
+  ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
+  ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
+  ttsPauseBtn.addEventListener('click', () => {
+    callbacks.onTtsPauseToggle()
+    if (ttsPauseBtn.getAttribute('aria-label') === 'Pausar leitura') {
+      ttsPauseBtn.innerHTML = ICON_TTS_PLAY
+      ttsPauseBtn.setAttribute('aria-label', 'Retomar leitura')
+    } else {
+      ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
+      ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
+    }
+  })
+
+  const ttsStopBtn = document.createElement('button')
+  ttsStopBtn.type = 'button'
+  ttsStopBtn.className = 'a11y-tts-btn'
+  ttsStopBtn.setAttribute('aria-label', 'Parar leitura')
+  ttsStopBtn.innerHTML = ICON_TTS_STOP
+  ttsStopBtn.addEventListener('click', () => {
+    const inp = document.getElementById(
+      'a11y-toggle-tts'
+    ) as HTMLInputElement | null
+    if (inp) {
+      inp.checked = false
+      inp.dispatchEvent(new Event('change'))
+    }
+  })
+
+  // Sub-row de controles (oculta quando TTS desligado)
+  const ttsControlsRow = document.createElement('div')
+  ttsControlsRow.className = 'a11y-tts-controls-row a11y-row-sub'
+  ttsControlsRow.append(ttsPauseBtn, ttsStopBtn)
+  setSubRowHidden(ttsControlsRow, !state.tts)
+
+  // Sub-row de velocidade (oculta quando TTS desligado)
+  const ttsSpeedRow = makeRow(
+    'Velocidade',
+    null,
+    makeStepper(state.ttsSpeed, TTS_SPEED_LABELS, 'Velocidade da leitura', v =>
+      callbacks.onTtsSpeed(v)
+    )
+  )
+  ttsSpeedRow.classList.add('a11y-row-sub')
+  setSubRowHidden(ttsSpeedRow, !state.tts)
+
+  // Toggle criado primeiro (sem handler) para poder ser filho do grupo
+  const ttsToggleEl = makeToggle(
+    state.tts,
+    'a11y-toggle-tts',
+    'Ativar leitura em voz',
+    () => {}
+  )
+  const ttsToggleRow = makeRow('Leitura em voz', null, ttsToggleEl)
+
+  const ttsGroup = makeAccordionGroup(
+    'tts',
+    ICON_TTS,
+    'Leitura em Voz',
+    ttsActive,
+    [ttsToggleRow, ttsProgressPanel, ttsControlsRow, ttsSpeedRow],
+    state.tts
+  )
+
+  // Handler real registrado após ttsGroup existir como const
+  const ttsToggleInput = ttsToggleEl.querySelector<HTMLInputElement>('input')!
+  ttsToggleInput.addEventListener('change', () => {
+    const v = ttsToggleInput.checked
+    setSubRowHidden(ttsControlsRow, !v)
+    setSubRowHidden(ttsSpeedRow, !v)
+    if (v) {
+      ttsGroup.updateBadge(1)
+      // Abre o accordion quando TTS é ativado
+      const accBody = ttsGroup.el.querySelector<HTMLElement>('#a11y-acc-tts')
+      const accTrigger = ttsGroup.el.querySelector<HTMLButtonElement>(
+        '.a11y-accordion-trigger'
+      )
+      if (accBody) {
+        accBody.classList.add('a11y-accordion-open')
+        setInert(accBody, false)
+      }
+      if (accTrigger) accTrigger.setAttribute('aria-expanded', 'true')
+      // Reset estado do botão de pausa
+      ttsPauseBtn.innerHTML = ICON_TTS_PAUSE
+      ttsPauseBtn.setAttribute('aria-label', 'Pausar leitura')
+    } else {
+      ttsGroup.updateBadge(0)
+      ttsProgressPanel.textContent = ''
+      // Devolve o foco ao toggle após desligar
+      ttsToggleInput.focus()
+    }
+    callbacks.onTts(v)
+  })
+
+  body.append(textGroup.el, visionGroup.el, motionGroup.el, ttsGroup.el)
 
   // ── Footer ──
   const footer = document.createElement('div')
