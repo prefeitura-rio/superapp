@@ -629,7 +629,7 @@ export function createPanel(
       ),
       makeRow(
         'Modo daltônico',
-        'Simula déficit de visão de cor',
+        'Adapta as cores para daltonismo',
         makeToggle(
           state.colorBlind > 0,
           'a11y-toggle-colorblind',
