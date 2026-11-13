@@ -6,11 +6,18 @@ import {
   accordionCancelButtonClassName,
   accordionSaveButtonClassName,
 } from '@/components/ui/custom/custom-button'
+import { buildTermosDeUsoHrefFrom } from '@/constants/termos-de-uso/origins'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { saveTermosAcceptAction } from './save-termos-accept-action'
+
+/** Detalhe "Termos de uso: Empregos", marcando o currículo como origem. */
+export const TERMOS_DE_USO_EMPREGOS_HREF = buildTermosDeUsoHrefFrom(
+  'empregos',
+  'curriculo'
+)
 
 interface TermosUsoAccordionContentProps {
   cpf?: string
@@ -64,8 +71,16 @@ export function TermosUsoAccordionContent({
       <p className="text-primary text-sm font-normal leading-5">
         Ao preencher e enviar este formulário, você declara que leu e concorda
         com nossos{' '}
-        <Link href="/servicos/trabalho/termos-de-uso" className="underline">
+        {/* Nova aba: o currículo (e o que já foi preenchido) fica intacto;
+            o voltar dos termos fecha a aba e devolve a pessoa para cá. */}
+        <Link
+          href={TERMOS_DE_USO_EMPREGOS_HREF}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
           Termos de Uso e nosso Aviso de Privacidade
+          <span className="sr-only"> (abre em nova aba)</span>
         </Link>
         . Seus dados serão compartilhados com a instituição responsável por esta
         vaga para fins de recrutamento e seleção.

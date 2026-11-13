@@ -1161,3 +1161,171 @@ test.describe('Footer — link de Termos de uso em outras páginas', () => {
     ).toBeVisible()
   })
 })
+
+// ---------------------------------------------------------------------------
+// MEU CURRÍCULO (EMPREGOS) → TERMOS DE USO: EMPREGOS
+// ---------------------------------------------------------------------------
+
+const CURRICULO = '/servicos/trabalho/curriculo'
+const TERMOS_DO_CURRICULO = '/termos-de-uso/empregos?origem=curriculo'
+const BACK_TO_CURRICULO = 'Voltar para o currículo'
+
+function curriculoTermsLink(page: Page) {
+  return page.getByRole('link', {
+    name: /Termos de Uso e nosso Aviso de Privacidade/,
+  })
+}
+
+test.describe('Termos de uso — voltar para o currículo (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('?origem=curriculo troca o voltar da lista pelo voltar para o currículo', async ({
+    page,
+  }) => {
+    await page.goto(TERMOS_DO_CURRICULO)
+
+    await expect(detailHeading(page, 'Empregos')).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: BACK_TO_CURRICULO })
+    ).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Voltar para Termos de uso' })
+    ).toHaveCount(0)
+  })
+
+  test('origem desconhecida é ignorada: o voltar continua indo para a lista', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/empregos?origem=qualquer-coisa')
+
+    await expect(
+      page.getByRole('link', { name: 'Voltar para Termos de uso' })
+    ).toHaveAttribute('href', '/termos-de-uso')
+    await expect(
+      page.getByRole('button', { name: BACK_TO_CURRICULO })
+    ).toHaveCount(0)
+  })
+})
+
+test.describe('Termos de uso — link no Meu Currículo (autenticado)', () => {
+  test.beforeEach(async ({ context }) => {
+    test.skip(!hasE2EAuth(), 'E2E_ACCESS_TOKEN não configurado')
+    await applyE2EAuthCookies(context)
+  })
+
+  async function openCurriculo(page: Page) {
+    await page.goto(CURRICULO)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
+    ).toBeVisible({ timeout: 15000 })
+  }
+
+  async function openTermosAccordion(page: Page) {
+    await page.getByText('Termos de Uso', { exact: true }).click()
+    await expect(curriculoTermsLink(page)).toBeVisible({ timeout: 10000 })
+  }
+
+  test('o link leva a "Termos de uso: Empregos" em nova aba; frase, checkbox e botões seguem iguais', async ({
+    page,
+  }) => {
+    await openCurriculo(page)
+    await openTermosAccordion(page)
+
+    const link = curriculoTermsLink(page)
+    await expect(link).toHaveAttribute('href', TERMOS_DO_CURRICULO)
+    await expect(link).toHaveAttribute('target', '_blank')
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    await expect(link).toHaveClass(/\bunderline\b/)
+    await expect(
+      page.getByText(
+        'Ao preencher e enviar este formulário, você declara que leu e concorda com nossos',
+        { exact: false }
+      )
+    ).toBeVisible()
+    await expect(
+      page.getByText('Li e concordo com os termos de uso')
+    ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Cancelar' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Salvar' })).toBeVisible()
+
+    // Nenhuma referência à página antiga de termos no Meu Currículo.
+    await expect(
+      page.locator('a[href^="/servicos/trabalho/termos-de-uso"]')
+    ).toHaveCount(0)
+  })
+
+  test('abre o texto completo em nova aba e o voltar fecha a aba, com o currículo intacto', async ({
+    page,
+    context,
+  }) => {
+    await openCurriculo(page)
+
+    // Preenche um campo sem salvar: tem que continuar lá na volta.
+    const typed = `Curso E2E termos ${Date.now()}`
+    await page.getByText('Formação', { exact: true }).click()
+    const nomeCurso = page
+      .getByTestId('formacao-card-0')
+      .getByPlaceholder('Preencha com o nome do curso')
+    await expect(nomeCurso).toBeVisible({ timeout: 10000 })
+    await nomeCurso.fill(typed)
+
+    await openTermosAccordion(page)
+    const [termos] = await Promise.all([
+      context.waitForEvent('page'),
+      curriculoTermsLink(page).click(),
+    ])
+    await termos.waitForLoadState()
+
+    expect(new URL(termos.url()).pathname).toBe('/termos-de-uso/empregos')
+    await expect(detailHeading(termos, 'Empregos')).toBeVisible()
+    await expect(
+      termos.getByRole('heading', { name: '1. Da ciência do Termo de uso' })
+    ).toBeVisible()
+    await expect(
+      termos.getByRole('heading', { name: '15. Foro' })
+    ).toBeAttached()
+
+    // O currículo não saiu do lugar enquanto os termos estavam abertos.
+    expect(new URL(page.url()).pathname).toBe(CURRICULO)
+
+    await Promise.all([
+      termos.waitForEvent('close'),
+      termos.getByRole('button', { name: BACK_TO_CURRICULO }).click(),
+    ])
+
+    expect(new URL(page.url()).pathname).toBe(CURRICULO)
+    await expect(curriculoTermsLink(page)).toBeVisible()
+    await page.getByText('Formação', { exact: true }).click()
+    await expect(nomeCurso).toHaveValue(typed)
+  })
+
+  test('na mesma aba, o voltar volta no histórico para o currículo', async ({
+    page,
+    baseURL,
+  }) => {
+    await openCurriculo(page)
+    await page.goto(TERMOS_DO_CURRICULO, { referer: `${baseURL}${CURRICULO}` })
+
+    await page.getByRole('button', { name: BACK_TO_CURRICULO }).click()
+    await page.waitForURL(url => url.pathname === CURRICULO)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
+    ).toBeVisible({ timeout: 15000 })
+  })
+
+  test('se a aba não pode ser fechada, o voltar abre o currículo', async ({
+    page,
+  }) => {
+    // Aba com histórico próprio e sem referrer: o navegador não deixa fechar.
+    await page.goto('/termos-de-uso')
+    await page.goto(TERMOS_DO_CURRICULO)
+
+    await page.getByRole('button', { name: BACK_TO_CURRICULO }).click()
+    await page.waitForURL(url => url.pathname === CURRICULO)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Meu Currículo' })
+    ).toBeVisible({ timeout: 15000 })
+  })
+})

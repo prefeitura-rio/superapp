@@ -40,7 +40,7 @@ export function BackButton({ fallbackHref }: BackButtonProps) {
  * Acesso direto (link externo, nova aba) não tem para onde voltar dentro do
  * app; nesse caso o botão leva ao fallback em vez de sair do site.
  */
-function hasSameOriginReferrer() {
+export function hasSameOriginReferrer() {
   if (window.history.length <= 1 || !document.referrer) return false
   try {
     return new URL(document.referrer).origin === window.location.origin

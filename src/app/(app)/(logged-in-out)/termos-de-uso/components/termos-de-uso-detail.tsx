@@ -9,10 +9,13 @@ import type {
   TermosDeUsoSection,
 } from '@/constants/termos-de-uso/types'
 import { BackLink } from './back-link'
+import { BackToOrigin } from './back-to-origin'
 
 interface TermosDeUsoDetailProps {
   platform: TermosDeUsoPlatform
   document: TermosDeUsoDocument
+  /** Tela que abriu os termos; sem ela o voltar leva à lista. */
+  origin?: { href: string; label: string }
 }
 
 /**
@@ -23,10 +26,18 @@ interface TermosDeUsoDetailProps {
 export function TermosDeUsoDetail({
   platform,
   document,
+  origin,
 }: TermosDeUsoDetailProps) {
   return (
     <>
-      <BackLink href={TERMOS_DE_USO_ROUTE} label="Voltar para Termos de uso" />
+      {origin ? (
+        <BackToOrigin href={origin.href} label={origin.label} />
+      ) : (
+        <BackLink
+          href={TERMOS_DE_USO_ROUTE}
+          label="Voltar para Termos de uso"
+        />
+      )}
 
       <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
         Termos de uso: {platform.name}
