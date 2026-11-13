@@ -1,8 +1,9 @@
 'use client'
 
 import { MenuIcon } from '@/assets/icons/menu-icon'
+import { setGlobalMenuOpen } from '@/hooks/use-global-menu-open'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GlobalMenu } from './global-menu'
 
 interface GlobalMenuTriggerProps {
@@ -18,6 +19,13 @@ export function GlobalMenuTrigger({ className }: GlobalMenuTriggerProps) {
   // O menu só é montado no primeiro clique (e fica montado para a animação de
   // fechar): o header aparece em todas as telas e não precisa carregar o menu.
   const [mounted, setMounted] = useState(false)
+
+  // Avisa quem vive fora do menu (o banner de cookies) que ele está aberto.
+  useEffect(() => {
+    if (!open) return
+    setGlobalMenuOpen(true)
+    return () => setGlobalMenuOpen(false)
+  }, [open])
 
   return (
     <>
