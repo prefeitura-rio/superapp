@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { CSS } from '../lib/accessibility-plugin/ui/styles'
 import { middleware } from '../middleware'
 
 function requestFor(path: string): NextRequest {
@@ -267,6 +268,48 @@ describe('middleware — CSP do VLibras', () => {
     expect(response?.headers.get('Cross-Origin-Resource-Policy')).toBe(
       'same-site'
     )
+  })
+})
+
+describe('middleware — CSP das fontes do plugin de acessibilidade', () => {
+  function fontSrcSources(csp: string): string[] {
+    const directive = csp
+      .split(';')
+      .map(part => part.trim())
+      .find(part => part.startsWith('font-src '))
+    return directive ? directive.split(/\s+/).slice(1) : []
+  }
+
+  // URLs de todas as declarações @font-face do CSS do plugin (o mesmo CSS publicado no bucket).
+  function fontFaceUrls(css: string): string[] {
+    const blocks = css.match(/@font-face\s*{[^}]*}/g) ?? []
+    return blocks.flatMap(block =>
+      [...block.matchAll(/url\(\s*['"]?(https?:\/\/[^'")\s]+)['"]?\s*\)/g)].map(
+        match => match[1]
+      )
+    )
+  }
+
+  test('toda fonte declarada pelo plugin é permitida em font-src', async () => {
+    const response = await middleware(requestFor('/'))
+    const sources = fontSrcSources(
+      response?.headers.get('Content-Security-Policy') ?? ''
+    )
+    const urls = fontFaceUrls(CSS)
+
+    expect(urls.length).toBeGreaterThan(0)
+    for (const url of urls) {
+      expect(sources).toContain(new URL(url).origin)
+    }
+  })
+
+  test('a fonte OpenDyslexic do jsDelivr (DEV-138) continua permitida', async () => {
+    const response = await middleware(requestFor('/'))
+    const sources = fontSrcSources(
+      response?.headers.get('Content-Security-Policy') ?? ''
+    )
+
+    expect(sources).toContain('https://cdn.jsdelivr.net')
   })
 })
 
