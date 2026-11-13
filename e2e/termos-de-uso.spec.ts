@@ -995,6 +995,173 @@ test.describe('Termos de uso — pelo menu global (autenticado)', () => {
   })
 })
 
+/**
+ * Footer: um único link "Termos de uso e Política de Privacidade" (o Termo de
+ * Uso e o Aviso de Privacidade são um documento só) levando à lista de Termos
+ * de uso, na linha do copyright, nas duas larguras.
+ */
+const FOOTER_LINK = 'Termos de uso e Política de Privacidade'
+
+for (const viewport of [
+  { name: 'mobile 360px', width: 360, height: 780 },
+  { name: 'desktop', width: 1280, height: 800 },
+] as const) {
+  test.describe(`Footer — Termos de uso (${viewport.name})`, () => {
+    test.use({ viewport: { width: viewport.width, height: viewport.height } })
+
+    test.beforeEach(async ({ context }) => {
+      await applyE2ECookieConsent(context)
+    })
+
+    test('um só link, na linha do copyright, que abre a lista de Termos de uso', async ({
+      page,
+    }) => {
+      await page.goto('/')
+      const footer = page.getByRole('contentinfo')
+      const link = footer.getByRole('link', { name: FOOTER_LINK })
+      await expect(link).toHaveCount(1)
+      await expect(link).toHaveAttribute('href', '/termos-de-uso')
+      await expect(
+        footer.getByText('Política de Privacidade', { exact: true })
+      ).toHaveCount(0)
+      await expect(
+        footer.getByText('Termos de uso', { exact: true })
+      ).toHaveCount(0)
+
+      await link.scrollIntoViewIfNeeded()
+      const copyright = footer
+        .getByText(/©2026 PrefRio/)
+        .filter({ visible: true })
+      const c = await copyright.boundingBox()
+      const l = await link.boundingBox()
+      if (!c || !l) throw new Error('linha do copyright sem bounding box')
+      if (viewport.width < 640) {
+        // Mobile: o link vem logo abaixo do copyright, alinhado à esquerda.
+        expect(l.x).toBe(c.x)
+        expect(l.y).toBeGreaterThanOrEqual(c.y + c.height)
+      } else {
+        // Desktop: mesma linha, centros alinhados.
+        expect(
+          Math.abs(l.y + l.height / 2 - (c.y + c.height / 2))
+        ).toBeLessThanOrEqual(1)
+        expect(l.x).toBeGreaterThan(c.x + c.width)
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth)
+      ).toBeLessThanOrEqual(viewport.width)
+
+      await link.click()
+      await page.waitForURL(/\/termos-de-uso$/)
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Termos de uso' })
+      ).toBeVisible()
+    })
+  })
+}
+
+test.describe('Footer — link de Termos de uso no hover (desktop)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('sublinha ao passar o mouse, como os outros links do footer', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const link = page
+      .getByRole('contentinfo')
+      .getByRole('link', { name: FOOTER_LINK })
+    await link.scrollIntoViewIfNeeded()
+    const decoration = () =>
+      link.evaluate(el => getComputedStyle(el).textDecorationLine)
+
+    await page.mouse.move(0, 0)
+    expect(await decoration()).toBe('none')
+    await link.hover()
+    await expect.poll(decoration).toBe('underline')
+  })
+})
+
+test.describe('Footer — link de Termos de uso pelo teclado', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  test('recebe foco com Tab, mostra o contorno de foco e Enter abre a lista', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const link = page
+      .getByRole('contentinfo')
+      .getByRole('link', { name: FOOTER_LINK })
+    await link.scrollIntoViewIfNeeded()
+
+    // Chega ao link pelo teclado (Shift+Tab e Tab), como quem navega sem mouse.
+    await link.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    await expect(link).toBeFocused()
+
+    const focusRing = await link.evaluate(el => {
+      const style = getComputedStyle(el)
+      return {
+        focusVisible: el.matches(':focus-visible'),
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+      }
+    })
+    expect(focusRing.focusVisible).toBe(true)
+    expect(focusRing.outlineStyle).not.toBe('none')
+    expect(focusRing.outlineWidth).toBeGreaterThan(0)
+
+    await page.keyboard.press('Enter')
+    await page.waitForURL(/\/termos-de-uso$/)
+  })
+})
+
+/**
+ * O footer é o mesmo componente em todo o app (FooterWrapper no layout): o link
+ * aparece e leva à lista também fora da home, inclusive nas telas dos Termos.
+ */
+test.describe('Footer — link de Termos de uso em outras páginas', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const path of [
+    '/servicos',
+    '/faq',
+    '/termos-de-uso',
+    '/termos-de-uso/cursos',
+  ]) {
+    test(`${path}: footer com o link único para a lista`, async ({ page }) => {
+      await page.goto(path)
+      const footer = page.getByRole('contentinfo')
+      const link = footer.getByRole('link', { name: FOOTER_LINK })
+
+      await expect(link).toHaveCount(1)
+      await expect(link).toHaveAttribute('href', '/termos-de-uso')
+      await expect(
+        footer.getByText('Política de Privacidade', { exact: true })
+      ).toHaveCount(0)
+    })
+  }
+
+  test('a partir do detalhe, o link do footer volta para a lista', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/empregos')
+    await page
+      .getByRole('contentinfo')
+      .getByRole('link', { name: FOOTER_LINK })
+      .click()
+    await page.waitForURL(/\/termos-de-uso$/)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Termos de uso' })
+    ).toBeVisible()
+  })
+})
+
 // ---------------------------------------------------------------------------
 // MEU CURRÍCULO (EMPREGOS) → TERMOS DE USO: EMPREGOS
 // ---------------------------------------------------------------------------
