@@ -91,11 +91,15 @@ test.describe('Home (público)', () => {
 
   test('exibe múltiplas categorias na grade de serviços', async ({ page }) => {
     await page.goto('/')
+    // Nome exato: sem as âncoras, "cidade" casava com o link "Termos de uso e
+    // Política de Privacidade" do footer, que vem do servidor antes de a grade
+    // (client) hidratar.
     const categoryLinks = page.getByRole('link', {
-      name: /cursos|cidade|educação|família|saúde|transporte|cultura/i,
+      name: /^(cursos|cidade|educação|família|saúde|transporte|cultura)$/i,
     })
-    await expect(categoryLinks.first()).toBeVisible({ timeout: 20000 })
-    expect(await categoryLinks.count()).toBeGreaterThanOrEqual(3)
+    // Espera a terceira categoria aparecer, em vez de contar logo após a
+    // primeira.
+    await expect(categoryLinks.nth(2)).toBeVisible({ timeout: 20000 })
   })
 
   test('não exibe a seção Documentos quando não autenticado', async ({
