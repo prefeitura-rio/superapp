@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { useIsGlobalMenuOpen } from '@/hooks/use-global-menu-open'
 import { cn } from '@/lib/utils'
 import { Cookie } from 'lucide-react'
 import * as React from 'react'
@@ -39,6 +40,9 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
   ) => {
     const [isOpen, setIsOpen] = React.useState(false)
     const [hide, setHide] = React.useState(false)
+    // Com o menu global (modal) aberto, o banner não recebe cliques: o toque
+    // cairia no item do menu por baixo. Fica oculto e volta ao fechar o menu.
+    const isGlobalMenuOpen = useIsGlobalMenuOpen()
 
     const handleAccept = React.useCallback(async () => {
       try {
@@ -103,6 +107,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
     const containerClasses = cn(
       'fixed z-51! transition-all duration-700',
       !isOpen ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100',
+      isGlobalMenuOpen && 'hidden',
       className
     )
 

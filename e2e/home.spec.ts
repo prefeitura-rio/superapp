@@ -499,3 +499,53 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
     })
   }
 })
+
+// ---------------------------------------------------------------------------
+// MENU GLOBAL × BANNER DE COOKIES
+// ---------------------------------------------------------------------------
+
+/**
+ * Visitante que ainda não respondeu ao banner de cookies (sem o cookie de
+ * consentimento). O menu global é modal: com ele aberto, o resto da página
+ * não recebe cliques. O banner fica por cima do menu e, se continuasse
+ * visível, o toque em "Rejeitar" cairia no item do menu embaixo dele (em
+ * staging abria Perguntas frequentes). O banner some com o menu aberto e
+ * volta, clicável, ao fechar.
+ */
+test.describe('Menu global × banner de cookies (visitante sem consentimento)', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  test('o banner some com o menu aberto e volta, clicável, ao fechar', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const banner = page.getByRole('region', {
+      name: 'Consentimento de cookies',
+    })
+    const rejeitar = banner.getByRole('button', { name: /Rejeitar/ }).first()
+    await expect(rejeitar).toBeVisible()
+
+    await page
+      .locator('header')
+      .first()
+      .getByRole('button', { name: 'Menu', exact: true })
+      .click()
+    const menu = page.getByRole('dialog', { name: 'Menu' })
+    await expect(menu).toBeVisible()
+    // Por CSS, não por papel: com o menu (modal) aberto o resto da página
+    // ganha aria-hidden, e getByRole deixaria de achar o banner mesmo com ele
+    // visível na tela.
+    await expect(
+      page.locator('[aria-label="Consentimento de cookies"]')
+    ).toBeHidden()
+
+    await menu.getByRole('button', { name: 'Fechar menu' }).click()
+    await expect(menu).toBeHidden()
+    await expect(rejeitar).toBeVisible()
+
+    await rejeitar.click()
+    await expect(banner).toBeHidden()
+    // O toque fica no banner: nada por baixo dele é acionado.
+    expect(new URL(page.url()).pathname).toBe('/')
+  })
+})
