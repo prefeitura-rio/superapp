@@ -19,6 +19,7 @@ export async function GET() {
         {
           isLoggedIn: false,
           userName: '',
+          userCpf: '',
           userAvatarUrl: null,
           userAvatarName: null,
         },
@@ -62,6 +63,7 @@ export async function GET() {
       {
         isLoggedIn: true,
         userName: userDisplayName || userAuthInfo.name,
+        userCpf: userAuthInfo.cpf,
         userAvatarUrl,
         userAvatarName,
       },
@@ -73,6 +75,7 @@ export async function GET() {
       {
         isLoggedIn: false,
         userName: '',
+        userCpf: '',
         userAvatarUrl: null,
         userAvatarName: null,
       },

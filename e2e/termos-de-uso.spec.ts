@@ -520,13 +520,14 @@ test.describe('Termos de uso — Header Global (público)', () => {
         banner.getByRole('link', { name: 'PrefRio – página inicial' })
       ).toHaveAttribute('href', '/')
       const login = banner.getByRole('link', { name: 'Faça seu login' })
-      const menu = banner.getByRole('link', { name: 'Menu' })
-      for (const control of [login, menu]) {
-        const href = (await control.getAttribute('href')) ?? ''
-        // Visitante: Perfil e Menu levam ao login do Identidade Carioca.
-        expect(new URL(href).pathname).toMatch(/\/auth$/)
-        expect(new URL(href).origin).not.toBe(new URL(page.url()).origin)
-      }
+      const href = (await login.getAttribute('href')) ?? ''
+      // Visitante: o Perfil leva ao login do Identidade Carioca...
+      expect(new URL(href).pathname).toMatch(/\/auth$/)
+      expect(new URL(href).origin).not.toBe(new URL(page.url()).origin)
+      // ...e o Menu abre o menu global.
+      await expect(
+        banner.getByRole('button', { name: 'Menu', exact: true })
+      ).toHaveAttribute('aria-haspopup', 'dialog')
       // Header próprio de módulo (ex.: faixa Oportunidades Cariocas) não aparece.
       await expect(
         page.getByRole('navigation', { name: 'Oportunidades Cariocas' })
@@ -770,7 +771,9 @@ const STATE_CONTROLS = [
     screen: '/termos-de-uso',
     name: 'Menu do Header Global',
     get: (page: Page) =>
-      page.getByRole('banner').getByRole('link', { name: 'Menu' }),
+      page
+        .getByRole('banner')
+        .getByRole('button', { name: 'Menu', exact: true }),
   },
   {
     screen: '/termos-de-uso/cursos',
@@ -889,7 +892,9 @@ test.describe('Termos de uso — Menu logado (desktop)', () => {
     page,
   }) => {
     await page.goto('/termos-de-uso')
-    const menu = page.getByRole('banner').getByRole('button', { name: 'Menu' })
+    const menu = page
+      .getByRole('banner')
+      .getByRole('button', { name: 'Menu', exact: true })
     await expect(menu).toBeVisible()
     const bg = () => menu.evaluate(el => getComputedStyle(el).backgroundColor)
 
@@ -897,5 +902,95 @@ test.describe('Termos de uso — Menu logado (desktop)', () => {
     const idle = await bg()
     await menu.hover()
     await expect.poll(bg).not.toBe(idle)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// MENU GLOBAL → LISTA → DETALHE → VOLTAR
+// ---------------------------------------------------------------------------
+
+async function openTermosFromGlobalMenu(page: Page) {
+  // Primeiro <header>, não role=banner: na home o header fica dentro do <main>.
+  await page
+    .locator('header')
+    .first()
+    .getByRole('button', { name: 'Menu', exact: true })
+    .click()
+  const menu = page.getByRole('dialog', { name: 'Menu' })
+  await expect(menu).toBeVisible()
+  // Item de primeiro nível no handoff: Termos de uso e Política de
+  // Privacidade são um documento só.
+  const termos = menu.getByRole('link', {
+    name: 'Termos de uso e política de privacidade',
+  })
+  await expect(termos).toHaveAttribute('href', '/termos-de-uso')
+  await expect(
+    menu.getByRole('link', { name: /^Política de Privacidade/ })
+  ).toHaveCount(0)
+  await termos.click()
+  await page.waitForURL(url => url.pathname === '/termos-de-uso')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+}
+
+async function expectListThenDetailThenBack(page: Page) {
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Termos de uso' })
+  ).toBeVisible()
+  await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
+
+  await platformLinks(page).getByText('Cursos', { exact: true }).click()
+  await page.waitForURL('**/termos-de-uso/cursos')
+  await expect(detailHeading(page, 'Cursos')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+  await page.waitForURL(url => url.pathname === '/termos-de-uso')
+  await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
+}
+
+test.describe('Termos de uso — pelo menu global (público)', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const start of ['/', '/servicos', '/servicos/trabalho']) {
+    test(`de ${start}: Menu → Termos de uso → lista → detalhe → voltar`, async ({
+      page,
+    }) => {
+      await page.goto(start)
+      await openTermosFromGlobalMenu(page)
+      await expectListThenDetailThenBack(page)
+    })
+  }
+
+  test('o menu global também abre dentro dos Termos de uso', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/empregos')
+    await openTermosFromGlobalMenu(page)
+    await expectListThenDetailThenBack(page)
+  })
+
+  test('mobile 360px: Menu → Termos de uso → lista → detalhe → voltar', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 760 })
+    await page.goto('/')
+    await openTermosFromGlobalMenu(page)
+    await expectListThenDetailThenBack(page)
+  })
+})
+
+test.describe('Termos de uso — pelo menu global (autenticado)', () => {
+  test.beforeEach(async ({ context }) => {
+    test.skip(!hasE2EAuth(), 'E2E_ACCESS_TOKEN não configurado')
+    await applyE2EAuthCookies(context)
+  })
+
+  test('logado: Menu → Termos de uso → lista → detalhe → voltar', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await openTermosFromGlobalMenu(page)
+    await expectListThenDetailThenBack(page)
   })
 })

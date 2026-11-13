@@ -20,9 +20,8 @@ const PUBLIC_PAGES = [
 ]
 
 const LOGGED_PAGES = [
-  // Logado sem menuHref: o Menu é um <button>.
+  // O Menu é sempre o botão do menu global, em qualquer forma de header.
   { path: '/', via: 'HeaderWrapperClient (home)' },
-  // /meu-perfil esconde o avatar (hideAvatar); aqui o Menu é link.
   { path: '/meu-perfil/autorizacoes', via: 'ProfileHeaderWrapper' },
 ]
 

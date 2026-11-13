@@ -43,11 +43,14 @@ function itensDe(protocolos: ProtocoloLista[]): RequestItem[] {
 interface OrigemChamadosProps {
   salesforce: RequestItem[]
   historicoSgrc: boolean
+  /** Aba aberta por `?filtro=` (destino de Ouvidoria e LAI no menu global). */
+  filtroInicial?: string
 }
 
 export function OrigemChamados({
   salesforce,
   historicoSgrc,
+  filtroInicial,
 }: OrigemChamadosProps) {
   const [origem, setOrigem] = useState<Origem>('salesforce')
   const [sgrc, setSgrc] = useState<RequestItem[] | null>(null)
@@ -69,7 +72,8 @@ export function OrigemChamados({
     }
   }
 
-  if (!historicoSgrc) return <RequestsList items={salesforce} />
+  if (!historicoSgrc)
+    return <RequestsList items={salesforce} filtroInicial={filtroInicial} />
 
   const itens = origem === 'sgrc' ? (sgrc ?? []) : salesforce
 
@@ -98,6 +102,7 @@ export function OrigemChamados({
           key={origem}
           items={itens}
           filtros={origem === 'sgrc' ? ['Todos'] : undefined}
+          filtroInicial={filtroInicial}
         />
       )}
     </div>

@@ -12,14 +12,12 @@ const LOGO_DARK =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas-dark.png'
 
 interface OportunidadesSubHeaderProps {
-  menuHref: string
   logoHref: string
   showSearchIcon?: boolean
   searchUrl?: string
 }
 
 export function OportunidadesSubHeader({
-  menuHref,
   logoHref,
   showSearchIcon,
   searchUrl,
@@ -38,7 +36,6 @@ export function OportunidadesSubHeader({
         isLoading={isLoading}
         showSearchIcon={showSearchIcon}
         searchUrl={searchUrl}
-        menuHref={menuHref}
         returnUrl={pathname}
         logoHref="/"
       />

@@ -1,12 +1,12 @@
 'use client'
 
 import { UserIcon } from '@/assets/icons'
-import { MenuIcon } from '@/assets/icons/menu-icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { buildAuthUrl } from '@/constants/url'
 import { sendGAEvent } from '@next/third-parties/google'
 import Image from 'next/image'
 import Link from 'next/link'
+import { GlobalMenuTrigger } from './global-menu/global-menu-trigger'
 
 interface HeaderUserLinkProps {
   userName: string
@@ -14,7 +14,6 @@ interface HeaderUserLinkProps {
   userAvatarUrl?: string | null
   userAvatarName?: string | null
   isLoading?: boolean
-  menuHref?: string
   returnUrl?: string
   hideAvatar?: boolean
 }
@@ -25,7 +24,6 @@ export default function HeaderUserLink({
   userAvatarUrl,
   userAvatarName,
   isLoading = false,
-  menuHref,
   returnUrl = '/',
   hideAvatar = false,
 }: HeaderUserLinkProps) {
@@ -51,8 +49,6 @@ export default function HeaderUserLink({
   }
 
   const profileHref = isLoggedIn ? '/meu-perfil' : buildAuthUrl(returnUrl)
-  const resolvedMenuHref =
-    menuHref ?? (isLoggedIn ? undefined : buildAuthUrl(returnUrl))
 
   return (
     <div className="flex items-center space-x-2">
@@ -82,23 +78,8 @@ export default function HeaderUserLink({
           </div>
         </Link>
       )}
-      {resolvedMenuHref ? (
-        <Link
-          href={resolvedMenuHref}
-          className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors p-3 flex items-center justify-center"
-        >
-          <MenuIcon className="h-5 w-5 text-foreground" />
-          <span className="sr-only">Menu</span>
-        </Link>
-      ) : (
-        <button
-          type="button"
-          className="rounded-full bg-card hover:bg-secondary active:bg-secondary transition-colors p-3 flex items-center justify-center"
-        >
-          <MenuIcon className="h-5 w-5 text-foreground" />
-          <span className="sr-only">Menu</span>
-        </button>
-      )}
+      {/* Menu global: o mesmo em todas as telas, logado ou não. */}
+      <GlobalMenuTrigger />
     </div>
   )
 }

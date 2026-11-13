@@ -49,7 +49,6 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
   return (
     <>
       <OportunidadesSubHeader
-        menuHref="/servicos/trabalho/menu"
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"

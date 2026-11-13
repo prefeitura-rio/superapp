@@ -13,7 +13,7 @@ export default function EmptyWallet() {
         {/* Header */}
         <div className="px-4 sm:px-0 flex items-start justify-between pt-6 pb-3">
           <h2 className="relative text-2xl font-bold bg-background z-10 text-foreground">
-            Carteira
+            Documentos
           </h2>
 
           <SearchButton />

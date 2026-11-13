@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import InstallPWAButtonClient from '@/app/components/install-pwa-button-client'
-import { LogoutButton } from '@/app/components/logout-button'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { EditIcon, UserIcon } from '@/assets/icons'
 import { MenuItem } from '@/components/ui/custom/menu-item'
@@ -50,7 +49,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
-      <ProfileHeaderWrapper hideAvatar title="Perfil" />
+      <ProfileHeaderWrapper hideAvatar title="Dados pessoais" />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">
@@ -101,8 +100,6 @@ export default async function ProfilePage() {
 
           {/* //Option to install the PWA */}
           <InstallPWAButtonClient />
-
-          <LogoutButton />
         </nav>
       </div>
     </div>

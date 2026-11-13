@@ -17,7 +17,6 @@ export function TermosDeUsoContent() {
   return (
     <div className="text-foreground">
       <OportunidadesSubHeader
-        menuHref="/servicos/trabalho/menu"
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"

@@ -5,11 +5,23 @@ import { isSgrcHistoryMockEnabled } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { OrigemChamados } from './components/origem-chamados'
-import { formatDate, mapCategoria, normalizeStatus } from './helpers'
+import {
+  filterTabFromParam,
+  formatDate,
+  mapCategoria,
+  normalizeStatus,
+} from './helpers'
 
 export const revalidate = 0
 
-export default async function MyRequestsPage() {
+interface MyRequestsPageProps {
+  searchParams?: Promise<{ filtro?: string | string[] }>
+}
+
+export default async function MyRequestsPage({
+  searchParams,
+}: MyRequestsPageProps) {
+  const filtroInicial = filterTabFromParam((await searchParams)?.filtro)
   const response = await listChamados()
   const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
 
@@ -40,6 +52,7 @@ export default async function MyRequestsPage() {
         <OrigemChamados
           salesforce={items}
           historicoSgrc={isSgrcHistoryMockEnabled()}
+          filtroInicial={filtroInicial}
         />
       </div>
       <FloatNavigationWrapper />

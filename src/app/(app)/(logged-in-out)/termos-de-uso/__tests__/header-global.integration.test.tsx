@@ -1,6 +1,7 @@
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -14,6 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
+  usePathname: () => '/termos-de-uso',
   notFound: () => {
     throw new Error('NEXT_NOT_FOUND')
   },
@@ -95,7 +97,7 @@ afterEach(() => {
 })
 
 describe.each(SCREENS)('Termos de uso ($name) com o Header Global', s => {
-  it('visitante: logo → home, login e Menu → Identidade Carioca, sem header próprio', async () => {
+  it('visitante: logo → home, login → Identidade Carioca e Menu global, sem header próprio', async () => {
     respondHeader(VISITOR)
     await renderScreen(s)
 
@@ -107,12 +109,12 @@ describe.each(SCREENS)('Termos de uso ($name) com o Header Global', s => {
     expect(
       within(banner).getByRole('link', { name: 'PrefRio – página inicial' })
     ).toHaveAttribute('href', '/')
-    const menu = within(banner).getByRole('link', { name: 'Menu' })
-    for (const control of [login, menu]) {
-      expect(control.getAttribute('href')).toMatch(
-        new RegExp(`^${AUTH_BASE.replace(/[.]/g, '\\.')}/auth\\?`)
-      )
-    }
+    expect(login.getAttribute('href')).toMatch(
+      new RegExp(`^${AUTH_BASE.replace(/[.]/g, '\\.')}/auth\\?`)
+    )
+    expect(
+      within(banner).getByRole('button', { name: 'Menu' })
+    ).toHaveAttribute('aria-haspopup', 'dialog')
     expect(
       screen.queryByRole('navigation', { name: 'Oportunidades Cariocas' })
     ).not.toBeInTheDocument()
@@ -172,6 +174,42 @@ describe('Header Global igual nas duas telas', () => {
 
       expect(controls[0].length).toBe(3)
       expect(controls[1]).toEqual(controls[0])
+    }
+  )
+})
+
+/**
+ * PREF-653: do menu global a pessoa chega à lista de Termos de uso. O Menu é
+ * o mesmo nas duas telas (e em todas as outras), logado ou não.
+ */
+describe.each(SCREENS)('Menu global na tela $name', s => {
+  it.each([
+    ['visitante', VISITOR],
+    ['cidadão logado', CITIZEN],
+  ])(
+    '%s: Menu → Termos de uso e política de privacidade leva à lista e fecha o menu',
+    async (_state, body) => {
+      const user = userEvent.setup()
+      respondHeader(body)
+      await renderScreen(s)
+
+      await user.click(
+        await within(screen.getByRole('banner')).findByRole('button', {
+          name: 'Menu',
+        })
+      )
+      const menu = await screen.findByRole('dialog', { name: 'Menu' })
+      const termos = within(menu).getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
+      expect(termos).toHaveAttribute('href', '/termos-de-uso')
+      // Termos e Política de Privacidade são um documento só: um item só.
+      expect(
+        within(menu).queryByRole('link', { name: /^Política de Privacidade/ })
+      ).not.toBeInTheDocument()
+
+      await user.click(termos)
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     }
   )
 })
