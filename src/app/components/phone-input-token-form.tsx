@@ -7,6 +7,8 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { OTP_CODE_LENGTH, extractOtpCode } from '@/lib/otp-code'
+import { REGEXP_ONLY_DIGITS } from 'input-otp'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -80,7 +82,9 @@ export default function PhoneInputTokenForm({
       <form className="w-full flex flex-col gap-4 items-start">
         <InputOTP
           className="w-full"
-          maxLength={6}
+          maxLength={OTP_CODE_LENGTH}
+          pattern={REGEXP_ONLY_DIGITS}
+          pasteTransformer={extractOtpCode}
           value={value}
           onChange={onChange}
         >
