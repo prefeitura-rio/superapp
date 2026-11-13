@@ -195,7 +195,9 @@ test.describe('Menu global (público)', () => {
     await expect(
       menu.getByRole('link', { name: 'Faça seu login' })
     ).toBeVisible()
-    await expect(menu.getByRole('link', { name: 'Serviços' })).toBeVisible()
+    await expect(
+      menu.getByRole('link', { name: 'Serviços', exact: true })
+    ).toBeVisible()
     await expect(
       menu.getByRole('button', { name: 'Oportunidades Cariocas' })
     ).toBeVisible()

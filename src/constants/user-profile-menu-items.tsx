@@ -1,4 +1,4 @@
-import { MapPinIcon, UserIcon } from '@/assets/icons'
+import { CheckIcon, MapPinIcon, UserIcon } from '@/assets/icons'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -9,8 +9,9 @@ interface UserProfileMenuItemsData {
 }
 
 /**
- * Tela "Dados pessoais". Solicitações, Autorizações, Configurações (tema),
- * FAQ e Sair saíram daqui — todos passaram a viver no menu global.
+ * Tela "Dados pessoais". Solicitações, Configurações (tema), FAQ e Sair saíram
+ * daqui e passaram a viver no menu global. Autorizações continua aqui, no
+ * mesmo lugar de antes (decisão de produto: o menu global não tem esse item).
  */
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
@@ -24,5 +25,11 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     icon: <MapPinIcon className="h-5 w-5" />,
     label: 'Endereço',
     href: '/meu-perfil/endereco',
+  },
+  {
+    id: 'autorizacoes',
+    icon: <CheckIcon className="h-5 w-5" />,
+    label: 'Autorizações',
+    href: '/meu-perfil/autorizacoes',
   },
 ] as const

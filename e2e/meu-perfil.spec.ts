@@ -46,7 +46,7 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await expect(page.getByText(/\d{3}\.\d{3}\.\d{3}-\d{2}/)).toBeVisible()
   })
 
-  test('exibe apenas Meus dados e Endereço', async ({ page }) => {
+  test('exibe Meus dados, Endereço e Autorizações', async ({ page }) => {
     await page.goto('/meu-perfil')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
@@ -60,11 +60,13 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       '/meu-perfil/endereco'
     )
 
-    // Handoff: Dados pessoais só tem Meus dados e Endereço; FAQ e Sair
-    // migraram para o menu global, Configurações virou o toggle de tema.
-    await expect(page.getByRole('link', { name: 'Autorizações' })).toHaveCount(
-      0
-    )
+    // Autorizações continua aqui (o menu global não tem esse item).
+    await expect(
+      page.getByRole('link', { name: 'Autorizações' })
+    ).toHaveAttribute('href', '/meu-perfil/autorizacoes')
+
+    // FAQ e Sair migraram para o menu global, Configurações virou o toggle
+    // de tema.
     await expect(page.getByRole('link', { name: 'Configurações' })).toHaveCount(
       0
     )
