@@ -22,6 +22,17 @@ export function isSalesforceServicesEnabled(): boolean {
 }
 
 /**
+ * The SGRC history ("Chamados antigos") has no real integration yet: the only
+ * data source is the fixed mock in `src/lib/chamados/mock-sgrc.ts`, which is
+ * the same for every citizen. It is served only when the explicit chamados
+ * mock mode is on (`NEXT_PUBLIC_USE_MOCK_CHAMADOS === 'true'`, off in staging
+ * and production builds), never to real citizens.
+ */
+export function isSgrcHistoryMockEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_USE_MOCK_CHAMADOS === 'true'
+}
+
+/**
  * `NEXT_PUBLIC_ACCESSIBILITY_ENABLED` turns the accessibility plugin on only
  * when it is exactly `'true'`. Builds receive the value as a string, so a plain
  * truthiness check would also enable the plugin for `'false'` (production).

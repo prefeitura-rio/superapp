@@ -1,6 +1,7 @@
 import {
   isAccessibilityPluginEnabled,
   isSalesforceServicesEnabled,
+  isSgrcHistoryMockEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
 import { afterEach, describe, expect, test, vi } from 'vitest'
@@ -85,6 +86,26 @@ describe('isVLibrasEnabled', () => {
       vi.stubEnv('NEXT_PUBLIC_VLIBRAS_ENABLED', value)
 
       expect(isVLibrasEnabled()).toBe(false)
+    }
+  })
+})
+
+describe('isSgrcHistoryMockEnabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('is enabled only in the explicit chamados mock mode', () => {
+    vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+
+    expect(isSgrcHistoryMockEnabled()).toBe(true)
+  })
+
+  test('is disabled when the mock flag is absent or not exactly "true" (staging and production)', () => {
+    for (const value of [undefined, 'false', '', 'TRUE', '1']) {
+      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', value)
+
+      expect(isSgrcHistoryMockEnabled()).toBe(false)
     }
   })
 })

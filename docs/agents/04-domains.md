@@ -17,6 +17,7 @@
 | Auth UX | `/sessao-expirada`, `/autenticacao-necessaria/*` | `(logged-out)/` |
 | Dívida Ativa | `/divida-ativa` | `(logged-in)/divida-ativa/`, `http-divida-ativa/` |
 | Termos de uso | `/termos-de-uso`, `/termos-de-uso/[plataforma]` (públicas) | `(logged-in-out)/termos-de-uso/`, conteúdo em `src/constants/termos-de-uso/` |
+| Menu global | Botão "Menu" do Header Global, em todas as telas (logado ou não) | itens em `src/constants/global-menu.tsx`, UI em `src/app/components/global-menu/`; item sem `href` não aparece |
 
 Redirect legado: `/oportunidadescariocas*` → trabalho (middleware).
 

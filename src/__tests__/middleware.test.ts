@@ -269,3 +269,54 @@ describe('middleware — CSP do VLibras', () => {
     )
   })
 })
+
+describe('middleware — menus por módulo absorvidos pelo menu global', () => {
+  beforeEach(() => {
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL',
+      'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'
+    )
+    vi.stubEnv('NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID', 'test-client')
+    vi.stubEnv(
+      'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
+      'http://localhost:3000/auth/callback'
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test.each([
+    ['/servicos/cursos/opcoes', '/servicos/cursos'],
+    ['/servicos/trabalho/menu', '/servicos/trabalho'],
+  ])('%s responde 308 para %s', async (from, to) => {
+    const response = await middleware(requestFor(from))
+
+    expect(response?.status).toBe(308)
+    expect(new URL(redirectTarget(response) ?? '').pathname).toBe(to)
+  })
+
+  test('mantém a query string no redirect', async () => {
+    const response = await middleware(
+      requestFor('/servicos/trabalho/menu?utm_source=app')
+    )
+
+    const target = new URL(redirectTarget(response) ?? '')
+    expect(target.pathname).toBe('/servicos/trabalho')
+    expect(target.searchParams.get('utm_source')).toBe('app')
+  })
+
+  test.each([
+    '/servicos/cursos',
+    '/servicos/trabalho',
+    '/servicos/trabalho/menu-de-vagas',
+    // A página antiga de termos continua existindo (fonte do texto v1.0).
+    '/servicos/trabalho/termos-de-uso',
+  ])('%s não é redirecionada', async path => {
+    const response = await middleware(requestFor(path))
+
+    expect(response?.status).not.toBe(308)
+    expect(redirectTarget(response)).toBeNull()
+  })
+})

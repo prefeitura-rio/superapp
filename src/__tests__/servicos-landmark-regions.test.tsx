@@ -36,6 +36,7 @@ vi.mock('@/providers/auth-header-provider', () => ({
 vi.mock('@/lib/feature-flags', () => ({
   isFeatureEnabled: (feature: string) =>
     feature === 'cursos' || feature === 'empregos',
+  isSalesforceServicesEnabled: () => false,
 }))
 
 vi.mock('@/app/components/float-navigation-wrapper', () => ({

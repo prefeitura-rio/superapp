@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function UserAuthorizationsLoading() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper menuHref="/meu-perfil" />
+      <ProfileHeaderWrapper />
 
       <div className="mx-4 flex flex-col gap-2">
         {/* Heading skeleton */}

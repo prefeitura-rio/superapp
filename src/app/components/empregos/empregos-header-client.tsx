@@ -1,7 +1,7 @@
 'use client'
 
+import { GlobalMenuTrigger } from '@/app/components/global-menu/global-menu-trigger'
 import { UserIcon } from '@/assets/icons'
-import { MenuIcon } from '@/assets/icons/menu-icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   oportunidadesCariocasLogo,
@@ -43,30 +43,21 @@ export function EmpregosHeaderClient() {
           {isLoading ? (
             <Skeleton className="rounded-full h-11 w-11" />
           ) : data.isLoggedIn ? (
-            <div className="flex items-center space-x-2">
-              <Link href="/meu-perfil">
-                <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden">
-                  {data.userAvatarUrl ? (
-                    <Image
-                      src={data.userAvatarUrl}
-                      alt={data.userAvatarName || 'Avatar'}
-                      width={44}
-                      height={44}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon className="h-5 w-5" />
-                  )}
-                </div>
-              </Link>
-              <Link
-                href="/servicos/trabalho/menu"
-                className="rounded-full bg-card hover:bg-secondary p-3 flex items-center justify-center"
-              >
-                <MenuIcon className="h-5 w-5 text-foreground" />
-                <span className="sr-only">Menu</span>
-              </Link>
-            </div>
+            <Link href="/meu-perfil">
+              <div className="rounded-full bg-card hover:bg-secondary w-11 h-11 flex items-center justify-center overflow-hidden">
+                {data.userAvatarUrl ? (
+                  <Image
+                    src={data.userAvatarUrl}
+                    alt={data.userAvatarName || 'Avatar'}
+                    width={44}
+                    height={44}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <UserIcon className="h-5 w-5" />
+                )}
+              </div>
+            </Link>
           ) : (
             <Link
               href={buildAuthUrl(pathname)}
@@ -80,6 +71,8 @@ export function EmpregosHeaderClient() {
               </div>
             </Link>
           )}
+
+          <GlobalMenuTrigger />
         </div>
       </div>
     </header>

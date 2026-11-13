@@ -29,6 +29,15 @@ const publicRoutes = [
   { path: '/termos-de-uso/*', whenAuthenticated: 'next' },
 ] as const
 
+/**
+ * Rotas antigas que deixaram de existir. 308 porque podem estar salvas ou
+ * divulgadas: os menus por módulo foram absorvidos pelo menu global.
+ */
+const legacyRedirects: Record<string, string> = {
+  '/servicos/cursos/opcoes': '/servicos/cursos',
+  '/servicos/trabalho/menu': '/servicos/trabalho',
+}
+
 const oportunidadesCariocasLegacyPaths = [
   '/oportunidadescariocas',
   '/oportunidades-cariocas',
@@ -162,6 +171,20 @@ export async function middleware(request: NextRequest) {
           applySecurityHeaders(response, contentSecurityPolicyHeaderValue)
           return response
         }
+      }
+
+      // Legacy URLs: telas que deixaram de existir (menus por módulo)
+      const legacyRedirect = legacyRedirects[path]
+      if (legacyRedirect) {
+        const url = request.nextUrl.clone()
+        url.pathname = legacyRedirect
+
+        const response = NextResponse.redirect(url, 308)
+        response.headers.set(
+          'Content-Security-Policy',
+          contentSecurityPolicyHeaderValue
+        )
+        return response
       }
 
       // Legacy URLs: Oportunidades Cariocas → serviços de trabalho

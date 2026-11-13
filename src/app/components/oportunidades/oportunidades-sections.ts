@@ -8,7 +8,6 @@ export interface OportunidadesSection {
   label: string
   href: string
   searchUrl: string
-  menuHref: string
   logoHref: string
   listingPaths: readonly string[]
   chromePaths: readonly string[]
@@ -24,7 +23,6 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     label: 'Trabalho',
     href: '/servicos/trabalho/',
     searchUrl: '/busca?tipo=empregos',
-    menuHref: '/servicos/trabalho/menu',
     logoHref: '/servicos/trabalho',
     listingPaths: ['/servicos/trabalho'],
     chromePaths: ['/servicos/trabalho'],
@@ -35,7 +33,6 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     label: 'MEI',
     href: '/servicos/mei',
     searchUrl: '/busca?tipo=mei',
-    menuHref: '/servicos/mei/menu',
     logoHref: '/servicos/mei',
     listingPaths: ['/servicos/mei'],
     chromePaths: ['/servicos/mei', '/servicos/mei/menu'],
@@ -46,7 +43,6 @@ export const OPORTUNIDADES_SECTIONS: readonly OportunidadesSection[] = [
     label: 'Cursos',
     href: '/servicos/cursos',
     searchUrl: '/servicos/cursos/busca',
-    menuHref: '/servicos/cursos/opcoes',
     logoHref: '/servicos/cursos',
     listingPaths: ['/servicos/cursos'],
     chromePaths: ['/servicos/cursos'],

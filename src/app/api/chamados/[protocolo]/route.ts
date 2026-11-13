@@ -1,6 +1,9 @@
 import { getChamadoDetail } from '@/http-pref-rio-cidadao/default/default'
 import { detalheSgrcMock, ehProtocoloSgrcMock } from '@/lib/chamados/mock-sgrc'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import {
+  isSalesforceServicesEnabled,
+  isSgrcHistoryMockEnabled,
+} from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_DETAIL, MOCK_PROTOCOLS } from '@/mocks/chamados'
 import { cookies } from 'next/headers'
@@ -16,7 +19,7 @@ export async function GET(
 
   const { protocolo } = await params
 
-  if (ehProtocoloSgrcMock(protocolo)) {
+  if (isSgrcHistoryMockEnabled() && ehProtocoloSgrcMock(protocolo)) {
     const jar = await cookies()
     const logado = Boolean(jar.get('access_token')?.value)
     const detalhe = logado ? detalheSgrcMock(protocolo, 'dono') : null

@@ -87,7 +87,6 @@ export default async function AtualizarDadosPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-lvh text-foreground">
       <OportunidadesSubHeader
-        menuHref="/servicos/cursos/menu"
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"

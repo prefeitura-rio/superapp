@@ -34,10 +34,10 @@ describe('HeaderUserLink — estados default/focused', () => {
       .getByRole('link', { name: 'Faça seu login' })
       .querySelector('div')
     expect(profileCircle).toHaveClass(...STATES)
-    expect(screen.getByRole('link', { name: 'Menu' })).toHaveClass(...STATES)
+    expect(screen.getByRole('button', { name: 'Menu' })).toHaveClass(...STATES)
   })
 
-  it('logado: o Perfil e o botão de Menu (sem destino) também têm hover e toque', () => {
+  it('logado: o Perfil e o Menu também têm hover e toque', () => {
     render(
       <HeaderUserLink
         userName="Maria"
@@ -53,12 +53,19 @@ describe('HeaderUserLink — estados default/focused', () => {
     expect(profileCircle).toHaveClass(...STATES)
     expect(screen.getByRole('button', { name: 'Menu' })).toHaveClass(...STATES)
   })
+})
 
-  it('logado com menuHref: o Menu vira link e mantém os estados', () => {
-    render(<HeaderUserLink userName="Maria" isLoggedIn menuHref="/menu" />)
+describe('HeaderUserLink — Menu global', () => {
+  it.each([
+    ['visitante', false],
+    ['logado', true],
+  ])('%s: o Menu é o botão que abre o menu global (diálogo)', (_, logado) => {
+    render(<HeaderUserLink userName="Maria" isLoggedIn={logado} />)
 
-    const menu = screen.getByRole('link', { name: 'Menu' })
-    expect(menu).toHaveAttribute('href', '/menu')
-    expect(menu).toHaveClass(...STATES)
+    const menu = screen.getByRole('button', { name: 'Menu' })
+    expect(menu).toHaveAttribute('aria-haspopup', 'dialog')
+    expect(menu).toHaveAttribute('aria-expanded', 'false')
+    // Não leva mais a menus por módulo nem ao login.
+    expect(screen.queryByRole('link', { name: 'Menu' })).not.toBeInTheDocument()
   })
 })

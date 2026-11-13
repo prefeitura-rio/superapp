@@ -16,9 +16,11 @@ test.describe('Auth UX — autenticação necessária (público)', () => {
   }) => {
     await page.goto('/autenticacao-necessaria/carteira')
 
-    await expect(page.getByRole('heading', { name: 'Carteira' })).toBeVisible({
-      timeout: 15000,
-    })
+    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
+      {
+        timeout: 15000,
+      }
+    )
     await expect(
       page.getByText('Informações para você em um só lugar', { exact: false })
     ).toBeVisible()

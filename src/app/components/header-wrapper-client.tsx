@@ -1,32 +1,13 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useHeaderData } from '@/hooks/use-header-data'
 import MainHeader from './main-header'
 import SearchPlaceholder from './search-placeholder'
-
-async function fetchHeaderData() {
-  const response = await fetch('/api/user/header', {
-    cache: 'no-store',
-    credentials: 'include',
-  })
-  if (!response.ok)
-    return {
-      isLoggedIn: false,
-      userName: '',
-      userAvatarUrl: null,
-      userAvatarName: null,
-    }
-  return response.json()
-}
 
 export default function HeaderWrapperClient({
   showSearchPlaceholder = false,
 }: { showSearchPlaceholder?: boolean }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['header'],
-    queryFn: fetchHeaderData,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data, isLoading } = useHeaderData()
 
   return (
     <>
@@ -37,7 +18,6 @@ export default function HeaderWrapperClient({
         userAvatarUrl={data?.userAvatarUrl ?? null}
         userAvatarName={data?.userAvatarName ?? null}
         isLoading={isLoading}
-        menuHref={undefined}
         logoHref="/"
       />
 

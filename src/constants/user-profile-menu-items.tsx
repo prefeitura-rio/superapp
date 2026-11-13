@@ -1,12 +1,4 @@
-import {
-  CheckIcon,
-  HelpCircleIcon,
-  MapPinIcon,
-  PhoneIcon,
-  SettingsIcon,
-  UserIcon,
-} from '@/assets/icons'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import { CheckIcon, MapPinIcon, UserIcon } from '@/assets/icons'
 
 interface UserProfileMenuItemsData {
   id: string
@@ -16,8 +8,11 @@ interface UserProfileMenuItemsData {
   variant?: 'default' | 'danger'
 }
 
-const isSalesforceEnabled = isSalesforceServicesEnabled()
-
+/**
+ * Tela "Dados pessoais". Solicitações, Configurações (tema), FAQ e Sair saíram
+ * daqui e passaram a viver no menu global. Autorizações continua aqui, no
+ * mesmo lugar de antes (decisão de produto: o menu global não tem esse item).
+ */
 export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
   {
     id: 'meus-dados',
@@ -31,38 +26,10 @@ export const USER_PROFILE_MENU_ITEMS: UserProfileMenuItemsData[] = [
     label: 'Endereço',
     href: '/meu-perfil/endereco',
   },
-  // {
-  //   id: 'trabalho',
-  //   icon: <Briefcase className="h-5 w-5" />,
-  //   label: 'Trabalho',
-  //   href: '/meu-perfil/user-job-info',
-  // },
-  ...(isSalesforceEnabled
-    ? [
-        {
-          id: 'solicitacoes',
-          icon: <PhoneIcon className="h-5 w-5" />,
-          label: 'Solicitações',
-          href: '/minhas-solicitacoes',
-        } as UserProfileMenuItemsData,
-      ]
-    : []),
   {
     id: 'autorizacoes',
     icon: <CheckIcon className="h-5 w-5" />,
     label: 'Autorizações',
     href: '/meu-perfil/autorizacoes',
-  },
-  {
-    id: 'configuracoes',
-    icon: <SettingsIcon className="h-5 w-5" />,
-    label: 'Configurações',
-    href: '/meu-perfil/configuracoes',
-  },
-  {
-    id: 'faq',
-    icon: <HelpCircleIcon className="h-5 w-5" />,
-    label: 'FAQ',
-    href: '/faq',
   },
 ] as const

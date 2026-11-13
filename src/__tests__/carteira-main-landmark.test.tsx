@@ -78,7 +78,7 @@ describe('DEV-81 — um único landmark <main> em /carteira', () => {
     const { container } = await renderInLoggedInLayout(<Wallet />)
 
     expectSingleMain(container)
-    expect(container.querySelector('main h2')).toHaveTextContent('Carteira')
+    expect(container.querySelector('main h2')).toHaveTextContent('Documentos')
   })
 
   it('/carteira (loading) tem um único <main>', async () => {

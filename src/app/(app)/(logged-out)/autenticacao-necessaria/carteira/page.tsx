@@ -15,7 +15,7 @@ export default async function WalletAuthenticationRequired() {
       <main className="flex max-w-xl mx-auto min-h-lvh flex-col bg-background text-foreground pb-32">
         {/* Header */}
         <div className="px-4 pt-8 pb-4">
-          <h1 className="text-lg font-medium text-foreground">Carteira</h1>
+          <h1 className="text-lg font-medium text-foreground">Documentos</h1>
         </div>
 
         {/* Main Content */}
