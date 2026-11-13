@@ -1,10 +1,19 @@
 'use client'
 
-import { useEffect } from 'react'
+import Script from 'next/script'
+
+const CDN_URL =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/a11y-plugin/a11y-plugin.min.js'
 
 export function AccessibilityPlugin() {
-  useEffect(() => {
-    import('@/lib/accessibility-plugin').then(({ init }) => init())
-  }, [])
-  return null
+  return (
+    <Script
+      src={CDN_URL}
+      strategy="afterInteractive"
+      onLoad={() => {
+        const w = window as unknown as { A11yPlugin?: { init: () => void } }
+        w.A11yPlugin?.init()
+      }}
+    />
+  )
 }
