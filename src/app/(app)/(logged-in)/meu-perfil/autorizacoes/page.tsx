@@ -25,7 +25,7 @@ export default async function ConsentForm() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper title="Autorizações" menuHref="/meu-perfil" />
+      <ProfileHeaderWrapper title="Autorizações" />
       <div className="mx-4 flex flex-col gap-2">
         <h2 className="text-3xl font-medium text-foreground tracking-tight leading-9">
           Você autoriza receber comunicações diretas pelos canais da Prefeitura

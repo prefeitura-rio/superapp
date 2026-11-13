@@ -11,7 +11,6 @@ interface MainHeaderProps {
   userAvatarUrl?: string | null
   userAvatarName?: string | null
   isLoading?: boolean
-  menuHref?: string
   returnUrl?: string
   logoHref?: string
   hideAvatar?: boolean
@@ -25,7 +24,6 @@ export default function MainHeader({
   userAvatarUrl,
   userAvatarName,
   isLoading = false,
-  menuHref,
   returnUrl,
   logoHref,
   hideAvatar = false,
@@ -68,7 +66,6 @@ export default function MainHeader({
             userAvatarUrl={userAvatarUrl}
             userAvatarName={userAvatarName}
             isLoading={isLoading}
-            menuHref={menuHref}
             returnUrl={returnUrl}
             hideAvatar={hideAvatar}
           />

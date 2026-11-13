@@ -5,7 +5,6 @@ import MainHeader from './main-header'
 
 interface ProfileHeaderWrapperProps {
   hideAvatar?: boolean
-  menuHref?: string
   /**
    * Título da página, renderizado como `<h1>` visualmente oculto (`sr-only`).
    * O MainHeader não exibe título, então sem isto a página fica sem h1 para
@@ -16,7 +15,6 @@ interface ProfileHeaderWrapperProps {
 
 export function ProfileHeaderWrapper({
   hideAvatar = false,
-  menuHref,
   title,
 }: ProfileHeaderWrapperProps) {
   const { data, isLoading } = useAuthHeader()
@@ -29,7 +27,6 @@ export function ProfileHeaderWrapper({
         userAvatarUrl={data?.userAvatarUrl ?? null}
         userAvatarName={data?.userAvatarName ?? null}
         isLoading={isLoading}
-        menuHref={menuHref}
         logoHref="/"
         hideAvatar={hideAvatar}
       />

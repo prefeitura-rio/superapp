@@ -69,7 +69,7 @@ export default function CarteiraSection({
   return (
     <section className="mt-6 w-full overflow-x-auto">
       <div className="flex items-center px-4 justify-between mb-4">
-        <h2 className="text-md font-medium text-foreground">Carteira</h2>
+        <h2 className="text-md font-medium text-foreground">Documentos</h2>
       </div>
 
       {walletCards.length > 0 ? (

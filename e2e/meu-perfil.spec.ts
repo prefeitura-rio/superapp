@@ -31,12 +31,12 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await applyE2EAuthCookies(context)
   })
 
-  test('exibe SecondaryHeader "Perfil", nome do usuário e CPF', async ({
+  test('exibe SecondaryHeader "Dados pessoais", nome do usuário e CPF', async ({
     page,
   }) => {
     await page.goto('/meu-perfil')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
     // h2 com nome de exibição do usuário
@@ -46,10 +46,10 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await expect(page.getByText(/\d{3}\.\d{3}\.\d{3}-\d{2}/)).toBeVisible()
   })
 
-  test('menu exibe todos os itens com links corretos', async ({ page }) => {
+  test('exibe Meus dados, Endereço e Autorizações', async ({ page }) => {
     await page.goto('/meu-perfil')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
 
     await expect(
@@ -59,23 +59,30 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       'href',
       '/meu-perfil/endereco'
     )
+
+    // Autorizações continua aqui (o menu global não tem esse item).
     await expect(
       page.getByRole('link', { name: 'Autorizações' })
     ).toHaveAttribute('href', '/meu-perfil/autorizacoes')
-    await expect(
-      page.getByRole('link', { name: 'Configurações' })
-    ).toHaveAttribute('href', '/meu-perfil/configuracoes')
-    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveAttribute(
-      'href',
-      '/faq'
+
+    // FAQ e Sair migraram para o menu global, Configurações virou o toggle
+    // de tema.
+    await expect(page.getByRole('link', { name: 'Configurações' })).toHaveCount(
+      0
     )
+    await expect(page.getByRole('link', { name: 'FAQ' })).toHaveCount(0)
   })
 
-  test('botão Sair inicia processo de logout', async ({ page }) => {
+  test('Meu perfil e Sair vivem no menu global', async ({ page }) => {
     await page.goto('/meu-perfil')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Perfil' })
+      page.getByRole('heading', { level: 1, name: 'Dados pessoais' })
     ).toBeVisible({ timeout: 15000 })
+
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    await expect(
+      page.getByRole('dialog').getByRole('link', { name: 'Meu perfil' })
+    ).toHaveAttribute('href', '/meu-perfil')
 
     // Intercepta o endpoint de logout para evitar redirecionamento externo.
     // 204 numa navegação mantém a página atual.

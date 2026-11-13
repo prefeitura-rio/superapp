@@ -206,16 +206,11 @@ export function SearchPage({
     context === 'empregos' ? '/servicos/trabalho' : '/servicos/cursos'
   const searchUrl =
     context === 'empregos' ? '/busca?tipo=empregos' : '/busca?tipo=cursos'
-  const menuHref =
-    context === 'empregos'
-      ? '/servicos/trabalho/menu'
-      : '/servicos/cursos/opcoes'
 
   return (
     <div>
       {context === 'empregos' || context === 'cursos' ? (
         <OportunidadesSubHeader
-          menuHref={menuHref}
           logoHref={logoHref}
           showSearchIcon
           searchUrl={searchUrl}

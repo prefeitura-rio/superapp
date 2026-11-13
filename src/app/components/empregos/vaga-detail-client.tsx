@@ -1,17 +1,9 @@
 'use client'
 
 import { VagaDetailContent } from '@/app/components/empregos/vaga-detail-content'
+import { useHeaderData } from '@/hooks/use-header-data'
 import type { VagaDetail } from '@/lib/emprego-utils'
 import { useQuery } from '@tanstack/react-query'
-
-async function fetchHeaderData() {
-  const res = await fetch('/api/user/header', {
-    cache: 'no-store',
-    credentials: 'include',
-  })
-  if (!res.ok) return { isLoggedIn: false }
-  return res.json()
-}
 
 async function fetchCandidaturaVaga(vagaId: string) {
   const res = await fetch(`/api/user/empregos/candidaturas?vagaId=${vagaId}`, {
@@ -27,11 +19,7 @@ interface VagaDetailClientProps {
 }
 
 export function VagaDetailClient({ vaga, vagaAtiva }: VagaDetailClientProps) {
-  const { data: headerData } = useQuery({
-    queryKey: ['header'],
-    queryFn: fetchHeaderData,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: headerData } = useHeaderData()
 
   const isLoggedIn = headerData?.isLoggedIn ?? false
 

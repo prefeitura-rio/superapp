@@ -13,7 +13,6 @@ export function CourseUnavailablePage() {
   return (
     <div className="flex flex-col max-h-lvh overflow-y-hidden">
       <OportunidadesSubHeader
-        menuHref="/servicos/cursos/menu"
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"

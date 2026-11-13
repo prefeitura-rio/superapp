@@ -49,7 +49,6 @@ export function FaqCursosClient({ sections }: { sections: FaqSection[] }) {
   return (
     <>
       <OportunidadesSubHeader
-        menuHref="/servicos/cursos/opcoes"
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"

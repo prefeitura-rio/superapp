@@ -1001,7 +1001,6 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
   return (
     <div>
       <OportunidadesSubHeader
-        menuHref="/servicos/cursos/opcoes"
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/servicos/cursos/busca"

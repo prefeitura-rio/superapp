@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 /**
- * DEV-161 — os rótulos da barra de navegação inferior (Home/Serviços/Carteira)
+ * DEV-161 — os rótulos da barra de navegação inferior (Home/Serviços/Documentos)
  * precisam de contraste de pelo menos 4.5:1 com o fundo da barra (WCAG 2.1 AA,
  * 1.4.3, texto normal), nos temas claro e escuro. O contraste é calculado a
  * partir da classe de cor realmente aplicada no rótulo e dos tokens de
@@ -22,7 +22,7 @@ vi.mock('@next/third-parties/google', () => ({
 }))
 
 const WCAG_AA_NORMAL_TEXT = 4.5
-const LABELS = ['Home', 'Serviços', 'Carteira'] as const
+const LABELS = ['Home', 'Serviços', 'Documentos'] as const
 
 type Rgb = readonly [number, number, number]
 type Theme = 'light' | 'dark'

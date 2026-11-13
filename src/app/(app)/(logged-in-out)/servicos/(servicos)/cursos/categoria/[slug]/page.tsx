@@ -64,7 +64,6 @@ export default async function CoursesCategoryPage({
   return (
     <>
       <OportunidadesSubHeader
-        menuHref="/servicos/cursos/opcoes"
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"

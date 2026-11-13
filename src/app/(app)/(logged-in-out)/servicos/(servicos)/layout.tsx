@@ -27,10 +27,7 @@ export default function ServicosLayout({
     return (
       <AuthHeaderProvider>
         <div>
-          <OportunidadesSubHeader
-            menuHref={section.menuHref}
-            logoHref={section.logoHref}
-          />
+          <OportunidadesSubHeader logoHref={section.logoHref} />
           <div
             style={{
               background:
