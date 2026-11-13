@@ -6,6 +6,14 @@ const LIGHT_PRIMARY = '#13335a'
 const DARK_PRIMARY = '#8ec5ff'
 
 export const CSS = `
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://storage.googleapis.com/rj-escritorio-dev-public/superapp/a11y-plugin/OpenDyslexic-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ════════════════════════════════════
    FEATURE STYLES
    ════════════════════════════════════ */
