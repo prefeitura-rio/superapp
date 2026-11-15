@@ -5,7 +5,7 @@ import { WalletPageClient } from '@/app/components/wallet-page-client'
 export default function Wallet() {
   return (
     <div className="text-white">
-      <ProfileHeaderWrapper />
+      <ProfileHeaderWrapper title="Documentos" />
       <div className="w-full max-w-4xl mx-auto">
         <WalletPageClient />
         <FloatNavigationWrapper />
