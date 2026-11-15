@@ -38,8 +38,10 @@ vi.mock('@/providers/auth-header-provider', () => ({
     refetch: async () => {},
   }),
 }))
-vi.mock('@/app/components/profile-header-wrapper', () => ({
-  ProfileHeaderWrapper: () => <header data-testid="profile-header" />,
+// O ProfileHeaderWrapper é real (é ele que renderiza o <h1> sr-only a partir
+// de `title`); só o MainHeader, que depende de sessão e rede, vira stub.
+vi.mock('@/app/components/main-header', () => ({
+  default: () => <header data-testid="profile-header" />,
 }))
 vi.mock('@/app/components/float-navigation-wrapper', () => ({
   FloatNavigationWrapper: () => null,
@@ -79,6 +81,14 @@ describe('DEV-81 — um único landmark <main> em /carteira', () => {
 
     expectSingleMain(container)
     expect(container.querySelector('main h2')).toHaveTextContent('Documentos')
+  })
+
+  it('DEV-588 — /carteira (página real) tem um único <h1> "Documentos"', async () => {
+    const { container } = await renderInLoggedInLayout(<Wallet />)
+
+    const headings = container.querySelectorAll('h1')
+    expect(headings).toHaveLength(1)
+    expect(headings[0]).toHaveTextContent('Documentos')
   })
 
   it('/carteira (loading) tem um único <main>', async () => {
