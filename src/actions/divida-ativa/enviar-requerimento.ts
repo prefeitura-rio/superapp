@@ -229,11 +229,16 @@ export async function enviarRequerimento(
   }
 
   // Por último entre as conferências: atravessa o ePortal.
-  const simulacao = await getDalDividaAtivaSimulacao(
-    dados.cdas,
-    dados.dtVencimento,
-    cpf
-  )
+  let simulacao: Awaited<ReturnType<typeof getDalDividaAtivaSimulacao>>
+  try {
+    simulacao = await getDalDividaAtivaSimulacao(
+      dados.cdas,
+      dados.dtVencimento,
+      cpf
+    )
+  } catch {
+    return { success: false, error: ERRO_GENERICO, status: 503 }
+  }
   if (simulacao.situacao === 'recusada') {
     return { success: false, error: simulacao.mensagem, status: 422 }
   }

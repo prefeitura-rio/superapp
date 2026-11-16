@@ -1,11 +1,18 @@
 import { cookies } from 'next/headers'
 
 // NOTE: Supports cases where `content-type` is other than `json`
-const getBody = <T>(c: Response | Request): Promise<T> => {
+const getBody = async <T>(c: Response | Request): Promise<T> => {
   const contentType = c.headers.get('content-type')
 
   if (contentType?.includes('application/json')) {
-    return c.json()
+    try {
+      return await (c as Response).json()
+    } catch {
+      // O DAM pode retornar Content-Type: application/json com body não-JSON (ex.: stacktrace
+      // .NET em HTML). Cair para texto evita que a exceção de parse suba não tratada.
+      const text = await (c as Response).text().catch(() => '')
+      return text as unknown as T
+    }
   }
 
   if (contentType?.includes('application/pdf')) {
