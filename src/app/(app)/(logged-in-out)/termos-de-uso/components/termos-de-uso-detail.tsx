@@ -1,14 +1,10 @@
 import { formatTermosDeUsoLastUpdate } from '@/constants/termos-de-uso/content'
-import {
-  TERMOS_DE_USO_ROUTE,
-  type TermosDeUsoPlatform,
-} from '@/constants/termos-de-uso/platforms'
+import type { TermosDeUsoPlatform } from '@/constants/termos-de-uso/platforms'
 import type {
   TermosDeUsoBlock,
   TermosDeUsoDocument,
   TermosDeUsoSection,
 } from '@/constants/termos-de-uso/types'
-import { BackLink } from './back-link'
 import { BackToOrigin } from './back-to-origin'
 
 interface TermosDeUsoDetailProps {
@@ -30,14 +26,7 @@ export function TermosDeUsoDetail({
 }: TermosDeUsoDetailProps) {
   return (
     <>
-      {origin ? (
-        <BackToOrigin href={origin.href} label={origin.label} />
-      ) : (
-        <BackLink
-          href={TERMOS_DE_USO_ROUTE}
-          label="Voltar para Termos de uso"
-        />
-      )}
+      {origin && <BackToOrigin href={origin.href} label={origin.label} />}
 
       <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
         Termos de uso: {platform.name}
