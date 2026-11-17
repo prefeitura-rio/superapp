@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { OfficialBanner } from '@/app/components/service'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
@@ -13,6 +14,7 @@ interface PageClientWrapperProps {
   serviceData: ModelsPrefRioService
   orgaoGestorName: string | null
   categorySlug: string
+  categoryName?: string
   contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
   isPreview?: boolean
@@ -22,16 +24,29 @@ export function PageClientWrapper({
   serviceData,
   orgaoGestorName,
   categorySlug,
+  categoryName,
   contentFormat = 'markdown',
   ticketFlags,
   isPreview = false,
 }: PageClientWrapperProps) {
+  const serviceTitle = serviceData.nome_servico ?? ''
+  const catLabel = categoryName ?? decodeURIComponent(categorySlug)
+  const catHref = `/servicos/categoria/${encodeURIComponent(categorySlug)}`
+
   return (
     <>
       <OfficialBanner />
 
       <div className="max-w-4xl mx-auto">
         <HeaderWrapperClient />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Serviços', href: '/servicos' },
+            { label: catLabel, href: catHref },
+            { label: serviceTitle },
+          ]}
+        />
 
         <main className="pb-20 px-4">
           <PageClient

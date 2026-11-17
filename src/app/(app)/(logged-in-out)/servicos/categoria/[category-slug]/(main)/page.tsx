@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { CategorySubcategoriesAccordion } from '@/app/components/category-subcategories-accordion'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { MostAccessedServiceLink } from '@/app/components/most-accessed-service-link'
@@ -90,7 +91,13 @@ export default async function CategoryPage({
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
-
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Serviços', href: '/servicos' },
+          { label: categoryName },
+        ]}
+      />
       <main className="max-w-4xl mx-auto px-4 pb-4">
         <h1 className="text-4xl font-bold text-foreground pt-2 pb-4">
           {categoryName}
@@ -115,10 +122,10 @@ export default async function CategoryPage({
                       key={service.id}
                       service={service}
                       position={index + 1}
-                      className="flex-1 min-w-[140px] basis-0"
+                      className="flex-1 min-w-35 basis-0"
                     >
                       <div
-                        className="rounded-2xl p-4 transition-all cursor-pointer flex flex-col items-start justify-end min-h-[130px] w-full h-full hover:brightness-110 hover:shadow-lg"
+                        className="rounded-2xl p-4 transition-all cursor-pointer flex flex-col items-start justify-end min-h-32.5 w-full h-full hover:brightness-110 hover:shadow-lg"
                         style={{
                           backgroundColor: cardColor,
                         }}

@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { CategoryGrid } from '@/app/components/category-grid'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
@@ -18,6 +19,9 @@ export default async function ServicesPage() {
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[{ label: 'Página inicial', href: '/' }, { label: 'Serviços' }]}
+      />
       <main className="w-full max-w-4xl mx-auto flex flex-col pb-6">
         <h1 className="sr-only">Serviços</h1>
         {/* Most Accessed Service Cards*/}
