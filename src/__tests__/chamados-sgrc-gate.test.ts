@@ -12,10 +12,14 @@ import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+const sessao = vi.hoisted(() => ({ token: 'token-sintetico' as string | null }))
+
 vi.mock('next/headers', () => ({
   cookies: async () => ({
     get: (name: string) =>
-      name === 'access_token' ? { value: 'token-sintetico' } : undefined,
+      name === 'access_token' && sessao.token
+        ? { value: sessao.token }
+        : undefined,
   }),
 }))
 
@@ -36,6 +40,7 @@ function listarSgrc() {
 describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
+    sessao.token = 'token-sintetico'
   })
 
   describe('com a flag do Salesforce desligada', () => {
@@ -70,6 +75,17 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
       for (const protocolo of FICTICIOS) {
         expect(corpo).not.toContain(protocolo)
       }
+    })
+
+    test('DEV-612: sem sessão, GET /api/chamados?origem=sgrc responde 401 sem dados', async () => {
+      sessao.token = null
+
+      const response = await listarSgrc()
+      const corpo = JSON.stringify(await response.json())
+
+      expect(response.status).toBe(401)
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+      expect(corpo).not.toContain('protocolos')
     })
 
     test('o detalhe logado de um protocolo do mock vai à API real, não ao mock', async () => {
@@ -129,6 +145,20 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
       expect(protocolos).toContain(PROTOCOLO_DONO_SGRC)
       expect(protocolos).toContain(PROTOCOLO_DONO_CONCLUIDO_SGRC)
       expect(protocolos).not.toContain(PROTOCOLO_TERCEIRO_SGRC)
+    })
+
+    test('DEV-612: sem sessão, nem o modo mock serve o histórico (401 sem dados)', async () => {
+      sessao.token = null
+
+      const response = await listarSgrc()
+      const corpo = JSON.stringify(await response.json())
+
+      expect(response.status).toBe(401)
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+      expect(corpo).not.toContain('protocolos')
+      for (const protocolo of FICTICIOS) {
+        expect(corpo).not.toContain(protocolo)
+      }
     })
   })
 })
