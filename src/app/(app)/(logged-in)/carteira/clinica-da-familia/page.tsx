@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { HealthCard } from '@/app/components/wallet-cards/health-card'
 import {
@@ -82,6 +83,13 @@ export default async function HealthCardDetail() {
     return (
       <div className="max-w-4xl mx-auto pb-10">
         <ProfileHeaderWrapper title="Documentos" />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Documentos/Cartões', href: '/carteira' },
+            { label: 'Clínica da Família' },
+          ]}
+        />
         <div className="flex items-center justify-center px-4 pt-2">
           <p className="text-muted-foreground text-center py-6">
             Dados de saúde não disponíveis.
@@ -133,6 +141,13 @@ export default async function HealthCardDetail() {
   return (
     <div className="max-w-4xl mx-auto pb-10">
       <ProfileHeaderWrapper title="Documentos" />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Documentos/Cartões', href: '/carteira' },
+          { label: 'Clínica da Família' },
+        ]}
+      />
       <div className="z-50">
         <div className="px-4 pt-2">
           <HealthCard

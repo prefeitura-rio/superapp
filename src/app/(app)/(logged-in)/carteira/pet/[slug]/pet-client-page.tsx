@@ -1,5 +1,6 @@
 import { MicroshippingStatusCard } from '@/app/(app)/(logged-in)/carteira/pet/components/microchipping-status-card'
 import { TutorInfo } from '@/app/(app)/(logged-in)/carteira/pet/components/tutor-info'
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { PetCard } from '@/app/components/wallet-cards/pet-wallet'
 import { ChipIcon } from '@/assets/icons/chip-icon'
@@ -46,6 +47,13 @@ export function PetClientPage({
   return (
     <div className="max-w-4xl mx-auto pb-10">
       <ProfileHeaderWrapper title="Documentos" />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Documentos/Pets', href: '/carteira?pets=true' },
+          { label: 'Pet' },
+        ]}
+      />
       <div className="pt-2">
         <div className="px-4 flex flex-col gap-4">
           <PetCard
