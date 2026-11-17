@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatDate, mapCategoria, normalizeStatus } from '../helpers'
 import { type RequestItem, RequestsList } from './requests-list'
 
 type Origem = 'sgrc' | 'salesforce'
 
-const DEFAULT_ORIGEM: Origem = 'salesforce'
+const DEFAULT_ORIGEM: Origem = 'sgrc'
 
 const OPCOES: { label: string; value: Origem }[] = [
   { label: 'abertas até 26/11/2026', value: 'sgrc' },
@@ -71,7 +71,7 @@ export function OrigemChamados({
   const [carregando, setCarregando] = useState(false)
   const [open, setOpen] = useState(false)
 
-  async function loadSgrc() {
+  const loadSgrc = useCallback(async () => {
     if (sgrc) return
 
     setCarregando(true)
@@ -85,7 +85,13 @@ export function OrigemChamados({
     } finally {
       setCarregando(false)
     }
-  }
+  }, [sgrc])
+
+  useEffect(() => {
+    if (historicoSgrc && selectedOrigem === 'sgrc') {
+      void loadSgrc()
+    }
+  }, [historicoSgrc, loadSgrc, selectedOrigem])
 
   function openSheet() {
     setDraft(selectedOrigem)
@@ -96,11 +102,6 @@ export function OrigemChamados({
     setSelectedOrigem(draft)
     setOpen(false)
     if (draft === 'sgrc') await loadSgrc()
-  }
-
-  async function selecionarOrigem(origem: Origem) {
-    setSelectedOrigem(origem)
-    if (origem === 'sgrc') await loadSgrc()
   }
 
   function handleClear() {
@@ -115,30 +116,6 @@ export function OrigemChamados({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => selecionarOrigem('salesforce')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
-            selectedOrigem === 'salesforce'
-              ? 'border border-foreground bg-secondary text-foreground'
-              : 'bg-card text-foreground border border-transparent hover:bg-card/70'
-          }`}
-        >
-          Chamados recentes
-        </button>
-        <button
-          type="button"
-          onClick={() => selecionarOrigem('sgrc')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
-            selectedOrigem === 'sgrc'
-              ? 'border border-foreground bg-secondary text-foreground'
-              : 'bg-card text-foreground border border-transparent hover:bg-card/70'
-          }`}
-        >
-          Chamados antigos
-        </button>
-      </div>
       <div className="flex gap-2 overflow-x-auto scrollbar-hide">
         <button
           type="button"

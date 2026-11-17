@@ -22,7 +22,7 @@ export function isSalesforceServicesEnabled(): boolean {
 }
 
 /**
- * The SGRC history ("Chamados antigos") has no real integration yet: the only
+ * The SGRC history has no real integration yet: the only
  * data source is the fixed mock in `src/lib/chamados/mock-sgrc.ts`, which is
  * the same for every citizen. It is served only when the explicit chamados
  * mock mode is on (`NEXT_PUBLIC_USE_MOCK_CHAMADOS === 'true'`, off in staging

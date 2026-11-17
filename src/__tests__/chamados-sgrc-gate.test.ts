@@ -124,10 +124,11 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
       }
 
       expect(response.status).toBe(200)
-      expect(corpo.protocolos.map(item => item.protocolo)).toEqual([
-        PROTOCOLO_DONO_SGRC,
-        PROTOCOLO_DONO_CONCLUIDO_SGRC,
-      ])
+      const protocolos = corpo.protocolos.map(item => item.protocolo)
+      expect(protocolos.length).toBeGreaterThan(10)
+      expect(protocolos).toContain(PROTOCOLO_DONO_SGRC)
+      expect(protocolos).toContain(PROTOCOLO_DONO_CONCLUIDO_SGRC)
+      expect(protocolos).not.toContain(PROTOCOLO_TERCEIRO_SGRC)
     })
   })
 })

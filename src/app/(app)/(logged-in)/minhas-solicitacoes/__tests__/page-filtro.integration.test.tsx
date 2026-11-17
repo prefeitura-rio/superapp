@@ -132,11 +132,11 @@ describe('/minhas-solicitacoes?filtro= com o histórico SGRC (modo mock)', () =>
     vi.unstubAllEnvs()
   })
 
-  it('as abas de origem aparecem e o filtro do menu continua valendo', async () => {
+  it('o seletor de data aparece e o filtro do menu continua valendo', async () => {
     await renderPage('ouvidoria')
 
     expect(
-      screen.getByRole('button', { name: 'Chamados recentes' })
+      screen.getByRole('button', { name: 'Data de abertura' })
     ).toBeInTheDocument()
     expect(activeTab()).toBe('Ouvidoria')
     expect(screen.getByText('Reclamação de atendimento')).toBeInTheDocument()
