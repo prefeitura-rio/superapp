@@ -195,6 +195,7 @@ jobs:
           NEXT_PUBLIC_FEATURE_SALESFORCE: "true"
           NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA: "true"
           NEXT_PUBLIC_VLIBRAS_ENABLED: "true"
+          NEXT_PUBLIC_USE_MOCK_CHAMADOS: "true"
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -249,6 +250,7 @@ jobs:
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
             --build-arg NEXT_PUBLIC_FEATURE_SALESFORCE="true" \
             --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="true" \
+            --build-arg NEXT_PUBLIC_USE_MOCK_CHAMADOS="true" \
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
             --load \
