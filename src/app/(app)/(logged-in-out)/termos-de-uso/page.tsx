@@ -1,7 +1,7 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { TERMOS_DE_USO_PLATFORMS } from '@/constants/termos-de-uso/platforms'
 import type { Metadata } from 'next'
-import { BackButton } from './components/back-button'
 import { PlatformList } from './components/platform-list'
 
 // Sem `dynamic = 'force-static'`: página estática sai sem o nonce da CSP
@@ -17,9 +17,13 @@ export default function TermosDeUsoPage() {
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Termos de uso' },
+        ]}
+      />
       <main className="mx-auto w-full max-w-4xl px-4 pb-10">
-        <BackButton fallbackHref="/" />
-
         <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
           Termos de uso
         </h1>
