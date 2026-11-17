@@ -17,8 +17,10 @@ describe('Footer', () => {
         'Página inicial',
         'Serviços',
         'Carta de serviços',
+        'Mapa do site',
       ])
       expect(links[2].getAttribute('href')).toBe(CARTA_DE_SERVICOS_ROUTE)
+      expect(links[3].getAttribute('href')).toBe('/mapa-do-site')
     }
   })
 
