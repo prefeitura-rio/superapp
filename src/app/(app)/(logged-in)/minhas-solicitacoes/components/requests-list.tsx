@@ -1,6 +1,7 @@
 'use client'
 
 import { SearchIcon20 } from '@/assets/icons/search-icon'
+import { Pagination } from '@/components/ui/pagination'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { RequestStatus } from '../types'
@@ -17,6 +18,7 @@ export interface RequestItem {
 }
 
 const FILTER_TABS = ['Todos', 'Serviços', 'Ouvidoria', 'Acesso à informação']
+const PAGE_SIZE = 10
 
 function RequestCard({ item }: { item: RequestItem }) {
   return (
@@ -59,15 +61,28 @@ export function RequestsList({
   items,
   filtros = FILTER_TABS,
   filtroInicial,
+  paginated = false,
 }: {
   items: RequestItem[]
   filtros?: readonly string[]
   filtroInicial?: string
+  paginated?: boolean
 }) {
   const [activeFilter, setActiveFilter] = useState(
     filtroInicial && filtros.includes(filtroInicial) ? filtroInicial : 'Todos'
   )
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+
+  function handleFilterChange(tab: string) {
+    setActiveFilter(tab)
+    setPage(1)
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value)
+    setPage(1)
+  }
 
   const filtered = items.filter(r => {
     const matchesFilter =
@@ -84,9 +99,14 @@ export function RequestsList({
     return matchesFilter && matchesSearch
   })
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const pageItems = paginated
+    ? filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+    : filtered
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Filter chips + Search — gap-2 entre eles */}
       <div className="flex flex-col gap-2">
         <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
           <div className="flex gap-2 w-max">
@@ -94,7 +114,7 @@ export function RequestsList({
               <button
                 key={tab}
                 type="button"
-                onClick={() => setActiveFilter(tab)}
+                onClick={() => handleFilterChange(tab)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   activeFilter === tab
                     ? 'border border-foreground bg-secondary text-foreground'
@@ -106,32 +126,38 @@ export function RequestsList({
             ))}
           </div>
         </div>
-
-        {/* Search */}
         <div className="relative flex items-center">
           <SearchIcon20 className="absolute left-5 text-foreground-light pointer-events-none shrink-0" />
           <input
             type="text"
             placeholder="Encontre sua solicitação"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={event => handleSearchChange(event.target.value)}
             className="w-full bg-card text-card-foreground placeholder:text-foreground-light placeholder:text-sm placeholder:font-normal placeholder:leading-5 placeholder:tracking-normal text-sm rounded-full pl-11 pr-5 py-4 outline-none hover:bg-card/80 transition-colors cursor-text"
           />
         </div>
       </div>
 
-      {/* Grid */}
-      {filtered.length === 0 ? (
+      {pageItems.length === 0 ? (
         <EmptyState filtered={activeFilter !== 'Todos' || search.length >= 2} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {filtered.map(item => (
+          {pageItems.map(item => (
             <RequestCard
               key={`${item.protocolo}-${item.codigoOs}`}
               item={item}
             />
           ))}
         </div>
+      )}
+
+      {paginated && (
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          className="pt-4"
+        />
       )}
     </div>
   )

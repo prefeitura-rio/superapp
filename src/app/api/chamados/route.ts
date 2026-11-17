@@ -14,9 +14,6 @@ export async function GET(req: Request) {
 
   const origem = new URL(req.url).searchParams.get('origem')
   if (origem === 'sgrc') {
-    // The real SGRC history (filtered by the citizen's CPF) does not exist yet.
-    // Outside the explicit mock mode, answer "not implemented" instead of
-    // handing every citizen the same fictitious records.
     const resposta = isSgrcHistoryMockEnabled()
       ? NextResponse.json(listarSgrcMock())
       : NextResponse.json({ error: 'Not implemented' }, { status: 501 })
@@ -25,7 +22,6 @@ export async function GET(req: Request) {
   }
 
   const result = await listChamados()
-
   const data = parseJsonBody(result.data)
   return NextResponse.json(data, { status: result.status })
 }

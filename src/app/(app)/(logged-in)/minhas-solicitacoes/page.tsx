@@ -24,7 +24,6 @@ export default async function MyRequestsPage({
   const filtroInicial = filterTabFromParam((await searchParams)?.filtro)
   const response = await listChamados()
   const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
-
   const protocolos = [
     ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
     ...(IS_MOCK_ENABLED ? MOCK_LIST.protocolos : []),
