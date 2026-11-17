@@ -51,6 +51,12 @@ const FILTRO_PARAM_TO_TAB: Record<string, string> = {
   'acesso-a-informacao': 'Acesso à informação',
 }
 
+export const TAB_TO_FILTRO_PARAM: Record<string, string> = {
+  Serviços: 'servicos',
+  Ouvidoria: 'ouvidoria',
+  'Acesso à informação': 'acesso-a-informacao',
+}
+
 export function filterTabFromParam(
   value: string | string[] | undefined
 ): string | undefined {
