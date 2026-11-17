@@ -1,4 +1,31 @@
 import { AiImproveIcon } from './ai-improve-icon'
+import { AlertTriangleIcon } from './alert-triangle-icon'
+import { BadgeCheckIcon } from './badge-check-icon'
+import { BuildingIcon } from './building-icon'
+import { BusIcon } from './bus-icon'
+import { CarIcon } from './car-icon'
+import { CitizenshipIcon } from './citizenship-icon'
+import { CoinIcon } from './coin-icon'
+import { EyeOpenIcon } from './eye-open-icon'
+import { FileSearchIcon } from './file-search-icon'
+import { FileTextIcon } from './file-text-icon'
+import { FolderIcon } from './folder-icon'
+import { GraduationCapIcon } from './graduation-cap-icon'
+import { HeartPulseIcon } from './heart-pulse-icon'
+import { HomeBuildingIcon } from './home-building-icon'
+import { IdCardIcon } from './id-card-icon'
+import { LeafIcon } from './leaf-icon'
+import { LockIcon } from './lock-icon'
+import { LuggageIcon } from './luggage-icon'
+import { MessageBubbleIcon } from './message-bubble-icon'
+import { MusicIcon } from './music-icon'
+import { OpenBookIcon } from './open-book-icon'
+import { PawIcon } from './paw-icon'
+import { SearchZoomIcon } from './search-zoom-icon'
+import { ShieldCheckIcon } from './shield-check-icon'
+import { ShieldIcon } from './shield-icon'
+import { SuitcaseIcon } from './suitcase-icon'
+import { TrashBinIcon } from './trash-bin-icon'
 import { BriefcaseIcon } from './briefcase-icon'
 import { CalendarIcon } from './calendar-icon'
 import { CheckCircleIcon } from './check-circle-icon'
@@ -48,6 +75,33 @@ import { YoutubeIcon } from './youtube-icon'
 
 export {
   AiImproveIcon,
+  AlertTriangleIcon,
+  BadgeCheckIcon,
+  BuildingIcon,
+  BusIcon,
+  CarIcon,
+  CitizenshipIcon,
+  CoinIcon,
+  EyeOpenIcon,
+  FileSearchIcon,
+  FileTextIcon,
+  FolderIcon,
+  GraduationCapIcon,
+  HeartPulseIcon,
+  HomeBuildingIcon,
+  IdCardIcon,
+  LeafIcon,
+  LockIcon,
+  LuggageIcon,
+  MessageBubbleIcon,
+  MusicIcon,
+  OpenBookIcon,
+  PawIcon,
+  SearchZoomIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  SuitcaseIcon,
+  TrashBinIcon,
   FacebookIcon,
   InstagramIcon,
   LinkedinIcon,

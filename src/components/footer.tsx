@@ -21,6 +21,7 @@ const menuLinks = [
   { label: 'Página inicial', href: '/' },
   { label: 'Serviços', href: '/servicos' },
   CARTA_DE_SERVICOS_FOOTER_LINK,
+  { label: 'Mapa do site', href: '/mapa-do-site' },
 ]
 
 const atendimentoLinks = [

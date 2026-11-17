@@ -27,6 +27,7 @@ const publicRoutes = [
   { path: '/politicas-de-uso-de-cookies', whenAuthenticated: 'next' },
   { path: '/termos-de-uso', whenAuthenticated: 'next' },
   { path: '/termos-de-uso/*', whenAuthenticated: 'next' },
+  { path: '/mapa-do-site', whenAuthenticated: 'next' },
 ] as const
 
 /**
