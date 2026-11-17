@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import autofalante from '@/assets/autofalante.png'
 import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
@@ -10,7 +11,9 @@ export default function OuvidoriaPage() {
   return (
     <div className="pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
       <HeaderWrapperClient />
-
+      <Breadcrumb
+        items={[{ label: 'Página inicial', href: '/' }, { label: 'Ouvidoria' }]}
+      />
       <main className="flex flex-col">
         <section className="relative">
           <div className="flex flex-col mb-6 pt-2 ">
