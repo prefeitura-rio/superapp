@@ -837,7 +837,13 @@ function agrupar(
 
 export function listarSgrcMock() {
   const doDono = porAbertura(
-    CHAMADOS.filter(chamado => chamado.cpf === CPF_DONO_SGRC)
+    CHAMADOS.filter(
+      chamado =>
+        chamado.cpf === CPF_DONO_SGRC &&
+        [PROTOCOLO_DONO_SGRC, PROTOCOLO_DONO_CONCLUIDO_SGRC].includes(
+          chamado.protocolo
+        )
+    )
   )
   return { protocolos: agrupar(doDono, 'lista') }
 }

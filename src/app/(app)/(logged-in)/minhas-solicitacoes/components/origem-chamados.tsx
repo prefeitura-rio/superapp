@@ -16,7 +16,7 @@ import { type RequestItem, RequestsList } from './requests-list'
 
 type Origem = 'sgrc' | 'salesforce'
 
-const DEFAULT_ORIGEM: Origem = 'sgrc'
+const DEFAULT_ORIGEM: Origem = 'salesforce'
 
 const OPCOES: { label: string; value: Origem }[] = [
   { label: 'abertas até 26/11/2026', value: 'sgrc' },
@@ -98,6 +98,11 @@ export function OrigemChamados({
     if (draft === 'sgrc') await loadSgrc()
   }
 
+  async function selecionarOrigem(origem: Origem) {
+    setSelectedOrigem(origem)
+    if (origem === 'sgrc') await loadSgrc()
+  }
+
   function handleClear() {
     setDraft(DEFAULT_ORIGEM)
   }
@@ -110,6 +115,30 @@ export function OrigemChamados({
 
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => selecionarOrigem('salesforce')}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+            selectedOrigem === 'salesforce'
+              ? 'border border-foreground bg-secondary text-foreground'
+              : 'bg-card text-foreground border border-transparent hover:bg-card/70'
+          }`}
+        >
+          Chamados recentes
+        </button>
+        <button
+          type="button"
+          onClick={() => selecionarOrigem('sgrc')}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+            selectedOrigem === 'sgrc'
+              ? 'border border-foreground bg-secondary text-foreground'
+              : 'bg-card text-foreground border border-transparent hover:bg-card/70'
+          }`}
+        >
+          Chamados antigos
+        </button>
+      </div>
       <div className="flex gap-2 overflow-x-auto scrollbar-hide">
         <button
           type="button"
