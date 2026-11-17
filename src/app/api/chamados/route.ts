@@ -5,6 +5,7 @@ import {
   isSgrcHistoryMockEnabled,
 } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -14,9 +15,15 @@ export async function GET(req: Request) {
 
   const origem = new URL(req.url).searchParams.get('origem')
   if (origem === 'sgrc') {
-    const resposta = isSgrcHistoryMockEnabled()
-      ? NextResponse.json(listarSgrcMock())
-      : NextResponse.json({ error: 'Not implemented' }, { status: 501 })
+    // The SGRC history belongs to the logged-in citizen: without a session
+    // nothing is served, not even in the explicit mock mode.
+    const jar = await cookies()
+    const logado = Boolean(jar.get('access_token')?.value)
+    const resposta = !logado
+      ? NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      : isSgrcHistoryMockEnabled()
+        ? NextResponse.json(listarSgrcMock())
+        : NextResponse.json({ error: 'Not implemented' }, { status: 501 })
     resposta.headers.set('Cache-Control', 'private, no-store')
     return resposta
   }
