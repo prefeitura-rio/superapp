@@ -20,6 +20,11 @@ vi.mock('@/app/components/profile-header-wrapper', () => ({
 vi.mock('@/app/components/float-navigation-wrapper', () => ({
   FloatNavigationWrapper: () => null,
 }))
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
+}))
 
 import MyRequestsPage from '../page'
 

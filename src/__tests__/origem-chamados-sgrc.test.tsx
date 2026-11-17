@@ -3,6 +3,12 @@ import type { RequestItem } from '@/app/(app)/(logged-in)/minhas-solicitacoes/co
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
+}))
+
 const SALESFORCE: RequestItem[] = [
   {
     protocolo: 'RIO-2026-00000001',
