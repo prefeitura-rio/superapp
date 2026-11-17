@@ -3,6 +3,8 @@
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
 import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
+import { Breadcrumb } from '@/app/components/breadcrumb'
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -460,6 +462,13 @@ function RequestDetail({ data }: { data: DetailData }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Solicitações/Todos', href: '/minhas-solicitacoes' },
+          { label: data.servico },
+        ]}
+      />
       <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-2">
         <h1
           className="text-3xl font-medium text-card-foreground leading-9 mb-4 pt-2"
@@ -693,6 +702,7 @@ function LoadingState() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <BreadcrumbSkeleton />
       <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
         <Skeleton className="h-9 w-3/4" />
 
@@ -716,6 +726,13 @@ function ErrorState({ protocolo }: { protocolo: string }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Solicitações/Todos', href: '/minhas-solicitacoes' },
+          { label: `Protocolo ${protocolo}` },
+        ]}
+      />
       <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col items-center justify-center text-center gap-2 pt-10">
         <p className="text-foreground-light text-sm">
           Protocolo {protocolo} não encontrado.

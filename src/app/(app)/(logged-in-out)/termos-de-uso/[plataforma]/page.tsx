@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { getTermosDeUsoDocument } from '@/constants/termos-de-uso/content'
 import {
@@ -56,6 +57,13 @@ export default async function TermosDeUsoPlataformaPage({
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Termos de uso', href: '/termos-de-uso' },
+          { label: `Termos de uso: ${platform.name}` },
+        ]}
+      />
       <main className="mx-auto w-full max-w-4xl px-4 pb-10">
         <TermosDeUsoDetail
           platform={platform}

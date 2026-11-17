@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { type FAQSection, faqSections } from '@/constants/faqs/pref-rio'
 import { useFaqHighlight } from '@/hooks/useFaqHighlight'
@@ -33,6 +34,13 @@ export function FaqPrefRioClient({ sections }: { sections: FAQSection[] }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Perguntas Frequentes', href: '/faq' },
+          { label: 'Perguntas Frequentes: PrefRio' },
+        ]}
+      />
       <main className="max-w-4xl min-h-lvh mx-auto pb-10">
         {/* O header global não exibe título: h1 só para leitores de tela. */}
         <h1 className="sr-only">FAQ</h1>

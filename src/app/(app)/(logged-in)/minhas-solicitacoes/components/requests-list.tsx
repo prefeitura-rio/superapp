@@ -3,7 +3,9 @@
 import { SearchIcon20 } from '@/assets/icons/search-icon'
 import { Pagination } from '@/components/ui/pagination'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { TAB_TO_FILTRO_PARAM } from '../helpers'
 import type { RequestStatus } from '../types'
 import { StatusBadge } from './status-badge'
 
@@ -68,6 +70,7 @@ export function RequestsList({
   filtroInicial?: string
   paginated?: boolean
 }) {
+  const router = useRouter()
   const [activeFilter, setActiveFilter] = useState(
     filtroInicial && filtros.includes(filtroInicial) ? filtroInicial : 'Todos'
   )
@@ -77,6 +80,11 @@ export function RequestsList({
   function handleFilterChange(tab: string) {
     setActiveFilter(tab)
     setPage(1)
+    const param = TAB_TO_FILTRO_PARAM[tab]
+    const url = param
+      ? `/minhas-solicitacoes?filtro=${param}`
+      : '/minhas-solicitacoes'
+    router.replace(url, { scroll: false })
   }
 
   function handleSearchChange(value: string) {

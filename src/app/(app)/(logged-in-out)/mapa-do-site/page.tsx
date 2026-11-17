@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import {
   AlertTriangleIcon,
@@ -263,6 +264,12 @@ export default function MapaDoSitePage() {
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Mapa do Site' },
+        ]}
+      />
 
       <main className="w-full max-w-4xl mx-auto px-4 pb-10">
         <h1 className="pt-2 pb-1 text-base font-medium leading-5.25 text-foreground">

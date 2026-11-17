@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { TrashIcon } from '@/assets/icons/trash-icon'
 import { IconButton } from '@/components/ui/custom/icon-button'
@@ -63,6 +64,13 @@ export function VehicleDetailPage({
   return (
     <div className="mx-auto w-full max-w-4xl bg-background pb-10">
       <ProfileHeaderWrapper title={vehicle.displayName} />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Documentos/Veículos', href: '/carteira?mobilidade=true' },
+          { label: 'Veículo' },
+        ]}
+      />
       <div className="flex flex-col gap-6 px-4 pt-2">
         {isConductor && (
           <div className="flex justify-end">

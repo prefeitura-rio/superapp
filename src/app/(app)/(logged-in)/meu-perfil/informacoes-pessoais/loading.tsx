@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -5,6 +6,7 @@ export default function UserPersonalInfoLoading() {
   return (
     <div className="max-w-4xl mx-auto pb-10 bg-background">
       <ProfileHeaderWrapper />
+      <BreadcrumbSkeleton />
       <div className="space-y-6 p-4">
         {/* CPF Field Skeleton */}
         <div className="space-y-2">

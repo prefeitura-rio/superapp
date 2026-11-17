@@ -1,4 +1,5 @@
 import { AddressInfoCard } from '@/app/components/address-info-card'
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { EmptyAddress } from '@/app/components/empty-address'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getDalCitizenCpf } from '@/lib/dal'
@@ -29,7 +30,16 @@ export default async function UserAddress() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper title="Endereço" />
+      <div className="flex flex-col">
+        <ProfileHeaderWrapper title="Endereço" />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Perfil do usuário', href: '/meu-perfil' },
+            { label: 'Endereço' },
+          ]}
+        />
+      </div>
       {addressInfo?.bairro !== 'null' && addressInfo?.bairro && addressInfo ? (
         <>
           <AddressInfoCard address={addressInfo} />

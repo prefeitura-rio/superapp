@@ -45,7 +45,8 @@ const SCREENS = [
   {
     name: 'lista',
     render: async () => <TermosDeUsoPage />,
-    back: () => screen.getByRole('button', { name: 'Voltar' }),
+    back: () =>
+      screen.getByRole('navigation', { name: 'Navegação estrutural' }),
   },
   {
     name: 'detalhe',
@@ -53,7 +54,8 @@ const SCREENS = [
       TermosDeUsoPlataformaPage({
         params: Promise.resolve({ plataforma: 'prefrio-site' }),
       }),
-    back: () => screen.getByRole('link', { name: 'Voltar para Termos de uso' }),
+    back: () =>
+      screen.getByRole('navigation', { name: 'Navegação estrutural' }),
   },
 ] as const
 

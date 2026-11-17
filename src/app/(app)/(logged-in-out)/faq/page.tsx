@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
 import { SearchIcon } from '@/assets/icons/search-icon'
@@ -94,6 +95,12 @@ export default function FaqHubPage() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Perguntas Frequentes' },
+        ]}
+      />
       <main className="max-w-4xl mx-auto pb-10">
         <div className="px-4 pb-4 max-w-4xl mx-auto">
           {/* título na página, não no header */}

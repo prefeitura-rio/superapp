@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CategoryServicesLoading() {
@@ -12,7 +13,7 @@ export default function CategoryServicesLoading() {
           </div>
         </div>
       </header>
-
+      <BreadcrumbSkeleton />
       <main className="max-w-4xl mx-auto px-4 pb-4">
         <Skeleton className="h-10 w-48 mb-4 mt-2" />
         <div className="flex items-center justify-between mb-2">
@@ -24,12 +25,12 @@ export default function CategoryServicesLoading() {
             {Array.from({ length: 4 }, (_, index) => (
               <div
                 key={index}
-                className="flex-1 min-w-[140px] basis-0 rounded-xl min-h-32.5"
+                className="flex-1 min-w-35 basis-0 rounded-xl min-h-32.5"
               >
                 <Skeleton className="h-full w-full rounded-xl" />
               </div>
             ))}
-            <div className="flex-shrink-0 sm:hidden w-2" />
+            <div className="shrink-0 sm:hidden w-2" />
           </div>
         </div>
 

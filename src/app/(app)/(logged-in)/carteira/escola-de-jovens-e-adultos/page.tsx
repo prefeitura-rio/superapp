@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import {
   formatEducationOperatingHours,
@@ -44,6 +45,13 @@ export default async function EducationCardDetail() {
   return (
     <div className="max-w-4xl mx-auto pb-10">
       <ProfileHeaderWrapper title="Documentos" />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Documentos/Cartões', href: '/carteira' },
+          { label: 'Escola de Jovens e Adultos' },
+        ]}
+      />
       <div className="z-50">
         <div className="px-4 pt-2">
           <EducationCard

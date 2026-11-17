@@ -78,10 +78,13 @@ describe('/termos-de-uso/[plataforma]', () => {
         screen.getByRole('heading', { name: '15. Foro' })
       ).toBeInTheDocument()
 
-      const back = screen.getByRole('link', {
-        name: 'Voltar para Termos de uso',
+      const breadcrumb = screen.getByRole('navigation', {
+        name: 'Navegação estrutural',
       })
-      expect(back).toHaveAttribute('href', '/termos-de-uso')
+      expect(breadcrumb).toBeInTheDocument()
+      expect(
+        screen.queryByRole('link', { name: 'Voltar para Termos de uso' })
+      ).not.toBeInTheDocument()
     }
   )
 
@@ -126,11 +129,14 @@ describe('/termos-de-uso/[plataforma]', () => {
     await renderDetail('empregos', { origem: 'https://evil.example' })
 
     expect(
-      screen.getByRole('link', { name: 'Voltar para Termos de uso' })
-    ).toHaveAttribute('href', '/termos-de-uso')
+      screen.queryByRole('link', { name: 'Voltar para Termos de uso' })
+    ).not.toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Voltar para o currículo' })
     ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('navigation', { name: 'Navegação estrutural' })
+    ).toBeInTheDocument()
   })
 
   it('slug desconhecido vira 404', async () => {

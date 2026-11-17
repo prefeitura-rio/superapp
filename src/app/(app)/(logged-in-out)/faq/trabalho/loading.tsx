@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function FaqTrabalhoLoading() {
@@ -13,6 +14,7 @@ export default function FaqTrabalhoLoading() {
           </div>
         </div>
       </div>
+      <BreadcrumbSkeleton />
       {/* OportunidadesCariocas band skeleton */}
       <div className="w-full bg-card py-4">
         <div className="mx-auto px-4 max-w-4xl">
