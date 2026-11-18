@@ -1,6 +1,12 @@
 import { getApiPublicSearch } from '@/http-app-catalogo/busca/busca'
 import { NextResponse } from 'next/server'
 
+// Enquanto a Carta de Serviços (Salesforce) não está pronta para produção,
+// filtramos itens com source='salesforce' antes de retornar ao cliente.
+// Para habilitar: definir SALESFORCE_SEARCH_ENABLED=true nas variáveis de ambiente.
+const SALESFORCE_SEARCH_ENABLED =
+  process.env.SALESFORCE_SEARCH_ENABLED === 'true'
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q') || undefined
@@ -21,7 +27,11 @@ export async function GET(request: Request) {
     )
 
     if (response.status === 200) {
-      return NextResponse.json(response.data)
+      const data = response.data
+      const items = SALESFORCE_SEARCH_ENABLED
+        ? (data.items ?? [])
+        : (data.items ?? []).filter(item => item.source !== 'salesforce')
+      return NextResponse.json({ ...data, items, total: items.length })
     }
 
     return NextResponse.json({ error: 'Search failed' }, { status: 500 })
