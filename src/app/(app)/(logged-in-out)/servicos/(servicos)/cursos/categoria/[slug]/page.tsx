@@ -67,6 +67,11 @@ export default async function CoursesCategoryPage({
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Oportunidades Cariocas/Cursos', href: '/servicos/cursos' },
+          { label: categoryName },
+        ]}
       />
       <div>
         <div className="max-w-4xl mx-auto pb-20">
