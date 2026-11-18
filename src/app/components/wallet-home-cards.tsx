@@ -7,7 +7,6 @@ import type {
 } from '@/http/models'
 import type { WalletVehicle } from '@/lib/cadmicro/types'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
@@ -50,6 +49,7 @@ export type BuildHomeWalletCardsInput = {
   pets?: ModelsPet[]
   vehicles?: WalletVehicle[]
   healthCardData?: HomeWalletHealthCardData
+  isSalesforceEnabled: boolean
 }
 
 function isDisplayablePet(pet: ModelsPet): boolean {
@@ -69,6 +69,7 @@ export function buildHomeWalletCards({
   pets = [],
   vehicles = [],
   healthCardData,
+  isSalesforceEnabled,
 }: BuildHomeWalletCardsInput): ReactElement[] {
   const cards: ReactElement[] = []
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
@@ -182,7 +183,7 @@ export function buildHomeWalletCards({
     )
   }
 
-  if (maintenanceStats.total > 0 && !isSalesforceServicesEnabled()) {
+  if (maintenanceStats.total > 0 && !isSalesforceEnabled) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.CARETAKER,
       walletData,

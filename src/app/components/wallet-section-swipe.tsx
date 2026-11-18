@@ -20,6 +20,7 @@ interface CartereiraSectionSwipeProps {
   pets?: ModelsPet[]
   vehicles?: WalletVehicle[]
   healthCardData?: HomeWalletHealthCardData
+  isSalesforceEnabled: boolean
 }
 
 export function CarteiraSectionSwipeSkeleton() {
@@ -74,6 +75,7 @@ export default function CarteiraSectionSwipe({
   healthCardData,
   pets = [],
   vehicles = [],
+  isSalesforceEnabled,
 }: CartereiraSectionSwipeProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const walletCards = buildHomeWalletCards({
@@ -82,6 +84,7 @@ export default function CarteiraSectionSwipe({
     healthCardData,
     pets,
     vehicles,
+    isSalesforceEnabled,
   })
 
   useEffect(() => {

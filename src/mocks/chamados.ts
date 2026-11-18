@@ -1,5 +1,5 @@
 /**
- * Mock data for chamados — only active when NEXT_PUBLIC_USE_MOCK_CHAMADOS=true (staging).
+ * Mock data for chamados — only active when USE_MOCK_CHAMADOS=true (staging).
  *
  * Three protocols covering all UI scenarios:
  *   RIO-MOCK-001 — two OSs (tests consulta-protocolo multi-card list)
@@ -522,7 +522,6 @@ export const MOCK_LIST = {
   ],
 }
 
-export const IS_MOCK_ENABLED =
-  process.env.NEXT_PUBLIC_USE_MOCK_CHAMADOS === 'true'
+export const IS_MOCK_ENABLED = process.env.USE_MOCK_CHAMADOS === 'true'
 
 export const MOCK_PROTOCOLS = Object.keys(MOCK_DETAIL)

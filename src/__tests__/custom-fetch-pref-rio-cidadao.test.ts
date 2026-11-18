@@ -94,7 +94,7 @@ describe('customFetchPrefRioCidadao: corpo da resposta', () => {
 
 describe('rotas /api/chamados com resposta vazia do upstream', () => {
   beforeEach(() => {
-    vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+    vi.stubEnv('FEATURE_SALESFORCE', 'true')
   })
 
   afterEach(() => {

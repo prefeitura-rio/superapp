@@ -50,6 +50,7 @@ Agentes invocados via Jira → GitHub em geral **não** têm `node_modules` até
 | [04-domains.md](docs/agents/04-domains.md) | Cursos, empregos, MEI, busca, carteira, perfil, feature flags |
 | [05-code-style.md](docs/agents/05-code-style.md) | Convenções de código e UI |
 | [06-pr-playbook.md](docs/agents/06-pr-playbook.md) | Checklist para PRs de alto nível (PMs / Claude Code) |
+| [07-feature-flags-runtime.md](docs/agents/07-feature-flags-runtime.md) | `FEATURE_SALESFORCE`, `USE_MOCK_CHAMADOS`, `SALESFORCE_SEARCH_ENABLED` — valores por ambiente e o que cada flag controla |
 
 ## Regras de ouro
 

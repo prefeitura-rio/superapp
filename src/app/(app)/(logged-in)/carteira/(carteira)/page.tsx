@@ -2,6 +2,7 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { WalletBreadcrumb } from '@/app/components/wallet-breadcrumb'
 import { WalletPageClient } from '@/app/components/wallet-page-client'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { Suspense } from 'react'
 
 export default function Wallet() {
@@ -12,7 +13,7 @@ export default function Wallet() {
         <WalletBreadcrumb />
       </Suspense>
       <div className="w-full max-w-4xl mx-auto">
-        <WalletPageClient />
+        <WalletPageClient isSalesforceEnabled={isSalesforceServicesEnabled()} />
         <FloatNavigationWrapper />
       </div>
     </div>
