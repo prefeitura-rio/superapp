@@ -1,6 +1,7 @@
 import { CookieConsent } from '@/components/cookie-consent'
 import { FooterWrapper } from '@/components/footer-wrapper'
 import { RouteTracker } from '@/components/route-tracker'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { ReactQueryProvider } from '@/providers/query-client-provider'
 import { OnboardingWrapperClient } from '../components/onboarding-wrapper-client'
 import { SessionExpiredHandler } from '../components/session-expired-handler'
@@ -18,7 +19,7 @@ export default async function AppLayout({
           <SessionExpiredHandler />
           <CookieConsent variant="mini" />
           <div className="flex-1 w-full">{children}</div>
-          <FooterWrapper />
+          <FooterWrapper salesforceEnabled={isSalesforceServicesEnabled()} />
         </div>
       </OnboardingWrapperClient>
     </ReactQueryProvider>

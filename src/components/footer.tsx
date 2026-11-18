@@ -18,16 +18,32 @@ import { FooterPhoneButton } from './footer-phone-button'
 const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
 const TRANSPARENCIA_URL = 'https://transparencia.prefeitura.rio/'
 
-const quickLinks = [
+interface QuickLink {
+  label: string
+  href: string
+  /**
+   * Só aparece com `FEATURE_SALESFORCE` ligada: os formulários de atendimento
+   * e a Carta de serviços, que o middleware reescreve para 404 com a flag
+   * desligada.
+   */
+  requiresSalesforce?: boolean
+}
+
+const quickLinks: QuickLink[] = [
   { label: 'Serviços', href: '/servicos' },
   { label: 'Oportunidades cariocas', href: '/servicos/trabalho' },
-  { label: 'Ouvidoria', href: `${TICKET_FORM_BASE_URL}/ouvidoria` },
+  {
+    label: 'Ouvidoria',
+    href: `${TICKET_FORM_BASE_URL}/ouvidoria`,
+    requiresSalesforce: true,
+  },
   {
     label: 'Lei de acesso à informação',
     href: `${TICKET_FORM_BASE_URL}/lai`,
+    requiresSalesforce: true,
   },
   { label: 'Perguntas frequentes', href: '/faq' },
-  CARTA_DE_SERVICOS_FOOTER_LINK,
+  { ...CARTA_DE_SERVICOS_FOOTER_LINK, requiresSalesforce: true },
   { label: 'Mapa do site', href: '/mapa-do-site' },
   { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
   {
@@ -64,8 +80,7 @@ const socialLinks = [
   },
 ]
 
-const titleCls =
-  'text-sm font-medium leading-4 tracking-normal text-foreground'
+const titleCls = 'text-sm font-medium leading-4 tracking-normal text-foreground'
 const bodyCls =
   'text-sm font-normal leading-5 tracking-normal text-foreground-light'
 const linkCls =
@@ -107,13 +122,21 @@ function AddressSection() {
   )
 }
 
-function QuickLinksSection() {
+function QuickLinksSection({
+  salesforceEnabled,
+}: {
+  salesforceEnabled: boolean
+}) {
+  const visibleQuickLinks = salesforceEnabled
+    ? quickLinks
+    : quickLinks.filter(link => !link.requiresSalesforce)
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-10">
       <div className="flex flex-col gap-1">
         <p className={titleCls}>Links rápidos</p>
         <ul className="flex flex-col gap-1 mt-1">
-          {quickLinks.map(link => (
+          {visibleQuickLinks.map(link => (
             <li key={link.href + link.label}>
               <Link href={link.href} className={linkCls}>
                 {link.label}
@@ -160,7 +183,11 @@ function LogosAndSocial() {
             alt="Prefeitura do Rio"
             width={77}
             height={32}
-            style={{ width: '77px', height: '31.233px', aspectRatio: '77/31.23' }}
+            style={{
+              width: '77px',
+              height: '31.233px',
+              aspectRatio: '77/31.23',
+            }}
             className="object-contain"
             unoptimized
           />
@@ -199,7 +226,16 @@ function LogosAndSocial() {
   )
 }
 
-export function Footer() {
+interface FooterProps {
+  /**
+   * Valor de `FEATURE_SALESFORCE` lido no servidor (`isSalesforceServicesEnabled()`):
+   * o footer é renderizado por um client component, onde a variável não existe
+   * no navegador. Ausente, os links que dependem da flag ficam ocultos.
+   */
+  salesforceEnabled?: boolean
+}
+
+export function Footer({ salesforceEnabled = false }: FooterProps) {
   return (
     <footer className="w-full mt-16 pb-28 bg-background">
       <div className="max-w-4xl mx-auto px-4">
@@ -212,7 +248,7 @@ export function Footer() {
         <Divider />
 
         <div className="py-6">
-          <QuickLinksSection />
+          <QuickLinksSection salesforceEnabled={salesforceEnabled} />
         </div>
 
         <Divider />
