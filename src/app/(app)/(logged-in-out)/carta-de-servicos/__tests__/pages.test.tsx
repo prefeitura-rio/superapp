@@ -20,7 +20,6 @@ vi.mock('@/lib/carta-servicos/org-units', async importOriginal => ({
 vi.mock('@/app/components/header-wrapper-client', () => ({
   default: () => <header data-testid="header" />,
 }))
-vi.mock('react-hot-toast', () => ({ default: { error: vi.fn() } }))
 
 const notFoundError = new Error('NEXT_NOT_FOUND')
 vi.mock('next/navigation', () => ({
@@ -65,6 +64,12 @@ describe('/carta-de-servicos', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Carta de serviços' })
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        level: 2,
+        name: 'Cartas de serviços por Órgão',
+      })
+    ).toBeVisible()
     expect(container.querySelectorAll('main')).toHaveLength(1)
     expect(screen.getByRole('button', { name: 'Ver mais' })).toBeInTheDocument()
 
@@ -76,6 +81,12 @@ describe('/carta-de-servicos', () => {
       'Controladoria Geral do Município do Rio de Janeiro - CGM',
     ])
     expect(links[0]).toHaveAttribute('href', '/carta-de-servicos/2951')
+    // Chevron à direita do nome reforça que o card é clicável (decorativo p/ leitor de tela).
+    for (const link of links) {
+      const icon = link.querySelector('svg')
+      expect(icon).toHaveAttribute('aria-hidden', 'true')
+      expect(link.lastElementChild).toBe(icon)
+    }
     expect(screen.queryByText(/todas as secretarias/i)).not.toBeInTheDocument()
   })
 
@@ -108,7 +119,7 @@ describe('/carta-de-servicos/[siciCode]', () => {
     { name: 'Serviço sem tema', slug: 'sem-tema' },
   ]
 
-  it('mostra o órgão, o botão de download e os serviços com link', async () => {
+  it('mostra o órgão, o botão que abre a carta e os serviços com link', async () => {
     fetchCartaOrgUnit.mockResolvedValue(CET)
     fetchCartaOrgUnitServices.mockResolvedValue(services)
 
@@ -120,12 +131,15 @@ describe('/carta-de-servicos/[siciCode]', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
       'Companhia de Engenharia de Tráfego do Rio de Janeiro - CET-RIO'
     )
-    const download = screen.getByRole('link', { name: 'Baixar documento' })
-    expect(download).toHaveAttribute('href', '/api/carta-de-servicos/2951/pdf')
-    expect(download).toHaveAttribute(
-      'download',
-      'carta-de-servicos-cet-rio.pdf'
-    )
+    const carta = screen.getByRole('link', {
+      name: /^Visualizar Carta de Serviços/,
+    })
+    expect(carta).toHaveAttribute('href', '/api/carta-de-servicos/2951/pdf')
+    expect(carta).toHaveAttribute('target', '_blank')
+    expect(carta.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Serviços relacionados' })
+    ).toBeVisible()
 
     const list = screen.getByRole('list')
     const serviceLink = within(list).getByRole('link', {

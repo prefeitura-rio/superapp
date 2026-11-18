@@ -1,7 +1,6 @@
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { ArrowUpRight } from '@/assets/icons/arrow-up-right'
 import {
-  cartaPdfFileName,
   cartaPdfHref,
   cartaServiceHref,
   fetchCartaOrgUnit,
@@ -13,7 +12,7 @@ import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { DownloadCartaButton } from '../components/download-carta-button'
+import { VisualizarCartaButton } from '../components/visualizar-carta-button'
 
 export const revalidate = 600
 
@@ -53,18 +52,18 @@ export default async function CartaDeServicosOrgaoPage({
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
       <main className="w-full max-w-4xl mx-auto px-4 pb-10">
-        <h1 className="pt-2 pb-6 text-3xl font-medium leading-9 tracking-tight text-primary">
+        <h1 className="pt-2 pb-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
           {formatOrgUnitLabel(org)}
         </h1>
 
-        <DownloadCartaButton
-          href={cartaPdfHref(org.siciCode)}
-          fileName={cartaPdfFileName(org)}
-        />
+        <VisualizarCartaButton href={cartaPdfHref(org.siciCode)} />
 
         <section aria-labelledby="carta-servicos-title" className="mt-6">
-          <h2 id="carta-servicos-title" className="sr-only">
-            Serviços do órgão
+          <h2
+            id="carta-servicos-title"
+            className="mb-2 text-base font-medium leading-5 text-foreground"
+          >
+            Serviços relacionados
           </h2>
           <ul className="flex flex-col gap-2">
             {services.map(service => {
