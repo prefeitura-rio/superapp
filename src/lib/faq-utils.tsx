@@ -147,7 +147,7 @@ export const FormattedContent = memo(
     return (
       <p
         className={cn(
-          'text-foreground text-sm leading-relaxed whitespace-pre-line opacity-50',
+          'text-foreground-light text-sm leading-relaxed whitespace-pre-line',
           className
         )}
       >
