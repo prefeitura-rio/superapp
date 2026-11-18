@@ -13,11 +13,30 @@ import { describe, expect, it } from 'vitest'
  * Por isso nenhuma página do app que chama `notFound()` pode ter `loading.*`
  * em qualquer diretório entre `src/app` e ela. Uma listagem que queira manter
  * o skeleton fica num route group `(main)` junto do seu `loading.tsx`.
+ *
+ * Exceções intencionais (SOFT_404_ALLOWED): páginas onde o skeleton instantâneo
+ * via `loading.tsx` tem prioridade sobre o status HTTP exato. O Next.js injeta
+ * automaticamente `<meta name="robots" content="noindex">` nessas respostas,
+ * evitando indexação incorreta. Ver seção "Status codes" da doc acima.
+ *   - Rotas autenticadas: o status HTTP 404 não tem relevância para SEO.
+ *   - Rotas públicas com skeleton crítico para UX: o `noindex` meta é suficiente.
  */
 
 const APP_DIR = path.resolve(__dirname, '../app')
 const PAGE_FILES = new Set(['page.tsx', 'page.ts', 'page.jsx', 'page.js'])
 const LOADING_FILES = ['loading.tsx', 'loading.ts', 'loading.jsx', 'loading.js']
+
+/**
+ * Páginas com soft 404 intencional: têm `loading.tsx` ancestor para skeleton
+ * instantâneo e aceitam status HTTP 200 no lugar de 404.
+ */
+const SOFT_404_ALLOWED = new Set([
+  // Rota autenticada — status HTTP 404 não tem relevância para SEO.
+  '(app)/(logged-in)/carteira/cadmicro/[vehicleId]/page.tsx',
+  '(app)/(logged-in)/carteira/cadmicro/[vehicleId]/editar/page.tsx',
+  // Rota pública — skeleton crítico para UX; Next.js adiciona noindex no soft 404.
+  '(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/page.tsx',
+])
 
 function findPages(dir: string): string[] {
   const pages: string[] = []
@@ -65,10 +84,19 @@ describe('páginas que chamam notFound()', () => {
     )
   })
 
-  it.each(pagesWithNotFound)(
+  it.each(pagesWithNotFound.filter(p => !SOFT_404_ALLOWED.has(p)))(
     '%s não fica dentro de um loading.* (o 404 sai antes do stream)',
     page => {
       expect(loadingFilesAbove(path.join(APP_DIR, page))).toEqual([])
+    }
+  )
+})
+
+describe('soft 404 intencionais (loading.tsx + notFound())', () => {
+  it.each([...SOFT_404_ALLOWED])(
+    '%s tem loading.tsx ancestor (skeleton instantâneo — soft 404 documentado)',
+    page => {
+      expect(loadingFilesAbove(path.join(APP_DIR, page))).not.toEqual([])
     }
   )
 })
