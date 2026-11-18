@@ -1,6 +1,12 @@
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -100,7 +106,16 @@ describe('GlobalMenu', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('logado: nome, CPF e Sair, que faz o logout encadeado com o Gov.br', async () => {
+  it('logado: nome, CPF e Sair, que encerra a sessão e faz o logout do Gov.br num iframe oculto', async () => {
+    vi.stubEnv('NEXT_PUBLIC_GOVBR_BASE_URL', 'https://sso.example.gov.br/')
+    vi.stubEnv('NEXT_PUBLIC_HOME_URL', 'https://app.example.rio/')
+    let logoutCalls = 0
+    server.use(
+      http.get('/api/auth/logout', () => {
+        logoutCalls++
+        return new HttpResponse(null, { status: 204 })
+      })
+    )
     respondHeader(CITIZEN)
     const { user, menu } = await openMenu()
 
@@ -108,10 +123,21 @@ describe('GlobalMenu', () => {
     expect(within(menu).getByText('123.456.789-09')).toBeInTheDocument()
 
     await user.click(within(menu).getByRole('button', { name: 'Sair' }))
-    expect(assign).toHaveBeenCalledWith('/api/auth/logout?sso=govbr')
     expect(
       within(menu).getByRole('button', { name: 'Saindo...' })
     ).toBeDisabled()
+
+    const iframe = await waitFor(() => {
+      const found = document.querySelector<HTMLIFrameElement>(
+        'iframe[src^="https://sso.example.gov.br/logout?"]'
+      )
+      expect(found).not.toBeNull()
+      return found as HTMLIFrameElement
+    })
+    expect(logoutCalls).toBe(1)
+
+    fireEvent.load(iframe)
+    expect(assign).toHaveBeenCalledWith('https://app.example.rio/')
   })
 
   it('Termos de uso e política de privacidade é item de primeiro nível e leva à lista', async () => {

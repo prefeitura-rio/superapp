@@ -84,8 +84,8 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       page.getByRole('dialog').getByRole('link', { name: 'Meu perfil' })
     ).toHaveAttribute('href', '/meu-perfil')
 
-    // Intercepta o endpoint de logout para evitar redirecionamento externo.
-    // 204 numa navegação mantém a página atual.
+    // Intercepta o logout da API (para não encerrar a sessão do teste) e o
+    // logout do Gov.br no iframe (para não depender de rede externa).
     const logoutRequests: URL[] = []
     await page.route(
       url => url.pathname === '/api/auth/logout',
@@ -93,6 +93,10 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
         logoutRequests.push(new URL(route.request().url()))
         return route.fulfill({ status: 204 })
       }
+    )
+    await page.route(
+      url => url.hostname.endsWith('acesso.gov.br'),
+      route => route.fulfill({ status: 200, body: '' })
     )
 
     const sairBtn = page.getByRole('button', { name: 'Sair' })
@@ -103,8 +107,7 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await expect(page.getByText('Saindo...')).toBeVisible({ timeout: 5000 })
 
     await expect.poll(() => logoutRequests.length).toBe(1)
-    expect(logoutRequests[0].searchParams.get('sso')).toBe('govbr')
-    await expect(page.locator('iframe[src*="logout"]')).toHaveCount(0)
+    expect(logoutRequests[0].search).toBe('')
   })
 })
 
