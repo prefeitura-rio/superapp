@@ -19,6 +19,7 @@ interface CartereiraSectionProps {
   pets?: ModelsPet[]
   vehicles?: WalletVehicle[]
   healthCardData?: HomeWalletHealthCardData
+  isSalesforceEnabled: boolean
 }
 
 export function CarteiraSectionSkeleton() {
@@ -48,6 +49,7 @@ export default function CarteiraSection({
   healthCardData,
   pets = [],
   vehicles = [],
+  isSalesforceEnabled,
 }: CartereiraSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const walletCards = buildHomeWalletCards({
@@ -56,6 +58,7 @@ export default function CarteiraSection({
     healthCardData,
     pets,
     vehicles,
+    isSalesforceEnabled,
   })
 
   useEffect(() => {

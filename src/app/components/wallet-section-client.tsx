@@ -25,7 +25,11 @@ async function fetchWalletData(): Promise<WalletApiResponse> {
   return res.json()
 }
 
-export default function WalletSectionClient() {
+export default function WalletSectionClient({
+  isSalesforceEnabled,
+}: {
+  isSalesforceEnabled: boolean
+}) {
   const { isLoggedIn, isLoading: isAuthLoading } = useAuthStatus()
   const isAuthenticated = Boolean(isLoggedIn && !isAuthLoading)
   const cadmicroEnabled = isFeatureEnabled('cadmicro')
@@ -108,6 +112,7 @@ export default function WalletSectionClient() {
           healthCardData={healthCardData}
           pets={pets}
           vehicles={walletVehicles}
+          isSalesforceEnabled={isSalesforceEnabled}
         />
       }
       desktopComponent={
@@ -117,6 +122,7 @@ export default function WalletSectionClient() {
           healthCardData={healthCardData}
           pets={pets}
           vehicles={walletVehicles}
+          isSalesforceEnabled={isSalesforceEnabled}
         />
       }
       desktopSkeletonComponent={<CarteiraSectionSwipeSkeleton />}

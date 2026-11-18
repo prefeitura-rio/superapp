@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +14,12 @@ import Link from 'next/link'
 export default function CookiesPolicy() {
   return (
     <div className="min-h-screen bg-background py-8 pb-20">
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Política de Privacidade' },
+        ]}
+      />
       <main className="max-w-xl mx-auto px-4 space-y-8">
         {/* Header */}
         <div className="space-y-4">

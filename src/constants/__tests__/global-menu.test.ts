@@ -7,7 +7,7 @@ import type { GlobalMenuEntry, GlobalMenuLink } from '../global-menu'
  */
 async function carregarMenu(env: Record<string, string> = {}) {
   vi.resetModules()
-  vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+  vi.stubEnv('FEATURE_SALESFORCE', 'true')
   vi.stubEnv(
     'NEXT_PUBLIC_TICKET_FORM_BASE_URL',
     'https://1746.example/protocolo'
@@ -180,7 +180,7 @@ describe('destinos', () => {
 describe('feature flags', () => {
   test('sem Salesforce: some Atendimentos e Carta de serviços (rotas bloqueadas no middleware)', async () => {
     const buildGlobalMenu = await carregarMenu({
-      NEXT_PUBLIC_FEATURE_SALESFORCE: 'false',
+      FEATURE_SALESFORCE: 'false',
     })
 
     for (const logado of [true, false]) {

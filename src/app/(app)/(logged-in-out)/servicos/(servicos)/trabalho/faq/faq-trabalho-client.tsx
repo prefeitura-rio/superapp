@@ -102,7 +102,6 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
                   </h2>
                   <FormattedContent
                     content={section.content}
-                    className="text-foreground"
                     query={highlightQuery}
                   />
                 </div>

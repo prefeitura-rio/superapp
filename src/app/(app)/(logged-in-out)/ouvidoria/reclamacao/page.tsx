@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import autofalante2 from '@/assets/autofalante2.png'
 import autofalante3 from '@/assets/autofalante3.png'
@@ -9,7 +10,13 @@ export default function ReclamacaoPage() {
   return (
     <div className="pb-4 min-h-lvh max-w-xl mx-auto text-foreground flex flex-col">
       <HeaderWrapperClient />
-
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Ouvidoria', href: '/ouvidoria' },
+          { label: 'Reclamação' },
+        ]}
+      />
       <main className="flex flex-col">
         <section className="relative">
           <div className="flex flex-col mb-6 pt-2 ">

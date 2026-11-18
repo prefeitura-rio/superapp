@@ -12,10 +12,14 @@ import { server } from '@/test/mocks/server'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+const sessao = vi.hoisted(() => ({ token: 'token-sintetico' as string | null }))
+
 vi.mock('next/headers', () => ({
   cookies: async () => ({
     get: (name: string) =>
-      name === 'access_token' ? { value: 'token-sintetico' } : undefined,
+      name === 'access_token' && sessao.token
+        ? { value: sessao.token }
+        : undefined,
   }),
 }))
 
@@ -36,12 +40,13 @@ function listarSgrc() {
 describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
+    sessao.token = 'token-sintetico'
   })
 
   describe('com a flag do Salesforce desligada', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'false')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'false')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
     })
 
     test('GET /api/chamados?origem=sgrc responde 404, como o detalhe', async () => {
@@ -56,8 +61,8 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
 
   describe('com a flag do Salesforce ligada e sem o modo mock (staging e produção)', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'false')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'false')
     })
 
     test('GET /api/chamados?origem=sgrc responde 501 sem nenhum chamado fictício', async () => {
@@ -70,6 +75,17 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
       for (const protocolo of FICTICIOS) {
         expect(corpo).not.toContain(protocolo)
       }
+    })
+
+    test('DEV-612: sem sessão, GET /api/chamados?origem=sgrc responde 401 sem dados', async () => {
+      sessao.token = null
+
+      const response = await listarSgrc()
+      const corpo = JSON.stringify(await response.json())
+
+      expect(response.status).toBe(401)
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+      expect(corpo).not.toContain('protocolos')
     })
 
     test('o detalhe logado de um protocolo do mock vai à API real, não ao mock', async () => {
@@ -113,8 +129,8 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
 
   describe('com o modo mock explícito (desenvolvimento)', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
     })
 
     test('GET /api/chamados?origem=sgrc continua servindo o mock', async () => {
@@ -124,10 +140,25 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
       }
 
       expect(response.status).toBe(200)
-      expect(corpo.protocolos.map(item => item.protocolo)).toEqual([
-        PROTOCOLO_DONO_SGRC,
-        PROTOCOLO_DONO_CONCLUIDO_SGRC,
-      ])
+      const protocolos = corpo.protocolos.map(item => item.protocolo)
+      expect(protocolos.length).toBeGreaterThan(10)
+      expect(protocolos).toContain(PROTOCOLO_DONO_SGRC)
+      expect(protocolos).toContain(PROTOCOLO_DONO_CONCLUIDO_SGRC)
+      expect(protocolos).not.toContain(PROTOCOLO_TERCEIRO_SGRC)
+    })
+
+    test('DEV-612: sem sessão, nem o modo mock serve o histórico (401 sem dados)', async () => {
+      sessao.token = null
+
+      const response = await listarSgrc()
+      const corpo = JSON.stringify(await response.json())
+
+      expect(response.status).toBe(401)
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+      expect(corpo).not.toContain('protocolos')
+      for (const protocolo of FICTICIOS) {
+        expect(corpo).not.toContain(protocolo)
+      }
     })
   })
 })

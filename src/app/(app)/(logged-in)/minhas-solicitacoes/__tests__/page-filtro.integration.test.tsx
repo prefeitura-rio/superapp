@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -19,6 +19,11 @@ vi.mock('@/app/components/profile-header-wrapper', () => ({
 }))
 vi.mock('@/app/components/float-navigation-wrapper', () => ({
   FloatNavigationWrapper: () => null,
+}))
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
 }))
 
 import MyRequestsPage from '../page'
@@ -125,21 +130,47 @@ describe('/minhas-solicitacoes?filtro= (destino do menu global)', () => {
 
 describe('/minhas-solicitacoes?filtro= com o histórico SGRC (modo mock)', () => {
   beforeEach(() => {
-    vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+    vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          protocolos: [
+            {
+              protocolo: 'RIO-SGRC',
+              status: 'Aberto',
+              ordens_de_servico: [
+                {
+                  codigoOs: 'sgrc-1',
+                  servico: 'Reclamação histórica',
+                  categoria: 'Reclamação',
+                },
+              ],
+            },
+          ],
+        }),
+      })
+    )
   })
 
   afterEach(() => {
     vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
   })
 
-  it('as abas de origem aparecem e o filtro do menu continua valendo', async () => {
+  it('o seletor de data aparece e a lista SGRC abre em Todos', async () => {
     await renderPage('ouvidoria')
 
     expect(
-      screen.getByRole('button', { name: 'Chamados recentes' })
+      screen.getByRole('button', { name: 'Data de abertura' })
     ).toBeInTheDocument()
-    expect(activeTab()).toBe('Ouvidoria')
-    expect(screen.getByText('Reclamação de atendimento')).toBeInTheDocument()
-    expect(screen.queryByText('Remoção de entulho')).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.getByText('Reclamação histórica')).toBeInTheDocument()
+    )
+    expect(screen.getByRole('button', { name: 'Todos' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Ouvidoria' })
+    ).not.toBeInTheDocument()
   })
 })

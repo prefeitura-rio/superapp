@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -14,6 +15,7 @@ export default function ServicesLoading() {
           </div>
         </div>
       </header>
+      <BreadcrumbSkeleton />
       <main className="flex max-w-4xl mx-auto flex-col px-4">
         {/* Most Accessed Services Skeleton - Mobile */}
         <div className="mb-8 sm:hidden">
@@ -29,7 +31,7 @@ export default function ServicesLoading() {
               {Array.from({ length: 7 }).map((_, index) => (
                 <Skeleton
                   key={index}
-                  className="rounded-lg p-3.5 w-[140px] h-[140px] min-w-[140px] max-w-[140px] min-h-[140px] max-h-[140px] flex flex-col justify-between"
+                  className="rounded-lg p-3.5 w-35 h-35 min-w-35 max-w-35 min-h-35 max-h-35 flex flex-col justify-between"
                 >
                   {/* Icon Skeleton */}
                   <div className="mb-4">
@@ -57,7 +59,7 @@ export default function ServicesLoading() {
           <div className="grid grid-cols-4 gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={`service-${i}`} className="flex flex-col">
-                <Skeleton className="w-full aspect-square rounded-lg mb-2 h-[140px]" />
+                <Skeleton className="w-full aspect-square rounded-lg mb-2 h-35" />
               </div>
             ))}
           </div>
@@ -79,7 +81,7 @@ export default function ServicesLoading() {
             {Array.from({ length: 12 }).map((_, index) => (
               <div key={index} className="flex flex-col items-center">
                 {/* Category Card */}
-                <Skeleton className="w-full aspect-square rounded-xl max-h-[90px]" />
+                <Skeleton className="w-full aspect-square rounded-xl max-h-22.5" />
 
                 {/* Category Name */}
                 <Skeleton className="h-4 w-16 mt-2" />

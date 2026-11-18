@@ -12,7 +12,11 @@ async function fetchWalletData(): Promise<WalletApiResponse> {
   return res.json()
 }
 
-export function WalletPageClient() {
+export function WalletPageClient({
+  isSalesforceEnabled,
+}: {
+  isSalesforceEnabled: boolean
+}) {
   const { data, isLoading: isLoadingWallet } = useQuery({
     queryKey: ['wallet'],
     queryFn: fetchWalletData,
@@ -61,6 +65,7 @@ export function WalletPageClient() {
           maintenanceRequests={maintenanceRequests ?? undefined}
           healthUnitData={healthUnitData ?? undefined}
           healthUnitRiskData={healthUnitRiskData ?? undefined}
+          isSalesforceEnabled={isSalesforceEnabled}
         />
       </Suspense>
     </section>

@@ -118,11 +118,19 @@ export function VagaDetailContent({
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          {
+            label: 'Oportunidades Cariocas/Trabalho',
+            href: '/servicos/trabalho',
+          },
+          { label: vaga.titulo },
+        ]}
       />
       <div>
         <div className="max-w-4xl mx-auto">
           {/* Capa */}
-          <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6 mx-4">
+          <header className="bg-[#3E5782] rounded-b-3xl px-4 py-6">
             <div className="flex items-center justify-end">
               <button
                 type="button"

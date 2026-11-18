@@ -181,7 +181,7 @@ describe('middleware — Termos de uso', () => {
 
   describe('middleware — superfícies Salesforce', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'false')
+      vi.stubEnv('FEATURE_SALESFORCE', 'false')
     })
 
     afterEach(() => {
@@ -209,7 +209,7 @@ describe('middleware — Termos de uso', () => {
     })
 
     test('as rotas Salesforce ficam acessíveis quando habilitada', async () => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
 
       const response = await middleware(requestFor('/ouvidoria'))
 

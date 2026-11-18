@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { OptInSwitch } from '@/app/components/opt-in-switch'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { getCitizenCpfOptin } from '@/http/citizen/citizen'
@@ -25,7 +26,16 @@ export default async function ConsentForm() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col space-y-6">
-      <ProfileHeaderWrapper title="Autorizações" />
+      <div className="flex flex-col">
+        <ProfileHeaderWrapper title="Autorizações" />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Perfil do usuário', href: '/meu-perfil' },
+            { label: 'Autorizações' },
+          ]}
+        />
+      </div>
       <div className="mx-4 flex flex-col gap-2">
         <h2 className="text-3xl font-medium text-foreground tracking-tight leading-9">
           Você autoriza receber comunicações diretas pelos canais da Prefeitura

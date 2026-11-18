@@ -13,12 +13,12 @@ describe('mock do legado SGRC', () => {
     const lista = listarSgrcMock()
     const json = JSON.stringify(lista)
 
-    expect(lista.protocolos.map(item => item.protocolo)).toEqual([
-      PROTOCOLO_DONO_SGRC,
-      'RIO-10928374-2',
-    ])
+    expect(lista.protocolos.length).toBeGreaterThan(10)
+    const protocoloPrincipal = lista.protocolos.find(
+      item => item.protocolo === PROTOCOLO_DONO_SGRC
+    )
     expect(
-      lista.protocolos[0]?.ordens_de_servico.map(os => os.codigoOs)
+      protocoloPrincipal?.ordens_de_servico.map(os => os.codigoOs)
     ).toEqual(['17469002', '17469001'])
     expect(json).not.toContain(CPF_DONO_SGRC)
     expect(json).not.toContain('Rua Voluntários da Pátria')

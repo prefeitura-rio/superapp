@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import {
@@ -7,7 +8,7 @@ import {
 } from '@/lib/carta-servicos/org-units'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Lei13460Text } from './components/lei-13460-text'
+import { Lei13460Text } from '../components/lei-13460-text'
 
 export const revalidate = 600
 
@@ -32,6 +33,12 @@ export default async function CartaDeServicosPage() {
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Carta de serviços' },
+        ]}
+      />
       <main className="w-full max-w-4xl mx-auto px-4 pb-10">
         <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 tracking-tight text-primary">
           Carta de serviços

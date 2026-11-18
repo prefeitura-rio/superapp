@@ -11,6 +11,8 @@ import { getUserInfoFromToken } from '@/lib/user-info'
 import { getDisplayName } from '@/lib/utils'
 import Link from 'next/link'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
+
 // Revalidate this page when needed
 export const revalidate = 0
 
@@ -50,6 +52,12 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-4xl mb-10 lg:mb-0 mx-auto text-foreground flex flex-col">
       <ProfileHeaderWrapper hideAvatar title="Dados pessoais" />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Perfil do usuário' },
+        ]}
+      />
 
       {/* Profile Info */}
       <div className="flex flex-col items-center mt-6 mb-10">

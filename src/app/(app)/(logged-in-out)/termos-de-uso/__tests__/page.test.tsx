@@ -12,8 +12,8 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, back }),
 }))
 
-import * as listPageModule from '../page'
-import TermosDeUsoPage from '../page'
+import * as listPageModule from '../(main)/page'
+import TermosDeUsoPage from '../(main)/page'
 
 function platformLinks() {
   const nav = screen.getByRole('navigation', { name: 'Plataformas' })
@@ -152,13 +152,14 @@ describe('/termos-de-uso', () => {
     )
   })
 
-  it('voltar sem página anterior do site leva para a home', async () => {
-    const user = userEvent.setup()
+  it('breadcrumb de navegação estrutural está presente', () => {
     render(<TermosDeUsoPage />)
 
-    await user.click(screen.getByRole('button', { name: 'Voltar' }))
-
-    expect(push).toHaveBeenCalledWith('/')
-    expect(back).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole('navigation', { name: 'Navegação estrutural' })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Voltar' })
+    ).not.toBeInTheDocument()
   })
 })

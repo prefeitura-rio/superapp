@@ -12,6 +12,11 @@ import { describe, expect, it } from 'vitest'
  *
  * As páginas de detalhe abaixo chamam `notFound()` para slug inexistente, então
  * nenhum diretório entre `src/app` e elas pode ter `loading.*`.
+ *
+ * Exceção: `(service-detail)` tem `loading.tsx` próprio para skeleton
+ * instantâneo (ver SOFT_404_ALLOWED em not-found-sem-loading.test.ts).
+ * O Next.js injeta `<meta name="robots" content="noindex">` no soft 404,
+ * evitando indexação incorreta pelo Google.
  */
 
 const APP_DIR = path.resolve(__dirname, '../app')
@@ -25,6 +30,9 @@ const detailPages = [
   `${SERVICOS}/categoria/[category-slug]/[...service-params]/(service-detail)`,
   `${SERVICOS}/(servicos)/empresas/[cnpj]`,
 ]
+
+// Soft 404 intencional: loading.tsx para skeleton instantâneo (noindex no HTML).
+const SOFT_404_DETAIL = `${SERVICOS}/categoria/[category-slug]/[...service-params]/(service-detail)`
 
 const listingPages = [
   `${SERVICOS}/(servicos)/trabalho/(main)`,
@@ -56,12 +64,16 @@ describe('páginas de /servicos que chamam notFound()', () => {
     expect(source).toContain('notFound()')
   })
 
-  it.each(detailPages)(
+  it.each(detailPages.filter(d => d !== SOFT_404_DETAIL))(
     '%s não fica dentro de um loading.* (o 404 sai antes do stream)',
     routeDir => {
       expect(loadingFilesAbove(routeDir)).toEqual([])
     }
   )
+
+  it('(service-detail) tem loading.tsx próprio (skeleton instantâneo — soft 404 documentado)', () => {
+    expect(loadingFilesAbove(SOFT_404_DETAIL)).not.toEqual([])
+  })
 })
 
 describe('listagens de /servicos', () => {

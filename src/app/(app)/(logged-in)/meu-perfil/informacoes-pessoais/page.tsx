@@ -1,4 +1,5 @@
 import { ActionDiv } from '@/app/components/action-div'
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { BirthDateDrawerContent } from '@/app/components/drawer-contents/birth-date-drawer-content'
 import { DisabilityDrawerContent } from '@/app/components/drawer-contents/disability-drawer-content'
 import { DisplayNameDrawerContent } from '@/app/components/drawer-contents/display-name-drawer-content'
@@ -66,6 +67,13 @@ export default async function PersonalInfoForm() {
     <>
       <div className="max-w-4xl mx-auto pb-10 bg-background">
         <ProfileHeaderWrapper title="Informações pessoais" />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Perfil do usuário', href: '/meu-perfil' },
+            { label: 'Dados básicos' },
+          ]}
+        />
         <div className="space-y-6 p-4">
           <CustomInput
             id="cpf"

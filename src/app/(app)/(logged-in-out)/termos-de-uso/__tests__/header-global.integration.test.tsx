@@ -22,8 +22,8 @@ vi.mock('next/navigation', () => ({
 }))
 vi.mock('@next/third-parties/google', () => ({ sendGAEvent: vi.fn() }))
 
+import TermosDeUsoPage from '../(main)/page'
 import TermosDeUsoPlataformaPage from '../[plataforma]/page'
-import TermosDeUsoPage from '../page'
 
 const AUTH_BASE =
   'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'
@@ -45,7 +45,8 @@ const SCREENS = [
   {
     name: 'lista',
     render: async () => <TermosDeUsoPage />,
-    back: () => screen.getByRole('button', { name: 'Voltar' }),
+    back: () =>
+      screen.getByRole('navigation', { name: 'Navegação estrutural' }),
   },
   {
     name: 'detalhe',
@@ -53,7 +54,8 @@ const SCREENS = [
       TermosDeUsoPlataformaPage({
         params: Promise.resolve({ plataforma: 'prefrio-site' }),
       }),
-    back: () => screen.getByRole('link', { name: 'Voltar para Termos de uso' }),
+    back: () =>
+      screen.getByRole('navigation', { name: 'Navegação estrutural' }),
   },
 ] as const
 

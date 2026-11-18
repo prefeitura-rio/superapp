@@ -29,8 +29,8 @@ vi.mock('next/navigation', () => ({
   },
 }))
 
+import CartaDeServicosPage from '../(main)/page'
 import CartaDeServicosOrgaoPage from '../[siciCode]/page'
-import CartaDeServicosPage from '../page'
 
 const CET: CartaOrgUnit = {
   siciCode: '2951',
@@ -68,7 +68,8 @@ describe('/carta-de-servicos', () => {
     expect(container.querySelectorAll('main')).toHaveLength(1)
     expect(screen.getByRole('button', { name: 'Ver mais' })).toBeInTheDocument()
 
-    const list = screen.getByRole('list')
+    const main = screen.getByRole('main')
+    const list = within(main).getByRole('list')
     const links = within(list).getAllByRole('link')
     expect(links.map(link => link.textContent)).toEqual([
       'Companhia de Engenharia de Tráfego do Rio de Janeiro - CET-RIO',
@@ -84,7 +85,8 @@ describe('/carta-de-servicos', () => {
     expect(
       screen.getByText(/Não foi possível carregar a lista de órgãos/)
     ).toBeInTheDocument()
-    expect(screen.queryByRole('list')).not.toBeInTheDocument()
+    const main = screen.getByRole('main')
+    expect(within(main).queryByRole('list')).not.toBeInTheDocument()
   })
 
   it('lista vazia tem estado próprio', async () => {

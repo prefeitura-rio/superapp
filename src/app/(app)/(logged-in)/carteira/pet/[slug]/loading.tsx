@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function PetPageLoading() {
@@ -13,9 +14,10 @@ export default function PetPageLoading() {
           </div>
         </div>
       </div>
+      <BreadcrumbSkeleton />
       <div className="max-w-4xl mx-auto pb-10 pt-2">
         <div className="px-4 flex flex-col gap-4">
-          <Skeleton className="w-full h-[185px] rounded-2xl" />
+          <Skeleton className="w-full h-46.25 rounded-2xl" />
           <div className="flex justify-center gap-1">
             <Skeleton className="w-2 h-2 rounded-full" />
             <Skeleton className="w-2 h-2 rounded-full" />

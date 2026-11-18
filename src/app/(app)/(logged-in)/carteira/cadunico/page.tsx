@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { SocialAssistanceCard } from '@/app/components/wallet-cards/social-assistance-card'
 import { CalendarIcon } from '@/assets/icons'
@@ -32,6 +33,13 @@ export default async function SocialAssistanceCardDetail() {
   return (
     <div className="max-w-4xl mx-auto pb-10">
       <ProfileHeaderWrapper title="Documentos" />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Documentos/Cartões', href: '/carteira' },
+          { label: 'CadÚnico' },
+        ]}
+      />
       <div className="z-50">
         <div className="px-4 pt-2">
           <SocialAssistanceCard

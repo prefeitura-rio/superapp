@@ -55,7 +55,15 @@ export default async function ServicePage({
     notFound()
   }
 
-  await getCategoryNameBySlug(categorySlug)
+  const decodedCategorySlug = decodeURIComponent(categorySlug)
+  let categoryName =
+    decodedCategorySlug.charAt(0).toUpperCase() + decodedCategorySlug.slice(1)
+  try {
+    const fetched = await getCategoryNameBySlug(decodedCategorySlug)
+    if (fetched) categoryName = fetched
+  } catch {
+    // fallback ao slug decodificado
+  }
 
   // Fetch orgao gestor name from Departments API
   let orgaoGestorName: string | null = null
@@ -106,6 +114,7 @@ export default async function ServicePage({
       serviceData={serviceForPage}
       orgaoGestorName={orgaoGestorName}
       categorySlug={categorySlug}
+      categoryName={categoryName}
       contentFormat={contentFormat}
       ticketFlags={ticketFlags}
     />

@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function FaqPrefRioLoading() {
@@ -13,6 +14,7 @@ export default function FaqPrefRioLoading() {
           </div>
         </div>
       </div>
+      <BreadcrumbSkeleton />
       <div className="max-w-4xl mx-auto px-4 pt-4 pb-10">
         <div className="space-y-14">
           {Array.from({ length: 3 }).map((_, sIdx) => (

@@ -1,3 +1,4 @@
+import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function WalletEducationLoading() {
@@ -13,6 +14,7 @@ export default function WalletEducationLoading() {
           </div>
         </div>
       </div>
+      <BreadcrumbSkeleton />
       <div className="max-w-4xl mx-auto pb-10">
         <div className="z-50">
           <div className="px-4 pt-2">

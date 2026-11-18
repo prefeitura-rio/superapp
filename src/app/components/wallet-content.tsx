@@ -33,6 +33,7 @@ interface WalletContentProps {
   maintenanceRequests?: ModelsMaintenanceRequest[]
   healthUnitData?: HealthUnitInfo
   healthUnitRiskData?: HealthUnitRisk
+  isSalesforceEnabled: boolean
 }
 
 export function WalletContent({
@@ -41,6 +42,7 @@ export function WalletContent({
   maintenanceRequests,
   healthUnitData,
   healthUnitRiskData,
+  isSalesforceEnabled,
 }: WalletContentProps) {
   const searchParams = useSearchParams()
   const cadmicroEnabled = isFeatureEnabled('cadmicro')
@@ -228,6 +230,7 @@ export function WalletContent({
             maintenanceRequests={maintenanceRequests}
             healthUnitData={healthUnitData}
             healthUnitRiskData={healthUnitRiskData}
+            isSalesforceEnabled={isSalesforceEnabled}
           />
         )}
       </div>

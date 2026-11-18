@@ -4,7 +4,9 @@ import { listChamados } from '@/http-pref-rio-cidadao/default/default'
 import { isSgrcHistoryMockEnabled } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
+import { Suspense } from 'react'
 import { OrigemChamados } from './components/origem-chamados'
+import { SolicitacoesBreadcrumb } from './components/solicitacoes-breadcrumb'
 import {
   filterTabFromParam,
   formatDate,
@@ -24,7 +26,6 @@ export default async function MyRequestsPage({
   const filtroInicial = filterTabFromParam((await searchParams)?.filtro)
   const response = await listChamados()
   const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
-
   const protocolos = [
     ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
     ...(IS_MOCK_ENABLED ? MOCK_LIST.protocolos : []),
@@ -45,6 +46,9 @@ export default async function MyRequestsPage({
   return (
     <div className="text-foreground">
       <ProfileHeaderWrapper />
+      <Suspense>
+        <SolicitacoesBreadcrumb />
+      </Suspense>
       <div className="max-w-4xl mx-auto px-4 pb-4">
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações

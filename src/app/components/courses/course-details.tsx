@@ -1004,10 +1004,15 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/servicos/cursos/busca"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Oportunidades Cariocas/Cursos', href: '/servicos/cursos' },
+          { label: course.title ?? '' },
+        ]}
       />
-      <div className="bg-white dark:bg-background">
+      <div className="bg-background">
         <div className="flex flex-col items-center pb-20">
-          <div className="w-full max-w-4xl px-4">
+          <div className="w-full max-w-4xl">
             {/* Confirmation Bottom Sheet */}
             <BottomSheet
               open={showConfirmation}

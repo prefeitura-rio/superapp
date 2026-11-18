@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { useFaqHighlight } from '@/hooks/useFaqHighlight'
 import { useSectionTracker } from '@/hooks/useSectionTracker'
@@ -29,6 +30,13 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Perguntas Frequentes', href: '/faq' },
+          { label: 'Perguntas Frequentes: Trabalho' },
+        ]}
+      />
       <main className="max-w-4xl min-h-lvh mx-auto pb-10">
         {showMini && (
           <>
@@ -77,7 +85,6 @@ export function FaqTrabalhoClient({ sections }: { sections: FaqSection[] }) {
                   </h2>
                   <FormattedContent
                     content={section.content}
-                    className="text-foreground"
                     query={highlightQuery}
                   />
                 </div>

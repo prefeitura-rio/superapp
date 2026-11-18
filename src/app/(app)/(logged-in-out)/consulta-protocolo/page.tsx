@@ -6,6 +6,7 @@ import {
   mapCategoria,
   normalizeStatus,
 } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { useRouter } from 'next/navigation'
@@ -105,6 +106,13 @@ export default function ConsultaProtocoloPage() {
     return (
       <div className="text-foreground">
         <HeaderWrapperClient />
+        <Breadcrumb
+          items={[
+            { label: 'Página inicial', href: '/' },
+            { label: 'Ouvidoria', href: '/ouvidoria' },
+            { label: 'Consulte seu protocolo' },
+          ]}
+        />
         <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-4">
           <div className="bg-card rounded-2xl p-4">
             <p className="text-sm text-foreground-light leading-5">
@@ -159,6 +167,13 @@ export default function ConsultaProtocoloPage() {
   return (
     <div className="text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Ouvidoria', href: '/ouvidoria' },
+          { label: 'Consulte seu protocolo' },
+        ]}
+      />
       <main className="max-w-4xl mx-auto pb-32 px-4 flex flex-col gap-6 pt-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-medium text-foreground leading-9 tracking-tight">

@@ -52,6 +52,11 @@ export function FaqCursosClient({ sections }: { sections: FaqSection[] }) {
         logoHref="/servicos/cursos"
         showSearchIcon
         searchUrl="/busca?tipo=cursos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Oportunidades Cariocas/Cursos', href: '/servicos/cursos' },
+          { label: 'FAQ' },
+        ]}
       />
       <div className="max-w-4xl mx-auto text-foreground pb-10">
         {showMini && (
