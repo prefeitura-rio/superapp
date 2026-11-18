@@ -7,6 +7,8 @@ import type {
 import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import { fetchServiceBySlug, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
+import { ServiceDetailLoading } from './components/service-detail-loading'
 import { PageClientWrapper } from './page-client-wrapper'
 
 export const revalidate = 1800
@@ -30,14 +32,30 @@ export default async function ServicePage({
   const { 'category-slug': categorySlug, 'service-params': serviceParams } =
     await params
 
-  // Extract service slug from params (first param is the service slug)
   const serviceSlug = serviceParams?.[0]
 
+  // Verificação síncrona antes do Suspense — preserva o status 404 real.
   if (!serviceSlug) {
     notFound()
   }
 
-  // Fetch the service data using the slug endpoint
+  return (
+    <Suspense fallback={<ServiceDetailLoading />}>
+      <ServiceDetailContent
+        serviceSlug={serviceSlug}
+        categorySlug={categorySlug}
+      />
+    </Suspense>
+  )
+}
+
+async function ServiceDetailContent({
+  serviceSlug,
+  categorySlug,
+}: {
+  serviceSlug: string
+  categorySlug: string
+}) {
   const serviceData = await fetchServiceBySlug(serviceSlug)
 
   if (!serviceData) {
