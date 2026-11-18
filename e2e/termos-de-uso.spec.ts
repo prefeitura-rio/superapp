@@ -30,10 +30,20 @@ function searchBox(page: Page) {
   return page.getByRole('searchbox', { name: 'Buscar plataforma' })
 }
 
-function backgroundOf(page: Page, name: string) {
-  return page
-    .getByRole('button', { name })
-    .evaluate(el => getComputedStyle(el).backgroundColor)
+/**
+ * Breadcrumb "Navegação estrutural" abaixo do Header Global, no lugar do
+ * antigo voltar: Página inicial › Termos de uso (› Termos de uso: <plataforma>).
+ */
+function breadcrumb(page: Page) {
+  return page.getByRole('navigation', { name: 'Navegação estrutural' })
+}
+
+function breadcrumbLink(page: Page, name: string) {
+  return breadcrumb(page).getByRole('link', { name, exact: true })
+}
+
+function underlineOf(link: ReturnType<Page['locator']>) {
+  return link.evaluate(el => getComputedStyle(el).textDecorationLine)
 }
 
 test.describe('Termos de uso — lista (público)', () => {
@@ -164,37 +174,42 @@ test.describe('Termos de uso — lista (público)', () => {
     ).toBeVisible()
   })
 
-  test('voltar retorna à página anterior do site', async ({
+  test('breadcrumb Página inicial › Termos de uso, sem o antigo voltar', async ({
     page,
-    baseURL,
   }) => {
-    await page.goto('/servicos')
-    await page.goto('/termos-de-uso', { referer: `${baseURL}/servicos` })
+    await page.goto('/termos-de-uso')
+    const nav = breadcrumb(page)
 
-    await page.getByRole('button', { name: 'Voltar' }).click()
-    await page.waitForURL(/\/servicos$/)
+    await expect(nav).toBeVisible()
+    await expect(nav.getByRole('link')).toHaveText(['Página inicial'])
+    await expect(breadcrumbLink(page, 'Página inicial')).toHaveAttribute(
+      'href',
+      '/'
+    )
+    await expect(nav.locator('[aria-current="page"]')).toHaveText(
+      'Termos de uso'
+    )
+    await expect(page.getByRole('button', { name: 'Voltar' })).toHaveCount(0)
   })
 
-  test('voltar em acesso direto leva para a home, sem sair do site', async ({
+  test('Página inicial do breadcrumb leva para a home, sem sair do site', async ({
     page,
   }) => {
     await page.goto('/termos-de-uso')
 
-    await page.getByRole('button', { name: 'Voltar' }).click()
+    await breadcrumbLink(page, 'Página inicial').click()
     await page.waitForURL(url => url.pathname === '/')
   })
 
-  test('voltar muda de default para focused no hover (desktop)', async ({
-    page,
-  }) => {
+  test('link do breadcrumb sublinha no hover (desktop)', async ({ page }) => {
     await page.goto('/termos-de-uso')
-    const back = page.getByRole('button', { name: 'Voltar' })
-    await expect(back).toBeVisible()
+    const home = breadcrumbLink(page, 'Página inicial')
+    await expect(home).toBeVisible()
 
     await page.mouse.move(0, 0)
-    const idle = await backgroundOf(page, 'Voltar')
-    await back.hover()
-    await expect.poll(() => backgroundOf(page, 'Voltar')).not.toBe(idle)
+    expect(await underlineOf(home)).toBe('none')
+    await home.hover()
+    await expect.poll(() => underlineOf(home)).toBe('underline')
   })
 })
 
@@ -228,7 +243,7 @@ test.describe('Termos de uso — lista (autenticado)', () => {
       page.getByRole('banner').getByText('Faça seu login')
     ).toHaveCount(0)
 
-    await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+    await breadcrumbLink(page, 'Termos de uso').click()
     await page.waitForURL(/\/termos-de-uso$/)
     await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
   })
@@ -271,7 +286,7 @@ test.describe('Termos de uso — detalhe (público)', () => {
   })
 
   for (const platform of PLATFORMS) {
-    test(`${platform.name}: a lista abre o detalhe com título próprio e o voltar retorna à lista`, async ({
+    test(`${platform.name}: a lista abre o detalhe com título próprio e o breadcrumb volta à lista`, async ({
       page,
     }) => {
       await page.goto('/termos-de-uso')
@@ -287,9 +302,19 @@ test.describe('Termos de uso — detalhe (público)', () => {
         page.getByRole('heading', { name: '1. Da ciência do Termo de uso' })
       ).toBeVisible()
 
-      await page
-        .getByRole('link', { name: 'Voltar para Termos de uso' })
-        .click()
+      const nav = breadcrumb(page)
+      await expect(nav.getByRole('link')).toHaveText([
+        'Página inicial',
+        'Termos de uso',
+      ])
+      await expect(nav.locator('[aria-current="page"]')).toHaveText(
+        `Termos de uso: ${platform.name}`
+      )
+      await expect(
+        page.getByRole('link', { name: 'Voltar para Termos de uso' })
+      ).toHaveCount(0)
+
+      await breadcrumbLink(page, 'Termos de uso').click()
       await page.waitForURL(/\/termos-de-uso$/)
       await expect(
         page.getByRole('heading', { level: 1, name: 'Termos de uso' })
@@ -319,12 +344,16 @@ test.describe('Termos de uso — detalhe (público)', () => {
     ).toBeVisible()
   })
 
-  test('voltar do detalhe em acesso direto também vai para a lista', async ({
+  test('breadcrumb do detalhe em acesso direto também vai para a lista', async ({
     page,
   }) => {
     await page.goto('/termos-de-uso/empregos')
+    await expect(breadcrumbLink(page, 'Página inicial')).toHaveAttribute(
+      'href',
+      '/'
+    )
 
-    await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+    await breadcrumbLink(page, 'Termos de uso').click()
     await page.waitForURL(/\/termos-de-uso$/)
   })
 
@@ -335,18 +364,17 @@ test.describe('Termos de uso — detalhe (público)', () => {
     await expect(page.getByText('Página não encontrada')).toBeVisible()
   })
 
-  test('voltar do detalhe muda de default para focused no hover (desktop)', async ({
+  test('link do breadcrumb do detalhe sublinha no hover (desktop)', async ({
     page,
   }) => {
     await page.goto('/termos-de-uso/cursos')
-    const back = page.getByRole('link', { name: 'Voltar para Termos de uso' })
-    await expect(back).toBeVisible()
-    const bgOf = () => back.evaluate(el => getComputedStyle(el).backgroundColor)
+    const list = breadcrumbLink(page, 'Termos de uso')
+    await expect(list).toBeVisible()
 
     await page.mouse.move(0, 0)
-    const idle = await bgOf()
-    await back.hover()
-    await expect.poll(bgOf).not.toBe(idle)
+    expect(await underlineOf(list)).toBe('none')
+    await list.hover()
+    await expect.poll(() => underlineOf(list)).toBe('underline')
   })
 
   test('desktop: conteúdo limitado a 896px', async ({ page }) => {
@@ -472,35 +500,25 @@ test.describe('Termos de uso — texto atual em todas as plataformas', () => {
 
 /**
  * Header Global PrefRio (PREF-525) nas duas telas: logo à esquerda, Perfil e
- * Menu à direita, sem header próprio; o voltar do handoff fica abaixo dele.
+ * Menu à direita, sem header próprio; o breadcrumb fica abaixo dele.
  */
 const SCREENS = [
   {
     name: 'lista',
     path: '/termos-de-uso',
-    back: { role: 'button', name: 'Voltar' },
+    up: 'Página inicial',
   },
   {
     name: 'detalhe',
     path: '/termos-de-uso/prefrio-site',
-    back: { role: 'link', name: 'Voltar para Termos de uso' },
+    up: 'Termos de uso',
   },
 ] as const
 
-function backControl(page: Page, screen: (typeof SCREENS)[number]) {
-  return page.getByRole(screen.back.role, {
-    name: screen.back.name,
-    exact: true,
-  })
-}
-
-async function expectBackBelowHeader(
-  page: Page,
-  screen: (typeof SCREENS)[number]
-) {
+async function expectBreadcrumbBelowHeader(page: Page) {
   const header = await page.getByRole('banner').boundingBox()
-  const back = await backControl(page, screen).boundingBox()
-  expect(header && back && back.y >= header.y + header.height).toBe(true)
+  const nav = await breadcrumb(page).boundingBox()
+  expect(header && nav && nav.y >= header.y + header.height).toBe(true)
 }
 
 test.describe('Termos de uso — Header Global (público)', () => {
@@ -509,7 +527,7 @@ test.describe('Termos de uso — Header Global (público)', () => {
   })
 
   for (const screen of SCREENS) {
-    test(`${screen.name}: Header Global com logo, login e Menu; voltar abaixo dele`, async ({
+    test(`${screen.name}: Header Global com logo, login e Menu; breadcrumb abaixo dele`, async ({
       page,
     }) => {
       await page.goto(screen.path)
@@ -533,7 +551,7 @@ test.describe('Termos de uso — Header Global (público)', () => {
         page.getByRole('navigation', { name: 'Oportunidades Cariocas' })
       ).toHaveCount(0)
 
-      await expectBackBelowHeader(page, screen)
+      await expectBreadcrumbBelowHeader(page)
     })
 
     test(`${screen.name}: a logo do Header Global leva à home`, async ({
@@ -598,8 +616,8 @@ test.describe('Termos de uso — Header Global (autenticado)', () => {
       await expect(banner.getByText('Faça seu login')).toHaveCount(0)
       await expect(banner.getByText('Menu', { exact: true })).toBeAttached()
 
-      await expectBackBelowHeader(page, screen)
-      await backControl(page, screen).click()
+      await expectBreadcrumbBelowHeader(page)
+      await breadcrumbLink(page, screen.up).click()
       if (screen.name === 'detalhe') await page.waitForURL(/\/termos-de-uso$/)
       else await page.waitForURL(url => url.pathname === '/')
     })
@@ -609,7 +627,7 @@ test.describe('Termos de uso — Header Global (autenticado)', () => {
 /**
  * Responsividade fiel ao Figma (seção Responsividade das duas telas):
  * mobile 360px com margem de 16px e desktop com conteúdo de 896px; distâncias
- * medidas no handoff (voltar → título 24, título colado ao subtítulo,
+ * medidas no handoff (breadcrumb → título 24, título colado ao subtítulo,
  * subtítulo → busca 16, busca com 56 de altura, itens de 14px etc.).
  */
 interface Box {
@@ -664,7 +682,8 @@ for (const viewport of VIEWPORTS) {
     }) => {
       await page.goto('/termos-de-uso')
       const main = page.getByRole('main')
-      const back = await box(page.getByRole('button', { name: 'Voltar' }))
+      const nav = await box(breadcrumb(page))
+      const trail = await box(breadcrumb(page).getByRole('list'))
       const h1 = await box(main.getByRole('heading', { level: 1 }))
       const sub = await box(main.locator('h1 + p'))
       const search = await box(page.getByRole('search'))
@@ -675,16 +694,11 @@ for (const viewport of VIEWPORTS) {
       const first = await box(items.first())
 
       expect((await box(main)).width).toBe(Math.min(viewport.width, 896))
-      for (const b of [h1, search, first]) {
+      for (const b of [trail, h1, search, first]) {
         expect(b.left).toBe(viewport.contentLeft)
         expect(b.width).toBe(viewport.contentWidth)
       }
-      expect(back).toMatchObject({
-        left: viewport.contentLeft,
-        width: 44,
-        height: 44,
-      })
-      expect(h1.top - back.bottom).toBe(24)
+      expect(h1.top - nav.bottom).toBe(24)
       expect(sub.top).toBe(h1.bottom)
       expect(search.top - sub.bottom).toBe(16)
       expect(search.height).toBe(56)
@@ -710,9 +724,8 @@ for (const viewport of VIEWPORTS) {
     }) => {
       await page.goto('/termos-de-uso/prefrio-site')
       const main = page.getByRole('main')
-      const back = await box(
-        page.getByRole('link', { name: 'Voltar para Termos de uso' })
-      )
+      const nav = await box(breadcrumb(page))
+      const trail = await box(breadcrumb(page).getByRole('list'))
       const h1 = await box(main.getByRole('heading', { level: 1 }))
       const sub = await box(main.locator('h1 + p'))
       const article = page.getByRole('article')
@@ -721,9 +734,11 @@ for (const viewport of VIEWPORTS) {
       const s2 = await box(sections.nth(1))
 
       expect((await box(main)).width).toBe(Math.min(viewport.width, 896))
-      expect(h1.left).toBe(viewport.contentLeft)
-      expect(h1.width).toBe(viewport.contentWidth)
-      expect(h1.top - back.bottom).toBe(24)
+      for (const b of [trail, h1]) {
+        expect(b.left).toBe(viewport.contentLeft)
+        expect(b.width).toBe(viewport.contentWidth)
+      }
+      expect(h1.top - nav.bottom).toBe(24)
       expect(sub.top).toBe(h1.bottom)
       expect((await box(article)).top - sub.bottom).toBe(20)
       expect(s2.top - s1.bottom).toBe(28)
@@ -756,17 +771,6 @@ for (const viewport of VIEWPORTS) {
  * `@media (hover: hover)` e `active:` sem condição.
  */
 const STATE_CONTROLS = [
-  {
-    screen: '/termos-de-uso',
-    name: 'voltar da lista',
-    get: (page: Page) => page.getByRole('button', { name: 'Voltar' }),
-  },
-  {
-    screen: '/termos-de-uso/cursos',
-    name: 'voltar do detalhe',
-    get: (page: Page) =>
-      page.getByRole('link', { name: 'Voltar para Termos de uso' }),
-  },
   {
     screen: '/termos-de-uso',
     name: 'Menu do Header Global',
@@ -858,6 +862,20 @@ test.describe('Termos de uso — estados dos botões no toque (mobile)', () => {
       await expect.poll(bg).not.toBe(idle)
     })
   }
+
+  test('link do breadcrumb: sem sublinhado de hover no toque', async ({
+    page,
+  }) => {
+    await page.goto('/termos-de-uso/cursos')
+    const list = breadcrumbLink(page, 'Termos de uso')
+    await expect(list).toBeVisible()
+    const box = await list.boundingBox()
+    if (!box) throw new Error('link do breadcrumb sem bounding box')
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(400)
+    expect(await underlineOf(list)).toBe('none')
+  })
 })
 
 test.describe('Termos de uso — busca com estado focused', () => {
@@ -942,7 +960,7 @@ async function expectListThenDetailThenBack(page: Page) {
   await page.waitForURL('**/termos-de-uso/cursos')
   await expect(detailHeading(page, 'Cursos')).toBeVisible()
 
-  await page.getByRole('link', { name: 'Voltar para Termos de uso' }).click()
+  await breadcrumbLink(page, 'Termos de uso').click()
   await page.waitForURL(url => url.pathname === '/termos-de-uso')
   await expect(platformLinks(page)).toHaveCount(PLATFORMS.length)
 }
@@ -1181,7 +1199,7 @@ test.describe('Termos de uso — voltar para o currículo (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('?origem=curriculo troca o voltar da lista pelo voltar para o currículo', async ({
+  test('?origem=curriculo mostra o voltar para o currículo, junto do breadcrumb', async ({
     page,
   }) => {
     await page.goto(TERMOS_DO_CURRICULO)
@@ -1190,19 +1208,24 @@ test.describe('Termos de uso — voltar para o currículo (público)', () => {
     await expect(
       page.getByRole('button', { name: BACK_TO_CURRICULO })
     ).toBeVisible()
+    await expect(breadcrumbLink(page, 'Termos de uso')).toHaveAttribute(
+      'href',
+      '/termos-de-uso'
+    )
     await expect(
       page.getByRole('link', { name: 'Voltar para Termos de uso' })
     ).toHaveCount(0)
   })
 
-  test('origem desconhecida é ignorada: o voltar continua indo para a lista', async ({
+  test('origem desconhecida é ignorada: sem voltar para o currículo, o breadcrumb segue indo para a lista', async ({
     page,
   }) => {
     await page.goto('/termos-de-uso/empregos?origem=qualquer-coisa')
 
-    await expect(
-      page.getByRole('link', { name: 'Voltar para Termos de uso' })
-    ).toHaveAttribute('href', '/termos-de-uso')
+    await expect(breadcrumbLink(page, 'Termos de uso')).toHaveAttribute(
+      'href',
+      '/termos-de-uso'
+    )
     await expect(
       page.getByRole('button', { name: BACK_TO_CURRICULO })
     ).toHaveCount(0)
