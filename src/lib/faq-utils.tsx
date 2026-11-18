@@ -120,7 +120,7 @@ function highlightText(text: string, query: string) {
         part.toLowerCase() === query.toLowerCase() ? (
           <mark
             key={i}
-            className="bg-neutral-200 dark:bg-neutral-700 rounded-sm px-0.5 text-inherit not-italic"
+            className="bg-neutral-200 dark:bg-neutral-700 rounded-sm px-0.5 text-foreground not-italic"
           >
             {part}
           </mark>

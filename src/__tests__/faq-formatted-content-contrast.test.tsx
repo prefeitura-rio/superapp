@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
  * DEV-581 — o texto das respostas de FAQ (`FormattedContent`) precisa de
  * contraste de pelo menos 4.5:1 com o fundo da página (WCAG 2.1 AA, 1.4.3,
  * texto normal), nos temas claro e escuro e em todas as chamadas do
- * componente. O contraste é calculado a partir das classes realmente
+ * componente, inclusive no termo destacado pela busca (`<mark>`). O contraste é calculado a partir das classes realmente
  * aplicadas no `<p>` e dos tokens de `globals.css`, compondo a opacidade do
  * Tailwind (`opacity-*`) sobre o fundo.
  */
@@ -66,29 +66,65 @@ function composite(fg: Rgb, bg: Rgb, alpha: number): Rgb {
   return fg.map((c, i) => c * alpha + bg[i] * (1 - alpha)) as unknown as Rgb
 }
 
-/** Cor efetiva do texto do `<p>`: token `text-*` composto com `opacity-*`. */
-function effectiveTextColor(classes: string[], theme: Theme, bg: Rgb): Rgb {
-  const colorClass = classes.find(c =>
-    /^text-(foreground|foreground-light)$/.test(c)
-  )
-  if (!colorClass) {
-    throw new Error(`sem classe de cor de texto: ${classes.join(' ')}`)
-  }
-  const opacityClass = classes.find(c => /^opacity-\d+$/.test(c))
-  const alpha = opacityClass ? Number(opacityClass.split('-')[1]) / 100 : 1
-  return composite(token(theme, colorClass.slice('text-'.length)), bg, alpha)
+/**
+ * Fundo do termo destacado pela busca (`<mark>` de `highlightText`):
+ * `bg-neutral-200` / `dark:bg-neutral-700` da paleta padrão do Tailwind 4
+ * (`oklch(92.2% 0 0)` e `oklch(37.1% 0 0)`), convertidos para sRGB.
+ */
+const MARK_BACKGROUND: Record<Theme, Rgb> = {
+  light: hexToRgb('#e5e5e5'),
+  dark: hexToRgb('#404040'),
 }
 
-function paragraphClasses(className?: string): string[] {
-  const { container } = render(
+function colorToken(classes: string[]): string | undefined {
+  return classes
+    .find(c => /^text-(foreground|foreground-light)$/.test(c))
+    ?.slice('text-'.length)
+}
+
+function opacityOf(classes: string[]): number {
+  const opacityClass = classes.find(c => /^opacity-\d+$/.test(c))
+  return opacityClass ? Number(opacityClass.split('-')[1]) / 100 : 1
+}
+
+type Rendered = { paragraph: string[]; mark: string[] }
+
+function renderClasses(className?: string): Rendered {
+  const { container, unmount } = render(
     <FormattedContent
-      content="Resposta com **negrito** e texto."
+      content="Resposta sobre o CPF com **negrito** e texto."
       className={className}
+      query="cpf"
     />
   )
   const p = container.querySelector('p')
+  const mark = container.querySelector('mark')
   if (!p) throw new Error('FormattedContent não renderizou <p>')
-  return Array.from(p.classList)
+  if (!mark) throw new Error('FormattedContent não destacou o termo buscado')
+  const rendered = {
+    paragraph: Array.from(p.classList),
+    mark: Array.from(mark.classList),
+  }
+  unmount()
+  return rendered
+}
+
+/** Contraste do texto do `<p>` sobre o fundo da página, compondo `opacity-*`. */
+function paragraphContrast(r: Rendered, theme: Theme, pageBg: Rgb): number {
+  const name = colorToken(r.paragraph)
+  if (!name) throw new Error(`sem cor de texto: ${r.paragraph.join(' ')}`)
+  const fg = composite(token(theme, name), pageBg, opacityOf(r.paragraph))
+  return contrastRatio(fg, pageBg)
+}
+
+/** Contraste do termo destacado sobre o fundo do `<mark>`. */
+function markContrast(r: Rendered, theme: Theme, pageBg: Rgb): number {
+  const name = colorToken(r.mark) ?? colorToken(r.paragraph)
+  if (!name) throw new Error(`sem cor de texto: ${r.mark.join(' ')}`)
+  const alpha = opacityOf(r.paragraph)
+  const markBg = composite(MARK_BACKGROUND[theme], pageBg, alpha)
+  const fg = composite(token(theme, name), pageBg, alpha)
+  return contrastRatio(fg, markBg)
 }
 
 function filesUnder(dir: string): string[] {
@@ -104,7 +140,14 @@ function callSiteClassNames(): Array<[string, string | undefined]> {
   const sites: Array<[string, string | undefined]> = []
   for (const file of filesUnder(path.join(SRC, 'app'))) {
     const source = readFileSync(file, 'utf8')
-    for (const [tag] of source.matchAll(/<FormattedContent\b[^>]*?\/>/g)) {
+    for (const match of source.matchAll(/<FormattedContent\b/g)) {
+      const end = source.indexOf('/>', match.index)
+      if (end === -1)
+        throw new Error(`<FormattedContent> sem fechamento em ${file}`)
+      const tag = source.slice(match.index, end)
+      if (/className=\{/.test(tag)) {
+        throw new Error(`className dinâmico em ${file}: o teste só lê literais`)
+      }
       const className = tag.match(/className="([^"]*)"/)?.[1]
       sites.push([path.relative(SRC, file), className])
     }
@@ -114,7 +157,7 @@ function callSiteClassNames(): Array<[string, string | undefined]> {
 
 describe('FormattedContent: contraste do texto das respostas de FAQ', () => {
   it('não aplica opacidade reduzida no texto por padrão', () => {
-    const classes = paragraphClasses()
+    const classes = renderClasses().paragraph
     expect(
       classes.filter(c => /^opacity-\d+$/.test(c) && c !== 'opacity-100')
     ).toEqual([])
@@ -134,10 +177,15 @@ describe('FormattedContent: contraste do texto das respostas de FAQ', () => {
           ['padrão', undefined] as const,
           ...sites,
         ]) {
-          const fg = effectiveTextColor(paragraphClasses(className), theme, bg)
+          const label = `${file} (${className ?? 'sem className'})`
+          const rendered = renderClasses(className)
           expect(
-            contrastRatio(fg, bg),
-            `${file} (${className ?? 'sem className'})`
+            paragraphContrast(rendered, theme, bg),
+            `texto: ${label}`
+          ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT)
+          expect(
+            markContrast(rendered, theme, bg),
+            `termo destacado: ${label}`
           ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT)
         }
       })
