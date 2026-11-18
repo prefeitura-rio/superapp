@@ -118,6 +118,14 @@ export function VagaDetailContent({
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          {
+            label: 'Oportunidades Cariocas/Trabalho',
+            href: '/servicos/trabalho',
+          },
+          { label: vaga.titulo },
+        ]}
       />
       <div>
         <div className="max-w-4xl mx-auto">

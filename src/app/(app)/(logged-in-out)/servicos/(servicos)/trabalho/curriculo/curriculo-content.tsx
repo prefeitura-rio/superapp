@@ -1732,6 +1732,14 @@ export function CurriculoContent({
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          {
+            label: 'Oportunidades Cariocas/Trabalho',
+            href: '/servicos/trabalho',
+          },
+          { label: 'Currículo' },
+        ]}
       />
       <div>
         <FormacaoApiProvider initialData={formacaoOptions}>

@@ -36,6 +36,14 @@ function MinhasCandidaturasSkeleton() {
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          {
+            label: 'Oportunidades Cariocas/Trabalho',
+            href: '/servicos/trabalho',
+          },
+          { label: 'Minhas candidaturas' },
+        ]}
       />
       <div>
         <div className="max-w-4xl mx-auto text-foreground pb-10">
