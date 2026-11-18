@@ -48,3 +48,19 @@ export const cursosIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Cursos.png'
 export const ouvidoriaIcon =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Ouvidoria.png'
+export const servicosUrbanosIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Servi%C3%A7os%20urbanos.png'
+export const culturaELazerIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Cultura%20e%20Lazer.png'
+export const fiscalizacaoIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Fiscaliza%C3%A7%C3%A3o.png'
+export const transparenciaIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Transpar%C3%AAncia.png'
+export const imoveisIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Im%C3%B3veis.png'
+export const processosIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Processos.png'
+export const turismoIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Turismo.png'
+export const defesaCivilIcon =
+  'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/categorias%20de%20servi%C3%A7o/Defesa%20Civil.png'
