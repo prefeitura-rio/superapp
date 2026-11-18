@@ -82,7 +82,7 @@ test.describe('Home (público)', () => {
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
     await expect(page.getByText('IPTU 2026')).toBeVisible()
-    // Com NEXT_PUBLIC_FEATURE_SALESFORCE os demais cards vêm da curadoria da
+    // Com FEATURE_SALESFORCE os demais cards vêm da curadoria da
     // app-catalogo; o de Dívida Ativa é fixo nos dois modos.
     await expect(
       page.getByRole('heading', { name: 'Dívida Ativa: Débitos de IPTU' })
@@ -225,8 +225,8 @@ test.describe('Menu global (público)', () => {
     page,
   }) => {
     test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Atendimentos depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
+      process.env.FEATURE_SALESFORCE !== 'true',
+      'Atendimentos depende de FEATURE_SALESFORCE'
     )
     await page.goto('/')
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
@@ -390,8 +390,8 @@ test.describe('Menu global (autenticado)', () => {
     page,
   }) => {
     test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Atendimentos depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
+      process.env.FEATURE_SALESFORCE !== 'true',
+      'Atendimentos depende de FEATURE_SALESFORCE'
     )
     await page.goto('/')
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
@@ -473,8 +473,8 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
       'Defina E2E_ACCESS_TOKEN para rodar testes autenticados'
     )
     test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Minhas solicitações depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
+      process.env.FEATURE_SALESFORCE !== 'true',
+      'Minhas solicitações depende de FEATURE_SALESFORCE'
     )
     await applyE2ECookieConsent(context)
     await applyE2EAuthCookies(context)

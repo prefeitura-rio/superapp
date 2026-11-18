@@ -207,6 +207,10 @@ jobs:
           # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
+          # Flags server-side lidas em runtime pelo `npm run start` (e pelos
+          # test.skip de e2e/home.spec.ts): o env do passo de build não chega aqui.
+          FEATURE_SALESFORCE: "true"
+          USE_MOCK_CHAMADOS: "true"
           COURSES_BASE_API_URL: 'https://services.staging.app.dados.rio/go'
           BASE_API_URL_APP_BUSCA_SEARCH: 'https://services.staging.app.dados.rio/app-busca-search/'
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
