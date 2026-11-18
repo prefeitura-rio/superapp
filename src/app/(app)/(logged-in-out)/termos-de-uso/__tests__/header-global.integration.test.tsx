@@ -22,8 +22,8 @@ vi.mock('next/navigation', () => ({
 }))
 vi.mock('@next/third-parties/google', () => ({ sendGAEvent: vi.fn() }))
 
+import TermosDeUsoPage from '../(main)/page'
 import TermosDeUsoPlataformaPage from '../[plataforma]/page'
-import TermosDeUsoPage from '../page'
 
 const AUTH_BASE =
   'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'

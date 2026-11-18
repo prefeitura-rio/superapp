@@ -12,8 +12,8 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, back }),
 }))
 
-import * as listPageModule from '../page'
-import TermosDeUsoPage from '../page'
+import * as listPageModule from '../(main)/page'
+import TermosDeUsoPage from '../(main)/page'
 
 function platformLinks() {
   const nav = screen.getByRole('navigation', { name: 'Plataformas' })

@@ -29,8 +29,8 @@ vi.mock('next/navigation', () => ({
   },
 }))
 
+import CartaDeServicosPage from '../(main)/page'
 import CartaDeServicosOrgaoPage from '../[siciCode]/page'
-import CartaDeServicosPage from '../page'
 
 const CET: CartaOrgUnit = {
   siciCode: '2951',

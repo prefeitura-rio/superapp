@@ -2,7 +2,7 @@ import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { TERMOS_DE_USO_PLATFORMS } from '@/constants/termos-de-uso/platforms'
 import type { Metadata } from 'next'
-import { PlatformList } from './components/platform-list'
+import { PlatformList } from '../components/platform-list'
 
 // Sem `dynamic = 'force-static'`: página estática sai sem o nonce da CSP
 // (que o middleware gera por requisição) e o navegador bloqueia o script da

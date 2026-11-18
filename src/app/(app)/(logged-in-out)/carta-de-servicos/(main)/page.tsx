@@ -8,7 +8,7 @@ import {
 } from '@/lib/carta-servicos/org-units'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Lei13460Text } from './components/lei-13460-text'
+import { Lei13460Text } from '../components/lei-13460-text'
 
 export const revalidate = 600
 
