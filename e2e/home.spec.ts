@@ -476,6 +476,10 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
       process.env.FEATURE_SALESFORCE !== 'true',
       'Minhas solicitações depende de FEATURE_SALESFORCE'
     )
+    test.skip(
+      !process.env.BASE_API_URL_PREF_RIO_CIDADAO,
+      'BASE_API_URL_PREF_RIO_CIDADAO ausente: a lista é buscada no servidor e a página cai no error boundary'
+    )
     await applyE2ECookieConsent(context)
     await applyE2EAuthCookies(context)
   })
