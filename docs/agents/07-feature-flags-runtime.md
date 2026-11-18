@@ -58,7 +58,13 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | Busca (`/api/catalog-search`) | Typesense (app-busca-search) | MuleSoft (app-catalogo) |
 | Home — banner de solicitações em andamento | Oculto | Visível |
 | Footer — links de Atendimentos (Ouvidoria, LAI…) | Ocultos | Visíveis |
+| Menu global — seção Atendimentos e item Carta de serviços | Ocultos | Visíveis |
 | Carteira — card "Cuidados com a Cidade" (legado 1746) | Visível | Oculto |
+
+Client components nunca leem `FEATURE_SALESFORCE` em `process.env` (no
+navegador é sempre `undefined`): recebem o valor por prop de um Server
+Component ou por `useRuntimeFeatureFlags()` (`src/providers/feature-flags-provider.tsx`),
+alimentado pelo `RootLayout`.
 
 ### FEATURE_HOME_SOLICITACOES
 

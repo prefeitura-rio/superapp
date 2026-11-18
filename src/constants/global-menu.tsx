@@ -3,10 +3,7 @@ import { MessageCircleIcon } from '@/assets/icons/message-circle'
 import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
-import {
-  isFeatureEnabled,
-  isSalesforceServicesEnabled,
-} from '@/lib/feature-flags'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 // Sem equivalente em src/assets/icons (falta no design system).
 import { FileTextIcon, GraduationCapIcon, LayersIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -17,7 +14,9 @@ import type { ReactNode } from 'react'
  * login atual, então nenhum ponto de entrada aponta para 404.
  *
  * Atendimentos e Carta de serviços seguem a flag do Salesforce, a mesma que o
- * middleware usa para liberar essas rotas e o footer para os seus links.
+ * middleware usa para liberar essas rotas. Ela é de runtime e só existe no
+ * servidor (`FEATURE_SALESFORCE` não chega ao bundle do cliente), então chega
+ * por parâmetro de `buildGlobalMenu`, nunca por `process.env`.
  */
 export interface GlobalMenuLink {
   id: string
@@ -33,6 +32,8 @@ export interface GlobalMenuLink {
   hrefWhenLoggedOut?: string
   /** Só no menu deslogado (ex.: Consulta de protocolo). */
   onlyLoggedOut?: boolean
+  /** Some do menu com a flag do Salesforce desligada (rota bloqueada). */
+  requiresSalesforce?: boolean
   /**
    * Recuo dentro da seção: 1 = item da seção (Ver cursos); 2 = filho de um
    * item (Meus cursos, abaixo de Ver cursos).
@@ -59,7 +60,6 @@ const iconClassName = 'h-6 w-6 shrink-0 text-foreground'
 
 const cursos = isFeatureEnabled('cursos')
 const empregos = isFeatureEnabled('empregos')
-const salesforce = isSalesforceServicesEnabled()
 
 const ENTRIES: GlobalMenuEntry[] = [
   {
@@ -135,34 +135,32 @@ const ENTRIES: GlobalMenuEntry[] = [
       {
         id: 'minhas-solicitacoes',
         label: 'Minhas solicitações',
-        href: salesforce ? '/minhas-solicitacoes' : undefined,
+        href: '/minhas-solicitacoes',
         requiresAuth: true,
+        requiresSalesforce: true,
       },
       {
         id: 'consulta-protocolo',
         label: 'Consulta de protocolo',
-        href: salesforce ? '/consulta-protocolo' : undefined,
+        href: '/consulta-protocolo',
         onlyLoggedOut: true,
+        requiresSalesforce: true,
       },
       {
         id: 'ouvidoria',
         label: 'Ouvidoria',
-        href: salesforce ? '/minhas-solicitacoes?filtro=ouvidoria' : undefined,
+        href: '/minhas-solicitacoes?filtro=ouvidoria',
         requiresAuth: true,
-        hrefWhenLoggedOut: salesforce
-          ? `${TICKET_FORM_BASE_URL}/ouvidoria`
-          : undefined,
+        hrefWhenLoggedOut: `${TICKET_FORM_BASE_URL}/ouvidoria`,
+        requiresSalesforce: true,
       },
       {
         id: 'lai',
         label: 'Lei de Acesso à Informação',
-        href: salesforce
-          ? '/minhas-solicitacoes?filtro=acesso-a-informacao'
-          : undefined,
+        href: '/minhas-solicitacoes?filtro=acesso-a-informacao',
         requiresAuth: true,
-        hrefWhenLoggedOut: salesforce
-          ? `${TICKET_FORM_BASE_URL}/lai`
-          : undefined,
+        hrefWhenLoggedOut: `${TICKET_FORM_BASE_URL}/lai`,
+        requiresSalesforce: true,
       },
     ],
   },
@@ -178,7 +176,8 @@ const ENTRIES: GlobalMenuEntry[] = [
     kind: 'link',
     id: 'carta-de-servicos',
     label: 'Carta de serviços',
-    href: salesforce ? CARTA_DE_SERVICOS_ROUTE : undefined,
+    href: CARTA_DE_SERVICOS_ROUTE,
+    requiresSalesforce: true,
     icon: <LayersIcon className={iconClassName} />,
   },
   {
@@ -198,12 +197,23 @@ const ENTRIES: GlobalMenuEntry[] = [
   },
 ]
 
+export interface GlobalMenuFlags {
+  /** `FEATURE_SALESFORCE` lida no servidor em runtime. */
+  salesforce: boolean
+}
+
 /**
  * Destino efetivo do item para o estado de autenticação atual. Retorna
  * `undefined` quando o item não deve aparecer — seja porque não há destino,
- * seja porque não se aplica a quem está (ou não está) logado.
+ * seja porque não se aplica a quem está (ou não está) logado, seja porque a
+ * flag de que depende está desligada.
  */
-function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
+function resolveHref(
+  item: GlobalMenuLink,
+  isLoggedIn: boolean,
+  flags: GlobalMenuFlags
+) {
+  if (item.requiresSalesforce && !flags.salesforce) return undefined
   if (isLoggedIn) return item.onlyLoggedOut ? undefined : item.href
   if (item.hrefWhenLoggedOut) return item.hrefWhenLoggedOut
   return item.requiresAuth ? undefined : item.href
@@ -214,16 +224,19 @@ function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
  * restritos são removidos (não desabilitados), conforme o handoff. Documentos,
  * Ouvidoria e LAI continuam, com o destino próprio para visitante.
  */
-export function buildGlobalMenu(isLoggedIn: boolean): GlobalMenuEntry[] {
+export function buildGlobalMenu(
+  isLoggedIn: boolean,
+  flags: GlobalMenuFlags
+): GlobalMenuEntry[] {
   return ENTRIES.reduce<GlobalMenuEntry[]>((entries, entry) => {
     if (entry.kind === 'link') {
-      const href = resolveHref(entry, isLoggedIn)
+      const href = resolveHref(entry, isLoggedIn, flags)
       if (href) entries.push({ ...entry, href })
       return entries
     }
 
     const items = entry.items.flatMap(item => {
-      const href = resolveHref(item, isLoggedIn)
+      const href = resolveHref(item, isLoggedIn, flags)
       return href ? [{ ...item, href }] : []
     })
     if (items.length > 0) entries.push({ ...entry, items })

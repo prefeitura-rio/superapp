@@ -1,13 +1,20 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import type { GlobalMenuEntry, GlobalMenuLink } from '../global-menu'
+import type {
+  GlobalMenuEntry,
+  GlobalMenuFlags,
+  GlobalMenuLink,
+} from '../global-menu'
 
 /**
- * `ENTRIES` é avaliado na carga do módulo (as feature flags são constantes de
- * build), então cada cenário de flag precisa reimportar o módulo.
+ * `cursos` e `empregos` são constantes de build (`NEXT_PUBLIC_FEATURE_FLAG`)
+ * avaliadas na carga do módulo, então cada cenário dessas flags reimporta o
+ * módulo. A flag do Salesforce é de runtime e chega por parâmetro.
  */
-async function carregarMenu(env: Record<string, string> = {}) {
+async function carregarMenu(
+  env: Record<string, string> = {},
+  flags: GlobalMenuFlags = { salesforce: true }
+) {
   vi.resetModules()
-  vi.stubEnv('FEATURE_SALESFORCE', 'true')
   vi.stubEnv(
     'NEXT_PUBLIC_TICKET_FORM_BASE_URL',
     'https://1746.example/protocolo'
@@ -16,7 +23,7 @@ async function carregarMenu(env: Record<string, string> = {}) {
     vi.stubEnv(chave, valor)
   }
   const { buildGlobalMenu } = await import('../global-menu')
-  return buildGlobalMenu
+  return (logado: boolean) => buildGlobalMenu(logado, flags)
 }
 
 function idsDe(entradas: GlobalMenuEntry[]) {
@@ -179,12 +186,35 @@ describe('destinos', () => {
 
 describe('feature flags', () => {
   test('sem Salesforce: some Atendimentos e Carta de serviços (rotas bloqueadas no middleware)', async () => {
-    const buildGlobalMenu = await carregarMenu({
-      FEATURE_SALESFORCE: 'false',
-    })
+    const buildGlobalMenu = await carregarMenu({}, { salesforce: false })
 
     for (const logado of [true, false]) {
       const ids = idsDe(buildGlobalMenu(logado))
+      expect(ids).not.toContain('atendimentos')
+      expect(ids).not.toContain('carta-de-servicos')
+    }
+  })
+
+  /**
+   * No navegador `process.env.FEATURE_SALESFORCE` é sempre `undefined` (só
+   * `NEXT_PUBLIC_*` vai para o bundle): o menu segue o valor que o servidor
+   * passa, nunca o `process.env` (DEV-645).
+   */
+  test('Salesforce segue o parâmetro, não process.env.FEATURE_SALESFORCE', async () => {
+    vi.stubEnv('FEATURE_SALESFORCE', undefined)
+    const ligado = await carregarMenu({}, { salesforce: true })
+    for (const logado of [true, false]) {
+      const ids = idsDe(ligado(logado))
+      expect(ids).toContain('atendimentos')
+      expect(ids).toContain('carta-de-servicos')
+    }
+
+    const desligado = await carregarMenu(
+      { FEATURE_SALESFORCE: 'true' },
+      { salesforce: false }
+    )
+    for (const logado of [true, false]) {
+      const ids = idsDe(desligado(logado))
       expect(ids).not.toContain('atendimentos')
       expect(ids).not.toContain('carta-de-servicos')
     }

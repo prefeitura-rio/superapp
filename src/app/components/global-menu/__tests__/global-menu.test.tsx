@@ -1,3 +1,7 @@
+import {
+  FeatureFlagsProvider,
+  type RuntimeFeatureFlags,
+} from '@/providers/feature-flags-provider'
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
@@ -30,15 +34,22 @@ function respondHeader(body: object) {
   server.use(http.get('/api/user/header', () => HttpResponse.json(body)))
 }
 
-async function openMenu() {
+async function openMenu(flags?: RuntimeFeatureFlags) {
   const user = userEvent.setup()
+  const trigger = flags ? (
+    <FeatureFlagsProvider flags={flags}>
+      <GlobalMenuTrigger />
+    </FeatureFlagsProvider>
+  ) : (
+    <GlobalMenuTrigger />
+  )
   render(
     <QueryClientProvider
       client={
         new QueryClient({ defaultOptions: { queries: { retry: false } } })
       }
     >
-      <GlobalMenuTrigger />
+      {trigger}
     </QueryClientProvider>
   )
   await user.click(screen.getByRole('button', { name: 'Menu' }))
@@ -149,5 +160,55 @@ describe('GlobalMenu', () => {
     expect(
       within(menu).getByRole('button', { name: 'Sair' })
     ).toBeInTheDocument()
+  })
+  /**
+   * No navegador `process.env.FEATURE_SALESFORCE` é sempre `undefined`; o
+   * valor chega do servidor pelo `FeatureFlagsProvider` do `RootLayout`
+   * (DEV-645).
+   */
+  describe('flag Salesforce de runtime', () => {
+    beforeEach(() => {
+      vi.stubEnv('FEATURE_SALESFORCE', undefined)
+    })
+
+    it.each([
+      ['visitante', VISITOR],
+      ['logado', CITIZEN],
+    ])(
+      '%s: ligada no servidor, mostra Atendimentos e Carta de serviços',
+      async (_, header) => {
+        respondHeader(header)
+        const { menu } = await openMenu({ salesforce: true })
+
+        expect(
+          within(menu).getByRole('button', { name: 'Atendimentos' })
+        ).toBeInTheDocument()
+        expect(
+          within(menu).getByRole('link', { name: 'Carta de serviços' })
+        ).toHaveAttribute('href', '/carta-de-servicos')
+      }
+    )
+
+    it('desligada no servidor, some Atendimentos e Carta de serviços', async () => {
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      respondHeader(VISITOR)
+      const { menu } = await openMenu({ salesforce: false })
+
+      expect(
+        within(menu).queryByRole('button', { name: 'Atendimentos' })
+      ).not.toBeInTheDocument()
+      expect(
+        within(menu).queryByRole('link', { name: 'Carta de serviços' })
+      ).not.toBeInTheDocument()
+    })
+
+    it('sem provider, fica desligada (kill switch seguro)', async () => {
+      respondHeader(VISITOR)
+      const { menu } = await openMenu()
+
+      expect(
+        within(menu).queryByRole('button', { name: 'Atendimentos' })
+      ).not.toBeInTheDocument()
+    })
   })
 })

@@ -5,8 +5,10 @@ import { AccessibilityPlugin } from '@/components/accessibility-plugin'
 import { VLibrasPlugin } from '@/components/vlibras-plugin'
 import {
   isAccessibilityPluginEnabled,
+  isSalesforceServicesEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
+import { FeatureFlagsProvider } from '@/providers/feature-flags-provider'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -102,7 +104,13 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <PWAProvider>{children}</PWAProvider>
+          {/* Flags de runtime lidas aqui, no servidor, a cada request: o
+              bundle do cliente não enxerga `FEATURE_SALESFORCE`. */}
+          <FeatureFlagsProvider
+            flags={{ salesforce: isSalesforceServicesEnabled() }}
+          >
+            <PWAProvider>{children}</PWAProvider>
+          </FeatureFlagsProvider>
           <LoginEventTracker />
           <ThemeColorMeta />
           <Toaster
