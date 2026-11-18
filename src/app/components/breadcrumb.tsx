@@ -7,24 +7,25 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[]
+  className?: string
 }
 
-export function Breadcrumb({ items }: BreadcrumbProps) {
+export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
     <nav
       aria-label="Navegação estrutural"
-      className="w-full max-w-4xl mx-auto px-4 py-2"
+      className={className ?? 'w-full max-w-4xl mx-auto px-4 py-2'}
     >
-      <ol className="flex flex-wrap items-center gap-1">
+      <ol className="[display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden text-xs font-normal leading-5 tracking-normal">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
 
           return (
-            <li key={index} className="flex items-center gap-1">
+            <li key={index} className="inline">
               {index > 0 && (
                 <span
                   aria-hidden="true"
-                  className="text-xs leading-4 text-foreground-light select-none"
+                  className="text-foreground-light select-none mx-1"
                 >
                   {'>'}
                 </span>
@@ -32,14 +33,14 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
               {isLast || !item.href ? (
                 <span
                   aria-current={isLast ? 'page' : undefined}
-                  className="text-xs font-normal leading-4 tracking-normal text-foreground"
+                  className="text-foreground"
                 >
                   {item.label}
                 </span>
               ) : (
                 <Link
                   href={item.href}
-                  className="text-xs font-normal leading-4 tracking-normal text-foreground-light underline-offset-2 hover:underline"
+                  className="text-foreground-light underline-offset-2 hover:underline"
                 >
                   {item.label}
                 </Link>

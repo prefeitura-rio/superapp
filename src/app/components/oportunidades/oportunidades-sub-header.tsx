@@ -1,5 +1,6 @@
 'use client'
 
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import MainHeader from '@/app/components/main-header'
 import { useAuthHeader } from '@/providers/auth-header-provider'
 import Image from 'next/image'
@@ -11,16 +12,23 @@ const LOGO_LIGHT =
 const LOGO_DARK =
   'https://storage.googleapis.com/rj-escritorio-dev-public/superapp/png/banner/oportunidades-cariocas-dark.png'
 
+interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
 interface OportunidadesSubHeaderProps {
   logoHref: string
   showSearchIcon?: boolean
   searchUrl?: string
+  breadcrumbItems?: BreadcrumbItem[]
 }
 
 export function OportunidadesSubHeader({
   logoHref,
   showSearchIcon,
   searchUrl,
+  breadcrumbItems,
 }: OportunidadesSubHeaderProps) {
   const { data, isLoading } = useAuthHeader()
   const pathname = usePathname()
@@ -44,13 +52,18 @@ export function OportunidadesSubHeader({
           MainHeader já é o banner da página, e um segundo <header> duplicaria) */}
       <nav
         aria-label="Oportunidades Cariocas"
-        className="w-full px-4 py-4"
+        className={`w-full px-4 ${breadcrumbItems ? 'pt-3 pb-4' : 'py-4'}`}
         style={{
           background:
             'linear-gradient(180deg, var(--card) 0%, var(--card) 100%)',
         }}
       >
         <div className="mx-auto md:px-4 max-w-4xl">
+          {breadcrumbItems && (
+            <div className="pb-3">
+              <Breadcrumb items={breadcrumbItems} className="w-full" />
+            </div>
+          )}
           <Link href={logoHref}>
             <Image
               src={LOGO_LIGHT}
