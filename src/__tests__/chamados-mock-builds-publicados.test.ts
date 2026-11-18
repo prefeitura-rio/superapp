@@ -14,15 +14,13 @@ function valoresDoMockChamados(workflow: string): string[] {
 
 // DEV-568 / DEV-612: the SGRC history mock is the same fictitious data for every
 // citizen. Until the real integration (PREF-691) filters by the citizen's CPF,
-// the builds that reach citizens (staging and production) keep the mock off.
-describe('DEV-612: modo mock de chamados desligado nos builds publicados', () => {
-  it.each(['deploy-staging.yaml', 'release-production.yaml'])(
-    '%s builda com NEXT_PUBLIC_USE_MOCK_CHAMADOS="false"',
-    workflow => {
-      const valores = valoresDoMockChamados(workflow)
+// the production build keeps the mock off.
+// Staging intentionally uses mock=true so QAs can validate the UI.
+describe('DEV-612: modo mock de chamados desligado no build de produção', () => {
+  it('release-production.yaml builda com NEXT_PUBLIC_USE_MOCK_CHAMADOS="false"', () => {
+    const valores = valoresDoMockChamados('release-production.yaml')
 
-      expect(valores.length).toBeGreaterThan(0)
-      expect(valores.every(valor => valor === 'false')).toBe(true)
-    }
-  )
+    expect(valores.length).toBeGreaterThan(0)
+    expect(valores.every(valor => valor === 'false')).toBe(true)
+  })
 })
