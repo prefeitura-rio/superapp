@@ -82,10 +82,7 @@ export default function MeiFaqPage() {
                 <h2 className="text-lg font-medium tracking-normal leading-5">
                   {section.title}
                 </h2>
-                <FormattedContent
-                  content={section.content}
-                  className="text-foreground"
-                />
+                <FormattedContent content={section.content} />
               </div>
               {index < MEI_FAQ_SECTIONS.length - 1 && (
                 <div className="mt-8 border-t border-border" />
