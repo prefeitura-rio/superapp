@@ -14,11 +14,11 @@ test.describe('Carteira', () => {
     page,
   }) => {
     await page.goto('/carteira')
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
     await expect(page.getByText('CLÍNICA DA FAMÍLIA')).toBeVisible({
       timeout: 25000,
     })
@@ -26,11 +26,11 @@ test.describe('Carteira', () => {
 
   test('exibe abas "Cartões", "Pets" e "Veículos"', async ({ page }) => {
     await page.goto('/carteira')
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
     // Rótulos definidos em src/app/components/wallet-tabs.tsx
     await expect(page.getByText('Cartões', { exact: true })).toBeVisible({
       timeout: 15000,
@@ -41,11 +41,11 @@ test.describe('Carteira', () => {
 
   test('exibe cartões ou estado vazio da carteira', async ({ page }) => {
     await page.goto('/carteira')
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
 
     const algumCartao = page.getByText(/CLÍNICA DA FAMÍLIA|CADÚNICO/)
     const carteiraVazia = page.getByText(
@@ -59,11 +59,11 @@ test.describe('Carteira', () => {
 
   test('aba Pets exibe pets ou estado vazio', async ({ page }) => {
     await page.goto('/carteira?pets=true')
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
 
     // Com pet: cartão "REGISTRO GERAL DE ANIMAIS" (pet-wallet.tsx).
     // Sem pet: estado vazio com o link do SISBICHO (wallet-content.tsx).
@@ -82,11 +82,11 @@ test.describe('Carteira', () => {
     page,
   }) => {
     await page.goto('/carteira')
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
 
     // O cartão é um link (asLink href="/carteira/clinica-da-familia")
     const cardLink = page
@@ -105,11 +105,11 @@ test.describe('Carteira', () => {
     await page.waitForURL('**/carteira/clinica-da-familia', { timeout: 15000 })
 
     // Detalhe renderiza de forma estável: header "Documentos" + título do cartão
-    await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible(
-      {
-        timeout: 20000,
-      }
-    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Documentos' })
+    ).toBeVisible({
+      timeout: 20000,
+    })
     await expect(page.getByText('CLÍNICA DA FAMÍLIA').first()).toBeVisible({
       timeout: 20000,
     })
