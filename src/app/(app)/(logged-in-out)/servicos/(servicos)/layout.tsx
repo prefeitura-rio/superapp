@@ -27,7 +27,13 @@ export default function ServicosLayout({
     return (
       <AuthHeaderProvider>
         <div>
-          <OportunidadesSubHeader logoHref={section.logoHref} />
+          <OportunidadesSubHeader
+            logoHref={section.logoHref}
+            breadcrumbItems={[
+              { label: 'Página inicial', href: '/' },
+              { label: `Oportunidades Cariocas/${section.label}` },
+            ]}
+          />
           <div
             style={{
               background:

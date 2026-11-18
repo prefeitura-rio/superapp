@@ -42,6 +42,14 @@ function CurriculoSkeleton() {
         logoHref="/servicos/trabalho"
         showSearchIcon
         searchUrl="/busca?tipo=empregos"
+        breadcrumbItems={[
+          { label: 'Página inicial', href: '/' },
+          {
+            label: 'Oportunidades Cariocas/Trabalho',
+            href: '/servicos/trabalho',
+          },
+          { label: 'Currículo' },
+        ]}
       />
       <div>
         <div className="px-4 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)] overflow-x-hidden">
