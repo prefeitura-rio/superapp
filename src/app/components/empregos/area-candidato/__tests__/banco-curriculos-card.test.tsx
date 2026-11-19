@@ -82,6 +82,12 @@ describe('BancoCurriculosCard', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('usa o switch grande do Menu global, em que a bolinha cabe na pílula', () => {
+    const { controle } = renderCard()
+
+    expect(controle).toHaveClass('large-switch')
+  })
+
   it('enquanto salva, o controle fica bloqueado', () => {
     const { controle } = renderCard({ salvando: true })
 

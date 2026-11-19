@@ -69,7 +69,9 @@ export function BancoCurriculosCard({
           checked={curriculoCompleto && disponivel}
           onCheckedChange={handleChange}
           disabled={!curriculoCompleto || salvando}
-          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-foreground-light/60"
+          // Mesmo tamanho do switch "Tema claro" do Menu global: no tamanho
+          // padrão a bolinha (19px) não cabe na pílula.
+          className="large-switch data-[state=checked]:bg-primary data-[state=unchecked]:bg-foreground-light/60"
         />
       </div>
 
