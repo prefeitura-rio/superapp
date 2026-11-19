@@ -87,7 +87,7 @@ const titleCls = 'text-sm font-medium leading-4 tracking-normal text-foreground'
 const bodyCls =
   'text-sm font-normal leading-5 tracking-normal text-foreground-light'
 const linkCls =
-  'text-sm font-normal leading-5 tracking-normal text-[var(--theme-color-card-2,#0084D1)] hover:underline'
+  'text-sm font-normal leading-5 tracking-normal text-[#0069A8] dark:text-[#0084D1] hover:underline'
 
 function Divider() {
   return <div className="border-t border-border" />
