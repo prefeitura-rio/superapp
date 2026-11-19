@@ -89,8 +89,38 @@ const bodyCls =
 const linkCls =
   'text-sm font-normal leading-5 tracking-normal text-[var(--theme-color-card-2,#0084D1)] hover:underline'
 
-function Divider() {
-  return <div className="border-t border-border" />
+function Logos() {
+  return (
+    <div className="flex items-center gap-4">
+      <a
+        href={PREFEITURA_RIO_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Prefeitura do Rio"
+      >
+        <Image
+          src={brasaoPrefeitura}
+          alt="Prefeitura do Rio"
+          width={77}
+          height={32}
+          style={{ width: '77px', height: '31.233px', aspectRatio: '77/31.23' }}
+          className="object-contain"
+          unoptimized
+        />
+      </a>
+      <Link href="/" aria-label="PrefRio">
+        <Image
+          src={prefRioLogo}
+          alt="PrefRio"
+          width={111}
+          height={43}
+          style={{ width: '105.3px', height: '42.9px' }}
+          className="object-contain"
+          unoptimized
+        />
+      </Link>
+    </div>
+  )
 }
 
 function AddressSection() {
@@ -145,7 +175,7 @@ function QuickLinksSection({
         </ul>
       </div>
 
-      <div className="flex flex-col gap-1 sm:col-start-2">
+      <div className="flex flex-col gap-1">
         <p className={titleCls}>Transparência</p>
         <a
           href={TRANSPARENCIA_URL}
@@ -162,46 +192,6 @@ function QuickLinksSection({
             unoptimized
           />
         </a>
-      </div>
-    </div>
-  )
-}
-
-function LogosAndSocial() {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <a
-          href={PREFEITURA_RIO_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Prefeitura do Rio"
-        >
-          <Image
-            src={brasaoPrefeitura}
-            alt="Prefeitura do Rio"
-            width={77}
-            height={32}
-            style={{
-              width: '77px',
-              height: '31.233px',
-              aspectRatio: '77/31.23',
-            }}
-            className="object-contain"
-            unoptimized
-          />
-        </a>
-        <Link href="/" aria-label="PrefRio">
-          <Image
-            src={prefRioLogo}
-            alt="PrefRio"
-            width={111}
-            height={43}
-            style={{ width: '105.3px', height: '42.9px' }}
-            className="object-contain"
-            unoptimized
-          />
-        </Link>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -231,25 +221,11 @@ export async function Footer() {
   const quickLinks = buildQuickLinks(salesforce, homeSolicitacoes)
 
   return (
-    <footer className="w-full mt-16 pb-28 bg-background">
-      <div className="max-w-4xl mx-auto px-4">
-        <Divider />
-
-        <div className="py-6">
-          <AddressSection />
-        </div>
-
-        <Divider />
-
-        <div className="py-6">
-          <QuickLinksSection links={quickLinks} />
-        </div>
-
-        <Divider />
-
-        <div className="pt-6">
-          <LogosAndSocial />
-        </div>
+    <footer className="w-full mt-16 pb-28 bg-card">
+      <div className="max-w-4xl mx-auto px-4 pt-10 pb-6 flex flex-col gap-6">
+        <Logos />
+        <AddressSection />
+        <QuickLinksSection links={quickLinks} />
       </div>
     </footer>
   )

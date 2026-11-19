@@ -2,6 +2,7 @@ import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import {
   AlertTriangleIcon,
+  AnticorruptionIcon,
   BadgeCheckIcon,
   BuildingIcon,
   BusIcon,
@@ -205,6 +206,11 @@ export default async function MapaDoSitePage() {
       icon: <OpenBookIcon />,
       external: true,
     },
+    {
+      label: 'Anticorrupção',
+      href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
+      icon: <AnticorruptionIcon />,
+    },
   ]
 
   const categorias = await fetchCategories()
@@ -256,7 +262,7 @@ export default async function MapaDoSitePage() {
             {salesforce && (
               <SitemapSection
                 id="section-atendimento"
-                title="Atendimento"
+                title="Solicitações"
                 items={atendimento}
               />
             )}

@@ -1,5 +1,6 @@
 import { AiImproveIcon } from './ai-improve-icon'
 import { AlertTriangleIcon } from './alert-triangle-icon'
+import { AnticorruptionIcon } from './anticorruption-icon'
 import { BadgeCheckIcon } from './badge-check-icon'
 import { BriefcaseIcon } from './briefcase-icon'
 import { BuildingIcon } from './building-icon'
@@ -76,6 +77,7 @@ import { YoutubeIcon } from './youtube-icon'
 export {
   AiImproveIcon,
   AlertTriangleIcon,
+  AnticorruptionIcon,
   BadgeCheckIcon,
   BuildingIcon,
   BusIcon,
