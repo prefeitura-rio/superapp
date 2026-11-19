@@ -11,6 +11,10 @@ import prefRioLogo from '@/assets/pref-rio-logo.svg'
 import { CARTA_DE_SERVICOS_FOOTER_LINK } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
+import {
+  isHomeSolicitacoesEnabled,
+  isSalesforceServicesEnabled,
+} from '@/lib/feature-flags'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FooterPhoneButton } from './footer-phone-button'
@@ -18,27 +22,34 @@ import { FooterPhoneButton } from './footer-phone-button'
 const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
 const TRANSPARENCIA_URL = 'https://transparencia.prefeitura.rio/'
 
-const quickLinks = [
-  { label: 'Serviços', href: '/servicos' },
-  { label: 'Oportunidades cariocas', href: '/servicos/trabalho' },
-  { label: 'Ouvidoria', href: `${TICKET_FORM_BASE_URL}/ouvidoria` },
-  {
-    label: 'Lei de acesso à informação',
-    href: `${TICKET_FORM_BASE_URL}/lai`,
-  },
-  { label: 'Perguntas frequentes', href: '/faq' },
-  CARTA_DE_SERVICOS_FOOTER_LINK,
-  { label: 'Mapa do site', href: '/mapa-do-site' },
-  {
-    label: 'Anticorrupção',
-    href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
-  },
-  { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
-  {
-    label: 'Política de privacidade',
-    href: TERMOS_DE_USO_ROUTE,
-  },
-]
+function buildQuickLinks(salesforce: boolean, homeSolicitacoes: boolean) {
+  return [
+    { label: 'Serviços', href: '/servicos' },
+    { label: 'Oportunidades cariocas', href: '/servicos/trabalho' },
+    ...(salesforce && homeSolicitacoes
+      ? [
+          { label: 'Ouvidoria', href: `${TICKET_FORM_BASE_URL}/ouvidoria` },
+          {
+            label: 'Lei de acesso à informação',
+            href: `${TICKET_FORM_BASE_URL}/lai`,
+          },
+        ]
+      : []),
+    { label: 'Perguntas frequentes', href: '/faq' },
+    ...(salesforce && homeSolicitacoes ? [CARTA_DE_SERVICOS_FOOTER_LINK] : []),
+    { label: 'Mapa do site', href: '/mapa-do-site' },
+    {
+      label: 'Anticorrupção',
+      href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
+    },
+    ...(salesforce
+      ? [
+          { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
+          { label: 'Política de privacidade', href: TERMOS_DE_USO_ROUTE },
+        ]
+      : []),
+  ]
+}
 
 const socialLinks = [
   {
@@ -110,13 +121,17 @@ function AddressSection() {
   )
 }
 
-function QuickLinksSection() {
+function QuickLinksSection({
+  links,
+}: {
+  links: { label: string; href: string }[]
+}) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-10">
       <div className="flex flex-col gap-1">
         <p className={titleCls}>Links rápidos</p>
         <ul className="flex flex-col gap-1 mt-1">
-          {quickLinks.map(link => (
+          {links.map(link => (
             <li key={link.href + link.label}>
               <Link href={link.href} className={linkCls}>
                 {link.label}
@@ -206,7 +221,11 @@ function LogosAndSocial() {
   )
 }
 
-export function Footer() {
+export async function Footer() {
+  const salesforce = isSalesforceServicesEnabled()
+  const homeSolicitacoes = isHomeSolicitacoesEnabled()
+  const quickLinks = buildQuickLinks(salesforce, homeSolicitacoes)
+
   return (
     <footer className="w-full mt-16 pb-28 bg-background">
       <div className="max-w-4xl mx-auto px-4">
@@ -219,7 +238,7 @@ export function Footer() {
         <Divider />
 
         <div className="py-6">
-          <QuickLinksSection />
+          <QuickLinksSection links={quickLinks} />
         </div>
 
         <Divider />

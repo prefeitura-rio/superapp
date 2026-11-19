@@ -31,8 +31,12 @@ import {
   SuitcaseIcon,
   TrashBinIcon,
 } from '@/assets/icons'
+import { normalizeCategoryName } from '@/lib/categories'
+import { fetchCategories } from '@/lib/categories'
+import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   title: 'Mapa do site',
@@ -42,157 +46,46 @@ export const metadata: Metadata = {
 interface SitemapItem {
   label: string
   href: string
-  icon: React.ReactNode
+  icon: ReactNode
   external?: boolean
 }
 
-const informacoes: SitemapItem[] = [
-  {
-    label: 'A Prefeitura',
-    href: 'https://prefeitura.rio',
-    icon: <BuildingIcon />,
-    external: true,
-  },
-  {
-    label: 'Carta de serviços',
-    href: '/carta-de-servicos',
-    icon: <FileTextIcon />,
-  },
-  {
-    label: 'Perguntas frequentes',
-    href: '/faq',
-    icon: <HelpCircleIcon />,
-  },
-  {
-    label: 'Termos de uso e política de privacidade',
-    href: '/termos-de-uso',
-    icon: <ShieldIcon />,
-  },
-]
+/**
+ * Mapeamento de slug normalizado de categoria → ícone SVG do design system.
+ * Preservado do mapeamento original da página; GlobeIcon como fallback.
+ */
+const CATEGORY_ICON_MAP: Record<string, ReactNode> = {
+  animais: <PawIcon />,
+  'central anticorrupcao': <ShieldCheckIcon />,
+  cidadania: <CitizenshipIcon />,
+  cultura: <MusicIcon />,
+  'cultura e lazer': <MusicIcon />,
+  'defesa civil': <AlertTriangleIcon />,
+  educacao: <GraduationCapIcon />,
+  fiscalizacao: <EyeOpenIcon />,
+  imoveis: <HomeBuildingIcon />,
+  'lei geral de protecao de dados (lgpd)': <LockIcon />,
+  lgpd: <LockIcon />,
+  'licencas e alvaras': <BadgeCheckIcon />,
+  licencas: <BadgeCheckIcon />,
+  'meio ambiente': <LeafIcon />,
+  ouvidoria: <MessageBubbleIcon />,
+  processos: <FolderIcon />,
+  saude: <HeartPulseIcon />,
+  'servicos urbanos': <TrashBinIcon />,
+  servidor: <IdCardIcon />,
+  trabalho: <SuitcaseIcon />,
+  transito: <CarIcon />,
+  transparencia: <SearchZoomIcon />,
+  transporte: <BusIcon />,
+  tributos: <CoinIcon />,
+  turismo: <LuggageIcon />,
+}
 
-const servicos: SitemapItem[] = [
-  { label: 'Animais', href: '/servicos/categoria/animais', icon: <PawIcon /> },
-  {
-    label: 'Anticorrupção',
-    href: '/servicos/categoria/central%20anticorrupcao',
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    label: 'Cidadania',
-    href: '/servicos/categoria/cidadania',
-    icon: <CitizenshipIcon />,
-  },
-  {
-    label: 'Cultura e Lazer',
-    href: '/servicos/categoria/cultura',
-    icon: <MusicIcon />,
-  },
-  {
-    label: 'Defesa Civil',
-    href: '/servicos/categoria/defesa-civil',
-    icon: <AlertTriangleIcon />,
-  },
-  {
-    label: 'Educação',
-    href: '/servicos/categoria/educacao',
-    icon: <GraduationCapIcon />,
-  },
-  {
-    label: 'Fiscalização',
-    href: '/servicos/categoria/fiscalizacao',
-    icon: <EyeOpenIcon />,
-  },
-  {
-    label: 'Imóveis',
-    href: '/servicos/categoria/imoveis',
-    icon: <HomeBuildingIcon />,
-  },
-  {
-    label: 'LGPD',
-    href: '/servicos/categoria/lei%20geral%20de%20protecao%20de%20dados%20(lgpd)',
-    icon: <LockIcon />,
-  },
-  {
-    label: 'Licenças e Alvarás',
-    href: '/servicos/categoria/licencas',
-    icon: <BadgeCheckIcon />,
-  },
-  {
-    label: 'Meio Ambiente',
-    href: '/servicos/categoria/meio%20ambiente',
-    icon: <LeafIcon />,
-  },
-  { label: 'Ouvidoria', href: '/ouvidoria', icon: <MessageBubbleIcon /> },
-  {
-    label: 'Processos',
-    href: '/servicos/categoria/processos',
-    icon: <FolderIcon />,
-  },
-  {
-    label: 'Saúde',
-    href: '/servicos/categoria/saude',
-    icon: <HeartPulseIcon />,
-  },
-  {
-    label: 'Serviços urbanos',
-    href: '/servicos/categoria/servicos%20urbanos',
-    icon: <TrashBinIcon />,
-  },
-  {
-    label: 'Servidor',
-    href: '/servicos/categoria/servidor',
-    icon: <IdCardIcon />,
-  },
-  {
-    label: 'Trabalho',
-    href: '/servicos/categoria/trabalho',
-    icon: <SuitcaseIcon />,
-  },
-  {
-    label: 'Trânsito',
-    href: '/servicos/categoria/transito',
-    icon: <CarIcon />,
-  },
-  {
-    label: 'Transparência',
-    href: '/servicos/categoria/transparencia',
-    icon: <SearchZoomIcon />,
-  },
-  {
-    label: 'Transporte',
-    href: '/servicos/categoria/transporte',
-    icon: <BusIcon />,
-  },
-  {
-    label: 'Tributos',
-    href: '/servicos/categoria/tributos',
-    icon: <CoinIcon />,
-  },
-  {
-    label: 'Turismo',
-    href: '/servicos/categoria/turismo',
-    icon: <LuggageIcon />,
-  },
-]
-
-const atendimento: SitemapItem[] = [
-  {
-    label: 'Consulta de protocolo',
-    href: '/consulta-protocolo',
-    icon: <FileSearchIcon />,
-  },
-  {
-    label: 'Ouvidoria',
-    href: '/ouvidoria',
-    icon: <MessageBubbleIcon />,
-  },
-  {
-    label: 'Lei de Acesso à Informação',
-    href: 'https://1746.staging.app.dados.rio/protocolo/lai',
-    icon: <OpenBookIcon />,
-    external: true,
-  },
-]
+function getCategoryIcon(categoryName: string): ReactNode {
+  const slug = normalizeCategoryName(categoryName)
+  return CATEGORY_ICON_MAP[slug] ?? <GlobeIcon />
+}
 
 const oportunidades: SitemapItem[] = [
   {
@@ -260,7 +153,67 @@ function SitemapSection({
   )
 }
 
-export default function MapaDoSitePage() {
+export default async function MapaDoSitePage() {
+  const salesforce = isSalesforceServicesEnabled()
+
+  const informacoes: SitemapItem[] = [
+    {
+      label: 'A Prefeitura',
+      href: 'https://prefeitura.rio',
+      icon: <BuildingIcon />,
+      external: true,
+    },
+    ...(salesforce
+      ? [
+          {
+            label: 'Carta de serviços',
+            href: '/carta-de-servicos',
+            icon: <FileTextIcon />,
+          },
+        ]
+      : []),
+    {
+      label: 'Perguntas frequentes',
+      href: '/faq',
+      icon: <HelpCircleIcon />,
+    },
+    ...(salesforce
+      ? [
+          {
+            label: 'Termos de uso e política de privacidade',
+            href: '/termos-de-uso',
+            icon: <ShieldIcon />,
+          },
+        ]
+      : []),
+  ]
+
+  const atendimento: SitemapItem[] = [
+    {
+      label: 'Consulta de protocolo',
+      href: '/consulta-protocolo',
+      icon: <FileSearchIcon />,
+    },
+    {
+      label: 'Ouvidoria',
+      href: '/ouvidoria',
+      icon: <MessageBubbleIcon />,
+    },
+    {
+      label: 'Lei de Acesso à Informação',
+      href: 'https://1746.staging.app.dados.rio/protocolo/lai',
+      icon: <OpenBookIcon />,
+      external: true,
+    },
+  ]
+
+  const categorias = await fetchCategories()
+  const servicos: SitemapItem[] = categorias.map(cat => ({
+    label: cat.name,
+    href: `/servicos/categoria/${cat.categorySlug}`,
+    icon: getCategoryIcon(cat.name),
+  }))
+
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
@@ -293,12 +246,20 @@ export default function MapaDoSitePage() {
           />
 
           {/* Atendimento + Oportunidades: empilhados mobile, lado a lado ≥ 896px */}
-          <div className="grid grid-cols-1 min-[896px]:grid-cols-2 gap-4">
-            <SitemapSection
-              id="section-atendimento"
-              title="Atendimento"
-              items={atendimento}
-            />
+          <div
+            className={
+              salesforce
+                ? 'grid grid-cols-1 min-[896px]:grid-cols-2 gap-4'
+                : undefined
+            }
+          >
+            {salesforce && (
+              <SitemapSection
+                id="section-atendimento"
+                title="Atendimento"
+                items={atendimento}
+              />
+            )}
             <SitemapSection
               id="section-oportunidades"
               title="Oportunidades Cariocas"

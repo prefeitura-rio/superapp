@@ -53,11 +53,14 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 
 | Superfície | `false` | `true` |
 |---|---|---|
-| Middleware | Bloqueia `/minhas-solicitacoes`, `/consulta-protocolo`, `/carta-de-servicos` | Libera |
+| Middleware | Bloqueia `/minhas-solicitacoes`, `/consulta-protocolo`, `/carta-de-servicos`, `/termos-de-uso` | Libera |
 | `/api/chamados/*` e `/api/chamados-publico/*` | 404 | Ativo |
 | Busca (`/api/catalog-search`) | Typesense (app-busca-search) | MuleSoft (app-catalogo) |
 | Home — banner de solicitações em andamento | Oculto | Visível |
-| Footer — links de Atendimentos (Ouvidoria, LAI…) | Ocultos | Visíveis |
+| Footer — Termos de uso, Política de privacidade | Ocultos | Visíveis |
+| Menu global — Termos de uso e política de privacidade | Oculto | Visível |
+| Mapa do site — seção Atendimento | Oculta | Visível |
+| Mapa do site — links Carta de serviços e Termos de uso (Informações) | Ocultos | Visíveis |
 | Carteira — card "Cuidados com a Cidade" (legado 1746) | Visível | Oculto |
 
 ### FEATURE_HOME_SOLICITACOES
@@ -69,6 +72,12 @@ as rotas, API, busca e banner ativos.
 | Superfície | `false` | `true` |
 |---|---|---|
 | Home — cards de Solicitações (`RequestsSectionCards`) | Ocultos | Visíveis |
+| Footer — Ouvidoria, Lei de acesso à informação, Carta de serviços | Ocultos (requer ambas as flags) | Visíveis (requer ambas as flags) |
+
+> **Nota:** os links do footer de Ouvidoria, LAI e Carta de serviços dependem
+> de **ambas** as flags (`FEATURE_SALESFORCE=true` **e** `FEATURE_HOME_SOLICITACOES=true`).
+> A razão é que esses links apontam para formulários externos do 1746 que só fazem
+> sentido quando o backend Salesforce está ativo e o bloco de atendimento está habilitado.
 
 ### USE_MOCK_CHAMADOS
 

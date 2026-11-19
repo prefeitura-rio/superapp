@@ -178,7 +178,7 @@ describe('destinos', () => {
 })
 
 describe('feature flags', () => {
-  test('sem Salesforce: some Atendimentos e Carta de serviços (rotas bloqueadas no middleware)', async () => {
+  test('sem Salesforce: some Atendimentos, Carta de serviços e Termos de uso (rotas bloqueadas no middleware)', async () => {
     const buildGlobalMenu = await carregarMenu({
       FEATURE_SALESFORCE: 'false',
     })
@@ -187,6 +187,7 @@ describe('feature flags', () => {
       const ids = idsDe(buildGlobalMenu(logado))
       expect(ids).not.toContain('atendimentos')
       expect(ids).not.toContain('carta-de-servicos')
+      expect(ids).not.toContain('termos-de-uso')
     }
   })
 

@@ -170,8 +170,9 @@ const ENTRIES: GlobalMenuEntry[] = [
     kind: 'link',
     id: 'termos-de-uso',
     // Termos de uso e Política de Privacidade são um documento só (PREF-653).
+    // A rota é bloqueada pelo middleware quando FEATURE_SALESFORCE=false.
     label: 'Termos de uso e política de privacidade',
-    href: TERMOS_DE_USO_ROUTE,
+    href: salesforce ? TERMOS_DE_USO_ROUTE : undefined,
     icon: <FileTextIcon className={iconClassName} />,
   },
   {

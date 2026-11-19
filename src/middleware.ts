@@ -214,7 +214,7 @@ export async function middleware(request: NextRequest) {
         r => path === r || path.startsWith(`${r}/`)
       )
 
-      const cartaRoutes = ['/carta-de-servicos']
+      const cartaRoutes = ['/carta-de-servicos', '/termos-de-uso']
       const isCartaRoute = cartaRoutes.some(
         r => path === r || path.startsWith(`${r}/`)
       )
