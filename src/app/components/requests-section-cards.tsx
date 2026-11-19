@@ -47,6 +47,15 @@ export default function RequestsSectionCards() {
               </span>
             </div>
           </Link>
+
+          {/* Full-width: Anticorrupção */}
+          <Link href="/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa">
+            <div className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-background hover:bg-secondary transition-colors cursor-pointer">
+              <span className="text-sm font-normal text-foreground leading-snug">
+                Anticorrupção
+              </span>
+            </div>
+          </Link>
         </div>
       </div>
     </>

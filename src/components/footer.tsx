@@ -29,6 +29,10 @@ const quickLinks = [
   { label: 'Perguntas frequentes', href: '/faq' },
   CARTA_DE_SERVICOS_FOOTER_LINK,
   { label: 'Mapa do site', href: '/mapa-do-site' },
+  {
+    label: 'Anticorrupção',
+    href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
+  },
   { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
   {
     label: 'Política de privacidade',
