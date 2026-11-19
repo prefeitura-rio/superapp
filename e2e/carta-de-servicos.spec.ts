@@ -26,14 +26,12 @@ test.describe('Carta de serviços (público)', () => {
     await page.goto('/')
 
     const footer = page.getByRole('contentinfo')
+    // Links rápidos do footer (redesign do #803): Serviços abre a lista e
+    // Carta de serviços vem depois.
     const menuLinks = footer.getByRole('link', {
-      name: /^(Página inicial|Serviços|Carta de serviços)$/,
+      name: /^(Serviços|Carta de serviços)$/,
     })
-    await expect(menuLinks).toHaveText([
-      'Página inicial',
-      'Serviços',
-      'Carta de serviços',
-    ])
+    await expect(menuLinks).toHaveText(['Serviços', 'Carta de serviços'])
 
     await footer.getByRole('link', { name: 'Carta de serviços' }).click()
     await page.waitForURL('**/carta-de-servicos')

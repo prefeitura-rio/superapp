@@ -1,16 +1,19 @@
 /**
- * URLs do logout encadeado (aplicação → Keycloak → Gov.br).
+ * URL do logout do Gov.br, aberta num iframe oculto depois do logout da
+ * aplicação e do Keycloak.
  *
- * Os logouts do Keycloak e do Gov.br precisam acontecer em navegação de
- * primeiro nível: num iframe oculto, navegadores que bloqueiam cookies de
- * terceiros (Brave, Safari) não enviam o cookie de sessão e ela continua ativa.
+ * O Gov.br só devolve o navegador para o `post_logout_redirect_uri` se essa
+ * URL estiver cadastrada no campo "URL de Log Out" da credencial da
+ * Identidade Carioca no Gov.br, e hoje ela não está: numa navegação de
+ * primeiro nível o usuário ficaria em `servicos.acesso.gov.br`. Por isso o
+ * logout do Gov.br fica no iframe, invisível para o usuário. A limitação
+ * conhecida é que navegadores que bloqueiam cookies de terceiros (Brave,
+ * Safari) não enviam o cookie do Gov.br ao iframe, e a sessão de lá continua
+ * ativa.
  */
-
-export const GOVBR_LOGOUT_ROUTE = '/api/auth/logout?sso=govbr'
 
 /**
  * URL de retorno após o logout do Gov.br (`post_logout_redirect_uri`).
- * Mantém exatamente o valor usado até aqui, que é o cadastrado no Gov.br.
  */
 export function buildGovbrPostLogoutRedirectUri(): string {
   return `${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL}/auth?client_id=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI}&response_type=code`
@@ -26,21 +29,4 @@ export function buildGovbrLogoutUrl(): string | null {
 
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
   return `${normalizedBase}logout?post_logout_redirect_uri=${encodeURIComponent(buildGovbrPostLogoutRedirectUri())}`
-}
-
-/**
- * Primeiro destino do navegador depois de a aplicação apagar os cookies.
- *
- * Passa pelo logout de navegador do Keycloak, que encerra a sessão SSO pelo
- * cookie dele mesmo quando o `refresh_token` da aplicação já expirou (sem isso,
- * a volta ao `/auth` do Keycloak logaria de novo o usuário anterior), e segue
- * para o logout do Gov.br. Sem Gov.br configurado, termina em `homeUrl`.
- */
-export function buildLogoutRedirectChain(homeUrl: string): string {
-  const finalUrl = buildGovbrLogoutUrl() ?? homeUrl
-  const keycloakBaseUrl =
-    process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL?.trim()
-  if (!keycloakBaseUrl) return finalUrl
-
-  return `${keycloakBaseUrl}/logout?redirect_uri=${encodeURIComponent(finalUrl)}`
 }

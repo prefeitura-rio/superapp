@@ -64,8 +64,7 @@ const socialLinks = [
   },
 ]
 
-const titleCls =
-  'text-sm font-medium leading-4 tracking-normal text-foreground'
+const titleCls = 'text-sm font-medium leading-4 tracking-normal text-foreground'
 const bodyCls =
   'text-sm font-normal leading-5 tracking-normal text-foreground-light'
 const linkCls =
@@ -160,7 +159,11 @@ function LogosAndSocial() {
             alt="Prefeitura do Rio"
             width={77}
             height={32}
-            style={{ width: '77px', height: '31.233px', aspectRatio: '77/31.23' }}
+            style={{
+              width: '77px',
+              height: '31.233px',
+              aspectRatio: '77/31.23',
+            }}
             className="object-contain"
             unoptimized
           />
