@@ -2,7 +2,7 @@ import { type Page, expect, test } from '@playwright/test'
 import { applyE2ECookieConsent } from './fixtures/auth'
 
 /**
- * Carta de Serviços ao Usuário (Lei 13.460): footer → listagem de órgãos → tela do
+ * Carta de Serviços ao Usuário (Lei 13.460): footer (com as flags) → listagem de órgãos → tela do
  * órgão → PDF da carta (aberto em aba nova). Roda contra a app-catalogo de staging, sem mock; o órgão
  * é o primeiro da lista (não fixamos sigla para não quebrar quando o dado mudar).
  */
@@ -10,6 +10,15 @@ import { applyE2ECookieConsent } from './fixtures/auth'
 const ORG_LABEL = /^.+ - .+$/
 // --foreground (#09090b) no tema claro.
 const FOREGROUND = 'rgb(9, 9, 11)'
+
+/**
+ * O link do footer exige as duas flags, lidas em runtime pelo servidor
+ * (ver `docs/agents/07-feature-flags-runtime.md`). A rota em si só depende de
+ * `FEATURE_SALESFORCE`.
+ */
+const footerCartaEnabled =
+  process.env.FEATURE_SALESFORCE === 'true' &&
+  process.env.FEATURE_HOME_SOLICITACOES === 'true'
 
 function orgLinks(page: Page) {
   return page.getByRole('main').getByRole('listitem').getByRole('link')
@@ -20,7 +29,7 @@ test.describe('Carta de serviços (público)', () => {
     await applyE2ECookieConsent(context)
   })
 
-  test('o footer leva à listagem, que lista os órgãos em ordem alfabética', async ({
+  test('footer: Carta de serviços só com FEATURE_SALESFORCE e FEATURE_HOME_SOLICITACOES', async ({
     page,
   }) => {
     await page.goto('/')
@@ -31,10 +40,22 @@ test.describe('Carta de serviços (público)', () => {
     const menuLinks = footer.getByRole('link', {
       name: /^(Serviços|Carta de serviços)$/,
     })
-    await expect(menuLinks).toHaveText(['Serviços', 'Carta de serviços'])
 
+    if (!footerCartaEnabled) {
+      await expect(menuLinks).toHaveText(['Serviços'])
+      return
+    }
+
+    await expect(menuLinks).toHaveText(['Serviços', 'Carta de serviços'])
     await footer.getByRole('link', { name: 'Carta de serviços' }).click()
     await page.waitForURL('**/carta-de-servicos')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Carta de serviços' })
+    ).toBeVisible()
+  })
+
+  test('a listagem lista os órgãos em ordem alfabética', async ({ page }) => {
+    await page.goto('/carta-de-servicos')
 
     await expect(
       page.getByRole('heading', { level: 1, name: 'Carta de serviços' })
