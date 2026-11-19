@@ -8,7 +8,7 @@ describe('Footer', () => {
   it('exibe informações de endereço da prefeitura', () => {
     render(<Footer />)
     expect(
-      screen.getByText('Prefeitura da Cidade do Rio de Janeiro'),
+      screen.getByText('Prefeitura da Cidade do Rio de Janeiro')
     ).toBeTruthy()
     expect(screen.getByText('Rua Afonso Cavalcanti, 455')).toBeTruthy()
     expect(screen.getByText('CNPJ: 42.498.733/0001-48')).toBeTruthy()
@@ -41,7 +41,10 @@ describe('Footer', () => {
   it('tem link de Transparência apontando para o portal de transparência', () => {
     render(<Footer />)
     const link = screen.getByRole('link', { name: 'Acesso à Informação' })
-    expect(link).toHaveAttribute('href', 'https://transparencia.prefeitura.rio/')
+    expect(link).toHaveAttribute(
+      'href',
+      'https://transparencia.prefeitura.rio/'
+    )
   })
 
   it('tem link "Oportunidades cariocas" apontando para /servicos/trabalho', () => {
