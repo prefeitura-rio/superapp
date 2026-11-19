@@ -36,12 +36,16 @@ function buildQuickLinks(salesforce: boolean, homeSolicitacoes: boolean) {
         ]
       : []),
     { label: 'Perguntas frequentes', href: '/faq' },
-    ...(salesforce && homeSolicitacoes ? [CARTA_DE_SERVICOS_FOOTER_LINK] : []),
+    ...(salesforce && homeSolicitacoes
+      ? [
+          CARTA_DE_SERVICOS_FOOTER_LINK,
+          {
+            label: 'Anticorrupção',
+            href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
+          },
+        ]
+      : []),
     { label: 'Mapa do site', href: '/mapa-do-site' },
-    {
-      label: 'Anticorrupção',
-      href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
-    },
     ...(salesforce
       ? [
           { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
