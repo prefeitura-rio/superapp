@@ -92,6 +92,10 @@ beforeEach(() => {
     'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
     'http://localhost:3000/auth/callback'
   )
+  // Termos de uso e política de privacidade só aparecem no menu global quando
+  // FEATURE_SALESFORCE=true (rota gateada). Testes desta tela pressupõem que
+  // a integração com Salesforce está ativa.
+  vi.stubEnv('FEATURE_SALESFORCE', 'true')
 })
 
 afterEach(() => {

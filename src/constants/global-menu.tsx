@@ -57,147 +57,151 @@ export type GlobalMenuEntry = GlobalMenuLeaf | GlobalMenuSection
 
 const iconClassName = 'h-6 w-6 shrink-0 text-foreground'
 
-const cursos = isFeatureEnabled('cursos')
-const empregos = isFeatureEnabled('empregos')
-const salesforce = isSalesforceServicesEnabled()
-
-const ENTRIES: GlobalMenuEntry[] = [
-  {
-    kind: 'link',
-    id: 'servicos',
-    label: 'Serviços',
-    href: '/servicos',
-    icon: <ServicesIcon className={iconClassName} />,
-  },
-  {
-    kind: 'link',
-    id: 'documentos',
-    label: 'Documentos',
-    href: '/carteira',
-    requiresAuth: true,
-    hrefWhenLoggedOut: '/autenticacao-necessaria/carteira',
-    icon: <WalletIcon className={iconClassName} />,
-  },
-  {
-    kind: 'section',
-    id: 'oportunidades-cariocas',
-    label: 'Oportunidades Cariocas',
-    icon: <GraduationCapIcon className={iconClassName} />,
-    items: [
-      {
-        id: 'ver-cursos',
-        label: 'Ver cursos',
-        href: cursos ? '/servicos/cursos' : undefined,
-      },
-      {
-        id: 'meus-cursos',
-        label: 'Meus cursos',
-        href: cursos ? '/servicos/cursos/meus-cursos' : undefined,
-        requiresAuth: true,
-        level: 2,
-      },
-      {
-        id: 'certificados',
-        label: 'Meus certificados',
-        href: cursos ? '/servicos/cursos/certificados' : undefined,
-        requiresAuth: true,
-        level: 2,
-      },
-      {
-        id: 'ver-vagas',
-        label: 'Ver vagas',
-        href: empregos ? '/servicos/trabalho' : undefined,
-      },
-      {
-        id: 'minhas-candidaturas',
-        label: 'Minhas candidaturas',
-        href: empregos ? '/servicos/trabalho/minhas-candidaturas' : undefined,
-        requiresAuth: true,
-        level: 2,
-      },
-      {
-        id: 'meu-curriculo',
-        label: 'Meu currículo',
-        href: empregos ? '/servicos/trabalho/curriculo' : undefined,
-        requiresAuth: true,
-        level: 2,
-      },
-    ],
-  },
-  {
-    kind: 'section',
-    id: 'atendimentos',
-    label: 'Atendimentos',
-    icon: <PhoneIcon className={iconClassName} />,
-    items: [
-      // Logado: tudo vive em Minhas solicitações (Ouvidoria e LAI abrem a aba
-      // correspondente). Deslogado: consulta por protocolo e os formulários.
-      {
-        id: 'minhas-solicitacoes',
-        label: 'Minhas solicitações',
-        href: salesforce ? '/minhas-solicitacoes' : undefined,
-        requiresAuth: true,
-      },
-      {
-        id: 'consulta-protocolo',
-        label: 'Consulta de protocolo',
-        href: salesforce ? '/consulta-protocolo' : undefined,
-        onlyLoggedOut: true,
-      },
-      {
-        id: 'ouvidoria',
-        label: 'Ouvidoria',
-        href: salesforce ? '/minhas-solicitacoes?filtro=ouvidoria' : undefined,
-        requiresAuth: true,
-        hrefWhenLoggedOut: salesforce
-          ? `${TICKET_FORM_BASE_URL}/ouvidoria`
-          : undefined,
-      },
-      {
-        id: 'lai',
-        label: 'Lei de Acesso à Informação',
-        href: salesforce
-          ? '/minhas-solicitacoes?filtro=acesso-a-informacao'
-          : undefined,
-        requiresAuth: true,
-        hrefWhenLoggedOut: salesforce
-          ? `${TICKET_FORM_BASE_URL}/lai`
-          : undefined,
-      },
-    ],
-  },
-  {
-    kind: 'link',
-    id: 'termos-de-uso',
-    // Termos de uso e Política de Privacidade são um documento só (PREF-653).
-    // A rota é bloqueada pelo middleware quando FEATURE_SALESFORCE=false.
-    label: 'Termos de uso e política de privacidade',
-    href: salesforce ? TERMOS_DE_USO_ROUTE : undefined,
-    icon: <FileTextIcon className={iconClassName} />,
-  },
-  {
-    kind: 'link',
-    id: 'carta-de-servicos',
-    label: 'Carta de serviços',
-    href: salesforce ? CARTA_DE_SERVICOS_ROUTE : undefined,
-    icon: <LayersIcon className={iconClassName} />,
-  },
-  {
-    kind: 'link',
-    id: 'faq',
-    label: 'Perguntas frequentes',
-    href: '/faq',
-    icon: <MessageCircleIcon className={iconClassName} />,
-  },
-  {
-    kind: 'link',
-    id: 'meu-perfil',
-    label: 'Meu perfil',
-    href: '/meu-perfil',
-    requiresAuth: true,
-    icon: <UserIcon className={iconClassName} />,
-  },
-]
+function buildEntries(
+  salesforce: boolean,
+  cursos: boolean,
+  empregos: boolean
+): GlobalMenuEntry[] {
+  return [
+    {
+      kind: 'link',
+      id: 'servicos',
+      label: 'Serviços',
+      href: '/servicos',
+      icon: <ServicesIcon className={iconClassName} />,
+    },
+    {
+      kind: 'link',
+      id: 'documentos',
+      label: 'Documentos',
+      href: '/carteira',
+      requiresAuth: true,
+      hrefWhenLoggedOut: '/autenticacao-necessaria/carteira',
+      icon: <WalletIcon className={iconClassName} />,
+    },
+    {
+      kind: 'section',
+      id: 'oportunidades-cariocas',
+      label: 'Oportunidades Cariocas',
+      icon: <GraduationCapIcon className={iconClassName} />,
+      items: [
+        {
+          id: 'ver-cursos',
+          label: 'Ver cursos',
+          href: cursos ? '/servicos/cursos' : undefined,
+        },
+        {
+          id: 'meus-cursos',
+          label: 'Meus cursos',
+          href: cursos ? '/servicos/cursos/meus-cursos' : undefined,
+          requiresAuth: true,
+          level: 2,
+        },
+        {
+          id: 'certificados',
+          label: 'Meus certificados',
+          href: cursos ? '/servicos/cursos/certificados' : undefined,
+          requiresAuth: true,
+          level: 2,
+        },
+        {
+          id: 'ver-vagas',
+          label: 'Ver vagas',
+          href: empregos ? '/servicos/trabalho' : undefined,
+        },
+        {
+          id: 'minhas-candidaturas',
+          label: 'Minhas candidaturas',
+          href: empregos ? '/servicos/trabalho/minhas-candidaturas' : undefined,
+          requiresAuth: true,
+          level: 2,
+        },
+        {
+          id: 'meu-curriculo',
+          label: 'Meu currículo',
+          href: empregos ? '/servicos/trabalho/curriculo' : undefined,
+          requiresAuth: true,
+          level: 2,
+        },
+      ],
+    },
+    {
+      kind: 'section',
+      id: 'atendimentos',
+      label: 'Atendimentos',
+      icon: <PhoneIcon className={iconClassName} />,
+      items: [
+        // Logado: tudo vive em Minhas solicitações (Ouvidoria e LAI abrem a aba
+        // correspondente). Deslogado: consulta por protocolo e os formulários.
+        {
+          id: 'minhas-solicitacoes',
+          label: 'Minhas solicitações',
+          href: salesforce ? '/minhas-solicitacoes' : undefined,
+          requiresAuth: true,
+        },
+        {
+          id: 'consulta-protocolo',
+          label: 'Consulta de protocolo',
+          href: salesforce ? '/consulta-protocolo' : undefined,
+          onlyLoggedOut: true,
+        },
+        {
+          id: 'ouvidoria',
+          label: 'Ouvidoria',
+          href: salesforce
+            ? '/minhas-solicitacoes?filtro=ouvidoria'
+            : undefined,
+          requiresAuth: true,
+          hrefWhenLoggedOut: salesforce
+            ? `${TICKET_FORM_BASE_URL}/ouvidoria`
+            : undefined,
+        },
+        {
+          id: 'lai',
+          label: 'Lei de Acesso à Informação',
+          href: salesforce
+            ? '/minhas-solicitacoes?filtro=acesso-a-informacao'
+            : undefined,
+          requiresAuth: true,
+          hrefWhenLoggedOut: salesforce
+            ? `${TICKET_FORM_BASE_URL}/lai`
+            : undefined,
+        },
+      ],
+    },
+    {
+      kind: 'link',
+      id: 'termos-de-uso',
+      // Termos de uso e Política de Privacidade são um documento só (PREF-653).
+      // A rota é bloqueada pelo middleware quando FEATURE_SALESFORCE=false.
+      label: 'Termos de uso e política de privacidade',
+      href: salesforce ? TERMOS_DE_USO_ROUTE : undefined,
+      icon: <FileTextIcon className={iconClassName} />,
+    },
+    {
+      kind: 'link',
+      id: 'carta-de-servicos',
+      label: 'Carta de serviços',
+      href: salesforce ? CARTA_DE_SERVICOS_ROUTE : undefined,
+      icon: <LayersIcon className={iconClassName} />,
+    },
+    {
+      kind: 'link',
+      id: 'faq',
+      label: 'Perguntas frequentes',
+      href: '/faq',
+      icon: <MessageCircleIcon className={iconClassName} />,
+    },
+    {
+      kind: 'link',
+      id: 'meu-perfil',
+      label: 'Meu perfil',
+      href: '/meu-perfil',
+      requiresAuth: true,
+      icon: <UserIcon className={iconClassName} />,
+    },
+  ]
+}
 
 /**
  * Destino efetivo do item para o estado de autenticação atual. Retorna
@@ -214,8 +218,17 @@ function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
  * Menu deslogado só contém o que o visitante consegue acessar: os itens
  * restritos são removidos (não desabilitados), conforme o handoff. Documentos,
  * Ouvidoria e LAI continuam, com o destino próprio para visitante.
+ *
+ * As flags são lidas aqui (lazy, por chamada) e não na carga do módulo,
+ * para que testes e RSCs reflitam o valor correto do process.env no momento
+ * da renderização — sem necessidade de reinicializar o módulo.
  */
 export function buildGlobalMenu(isLoggedIn: boolean): GlobalMenuEntry[] {
+  const salesforce = isSalesforceServicesEnabled()
+  const cursos = isFeatureEnabled('cursos')
+  const empregos = isFeatureEnabled('empregos')
+  const ENTRIES = buildEntries(salesforce, cursos, empregos)
+
   return ENTRIES.reduce<GlobalMenuEntry[]>((entries, entry) => {
     if (entry.kind === 'link') {
       const href = resolveHref(entry, isLoggedIn)
