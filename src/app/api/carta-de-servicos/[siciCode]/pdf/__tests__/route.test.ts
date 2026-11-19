@@ -62,7 +62,7 @@ describe('GET /api/carta-de-servicos/[siciCode]/pdf', () => {
     vi.restoreAllMocks()
   })
 
-  it('devolve o PDF pronto para baixar, com o nome pela sigla', async () => {
+  it('devolve o PDF inline (abre no navegador), com o nome pela sigla', async () => {
     getApiPublicOrgUnitsSiciCodeServices.mockResolvedValue(
       paged([service('a'), service('b')])
     )
@@ -72,7 +72,7 @@ describe('GET /api/carta-de-servicos/[siciCode]/pdf', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toBe('application/pdf')
     expect(response.headers.get('content-disposition')).toBe(
-      'attachment; filename="carta-de-servicos-cet-rio.pdf"'
+      'inline; filename="carta-de-servicos-cet-rio.pdf"'
     )
     expect(response.headers.get('cache-control')).toContain('max-age=600')
 

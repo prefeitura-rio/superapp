@@ -1,15 +1,15 @@
-# Carta de Serviços ao Usuário — download em PDF
+# Carta de Serviços ao Usuário — PDF
 
 Lei Federal nº 13.460/2017. Entrada provisória no footer (coluna **Menu**, 3º item),
-listagem de órgãos, tela do órgão e download da carta daquele órgão em PDF A4.
+listagem de órgãos, tela do órgão e a carta daquele órgão em PDF A4, aberta em aba nova.
 
 ## Rotas
 
 | Rota | O que é |
 |------|---------|
 | `/carta-de-servicos` | Texto da Lei ("Ver mais"/"Ver menos") + órgãos em ordem alfabética, "Nome do ente - Sigla" |
-| `/carta-de-servicos/{siciCode}` | Título do órgão, botão **Baixar documento**, serviços com link para a tela do serviço |
-| `GET /api/carta-de-servicos/{siciCode}/pdf` | Route Handler que devolve o PDF (`carta-de-servicos-{sigla}.pdf`) |
+| `/carta-de-servicos/{siciCode}` | Título do órgão, botão **Visualizar Carta de Serviços** (abre o PDF em aba nova), "Serviços relacionados" com link para a tela do serviço |
+| `GET /api/carta-de-servicos/{siciCode}/pdf` | Route Handler que devolve o PDF `inline` (`carta-de-servicos-{sigla}.pdf`), para abrir no visualizador do navegador |
 
 As duas páginas são públicas (`publicRoutes` no middleware); `/api/*` não passa pelo middleware.
 

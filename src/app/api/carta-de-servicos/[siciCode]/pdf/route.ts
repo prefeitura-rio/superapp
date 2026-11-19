@@ -15,8 +15,10 @@ export const runtime = 'nodejs'
  * GET /api/carta-de-servicos/{siciCode}/pdf
  *
  * Busca todas as páginas de `GET /api/public/org-units/{siciCode}/services` na
- * app-catalogo e devolve a Carta de Serviços do órgão em PDF (A4), pronta para o
- * navegador baixar. Decisão de gerar no servidor: `docs/carta-de-servicos-pdf.md`.
+ * app-catalogo e devolve a Carta de Serviços do órgão em PDF (A4). Vai `inline`
+ * para abrir no visualizador do navegador (a tela do órgão abre em aba nova); o
+ * `filename` continua valendo para quem salvar de lá.
+ * Decisão de gerar no servidor: `docs/carta-de-servicos-pdf.md`.
  */
 export async function GET(
   _request: NextRequest,
@@ -50,7 +52,7 @@ export async function GET(
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Length': String(pdf.byteLength),
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `inline; filename="${fileName}"`,
         // Os dados da app-catalogo já ficam 10 min no data cache do Next.
         'Cache-Control': 'public, max-age=600, stale-while-revalidate=3600',
       },

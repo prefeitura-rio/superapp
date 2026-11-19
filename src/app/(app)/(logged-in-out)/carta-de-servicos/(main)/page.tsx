@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
+import { ChevronRightIcon } from '@/assets/icons/chevron-right-icon'
 import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import {
   type CartaOrgUnit,
@@ -40,15 +41,18 @@ export default async function CartaDeServicosPage() {
         ]}
       />
       <main className="w-full max-w-4xl mx-auto px-4 pb-10">
-        <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 tracking-tight text-primary">
+        <h1 className="pt-2 pb-2 text-3xl font-medium leading-9 tracking-tight text-foreground">
           Carta de serviços
         </h1>
 
         <Lei13460Text />
 
         <section aria-labelledby="carta-orgaos-title" className="mt-6">
-          <h2 id="carta-orgaos-title" className="sr-only">
-            Órgãos e entidades
+          <h2
+            id="carta-orgaos-title"
+            className="mb-2 text-base font-medium leading-5 text-foreground"
+          >
+            Cartas de serviços por Órgão
           </h2>
 
           {orgUnits === null && (
@@ -70,9 +74,13 @@ export default async function CartaDeServicosPage() {
                 <li key={org.siciCode}>
                   <Link
                     href={`${CARTA_DE_SERVICOS_ROUTE}/${encodeURIComponent(org.siciCode)}`}
-                    className="flex w-full items-center rounded-2xl bg-card p-4 text-sm leading-5 text-foreground transition-colors hover:bg-secondary active:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex w-full items-center justify-between gap-4 rounded-2xl bg-card p-4 text-sm leading-5 text-foreground transition-colors hover:bg-secondary active:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {formatOrgUnitLabel(org)}
+                    <span>{formatOrgUnitLabel(org)}</span>
+                    <ChevronRightIcon
+                      className="h-6 w-6 shrink-0 text-foreground"
+                      aria-hidden
+                    />
                   </Link>
                 </li>
               ))}
