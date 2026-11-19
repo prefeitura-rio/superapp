@@ -1,3 +1,7 @@
+import {
+  type ServerFeatureFlags,
+  ServerFeatureFlagsProvider,
+} from '@/providers/server-feature-flags-provider'
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -36,16 +40,22 @@ function respondHeader(body: object) {
   server.use(http.get('/api/user/header', () => HttpResponse.json(body)))
 }
 
-async function openMenu() {
+/**
+ * A flag do Salesforce chega como no app: lida no servidor e entregue pelo
+ * provider do root layout. Salesforce ligado por padrão.
+ */
+async function openMenu(flags: ServerFeatureFlags = { salesforce: true }) {
   const user = userEvent.setup()
   render(
-    <QueryClientProvider
-      client={
-        new QueryClient({ defaultOptions: { queries: { retry: false } } })
-      }
-    >
-      <GlobalMenuTrigger />
-    </QueryClientProvider>
+    <ServerFeatureFlagsProvider flags={flags}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <GlobalMenuTrigger />
+      </QueryClientProvider>
+    </ServerFeatureFlagsProvider>
   )
   await user.click(screen.getByRole('button', { name: 'Menu' }))
   return { user, menu: await screen.findByRole('dialog', { name: 'Menu' }) }
@@ -64,9 +74,9 @@ beforeEach(() => {
     'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
     'http://localhost:3000/auth/callback'
   )
-  // Termos de uso e itens de Atendimento só aparecem no menu global quando
-  // FEATURE_SALESFORCE=true. Testes deste arquivo pressupõem Salesforce ativo.
-  vi.stubEnv('FEATURE_SALESFORCE', 'true')
+  // No navegador `FEATURE_SALESFORCE` (só de servidor) não existe. O menu tem
+  // de ler a flag do provider, nunca do process.env.
+  vi.stubEnv('FEATURE_SALESFORCE', '')
   assign.mockReset()
   Object.defineProperty(window, 'location', {
     configurable: true,
@@ -153,6 +163,59 @@ describe('GlobalMenu', () => {
       })
     ).toHaveAttribute('href', '/termos-de-uso')
   })
+
+  it.each([
+    ['visitante', VISITOR],
+    ['cidadão logado', CITIZEN],
+  ])(
+    '%s: com Salesforce ligado no servidor mostra Atendimentos, Termos de uso e Carta de serviços',
+    async (_state, body) => {
+      respondHeader(body)
+      const { menu } = await openMenu({ salesforce: true })
+      if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
+
+      expect(
+        within(menu).getByRole('button', { name: 'Atendimentos' })
+      ).toBeInTheDocument()
+      expect(
+        within(menu).getByRole('link', {
+          name: 'Termos de uso e política de privacidade',
+        })
+      ).toHaveAttribute('href', '/termos-de-uso')
+      expect(
+        within(menu).getByRole('link', { name: 'Carta de serviços' })
+      ).toHaveAttribute('href', '/carta-de-servicos')
+    }
+  )
+
+  it.each([
+    ['visitante', VISITOR],
+    ['cidadão logado', CITIZEN],
+  ])(
+    '%s: com Salesforce desligado no servidor esconde os três itens',
+    async (_state, body) => {
+      // Mesmo que o env do bundle diga o contrário, vale o que o servidor mandou.
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      respondHeader(body)
+      const { menu } = await openMenu({ salesforce: false })
+      if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
+
+      expect(
+        within(menu).queryByRole('button', { name: 'Atendimentos' })
+      ).not.toBeInTheDocument()
+      expect(
+        within(menu).queryByRole('link', {
+          name: 'Termos de uso e política de privacidade',
+        })
+      ).not.toBeInTheDocument()
+      expect(
+        within(menu).queryByRole('link', { name: 'Carta de serviços' })
+      ).not.toBeInTheDocument()
+      expect(
+        within(menu).getByRole('link', { name: 'Perguntas frequentes' })
+      ).toBeInTheDocument()
+    }
+  )
 
   it('logado: subitens com o recuo do handoff (36px e 56px) e Tema claro + Sair no fim', async () => {
     respondHeader(CITIZEN)

@@ -3,10 +3,8 @@ import { MessageCircleIcon } from '@/assets/icons/message-circle'
 import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
-import {
-  isFeatureEnabled,
-  isSalesforceServicesEnabled,
-} from '@/lib/feature-flags'
+import { isFeatureEnabled } from '@/lib/feature-flags'
+import type { ServerFeatureFlags } from '@/providers/server-feature-flags-provider'
 // Sem equivalente em src/assets/icons (falta no design system).
 import { FileTextIcon, GraduationCapIcon, LayersIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -219,12 +217,15 @@ function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
  * restritos são removidos (não desabilitados), conforme o handoff. Documentos,
  * Ouvidoria e LAI continuam, com o destino próprio para visitante.
  *
- * As flags são lidas aqui (lazy, por chamada) e não na carga do módulo,
- * para que testes e RSCs reflitam o valor correto do process.env no momento
- * da renderização — sem necessidade de reinicializar o módulo.
+ * O menu roda no navegador, onde `FEATURE_SALESFORCE` (só de servidor) não
+ * existe. Por isso a flag chega por parâmetro, lida no servidor a cada
+ * requisição (`useServerFeatureFlags`), e não via `process.env` aqui. As flags
+ * `NEXT_PUBLIC_` de Cursos/Empregos são inlined no build e podem ser lidas.
  */
-export function buildGlobalMenu(isLoggedIn: boolean): GlobalMenuEntry[] {
-  const salesforce = isSalesforceServicesEnabled()
+export function buildGlobalMenu(
+  isLoggedIn: boolean,
+  { salesforce }: ServerFeatureFlags
+): GlobalMenuEntry[] {
   const cursos = isFeatureEnabled('cursos')
   const empregos = isFeatureEnabled('empregos')
   const ENTRIES = buildEntries(salesforce, cursos, empregos)
