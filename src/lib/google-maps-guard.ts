@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 const WINDOW_MS = 60_000
 const MAX_REQUESTS = 60
 const MAX_TRACKED_CLIENTS = 10_000
+const EVICT_BATCH = 1_000
 
 export type GoogleMapsScope = 'address_autocomplete' | 'cep_lookup'
 
@@ -18,19 +19,44 @@ const hits = new Map<string, number[]>()
 
 const noStore = { 'Cache-Control': 'private, no-store' }
 
+/**
+ * The first X-Forwarded-For value is whatever the client declares; the Envoy
+ * only appends hops to the right. Trust what the mesh saw instead:
+ * `x-envoy-external-address`, written by Istio from the connection, or else
+ * the last hop, appended by the ingress itself (same rule as
+ * `src/actions/divida-ativa/enviar-requerimento.ts`).
+ */
 export function googleMapsClientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) {
-    const first = forwarded.split(',')[0]?.trim()
-    if (first) return first
-  }
+  const fromMesh = request.headers.get('x-envoy-external-address')?.trim()
+  if (fromMesh) return fromMesh
+
+  const lastHop = request.headers
+    .get('x-forwarded-for')
+    ?.split(',')
+    .pop()
+    ?.trim()
+  if (lastHop) return lastHop
 
   return request.headers.get('x-real-ip')?.trim() || 'unknown'
 }
 
-function pruneStale(now: number) {
+/**
+ * Keeps the counter bounded: drops the clients without a hit in the window
+ * and, if it is still full, the oldest tracked ones. Runs only when the cap
+ * is reached, so a request does not walk the whole map.
+ */
+function makeRoom(now: number) {
   for (const [key, times] of hits) {
     if (!times.some(at => now - at < WINDOW_MS)) hits.delete(key)
+  }
+
+  if (hits.size < MAX_TRACKED_CLIENTS) return
+
+  let toEvict = hits.size - MAX_TRACKED_CLIENTS + EVICT_BATCH
+  for (const key of hits.keys()) {
+    if (toEvict <= 0) break
+    hits.delete(key)
+    toEvict--
   }
 }
 
@@ -40,10 +66,13 @@ export function allowGoogleMapsRequest(
   ip: string,
   now = Date.now()
 ): boolean {
-  if (hits.size >= MAX_TRACKED_CLIENTS) pruneStale(now)
-
   const key = `${scope}:${ip}`
+  if (!hits.has(key) && hits.size >= MAX_TRACKED_CLIENTS) makeRoom(now)
+
   const recent = (hits.get(key) ?? []).filter(at => now - at < WINDOW_MS)
+  // Re-inserting moves the client to the end, so eviction drops the least
+  // recently seen first.
+  hits.delete(key)
   if (recent.length >= MAX_REQUESTS) {
     hits.set(key, recent)
     return false

@@ -51,11 +51,20 @@ describe('hasValidSession', () => {
 })
 
 describe('googleMapsClientIp', () => {
-  it('usa o primeiro x-forwarded-for, depois x-real-ip', () => {
+  it('prefere x-envoy-external-address, que o cliente não controla', () => {
     expect(
       googleMapsClientIp(
-        request({ 'x-forwarded-for': '203.0.113.1, 10.0.0.1' })
+        request({
+          'x-envoy-external-address': '203.0.113.9',
+          'x-forwarded-for': '1.2.3.4, 203.0.113.9',
+        })
       )
+    ).toBe('203.0.113.9')
+  })
+
+  it('sem o cabeçalho do mesh, usa o último hop do x-forwarded-for, não o primeiro', () => {
+    expect(
+      googleMapsClientIp(request({ 'x-forwarded-for': '1.2.3.4, 203.0.113.1' }))
     ).toBe('203.0.113.1')
     expect(googleMapsClientIp(request({ 'x-real-ip': '203.0.113.2' }))).toBe(
       '203.0.113.2'
@@ -122,5 +131,66 @@ describe('guardGoogleMapsRequest', () => {
     expect(refused?.status).toBe(429)
     expect(refused?.headers.get('retry-after')).toBe('60')
     expect(await refused?.json()).toEqual({ error: 'Too many requests' })
+  })
+})
+
+describe('guardGoogleMapsRequest com x-forwarded-for forjado', () => {
+  it('trocar o primeiro valor do x-forwarded-for a cada chamada não burla o limite', () => {
+    const token = syntheticJwt(3600)
+    const results: (number | null)[] = []
+    for (let i = 0; i < 61; i++) {
+      const refused = guardGoogleMapsRequest(
+        request(
+          {
+            'x-forwarded-for': `10.9.${Math.floor(i / 250)}.${i % 250}, 198.51.100.12`,
+          },
+          { access_token: token }
+        ),
+        'address_autocomplete'
+      )
+      results.push(refused?.status ?? null)
+    }
+    expect(results.slice(0, 60).every(status => status === null)).toBe(true)
+    expect(results[60]).toBe(429)
+  })
+
+  it('trocar o x-forwarded-for não burla o limite quando o mesh informa o IP', () => {
+    const token = syntheticJwt(3600)
+    let last: number | null = null
+    for (let i = 0; i < 61; i++) {
+      last =
+        guardGoogleMapsRequest(
+          request(
+            {
+              'x-envoy-external-address': '198.51.100.13',
+              'x-forwarded-for': `10.8.0.${i}`,
+            },
+            { access_token: token }
+          ),
+          'cep_lookup'
+        )?.status ?? null
+    }
+    expect(last).toBe(429)
+  })
+})
+
+describe('allowGoogleMapsRequest com muitos clientes', () => {
+  it('mantém o contador limitado, descartando o cliente visto há mais tempo', () => {
+    const now = 5_000_000
+    for (let i = 0; i < 60; i++) {
+      allowGoogleMapsRequest('cep_lookup', '198.51.100.99', now)
+    }
+    expect(allowGoogleMapsRequest('cep_lookup', '198.51.100.99', now)).toBe(
+      false
+    )
+
+    // 10 mil clientes distintos na mesma janela: o mais antigo sai do contador
+    for (let i = 0; i < 10_000; i++) {
+      allowGoogleMapsRequest('cep_lookup', `ip-${i}`, now)
+    }
+
+    expect(allowGoogleMapsRequest('cep_lookup', '198.51.100.99', now)).toBe(
+      true
+    )
   })
 })
