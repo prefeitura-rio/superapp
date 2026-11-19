@@ -54,6 +54,8 @@ interface GlobalMenuSection {
 export type GlobalMenuEntry = GlobalMenuLeaf | GlobalMenuSection
 
 const iconClassName = 'h-6 w-6 shrink-0 text-foreground'
+// Lucide vem com stroke 2; os ícones do design system usam 1.4.
+const iconStrokeWidth = 1.4
 
 function buildEntries(
   salesforce: boolean,
@@ -81,7 +83,12 @@ function buildEntries(
       kind: 'section',
       id: 'oportunidades-cariocas',
       label: 'Oportunidades Cariocas',
-      icon: <GraduationCapIcon className={iconClassName} />,
+      icon: (
+        <GraduationCapIcon
+          className={iconClassName}
+          strokeWidth={iconStrokeWidth}
+        />
+      ),
       items: [
         {
           id: 'ver-cursos',
@@ -174,14 +181,18 @@ function buildEntries(
       // A rota é bloqueada pelo middleware quando FEATURE_SALESFORCE=false.
       label: 'Termos de uso e política de privacidade',
       href: salesforce ? TERMOS_DE_USO_ROUTE : undefined,
-      icon: <FileTextIcon className={iconClassName} />,
+      icon: (
+        <FileTextIcon className={iconClassName} strokeWidth={iconStrokeWidth} />
+      ),
     },
     {
       kind: 'link',
       id: 'carta-de-servicos',
       label: 'Carta de serviços',
       href: salesforce ? CARTA_DE_SERVICOS_ROUTE : undefined,
-      icon: <LayersIcon className={iconClassName} />,
+      icon: (
+        <LayersIcon className={iconClassName} strokeWidth={iconStrokeWidth} />
+      ),
     },
     {
       kind: 'link',
