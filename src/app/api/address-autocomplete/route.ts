@@ -1,3 +1,4 @@
+import { guardGoogleMapsRequest } from '@/lib/google-maps-guard'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type { GoogleAddressSuggestion } from '@/types/address'
 import { type NextRequest, NextResponse } from 'next/server'
@@ -17,6 +18,14 @@ interface GoogleMapsResponse {
 
 export async function GET(req: NextRequest) {
   return withSpan('api.address_autocomplete', async span => {
+    const refused = guardGoogleMapsRequest(req, 'address_autocomplete')
+    if (refused) {
+      addSpanEvent('autocomplete.refused', {
+        'http.status_code': refused.status,
+      })
+      return refused
+    }
+
     const query = req.nextUrl.searchParams.get('q')
 
     span.setAttribute('autocomplete.query', query || '')
