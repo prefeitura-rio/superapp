@@ -1,13 +1,19 @@
+import type { ServerFeatureFlags } from '@/providers/server-feature-flags-provider'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import type { GlobalMenuEntry, GlobalMenuLink } from '../global-menu'
 
 /**
- * `ENTRIES` é avaliado na carga do módulo (as feature flags são constantes de
- * build), então cada cenário de flag precisa reimportar o módulo.
+ * O menu roda no navegador, onde `FEATURE_SALESFORCE` (só de servidor) não
+ * existe: o env fica vazio aqui de propósito e a flag chega só por parâmetro,
+ * como o `GlobalMenu` faz com o valor lido no servidor. As flags
+ * `NEXT_PUBLIC_` (inlined no build) continuam vindo do env.
  */
-async function carregarMenu(env: Record<string, string> = {}) {
+async function carregarMenu(
+  env: Record<string, string> = {},
+  flags: ServerFeatureFlags = { salesforce: true }
+) {
   vi.resetModules()
-  vi.stubEnv('FEATURE_SALESFORCE', 'true')
+  vi.stubEnv('FEATURE_SALESFORCE', '')
   vi.stubEnv(
     'NEXT_PUBLIC_TICKET_FORM_BASE_URL',
     'https://1746.example/protocolo'
@@ -16,7 +22,7 @@ async function carregarMenu(env: Record<string, string> = {}) {
     vi.stubEnv(chave, valor)
   }
   const { buildGlobalMenu } = await import('../global-menu')
-  return buildGlobalMenu
+  return (isLoggedIn: boolean) => buildGlobalMenu(isLoggedIn, flags)
 }
 
 function idsDe(entradas: GlobalMenuEntry[]) {
@@ -179,15 +185,35 @@ describe('destinos', () => {
 
 describe('feature flags', () => {
   test('sem Salesforce: some Atendimentos, Carta de serviços e Termos de uso (rotas bloqueadas no middleware)', async () => {
-    const buildGlobalMenu = await carregarMenu({
-      FEATURE_SALESFORCE: 'false',
-    })
+    const buildGlobalMenu = await carregarMenu({}, { salesforce: false })
 
     for (const logado of [true, false]) {
       const ids = idsDe(buildGlobalMenu(logado))
       expect(ids).not.toContain('atendimentos')
       expect(ids).not.toContain('carta-de-servicos')
       expect(ids).not.toContain('termos-de-uso')
+    }
+  })
+
+  test('Salesforce vem só do parâmetro, nunca do process.env (que não existe no navegador)', async () => {
+    const ligadoNoServidor = await carregarMenu({}, { salesforce: true })
+    const desligadoNoServidor = await carregarMenu(
+      { FEATURE_SALESFORCE: 'true' },
+      { salesforce: false }
+    )
+
+    for (const logado of [true, false]) {
+      expect(idsDe(ligadoNoServidor(logado))).toEqual(
+        expect.arrayContaining([
+          'atendimentos',
+          'termos-de-uso',
+          'carta-de-servicos',
+        ])
+      )
+      const ids = idsDe(desligadoNoServidor(logado))
+      expect(ids).not.toContain('atendimentos')
+      expect(ids).not.toContain('termos-de-uso')
+      expect(ids).not.toContain('carta-de-servicos')
     }
   })
 
