@@ -1,26 +1,24 @@
+import {
+  KEYCLOAK_TEST_BASE,
+  KEYCLOAK_TEST_JWKS_URL,
+  createRealmKey,
+  jwksResponse,
+  signAccessToken,
+  unsignedAccessToken,
+} from '@/test/keycloak-token-fixture'
 import { NextRequest } from 'next/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GET } from '../route'
 
-function base64Url(value: object): string {
-  return Buffer.from(JSON.stringify(value)).toString('base64url')
-}
-
-function syntheticJwt(expOffsetSeconds: number): string {
-  const exp = Math.floor(Date.now() / 1000) + expOffsetSeconds
-  return `${base64Url({ alg: 'none', typ: 'JWT' })}.${base64Url({ exp })}.assinatura`
-}
+const realmKey = createRealmKey('kid-realm')
 
 function cepRequest(
-  ip: string,
   accessToken?: string,
   query = 'place_id=place-sintetico'
 ): NextRequest {
-  const headers: Record<string, string> = { 'x-forwarded-for': ip }
-  if (accessToken) headers.cookie = `access_token=${accessToken}`
   return new NextRequest(
     new URL(`/api/cep-lookup?${query}`, 'http://localhost:3000'),
-    { headers }
+    { headers: accessToken ? { cookie: `access_token=${accessToken}` } : {} }
   )
 }
 
@@ -36,12 +34,19 @@ const placeDetails = {
 
 describe('GET /api/cep-lookup', () => {
   const fetchMock = vi.fn()
+  const googleCalls = () =>
+    fetchMock.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://maps.googleapis.com/')
+    )
 
   beforeEach(() => {
     vi.stubEnv('GOOGLE_MAPS_API_KEY', 'chave-de-teste')
+    vi.stubEnv('NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL', KEYCLOAK_TEST_BASE)
     fetchMock.mockReset()
-    fetchMock.mockImplementation(
-      async () => new Response(JSON.stringify(placeDetails), { status: 200 })
+    fetchMock.mockImplementation(async (url: string) =>
+      String(url) === KEYCLOAK_TEST_JWKS_URL
+        ? jwksResponse([realmKey])
+        : new Response(JSON.stringify(placeDetails), { status: 200 })
     )
     vi.stubGlobal('fetch', fetchMock)
   })
@@ -53,54 +58,59 @@ describe('GET /api/cep-lookup', () => {
 
   it('recusa chamada anônima com 401 sem chamar o Google, nem com number', async () => {
     const response = await GET(
-      cepRequest('192.0.2.21', undefined, 'place_id=place-sintetico&number=100')
+      cepRequest(undefined, 'place_id=place-sintetico&number=100')
     )
 
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({ error: 'Not authenticated' })
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(googleCalls()).toHaveLength(0)
   })
 
-  it('recusa token expirado com 401 sem chamar o Google', async () => {
-    const response = await GET(cepRequest('192.0.2.22', syntheticJwt(-60)))
-
-    expect(response.status).toBe(401)
-    expect(fetchMock).not.toHaveBeenCalled()
+  it('recusa token forjado ou expirado com 401 sem chamar o Google', async () => {
+    for (const token of [
+      unsignedAccessToken(),
+      signAccessToken(realmKey, {}, { expiresIn: -60 }),
+    ]) {
+      const response = await GET(cepRequest(token))
+      expect(response.status).toBe(401)
+    }
+    expect(googleCalls()).toHaveLength(0)
   })
 
-  it('com sessão válida, consulta o Place Details e devolve o CEP formatado', async () => {
-    const response = await GET(cepRequest('192.0.2.23', syntheticJwt(3600)))
+  it('com sessão verificada, consulta o Place Details e devolve o CEP formatado', async () => {
+    const response = await GET(
+      cepRequest(signAccessToken(realmKey, { sub: 'sub-ok' }))
+    )
 
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ cep: '20000-000' })
-    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(googleCalls()).toHaveLength(1)
   })
 
   it('codifica o place_id, sem deixar injetar parâmetros na URL do Google', async () => {
     await GET(
       cepRequest(
-        '192.0.2.24',
-        syntheticJwt(3600),
+        signAccessToken(realmKey, { sub: 'sub-injecao' }),
         `place_id=${encodeURIComponent('abc&fields=geometry')}`
       )
     )
 
-    const url = new URL(String(fetchMock.mock.calls[0][0]))
+    const url = new URL(String(googleCalls()[0][0]))
     expect(url.searchParams.get('place_id')).toBe('abc&fields=geometry')
     expect(url.searchParams.getAll('fields')).toEqual(['address_components'])
   })
 
-  it('com sessão válida e acima do limite por IP, responde 429 sem chamar o Google', async () => {
-    const token = syntheticJwt(3600)
+  it('acima do limite do cidadão, responde 429 sem chamar o Google', async () => {
+    const token = signAccessToken(realmKey, { sub: 'sub-limite' })
     for (let i = 0; i < 60; i++) {
-      const ok = await GET(cepRequest('192.0.2.25', token))
+      const ok = await GET(cepRequest(token))
       expect(ok.status).toBe(200)
     }
     fetchMock.mockClear()
 
-    const response = await GET(cepRequest('192.0.2.25', token))
+    const response = await GET(cepRequest(token))
 
     expect(response.status).toBe(429)
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(googleCalls()).toHaveLength(0)
   })
 })

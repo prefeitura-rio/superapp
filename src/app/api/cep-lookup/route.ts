@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   return withSpan('api.cep_lookup', async span => {
-    const refused = guardGoogleMapsRequest(req, 'cep_lookup')
+    const refused = await guardGoogleMapsRequest(req, 'cep_lookup')
     if (refused) {
       addSpanEvent('google_maps.refused', {
         'http.status_code': refused.status,

@@ -18,7 +18,7 @@ interface GoogleMapsResponse {
 
 export async function GET(req: NextRequest) {
   return withSpan('api.address_autocomplete', async span => {
-    const refused = guardGoogleMapsRequest(req, 'address_autocomplete')
+    const refused = await guardGoogleMapsRequest(req, 'address_autocomplete')
     if (refused) {
       addSpanEvent('autocomplete.refused', {
         'http.status_code': refused.status,
