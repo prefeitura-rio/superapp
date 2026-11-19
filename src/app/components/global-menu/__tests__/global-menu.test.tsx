@@ -154,6 +154,24 @@ describe('GlobalMenu', () => {
     ).toHaveAttribute('href', '/termos-de-uso')
   })
 
+  it('ícones do Lucide seguem o traço 1.4 do design system, não o 2 padrão', async () => {
+    respondHeader(CITIZEN)
+    const { menu } = await openMenu()
+    await within(menu).findByText('Maria da Silva')
+
+    const rows = [
+      within(menu).getByRole('button', { name: 'Oportunidades Cariocas' }),
+      within(menu).getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      }),
+      within(menu).getByRole('link', { name: 'Carta de serviços' }),
+    ]
+    for (const row of rows) {
+      // O primeiro svg da linha é o ícone; o chevron da seção vem depois.
+      expect(row.querySelector('svg')).toHaveAttribute('stroke-width', '1.4')
+    }
+  })
+
   it('logado: subitens com o recuo do handoff (36px e 56px) e Tema claro + Sair no fim', async () => {
     respondHeader(CITIZEN)
     const { user, menu } = await openMenu()
