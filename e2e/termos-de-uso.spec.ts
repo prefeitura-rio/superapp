@@ -1014,11 +1014,23 @@ test.describe('Termos de uso — pelo menu global (autenticado)', () => {
 })
 
 /**
- * Footer: um único link "Termos de uso e Política de Privacidade" (o Termo de
- * Uso e o Aviso de Privacidade são um documento só) levando à lista de Termos
- * de uso, na linha do copyright, nas duas larguras.
+ * Footer (redesign do #803): em "Links rápidos", "Termos de uso" e "Política
+ * de privacidade" são links separados, e os dois levam à lista de Termos de
+ * uso (o Termo de Uso e o Aviso de Privacidade são um documento só).
  */
-const FOOTER_LINK = 'Termos de uso e Política de Privacidade'
+const FOOTER_LINK = 'Termos de uso'
+const FOOTER_PRIVACY_LINK = 'Política de privacidade'
+
+function footerTermsLinks(page: Page) {
+  const footer = page.getByRole('contentinfo')
+  return {
+    terms: footer.getByRole('link', { name: FOOTER_LINK, exact: true }),
+    privacy: footer.getByRole('link', {
+      name: FOOTER_PRIVACY_LINK,
+      exact: true,
+    }),
+  }
+}
 
 for (const viewport of [
   { name: 'mobile 360px', width: 360, height: 780 },
@@ -1031,44 +1043,29 @@ for (const viewport of [
       await applyE2ECookieConsent(context)
     })
 
-    test('um só link, na linha do copyright, que abre a lista de Termos de uso', async ({
+    test('Termos de uso e Política de privacidade em Links rápidos, os dois levando à lista', async ({
       page,
     }) => {
       await page.goto('/')
-      const footer = page.getByRole('contentinfo')
-      const link = footer.getByRole('link', { name: FOOTER_LINK })
-      await expect(link).toHaveCount(1)
-      await expect(link).toHaveAttribute('href', '/termos-de-uso')
-      await expect(
-        footer.getByText('Política de Privacidade', { exact: true })
-      ).toHaveCount(0)
-      await expect(
-        footer.getByText('Termos de uso', { exact: true })
-      ).toHaveCount(0)
+      const { terms, privacy } = footerTermsLinks(page)
+      await expect(terms).toHaveCount(1)
+      await expect(terms).toHaveAttribute('href', '/termos-de-uso')
+      await expect(privacy).toHaveCount(1)
+      await expect(privacy).toHaveAttribute('href', '/termos-de-uso')
 
-      await link.scrollIntoViewIfNeeded()
-      const copyright = footer
-        .getByText(/©2026 PrefRio/)
-        .filter({ visible: true })
-      const c = await copyright.boundingBox()
-      const l = await link.boundingBox()
-      if (!c || !l) throw new Error('linha do copyright sem bounding box')
-      if (viewport.width < 640) {
-        // Mobile: o link vem logo abaixo do copyright, alinhado à esquerda.
-        expect(l.x).toBe(c.x)
-        expect(l.y).toBeGreaterThanOrEqual(c.y + c.height)
-      } else {
-        // Desktop: mesma linha, centros alinhados.
-        expect(
-          Math.abs(l.y + l.height / 2 - (c.y + c.height / 2))
-        ).toBeLessThanOrEqual(1)
-        expect(l.x).toBeGreaterThan(c.x + c.width)
-      }
+      // Vizinhos na lista de Links rápidos: Política logo abaixo de Termos,
+      // alinhados à esquerda.
+      await terms.scrollIntoViewIfNeeded()
+      const t = await terms.boundingBox()
+      const p = await privacy.boundingBox()
+      if (!t || !p) throw new Error('links do footer sem bounding box')
+      expect(p.x).toBe(t.x)
+      expect(p.y).toBeGreaterThanOrEqual(t.y + t.height)
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth)
       ).toBeLessThanOrEqual(viewport.width)
 
-      await link.click()
+      await terms.click()
       await page.waitForURL(/\/termos-de-uso$/)
       await expect(
         page.getByRole('heading', { level: 1, name: 'Termos de uso' })
@@ -1086,9 +1083,7 @@ test.describe('Footer — link de Termos de uso no hover (desktop)', () => {
     page,
   }) => {
     await page.goto('/')
-    const link = page
-      .getByRole('contentinfo')
-      .getByRole('link', { name: FOOTER_LINK })
+    const link = footerTermsLinks(page).terms
     await link.scrollIntoViewIfNeeded()
     const decoration = () =>
       link.evaluate(el => getComputedStyle(el).textDecorationLine)
@@ -1109,9 +1104,7 @@ test.describe('Footer — link de Termos de uso pelo teclado', () => {
     page,
   }) => {
     await page.goto('/')
-    const link = page
-      .getByRole('contentinfo')
-      .getByRole('link', { name: FOOTER_LINK })
+    const link = footerTermsLinks(page).terms
     await link.scrollIntoViewIfNeeded()
 
     // Chega ao link pelo teclado (Shift+Tab e Tab), como quem navega sem mouse.
@@ -1138,8 +1131,9 @@ test.describe('Footer — link de Termos de uso pelo teclado', () => {
 })
 
 /**
- * O footer é o mesmo componente em todo o app (FooterWrapper no layout): o link
- * aparece e leva à lista também fora da home, inclusive nas telas dos Termos.
+ * O footer é o mesmo componente em todo o app (FooterWrapper no layout): os
+ * links aparecem e levam à lista também fora da home, inclusive nas telas dos
+ * Termos.
  */
 test.describe('Footer — link de Termos de uso em outras páginas', () => {
   test.beforeEach(async ({ context }) => {
@@ -1152,16 +1146,16 @@ test.describe('Footer — link de Termos de uso em outras páginas', () => {
     '/termos-de-uso',
     '/termos-de-uso/cursos',
   ]) {
-    test(`${path}: footer com o link único para a lista`, async ({ page }) => {
+    test(`${path}: footer com os links de Termos de uso e Política de privacidade`, async ({
+      page,
+    }) => {
       await page.goto(path)
-      const footer = page.getByRole('contentinfo')
-      const link = footer.getByRole('link', { name: FOOTER_LINK })
+      const { terms, privacy } = footerTermsLinks(page)
 
-      await expect(link).toHaveCount(1)
-      await expect(link).toHaveAttribute('href', '/termos-de-uso')
-      await expect(
-        footer.getByText('Política de Privacidade', { exact: true })
-      ).toHaveCount(0)
+      await expect(terms).toHaveCount(1)
+      await expect(terms).toHaveAttribute('href', '/termos-de-uso')
+      await expect(privacy).toHaveCount(1)
+      await expect(privacy).toHaveAttribute('href', '/termos-de-uso')
     })
   }
 
@@ -1169,10 +1163,7 @@ test.describe('Footer — link de Termos de uso em outras páginas', () => {
     page,
   }) => {
     await page.goto('/termos-de-uso/empregos')
-    await page
-      .getByRole('contentinfo')
-      .getByRole('link', { name: FOOTER_LINK })
-      .click()
+    await footerTermsLinks(page).terms.click()
     await page.waitForURL(/\/termos-de-uso$/)
     await expect(
       page.getByRole('heading', { level: 1, name: 'Termos de uso' })
