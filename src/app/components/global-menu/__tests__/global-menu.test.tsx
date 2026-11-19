@@ -64,6 +64,9 @@ beforeEach(() => {
     'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
     'http://localhost:3000/auth/callback'
   )
+  // Termos de uso e itens de Atendimento só aparecem no menu global quando
+  // FEATURE_SALESFORCE=true. Testes deste arquivo pressupõem Salesforce ativo.
+  vi.stubEnv('FEATURE_SALESFORCE', 'true')
   assign.mockReset()
   Object.defineProperty(window, 'location', {
     configurable: true,
