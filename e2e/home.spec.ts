@@ -95,7 +95,7 @@ test.describe('Home (público)', () => {
     // Política de Privacidade" do footer, que vem do servidor antes de a grade
     // (client) hidratar.
     const categoryLinks = page.getByRole('link', {
-      name: /^(cursos|cidade|educação|família|saúde|transporte|cultura)$/i,
+      name: /^(cidade|educação|família|saúde|transporte|cultura)$/i,
     })
     // Espera a terceira categoria aparecer, em vez de contar logo após a
     // primeira.
