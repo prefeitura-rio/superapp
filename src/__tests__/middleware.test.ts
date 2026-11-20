@@ -232,6 +232,10 @@ describe('middleware — Termos de uso', () => {
 })
 
 describe('middleware — CSP do VLibras', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   test('a rota pública libera o iframe do widget em frame-src', async () => {
     const response = await middleware(requestFor('/'))
     const csp = response?.headers.get('Content-Security-Policy') ?? ''
@@ -253,6 +257,21 @@ describe('middleware — CSP do VLibras', () => {
       'same-site'
     )
     expect(response?.headers.get('Cross-Origin-Opener-Policy')).toBeNull()
+  })
+
+  test('libera a origem do logout do 1746 em connect-src quando configurada', async () => {
+    vi.stubEnv(
+      'NEXT_PUBLIC_1746_LOGOUT_URL',
+      'https://1746.pref.rio/solicitacaovforcesite/secur/logout.jsp'
+    )
+
+    const response = await middleware(requestFor('/'))
+    const csp = response?.headers.get('Content-Security-Policy') ?? ''
+    const connectSrc = csp
+      .split(';')
+      .find(directive => directive.includes('connect-src'))
+
+    expect(connectSrc).toContain('https://1746.pref.rio')
   })
 
   test('token inválido na home ainda envia os cabeçalhos', async () => {

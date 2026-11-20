@@ -140,7 +140,9 @@ describe('GlobalMenu', () => {
     expect(logoutCalls).toBe(1)
 
     fireEvent.load(iframe)
-    expect(assign).toHaveBeenCalledWith('https://app.example.rio/')
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('/api/auth/sso-logout')
+    )
   })
 
   it('Termos de uso e política de privacidade é item de primeiro nível e leva à lista', async () => {

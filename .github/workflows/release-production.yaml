@@ -57,6 +57,7 @@ jobs:
             --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="false" \
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --build-arg NEXT_PUBLIC_TICKET_FORM_BASE_URL="https://1746.pref.rio/protocolo" \
+            --build-arg NEXT_PUBLIC_1746_LOGOUT_URL="https://1746.pref.rio/solicitacaovforcesite/secur/logout.jsp" \
             --build-arg NEXT_PUBLIC_ACCESSIBILITY_ENABLED="true" \
             --tag $IMAGE_NAME:$VERSION \
             --tag $IMAGE_NAME:$VERSION_NO_V \
