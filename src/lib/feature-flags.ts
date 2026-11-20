@@ -26,6 +26,22 @@ export function isSalesforceServicesEnabled(): boolean {
 }
 
 /**
+ * LOCAL/TEST ONLY. Rewrites production service URLs coming from the Carta de
+ * Serviços (Salesforce data is a copy of production) to their homologation
+ * equivalents. See `src/lib/carta-servicos/environment-url-rewrite.ts`.
+ *
+ * Strict boolean: only the exact value `'true'` enables it, so an unset
+ * variable is safely disabled (production must never set it). It only takes
+ * effect together with `FEATURE_SALESFORCE=true`.
+ *
+ * Server-side only (`REWRITE_SERVICE_URLS_TO_HML`). Read at runtime from
+ * `process.env`.
+ */
+export function isServiceUrlHmlRewriteEnabled(): boolean {
+  return process.env.REWRITE_SERVICE_URLS_TO_HML === 'true'
+}
+
+/**
  * The SGRC history has no real integration yet: the only
  * data source is the fixed mock in `src/lib/chamados/mock-sgrc.ts`, which is
  * the same for every citizen. It is served only when the explicit chamados
