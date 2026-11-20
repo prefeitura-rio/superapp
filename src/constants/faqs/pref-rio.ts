@@ -33,7 +33,7 @@ export const faqSections: FAQSection[] = [
           'Clínica da Família',
           'Escola de Jovens e Adultos',
           'CadÚnico',
-          'Cuidados com a Cidade',
+          'Sisbicho',
           'Dados de qualquer serviço que você tenha solicitado na Prefeitura',
         ],
       },
@@ -62,7 +62,7 @@ export const faqSections: FAQSection[] = [
       {
         title: 'Quais serviços estarão disponíveis no lançamento?',
         content:
-          'No início, o cidadão poderá acessar dados pessoais, histórico de interações com a Prefeitura e informações sobre serviços mais utilizados, como: Saúde (Clínica da Família), Educação (Escola de Jovens e Adultos), Assistência Social (CadÚnico), Cuidados com a Cidade e seus dados cadastrados.',
+          'No início, o cidadão poderá acessar dados pessoais, histórico de interações com a Prefeitura e informações sobre serviços mais utilizados, como: Saúde (Clínica da Família), Educação (Escola de Jovens e Adultos), Assistência Social (CadÚnico), Sisbicho e seus dados cadastrados.',
       },
       {
         title: 'Será possível solicitar serviços diretamente no portal?',

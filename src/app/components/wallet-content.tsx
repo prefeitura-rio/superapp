@@ -221,7 +221,7 @@ export function WalletContent({
                       target="_blank"
                       className="text-primary"
                     >
-                      SISBICHO
+                      Sisbicho
                     </Link>
                   </p>
                 </div>
