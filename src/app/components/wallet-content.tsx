@@ -51,6 +51,10 @@ export function WalletContent({
   const isPetsView = !isCadmicroView && searchParams.get('pets') === 'true'
   const activeTab = isCadmicroView ? 'cadmicro' : isPetsView ? 'pets' : 'cards'
 
+  const sisbichoHref = isSalesforceEnabled
+    ? '/servicos/categoria/animais/cadastro-de-animais-no-sisbicho'
+    : '/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27'
+
   const {
     data: vehicles = [],
     isLoading: isLoadingVehicles,
@@ -213,7 +217,7 @@ export function WalletContent({
                   <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
                     Conheça o{' '}
                     <Link
-                      href="/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27"
+                      href={sisbichoHref}
                       target="_blank"
                       className="text-primary"
                     >
