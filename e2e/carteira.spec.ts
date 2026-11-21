@@ -31,12 +31,20 @@ test.describe('Carteira', () => {
     ).toBeVisible({
       timeout: 20000,
     })
-    // Rótulos definidos em src/app/components/wallet-tabs.tsx
-    await expect(page.getByText('Cartões', { exact: true })).toBeVisible({
+    // Rótulos definidos em src/app/components/wallet-tabs.tsx.
+    // Por papel (link), não por texto: durante o streaming há uma cópia oculta
+    // das abas (fora da árvore de acessibilidade) que o getByText também casa.
+    await expect(
+      page.getByRole('link', { name: 'Cartões', exact: true })
+    ).toBeVisible({
       timeout: 15000,
     })
-    await expect(page.getByText('Pets', { exact: true })).toBeVisible()
-    await expect(page.getByText('Veículos', { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Pets', exact: true })
+    ).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Veículos', exact: true })
+    ).toBeVisible()
   })
 
   test('exibe cartões ou estado vazio da carteira', async ({ page }) => {
