@@ -1,5 +1,6 @@
 import type { ClientsCartaChannel } from '@/http-app-catalogo/models/clientsCartaChannel'
 import type { ClientsCartaServiceDetail } from '@/http-app-catalogo/models/clientsCartaServiceDetail'
+import { rewriteServiceUrlForEnvironment } from '@/lib/carta-servicos/environment-url-rewrite'
 
 /**
  * Regras de conteúdo do PDF, separadas do layout para serem testáveis sem renderizar.
@@ -95,10 +96,12 @@ function channelKind(channel: ClientsCartaChannel): ChannelGroup['key'] {
 }
 
 function hrefFor(channel: ClientsCartaChannel, kind: ChannelGroup['key']) {
-  if (channel.whatsappLink) return channel.whatsappLink
+  if (channel.whatsappLink) {
+    return rewriteServiceUrlForEnvironment(channel.whatsappLink)
+  }
   const value = channel.value?.trim()
   if (!value) return channel.mapUrl || undefined
-  if (/^https?:\/\//i.test(value)) return value
+  if (/^https?:\/\//i.test(value)) return rewriteServiceUrlForEnvironment(value)
   if (norm(channel.channelType).includes('mail') && value.includes('@')) {
     return `mailto:${value}`
   }
@@ -110,7 +113,9 @@ function channelText(channel: ClientsCartaChannel, kind: ChannelGroup['key']) {
   if (kind === 'presencial') {
     return [channel.titulo, channel.endereco].filter(Boolean).join(' – ')
   }
-  const raw = channel.value?.trim() || channel.whatsappLink || ''
+  const raw = rewriteServiceUrlForEnvironment(
+    channel.value?.trim() || channel.whatsappLink || ''
+  )
   const value = /^https?:\/\//i.test(raw) ? displayUrl(raw) : raw
   const prefix =
     kind === 'online' && channel.channelType ? `${channel.channelType}: ` : ''
@@ -142,7 +147,7 @@ export function groupServiceChannels(
   for (const button of buttons) {
     groups.get('online')?.push({
       text: button.title || button.description || 'Acessar serviço',
-      href: button.url,
+      href: rewriteServiceUrlForEnvironment(button.url),
       showUrl: true,
     })
   }

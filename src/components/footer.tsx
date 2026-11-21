@@ -1,3 +1,4 @@
+import acessoInformacao from '@/assets/acesso-informacao.png'
 import brasaoPrefeitura from '@/assets/brasao-prefeitura.svg'
 import {
   FacebookIcon,
@@ -10,33 +11,49 @@ import prefRioLogo from '@/assets/pref-rio-logo.svg'
 import { CARTA_DE_SERVICOS_FOOTER_LINK } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import {
+  isHomeSolicitacoesEnabled,
+  isSalesforceServicesEnabled,
+} from '@/lib/feature-flags'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Footer1746Link } from './footer-1746-link'
+import { FooterPhoneButton } from './footer-phone-button'
 
 const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
+const TRANSPARENCIA_URL = 'https://transparencia.prefeitura.rio/'
 
-const menuLinks = [
-  { label: 'Página inicial', href: '/' },
-  { label: 'Serviços', href: '/servicos' },
-  CARTA_DE_SERVICOS_FOOTER_LINK,
-  { label: 'Mapa do site', href: '/mapa-do-site' },
-]
-
-const atendimentoLinks = [
-  {
-    label: 'Ouvidoria',
-    href: `${TICKET_FORM_BASE_URL}/ouvidoria`,
-    external: false,
-  },
-  {
-    label: 'Lei de Acesso à Informação',
-    href: `${TICKET_FORM_BASE_URL}/lai`,
-    external: false,
-  },
-  { label: 'Perguntas frequentes', href: '/faq', external: false },
-]
+function buildQuickLinks(salesforce: boolean, homeSolicitacoes: boolean) {
+  return [
+    { label: 'Serviços', href: '/servicos' },
+    { label: 'Oportunidades cariocas', href: '/servicos/trabalho' },
+    ...(salesforce && homeSolicitacoes
+      ? [
+          { label: 'Ouvidoria', href: `${TICKET_FORM_BASE_URL}/ouvidoria` },
+          {
+            label: 'Lei de acesso à informação',
+            href: `${TICKET_FORM_BASE_URL}/lai`,
+          },
+        ]
+      : []),
+    { label: 'Perguntas frequentes', href: '/faq' },
+    ...(salesforce && homeSolicitacoes
+      ? [
+          CARTA_DE_SERVICOS_FOOTER_LINK,
+          {
+            label: 'Anticorrupção',
+            href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
+          },
+        ]
+      : []),
+    { label: 'Mapa do site', href: '/mapa-do-site' },
+    ...(salesforce
+      ? [
+          { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
+          { label: 'Política de privacidade', href: TERMOS_DE_USO_ROUTE },
+        ]
+      : []),
+  ]
+}
 
 const socialLinks = [
   {
@@ -65,6 +82,12 @@ const socialLinks = [
     href: 'https://www.youtube.com/prefeiturario',
   },
 ]
+
+const titleCls = 'text-sm font-medium leading-4 tracking-normal text-foreground'
+const bodyCls =
+  'text-sm font-normal leading-5 tracking-normal text-foreground-light'
+const linkCls =
+  'text-sm font-normal leading-5 tracking-normal text-[var(--theme-color-card-2,#0084D1)] hover:underline'
 
 function Logos() {
   return (
@@ -100,140 +123,109 @@ function Logos() {
   )
 }
 
-function SocialLinks() {
+function AddressSection() {
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm font-medium leading-none tracking-normal text-foreground">
-        Redes
-      </p>
-      <div className="flex items-center gap-4">
-        {socialLinks.map(({ icon: Icon, label, href }) => (
-          <a
-            key={label}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={label}
-            className="text-primary transition-colors"
-          >
-            <Icon width={24} height={24} />
-          </a>
-        ))}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-10">
+      <div className="flex flex-col gap-1">
+        <p className={titleCls}>Prefeitura da Cidade do Rio de Janeiro</p>
+        <p className={bodyCls}>Rua Afonso Cavalcanti, 455</p>
+        <p className={bodyCls}>Cidade Nova, Rio de Janeiro – RJ</p>
+        <p className={bodyCls}>CEP: 20211-110</p>
+        <p className={bodyCls}>CNPJ: 42.498.733/0001-48</p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className={titleCls}>Telefones para atendimento</p>
+        <p className={bodyCls}>
+          Município do Rio de Janeiro:{' '}
+          <FooterPhoneButton number="1746" display="1746" />
+        </p>
+        <p className={bodyCls}>
+          Demais localidades:{' '}
+          <FooterPhoneButton number="(21) 3460-1746" display="(21) 3460-1746" />
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className={titleCls}>Horários de atendimento</p>
+        <p className={bodyCls}>Agência presencial: 9h às 17h</p>
+        <p className={bodyCls}>Telefonia: 24h</p>
       </div>
     </div>
   )
 }
 
-function NavSection({
-  title,
+function QuickLinksSection({
   links,
-  firstItem,
 }: {
-  title: string
-  links: { label: string; href: string; external?: boolean }[]
-  firstItem?: React.ReactNode
+  links: { label: string; href: string }[]
 }) {
   return (
-    <div className="flex flex-col">
-      <p className="text-sm font-medium leading-none tracking-normal text-foreground mb-2">
-        {title}
-      </p>
-      <ul className="flex flex-col">
-        {firstItem && <li className="mt-1">{firstItem}</li>}
-        {links.map(link => (
-          <li key={link.href} className="mt-1">
-            <Link
-              href={link.href}
-              {...(link.external
-                ? { target: '_blank', rel: 'noopener noreferrer' }
-                : {})}
-              className="text-sm font-normal leading-none tracking-normal text-foreground-light hover:underline"
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-10">
+      <div className="flex flex-col gap-1">
+        <p className={titleCls}>Links rápidos</p>
+        <ul className="flex flex-col gap-1 mt-1">
+          {links.map(link => (
+            <li key={link.href + link.label}>
+              <Link href={link.href} className={linkCls}>
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className={titleCls}>Transparência</p>
+        <a
+          href={TRANSPARENCIA_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Acesso à Informação"
+          className="mt-1"
+        >
+          <Image
+            src={acessoInformacao}
+            alt="Acesso à Informação"
+            width={106}
+            height={47}
+            unoptimized
+          />
+        </a>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className={titleCls}>Redes sociais</p>
+        <div className="flex items-center gap-4">
+          {socialLinks.map(({ icon: Icon, label, href }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="text-primary transition-colors"
             >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <Icon width={24} height={24} />
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
 
-function LegalRow() {
-  return (
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-      <p className="text-sm font-normal leading-5 tracking-normal text-foreground">
-        ©2026 PrefRio. Todos os direitos reservados.
-      </p>
-      <span className="hidden sm:inline text-sm text-foreground-light">•</span>
-      {/* Termo de Uso e Aviso de Privacidade são um documento só: um link,
-          para a lista de Termos de uso por plataforma. */}
-      <Link
-        href={TERMOS_DE_USO_ROUTE}
-        className="self-start text-sm font-normal leading-5 tracking-normal text-foreground-light hover:underline sm:self-auto"
-      >
-        Termos de uso e Política de Privacidade
-      </Link>
-    </div>
-  )
-}
-
-export function Footer() {
-  const atendimentoLinksEnabled = isSalesforceServicesEnabled()
-  const visibleAtendimentoLinks = atendimentoLinksEnabled
-    ? atendimentoLinks
-    : atendimentoLinks.filter(link => link.label === 'Perguntas frequentes')
+export async function Footer() {
+  const salesforce = isSalesforceServicesEnabled()
+  const homeSolicitacoes = isHomeSolicitacoesEnabled()
+  const quickLinks = buildQuickLinks(salesforce, homeSolicitacoes)
 
   return (
-    <footer className="w-full mt-16 pb-28 bg-background">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="pt-6">
-          <div className="border-t border-border" />
-        </div>
-
-        {/* ── MOBILE (< sm) ── */}
-        <div className="sm:hidden flex flex-col pt-6 pb-6 gap-12">
-          <Logos />
-
-          <div className="flex flex-col gap-6">
-            <NavSection title="Menu" links={menuLinks} />
-            <NavSection
-              title="Atendimento"
-              links={visibleAtendimentoLinks}
-              firstItem={<Footer1746Link />}
-            />
-          </div>
-
-          <SocialLinks />
-
-          <div className="flex flex-col gap-6">
-            <div className="border-t border-border" />
-            <LegalRow />
-          </div>
-        </div>
-
-        {/* ── DESKTOP (≥ sm) ── */}
-        <div className="hidden sm:flex flex-col pt-6 pb-6">
-          <div className="flex items-start">
-            <div className="flex-1">
-              <Logos />
-            </div>
-
-            <div className="flex gap-6">
-              <NavSection title="Menu" links={menuLinks} />
-              <NavSection
-                title="Atendimento"
-                links={visibleAtendimentoLinks}
-                firstItem={<Footer1746Link />}
-              />
-              <SocialLinks />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-6 mt-6">
-            <div className="border-t border-border" />
-            <LegalRow />
-          </div>
-        </div>
+    <footer className="w-full mt-16 pb-28 bg-card">
+      <div className="max-w-4xl mx-auto px-4 pt-10 pb-6 flex flex-col gap-6">
+        <Logos />
+        <AddressSection />
+        <QuickLinksSection links={quickLinks} />
       </div>
     </footer>
   )

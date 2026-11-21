@@ -33,6 +33,7 @@ interface WalletContentProps {
   maintenanceRequests?: ModelsMaintenanceRequest[]
   healthUnitData?: HealthUnitInfo
   healthUnitRiskData?: HealthUnitRisk
+  isSalesforceEnabled: boolean
 }
 
 export function WalletContent({
@@ -41,6 +42,7 @@ export function WalletContent({
   maintenanceRequests,
   healthUnitData,
   healthUnitRiskData,
+  isSalesforceEnabled,
 }: WalletContentProps) {
   const searchParams = useSearchParams()
   const cadmicroEnabled = isFeatureEnabled('cadmicro')
@@ -48,6 +50,10 @@ export function WalletContent({
     cadmicroEnabled && searchParams.get('mobilidade') === 'true'
   const isPetsView = !isCadmicroView && searchParams.get('pets') === 'true'
   const activeTab = isCadmicroView ? 'cadmicro' : isPetsView ? 'pets' : 'cards'
+
+  const sisbichoHref = isSalesforceEnabled
+    ? '/servicos/categoria/animais/cadastro-de-animais-no-sisbicho'
+    : '/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27'
 
   const {
     data: vehicles = [],
@@ -211,11 +217,11 @@ export function WalletContent({
                   <p className="mt-2 text-sm font-normal text-muted-foreground leading-5">
                     Conheça o{' '}
                     <Link
-                      href="/servicos/categoria/animais/cadastro-de-animais-no-sisbicho-b5ad2d27"
+                      href={sisbichoHref}
                       target="_blank"
                       className="text-primary"
                     >
-                      SISBICHO
+                      Sisbicho
                     </Link>
                   </p>
                 </div>
@@ -228,6 +234,7 @@ export function WalletContent({
             maintenanceRequests={maintenanceRequests}
             healthUnitData={healthUnitData}
             healthUnitRiskData={healthUnitRiskData}
+            isSalesforceEnabled={isSalesforceEnabled}
           />
         )}
       </div>

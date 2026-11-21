@@ -185,6 +185,7 @@ jobs:
           NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
+          NEXT_PUBLIC_1746_LOGOUT_URL: "https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
@@ -192,16 +193,18 @@ jobs:
           API_KEY_SUBPAV_OSA_SMS: ${{ secrets.API_KEY_SUBPAV_OSA_SMS }}
           NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS: "true"
           NEXT_PUBLIC_FEATURE_FLAG: "false"
-          NEXT_PUBLIC_FEATURE_SALESFORCE: "true"
+          FEATURE_SALESFORCE: "true"
           NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA: "true"
           NEXT_PUBLIC_VLIBRAS_ENABLED: "true"
-          NEXT_PUBLIC_USE_MOCK_CHAMADOS: "true"
+          USE_MOCK_CHAMADOS: "true"
 
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: "true"
           PORT: "3000"
+          # Lida em runtime pelo middleware (carta de serviços e chamados).
+          FEATURE_SALESFORCE: "true"
           # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
           # Lidos em runtime: Google Maps (address-autocomplete/cep-lookup) e
           # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).
@@ -241,6 +244,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_1746_LOGOUT_URL="https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp" \
             --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \
@@ -248,9 +252,7 @@ jobs:
             --build-arg API_KEY_SUBPAV_OSA_SMS="API_KEY_SUBPAV_OSA_SMS" \
             --build-arg NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS="true" \
             --build-arg NEXT_PUBLIC_FEATURE_FLAG="false" \
-            --build-arg NEXT_PUBLIC_FEATURE_SALESFORCE="true" \
             --build-arg NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA="true" \
-            --build-arg NEXT_PUBLIC_USE_MOCK_CHAMADOS="true" \
             --build-arg NEXT_PUBLIC_VLIBRAS_ENABLED="true" \
             --tag ghcr.io/${{ github.repository_owner }}/superapp:pr-${{ github.event.pull_request.number }} \
             --load \

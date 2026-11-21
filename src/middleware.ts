@@ -7,6 +7,7 @@ import {
 } from 'next/server'
 import { buildAuthUrl } from './constants/url'
 import { applySecurityHeaders, handleExpiredToken, isJwtExpired } from './lib'
+import { get1746LogoutOrigin } from './lib/1746-logout'
 import { isSalesforceServicesEnabled } from './lib/feature-flags'
 
 const publicRoutes = [
@@ -93,13 +94,18 @@ export async function middleware(request: NextRequest) {
         ...(isDevelopment ? ["'unsafe-eval'"] : []),
       ]
 
+      // Origem do logout do 1746 (Salesforce). Em staging, `*.app.dados.rio`
+      // já cobre; em produção precisamos liberar `https://1746.pref.rio`.
+      const logout1746Origin = get1746LogoutOrigin()
+      const connectSrc1746 = logout1746Origin ? ` ${logout1746Origin}` : ''
+
       const cspHeader = `
   default-src 'self' https://*.apps.rio.gov.br/ https://storage.googleapis.com;
   script-src ${scriptSrcDirectives.join(' ')} https://storage.googleapis.com https://vlibras.gov.br https://cdn.jsdelivr.net;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://www.googletagmanager.com https://static.hotjar.com https://script.hotjar.com https://flagcdn.com https://*.doubleclick.net https://*.apps.rio.gov.br https://storage.googleapis.com https://vlibras.gov.br https://cdn.jsdelivr.net;
   font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://*.hotjar.com https://vlibras.gov.br https://cdn.jsdelivr.net https://storage.googleapis.com;
-  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://rio-queue.dados.rio https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br;
+  connect-src 'self' blob: https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://auth-idriohom.apps.rio.gov.br/ https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.hotjar.com https://*.hotjar.io https://metrics.hotjar.io wss://*.hotjar.com https://*.doubleclick.net https://*.app.dados.rio https://storage.googleapis.com https://rio-queue.dados.rio https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br${connectSrc1746};
   frame-src 'self' https://*.google.com/ https://www.google.com/* https://*.acesso.gov.br/ https://www.googletagmanager.com https://vars.hotjar.com https://*.doubleclick.net https://vlibras.gov.br;
   media-src 'self' https://storage.googleapis.com data: blob:;
 
@@ -214,7 +220,7 @@ export async function middleware(request: NextRequest) {
         r => path === r || path.startsWith(`${r}/`)
       )
 
-      const cartaRoutes = ['/carta-de-servicos']
+      const cartaRoutes = ['/carta-de-servicos', '/termos-de-uso']
       const isCartaRoute = cartaRoutes.some(
         r => path === r || path.startsWith(`${r}/`)
       )

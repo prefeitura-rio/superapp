@@ -49,14 +49,14 @@ describe('isVLibrasEnabled', () => {
     })
 
     test('is enabled only when the unified flag is exactly "true"', () => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
 
       expect(isSalesforceServicesEnabled()).toBe(true)
     })
 
     test('is disabled when the flag is absent or not exactly "true"', () => {
       for (const value of [undefined, 'false', '', 'TRUE', '1']) {
-        vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', value)
+        vi.stubEnv('FEATURE_SALESFORCE', value)
 
         expect(isSalesforceServicesEnabled()).toBe(false)
       }
@@ -96,14 +96,14 @@ describe('isSgrcHistoryMockEnabled', () => {
   })
 
   test('is enabled only in the explicit chamados mock mode', () => {
-    vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+    vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
 
     expect(isSgrcHistoryMockEnabled()).toBe(true)
   })
 
   test('is disabled when the mock flag is absent or not exactly "true" (staging and production)', () => {
     for (const value of [undefined, 'false', '', 'TRUE', '1']) {
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', value)
+      vi.stubEnv('USE_MOCK_CHAMADOS', value)
 
       expect(isSgrcHistoryMockEnabled()).toBe(false)
     }

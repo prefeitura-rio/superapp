@@ -15,7 +15,10 @@ import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import {
+  isHomeSolicitacoesEnabled,
+  isSalesforceServicesEnabled,
+} from '@/lib/feature-flags'
 import { AuthStatusProvider } from '@/providers/auth-status-provider'
 
 export default async function Home() {
@@ -24,7 +27,7 @@ export default async function Home() {
     fetchCategories(),
     resolveMostAccessedServices(),
   ])
-  const categoriesSlice = categories.slice(0, 14)
+  const categoriesSlice = categories.slice(0, 15)
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   return (
@@ -51,13 +54,15 @@ export default async function Home() {
         <HomeCategoriesGrid categories={allCategories} />
 
         {/* Requests Section Cards */}
-        {isSalesforceEnabled && <RequestsSectionCards />}
+        {isSalesforceEnabled && isHomeSolicitacoesEnabled() && (
+          <RequestsSectionCards />
+        )}
 
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards services={mostAccessed} />
 
         {/* Carteira section - fetched client-side to avoid cache issues */}
-        <WalletSectionClient />
+        <WalletSectionClient isSalesforceEnabled={isSalesforceEnabled} />
         <FloatNavigationWrapper />
       </main>
     </AuthStatusProvider>

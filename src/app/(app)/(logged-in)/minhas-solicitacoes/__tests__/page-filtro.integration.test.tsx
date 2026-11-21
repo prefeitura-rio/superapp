@@ -130,7 +130,7 @@ describe('/minhas-solicitacoes?filtro= (destino do menu global)', () => {
 
 describe('/minhas-solicitacoes?filtro= com o histórico SGRC (modo mock)', () => {
   beforeEach(() => {
-    vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+    vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({

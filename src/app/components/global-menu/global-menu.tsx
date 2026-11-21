@@ -16,6 +16,7 @@ import { useHeaderData } from '@/hooks/use-header-data'
 import { useLogout } from '@/hooks/use-logout'
 import { formatCpf } from '@/lib/format-cpf'
 import { cn } from '@/lib/utils'
+import { useServerFeatureFlags } from '@/providers/server-feature-flags-provider'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -44,8 +45,13 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
   const { data } = useHeaderData()
   const { isLoggedIn, userName, userCpf, userAvatarUrl, userAvatarName } = data
 
+  const { salesforce } = useServerFeatureFlags()
+
   const pathname = usePathname()
-  const entries = useMemo(() => buildGlobalMenu(isLoggedIn), [isLoggedIn])
+  const entries = useMemo(
+    () => buildGlobalMenu(isLoggedIn, { salesforce }),
+    [isLoggedIn, salesforce]
+  )
   const close = () => onOpenChange(false)
 
   return (

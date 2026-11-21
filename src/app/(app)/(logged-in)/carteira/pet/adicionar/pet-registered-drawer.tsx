@@ -44,7 +44,7 @@ export function PetRegisteredDrawer({
 
               <p className="text-foreground-light text-sm font-normal leading-5 mt-4">
                 Enviaremos mais informações no seu e-mail sobre como realizar a
-                Microchipagem do seu animal e incluí-lo no SisBicho.
+                Microchipagem do seu animal e incluí-lo no Sisbicho.
               </p>
             </div>
           </div>

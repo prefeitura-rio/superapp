@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import PhoneInputTokenForm from '../phone-input-token-form'
 
 vi.mock('next/navigation', () => ({
@@ -25,6 +25,12 @@ globalThis.ResizeObserver ??= class {
   disconnect() {}
 }
 document.elementFromPoint ??= () => null
+
+// input-otp agenda setTimeout de 0, 10 e 50 ms a cada mudança de valor e não os
+// cancela ao desmontar. Se o de 50 ms dispara depois que o Vitest desmonta o
+// jsdom do arquivo, o setState quebra com "window is not defined", um erro não
+// tratado que reprova a suíte. Espera esses timers antes de seguir.
+afterEach(() => new Promise(resolve => setTimeout(resolve, 100)))
 
 const onValue = vi.fn()
 

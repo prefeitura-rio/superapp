@@ -1010,9 +1010,9 @@ export function CourseDetails({ course, department }: CourseDetailsProps) {
           { label: course.title ?? '' },
         ]}
       />
-      <div className="bg-white dark:bg-background">
+      <div className="bg-background">
         <div className="flex flex-col items-center pb-20">
-          <div className="w-full max-w-4xl px-4">
+          <div className="w-full max-w-4xl">
             {/* Confirmation Bottom Sheet */}
             <BottomSheet
               open={showConfirmation}

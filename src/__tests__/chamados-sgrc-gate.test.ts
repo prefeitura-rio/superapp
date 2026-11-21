@@ -45,8 +45,8 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
 
   describe('com a flag do Salesforce desligada', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'false')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'false')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
     })
 
     test('GET /api/chamados?origem=sgrc responde 404, como o detalhe', async () => {
@@ -61,8 +61,8 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
 
   describe('com a flag do Salesforce ligada e sem o modo mock (staging e produção)', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'false')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'false')
     })
 
     test('GET /api/chamados?origem=sgrc responde 501 sem nenhum chamado fictício', async () => {
@@ -129,8 +129,8 @@ describe('DEV-568: histórico SGRC fictício fora do alcance do cidadão', () =>
 
   describe('com o modo mock explícito (desenvolvimento)', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_FEATURE_SALESFORCE', 'true')
-      vi.stubEnv('NEXT_PUBLIC_USE_MOCK_CHAMADOS', 'true')
+      vi.stubEnv('FEATURE_SALESFORCE', 'true')
+      vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
     })
 
     test('GET /api/chamados?origem=sgrc continua servindo o mock', async () => {

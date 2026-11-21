@@ -14,6 +14,14 @@ function homeMain(page: Page) {
   return page.locator('main.max-w-4xl').first()
 }
 
+/**
+ * `FEATURE_SALESFORCE` é só de servidor e lida em runtime: o mesmo valor que o
+ * servidor do E2E recebe (na CI, `"true"` no passo "Run E2E tests"). Libera
+ * Atendimentos, Termos de uso e Carta de serviços no menu global.
+ */
+const salesforceEnabled = process.env.FEATURE_SALESFORCE === 'true'
+const SALESFORCE_SKIP_REASON = 'Depende de FEATURE_SALESFORCE=true no servidor'
+
 test.describe('Home (público)', () => {
   test.beforeEach(async ({ context }) => {
     await applyE2ECookieConsent(context)
@@ -82,7 +90,7 @@ test.describe('Home (público)', () => {
       page.getByRole('heading', { name: 'Mais acessados' })
     ).toBeVisible()
     await expect(page.getByText('IPTU 2026')).toBeVisible()
-    // Com NEXT_PUBLIC_FEATURE_SALESFORCE os demais cards vêm da curadoria da
+    // Com FEATURE_SALESFORCE os demais cards vêm da curadoria da
     // app-catalogo; o de Dívida Ativa é fixo nos dois modos.
     await expect(
       page.getByRole('heading', { name: 'Dívida Ativa: Débitos de IPTU' })
@@ -95,7 +103,7 @@ test.describe('Home (público)', () => {
     // Política de Privacidade" do footer, que vem do servidor antes de a grade
     // (client) hidratar.
     const categoryLinks = page.getByRole('link', {
-      name: /^(cursos|cidade|educação|família|saúde|transporte|cultura)$/i,
+      name: /^(cidade|educação|família|saúde|transporte|cultura)$/i,
     })
     // Espera a terceira categoria aparecer, em vez de contar logo após a
     // primeira.
@@ -206,11 +214,6 @@ test.describe('Menu global (público)', () => {
       menu.getByRole('button', { name: 'Oportunidades Cariocas' })
     ).toBeVisible()
     await expect(
-      menu.getByRole('link', {
-        name: 'Termos de uso e política de privacidade',
-      })
-    ).toHaveAttribute('href', '/termos-de-uso')
-    await expect(
       menu.getByRole('link', { name: 'Perguntas frequentes' })
     ).toHaveAttribute('href', '/faq')
     await expect(menu.getByLabel('Tema claro')).toBeVisible()
@@ -221,13 +224,70 @@ test.describe('Menu global (público)', () => {
     await expect(menu.getByRole('button', { name: 'Outros' })).toHaveCount(0)
   })
 
+  test('com FEATURE_SALESFORCE: Atendimentos, Termos de uso e Carta de serviços', async ({
+    page,
+  }) => {
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    const menu = page.getByRole('dialog')
+
+    // A flag é só de servidor: o menu (client component) precisa recebê-la
+    // do layout, e não ler process.env no navegador.
+    await expect(
+      menu.getByRole('button', { name: 'Atendimentos' })
+    ).toBeVisible()
+    await expect(
+      menu.getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
+    ).toHaveAttribute('href', '/termos-de-uso')
+    await expect(
+      menu.getByRole('link', { name: 'Carta de serviços' })
+    ).toHaveAttribute('href', '/carta-de-servicos')
+  })
+
+  test('sem FEATURE_SALESFORCE: sem Atendimentos, Termos de uso e Carta de serviços', async ({
+    page,
+  }) => {
+    test.skip(salesforceEnabled, 'Só roda com FEATURE_SALESFORCE desligada')
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    const menu = page.getByRole('dialog')
+
+    await expect(
+      menu.getByRole('link', { name: 'Perguntas frequentes' })
+    ).toBeVisible()
+    await expect(
+      menu.getByRole('button', { name: 'Atendimentos' })
+    ).toHaveCount(0)
+    await expect(
+      menu.getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
+    ).toHaveCount(0)
+    await expect(
+      menu.getByRole('link', { name: 'Carta de serviços' })
+    ).toHaveCount(0)
+  })
+
+  test('Carta de serviços leva à carta e fecha o menu', async ({ page }) => {
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('link', { name: 'Carta de serviços' })
+      .click()
+
+    await page.waitForURL('**/carta-de-servicos', { timeout: 15000 })
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
   test('Atendimentos deslogado: Consulta de protocolo, Ouvidoria e LAI', async ({
     page,
   }) => {
-    test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Atendimentos depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
-    )
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
     await page.goto('/')
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
     const menu = page.getByRole('dialog')
@@ -291,6 +351,7 @@ test.describe('Menu global (público)', () => {
   })
 
   test('fecha ao navegar por um item', async ({ page }) => {
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
     await page.goto('/')
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
     await page
@@ -361,6 +422,30 @@ test.describe('Menu global (autenticado)', () => {
     ).toHaveCount(0)
   })
 
+  test('com FEATURE_SALESFORCE: Atendimentos, Termos de uso e Carta de serviços', async ({
+    page,
+  }) => {
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    const menu = page.getByRole('dialog')
+    await expect(menu.getByRole('button', { name: 'Sair' })).toBeVisible({
+      timeout: 15000,
+    })
+
+    await expect(
+      menu.getByRole('button', { name: 'Atendimentos' })
+    ).toBeVisible()
+    await expect(
+      menu.getByRole('link', {
+        name: 'Termos de uso e política de privacidade',
+      })
+    ).toHaveAttribute('href', '/termos-de-uso')
+    await expect(
+      menu.getByRole('link', { name: 'Carta de serviços' })
+    ).toHaveAttribute('href', '/carta-de-servicos')
+  })
+
   test('Oportunidades Cariocas logado: Meus cursos/certificados e Minhas candidaturas/currículo', async ({
     page,
   }) => {
@@ -389,10 +474,7 @@ test.describe('Menu global (autenticado)', () => {
   test('Atendimentos logado: Ouvidoria e LAI abrem a aba de Minhas solicitações', async ({
     page,
   }) => {
-    test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Atendimentos depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
-    )
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
     await page.goto('/')
     await page.getByRole('button', { name: 'Menu', exact: true }).click()
     const menu = page.getByRole('dialog')
@@ -472,9 +554,12 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
       !hasE2EAuth(),
       'Defina E2E_ACCESS_TOKEN para rodar testes autenticados'
     )
+    test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
+    // A página lista os chamados na API pref-rio-cidadao e quebra (500) sem a
+    // URL base, que o passo de E2E da CI ainda não define.
     test.skip(
-      process.env.NEXT_PUBLIC_FEATURE_SALESFORCE !== 'true',
-      'Minhas solicitações depende de NEXT_PUBLIC_FEATURE_SALESFORCE'
+      !process.env.BASE_API_URL_PREF_RIO_CIDADAO,
+      'Minhas solicitações depende de BASE_API_URL_PREF_RIO_CIDADAO'
     )
     await applyE2ECookieConsent(context)
     await applyE2EAuthCookies(context)

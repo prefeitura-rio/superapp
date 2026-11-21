@@ -27,7 +27,7 @@ export default async function WalletAuthenticationRequired() {
             </h2>
             <p className="text-sm text-foreground-light leading-5">
               CadÚnico, Clínica da Família, Educação de Jovens e Adultos e
-              Cuidados com a Cidade
+              Sisbicho
             </p>
           </div>
 

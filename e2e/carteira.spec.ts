@@ -74,7 +74,7 @@ test.describe('Carteira', () => {
     })
 
     // Com pet: cartão "REGISTRO GERAL DE ANIMAIS" (pet-wallet.tsx).
-    // Sem pet: estado vazio com o link do SISBICHO (wallet-content.tsx).
+    // Sem pet: estado vazio com o link do Sisbicho (wallet-content.tsx).
     const cartaoPet = page.getByText('REGISTRO GERAL DE ANIMAIS', {
       exact: true,
     })

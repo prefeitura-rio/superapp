@@ -10,7 +10,7 @@ export const ENABLE_HARDCODED_SEARCH_LINKS =
  * Preview of a Carta de Serviços draft opened from Salesforce Lightning.
  * Default: disabled. Set PREVIEW_CARTA_SERVICOS_ENABLED=true to expose
  * /servicos/preview and POST /api/preview/servicos. Server-only.
- * Independent of NEXT_PUBLIC_FEATURE_SALESFORCE.
+ * Independent of FEATURE_SALESFORCE.
  */
 export function isPreviewCartaServicosEnabled(): boolean {
   return process.env.PREVIEW_CARTA_SERVICOS_ENABLED === 'true'

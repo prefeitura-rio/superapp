@@ -5,7 +5,6 @@ import type {
   ModelsMaintenanceRequest,
 } from '@/http/models'
 import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { HealthUnitInfo, HealthUnitRisk } from '@/lib/health-unit'
 import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
@@ -38,6 +37,7 @@ interface WalletCardsWrapperProps {
   maintenanceRequests?: ModelsMaintenanceRequest[]
   healthUnitData?: HealthUnitInfo
   healthUnitRiskData?: HealthUnitRisk
+  isSalesforceEnabled: boolean
 }
 
 export function WalletCardsWrapper({
@@ -45,6 +45,7 @@ export function WalletCardsWrapper({
   maintenanceRequests,
   healthUnitData,
   healthUnitRiskData,
+  isSalesforceEnabled,
 }: WalletCardsWrapperProps) {
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
@@ -59,7 +60,7 @@ export function WalletCardsWrapper({
     walletData?.assistencia_social?.cadunico?.indicador
   )
   const hasCaretakerData = maintenanceStats.total > 0
-  const showCaretakerCard = hasCaretakerData && !isSalesforceServicesEnabled()
+  const showCaretakerCard = hasCaretakerData && !isSalesforceEnabled
 
   const hasAnyCard =
     hasHealthData ||
