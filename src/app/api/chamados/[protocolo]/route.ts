@@ -9,6 +9,19 @@ import { IS_MOCK_ENABLED, MOCK_DETAIL, MOCK_PROTOCOLS } from '@/mocks/chamados'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+const ERRO_NAO_ENCONTRADO = 'Chamado não encontrado'
+const ERRO_CONSULTA = 'Não foi possível consultar o chamado'
+
+/**
+ * O corpo de erro do Mule/Salesforce (hostname do backend, path do Apex REST,
+ * códigos internos) nunca é repassado ao navegador: só o status e uma
+ * mensagem genérica.
+ */
+function respostaDeErro(status: number) {
+  const error = status === 404 ? ERRO_NAO_ENCONTRADO : ERRO_CONSULTA
+  return NextResponse.json({ error }, { status })
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ protocolo: string }> }
@@ -34,8 +47,19 @@ export async function GET(
     return NextResponse.json(MOCK_DETAIL[protocolo], { status: 200 })
   }
 
-  const result = await getChamadoDetail(protocolo)
+  let result: Awaited<ReturnType<typeof getChamadoDetail>>
+  try {
+    result = await getChamadoDetail(protocolo)
+  } catch (error) {
+    console.error('Falha ao consultar detalhe do chamado:', error)
+    return respostaDeErro(502)
+  }
 
-  const data = parseJsonBody(result.data)
-  return NextResponse.json(data, { status: result.status })
+  if (result.status >= 400) {
+    return respostaDeErro(result.status)
+  }
+
+  return NextResponse.json(parseJsonBody(result.data), {
+    status: result.status,
+  })
 }
