@@ -1,6 +1,6 @@
 import { CARTA_DE_SERVICOS_ROUTE } from '@/constants/carta-de-servicos'
 import { TERMOS_DE_USO_ROUTE } from '@/constants/termos-de-uso/platforms'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Footer } from '../footer'
 
@@ -139,5 +139,88 @@ describe('Footer — links controlados apenas por FEATURE_SALESFORCE', () => {
     expect(
       screen.queryByRole('link', { name: 'Política de privacidade' })
     ).toBeNull()
+  })
+})
+
+describe('Footer — contraste dos links secundários (WCAG AA)', () => {
+  // Fundo do footer (`bg-background`), de `--background` em globals.css
+  const BACKGROUND_LIGHT: [number, number, number] = [0xf9, 0xfa, 0xfb]
+  const BACKGROUND_DARK: [number, number, number] = [0x09, 0x09, 0x0b]
+
+  function luminance([r, g, b]: [number, number, number]): number {
+    const [lr, lg, lb] = [r, g, b].map(c => {
+      const s = c / 255
+      return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb
+  }
+
+  function contrast(
+    a: [number, number, number],
+    b: [number, number, number]
+  ): number {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+    return (hi + 0.05) / (lo + 0.05)
+  }
+
+  function hexClassColor(
+    className: string,
+    prefix: '' | 'dark:'
+  ): [number, number, number] | null {
+    const escaped = prefix.replace(':', '\\:')
+    const match = className.match(
+      new RegExp(`(?:^|\\s)${escaped}text-\\[#([0-9a-fA-F]{6})\\](?:\\s|$)`)
+    )
+    if (!match) return null
+    const hex = match[1]
+    return [0, 2, 4].map(i => Number.parseInt(hex.slice(i, i + 2), 16)) as [
+      number,
+      number,
+      number,
+    ]
+  }
+
+  async function secondaryElements(): Promise<HTMLElement[]> {
+    vi.stubEnv('FEATURE_SALESFORCE', 'true')
+    vi.stubEnv('FEATURE_HOME_SOLICITACOES', 'true')
+    await renderFooter()
+    const quickLinks = within(
+      screen.getByText('Links rápidos').parentElement as HTMLElement
+    ).getAllByRole('link')
+    const phoneButtons = [
+      screen.getByRole('button', { name: '1746' }),
+      screen.getByRole('button', { name: '(21) 3460-1746' }),
+    ]
+    return [...quickLinks, ...phoneButtons]
+  }
+
+  it('links rápidos e telefones não usam a variável inexistente --theme-color-card-2', async () => {
+    const elements = await secondaryElements()
+    expect(elements.length).toBeGreaterThanOrEqual(12)
+    for (const el of elements) {
+      expect(el.className).not.toContain('--theme-color-card-2')
+    }
+  })
+
+  it('links rápidos e telefones têm contraste >= 4.5:1 no tema claro', async () => {
+    for (const el of await secondaryElements()) {
+      const color = hexClassColor(el.className, '')
+      expect(color, `cor do tema claro em "${el.textContent}"`).not.toBeNull()
+      expect(
+        contrast(color as [number, number, number], BACKGROUND_LIGHT),
+        `contraste de "${el.textContent}" no tema claro`
+      ).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('links rápidos e telefones têm contraste >= 4.5:1 no tema escuro', async () => {
+    for (const el of await secondaryElements()) {
+      const color = hexClassColor(el.className, 'dark:')
+      expect(color, `cor do tema escuro em "${el.textContent}"`).not.toBeNull()
+      expect(
+        contrast(color as [number, number, number], BACKGROUND_DARK),
+        `contraste de "${el.textContent}" no tema escuro`
+      ).toBeGreaterThanOrEqual(4.5)
+    }
   })
 })
