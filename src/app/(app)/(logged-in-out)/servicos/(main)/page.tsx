@@ -3,7 +3,6 @@ import { CategoryGrid } from '@/app/components/category-grid'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
-import { additionalCategories } from '@/constants/aditional-services'
 import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
 
@@ -14,7 +13,6 @@ export default async function ServicesPage() {
     fetchCategories(),
     resolveMostAccessedServices(),
   ])
-  const allCategories = [...categories, ...additionalCategories]
 
   return (
     <div className="w-full bg-background text-foreground">
@@ -28,7 +26,7 @@ export default async function ServicesPage() {
         <MostAccessedServiceCards services={mostAccessed} limit={4} />
 
         {/* Category Grid*/}
-        <CategoryGrid title="Categorias" categories={allCategories} />
+        <CategoryGrid title="Categorias" categories={categories} />
 
         <FloatNavigationWrapper />
       </main>

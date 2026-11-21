@@ -7,8 +7,9 @@
 | `FEATURE_SALESFORCE` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `USE_MOCK_CHAMADOS` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_HOME_SOLICITACOES` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
+| `REWRITE_SERVICE_URLS_TO_HML` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 
-Ambas são lidas em **runtime** via `process.env`. Não exigem rebuild da imagem
+Todas são lidas em **runtime** via `process.env`. Não exigem rebuild da imagem
 Docker — apenas um **restart dos pods** (rolling restart).
 
 ```
@@ -100,3 +101,62 @@ redirecionamento externo no lugar da página do serviço.
 
 Manter `false` (ou ausente) até que a Carta de Serviços no Salesforce tenha
 `tema_geral` populado para todos os serviços.
+
+---
+
+## REWRITE_SERVICE_URLS_TO_HML (paliativo)
+
+> **Solução paliativa, para casos específicos.** O ideal é corrigir os links
+> **na origem (Salesforce)**. Se a lista de exceções crescer ou o padrão se
+> repetir em muitos serviços, **não escale esta solução**: corrija o cadastro
+> da Carta de Serviços.
+
+**Problema.** O banco do Salesforce foi populado a partir da base de produção.
+Com `FEATURE_SALESFORCE=true` em staging/localhost, alguns serviços (por
+exemplo `/servicos/categoria/licencas/alvara-consulta-previa-de-local`) trazem
+botões "Acessar serviço" que apontam para o gateway de **produção**
+(`gateway-idrio.apps.rio.gov.br`), impedindo testar o fluxo de homologação.
+
+**O que faz.** Reescreve, no servidor, URLs de produção para o equivalente de
+homologação antes de chegarem ao usuário.
+
+| Ativação | Regra |
+|---|---|
+| `FEATURE_SALESFORCE=true` **e** `REWRITE_SERVICE_URLS_TO_HML=true` | Reescreve |
+| Qualquer outra combinação (inclusive variável ausente) | Não toca em nada |
+
+Por padrão, só o `.env` local define a variável. **Não** está no Infisical de
+staging (logo staging continua com os links de produção) e **nunca** deve ser
+definida em produção.
+
+**Onde é aplicado** (todos server-side):
+
+| Superfície | Arquivo |
+|---|---|
+| Botões "Acessar serviço" e canais digitais | `src/lib/carta-servicos/mappers.ts` |
+| Links `<a>` dentro dos textos HTML | `src/lib/carta-servicos/sanitize-service-html.ts` |
+| PDF da Carta (botões e canais) | `src/lib/carta-servicos/pdf/carta-pdf-content.ts` |
+
+**Regras** (`src/lib/carta-servicos/environment-url-rewrite.ts`):
+
+1. Troca de host por tabela (`HOST_MAP`): gateway, Carioca Digital Services,
+   peticionamento e Scuff.
+2. No gateway, o parâmetro `urlServico` também é reescrito (decodifica,
+   reescreve, recodifica).
+3. `URL_OVERRIDES`: URL completa de produção para URL completa de homologação,
+   para quando o **caminho** também muda (ex.: `alvara-de-licenca-para-estabelecimento`
+   vira `alvara-consulta-previa-de-local`). Consultada antes da troca de host.
+4. URLs inválidas, relativas, `mailto:`, `tel:` ou hosts fora da tabela voltam intactas.
+
+**Para adicionar um caso:** novo par de hosts em `HOST_MAP`, ou nova entrada em
+`URL_OVERRIDES`, com teste em `src/lib/carta-servicos/__tests__/environment-url-rewrite.test.ts`.
+
+**Fora do escopo:** resultados de busca com `item.url` e links do ticket 1746
+(`TICKET_FORM_BASE_URL`, que já tem variável própria).
+
+**Para testar localmente** (`.env`):
+
+```
+FEATURE_SALESFORCE=true
+REWRITE_SERVICE_URLS_TO_HML=true
+```
