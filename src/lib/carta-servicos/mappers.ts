@@ -6,6 +6,7 @@ import type { ModelsCartaTheme } from '@/http-app-catalogo/models/modelsCartaThe
 import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type { ModelsServiceDocument } from '@/http-busca-search/models/modelsServiceDocument'
+import { rewriteServiceUrlForEnvironment } from '@/lib/carta-servicos/environment-url-rewrite'
 import { normalizeCategoryName } from '@/lib/carta-servicos/normalize-category-name'
 import type { AppSubcategory } from '@/lib/carta-servicos/types'
 import type { Category } from '@/lib/categories'
@@ -33,11 +34,15 @@ function mapChannelsToDigitais(channels?: ClientsCartaChannel[]): string[] {
         isChannelType(channel, 'Digital') || isChannelType(channel, 'Telefone')
     )
     .map(channel => {
-      if (channel.whatsappLink) return channel.whatsappLink
+      if (channel.whatsappLink) {
+        return rewriteServiceUrlForEnvironment(channel.whatsappLink)
+      }
       if (channel.value && channel.channelType) {
         return `${channel.channelType}: ${channel.value}`
       }
-      return channel.value ?? channel.titulo ?? ''
+      return rewriteServiceUrlForEnvironment(
+        channel.value ?? channel.titulo ?? ''
+      )
     })
     .filter(Boolean)
 }
@@ -108,7 +113,7 @@ export function mapServiceDetailToPrefRioService(
   const buttons: ModelsButton[] | undefined = detail.buttons?.map(button => ({
     titulo: button.title,
     descricao: button.description,
-    url_service: button.url,
+    url_service: rewriteServiceUrlForEnvironment(button.url),
     ordem: button.order,
     is_enabled: button.enabled !== false,
   }))
