@@ -109,7 +109,9 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
     )
 
     expect(response.status).toBe(401)
-    expect(await response.json()).toBeNull()
+    expect(await response.json()).toEqual({
+      error: 'Não foi possível consultar os chamados',
+    })
   })
 
   test('GET /api/chamados não lança com corpo vazio sem content-type', async () => {
@@ -122,7 +124,9 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
     )
 
     expect(response.status).toBe(500)
-    expect(await response.json()).toBeNull()
+    expect(await response.json()).toEqual({
+      error: 'Não foi possível consultar os chamados',
+    })
   })
 
   test('GET /api/chamados/[protocolo] repassa o status sem lançar quando o corpo vem vazio', async () => {
