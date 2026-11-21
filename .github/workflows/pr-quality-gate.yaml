@@ -215,6 +215,9 @@ jobs:
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
           BASE_API_URL_RMI: 'https://services.staging.app.dados.rio/rmi/'
           BASE_API_URL_APP_CATALOGO: 'https://services.staging.app.dados.rio/catalogo/'
+          # Gateway de staging de Minhas Solicitações (variável do repositório, em
+          # Actions → Variables); vazia, o E2E pula esses testes com motivo.
+          BASE_API_URL_PREF_RIO_CIDADAO: ${{ vars.BASE_API_URL_PREF_RIO_CIDADAO }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

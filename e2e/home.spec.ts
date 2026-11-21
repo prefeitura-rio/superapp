@@ -556,7 +556,7 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
     )
     test.skip(!salesforceEnabled, SALESFORCE_SKIP_REASON)
     // A página lista os chamados na API pref-rio-cidadao e quebra (500) sem a
-    // URL base, que o passo de E2E da CI ainda não define.
+    // URL base, que a CI lê da variável do repositório de mesmo nome.
     test.skip(
       !process.env.BASE_API_URL_PREF_RIO_CIDADAO,
       'Minhas solicitações depende de BASE_API_URL_PREF_RIO_CIDADAO'
