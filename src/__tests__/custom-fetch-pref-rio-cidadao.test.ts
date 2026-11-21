@@ -136,6 +136,8 @@ describe('rotas /api/chamados com resposta vazia do upstream', () => {
     )
 
     expect(response.status).toBe(500)
-    expect(await response.json()).toBeNull()
+    expect(await response.json()).toEqual({
+      error: 'Não foi possível consultar o chamado',
+    })
   })
 })
