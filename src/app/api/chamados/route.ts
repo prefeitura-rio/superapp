@@ -8,6 +8,17 @@ import { parseJsonBody } from '@/lib/parse-json-body'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+const ERRO_CONSULTA = 'Não foi possível consultar os chamados'
+
+/**
+ * O corpo de erro do Mule/Salesforce (mensagens do gateway, hostname do
+ * backend, códigos internos) nunca é repassado ao navegador: só o status e
+ * uma mensagem genérica.
+ */
+function respostaDeErro(status: number) {
+  return NextResponse.json({ error: ERRO_CONSULTA }, { status })
+}
+
 export async function GET(req: Request) {
   if (!isSalesforceServicesEnabled()) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -28,7 +39,19 @@ export async function GET(req: Request) {
     return resposta
   }
 
-  const result = await listChamados()
-  const data = parseJsonBody(result.data)
-  return NextResponse.json(data, { status: result.status })
+  let result: Awaited<ReturnType<typeof listChamados>>
+  try {
+    result = await listChamados()
+  } catch (error) {
+    console.error('Falha ao consultar a lista de chamados:', error)
+    return respostaDeErro(502)
+  }
+
+  if (result.status >= 400) {
+    return respostaDeErro(result.status)
+  }
+
+  return NextResponse.json(parseJsonBody(result.data), {
+    status: result.status,
+  })
 }
