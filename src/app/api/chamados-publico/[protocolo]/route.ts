@@ -4,8 +4,21 @@ import {
   isSalesforceServicesEnabled,
   isSgrcHistoryMockEnabled,
 } from '@/lib/feature-flags'
+import { parseJsonBody } from '@/lib/parse-json-body'
 import { IS_MOCK_ENABLED, MOCK_PROTOCOLS, MOCK_PUBLIC } from '@/mocks/chamados'
 import { NextResponse } from 'next/server'
+
+const ERRO_NAO_ENCONTRADO = 'Chamado não encontrado'
+const ERRO_CONSULTA = 'Não foi possível consultar o chamado'
+
+/**
+ * Rota pública e anônima: o corpo de erro do Mule/Salesforce (hostname do
+ * backend, path do Apex REST, códigos internos) nunca é repassado ao cliente.
+ */
+function respostaDeErro(status: number) {
+  const error = status === 404 ? ERRO_NAO_ENCONTRADO : ERRO_CONSULTA
+  return NextResponse.json({ error }, { status })
+}
 
 export async function GET(
   _req: Request,
@@ -30,9 +43,19 @@ export async function GET(
     return NextResponse.json(MOCK_PUBLIC[protocolo], { status: 200 })
   }
 
-  const result = await getChamadoPublico(protocolo)
+  let result: Awaited<ReturnType<typeof getChamadoPublico>>
+  try {
+    result = await getChamadoPublico(protocolo)
+  } catch (error) {
+    console.error('Falha ao consultar chamado público:', error)
+    return respostaDeErro(502)
+  }
 
-  const data =
-    typeof result.data === 'string' ? JSON.parse(result.data) : result.data
-  return NextResponse.json(data, { status: result.status })
+  if (result.status >= 400) {
+    return respostaDeErro(result.status)
+  }
+
+  return NextResponse.json(parseJsonBody(result.data), {
+    status: result.status,
+  })
 }
