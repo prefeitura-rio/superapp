@@ -23,7 +23,7 @@ export function FooterPhoneButton({ number, display }: FooterPhoneButtonProps) {
     <button
       type="button"
       onClick={handleClick}
-      className="text-sm font-normal leading-5 tracking-normal text-[var(--theme-color-card-2,#0084D1)] hover:underline text-left cursor-pointer"
+      className="text-sm font-normal leading-5 tracking-normal text-[#0069A8] dark:text-[#0084D1] hover:underline text-left cursor-pointer"
     >
       {display}
     </button>
