@@ -418,6 +418,35 @@ test.describe('Empregos — home (autenticado)', () => {
     await expect(page.getByText(texto)).toBeVisible()
   })
 
+  // Homologação: a bolinha (19px) vazava da pílula do switch no tamanho
+  // padrão (32×18px). O card usa a pílula grande do "Tema claro" (44×24px).
+  // A sobra vertical independe do estado, então não precisa clicar.
+  test('a bolinha do switch do Banco de Currículos fica inteira dentro da pílula', async ({
+    page,
+  }) => {
+    await page.goto('/servicos/trabalho')
+
+    const controle = page.getByRole('switch')
+    await expect(controle).toBeVisible({ timeout: 20000 })
+
+    const pilula = await controle.boundingBox()
+    const bolinha = await controle
+      .locator('[data-slot="switch-thumb"]')
+      .boundingBox()
+    if (!pilula || !bolinha) throw new Error('switch sem caixa renderizada')
+
+    // Meio pixel de folga para arredondamento de subpixel.
+    const folga = 0.5
+    expect(bolinha.y).toBeGreaterThanOrEqual(pilula.y - folga)
+    expect(bolinha.y + bolinha.height).toBeLessThanOrEqual(
+      pilula.y + pilula.height + folga
+    )
+    expect(bolinha.x).toBeGreaterThanOrEqual(pilula.x - folga)
+    expect(bolinha.x + bolinha.width).toBeLessThanOrEqual(
+      pilula.x + pilula.width + folga
+    )
+  })
+
   test('desativar o Banco de Currículos pede confirmação (cancelar mantém ativo)', async ({
     page,
   }) => {

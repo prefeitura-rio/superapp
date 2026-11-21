@@ -1,3 +1,4 @@
+import { ServerFeatureFlagsProvider } from '@/providers/server-feature-flags-provider'
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
@@ -71,8 +72,13 @@ async function renderScreen(screenToRender: (typeof SCREENS)[number]) {
   })
   const ui = await screenToRender.render()
   return render(ui, {
+    // Como o root layout: a flag do Salesforce chega lida no servidor.
     wrapper: ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <ServerFeatureFlagsProvider flags={{ salesforce: true }}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </ServerFeatureFlagsProvider>
     ),
   })
 }
@@ -92,10 +98,10 @@ beforeEach(() => {
     'NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI',
     'http://localhost:3000/auth/callback'
   )
-  // Termos de uso e política de privacidade só aparecem no menu global quando
-  // FEATURE_SALESFORCE=true (rota gateada). Testes desta tela pressupõem que
-  // a integração com Salesforce está ativa.
-  vi.stubEnv('FEATURE_SALESFORCE', 'true')
+  // Termos de uso e política de privacidade só aparecem no menu global com o
+  // Salesforce ligado, e o menu recebe a flag do servidor (provider em
+  // renderScreen). No navegador `FEATURE_SALESFORCE` não existe.
+  vi.stubEnv('FEATURE_SALESFORCE', '')
 })
 
 afterEach(() => {

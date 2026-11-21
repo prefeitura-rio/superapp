@@ -185,6 +185,7 @@ jobs:
           NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
+          NEXT_PUBLIC_1746_LOGOUT_URL: "https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
@@ -243,6 +244,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_1746_LOGOUT_URL="https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp" \
             --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \

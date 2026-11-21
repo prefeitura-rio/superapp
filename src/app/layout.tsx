@@ -5,9 +5,11 @@ import { AccessibilityPlugin } from '@/components/accessibility-plugin'
 import { VLibrasPlugin } from '@/components/vlibras-plugin'
 import {
   isAccessibilityPluginEnabled,
+  isSalesforceServicesEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
 import { PWAProvider } from '@/providers/pwa-provider'
+import { ServerFeatureFlagsProvider } from '@/providers/server-feature-flags-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
@@ -102,7 +104,13 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <PWAProvider>{children}</PWAProvider>
+          {/* Flags só de servidor lidas a cada requisição (layout dinâmico)
+              para os client components, como o Menu global. */}
+          <ServerFeatureFlagsProvider
+            flags={{ salesforce: isSalesforceServicesEnabled() }}
+          >
+            <PWAProvider>{children}</PWAProvider>
+          </ServerFeatureFlagsProvider>
           <LoginEventTracker />
           <ThemeColorMeta />
           <Toaster

@@ -1,4 +1,5 @@
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
+import { rewriteServiceUrlForEnvironment } from '@/lib/carta-servicos/environment-url-rewrite'
 import DOMPurify from 'dompurify'
 import type { Config } from 'dompurify'
 import { JSDOM } from 'jsdom'
@@ -47,6 +48,8 @@ function createPurifier(domWindow: Window): Purifier {
 
   instance.addHook('afterSanitizeAttributes', node => {
     if (node.tagName !== 'A') return
+    const href = node.getAttribute('href')
+    if (href) node.setAttribute('href', rewriteServiceUrlForEnvironment(href))
     node.setAttribute('target', '_blank')
     node.setAttribute('rel', 'noopener noreferrer')
   })
