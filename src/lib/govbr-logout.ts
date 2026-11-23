@@ -1,15 +1,23 @@
 /**
- * URL do logout do Gov.br, aberta num iframe oculto depois do logout da
- * aplicação e do Keycloak.
+ * URL do logout do Gov.br.
  *
  * O Gov.br só devolve o navegador para o `post_logout_redirect_uri` se essa
  * URL estiver cadastrada no campo "URL de Log Out" da credencial da
  * Identidade Carioca no Gov.br, e hoje ela não está: numa navegação de
- * primeiro nível o usuário ficaria em `servicos.acesso.gov.br`. Por isso o
- * logout do Gov.br fica no iframe, invisível para o usuário. A limitação
- * conhecida é que navegadores que bloqueiam cookies de terceiros (Brave,
- * Safari) não enviam o cookie do Gov.br ao iframe, e a sessão de lá continua
- * ativa.
+ * primeiro nível o usuário fica em `servicos.acesso.gov.br`. Por isso o
+ * "Sair" (`useLogout`) depende do navegador:
+ *
+ * - Google Chrome: o logout do Gov.br roda num iframe oculto, invisível para o
+ *   usuário, que volta para a home. Limitação conhecida: com cookies de
+ *   terceiros bloqueados (aba anônima, configuração do usuário), o cookie do
+ *   Gov.br não vai ao iframe e a sessão de lá continua ativa.
+ * - Outros navegadores (Safari, Firefox, Brave, Edge, Samsung Internet,
+ *   Chrome no iOS): bloqueiam ou podem bloquear cookies de terceiros, então o
+ *   logout do Gov.br vai por navegação de topo, depois do Keycloak
+ *   (`/api/auth/sso-logout/govbr`). O usuário termina no Gov.br, deslogado.
+ *
+ * Quando a "URL de Log Out" for cadastrada no Gov.br, todos os navegadores
+ * podem usar a navegação de topo e voltar para a home, sem iframe.
  */
 
 /**

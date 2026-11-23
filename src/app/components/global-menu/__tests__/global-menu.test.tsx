@@ -2,6 +2,7 @@ import {
   type ServerFeatureFlags,
   ServerFeatureFlagsProvider,
 } from '@/providers/server-feature-flags-provider'
+import { restoreBrowser, stubBrowser } from '@/test/browser-brands'
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -88,6 +89,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs()
+  restoreBrowser()
   Object.defineProperty(window, 'location', {
     configurable: true,
     value: originalLocation,
@@ -121,9 +123,10 @@ describe('GlobalMenu', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('logado: nome, CPF e Sair, que encerra a sessão e faz o logout do Gov.br num iframe oculto', async () => {
+  it('logado no Google Chrome: nome, CPF e Sair, que encerra a sessão e faz o logout do Gov.br num iframe oculto', async () => {
     vi.stubEnv('NEXT_PUBLIC_GOVBR_BASE_URL', 'https://sso.example.gov.br/')
     vi.stubEnv('NEXT_PUBLIC_HOME_URL', 'https://app.example.rio/')
+    stubBrowser('chrome')
     let logoutCalls = 0
     server.use(
       http.get('/api/auth/logout', () => {
@@ -155,6 +158,29 @@ describe('GlobalMenu', () => {
     await waitFor(() =>
       expect(assign).toHaveBeenCalledWith('/api/auth/sso-logout')
     )
+  })
+
+  it('logado fora do Google Chrome: Sair encerra a sessão e vai para o logout do Gov.br por navegação de topo, sem iframe', async () => {
+    vi.stubEnv('NEXT_PUBLIC_GOVBR_BASE_URL', 'https://sso.example.gov.br/')
+    vi.stubEnv('NEXT_PUBLIC_HOME_URL', 'https://app.example.rio/')
+    let logoutCalls = 0
+    server.use(
+      http.get('/api/auth/logout', () => {
+        logoutCalls++
+        return new HttpResponse(null, { status: 204 })
+      })
+    )
+    respondHeader(CITIZEN)
+    const { user, menu } = await openMenu()
+    await within(menu).findByText('Maria da Silva')
+
+    await user.click(within(menu).getByRole('button', { name: 'Sair' }))
+
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('/api/auth/sso-logout/govbr')
+    )
+    expect(logoutCalls).toBe(1)
+    expect(document.querySelector('iframe')).toBeNull()
   })
 
   it('Termos de uso e política de privacidade é item de primeiro nível e leva à lista', async () => {

@@ -83,25 +83,32 @@ export function isSpeculativeRequest(request: NextRequest): boolean {
 /**
  * URL do logout do Keycloak por navegação de topo. Ao contrário do
  * `logoutFromKeycloak`, encerra a sessão SSO pelo cookie do Keycloak, então
- * funciona mesmo depois que o refresh token expirou, e volta para a home.
- * `null` quando o Keycloak ou a home não estão configurados no ambiente.
+ * funciona mesmo depois que o refresh token expirou.
+ *
+ * Depois do logout o Keycloak leva o navegador a `postLogoutRedirectUri`, que
+ * por padrão é a home. O destino vem sempre do ambiente (home ou logout do
+ * Gov.br), nunca da requisição. `null` quando o Keycloak ou o destino não
+ * estão configurados no ambiente.
  *
  * A versão atual do Keycloak aceita `post_logout_redirect_uri` sem
  * `id_token_hint`. A partir do Keycloak 18, sem `id_token_hint` o Keycloak
  * exige `client_id`, só aceita URIs cadastradas em "Valid post logout redirect
  * URIs" e mostra uma tela de confirmação antes de sair. Antes desse upgrade, é
- * preciso passar a enviar o `id_token_hint` (ver
- * `docs/logout-sincronizado-1746.md`).
+ * preciso passar a enviar o `id_token_hint` e cadastrar a home e o logout do
+ * Gov.br nessas URIs (ver `docs/logout-sincronizado-1746.md`).
  */
-export function buildKeycloakLogoutUrl(): string | null {
+export function buildKeycloakLogoutUrl(
+  postLogoutRedirectUri?: string
+): string | null {
   const baseUrl = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL?.trim()
-  const homeUrl = process.env.NEXT_PUBLIC_HOME_URL?.trim()
-  if (!baseUrl || !homeUrl) return null
+  const redirectUri =
+    postLogoutRedirectUri ?? process.env.NEXT_PUBLIC_HOME_URL?.trim()
+  if (!baseUrl || !redirectUri) return null
 
   const params = new URLSearchParams()
   const clientId = process.env.NEXT_PUBLIC_IDENTIDADE_CARIOCA_CLIENT_ID
   if (clientId) params.set('client_id', clientId)
-  params.set('post_logout_redirect_uri', homeUrl)
+  params.set('post_logout_redirect_uri', redirectUri)
 
   return `${baseUrl}/logout?${params.toString()}`
 }

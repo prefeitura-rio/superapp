@@ -84,8 +84,12 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
       page.getByRole('dialog').getByRole('link', { name: 'Meu perfil' })
     ).toHaveAttribute('href', '/meu-perfil')
 
-    // Intercepta o logout da API (para não encerrar a sessão do teste) e o
-    // logout do Gov.br no iframe (para não depender de rede externa).
+    // Intercepta o logout da API (para não encerrar a sessão do teste), o
+    // logout do Gov.br no iframe (Google Chrome) e a navegação de topo final
+    // (`/api/auth/sso-logout` no Chrome, `/api/auth/sso-logout/govbr` nos
+    // outros navegadores), para não depender de rede externa. O caminho
+    // depende das marcas que o Chromium do Playwright expõe, então o teste
+    // cobre os dois. 204 numa navegação mantém a página atual.
     const logoutRequests: URL[] = []
     await page.route(
       url => url.pathname === '/api/auth/logout',
@@ -97,6 +101,10 @@ test.describe('Meu Perfil — hub (autenticado)', () => {
     await page.route(
       url => url.hostname.endsWith('acesso.gov.br'),
       route => route.fulfill({ status: 200, body: '' })
+    )
+    await page.route(
+      url => url.pathname.startsWith('/api/auth/sso-logout'),
+      route => route.fulfill({ status: 204 })
     )
 
     const sairBtn = page.getByRole('button', { name: 'Sair' })
