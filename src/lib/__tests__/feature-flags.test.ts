@@ -1,7 +1,7 @@
 import {
   isAccessibilityPluginEnabled,
   isSalesforceServicesEnabled,
-  isSgrcHistoryMockEnabled,
+  isSgrcHistoricoEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
 import { afterEach, describe, expect, test, vi } from 'vitest'
@@ -90,22 +90,29 @@ describe('isVLibrasEnabled', () => {
   })
 })
 
-describe('isSgrcHistoryMockEnabled', () => {
+describe('isSgrcHistoricoEnabled', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
   })
 
-  test('is enabled only in the explicit chamados mock mode', () => {
-    vi.stubEnv('USE_MOCK_CHAMADOS', 'true')
+  test('is enabled only when the flag is exactly "true"', () => {
+    vi.stubEnv('FEATURE_SGRC_HISTORICO', 'true')
 
-    expect(isSgrcHistoryMockEnabled()).toBe(true)
+    expect(isSgrcHistoricoEnabled()).toBe(true)
   })
 
-  test('is disabled when the mock flag is absent or not exactly "true" (staging and production)', () => {
-    for (const value of [undefined, 'false', '', 'TRUE', '1']) {
-      vi.stubEnv('USE_MOCK_CHAMADOS', value)
+  test('is disabled when the flag is absent or not exactly "true" (production default)', () => {
+    for (const value of [undefined, 'false', '', 'TRUE', '1', ' true']) {
+      vi.stubEnv('FEATURE_SGRC_HISTORICO', value)
 
-      expect(isSgrcHistoryMockEnabled()).toBe(false)
+      expect(isSgrcHistoricoEnabled()).toBe(false)
     }
+  })
+
+  test('does not depend on FEATURE_SALESFORCE (callers check both)', () => {
+    vi.stubEnv('FEATURE_SALESFORCE', 'false')
+    vi.stubEnv('FEATURE_SGRC_HISTORICO', 'true')
+
+    expect(isSgrcHistoricoEnabled()).toBe(true)
   })
 })

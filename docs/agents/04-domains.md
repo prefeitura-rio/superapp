@@ -13,6 +13,7 @@
 | Busca | `/busca` | `http-app-catalogo/` / busca-search |
 | Carteira digital | `/carteira`, pet, cadunico, clínica da família, CadMicro (`/carteira/cadmicro`)… | `(logged-in)/carteira/` |
 | Perfil | `/meu-perfil`, dados pessoais, endereço, avatar | `src/actions/`, `http/` (RMI) |
+| Solicitações (chamados) | `/minhas-solicitacoes`, `/consulta-protocolo`, `/solicitacoes/[id]` | `src/app/api/chamados*`, `src/lib/chamados/sgrc.ts`; SGRC legado via `http/` (RMI), Salesforce via `http-pref-rio-cidadao/` e `http-pref-rio-chamados-publico/` |
 | FAQ / Ouvidoria | `/faq`, `/ouvidoria` | rotas mistas |
 | Auth UX | `/sessao-expirada`, `/autenticacao-necessaria/*` | `(logged-out)/` |
 | Dívida Ativa | `/divida-ativa` | `(logged-in)/divida-ativa/`, `http-divida-ativa/` |
@@ -34,7 +35,8 @@ Testes: `termos-de-uso/__tests__/detail-page.test.tsx` compara o texto v1.0 com 
 Controladas principalmente em `src/middleware.ts` e banners (`src/constants/banners.ts`):
 
 - `NEXT_PUBLIC_FEATURE_FLAG` — lista separada por vírgula (`cursos`, `empregos`, `mei`, `cadmicro`). Ausente/`false` em dev/staging costuma liberar tudo. Em produção, ausência de `empregos`/`mei`/`cadmicro` bloqueia segmentos de path `/trabalho`, `/empresas`, `/mei`, `/carteira/cadmicro`.
-- `NEXT_PUBLIC_FEATURE_SALESFORCE` — booleano estrito (`=== 'true'`) para as superfícies Salesforce/MuleSoft: solicitações, consulta de protocolo, ouvidoria e Carta de Serviços exclusiva do app-catalogo. Ausente ou diferente de `'true'` reescreve essas rotas para `/not-found`; busca e Carta que possuem fallback no app-busca-search continuam usando o caminho legado.
+- `FEATURE_SALESFORCE` — server-side, lida em runtime, booleano estrito (`=== 'true'`) para as superfícies Salesforce/MuleSoft: solicitações, consulta de protocolo, ouvidoria e Carta de Serviços exclusiva do app-catalogo. Ausente ou diferente de `'true'` reescreve essas rotas para `/not-found`; busca e Carta que possuem fallback no app-busca-search continuam usando o caminho legado. Detalhes em [07-feature-flags-runtime.md](07-feature-flags-runtime.md).
+- `FEATURE_SGRC_HISTORICO` — server-side, lida em runtime, booleano estrito. Liga o histórico do 1746 legado (SGRC, via RMI) em Minhas Solicitações e na consulta de protocolo; só tem efeito com `FEATURE_SALESFORCE=true`. Desligada, as rotas SGRC respondem 404 e a carteira mantém o card "Cuidados com a Cidade". Fica desligada em produção até a feature estar pronta. Detalhes em [`../solicitacoes.md`](../solicitacoes.md).
 - `NEXT_PUBLIC_FEATURE_CHAMADOS` — legado, sem uso no runtime; manter apenas durante a migração de configuração.
 - `NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA` — booleano (`=== 'true'`). Ausente ou diferente de `'true'` esconde o módulo inteiro, inclusive em staging. Padrão para superfície que não pode aparecer até a homologação.
 - `NEXT_PUBLIC_ENABLE_HARDCODED_SEARCH_LINKS` — `src/constants/venvs.ts`.
@@ -43,6 +45,7 @@ Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos b
 
 ## Docs de domínio
 
+- Solicitações (SGRC + Salesforce): [`../solicitacoes.md`](../solicitacoes.md)
 - MEI: [`../mei.md`](../mei.md)
 - Busca: [`../search-feature.md`](../search-feature.md)
 - Empregabilidade (testes): [`../testes-empregabilidade.md`](../testes-empregabilidade.md)

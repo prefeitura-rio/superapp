@@ -5,8 +5,8 @@
 | Variável | Tipo | Default se ausente |
 |---|---|---|
 | `FEATURE_SALESFORCE` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
-| `USE_MOCK_CHAMADOS` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_HOME_SOLICITACOES` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
+| `FEATURE_SGRC_HISTORICO` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `REWRITE_SERVICE_URLS_TO_HML` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 
 Todas são lidas em **runtime** via `process.env`. Não exigem rebuild da imagem
@@ -25,16 +25,25 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | Variável | Valor | Efeito |
 |---|---|---|
 | `FEATURE_SALESFORCE` | `false` | Rotas de chamados retornam 404; busca usa Typesense; footer/menu sem links de Atendimentos |
-| `USE_MOCK_CHAMADOS` | `false` | Nenhum dado fictício de chamados é servido |
 | `FEATURE_HOME_SOLICITACOES` | `false` | Cards de Solicitações ocultos na home |
+| `FEATURE_SGRC_HISTORICO` | ausente ou `false` | Sem efeito (as telas de chamados não existem) |
 
-### Produção — integração Salesforce pronta (flip futuro)
+### Produção — Salesforce pronto, histórico SGRC ainda não
 
 | Variável | Valor | Efeito |
 |---|---|---|
 | `FEATURE_SALESFORCE` | `true` | Rotas de chamados ativas; busca usa app-catalogo; footer/menu completos |
-| `USE_MOCK_CHAMADOS` | `false` | Integração real com Salesforce, sem mocks |
 | `FEATURE_HOME_SOLICITACOES` | `true` | Cards de Solicitações visíveis na home |
+| `FEATURE_SGRC_HISTORICO` | ausente ou `false` | Minhas Solicitações só com Salesforce, sem seletor; protocolo SGRC "não encontrado"; carteira mantém "Cuidados com a Cidade" |
+| `SALESFORCE_SEARCH_ENABLED` | `true` | Habilita itens `source='salesforce'` na busca (ver nota) |
+
+### Produção — tudo pronto (flip futuro)
+
+| Variável | Valor | Efeito |
+|---|---|---|
+| `FEATURE_SALESFORCE` | `true` | Rotas de chamados ativas; busca usa app-catalogo; footer/menu completos |
+| `FEATURE_HOME_SOLICITACOES` | `true` | Cards de Solicitações visíveis na home |
+| `FEATURE_SGRC_HISTORICO` | `true` | Histórico do 1746 em Minhas Solicitações; o card da carteira sai |
 | `SALESFORCE_SEARCH_ENABLED` | `true` | Habilita itens `source='salesforce'` na busca (ver nota) |
 
 ### Staging (homologação)
@@ -42,8 +51,8 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | Variável | Valor | Efeito |
 |---|---|---|
 | `FEATURE_SALESFORCE` | `true` | Integração Salesforce ativa para validação |
-| `USE_MOCK_CHAMADOS` | `true` | Dados fictícios de chamados SGRC para testes de UI |
 | `FEATURE_HOME_SOLICITACOES` | `true` | Cards de Solicitações visíveis na home |
+| `FEATURE_SGRC_HISTORICO` | `true` | Histórico do 1746 (RMI) em Minhas Solicitações para validação. **Criar no Infisical antes do deploy**: sem ela, o histórico some de staging |
 | `SALESFORCE_SEARCH_ENABLED` | `false` | Itens Salesforce filtrados da busca até `tema_geral` estar populado |
 
 ---
@@ -62,7 +71,7 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | Menu global — Termos de uso e política de privacidade | Oculto | Visível |
 | Mapa do site — seção Atendimento | Oculta | Visível |
 | Mapa do site — links Carta de serviços e Termos de uso (Informações) | Ocultos | Visíveis |
-| Carteira — card "Cuidados com a Cidade" (legado 1746) | Visível | Oculto |
+| Carteira — card "Cuidados com a Cidade" (legado 1746) | Visível | Oculto só com `FEATURE_SGRC_HISTORICO=true` (ver abaixo) |
 
 ### FEATURE_HOME_SOLICITACOES
 
@@ -80,13 +89,27 @@ as rotas, API, busca e banner ativos.
 > A razão é que esses links apontam para formulários externos do 1746 que só fazem
 > sentido quando o backend Salesforce está ativo e o bloco de atendimento está habilitado.
 
-### USE_MOCK_CHAMADOS
+### FEATURE_SGRC_HISTORICO
 
-| Superfície | `false` | `true` |
+Histórico do 1746 legado (SGRC), servido pelo app-rmi (`BASE_API_URL_RMI`).
+Exige `FEATURE_SALESFORCE=true` para ter efeito (as telas não existem sem ela).
+Função: `isSgrcHistoricoEnabled()` em `src/lib/feature-flags.ts`; chega aos
+client components pelo `ServerFeatureFlagsProvider` (`sgrcHistorico`). Fluxo
+completo em [`../solicitacoes.md`](../solicitacoes.md).
+
+| Superfície | `false` (ou ausente) | `true` |
 |---|---|---|
-| `/api/chamados?origem=sgrc` | 501 Not Implemented | Serve lista SGRC fictícia |
-| `/api/chamados/[protocolo]` | Vai à API real | Serve mock para protocolos SGRC e `RIO-MOCK-001..005` |
-| Minhas Solicitações | Apenas dados Salesforce | Painel de histórico SGRC + protocolos mock na lista |
+| `/api/chamados?origem=sgrc&page=N` | 404, sem sessão nem RMI | `GET /citizen/{cpf}/maintenance-request` (CPF da sessão, 10 por página) |
+| `/api/chamados/[protocolo]` e `/api/chamados-publico/[protocolo]` com `RIO-12345678-9` | 404, sem RMI nem Mule | `GET /maintenance-request/{protocolo}` |
+| Os mesmos, com protocolo do Salesforce (`RIO-2026-00000001`) | MuleSoft/Salesforce | MuleSoft/Salesforce |
+| Minhas Solicitações | Só Salesforce, sem seletor, com as abas | Seletor "Data de abertura": "abertas até 26/11/2026" (SGRC, padrão) e "abertas a partir de 27/11/2026" (Salesforce) |
+| Carteira — card "Cuidados com a Cidade" | Visível | Oculto (com `FEATURE_SALESFORCE=true`) |
+
+> **Por que a carteira acompanha:** o card mostra o mesmo histórico do RMI. Ele
+> só sai quando as duas flags estão ligadas, para o histórico mudar da carteira
+> para Minhas Solicitações de uma vez, sem janela em que o cidadão fique sem os
+> chamados antigos. Regra em `shouldShowCaretakerCard`
+> (`src/lib/maintenance-requests-utils.ts`).
 
 ---
 

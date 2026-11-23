@@ -24,7 +24,7 @@ A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de se
 npx orval --project dividaAtiva
 ```
 
-Projetos configurados hoje: `prefRioChamadosPublico` e `dividaAtiva`.
+Projetos configurados hoje: `prefRioChamadosPublico`, `dividaAtiva` e `rmi` (`src/http/`, spec remoto do app-rmi).
 
 ⚠️ `npx orval` **sem** `--project` regenera todos os projetos do arquivo, misturando no diff clients que a sua tarefa não tocou. Use sempre `--project`.
 

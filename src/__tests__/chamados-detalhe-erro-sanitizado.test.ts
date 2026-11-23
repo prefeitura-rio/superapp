@@ -46,7 +46,6 @@ function semDetalheDeInfra(corpo: string) {
 describe('DEV-711: erro do detalhe autenticado de chamado não vaza o backend', () => {
   beforeEach(() => {
     vi.stubEnv('FEATURE_SALESFORCE', 'true')
-    vi.stubEnv('USE_MOCK_CHAMADOS', 'false')
   })
 
   afterEach(() => {

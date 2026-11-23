@@ -6,6 +6,7 @@ import { VLibrasPlugin } from '@/components/vlibras-plugin'
 import {
   isAccessibilityPluginEnabled,
   isSalesforceServicesEnabled,
+  isSgrcHistoricoEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
 import { PWAProvider } from '@/providers/pwa-provider'
@@ -107,7 +108,10 @@ export default async function RootLayout({
           {/* Flags só de servidor lidas a cada requisição (layout dinâmico)
               para os client components, como o Menu global. */}
           <ServerFeatureFlagsProvider
-            flags={{ salesforce: isSalesforceServicesEnabled() }}
+            flags={{
+              salesforce: isSalesforceServicesEnabled(),
+              sgrcHistorico: isSgrcHistoricoEnabled(),
+            }}
           >
             <PWAProvider>{children}</PWAProvider>
           </ServerFeatureFlagsProvider>

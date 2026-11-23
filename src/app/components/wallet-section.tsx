@@ -7,6 +7,7 @@ import type {
   ModelsPet,
 } from '@/http/models'
 import type { WalletVehicle } from '@/lib/cadmicro/types'
+import { useServerFeatureFlags } from '@/providers/server-feature-flags-provider'
 import { useEffect, useState } from 'react'
 import {
   type HomeWalletHealthCardData,
@@ -52,6 +53,7 @@ export default function CarteiraSection({
   isSalesforceEnabled,
 }: CartereiraSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false)
+  const { sgrcHistorico } = useServerFeatureFlags()
   const walletCards = buildHomeWalletCards({
     walletData,
     maintenanceRequests,
@@ -59,6 +61,7 @@ export default function CarteiraSection({
     pets,
     vehicles,
     isSalesforceEnabled,
+    sgrcHistoricoEnabled: sgrcHistorico,
   })
 
   useEffect(() => {

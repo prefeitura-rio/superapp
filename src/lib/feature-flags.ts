@@ -42,21 +42,6 @@ export function isServiceUrlHmlRewriteEnabled(): boolean {
 }
 
 /**
- * The SGRC history has no real integration yet: the only
- * data source is the fixed mock in `src/lib/chamados/mock-sgrc.ts`, which is
- * the same for every citizen. It is served only when the explicit chamados
- * mock mode is on (`USE_MOCK_CHAMADOS === 'true'`, off in production),
- * never to real citizens.
- *
- * Server-side only (`USE_MOCK_CHAMADOS`). Value is read at runtime from
- * `process.env`, so changes in Infisical take effect after a pod restart
- * without requiring a new build or deploy.
- */
-export function isSgrcHistoryMockEnabled(): boolean {
-  return process.env.USE_MOCK_CHAMADOS === 'true'
-}
-
-/**
  * Controls whether the "Solicitações" section cards appear on the home page.
  * Independent of `FEATURE_SALESFORCE`: requires both flags to be `'true'` to
  * show the section. Allows hiding the home block while keeping the full
@@ -68,6 +53,24 @@ export function isSgrcHistoryMockEnabled(): boolean {
  */
 export function isHomeSolicitacoesEnabled(): boolean {
   return process.env.FEATURE_HOME_SOLICITACOES === 'true'
+}
+
+/**
+ * Controls the legacy 1746 (SGRC) history served by app-rmi: the "abertas até
+ * 26/11/2026" option in Minhas Solicitações and the lookup of `RIO-12345678-9`
+ * protocols. Off: those surfaces show only Salesforce data, the SGRC routes
+ * answer 404 without calling the RMI, and the wallet keeps the legacy
+ * "Cuidados com a Cidade" card.
+ *
+ * Only takes effect together with `FEATURE_SALESFORCE=true` (the screens do not
+ * exist without it). Strict boolean: an unset flag is safely disabled.
+ *
+ * Server-side only (`FEATURE_SGRC_HISTORICO`). Value is read at runtime from
+ * `process.env`, so changes in Infisical take effect after a pod restart
+ * without requiring a new build or deploy.
+ */
+export function isSgrcHistoricoEnabled(): boolean {
+  return process.env.FEATURE_SGRC_HISTORICO === 'true'
 }
 
 /**

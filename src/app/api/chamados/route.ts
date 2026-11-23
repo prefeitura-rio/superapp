@@ -1,22 +1,74 @@
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
-import { listarSgrcMock } from '@/lib/chamados/mock-sgrc'
+import { POR_PAGINA_SGRC, mapearListaSgrc } from '@/lib/chamados/sgrc'
+import { getDalCitizenCpfMaintenanceRequest } from '@/lib/dal'
 import {
   isSalesforceServicesEnabled,
-  isSgrcHistoryMockEnabled,
+  isSgrcHistoricoEnabled,
 } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
-import { cookies } from 'next/headers'
+import { getUserInfoFromToken } from '@/lib/user-info'
 import { NextResponse } from 'next/server'
 
 const ERRO_CONSULTA = 'Não foi possível consultar os chamados'
 
 /**
- * O corpo de erro do Mule/Salesforce (mensagens do gateway, hostname do
- * backend, códigos internos) nunca é repassado ao navegador: só o status e
+ * O corpo de erro do Mule/Salesforce e do RMI (mensagens do gateway, hostname
+ * do backend, códigos internos) nunca é repassado ao navegador: só o status e
  * uma mensagem genérica.
  */
 function respostaDeErro(status: number) {
   return NextResponse.json({ error: ERRO_CONSULTA }, { status })
+}
+
+function semCache(resposta: NextResponse) {
+  resposta.headers.set('Cache-Control', 'private, no-store')
+  return resposta
+}
+
+function paginaDe(valor: string | null): number {
+  if (!valor || !/^\d{1,6}$/.test(valor)) return 1
+  return Math.max(1, Number(valor))
+}
+
+/**
+ * Histórico do 1746 legado (SGRC) do cidadão logado, paginado pelo RMI. O CPF
+ * vem do token da sessão, nunca do navegador.
+ */
+async function listarHistoricoSgrc(req: Request) {
+  const { cpf: claim } = await getUserInfoFromToken()
+  const cpf = claim.replace(/\D/g, '')
+  if (cpf.length !== 11) {
+    return semCache(
+      NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    )
+  }
+
+  const page = paginaDe(new URL(req.url).searchParams.get('page'))
+
+  let result: Awaited<ReturnType<typeof getDalCitizenCpfMaintenanceRequest>>
+  try {
+    result = await getDalCitizenCpfMaintenanceRequest(cpf, {
+      page,
+      per_page: POR_PAGINA_SGRC,
+    })
+  } catch (error) {
+    console.error(
+      'Falha ao consultar o histórico SGRC no RMI:',
+      error instanceof Error ? error.message : 'erro desconhecido'
+    )
+    return semCache(respostaDeErro(502))
+  }
+
+  if (result.status !== 200) {
+    return semCache(respostaDeErro(result.status >= 400 ? result.status : 502))
+  }
+
+  const corpo = parseJsonBody<typeof result.data>(result.data)
+  if (!corpo || typeof corpo !== 'object') {
+    return semCache(respostaDeErro(502))
+  }
+
+  return semCache(NextResponse.json(mapearListaSgrc(corpo, page)))
 }
 
 export async function GET(req: Request) {
@@ -26,17 +78,11 @@ export async function GET(req: Request) {
 
   const origem = new URL(req.url).searchParams.get('origem')
   if (origem === 'sgrc') {
-    // The SGRC history belongs to the logged-in citizen: without a session
-    // nothing is served, not even in the explicit mock mode.
-    const jar = await cookies()
-    const logado = Boolean(jar.get('access_token')?.value)
-    const resposta = !logado
-      ? NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-      : isSgrcHistoryMockEnabled()
-        ? NextResponse.json(listarSgrcMock())
-        : NextResponse.json({ error: 'Not implemented' }, { status: 501 })
-    resposta.headers.set('Cache-Control', 'private, no-store')
-    return resposta
+    // Sem a flag, o histórico SGRC não existe: nem sessão, nem RMI.
+    if (!isSgrcHistoricoEnabled()) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+    return listarHistoricoSgrc(req)
   }
 
   let result: Awaited<ReturnType<typeof listChamados>>

@@ -44,7 +44,9 @@ function respondHeader(body: object) {
  * A flag do Salesforce chega como no app: lida no servidor e entregue pelo
  * provider do root layout. Salesforce ligado por padrão.
  */
-async function openMenu(flags: ServerFeatureFlags = { salesforce: true }) {
+async function openMenu(
+  flags: ServerFeatureFlags = { salesforce: true, sgrcHistorico: false }
+) {
   const user = userEvent.setup()
   render(
     <ServerFeatureFlagsProvider flags={flags}>
@@ -168,7 +170,7 @@ describe('GlobalMenu', () => {
 
   it('ícones do Lucide seguem o traço 1.4 do design system, não o 2 padrão', async () => {
     respondHeader(CITIZEN)
-    const { menu } = await openMenu({ salesforce: true })
+    const { menu } = await openMenu({ salesforce: true, sgrcHistorico: false })
     await within(menu).findByText('Maria da Silva')
 
     const rows = [
@@ -191,7 +193,10 @@ describe('GlobalMenu', () => {
     '%s: com Salesforce ligado no servidor mostra Atendimentos, Termos de uso e Carta de serviços',
     async (_state, body) => {
       respondHeader(body)
-      const { menu } = await openMenu({ salesforce: true })
+      const { menu } = await openMenu({
+        salesforce: true,
+        sgrcHistorico: false,
+      })
       if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
 
       expect(
@@ -217,7 +222,10 @@ describe('GlobalMenu', () => {
       // Mesmo que o env do bundle diga o contrário, vale o que o servidor mandou.
       vi.stubEnv('FEATURE_SALESFORCE', 'true')
       respondHeader(body)
-      const { menu } = await openMenu({ salesforce: false })
+      const { menu } = await openMenu({
+        salesforce: false,
+        sgrcHistorico: false,
+      })
       if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
 
       expect(

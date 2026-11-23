@@ -10,6 +10,7 @@ import { formatRecadastramentoDate } from '@/lib/cadunico-utils'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
+  shouldShowCaretakerCard,
 } from '@/lib/maintenance-requests-utils'
 import {
   formatEducationOperatingHours,
@@ -50,6 +51,8 @@ export type BuildHomeWalletCardsInput = {
   vehicles?: WalletVehicle[]
   healthCardData?: HomeWalletHealthCardData
   isSalesforceEnabled: boolean
+  /** `FEATURE_SGRC_HISTORICO`. Ausente conta como desligada. */
+  sgrcHistoricoEnabled?: boolean
 }
 
 function isDisplayablePet(pet: ModelsPet): boolean {
@@ -70,6 +73,7 @@ export function buildHomeWalletCards({
   vehicles = [],
   healthCardData,
   isSalesforceEnabled,
+  sgrcHistoricoEnabled = false,
 }: BuildHomeWalletCardsInput): ReactElement[] {
   const cards: ReactElement[] = []
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
@@ -183,7 +187,13 @@ export function buildHomeWalletCards({
     )
   }
 
-  if (maintenanceStats.total > 0 && !isSalesforceEnabled) {
+  if (
+    shouldShowCaretakerCard({
+      total: maintenanceStats.total,
+      salesforce: isSalesforceEnabled,
+      sgrcHistorico: sgrcHistoricoEnabled,
+    })
+  ) {
     const position = getCardPosition(
       WALLET_CARD_TYPES.CARETAKER,
       walletData,

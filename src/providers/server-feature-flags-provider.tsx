@@ -12,10 +12,15 @@ import { type ReactNode, createContext, useContext } from 'react'
  */
 export interface ServerFeatureFlags {
   salesforce: boolean
+  /** `FEATURE_SGRC_HISTORICO`: histórico do 1746 legado em Minhas Solicitações. */
+  sgrcHistorico: boolean
 }
 
 /** Sem provider, tudo desligado: o mesmo padrão seguro da flag ausente. */
-const DEFAULT_SERVER_FEATURE_FLAGS: ServerFeatureFlags = { salesforce: false }
+const DEFAULT_SERVER_FEATURE_FLAGS: ServerFeatureFlags = {
+  salesforce: false,
+  sgrcHistorico: false,
+}
 
 const ServerFeatureFlagsContext = createContext<ServerFeatureFlags>(
   DEFAULT_SERVER_FEATURE_FLAGS

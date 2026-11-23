@@ -22,6 +22,13 @@ function homeMain(page: Page) {
 const salesforceEnabled = process.env.FEATURE_SALESFORCE === 'true'
 const SALESFORCE_SKIP_REASON = 'Depende de FEATURE_SALESFORCE=true no servidor'
 
+/**
+ * `FEATURE_SGRC_HISTORICO`, também só de servidor e lida em runtime (na CI,
+ * `"true"` no passo "Run E2E tests"). Ligada, Minhas Solicitações abre no
+ * histórico SGRC, com o seletor "Data de abertura".
+ */
+const sgrcHistoricoEnabled = process.env.FEATURE_SGRC_HISTORICO === 'true'
+
 test.describe('Home (público)', () => {
   test.beforeEach(async ({ context }) => {
     await applyE2ECookieConsent(context)
@@ -574,6 +581,20 @@ test.describe('Minhas solicitações pela aba do menu global (autenticado)', () 
       await expect(
         page.getByRole('heading', { level: 1, name: 'Minhas Solicitações' })
       ).toBeVisible({ timeout: 20000 })
+
+      // Com o histórico SGRC, a página abre nele (só "Todos"); as abas do
+      // filtro estão nas solicitações do Salesforce. Sem a flag, já abre lá.
+      if (sgrcHistoricoEnabled) {
+        await page.getByRole('button', { name: 'Data de abertura' }).click()
+        await page
+          .getByRole('radio', { name: 'abertas a partir de 27/11/2026' })
+          .click()
+        await page.getByRole('button', { name: 'Aplicar' }).click()
+      } else {
+        await expect(
+          page.getByRole('button', { name: 'Data de abertura' })
+        ).toHaveCount(0)
+      }
 
       await expect(
         page.getByRole('button', { name: aba, exact: true })

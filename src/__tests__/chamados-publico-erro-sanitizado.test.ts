@@ -40,7 +40,6 @@ function semDetalheDeInfra(corpo: string) {
 describe('DEV-709: erro da consulta pública de chamado não vaza o backend', () => {
   beforeEach(() => {
     vi.stubEnv('FEATURE_SALESFORCE', 'true')
-    vi.stubEnv('USE_MOCK_CHAMADOS', 'false')
   })
 
   afterEach(() => {

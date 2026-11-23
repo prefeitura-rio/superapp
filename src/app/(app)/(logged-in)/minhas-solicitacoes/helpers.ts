@@ -1,14 +1,31 @@
 import type { RequestStatus } from './types'
 
+/**
+ * Chaves em minúsculas e sem acento (ver `chaveStatus`). Cobre os status do
+ * Salesforce e os do 1746 legado (SGRC), agrupados como na carteira
+ * (`src/lib/maintenance-requests-utils.ts`).
+ */
 const STATUS_MAP: Record<string, RequestStatus> = {
-  'Em andamento': 'Em andamento',
-  Aberto: 'Aberto',
-  Novo: 'Aberto',
-  'Em Espera': 'Em andamento',
-  Concluído: 'Concluído',
-  Concluido: 'Concluído',
-  Fechado: 'Concluído',
-  Cancelado: 'Cancelado',
+  // Salesforce
+  novo: 'Aberto',
+  aberto: 'Aberto',
+  'em andamento': 'Em andamento',
+  'em espera': 'Em andamento',
+  concluido: 'Concluído',
+  fechado: 'Concluído',
+  cancelado: 'Cancelado',
+  // SGRC
+  pendente: 'Em andamento',
+  'em andamento privado': 'Em andamento',
+  'encaminhado a comlurb - residuo': 'Em andamento',
+  'nao constatado': 'Cancelado',
+  recusado: 'Cancelado',
+  'sem possibilidade de atendimento': 'Cancelado',
+  'fechado sem solucao': 'Cancelado',
+}
+
+function chaveStatus(raw: string): string {
+  return raw.trim().toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
 }
 
 const CATEGORIA_MAP: Record<string, string> = {
@@ -26,12 +43,18 @@ export function mapCategoria(raw: string | undefined | null): string {
 
 export function normalizeStatus(raw: string | undefined | null): RequestStatus {
   if (!raw) return 'Aberto'
-  return STATUS_MAP[raw] ?? 'Aberto'
+  const chave = chaveStatus(raw)
+  const status = STATUS_MAP[chave]
+  if (status) return status
+  // "Fechado com solução", "Fechado de ofício", "Fechado com providências"…
+  if (chave.startsWith('fechado')) return 'Concluído'
+  return 'Aberto'
 }
 
 export function formatDate(iso: string | undefined | null): string {
   if (!iso) return '—'
   const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
   const day = String(d.getDate()).padStart(2, '0')
   const month = d
     .toLocaleDateString('pt-BR', { month: 'short' })

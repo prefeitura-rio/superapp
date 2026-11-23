@@ -10,9 +10,10 @@ import {
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { formatDate, mapCategoria, normalizeStatus } from '../helpers'
 import { type RequestItem, RequestsList } from './requests-list'
+import { RequestsListSkeleton } from './requests-list-skeleton'
 
 type Origem = 'sgrc' | 'salesforce'
 
@@ -52,67 +53,128 @@ function itensDe(protocolos: ProtocoloLista[]): RequestItem[] {
   )
 }
 
+interface PaginaSgrc {
+  itens: RequestItem[]
+  totalPages: number
+}
+
+type StatusSgrc = 'carregando' | 'erro' | 'pronto'
+
 interface OrigemChamadosProps {
   salesforce: RequestItem[]
-  historicoSgrc: boolean
   filtroInicial?: string
 }
 
 export function OrigemChamados({
   salesforce,
-  historicoSgrc,
   filtroInicial,
 }: OrigemChamadosProps) {
-  const [selectedOrigem, setSelectedOrigem] = useState<Origem>(
-    historicoSgrc ? DEFAULT_ORIGEM : 'salesforce'
-  )
+  const [selectedOrigem, setSelectedOrigem] = useState<Origem>(DEFAULT_ORIGEM)
   const [draft, setDraft] = useState<Origem>(selectedOrigem)
-  const [sgrc, setSgrc] = useState<RequestItem[] | null>(null)
-  const [carregando, setCarregando] = useState(false)
   const [open, setOpen] = useState(false)
-
-  const loadSgrc = useCallback(async () => {
-    if (sgrc) return
-
-    setCarregando(true)
-    try {
-      const resposta = await fetch('/api/chamados?origem=sgrc')
-      if (!resposta.ok) {
-        throw new Error(`Falha ao carregar histórico SGRC: ${resposta.status}`)
-      }
-      const json = await resposta.json()
-      setSgrc(itensDe(json?.protocolos ?? []))
-    } finally {
-      setCarregando(false)
-    }
-  }, [sgrc])
+  // Objeto novo a cada pedido: "tentar novamente" refaz a mesma página.
+  const [consulta, setConsulta] = useState({ pagina: 1 })
+  // A última página recebida fica na tela enquanto a próxima carrega (troca de
+  // página, volta do Salesforce): a lista não some nem pisca.
+  const [historico, setHistorico] = useState<PaginaSgrc | null>(null)
+  const [status, setStatus] = useState<StatusSgrc>('carregando')
 
   useEffect(() => {
-    if (historicoSgrc && selectedOrigem === 'sgrc') {
-      void loadSgrc()
+    if (selectedOrigem !== 'sgrc') return
+
+    let ativo = true
+    const controller = new AbortController()
+    setStatus('carregando')
+
+    fetch(`/api/chamados?origem=sgrc&page=${consulta.pagina}`, {
+      signal: controller.signal,
+    })
+      .then(async resposta => {
+        if (!resposta.ok) {
+          throw new Error(
+            `Falha ao carregar histórico SGRC: ${resposta.status}`
+          )
+        }
+        const json = await resposta.json()
+        if (!ativo) return
+        setHistorico({
+          itens: itensDe(json?.protocolos ?? []),
+          totalPages: json?.pagination?.totalPages ?? 1,
+        })
+        setStatus('pronto')
+      })
+      .catch(() => {
+        if (ativo) setStatus('erro')
+      })
+
+    return () => {
+      ativo = false
+      controller.abort()
     }
-  }, [historicoSgrc, loadSgrc, selectedOrigem])
+  }, [selectedOrigem, consulta])
 
   function openSheet() {
     setDraft(selectedOrigem)
     setOpen(true)
   }
 
-  async function handleApply() {
+  function handleApply() {
     setSelectedOrigem(draft)
     setOpen(false)
-    if (draft === 'sgrc') await loadSgrc()
   }
 
   function handleClear() {
     setDraft(DEFAULT_ORIGEM)
   }
 
-  if (!historicoSgrc) {
-    return <RequestsList items={salesforce} filtroInicial={filtroInicial} />
-  }
+  function renderSgrc() {
+    if (status === 'erro') {
+      return (
+        <div
+          role="alert"
+          className="flex flex-col items-center gap-3 rounded-2xl bg-card p-4"
+        >
+          <p className="text-sm text-foreground-light text-center">
+            Não foi possível carregar o histórico de solicitações.
+          </p>
+          <CustomButton
+            variant="secondary"
+            size="lg"
+            onClick={() => setConsulta(atual => ({ ...atual }))}
+          >
+            Tentar novamente
+          </CustomButton>
+        </div>
+      )
+    }
 
-  const itens = selectedOrigem === 'sgrc' ? (sgrc ?? []) : salesforce
+    // Primeira carga: o mesmo skeleton da rota, sem texto piscando.
+    if (!historico) return <RequestsListSkeleton />
+
+    const atualizando = status === 'carregando'
+    return (
+      <div
+        aria-busy={atualizando}
+        className={cn(
+          'transition-opacity duration-200',
+          // Só esmaece se a resposta demorar: página rápida não pisca.
+          atualizando && 'pointer-events-none opacity-60 delay-150'
+        )}
+      >
+        <RequestsList
+          key="sgrc"
+          items={historico.itens}
+          filtros={['Todos']}
+          filtroInicial={filtroInicial}
+          pagination={{
+            page: consulta.pagina,
+            totalPages: historico.totalPages,
+            onPageChange: pagina => setConsulta({ pagina }),
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -132,15 +194,13 @@ export function OrigemChamados({
         </button>
       </div>
 
-      {carregando ? (
-        <p className="text-sm text-foreground-light">Carregando histórico…</p>
+      {selectedOrigem === 'sgrc' ? (
+        renderSgrc()
       ) : (
         <RequestsList
-          key={selectedOrigem}
-          items={itens}
-          filtros={selectedOrigem === 'sgrc' ? ['Todos'] : undefined}
+          key="salesforce"
+          items={salesforce}
           filtroInicial={filtroInicial}
-          paginated={selectedOrigem === 'sgrc'}
         />
       )}
 

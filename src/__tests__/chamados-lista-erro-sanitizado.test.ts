@@ -46,7 +46,6 @@ function semDetalheDoBackend(corpo: string) {
 describe('DEV-725: erro da lista autenticada de chamados não vaza o backend', () => {
   beforeEach(() => {
     vi.stubEnv('FEATURE_SALESFORCE', 'true')
-    vi.stubEnv('USE_MOCK_CHAMADOS', 'false')
   })
 
   afterEach(() => {
