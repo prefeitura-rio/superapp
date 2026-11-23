@@ -1,17 +1,12 @@
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
+import { HomeBannerCarousel } from '@/app/components/home-banners/home-banner-carousel'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
 import { PendingInviteSection } from '@/app/components/pending-invite-section'
 import RequestsInProgressBanner from '@/app/components/requests-in-progress-banner'
 import RequestsSectionCards from '@/app/components/requests-section-cards'
-import SuggestionCards from '@/app/components/suggestion-cards'
-import {
-  SuggestionCardsSwipe,
-  SuggestionCardsSwipeSkeleton,
-} from '@/app/components/suggestion-cards-swipe'
 import WalletSectionClient from '@/app/components/wallet-section-client'
-import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
@@ -43,12 +38,8 @@ export default async function Home() {
 
         <PendingInviteSection />
 
-        {/* Suggestion Cards*/}
-        <ResponsiveWrapper
-          mobileComponent={<SuggestionCards />}
-          desktopComponent={<SuggestionCardsSwipe />}
-          desktopSkeletonComponent={<SuggestionCardsSwipeSkeleton />}
-        />
+        {/* Carrossel de banners */}
+        <HomeBannerCarousel />
 
         {/* Home Categories Grid*/}
         <HomeCategoriesGrid categories={allCategories} />
