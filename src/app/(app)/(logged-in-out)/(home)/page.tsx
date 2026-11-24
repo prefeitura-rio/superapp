@@ -6,11 +6,18 @@ import MostAccessedServiceCards from '@/app/components/most-accessed-services-ca
 import { PendingInviteSection } from '@/app/components/pending-invite-section'
 import RequestsInProgressBanner from '@/app/components/requests-in-progress-banner'
 import RequestsSectionCards from '@/app/components/requests-section-cards'
+import SuggestionCards from '@/app/components/suggestion-cards'
+import {
+  SuggestionCardsSwipe,
+  SuggestionCardsSwipeSkeleton,
+} from '@/app/components/suggestion-cards-swipe'
 import WalletSectionClient from '@/app/components/wallet-section-client'
+import { ResponsiveWrapper } from '@/components/ui/custom/responsive-wrapper'
 import { aditionalCategoriesFull } from '@/constants/aditional-services'
 import { resolveMostAccessedServices } from '@/lib/carta-servicos/home-featured'
 import { fetchCategories } from '@/lib/categories'
 import {
+  isHomeBannersV3Enabled,
   isHomeSolicitacoesEnabled,
   isSalesforceServicesEnabled,
 } from '@/lib/feature-flags'
@@ -38,8 +45,16 @@ export default async function Home() {
 
         <PendingInviteSection />
 
-        {/* Carrossel de banners */}
-        <HomeBannerCarousel />
+        {/* Banners: carrossel v3 só com FEATURE_HOME_BANNERS_V3; sem a flag, os banners de sugestão anteriores */}
+        {isHomeBannersV3Enabled() ? (
+          <HomeBannerCarousel />
+        ) : (
+          <ResponsiveWrapper
+            mobileComponent={<SuggestionCards />}
+            desktopComponent={<SuggestionCardsSwipe />}
+            desktopSkeletonComponent={<SuggestionCardsSwipeSkeleton />}
+          />
+        )}
 
         {/* Home Categories Grid*/}
         <HomeCategoriesGrid categories={allCategories} />
