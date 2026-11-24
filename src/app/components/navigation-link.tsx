@@ -8,6 +8,7 @@ interface NavigationItem {
   href: string
   icon: React.ElementType
   label: string
+  external?: boolean
 }
 
 interface NavigationLinkProps {
@@ -35,6 +36,7 @@ export function NavigationLink({
       className="group flex items-center justify-center"
       aria-label={item.label}
       onClick={handleClick}
+      {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
     >
       {children}
     </Link>

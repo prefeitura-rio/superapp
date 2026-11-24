@@ -15,6 +15,7 @@ export const allowedImageBuckets = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // allowedDevOrigins: ['*.ngrok-free.app', '*.share.zrok.io'],
   transpilePackages: ['react-pdf', 'pdfjs-dist'],
   // jsdom backs HTML sanitization during server render. Bundling it pulls
   // optional native deps and breaks the client build.

@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 
-import { ServicesIcon, WalletIcon } from '@/assets/icons'
+import { ServicesIcon, WalletIcon, WhatsappIcon } from '@/assets/icons'
 import { Home2Icon } from '@/assets/icons/home2-icon'
 import { usePathname } from 'next/navigation'
 import { NavigationLink } from './navigation-link'
@@ -11,7 +11,10 @@ interface NavItem {
   href: string
   icon: React.ElementType
   label: string
+  external?: boolean
 }
+
+const WHATSAPP_URL = 'https://wa.me/5521991952121'
 
 interface FloatNavigationClientProps {
   walletUrl: string
@@ -27,6 +30,12 @@ export function FloatNavigationClient({
     { href: '/', icon: Home2Icon, label: 'Home' },
     { href: '/servicos', icon: ServicesIcon, label: 'Serviços' },
     { href: walletUrl, icon: WalletIcon, label: 'Documentos' },
+    {
+      href: WHATSAPP_URL,
+      icon: WhatsappIcon,
+      label: 'WhatsApp',
+      external: true,
+    },
   ]
 
   return (
@@ -36,10 +45,11 @@ export function FloatNavigationClient({
           {navItems.map(item => {
             // Special case: wallet button should be active on both wallet routes
             const isActive =
-              pathname === item.href ||
-              (item.label === 'Documentos' &&
-                (pathname === '/carteira' ||
-                  pathname === '/autenticacao-necessaria/carteira'))
+              !item.external &&
+              (pathname === item.href ||
+                (item.label === 'Documentos' &&
+                  (pathname === '/carteira' ||
+                    pathname === '/autenticacao-necessaria/carteira')))
             const Icon = item.icon
 
             return (
