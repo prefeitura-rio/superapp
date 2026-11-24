@@ -70,7 +70,7 @@ export function HomeBannerSlide({
         )}
       />
 
-      <span className="absolute top-4 right-[42%] left-6 flex flex-col md:top-6 md:right-6">
+      <span className="absolute top-4 right-[42%] left-6 flex flex-col min-[500px]:right-[38%] md:top-6 md:right-6">
         <span className="text-base leading-5 font-medium md:text-2xl md:leading-8">
           {banner.title}
         </span>
