@@ -34,6 +34,7 @@ const CATEGORIA_MAP: Record<string, string> = {
   Elogio: 'Ouvidoria',
   Sugestão: 'Ouvidoria',
   Reclamação: 'Ouvidoria',
+  Denúncia: 'Ouvidoria',
 }
 
 export function mapCategoria(raw: string | undefined | null): string {
