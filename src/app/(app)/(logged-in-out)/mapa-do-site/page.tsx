@@ -32,8 +32,8 @@ import {
   SuitcaseIcon,
   TrashBinIcon,
 } from '@/assets/icons'
-import { normalizeCategoryName } from '@/lib/categories'
-import { fetchCategories } from '@/lib/categories'
+import { TICKET_FORM_BASE_URL } from '@/constants/url'
+import { fetchCategories, normalizeCategoryName } from '@/lib/categories'
 import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -191,18 +191,24 @@ export default async function MapaDoSitePage() {
 
   const atendimento: SitemapItem[] = [
     {
+      label: 'Minhas solicitações',
+      href: '/minhas-solicitacoes',
+      icon: <FolderIcon />,
+    },
+    {
       label: 'Consulta de protocolo',
       href: '/consulta-protocolo',
       icon: <FileSearchIcon />,
     },
     {
       label: 'Ouvidoria',
-      href: '/ouvidoria',
+      href: `${TICKET_FORM_BASE_URL}/ouvidoria`,
       icon: <MessageBubbleIcon />,
+      external: true,
     },
     {
       label: 'Lei de Acesso à Informação',
-      href: 'https://1746.staging.app.dados.rio/protocolo/lai',
+      href: `${TICKET_FORM_BASE_URL}/lai`,
       icon: <OpenBookIcon />,
       external: true,
     },
