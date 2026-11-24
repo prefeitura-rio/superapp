@@ -11,6 +11,11 @@ export const TEST_ENV = {
   BASE_API_URL_PREF_RIO_CIDADAO: 'http://localhost:3006/api/private/',
   BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO: 'http://localhost:3007/api/',
   BASE_API_URL_DIVIDA_ATIVA: 'http://localhost:3009',
+  SALESFORCE_VOTACAO_API_URL:
+    'http://localhost:3010/services/apexrest/apis/public',
+  SALESFORCE_VOTACAO_TOKEN_URL: 'http://localhost:3010/services/oauth2/token',
+  SALESFORCE_VOTACAO_CLIENT_ID: 'test-votacao-client-id',
+  SALESFORCE_VOTACAO_CLIENT_SECRET: 'test-votacao-client-secret',
   NODE_ENV: 'test',
 } as const
 

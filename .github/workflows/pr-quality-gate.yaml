@@ -208,6 +208,9 @@ jobs:
           FEATURE_SGRC_HISTORICO: "true"
           # Carrossel de banners v3 da home, lido em runtime.
           FEATURE_HOME_BANNERS_V3: "true"
+          # "Este conteúdo foi útil?" na página de serviço, lido em runtime. O spec
+          # intercepta o voto: a CI não precisa das credenciais do Salesforce.
+          FEATURE_AVALIACAO_SERVICO: "true"
           # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
           # Lidos em runtime: Google Maps (address-autocomplete/cep-lookup) e
           # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).

@@ -26,6 +26,24 @@ export function isSalesforceServicesEnabled(): boolean {
 }
 
 /**
+ * Controls the "Este conteúdo foi útil?" rating at the end of the service page and
+ * its route (`POST /api/servicos/{slug}/avaliacao`). Off: the component is not
+ * rendered and the route answers 404 without calling Salesforce.
+ *
+ * Only takes effect together with `FEATURE_SALESFORCE=true`: the vote needs the
+ * `articleId` that only the Carta de Serviços returns. Keep it off until the edge
+ * rate limit and the fixed egress IPs are in place.
+ *
+ * Server-side only (`FEATURE_AVALIACAO_SERVICO`). Strict boolean, read at runtime.
+ */
+export function isServiceRatingEnabled(): boolean {
+  return (
+    process.env.FEATURE_AVALIACAO_SERVICO === 'true' &&
+    isSalesforceServicesEnabled()
+  )
+}
+
+/**
  * LOCAL/TEST ONLY. Rewrites production service URLs coming from the Carta de
  * Serviços (Salesforce data is a copy of production) to their homologation
  * equivalents. See `src/lib/carta-servicos/environment-url-rewrite.ts`.

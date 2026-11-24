@@ -13,8 +13,9 @@
 | `src/http-pref-rio-cidadao/` | Spec local `pref-rio-cidadao-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-cidadao.ts` | `BASE_API_URL_PREF_RIO_CIDADAO` |
 | `src/http-pref-rio-chamados-publico/` | Spec local `pref-rio-chamados-publico-api.yaml` (MuleSoft) | `custom-fetch-pref-rio-chamados-publico.ts` | `BASE_API_URL_PREF_RIO_CHAMADOS_PUBLICO` |
 | `src/http-divida-ativa/` | Spec local `divida-ativa-api.yaml` (`api-imoveis`, Quarkus) | `custom-fetch-divida-ativa.ts` | `BASE_API_URL_DIVIDA_ATIVA` |
+| `src/http-pref-rio-carta-votacao/` | Spec local `pref-rio-carta-votacao-api.yaml` (Apex do Salesforce, provisório) | `custom-fetch-pref-rio-carta-votacao.ts` | `SALESFORCE_VOTACAO_API_URL` |
 
-A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. As exceções são **Carta de Serviços** e **Chamados Público** — APIs públicas sem Bearer do cidadão (auth M2M na camada Mule).
+A maioria dos mutators injeta `Authorization: Bearer` a partir dos cookies de sessão. As exceções são **Carta de Serviços** e **Chamados Público** — APIs públicas sem Bearer do cidadão (auth M2M na camada Mule) — e a **votação da Carta**, que só roda no servidor com um token de client credentials do Salesforce (renovado em `401 INVALID_SESSION_ID`).
 
 ## Orval — config multi-projeto
 
