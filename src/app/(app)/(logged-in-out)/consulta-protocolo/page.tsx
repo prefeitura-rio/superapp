@@ -169,7 +169,6 @@ export default function ConsultaProtocoloPage() {
       <Breadcrumb
         items={[
           { label: 'Página inicial', href: '/' },
-          { label: 'Ouvidoria', href: '/ouvidoria' },
           { label: 'Consulte seu protocolo' },
         ]}
       />
