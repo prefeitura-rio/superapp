@@ -207,7 +207,7 @@ export default async function MapaDoSitePage() {
       external: true,
     },
     {
-      label: 'Anticorrupção',
+      label: 'Central Anticorrupção',
       href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
       icon: <AnticorruptionIcon />,
     },

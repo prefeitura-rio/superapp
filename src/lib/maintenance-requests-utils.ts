@@ -175,6 +175,26 @@ export function getMaintenanceRequestStats(
 }
 
 /**
+ * Card "Cuidados com a Cidade" da carteira (chamados do 1746 legado).
+ *
+ * O mesmo histórico mora em Minhas Solicitações quando `FEATURE_SALESFORCE` e
+ * `FEATURE_SGRC_HISTORICO` estão ligadas. Só nesse caso o card sai da
+ * carteira: o histórico muda de lugar de uma vez, sem janela em que o cidadão
+ * fique sem ver os chamados antigos.
+ */
+export function shouldShowCaretakerCard({
+  total,
+  salesforce,
+  sgrcHistorico,
+}: {
+  total: number
+  salesforce: boolean
+  sgrcHistorico: boolean
+}): boolean {
+  return total > 0 && !(salesforce && sgrcHistorico)
+}
+
+/**
  * Formats API date to Brazilian format
  * @param dateString - ISO date string from API
  * @returns Formatted date string

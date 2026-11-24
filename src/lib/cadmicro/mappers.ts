@@ -48,10 +48,10 @@ function mapRoleToCategory(
 }
 
 function buildBrandModelLabel(item: {
-  brand_other?: string
-  brand_name?: string
-  model_other?: string
-  model_name?: string
+  brand_other?: string | null
+  brand_name?: string | null
+  model_other?: string | null
+  model_name?: string | null
 }): string {
   const brand = item.brand_other?.trim() || item.brand_name?.trim() || ''
   const model = item.model_other?.trim() || item.model_name?.trim() || ''
@@ -60,7 +60,7 @@ function buildBrandModelLabel(item: {
 }
 
 function toDocument(
-  url: string | undefined,
+  url: string | null | undefined,
   fileName: string | undefined,
   fileSize: number | undefined
 ): VehicleDocument {
@@ -75,7 +75,7 @@ function toDocument(
 }
 
 function toPhoto(
-  url: string | undefined,
+  url: string | null | undefined,
   fileName: string | undefined,
   fileSize: number | undefined
 ): VehiclePhoto {

@@ -1,4 +1,4 @@
-import acessoInformacao from '@/assets/acesso-informacao.png'
+import acessoInformacao from '@/assets/acesso-informacao2.png'
 import brasaoPrefeitura from '@/assets/brasao-prefeitura.svg'
 import {
   FacebookIcon,
@@ -40,7 +40,7 @@ function buildQuickLinks(salesforce: boolean, homeSolicitacoes: boolean) {
       ? [
           CARTA_DE_SERVICOS_FOOTER_LINK,
           {
-            label: 'Anticorrupção',
+            label: 'Central Anticorrupção',
             href: '/servicos/categoria/transparencia/denuncia-de-corrupcao-eou-improbidade-administrativa',
           },
         ]
@@ -87,7 +87,7 @@ const titleCls = 'text-sm font-medium leading-4 tracking-normal text-foreground'
 const bodyCls =
   'text-sm font-normal leading-5 tracking-normal text-foreground-light'
 const linkCls =
-  'text-sm font-normal leading-5 tracking-normal text-[var(--theme-color-card-2,#0084D1)] hover:underline'
+  'text-sm font-normal leading-5 tracking-normal text-[#0069A8] dark:text-[#0084D1] hover:underline'
 
 function Logos() {
   return (
@@ -148,7 +148,7 @@ function AddressSection() {
 
       <div className="flex flex-col gap-1">
         <p className={titleCls}>Horários de atendimento</p>
-        <p className={bodyCls}>Agência presencial: 9h às 17h</p>
+        <p className={bodyCls}>Agência presencial: 9h às 16h</p>
         <p className={bodyCls}>Telefonia: 24h</p>
       </div>
     </div>
@@ -187,8 +187,8 @@ function QuickLinksSection({
           <Image
             src={acessoInformacao}
             alt="Acesso à Informação"
-            width={106}
-            height={47}
+            width={160}
+            height={56}
             unoptimized
           />
         </a>

@@ -185,6 +185,7 @@ jobs:
           NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI: "https://staging.app.dados.rio/api/auth/callback/keycloak"
           NEXT_PUBLIC_HOME_URL: "https://staging.app.dados.rio/"
           NEXT_PUBLIC_GOVBR_BASE_URL: "https://sso.staging.acesso.gov.br/"
+          NEXT_PUBLIC_1746_LOGOUT_URL: "https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp"
           NEXT_PUBLIC_USE_GOVBR_HINT: "false"
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-0970HR3V20"
@@ -195,7 +196,6 @@ jobs:
           FEATURE_SALESFORCE: "true"
           NEXT_PUBLIC_FEATURE_DIVIDA_ATIVA: "true"
           NEXT_PUBLIC_VLIBRAS_ENABLED: "true"
-          USE_MOCK_CHAMADOS: "true"
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -204,6 +204,8 @@ jobs:
           PORT: "3000"
           # Lida em runtime pelo middleware (carta de serviços e chamados).
           FEATURE_SALESFORCE: "true"
+          # Histórico do 1746 legado (SGRC) em Minhas Solicitações, lido em runtime.
+          FEATURE_SGRC_HISTORICO: "true"
           # E2E_ACCESS_TOKEN e E2E_REQUIRE_AUTH vêm do passo anterior (via $GITHUB_ENV).
           # Lidos em runtime: Google Maps (address-autocomplete/cep-lookup) e
           # API_KEY_SUBPAV_OSA_SMS (unidade de saúde na carteira).
@@ -214,6 +216,9 @@ jobs:
           BASE_API_URL_SUBPAV_OSA_API: 'https://services.staging.app.dados.rio/subpav-osa-api/'
           BASE_API_URL_RMI: 'https://services.staging.app.dados.rio/rmi/'
           BASE_API_URL_APP_CATALOGO: 'https://services.staging.app.dados.rio/catalogo/'
+          # Gateway de staging de Minhas Solicitações (variável do repositório, em
+          # Actions → Variables); vazia, o E2E pula esses testes com motivo.
+          BASE_API_URL_PREF_RIO_CIDADAO: ${{ vars.BASE_API_URL_PREF_RIO_CIDADAO }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -243,6 +248,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IDENTIDADE_CARIOCA_REDIRECT_URI="https://staging.app.dados.rio/api/auth/callback/keycloak" \
             --build-arg NEXT_PUBLIC_HOME_URL="https://staging.app.dados.rio/" \
             --build-arg NEXT_PUBLIC_GOVBR_BASE_URL="https://sso.staging.acesso.gov.br/" \
+            --build-arg NEXT_PUBLIC_1746_LOGOUT_URL="https://1746.staging.app.dados.rio/solicitacaovforcesite/secur/logout.jsp" \
             --build-arg NEXT_PUBLIC_USE_GOVBR_HINT="false" \
             --build-arg GOOGLE_MAPS_API_KEY="GOOGLE_MAPS_API_KEY" \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID="G-0970HR3V20" \

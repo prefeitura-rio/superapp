@@ -30,7 +30,10 @@ function expectLoggedOutResponse(response: Response) {
     expect(cookie).toContain('Max-Age=0')
     expect(cookie).toContain('Path=/')
     expect(cookie).toContain('HttpOnly')
+    // Mesmos atributos do login (`AUTH_COOKIE_CONFIG`).
+    expect(cookie?.toLowerCase()).toContain('samesite=lax')
   }
+  expect(response.headers.get('cache-control')).toBe('no-store')
 }
 
 const sessionCookies = {

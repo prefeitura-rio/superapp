@@ -74,7 +74,9 @@ async function renderScreen(screenToRender: (typeof SCREENS)[number]) {
   return render(ui, {
     // Como o root layout: a flag do Salesforce chega lida no servidor.
     wrapper: ({ children }: { children: ReactNode }) => (
-      <ServerFeatureFlagsProvider flags={{ salesforce: true }}>
+      <ServerFeatureFlagsProvider
+        flags={{ salesforce: true, sgrcHistorico: false }}
+      >
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>

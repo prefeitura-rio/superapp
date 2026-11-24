@@ -83,7 +83,7 @@ export default function ConsultaProtocoloPage() {
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
         categoria: mapCategoria(os.categoria),
         status: os.status ?? '',
-        dataAbertura: data.dataAbertura ?? '',
+        dataAbertura: os.dataAbertura ?? data.dataAbertura ?? '',
         protocolo: trimmed,
         isAcessoInformacao: os.isAcessoInformacao ?? false,
       }))

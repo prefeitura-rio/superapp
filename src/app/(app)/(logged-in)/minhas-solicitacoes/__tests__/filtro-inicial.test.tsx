@@ -80,6 +80,30 @@ describe('RequestsList — aba inicial vinda do menu global', () => {
     expect(screen.queryByText('Remoção de entulho')).not.toBeInTheDocument()
   })
 
+  it('não mostra o campo de busca', () => {
+    render(<RequestsList items={ITEMS} />)
+
+    expect(
+      screen.queryByPlaceholderText('Encontre sua solicitação')
+    ).not.toBeInTheDocument()
+  })
+
+  it('chamado sem protocolo consultável vira card sem link', () => {
+    render(
+      <RequestsList
+        items={[{ ...ITEMS[0], protocolo: '' }, ITEMS[1]]}
+        filtros={['Todos']}
+      />
+    )
+
+    expect(
+      screen.getByText('Remoção de entulho').closest('a')
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Reclamação de atendimento').closest('a')
+    ).toHaveAttribute('href', '/solicitacoes/2?os=b')
+  })
+
   it('aba que não existe na origem (chamados antigos só têm Todos) cai em Todos', () => {
     render(
       <RequestsList

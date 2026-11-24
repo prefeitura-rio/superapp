@@ -21,7 +21,12 @@ Heimdall **não** entra no fluxo do cidadão neste portal.
 | Refresh no middleware | `src/lib/middleware-helpers.ts`, `src/lib/token-refresh.ts` |
 | URLs de login | `src/constants/url.ts` |
 | Callback OAuth → cookies | `src/app/api/auth/callback/keycloak/route.ts` |
-| Refresh / logout | `src/app/api/auth/refresh/route.ts`, `src/app/api/auth/logout/route.ts` |
+| Refresh | `src/app/api/auth/refresh/route.ts` |
+| Logout local (204) | `src/app/api/auth/logout/route.ts` |
+| Logout SSO (303 → Keycloak → home), destino do "Sair" do Pref.Rio no Chrome e do 1746 | `src/app/api/auth/sso-logout/route.ts` |
+| Logout SSO + gov.br (303 → Keycloak → logout do gov.br), destino do "Sair" do Pref.Rio fora do Chrome | `src/app/api/auth/sso-logout/govbr/route.ts` |
+| Helpers de logout no servidor | `src/lib/auth-logout.ts`, `src/lib/sso-logout.ts` (corpo das duas rotas de SSO logout) |
+| "Sair" no client (Chrome: 1746 + iframe gov.br → `sso-logout`; outros: 1746 → `sso-logout/govbr`) | `src/hooks/use-logout.ts`, `src/lib/is-google-chrome.ts`, `src/lib/1746-logout.ts`, `src/lib/govbr-logout.ts` |
 | Ler usuário do JWT | `src/lib/user-info.ts` |
 | Refresh no client | `src/components/token-refresh-provider.tsx`, `src/hooks/useTokenRefresh.ts` |
 
@@ -44,9 +49,13 @@ Tudo o mais (ex.: `/carteira`, `/meu-perfil`) exige token válido; expirado → 
 - Introduzir next-auth / Auth.js como nova camada.
 - Chamar Heimdall `users/me` no superapp.
 - Bypassar middleware com “páginas protegidas” só no client.
+- Fazer `/api/auth/sso-logout` aceitar URL de retorno por query string (viraria open redirect) ou removê-lo: o "Sair" do 1746 depende dele.
+- Mudar o destino de `/api/auth/sso-logout` para o gov.br: o 1746 espera voltar à home. A variante com gov.br é `/api/auth/sso-logout/govbr`, e o destino dela vem só do ambiente (`buildGovbrLogoutUrl`), nunca da requisição.
+- Usar o User-Agent para decidir o logout do gov.br: Brave, Edge, Opera e Samsung Internet também têm `Chrome/` nele. Usar `isGoogleChrome` (ver [`../logout-sincronizado-1746.md`](../logout-sincronizado-1746.md) §2.3).
 
 ## Docs detalhadas
 
 - [`../pt-br/README.pt.md`](../pt-br/README.pt.md) — fluxo de auth
 - [`../en-us/REFRESH_TOKEN_STRATEGY.md`](../en-us/REFRESH_TOKEN_STRATEGY.md) — refresh no middleware
 - [`../LOGIN_TRACKING.md`](../LOGIN_TRACKING.md) — analytics de login
+- [`../logout-sincronizado-1746.md`](../logout-sincronizado-1746.md) — logout sincronizado Pref.Rio ↔ 1746 (Salesforce)

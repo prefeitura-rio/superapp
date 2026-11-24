@@ -10,7 +10,7 @@ import type { GlobalMenuEntry, GlobalMenuLink } from '../global-menu'
  */
 async function carregarMenu(
   env: Record<string, string> = {},
-  flags: ServerFeatureFlags = { salesforce: true }
+  flags: ServerFeatureFlags = { salesforce: true, sgrcHistorico: false }
 ) {
   vi.resetModules()
   vi.stubEnv('FEATURE_SALESFORCE', '')
@@ -185,7 +185,10 @@ describe('destinos', () => {
 
 describe('feature flags', () => {
   test('sem Salesforce: some Atendimentos, Carta de serviços e Termos de uso (rotas bloqueadas no middleware)', async () => {
-    const buildGlobalMenu = await carregarMenu({}, { salesforce: false })
+    const buildGlobalMenu = await carregarMenu(
+      {},
+      { salesforce: false, sgrcHistorico: false }
+    )
 
     for (const logado of [true, false]) {
       const ids = idsDe(buildGlobalMenu(logado))
@@ -196,10 +199,13 @@ describe('feature flags', () => {
   })
 
   test('Salesforce vem só do parâmetro, nunca do process.env (que não existe no navegador)', async () => {
-    const ligadoNoServidor = await carregarMenu({}, { salesforce: true })
+    const ligadoNoServidor = await carregarMenu(
+      {},
+      { salesforce: true, sgrcHistorico: false }
+    )
     const desligadoNoServidor = await carregarMenu(
       { FEATURE_SALESFORCE: 'true' },
-      { salesforce: false }
+      { salesforce: false, sgrcHistorico: false }
     )
 
     for (const logado of [true, false]) {

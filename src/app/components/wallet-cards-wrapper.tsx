@@ -10,6 +10,7 @@ import { getHealthUnitRiskStatus } from '@/lib/health-unit-utils'
 import {
   formatMaintenanceRequestsCount,
   getMaintenanceRequestStats,
+  shouldShowCaretakerCard,
 } from '@/lib/maintenance-requests-utils'
 import {
   formatEducationOperatingHours,
@@ -22,6 +23,7 @@ import {
   getCardPosition,
   sendWalletCardGAEvent,
 } from '@/lib/wallet-tracking-utils'
+import { useServerFeatureFlags } from '@/providers/server-feature-flags-provider'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CaretakerCard } from './wallet-cards/caretaker-card'
@@ -47,6 +49,7 @@ export function WalletCardsWrapper({
   healthUnitRiskData,
   isSalesforceEnabled,
 }: WalletCardsWrapperProps) {
+  const { sgrcHistorico } = useServerFeatureFlags()
   // Calculate maintenance requests statistics
   const maintenanceStats = getMaintenanceRequestStats(maintenanceRequests)
 
@@ -59,8 +62,11 @@ export function WalletCardsWrapper({
   const hasSocialAssistanceData = Boolean(
     walletData?.assistencia_social?.cadunico?.indicador
   )
-  const hasCaretakerData = maintenanceStats.total > 0
-  const showCaretakerCard = hasCaretakerData && !isSalesforceEnabled
+  const showCaretakerCard = shouldShowCaretakerCard({
+    total: maintenanceStats.total,
+    salesforce: isSalesforceEnabled,
+    sgrcHistorico,
+  })
 
   const hasAnyCard =
     hasHealthData ||

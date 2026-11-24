@@ -1,8 +1,17 @@
+import { guardGoogleMapsRequest } from '@/lib/google-maps-guard'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   return withSpan('api.cep_lookup', async span => {
+    const refused = await guardGoogleMapsRequest(req, 'cep_lookup')
+    if (refused) {
+      addSpanEvent('google_maps.refused', {
+        'http.status_code': refused.status,
+      })
+      return refused
+    }
+
     const placeId = req.nextUrl.searchParams.get('place_id')
     const number = req.nextUrl.searchParams.get('number')
 
@@ -34,7 +43,7 @@ export async function GET(req: NextRequest) {
       addSpanEvent('google_maps.place_details.request.start')
 
       // Get place details to extract CEP
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=address_components&key=${apiKey}`
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=address_components&key=${apiKey}`
 
       const res = await fetch(url)
 

@@ -22,7 +22,7 @@ export default async function Home() {
     fetchCategories(),
     resolveMostAccessedServices(),
   ])
-  const categoriesSlice = categories.slice(0, 14)
+  const categoriesSlice = categories.slice(0, 15)
   const allCategories = [...categoriesSlice, ...aditionalCategoriesFull]
 
   return (

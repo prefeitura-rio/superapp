@@ -26,18 +26,19 @@ export function isSalesforceServicesEnabled(): boolean {
 }
 
 /**
- * The SGRC history has no real integration yet: the only
- * data source is the fixed mock in `src/lib/chamados/mock-sgrc.ts`, which is
- * the same for every citizen. It is served only when the explicit chamados
- * mock mode is on (`USE_MOCK_CHAMADOS === 'true'`, off in production),
- * never to real citizens.
+ * LOCAL/TEST ONLY. Rewrites production service URLs coming from the Carta de
+ * Serviços (Salesforce data is a copy of production) to their homologation
+ * equivalents. See `src/lib/carta-servicos/environment-url-rewrite.ts`.
  *
- * Server-side only (`USE_MOCK_CHAMADOS`). Value is read at runtime from
- * `process.env`, so changes in Infisical take effect after a pod restart
- * without requiring a new build or deploy.
+ * Strict boolean: only the exact value `'true'` enables it, so an unset
+ * variable is safely disabled (production must never set it). It only takes
+ * effect together with `FEATURE_SALESFORCE=true`.
+ *
+ * Server-side only (`REWRITE_SERVICE_URLS_TO_HML`). Read at runtime from
+ * `process.env`.
  */
-export function isSgrcHistoryMockEnabled(): boolean {
-  return process.env.USE_MOCK_CHAMADOS === 'true'
+export function isServiceUrlHmlRewriteEnabled(): boolean {
+  return process.env.REWRITE_SERVICE_URLS_TO_HML === 'true'
 }
 
 /**
@@ -52,6 +53,24 @@ export function isSgrcHistoryMockEnabled(): boolean {
  */
 export function isHomeSolicitacoesEnabled(): boolean {
   return process.env.FEATURE_HOME_SOLICITACOES === 'true'
+}
+
+/**
+ * Controls the legacy 1746 (SGRC) history served by app-rmi: the "abertas até
+ * 26/11/2026" option in Minhas Solicitações and the lookup of `RIO-12345678-9`
+ * protocols. Off: those surfaces show only Salesforce data, the SGRC routes
+ * answer 404 without calling the RMI, and the wallet keeps the legacy
+ * "Cuidados com a Cidade" card.
+ *
+ * Only takes effect together with `FEATURE_SALESFORCE=true` (the screens do not
+ * exist without it). Strict boolean: an unset flag is safely disabled.
+ *
+ * Server-side only (`FEATURE_SGRC_HISTORICO`). Value is read at runtime from
+ * `process.env`, so changes in Infisical take effect after a pod restart
+ * without requiring a new build or deploy.
+ */
+export function isSgrcHistoricoEnabled(): boolean {
+  return process.env.FEATURE_SGRC_HISTORICO === 'true'
 }
 
 /**

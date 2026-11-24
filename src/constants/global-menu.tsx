@@ -235,7 +235,7 @@ function resolveHref(item: GlobalMenuLink, isLoggedIn: boolean) {
  */
 export function buildGlobalMenu(
   isLoggedIn: boolean,
-  { salesforce }: ServerFeatureFlags
+  { salesforce }: Pick<ServerFeatureFlags, 'salesforce'>
 ): GlobalMenuEntry[] {
   const cursos = isFeatureEnabled('cursos')
   const empregos = isFeatureEnabled('empregos')

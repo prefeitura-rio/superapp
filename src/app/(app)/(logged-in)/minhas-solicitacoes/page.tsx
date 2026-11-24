@@ -1,11 +1,11 @@
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import { ProfileHeaderWrapper } from '@/app/components/profile-header-wrapper'
 import { listChamados } from '@/http-pref-rio-cidadao/default/default'
-import { isSgrcHistoryMockEnabled } from '@/lib/feature-flags'
+import { isSgrcHistoricoEnabled } from '@/lib/feature-flags'
 import { parseJsonBody } from '@/lib/parse-json-body'
-import { IS_MOCK_ENABLED, MOCK_LIST } from '@/mocks/chamados'
 import { Suspense } from 'react'
 import { OrigemChamados } from './components/origem-chamados'
+import { RequestsList } from './components/requests-list'
 import { SolicitacoesBreadcrumb } from './components/solicitacoes-breadcrumb'
 import {
   filterTabFromParam,
@@ -26,10 +26,7 @@ export default async function MyRequestsPage({
   const filtroInicial = filterTabFromParam((await searchParams)?.filtro)
   const response = await listChamados()
   const apiData = parseJsonBody<{ protocolos?: any[] }>(response.data)
-  const protocolos = [
-    ...(response.status === 200 ? (apiData?.protocolos ?? []) : []),
-    ...(IS_MOCK_ENABLED ? MOCK_LIST.protocolos : []),
-  ]
+  const protocolos = response.status === 200 ? (apiData?.protocolos ?? []) : []
 
   const items = protocolos.flatMap((protocolo: any) =>
     (protocolo.ordens_de_servico ?? []).map((os: any) => ({
@@ -53,11 +50,13 @@ export default async function MyRequestsPage({
         <h1 className="text-3xl font-medium text-foreground pt-2 pb-2">
           Minhas Solicitações
         </h1>
-        <OrigemChamados
-          salesforce={items}
-          historicoSgrc={isSgrcHistoryMockEnabled()}
-          filtroInicial={filtroInicial}
-        />
+        {/* Sem FEATURE_SGRC_HISTORICO, só os chamados do Salesforce, sem o
+            seletor "Data de abertura". */}
+        {isSgrcHistoricoEnabled() ? (
+          <OrigemChamados salesforce={items} filtroInicial={filtroInicial} />
+        ) : (
+          <RequestsList items={items} filtroInicial={filtroInicial} />
+        )}
       </div>
       <FloatNavigationWrapper />
     </div>

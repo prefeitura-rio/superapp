@@ -2,6 +2,7 @@ import {
   type ServerFeatureFlags,
   ServerFeatureFlagsProvider,
 } from '@/providers/server-feature-flags-provider'
+import { restoreBrowser, stubBrowser } from '@/test/browser-brands'
 import { server } from '@/test/mocks/server'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -44,7 +45,9 @@ function respondHeader(body: object) {
  * A flag do Salesforce chega como no app: lida no servidor e entregue pelo
  * provider do root layout. Salesforce ligado por padrão.
  */
-async function openMenu(flags: ServerFeatureFlags = { salesforce: true }) {
+async function openMenu(
+  flags: ServerFeatureFlags = { salesforce: true, sgrcHistorico: false }
+) {
   const user = userEvent.setup()
   render(
     <ServerFeatureFlagsProvider flags={flags}>
@@ -86,6 +89,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs()
+  restoreBrowser()
   Object.defineProperty(window, 'location', {
     configurable: true,
     value: originalLocation,
@@ -119,9 +123,10 @@ describe('GlobalMenu', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('logado: nome, CPF e Sair, que encerra a sessão e faz o logout do Gov.br num iframe oculto', async () => {
+  it('logado no Google Chrome: nome, CPF e Sair, que encerra a sessão e faz o logout do Gov.br num iframe oculto', async () => {
     vi.stubEnv('NEXT_PUBLIC_GOVBR_BASE_URL', 'https://sso.example.gov.br/')
     vi.stubEnv('NEXT_PUBLIC_HOME_URL', 'https://app.example.rio/')
+    stubBrowser('chrome')
     let logoutCalls = 0
     server.use(
       http.get('/api/auth/logout', () => {
@@ -150,7 +155,32 @@ describe('GlobalMenu', () => {
     expect(logoutCalls).toBe(1)
 
     fireEvent.load(iframe)
-    expect(assign).toHaveBeenCalledWith('https://app.example.rio/')
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('/api/auth/sso-logout')
+    )
+  })
+
+  it('logado fora do Google Chrome: Sair encerra a sessão e vai para o logout do Gov.br por navegação de topo, sem iframe', async () => {
+    vi.stubEnv('NEXT_PUBLIC_GOVBR_BASE_URL', 'https://sso.example.gov.br/')
+    vi.stubEnv('NEXT_PUBLIC_HOME_URL', 'https://app.example.rio/')
+    let logoutCalls = 0
+    server.use(
+      http.get('/api/auth/logout', () => {
+        logoutCalls++
+        return new HttpResponse(null, { status: 204 })
+      })
+    )
+    respondHeader(CITIZEN)
+    const { user, menu } = await openMenu()
+    await within(menu).findByText('Maria da Silva')
+
+    await user.click(within(menu).getByRole('button', { name: 'Sair' }))
+
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('/api/auth/sso-logout/govbr')
+    )
+    expect(logoutCalls).toBe(1)
+    expect(document.querySelector('iframe')).toBeNull()
   })
 
   it('Termos de uso e política de privacidade é item de primeiro nível e leva à lista', async () => {
@@ -166,7 +196,7 @@ describe('GlobalMenu', () => {
 
   it('ícones do Lucide seguem o traço 1.4 do design system, não o 2 padrão', async () => {
     respondHeader(CITIZEN)
-    const { menu } = await openMenu({ salesforce: true })
+    const { menu } = await openMenu({ salesforce: true, sgrcHistorico: false })
     await within(menu).findByText('Maria da Silva')
 
     const rows = [
@@ -189,7 +219,10 @@ describe('GlobalMenu', () => {
     '%s: com Salesforce ligado no servidor mostra Atendimentos, Termos de uso e Carta de serviços',
     async (_state, body) => {
       respondHeader(body)
-      const { menu } = await openMenu({ salesforce: true })
+      const { menu } = await openMenu({
+        salesforce: true,
+        sgrcHistorico: false,
+      })
       if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
 
       expect(
@@ -215,7 +248,10 @@ describe('GlobalMenu', () => {
       // Mesmo que o env do bundle diga o contrário, vale o que o servidor mandou.
       vi.stubEnv('FEATURE_SALESFORCE', 'true')
       respondHeader(body)
-      const { menu } = await openMenu({ salesforce: false })
+      const { menu } = await openMenu({
+        salesforce: false,
+        sgrcHistorico: false,
+      })
       if (body.isLoggedIn) await within(menu).findByText('Maria da Silva')
 
       expect(
