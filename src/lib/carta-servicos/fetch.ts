@@ -458,6 +458,7 @@ export async function fetchCartaServicosServiceBySlug(
 
   return {
     ...mapped,
+    articleId: detail.articleId,
     ticketFlags: flags?.activeCategoryConfigId
       ? {
           allowTicketSubmission: flags.allowTicketSubmission,

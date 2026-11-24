@@ -2,6 +2,7 @@ import {
   isAccessibilityPluginEnabled,
   isHomeBannersV3Enabled,
   isSalesforceServicesEnabled,
+  isServiceRatingEnabled,
   isSgrcHistoricoEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
@@ -134,6 +135,37 @@ describe('isHomeBannersV3Enabled', () => {
       vi.stubEnv('FEATURE_HOME_BANNERS_V3', value)
 
       expect(isHomeBannersV3Enabled()).toBe(false)
+    }
+  })
+})
+
+describe('isServiceRatingEnabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('is enabled only with FEATURE_AVALIACAO_SERVICO and FEATURE_SALESFORCE both "true"', () => {
+    vi.stubEnv('FEATURE_SALESFORCE', 'true')
+    vi.stubEnv('FEATURE_AVALIACAO_SERVICO', 'true')
+
+    expect(isServiceRatingEnabled()).toBe(true)
+  })
+
+  test('is disabled when FEATURE_AVALIACAO_SERVICO is absent or not exactly "true"', () => {
+    vi.stubEnv('FEATURE_SALESFORCE', 'true')
+    for (const value of [undefined, 'false', '', 'TRUE', '1', ' true']) {
+      vi.stubEnv('FEATURE_AVALIACAO_SERVICO', value)
+
+      expect(isServiceRatingEnabled()).toBe(false)
+    }
+  })
+
+  test('is disabled without FEATURE_SALESFORCE (the vote needs the Carta articleId)', () => {
+    vi.stubEnv('FEATURE_AVALIACAO_SERVICO', 'true')
+    for (const value of [undefined, 'false', '']) {
+      vi.stubEnv('FEATURE_SALESFORCE', value)
+
+      expect(isServiceRatingEnabled()).toBe(false)
     }
   })
 })

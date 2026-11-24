@@ -14,6 +14,14 @@ export interface ServiceTicketFlags {
 
 export interface PrefRioServiceWithFlags extends ModelsPrefRioService {
   ticketFlags?: ServiceTicketFlags
+  /** `data.articleId` da Carta (Id da versão). Só existe com `FEATURE_SALESFORCE`. */
+  articleId?: string
+}
+
+/** Artigo que recebe o voto "Este conteúdo foi útil?". */
+export interface ServiceRatingTarget {
+  slug: string
+  articleId: string
 }
 
 /** Carta de Serviços publishes HTML. app-busca-search still publishes markdown. */

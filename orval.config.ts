@@ -90,6 +90,31 @@ export default defineConfig({
       },
     },
   },
+  /**
+   * Votação de artigos da Carta (Apex REST do Salesforce, chamado direto na v0).
+   * O YAML na raiz é provisório, escrito pelo Pref.Rio a partir do contrato do CRM;
+   * trocar pelo spec oficial quando chegar e regenerar com
+   * `npx orval --project prefRioCartaVotacao`.
+   */
+  prefRioCartaVotacao: {
+    input: './pref-rio-carta-votacao-api.yaml',
+    output: {
+      target: './src/http-pref-rio-carta-votacao/default/default.ts',
+      schemas: './src/http-pref-rio-carta-votacao/models',
+      mode: 'single',
+      client: 'fetch',
+      formatter: 'biome',
+      httpClient: 'fetch',
+      clean: true,
+      baseUrl: process.env.SALESFORCE_VOTACAO_API_URL,
+      override: {
+        mutator: {
+          path: './custom-fetch-pref-rio-carta-votacao.ts',
+          name: 'customFetchPrefRioCartaVotacao',
+        },
+      },
+    },
+  },
   prefRioCidadao: {
     input: './pref-rio-cidadao-api.yaml',
     output: {

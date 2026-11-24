@@ -6,6 +6,7 @@ import { OfficialBanner } from '@/app/components/service'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type {
   ServiceContentFormat,
+  ServiceRatingTarget,
   ServiceTicketFlags,
 } from '@/lib/carta-servicos/types'
 import { PageClient } from './page-client'
@@ -17,6 +18,7 @@ interface PageClientWrapperProps {
   categoryName?: string
   contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
+  ratingTarget?: ServiceRatingTarget
   isPreview?: boolean
 }
 
@@ -27,6 +29,7 @@ export function PageClientWrapper({
   categoryName,
   contentFormat = 'markdown',
   ticketFlags,
+  ratingTarget,
   isPreview = false,
 }: PageClientWrapperProps) {
   const serviceTitle = serviceData.nome_servico ?? ''
@@ -54,6 +57,7 @@ export function PageClientWrapper({
             orgaoGestorName={orgaoGestorName}
             contentFormat={contentFormat}
             ticketFlags={ticketFlags}
+            ratingTarget={isPreview ? undefined : ratingTarget}
             isPreview={isPreview}
           />
         </main>

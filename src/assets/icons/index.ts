@@ -63,6 +63,8 @@ import { ShieldIcon } from './shield-icon'
 import { SquarePenIcon } from './square-pen-icon'
 import { SuitcaseIcon } from './suitcase-icon'
 import { SunIcon } from './sun-icon'
+import { ThumbsDownIcon } from './thumbs-down-icon'
+import { ThumbsUpIcon } from './thumbs-up-icon'
 import { TrashBinIcon } from './trash-bin-icon'
 import { TrashIcon } from './trash-icon'
 import { TwitterXIcon } from './twitter-x-icon'
@@ -143,6 +145,8 @@ export {
   ShareIcon,
   SquarePenIcon,
   SunIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
   TrashIcon,
   UserIcon,
   UsersIcon,

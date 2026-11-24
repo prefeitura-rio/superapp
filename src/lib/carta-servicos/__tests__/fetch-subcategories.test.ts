@@ -306,4 +306,38 @@ describe('fetchCartaServicosServiceBySlug', () => {
     expect(result?.slug).toBe('iptu-2026')
     expect(result?.nome_servico).toBe('IPTU 2026')
   })
+
+  it('returns the Salesforce articleId used by the "Este conteúdo foi útil?" vote', async () => {
+    mockGetService.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        data: {
+          slug: 'iptu-2026',
+          name: 'IPTU 2026',
+          articleId: 'ka089000000BUO5AAO',
+          lastModifiedDate: '2026-10-05T13:00:00.000Z',
+        },
+      },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof getApiPublicServicesSlug>>)
+
+    const result = await fetchCartaServicosServiceBySlug('iptu-2026')
+
+    expect(result?.articleId).toBe('ka089000000BUO5AAO')
+    expect(result?.last_update).toBe(
+      Date.parse('2026-10-05T13:00:00.000Z') / 1000
+    )
+  })
+
+  it('leaves articleId undefined when the catalog does not send it', async () => {
+    mockGetService.mockResolvedValueOnce({
+      status: 200,
+      data: { data: { slug: 'iptu-2026', name: 'IPTU 2026' } },
+      headers: new Headers(),
+    } as Awaited<ReturnType<typeof getApiPublicServicesSlug>>)
+
+    const result = await fetchCartaServicosServiceBySlug('iptu-2026')
+
+    expect(result?.articleId).toBeUndefined()
+  })
 })

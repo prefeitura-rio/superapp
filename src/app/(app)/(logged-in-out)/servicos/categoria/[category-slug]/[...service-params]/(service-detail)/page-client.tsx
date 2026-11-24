@@ -12,6 +12,7 @@ import {
   QuickInfoTime,
 } from '@/app/components/service'
 import { ServiceHtmlContent } from '@/app/components/service/service-html-content'
+import { ServiceRating } from '@/app/components/service/service-rating'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,11 +26,11 @@ import type { ModelsButton } from '@/http-busca-search/models/modelsButton'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type {
   ServiceContentFormat,
+  ServiceRatingTarget,
   ServiceTicketFlags,
 } from '@/lib/carta-servicos/types'
 import { formatTimestamp } from '@/lib/date'
 import { formatTitleCase } from '@/lib/utils'
-import { Clock } from 'lucide-react'
 import { MarkdownRenderer } from './components/markdown-renderer'
 
 interface PageClientProps {
@@ -37,6 +38,7 @@ interface PageClientProps {
   orgaoGestorName: string | null
   contentFormat?: ServiceContentFormat
   ticketFlags?: ServiceTicketFlags
+  ratingTarget?: ServiceRatingTarget
   isPreview?: boolean
 }
 
@@ -45,6 +47,7 @@ export function PageClient({
   orgaoGestorName,
   contentFormat = 'markdown',
   ticketFlags,
+  ratingTarget,
   isPreview = false,
 }: PageClientProps) {
   const buttons: ModelsButton[] = serviceData?.buttons || []
@@ -127,11 +130,16 @@ export function PageClient({
   return (
     <>
       <div className="space-y-4 mb-8">
-        {/* Title and Summary */}
-        <div>
-          <h1 className="text-4xl text-foreground leading-10 mb-2 font-medium">
+        {/* Title, last update and summary */}
+        <div className="flex flex-col gap-3">
+          <h1 className="text-2xl text-foreground leading-8 font-medium tracking-normal">
             {serviceData.nome_servico}
           </h1>
+          {updatedAtFormatted && (
+            <p className="text-sm text-primary leading-5 font-normal">
+              Última atualização: {updatedAtFormatted}
+            </p>
+          )}
           {renderContent(
             serviceData.resumo,
             'text-sm font-normal text-foreground-light leading-5'
@@ -259,7 +267,7 @@ export function PageClient({
 
       {/* Legislation */}
       {legislation.length > 0 && (
-        <div className="space-y-4 mb-3">
+        <div className="space-y-4">
           <h2 className="text-base font-medium text-foreground">Legislação</h2>
           <div className="flex flex-col gap-3">
             {legislation.map((law, index) => (
@@ -269,15 +277,7 @@ export function PageClient({
         </div>
       )}
 
-      {/* Last Update */}
-      {updatedAtFormatted && (
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-foreground-light" />
-          <span className="text-sm text-foreground-light leading-5 tracking-normal">
-            Última atualização: {updatedAtFormatted}
-          </span>
-        </div>
-      )}
+      {ratingTarget && <ServiceRating target={ratingTarget} />}
     </>
   )
 }

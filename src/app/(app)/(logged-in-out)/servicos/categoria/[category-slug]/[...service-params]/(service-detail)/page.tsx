@@ -2,9 +2,13 @@ import { getDepartmentsCdUa } from '@/http/departments/departments'
 import { sanitizePrefRioServiceHtml } from '@/lib/carta-servicos/sanitize-service-html'
 import type {
   ServiceContentFormat,
+  ServiceRatingTarget,
   ServiceTicketFlags,
 } from '@/lib/carta-servicos/types'
-import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
+import {
+  isSalesforceServicesEnabled,
+  isServiceRatingEnabled,
+} from '@/lib/feature-flags'
 import { fetchServiceBySlug, getCategoryNameBySlug } from '@/lib/services-utils'
 import { notFound } from 'next/navigation'
 import { PageClientWrapper } from './page-client-wrapper'
@@ -109,6 +113,11 @@ export default async function ServicePage({
       ? sanitizePrefRioServiceHtml(serviceData)
       : serviceData
 
+  const ratingTarget: ServiceRatingTarget | undefined =
+    isServiceRatingEnabled() && serviceData.slug && serviceData.articleId
+      ? { slug: serviceData.slug, articleId: serviceData.articleId }
+      : undefined
+
   return (
     <PageClientWrapper
       serviceData={serviceForPage}
@@ -117,6 +126,7 @@ export default async function ServicePage({
       categoryName={categoryName}
       contentFormat={contentFormat}
       ticketFlags={ticketFlags}
+      ratingTarget={ratingTarget}
     />
   )
 }

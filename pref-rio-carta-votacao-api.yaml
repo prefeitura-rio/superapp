@@ -1,0 +1,201 @@
+openapi: 3.0.3
+info:
+  title: Votação de artigos da Carta de Serviços (v0, Apex direto)
+  version: 0.1.0-provisorio
+  description: |
+    PROVISÓRIO. Escrito pelo time do Pref.Rio a partir do contrato v3 e da entrega
+    v0 do CRM (cards CZRM-2969 e CZRM-3304), conferido contra o Apex de staging em
+    24/11/2026. Será substituído pelo spec oficial do CRM assim que for enviado.
+
+    Nesta fase o portal chama o Apex REST do Salesforce direto, autenticado por
+    client credentials (External Client App `Votacao_API_Pref_Rio`). Quando a rota
+    for para o MuleSoft, mudam só a base URL e a credencial.
+
+    Erros chegam em dois formatos: os do Apex (`ErrorResponse`) e os da plataforma
+    Salesforce (`SalesforcePlatformErrors`, uma lista), como token inválido e
+    limite de API da org.
+servers:
+  - url: https://prefeitura-rio--qa.sandbox.my.salesforce.com/services/apexrest/apis/public
+    description: QA
+  - url: https://prefeitura-rio--staging.sandbox.my.salesforce.com/services/apexrest/apis/public
+    description: Staging
+  - url: https://prefeitura-rio.my.salesforce.com/services/apexrest/apis/public
+    description: Produção
+security:
+  - salesforceClientCredentials: []
+paths:
+  /services/{slug}/vote:
+    post:
+      operationId: postServiceVote
+      summary: Registra ou troca o voto de um visitante anônimo num artigo
+      description: |
+        Upsert por visitante e artigo (`SHA-256(voterToken + "|" + KnowledgeArticleId)`).
+        Repetir a chamada não duplica. Trocar 👎 → 👍 apaga motivos e comentário.
+        Slug antigo é resolvido no servidor, sem redirecionar.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: '`data.slug` do detalhe do serviço.'
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '200':
+          description: Voto gravado. Devolve o placar atual do artigo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '400':
+          description: Corpo inválido (ver `error.message`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Sem token válido. Token expirado vem como `INVALID_SESSION_ID` da plataforma.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - $ref: '#/components/schemas/SalesforcePlatformErrors'
+        '403':
+          description: Limite de API da org esgotado (`REQUEST_LIMIT_EXCEEDED`). Não repetir.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesforcePlatformErrors'
+        '404':
+          description: Slug não resolve artigo publicado, ou serviço fora da carta pública.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Salesforce indisponível (`SERVER_UNAVAILABLE`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesforcePlatformErrors'
+components:
+  securitySchemes:
+    salesforceClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://prefeitura-rio.my.salesforce.com/services/oauth2/token
+          scopes: {}
+  schemas:
+    Vote:
+      type: string
+      enum: [up, down]
+    RejectionReason:
+      type: string
+      description: API name do chip. A ordem é a do design.
+      enum:
+        - Informacao_desatualizada
+        - Informacao_incompleta
+        - Dificil_de_entender
+        - Nao_encontrei_o_que_precisava
+        - Informacao_incorreta
+        - Outro_motivo
+    VoteRequest:
+      oneOf:
+        - $ref: '#/components/schemas/VoteUpRequest'
+        - $ref: '#/components/schemas/VoteDownRequest'
+      discriminator:
+        propertyName: vote
+        mapping:
+          up: '#/components/schemas/VoteUpRequest'
+          down: '#/components/schemas/VoteDownRequest'
+    VoteUpRequest:
+      type: object
+      required: [articleId, vote, voterToken]
+      properties:
+        articleId:
+          type: string
+          description: '`data.articleId` do detalhe (Id da versão, Knowledge__kav).'
+        vote:
+          type: string
+          enum: [up]
+        voterToken:
+          type: string
+          description: Identificador anônimo do visitante, gerado pelo backend do portal.
+    VoteDownRequest:
+      type: object
+      required: [articleId, vote, voterToken, rejectionReasons]
+      properties:
+        articleId:
+          type: string
+          description: '`data.articleId` do detalhe (Id da versão, Knowledge__kav).'
+        vote:
+          type: string
+          enum: [down]
+        voterToken:
+          type: string
+          description: Identificador anônimo do visitante, gerado pelo backend do portal.
+        rejectionReasons:
+          type: array
+          minItems: 1
+          description: Repetidos são deduplicados no servidor.
+          items:
+            $ref: '#/components/schemas/RejectionReason'
+        rejectionDescription:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Opcional. Só é gravado quando `rejectionReasons` inclui `Outro_motivo`.
+    Helpfulness:
+      type: object
+      required: [up, down, score]
+      properties:
+        up:
+          type: integer
+        down:
+          type: integer
+        score:
+          type: number
+          nullable: true
+          description: up / (up + down). Nulo quando não há votos.
+    VoteResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Helpfulness'
+    ErrorCode:
+      type: string
+      enum: [VALIDATION_ERROR, UNAUTHORIZED, NOT_FOUND]
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              $ref: '#/components/schemas/ErrorCode'
+            message:
+              type: string
+              description: Descritiva; pode mudar. Tratar pelo `code`.
+    SalesforcePlatformError:
+      type: object
+      required: [message, errorCode]
+      properties:
+        message:
+          type: string
+        errorCode:
+          type: string
+          description: Ex. INVALID_SESSION_ID, INVALID_AUTH_HEADER, REQUEST_LIMIT_EXCEEDED, SERVER_UNAVAILABLE.
+    SalesforcePlatformErrors:
+      type: array
+      items:
+        $ref: '#/components/schemas/SalesforcePlatformError'

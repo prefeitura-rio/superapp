@@ -8,6 +8,7 @@
 | `FEATURE_HOME_SOLICITACOES` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_SGRC_HISTORICO` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_HOME_BANNERS_V3` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
+| `FEATURE_AVALIACAO_SERVICO` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `REWRITE_SERVICE_URLS_TO_HML` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 
 Todas são lidas em **runtime** via `process.env`. Não exigem rebuild da imagem
@@ -129,6 +130,23 @@ Independente das flags de Salesforce. Função: `isHomeBannersV3Enabled()` em
 > o ramo antigo da home e os arquivos `src/app/components/banners/`,
 > `suggestion-cards*.tsx`, `src/components/ui/custom/banner-base.tsx` e
 > `src/constants/banners.ts`.
+
+### FEATURE_AVALIACAO_SERVICO
+
+Só tem efeito com `FEATURE_SALESFORCE=true`: o voto precisa do `articleId`, que só a
+Carta de Serviços devolve. Função: `isServiceRatingEnabled()` em
+`src/lib/feature-flags.ts`, lida pela página de serviço e pela rota do voto.
+
+| Superfície | `false` (ou ausente) | `true` |
+|---|---|---|
+| Página de serviço | Sem o bloco "Este conteúdo foi útil?" | Bloco no fim da página, antes do footer |
+| `POST /api/servicos/{slug}/avaliacao` | 404, sem chamar o Salesforce | Grava o voto no Apex (`Knowledge_Vote__c`) |
+
+A rota exige as variáveis `SALESFORCE_VOTACAO_API_URL`, `SALESFORCE_VOTACAO_TOKEN_URL`,
+`SALESFORCE_VOTACAO_CLIENT_ID` e `SALESFORCE_VOTACAO_CLIENT_SECRET` (External Client App
+`Votacao_API_Pref_Rio`, um por ambiente). Antes de ligar em produção: rate limit na borda
+(nginx/Cloudflare) e IP de saída fixo cadastrado no Salesforce. O limitador da rota é por
+processo e só segura uso repetido.
 
 ---
 
