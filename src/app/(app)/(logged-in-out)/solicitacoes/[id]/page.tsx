@@ -130,20 +130,22 @@ function TimelineItem({
             <span style={captionStyle}>{date}</span>
           </div>
           {description && (
-            <svg
-              className={`w-4 h-4 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--foreground-light, #71717B)' }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            <div className="w-9 h-9 shrink-0 rounded-full bg-secondary flex items-center justify-center">
+              <svg
+                className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+                style={{ color: 'var(--foreground, #020618)' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           )}
         </button>
         <div
