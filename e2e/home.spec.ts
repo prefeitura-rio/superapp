@@ -29,6 +29,17 @@ const SALESFORCE_SKIP_REASON = 'Depende de FEATURE_SALESFORCE=true no servidor'
  */
 const sgrcHistoricoEnabled = process.env.FEATURE_SGRC_HISTORICO === 'true'
 
+/**
+ * `FEATURE_HOME_BANNERS_V3`, também só de servidor e lida em runtime (na CI,
+ * `"true"` no passo "Run E2E tests"). Ligada, a home mostra o carrossel de
+ * banners v3; desligada (padrão de produção), os banners de sugestão anteriores.
+ */
+const homeBannersV3Enabled = process.env.FEATURE_HOME_BANNERS_V3 === 'true'
+const BANNERS_V3_ON_REASON =
+  'Depende de FEATURE_HOME_BANNERS_V3=true no servidor'
+const BANNERS_V3_OFF_REASON =
+  'Só roda com FEATURE_HOME_BANNERS_V3 desligada no servidor'
+
 test.describe('Home (público)', () => {
   test.beforeEach(async ({ context }) => {
     await applyE2ECookieConsent(context)
@@ -84,6 +95,7 @@ test.describe('Home (público)', () => {
   test('carrossel começa no banner de boas-vindas e troca pelos indicadores', async ({
     page,
   }) => {
+    test.skip(!homeBannersV3Enabled, BANNERS_V3_ON_REASON)
     await page.goto('/')
     const carousel = page.getByRole('region', { name: 'Destaques' })
 
@@ -109,6 +121,7 @@ test.describe('Home (público)', () => {
   test('carrossel troca sozinho a cada 8 segundos, em repetição contínua', async ({
     page,
   }) => {
+    test.skip(!homeBannersV3Enabled, BANNERS_V3_ON_REASON)
     // Relógio simulado: avança os 8s sem esperar de verdade.
     await page.clock.install()
     await page.goto('/')
@@ -122,6 +135,18 @@ test.describe('Home (público)', () => {
     await expect(banner(/Cursos da prefeitura/)).toBeVisible()
     await page.clock.runFor(8000)
     await expect(banner(/Carioca Digital e 1746/)).toBeVisible()
+  })
+
+  test('sem FEATURE_HOME_BANNERS_V3: exibe banner de login (carteira / serviços municipais)', async ({
+    page,
+  }) => {
+    test.skip(homeBannersV3Enabled, BANNERS_V3_OFF_REASON)
+    await page.goto('/')
+    await expect(page.getByText('Acesse sua carteira e os')).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(page.getByText('serviços municipais')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Destaques' })).toHaveCount(0)
   })
 
   test('exibe a seção Mais acessados e cards conhecidos', async ({ page }) => {
@@ -160,6 +185,14 @@ test.describe('Home (público)', () => {
     await expect(page.getByRole('heading', { name: 'Documentos' })).toHaveCount(
       0
     )
+  })
+
+  test('sem FEATURE_HOME_BANNERS_V3: não exibe banner de atualização de cadastro do usuário logado', async ({
+    page,
+  }) => {
+    test.skip(homeBannersV3Enabled, BANNERS_V3_OFF_REASON)
+    await page.goto('/')
+    await expect(page.getByText('Atualize seu cadastro')).toHaveCount(0)
   })
 })
 
@@ -216,6 +249,8 @@ async function measureWelcomeBanner(page: Page) {
 }
 
 test.describe('Carrossel de banners × Figma', () => {
+  test.skip(!homeBannersV3Enabled, BANNERS_V3_ON_REASON)
+
   test.beforeEach(async ({ context }) => {
     await applyE2ECookieConsent(context)
   })
@@ -380,6 +415,17 @@ test.describe('Home (autenticado)', () => {
     await expect(
       page.getByRole('link', { name: 'Documentos' })
     ).toHaveAttribute('href', '/carteira')
+  })
+
+  test('sem FEATURE_HOME_BANNERS_V3: exibe banner de atualização de cadastro em vez do banner de login', async ({
+    page,
+  }) => {
+    test.skip(homeBannersV3Enabled, BANNERS_V3_OFF_REASON)
+    await page.goto('/')
+    await expect(page.getByText('Atualize seu cadastro')).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(page.getByText('Acesse sua carteira e os')).toHaveCount(0)
   })
 
   test('exibe Documentos ou estado de carteira vazia após carregar', async ({

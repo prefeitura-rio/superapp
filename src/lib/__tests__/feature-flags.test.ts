@@ -1,5 +1,6 @@
 import {
   isAccessibilityPluginEnabled,
+  isHomeBannersV3Enabled,
   isSalesforceServicesEnabled,
   isSgrcHistoricoEnabled,
   isVLibrasEnabled,
@@ -114,5 +115,25 @@ describe('isSgrcHistoricoEnabled', () => {
     vi.stubEnv('FEATURE_SGRC_HISTORICO', 'true')
 
     expect(isSgrcHistoricoEnabled()).toBe(true)
+  })
+})
+
+describe('isHomeBannersV3Enabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('is enabled only when the flag is exactly "true"', () => {
+    vi.stubEnv('FEATURE_HOME_BANNERS_V3', 'true')
+
+    expect(isHomeBannersV3Enabled()).toBe(true)
+  })
+
+  test('is disabled when the flag is absent or not exactly "true" (production default)', () => {
+    for (const value of [undefined, 'false', '', 'TRUE', '1', ' true']) {
+      vi.stubEnv('FEATURE_HOME_BANNERS_V3', value)
+
+      expect(isHomeBannersV3Enabled()).toBe(false)
+    }
   })
 })

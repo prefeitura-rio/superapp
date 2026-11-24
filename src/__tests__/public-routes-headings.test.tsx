@@ -78,6 +78,24 @@ vi.mock('@/app/components/pending-invite-section', () => ({
 vi.mock('@/app/components/wallet-section-client', () => ({
   default: () => null,
 }))
+// O ResponsiveWrapper escolhe a versão pela largura da janela; aqui as duas
+// versões reais dos banners de sugestão (mobile e desktop) são renderizadas,
+// para que os headings delas entrem na conferência da hierarquia quando a
+// flag FEATURE_HOME_BANNERS_V3 está desligada.
+vi.mock('@/components/ui/custom/responsive-wrapper', () => ({
+  ResponsiveWrapper: ({
+    mobileComponent,
+    desktopComponent,
+  }: {
+    mobileComponent: ReactNode
+    desktopComponent: ReactNode
+  }) => (
+    <>
+      <div data-testid="responsive-mobile">{mobileComponent}</div>
+      <div data-testid="responsive-desktop">{desktopComponent}</div>
+    </>
+  ),
+}))
 // Visitante sem login (as rotas públicas são verificadas sem sessão).
 vi.mock('@/providers/auth-status-provider', () => ({
   AuthStatusProvider: ({ children }: { children: ReactNode }) => children,
@@ -139,9 +157,11 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
   })
 
-  it('/ tem um único H1 e a seção Serviços é H2', async () => {
+  it('/ com FEATURE_HOME_BANNERS_V3 tem um único H1 e a seção Serviços é H2', async () => {
+    vi.stubEnv('FEATURE_HOME_BANNERS_V3', 'true')
     const { container } = renderWithQuery(await Home())
 
     // HomeCategoriesGrid mostra um skeleton até montar no cliente.
@@ -156,6 +176,9 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
       'section[aria-roledescription="carrossel"]'
     )
     expect(carousel).toHaveTextContent('Encontre seu trabalho')
+    expect(container.querySelector('[data-testid="responsive-mobile"]')).toBe(
+      null
+    )
     expectSequentialOutline(
       container,
       'Portal de serviços da Prefeitura do Rio'
@@ -165,6 +188,33 @@ describe('DEV-78 — H1 e hierarquia de headings nas rotas públicas', () => {
     )
     expect(h2Texts).toEqual(
       expect.arrayContaining(['Serviços', 'Mais acessados'])
+    )
+  })
+
+  it('/ sem FEATURE_HOME_BANNERS_V3 mantém os banners de sugestão anteriores', async () => {
+    vi.stubEnv('FEATURE_HOME_BANNERS_V3', undefined)
+    const { container } = renderWithQuery(await Home())
+
+    await waitFor(() =>
+      expect(
+        Array.from(container.querySelectorAll('h2')).map(h => h.textContent)
+      ).toContain('Serviços')
+    )
+    // Os banners de sugestão (antes do H2 "Serviços") estão na árvore.
+    const mobileBanners = container.querySelector(
+      '[data-testid="responsive-mobile"]'
+    )
+    const desktopBanners = container.querySelector(
+      '[data-testid="responsive-desktop"]'
+    )
+    expect(mobileBanners).toHaveTextContent('Encontre seu trabalho')
+    expect(desktopBanners).toHaveTextContent('Encontre seu trabalho')
+    expect(
+      container.querySelector('section[aria-roledescription="carrossel"]')
+    ).toBeNull()
+    expectSequentialOutline(
+      container,
+      'Portal de serviços da Prefeitura do Rio'
     )
   })
 

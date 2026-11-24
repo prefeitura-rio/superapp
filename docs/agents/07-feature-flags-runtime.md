@@ -7,6 +7,7 @@
 | `FEATURE_SALESFORCE` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_HOME_SOLICITACOES` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `FEATURE_SGRC_HISTORICO` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
+| `FEATURE_HOME_BANNERS_V3` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 | `REWRITE_SERVICE_URLS_TO_HML` | Server-side (sem `NEXT_PUBLIC_`) | `false` — seguro |
 
 Todas são lidas em **runtime** via `process.env`. Não exigem rebuild da imagem
@@ -27,6 +28,7 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | `FEATURE_SALESFORCE` | `false` | Rotas de chamados retornam 404; busca usa Typesense; footer/menu sem links de Atendimentos |
 | `FEATURE_HOME_SOLICITACOES` | `false` | Cards de Solicitações ocultos na home |
 | `FEATURE_SGRC_HISTORICO` | ausente ou `false` | Sem efeito (as telas de chamados não existem) |
+| `FEATURE_HOME_BANNERS_V3` | ausente ou `false` | Home mantém os banners de sugestão anteriores |
 
 ### Produção — Salesforce pronto, histórico SGRC ainda não
 
@@ -53,6 +55,7 @@ Infisical → K8s secret update → rolling restart → reflete em segundos
 | `FEATURE_SALESFORCE` | `true` | Integração Salesforce ativa para validação |
 | `FEATURE_HOME_SOLICITACOES` | `true` | Cards de Solicitações visíveis na home |
 | `FEATURE_SGRC_HISTORICO` | `true` | Histórico do 1746 (RMI) em Minhas Solicitações para validação. **Criar no Infisical antes do deploy**: sem ela, o histórico some de staging |
+| `FEATURE_HOME_BANNERS_V3` | `true` | Carrossel de banners v3 na home para validação. **Criar no Infisical antes do deploy**: sem ela, staging mostra os banners anteriores |
 | `SALESFORCE_SEARCH_ENABLED` | `false` | Itens Salesforce filtrados da busca até `tema_geral` estar populado |
 
 ---
@@ -110,6 +113,22 @@ completo em [`../solicitacoes.md`](../solicitacoes.md).
 > para Minhas Solicitações de uma vez, sem janela em que o cidadão fique sem os
 > chamados antigos. Regra em `shouldShowCaretakerCard`
 > (`src/lib/maintenance-requests-utils.ts`).
+
+### FEATURE_HOME_BANNERS_V3
+
+Independente das flags de Salesforce. Função: `isHomeBannersV3Enabled()` em
+`src/lib/feature-flags.ts`, lida pelo Server Component da home
+(`src/app/(app)/(logged-in-out)/(home)/page.tsx`); não precisa do
+`ServerFeatureFlagsProvider`.
+
+| Superfície | `false` (ou ausente) | `true` |
+|---|---|---|
+| Home — banners | Banners de sugestão anteriores (`SuggestionCards` no mobile, `SuggestionCardsSwipe` no desktop, `src/constants/banners.ts`) | Carrossel v3 (`HomeBannerCarousel`, `src/app/components/home-banners/`) com boas-vindas, trabalho e cursos |
+
+> **Remoção da flag:** quando o carrossel v3 for liberado de vez, apague a flag,
+> o ramo antigo da home e os arquivos `src/app/components/banners/`,
+> `suggestion-cards*.tsx`, `src/components/ui/custom/banner-base.tsx` e
+> `src/constants/banners.ts`.
 
 ---
 

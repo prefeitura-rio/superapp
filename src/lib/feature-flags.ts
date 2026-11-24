@@ -56,6 +56,21 @@ export function isHomeSolicitacoesEnabled(): boolean {
 }
 
 /**
+ * Controls the home banner carousel v3 (welcome banner + jobs + courses).
+ * Off: the home keeps the previous suggestion banners (mobile scroll list and
+ * desktop swiper), exactly as before the carousel was introduced.
+ *
+ * Strict boolean: an unset flag is safely disabled (production).
+ *
+ * Server-side only (`FEATURE_HOME_BANNERS_V3`). Read at runtime from
+ * `process.env` by the home Server Component, so changes in Infisical take
+ * effect after a pod restart without requiring a new build or deploy.
+ */
+export function isHomeBannersV3Enabled(): boolean {
+  return process.env.FEATURE_HOME_BANNERS_V3 === 'true'
+}
+
+/**
  * Controls the legacy 1746 (SGRC) history served by app-rmi: the "abertas até
  * 26/11/2026" option in Minhas Solicitações and the lookup of `RIO-12345678-9`
  * protocols. Off: those surfaces show only Salesforce data, the SGRC routes
