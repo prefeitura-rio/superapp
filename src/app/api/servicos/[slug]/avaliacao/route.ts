@@ -24,13 +24,13 @@ const noStore = { 'Cache-Control': 'no-store' }
  */
 export async function POST(
   request: NextRequest,
-  ctx: RouteContext<'/api/servicos/[slug]/avaliacao'>
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   if (!isServiceRatingEnabled()) {
     return new NextResponse(null, { status: 404, headers: noStore })
   }
 
-  const { slug } = await ctx.params
+  const { slug } = await params
   if (!SERVICE_SLUG_PATTERN.test(slug)) {
     return ratingError(404, 'not_found')
   }
