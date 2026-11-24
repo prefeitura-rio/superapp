@@ -141,7 +141,8 @@ describe('/carta-de-servicos/[siciCode]', () => {
       screen.getByRole('heading', { level: 2, name: 'Serviços relacionados' })
     ).toBeVisible()
 
-    const list = screen.getByRole('list')
+    const main = screen.getByRole('main')
+    const list = within(main).getByRole('list')
     const serviceLink = within(list).getByRole('link', {
       name: 'Alteração do sentido de vias',
     })
@@ -160,7 +161,8 @@ describe('/carta-de-servicos/[siciCode]', () => {
 
     render(await CartaDeServicosOrgaoPage(orgParams('2951')))
 
-    const list = screen.getByRole('list')
+    const main = screen.getByRole('main')
+    const list = within(main).getByRole('list')
     expect(within(list).queryAllByRole('link')).toHaveLength(0)
     expect(
       within(list).getByText('Alteração do sentido de vias')

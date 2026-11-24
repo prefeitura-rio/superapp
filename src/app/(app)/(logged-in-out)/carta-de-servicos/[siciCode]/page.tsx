@@ -1,3 +1,4 @@
+import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { ArrowUpRight } from '@/assets/icons/arrow-up-right'
 import {
@@ -51,6 +52,13 @@ export default async function CartaDeServicosOrgaoPage({
   return (
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
+      <Breadcrumb
+        items={[
+          { label: 'Página inicial', href: '/' },
+          { label: 'Carta de serviços', href: '/carta-de-servicos' },
+          { label: formatOrgUnitLabel(org) },
+        ]}
+      />
       <main className="w-full max-w-4xl mx-auto px-4 pb-10">
         <h1 className="pt-2 pb-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
           {formatOrgUnitLabel(org)}
