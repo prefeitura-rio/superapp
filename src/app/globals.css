@@ -22,6 +22,22 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+/*
+ * VLibras e o plugin de recursos assistivos são injetados no body, fora do
+ * menu global. Com o Dialog modal aberto, o Radix define pointer-events: none
+ * no body — e a propriedade é herdada. Os botões ficam por cima (z-index
+ * maior), mas o clique atravessa até o menu. auto interrompe a herança só
+ * nesses hosts; os filhos herdam auto de novo.
+ */
+#a11y-btn-wrapper,
+#a11y-panel,
+#a11y-vlibras-wrapper,
+#vlibras-access-wrapper,
+#a11y-tts-widget,
+#a11y-mobile-overlay {
+  pointer-events: auto;
+}
+
 /* CARD FLIP  */
 .card__flip__container {
   width: 100%;

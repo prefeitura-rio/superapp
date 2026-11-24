@@ -14,6 +14,7 @@ import { type GlobalMenuLink, buildGlobalMenu } from '@/constants/global-menu'
 import { buildAuthUrl } from '@/constants/url'
 import { useHeaderData } from '@/hooks/use-header-data'
 import { useLogout } from '@/hooks/use-logout'
+import { isAccessibilityWidgetTarget } from '@/lib/accessibility-widget-target'
 import { formatCpf } from '@/lib/format-cpf'
 import { cn } from '@/lib/utils'
 import { useServerFeatureFlags } from '@/providers/server-feature-flags-provider'
@@ -59,6 +60,11 @@ export function GlobalMenu({ open, onOpenChange }: GlobalMenuProps) {
       <DialogContent
         showCloseButton={false}
         className="top-0 left-0 h-dvh w-screen max-w-none translate-x-0 translate-y-0 gap-0 rounded-none border-0 bg-global-menu-header p-0 shadow-none data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 sm:max-w-none"
+        onPointerDownOutside={event => {
+          // O menu cobre a tela, mas os widgets ficam por cima dele. Sem isto
+          // o toque neles conta como "fora" e o menu fecha antes do painel abrir.
+          if (isAccessibilityWidgetTarget(event.target)) event.preventDefault()
+        }}
       >
         <DialogTitle className="sr-only">Menu</DialogTitle>
 

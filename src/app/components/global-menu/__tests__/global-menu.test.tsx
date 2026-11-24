@@ -296,4 +296,28 @@ describe('GlobalMenu', () => {
       within(menu).getByRole('button', { name: 'Sair' })
     ).toBeInTheDocument()
   })
+
+  it('o plugin de acessibilidade recebe o clique e o menu continua aberto', async () => {
+    respondHeader(VISITOR)
+    const onWidgetClick = vi.fn()
+    const wrapper = document.createElement('div')
+    wrapper.id = 'a11y-btn-wrapper'
+    // O CSS global faz o mesmo: interrompe o pointer-events: none herdado do body.
+    wrapper.style.pointerEvents = 'auto'
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.textContent = 'Recursos assistivos'
+    button.addEventListener('click', onWidgetClick)
+    wrapper.append(button)
+    document.body.append(wrapper)
+
+    try {
+      const { user } = await openMenu()
+      await user.click(button)
+      expect(onWidgetClick).toHaveBeenCalledOnce()
+      expect(screen.getByRole('dialog', { name: 'Menu' })).toBeInTheDocument()
+    } finally {
+      wrapper.remove()
+    }
+  })
 })
