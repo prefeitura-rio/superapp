@@ -81,14 +81,47 @@ test.describe('Home (público)', () => {
     ).toHaveAttribute('href', '/autenticacao-necessaria/carteira')
   })
 
-  test('exibe banner de login (carteira / serviços municipais)', async ({
+  test('carrossel começa no banner de boas-vindas e troca pelos indicadores', async ({
     page,
   }) => {
     await page.goto('/')
-    await expect(page.getByText('Acesse sua carteira e os')).toBeVisible({
-      timeout: 15000,
-    })
-    await expect(page.getByText('serviços municipais')).toBeVisible()
+    const carousel = page.getByRole('region', { name: 'Destaques' })
+
+    await expect(
+      carousel.getByRole('link', { name: /Carioca Digital e 1746/ })
+    ).toHaveAttribute('href', '/servicos')
+
+    await carousel
+      .getByRole('button', { name: 'Mostrar banner 2 de 3' })
+      .click()
+    await expect(
+      carousel.getByRole('link', { name: /Encontre seu trabalho/ })
+    ).toHaveAttribute('href', '/servicos/trabalho')
+
+    await carousel
+      .getByRole('button', { name: 'Mostrar banner 3 de 3' })
+      .click()
+    await expect(
+      carousel.getByRole('link', { name: /Cursos da prefeitura/ })
+    ).toHaveAttribute('href', '/servicos/cursos')
+  })
+
+  test('carrossel troca sozinho a cada 8 segundos, em repetição contínua', async ({
+    page,
+  }) => {
+    // Relógio simulado: avança os 8s sem esperar de verdade.
+    await page.clock.install()
+    await page.goto('/')
+    const carousel = page.getByRole('region', { name: 'Destaques' })
+    const banner = (name: RegExp) => carousel.getByRole('link', { name })
+
+    await expect(banner(/Carioca Digital e 1746/)).toBeVisible()
+    await page.clock.runFor(8000)
+    await expect(banner(/Encontre seu trabalho/)).toBeVisible()
+    await page.clock.runFor(8000)
+    await expect(banner(/Cursos da prefeitura/)).toBeVisible()
+    await page.clock.runFor(8000)
+    await expect(banner(/Carioca Digital e 1746/)).toBeVisible()
   })
 
   test('exibe a seção Mais acessados e cards conhecidos', async ({ page }) => {
@@ -128,12 +161,187 @@ test.describe('Home (público)', () => {
       0
     )
   })
+})
 
-  test('não exibe banner de atualização de cadastro do usuário logado', async ({
+// ---------------------------------------------------------------------------
+// CARROSSEL DE BANNERS × FIGMA ("Novo Banner")
+// ---------------------------------------------------------------------------
+
+/**
+ * Medidas do banner de boas-vindas relativas ao próprio banner, nas três
+ * faixas de largura do Figma (frame "Observações"). Cobrem o que o teste
+ * unitário não alcança (jsdom não calcula layout).
+ */
+async function measureWelcomeBanner(page: Page) {
+  const carousel = page.getByRole('region', { name: 'Destaques' })
+  const link = carousel.locator('a[href="/servicos"]')
+  await expect(link).toBeAttached()
+  return link.evaluate(a => {
+    const box = a.getBoundingClientRect()
+    const rel = (el: Element) => {
+      const r = el.getBoundingClientRect()
+      return {
+        top: r.top - box.top,
+        bottom: r.bottom - box.top,
+        height: r.height,
+      }
+    }
+    const spans = Array.from(a.children)
+    const text = spans.find(
+      s => s.querySelector('span') && !s.hasAttribute('aria-hidden')
+    )
+    if (!text) throw new Error('bloco de texto do banner não encontrado')
+    const [title, subtitle] = Array.from(text.children)
+    const cta = spans[spans.length - 1]
+    const img = a.querySelector('img')
+    if (!img) throw new Error('ilustração do banner não encontrada')
+    const viewport = a.closest('section')?.firstElementChild
+    const heading = Array.from(document.querySelectorAll('h2')).find(
+      h => h.textContent?.trim() === 'Serviços' && h.getClientRects().length > 0
+    )
+    return {
+      height: box.height,
+      title: rel(title),
+      subtitle: rel(subtitle),
+      subtitleWeight: getComputedStyle(subtitle).fontWeight,
+      cta: rel(cta),
+      illustrationBottom: rel(img).bottom,
+      gapToServicos:
+        heading && viewport
+          ? heading.getBoundingClientRect().top -
+            viewport.getBoundingClientRect().bottom
+          : null,
+    }
+  })
+}
+
+test.describe('Carrossel de banners × Figma', () => {
+  test.beforeEach(async ({ context }) => {
+    await applyE2ECookieConsent(context)
+  })
+
+  for (const { label, width, expected } of [
+    {
+      label: 'mobile (< 500px)',
+      width: 375,
+      expected: { height: 120, titleTop: 16, subtitleTop: 60, ctaHeight: 20 },
+    },
+    {
+      label: 'intermediário (500–767px)',
+      width: 600,
+      expected: { height: 120, titleTop: 16, subtitleTop: 40, ctaHeight: 20 },
+    },
+    {
+      label: 'tablet/desktop (≥ 768px)',
+      width: 1024,
+      expected: { height: 160, titleTop: 24, subtitleTop: 56, ctaHeight: 36 },
+    },
+  ]) {
+    test(`banner de boas-vindas segue as medidas do Figma — ${label}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+      await expect(
+        page.getByRole('heading', { level: 2, name: 'Serviços' })
+      ).toBeVisible({ timeout: 20000 })
+
+      const m = await measureWelcomeBanner(page)
+      expect(m.height).toBe(expected.height)
+      expect(m.title.top).toBeCloseTo(expected.titleTop, 0)
+      expect(m.subtitle.top).toBeCloseTo(expected.subtitleTop, 0)
+      expect(m.cta.height).toBe(expected.ctaHeight)
+      // O CTA fica a 16px (mobile/intermediário) ou 24px (tablet) da base.
+      expect(m.height - m.cta.bottom).toBeCloseTo(
+        expected.height === 120 ? 16 : 24,
+        0
+      )
+      // A ilustração vai até a borda de baixo (o banner corta o excesso).
+      expect(m.illustrationBottom).toBeGreaterThanOrEqual(expected.height - 0.5)
+      // 24px entre o carrossel e a seção Serviços.
+      expect(m.gapToServicos).toBeCloseTo(24, 0)
+    })
+  }
+
+  test('subtítulo longo usa DM Sans 300 carregada a partir de 768px', async ({
     page,
   }) => {
+    await page.setViewportSize({ width: 1024, height: 900 })
     await page.goto('/')
-    await expect(page.getByText('Atualize seu cadastro')).toHaveCount(0)
+    const carousel = page.getByRole('region', { name: 'Destaques' })
+    await expect(
+      carousel.getByText(
+        'Acesse tudo o que você precisa da Prefeitura em um só lugar'
+      )
+    ).toBeVisible()
+    await expect(carousel.getByText('Acesse tudo em um só lugar')).toBeHidden()
+
+    expect((await measureWelcomeBanner(page)).subtitleWeight).toBe('300')
+    // Sem o peso 300 em next/font, o navegador sintetizaria a fonte a partir
+    // do 400 e o subtítulo sairia mais grosso que no Figma.
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          await document.fonts.ready
+          return Array.from(document.fonts).some(
+            f =>
+              f.family.replace(/["']/g, '') === 'DM Sans' &&
+              f.weight === '300' &&
+              f.status === 'loaded'
+          )
+        })
+      )
+      .toBe(true)
+  })
+
+  test.describe('no celular', () => {
+    test.use({ viewport: { width: 375, height: 812 } })
+
+    test('mostra o subtítulo curto', async ({ page }) => {
+      await page.goto('/')
+      const carousel = page.getByRole('region', { name: 'Destaques' })
+      await expect(
+        carousel.getByText('Acesse tudo em um só lugar')
+      ).toBeVisible()
+      await expect(
+        carousel.getByText(
+          'Acesse tudo o que você precisa da Prefeitura em um só lugar'
+        )
+      ).toBeHidden()
+    })
+
+    test('arrastar para o lado troca de banner sem abrir o link', async ({
+      page,
+    }) => {
+      await page.goto('/')
+      const carousel = page.getByRole('region', { name: 'Destaques' })
+      const welcome = carousel.getByRole('link', {
+        name: /Carioca Digital e 1746/,
+      })
+      await expect(welcome).toBeVisible()
+
+      const box = await welcome.boundingBox()
+      if (!box) throw new Error('banner sem bounding box')
+      const y = box.y + box.height / 2
+      const drag = async (fromX: number, toX: number) => {
+        await page.mouse.move(fromX, y)
+        await page.mouse.down()
+        await page.mouse.move(toX, y, { steps: 5 })
+        await page.mouse.up()
+      }
+
+      // Para a esquerda: próximo banner.
+      await drag(box.x + box.width * 0.8, box.x + box.width * 0.2)
+      await expect(
+        carousel.getByRole('link', { name: /Encontre seu trabalho/ })
+      ).toBeVisible()
+      expect(new URL(page.url()).pathname).toBe('/')
+
+      // Para a direita: volta ao anterior.
+      await drag(box.x + box.width * 0.2, box.x + box.width * 0.8)
+      await expect(welcome).toBeVisible()
+      expect(new URL(page.url()).pathname).toBe('/')
+    })
   })
 })
 
@@ -172,16 +380,6 @@ test.describe('Home (autenticado)', () => {
     await expect(
       page.getByRole('link', { name: 'Documentos' })
     ).toHaveAttribute('href', '/carteira')
-  })
-
-  test('exibe banner de atualização de cadastro em vez do banner de login', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    await expect(page.getByText('Atualize seu cadastro')).toBeVisible({
-      timeout: 15000,
-    })
-    await expect(page.getByText('Acesse sua carteira e os')).toHaveCount(0)
   })
 
   test('exibe Documentos ou estado de carteira vazia após carregar', async ({
