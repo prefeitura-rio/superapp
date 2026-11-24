@@ -1,7 +1,10 @@
 'use client'
 
 import { StatusBadge } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/status-badge'
-import { normalizeStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
+import {
+  formatDate,
+  normalizeStatus,
+} from '@/app/(app)/(logged-in)/minhas-solicitacoes/helpers'
 import type { RequestStatus } from '@/app/(app)/(logged-in)/minhas-solicitacoes/types'
 import { Breadcrumb } from '@/app/components/breadcrumb'
 import { BreadcrumbSkeleton } from '@/app/components/breadcrumb-skeleton'
@@ -788,16 +791,14 @@ export default function RequestDetailPage() {
               servico: os?.servico ?? os?.subtema ?? '—',
               macroStatus: normalizeStatus(os?.status ?? json.status),
               dataAbertura: os?.dataAbertura
-                ? formatDateTime(os.dataAbertura)
+                ? formatDate(os.dataAbertura)
                 : json.dataAbertura
-                  ? formatDateTime(json.dataAbertura)
+                  ? formatDate(json.dataAbertura)
                   : '',
               dataUltimaAtualizacao: json.dataUltimaAtualizacao
                 ? formatDateTime(json.dataUltimaAtualizacao)
                 : '',
-              previsaoSLA: os?.previsaoSLA
-                ? formatDateTime(os.previsaoSLA)
-                : '',
+              previsaoSLA: os?.previsaoSLA ? formatDate(os.previsaoSLA) : '',
               motivoFechamento: os?.motivoFechamento ?? '',
               descricao: os?.descricao ?? '',
               endereco: os?.endereco ?? null,
@@ -873,9 +874,9 @@ export default function RequestDetailPage() {
             servico: os?.servico ?? '—',
             macroStatus: normalizeStatus(os?.status ?? json.status),
             dataAbertura: os?.dataAbertura
-              ? formatDateTime(os.dataAbertura)
+              ? formatDate(os.dataAbertura)
               : json.dataAbertura
-                ? formatDateTime(json.dataAbertura)
+                ? formatDate(json.dataAbertura)
                 : '',
             dataUltimaAtualizacao: '',
             previsaoSLA: '',
