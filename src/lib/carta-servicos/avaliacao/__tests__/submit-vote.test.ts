@@ -17,12 +17,9 @@ const VOTER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAA'
 const TOKEN_URL = TEST_ENV.SALESFORCE_VOTACAO_TOKEN_URL
 const VOTE_URL = `${TEST_ENV.SALESFORCE_VOTACAO_API_URL}/services/${SLUG}/vote`
 
-/** O Apex responde com este Content-Type inválido; o corpo é JSON mesmo assim. */
-const octetstream = (body: unknown, status: number) =>
-  new HttpResponse(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/octetstream' },
-  })
+/** Resposta do Apex como no contrato oficial (`application/json`). */
+const apex = (body: unknown, status: number) =>
+  HttpResponse.json(body as Record<string, unknown>, { status })
 
 function mockSalesforce(respond: () => Response) {
   const requests: { body: unknown; authorization: string | null }[] = []
@@ -55,7 +52,7 @@ describe('submitVote', () => {
 
   test('like: envia o corpo do contrato com o token do visitante e devolve ok', async () => {
     const requests = mockSalesforce(() =>
-      octetstream({ data: { up: 3, down: 1, score: 0.75 } }, 200)
+      apex({ data: { up: 3, down: 1, score: 0.75 } }, 200)
     )
 
     const result = await submitVote(
@@ -75,7 +72,7 @@ describe('submitVote', () => {
 
   test('dislike: envia motivos e comentário só com "Outro motivo"', async () => {
     const requests = mockSalesforce(() =>
-      octetstream({ data: { up: 0, down: 1, score: 0 } }, 200)
+      apex({ data: { up: 0, down: 1, score: 0 } }, 200)
     )
 
     const result = await submitVote(
@@ -101,7 +98,7 @@ describe('submitVote', () => {
 
   test('400 do Apex vira invalid_payload e registra o código no log', async () => {
     mockSalesforce(() =>
-      octetstream(
+      apex(
         {
           error: {
             code: 'VALIDATION_ERROR',
@@ -127,10 +124,7 @@ describe('submitVote', () => {
 
   test('404 do Apex vira not_found', async () => {
     mockSalesforce(() =>
-      octetstream(
-        { error: { code: 'NOT_FOUND', message: 'Service not found' } },
-        404
-      )
+      apex({ error: { code: 'NOT_FOUND', message: 'Service not found' } }, 404)
     )
 
     const result = await submitVote(
@@ -165,9 +159,24 @@ describe('submitVote', () => {
 
   test('401 do Apex (não é sessão expirada) vira unavailable sem renovar o token', async () => {
     const requests = mockSalesforce(() =>
-      octetstream(
-        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
-        401
+      apex({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+    )
+
+    const result = await submitVote(
+      SLUG,
+      { vote: 'up', articleId: ARTICLE_ID },
+      VOTER_TOKEN
+    )
+
+    expect(result).toEqual({ ok: false, status: 503, code: 'unavailable' })
+    expect(requests).toHaveLength(1)
+  })
+
+  test('500 INTERNAL_ERROR do Apex (application/json) vira unavailable e loga o código', async () => {
+    const requests = mockSalesforce(() =>
+      HttpResponse.json(
+        { error: { code: 'INTERNAL_ERROR', message: 'Falha inesperada' } },
+        { status: 500 }
       )
     )
 
@@ -179,6 +188,40 @@ describe('submitVote', () => {
 
     expect(result).toEqual({ ok: false, status: 503, code: 'unavailable' })
     expect(requests).toHaveLength(1)
+    expect(consoleError).toHaveBeenCalledWith(
+      '[avaliacao-servico] falha no Salesforce',
+      expect.objectContaining({ status: 500, errorCode: 'INTERNAL_ERROR' })
+    )
+  })
+
+  test('403 REQUEST_LIMIT_EXCEEDED (limite de API da org) vira unavailable sem repetir', async () => {
+    const requests = mockSalesforce(() =>
+      HttpResponse.json(
+        [
+          {
+            message: 'TotalRequests Limit exceeded.',
+            errorCode: 'REQUEST_LIMIT_EXCEEDED',
+          },
+        ],
+        { status: 403 }
+      )
+    )
+
+    const result = await submitVote(
+      SLUG,
+      { vote: 'up', articleId: ARTICLE_ID },
+      VOTER_TOKEN
+    )
+
+    expect(result).toEqual({ ok: false, status: 503, code: 'unavailable' })
+    expect(requests).toHaveLength(1)
+    expect(consoleError).toHaveBeenCalledWith(
+      '[avaliacao-servico] falha no Salesforce',
+      expect.objectContaining({
+        status: 403,
+        errorCode: 'REQUEST_LIMIT_EXCEEDED',
+      })
+    )
   })
 
   test('falha de rede vira unavailable e nunca lança', async () => {

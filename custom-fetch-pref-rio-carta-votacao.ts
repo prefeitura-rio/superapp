@@ -82,7 +82,10 @@ function parseJsonText(text: string): unknown {
   }
 }
 
-/** O Apex responde `Content-Type: application/octetstream`; o corpo é lido como texto. */
+/**
+ * Lê o corpo como texto e converte para JSON quando for JSON. Até 23/11/2026 o Apex
+ * respondia `Content-Type: application/octetstream`; a leitura não depende do header.
+ */
 async function getBody(response: Response): Promise<unknown> {
   const text = await response.text()
   return text ? parseJsonText(text) : null

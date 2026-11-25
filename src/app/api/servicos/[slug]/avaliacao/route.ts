@@ -68,8 +68,14 @@ export async function POST(
     return response
   }
 
-  if (!allowRatingRequest({ voterToken, ip: previewClientIp(request) })) {
-    return withVoterCookie(ratingError(429, 'rate_limited'))
+  const rateLimit = allowRatingRequest({
+    voterToken,
+    ip: previewClientIp(request),
+  })
+  if (!rateLimit.allowed) {
+    const response = ratingError(429, 'rate_limited')
+    response.headers.set('Retry-After', String(rateLimit.retryAfterSeconds))
+    return withVoterCookie(response)
   }
 
   const result = await submitVote(slug, parsed.data, voterToken)

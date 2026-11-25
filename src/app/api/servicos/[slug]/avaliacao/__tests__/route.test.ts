@@ -173,6 +173,11 @@ describe('POST /api/servicos/[slug]/avaliacao', () => {
 
     expect(blocked.status).toBe(429)
     expect(await blocked.json()).toEqual({ code: 'rate_limited' })
+    // Os 20 votos foram no mesmo instante: libera daqui a ~1 hora.
+    const retryAfter = Number(blocked.headers.get('retry-after'))
+    expect(retryAfter).toBeGreaterThan(3500)
+    expect(retryAfter).toBeLessThanOrEqual(3600)
+    expect(blocked.headers.get('cache-control')).toBe('no-store')
     expect(submitVote).toHaveBeenCalledTimes(20)
   })
 })

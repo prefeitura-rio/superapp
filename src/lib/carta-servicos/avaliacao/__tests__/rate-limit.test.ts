@@ -27,11 +27,13 @@ describe('allowRatingRequest', () => {
     for (let i = 0; i < 20; i++) {
       expect(
         allowRatingRequest({ voterToken: voter(1), ip: `10.0.0.${i}` }, NOW + i)
+          .allowed
       ).toBe(true)
     }
 
     expect(
       allowRatingRequest({ voterToken: voter(1), ip: '10.0.1.1' }, NOW + 20)
+        .allowed
     ).toBe(false)
   })
 
@@ -39,14 +41,17 @@ describe('allowRatingRequest', () => {
     for (let i = 0; i < 60; i++) {
       expect(
         allowRatingRequest({ voterToken: voter(i), ip: '200.1.1.1' }, NOW + i)
+          .allowed
       ).toBe(true)
     }
 
     expect(
       allowRatingRequest({ voterToken: voter(999), ip: '200.1.1.1' }, NOW + 60)
+        .allowed
     ).toBe(false)
     expect(
       allowRatingRequest({ voterToken: voter(999), ip: '200.1.1.2' }, NOW + 61)
+        .allowed
     ).toBe(true)
   })
 
@@ -58,14 +63,14 @@ describe('allowRatingRequest', () => {
       allowRatingRequest(
         { voterToken: voter(1), ip: '200.1.1.1' },
         NOW + HOUR_MS - 1
-      )
+      ).allowed
     ).toBe(false)
 
     expect(
       allowRatingRequest(
         { voterToken: voter(1), ip: '200.1.1.1' },
         NOW + HOUR_MS
-      )
+      ).allowed
     ).toBe(true)
   })
 
@@ -85,7 +90,7 @@ describe('allowRatingRequest', () => {
       allowRatingRequest(
         { voterToken: voter(1), ip: '200.1.1.1' },
         NOW + HOUR_MS
-      )
+      ).allowed
     ).toBe(true)
   })
 
@@ -97,15 +102,53 @@ describe('allowRatingRequest', () => {
     for (let i = 0; i < 19; i++) {
       allowRatingRequest({ voterToken: voter(0), ip: 'ip-0' }, NOW)
     }
-    expect(allowRatingRequest({ voterToken: voter(0), ip: 'ip-0' }, NOW)).toBe(
-      false
-    )
+    expect(
+      allowRatingRequest({ voterToken: voter(0), ip: 'ip-0' }, NOW).allowed
+    ).toBe(false)
 
     // Chave nova com o mapa cheio derruba a mais antiga (voter-0): o contador dele zera.
     allowRatingRequest({ voterToken: voter(5_000), ip: 'ip-novo' }, NOW)
 
     expect(
-      allowRatingRequest({ voterToken: voter(0), ip: 'ip-outro' }, NOW)
+      allowRatingRequest({ voterToken: voter(0), ip: 'ip-outro' }, NOW).allowed
     ).toBe(true)
+  })
+
+  test('bloqueado devolve em quantos segundos o voto mais antigo sai da janela', () => {
+    for (let i = 0; i < 20; i++) {
+      allowRatingRequest(
+        { voterToken: voter(1), ip: '200.1.1.1' },
+        NOW + i * 60_000
+      )
+    }
+
+    // O primeiro voto foi em NOW: libera em NOW + 1h. Faltam 30 min.
+    expect(
+      allowRatingRequest(
+        { voterToken: voter(1), ip: '200.1.1.1' },
+        NOW + 30 * 60_000
+      )
+    ).toEqual({ allowed: false, retryAfterSeconds: 30 * 60 })
+
+    // Nunca devolve menos de 1 segundo.
+    expect(
+      allowRatingRequest(
+        { voterToken: voter(1), ip: '200.1.1.1' },
+        NOW + HOUR_MS - 1
+      )
+    ).toEqual({ allowed: false, retryAfterSeconds: 1 })
+  })
+
+  test('bloqueio por IP também devolve o tempo de espera', () => {
+    for (let i = 0; i < 60; i++) {
+      allowRatingRequest({ voterToken: voter(i), ip: '200.1.1.1' }, NOW)
+    }
+
+    expect(
+      allowRatingRequest(
+        { voterToken: voter(999), ip: '200.1.1.1' },
+        NOW + 10 * 60_000
+      )
+    ).toEqual({ allowed: false, retryAfterSeconds: 50 * 60 })
   })
 })

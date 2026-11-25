@@ -92,9 +92,11 @@ export default defineConfig({
   },
   /**
    * Votação de artigos da Carta (Apex REST do Salesforce, chamado direto na v0).
-   * O YAML na raiz é provisório, escrito pelo Pref.Rio a partir do contrato do CRM;
-   * trocar pelo spec oficial quando chegar e regenerar com
-   * `npx orval --project prefRioCartaVotacao`.
+   * O YAML na raiz é o spec oficial do CRM (`CZRM-2969-votacao-prod.yaml`), sem edição.
+   * Os arquivos de QA, staging e produção só mudam o host em `servers` e no `tokenUrl`;
+   * aqui não importa, porque o mutator monta a URL a partir das envs. Ao receber uma
+   * versão nova, substituir o arquivo e regenerar com `npx orval --project prefRioCartaVotacao`
+   * (sem `SALESFORCE_VOTACAO_API_URL` no ambiente, para não fixar a base URL no client).
    */
   prefRioCartaVotacao: {
     input: './pref-rio-carta-votacao-api.yaml',
