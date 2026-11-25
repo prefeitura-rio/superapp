@@ -1,4 +1,4 @@
-import { postServiceVote } from '@/http-pref-rio-carta-votacao/default/default'
+import { postArticleVote } from '@/http-pref-rio-carta-votacao/default/default'
 import type { ServiceRatingErrorCode, ServiceRatingRequest } from './request'
 import { toVoteRequest } from './request'
 
@@ -17,7 +17,7 @@ export async function submitVote(
   voterToken: string
 ): Promise<SubmitVoteResult> {
   try {
-    const response = await postServiceVote(
+    const response = await postArticleVote(
       slug,
       toVoteRequest(input, voterToken)
     )
@@ -35,6 +35,8 @@ export async function submitVote(
       case 404:
         return { ok: false, status: 404, code: 'not_found' }
       default:
+        // 401 que sobrou depois da renovação do token, 403 (REQUEST_LIMIT_EXCEEDED),
+        // 500 (INTERNAL_ERROR) e 503: falha neutra, sem repetir a chamada.
         console.error('[avaliacao-servico] falha no Salesforce', {
           slug,
           status: response.status,

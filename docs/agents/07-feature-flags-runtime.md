@@ -146,7 +146,15 @@ A rota exige as variáveis `SALESFORCE_VOTACAO_API_URL`, `SALESFORCE_VOTACAO_TOK
 `SALESFORCE_VOTACAO_CLIENT_ID` e `SALESFORCE_VOTACAO_CLIENT_SECRET` (External Client App
 `Votacao_API_Pref_Rio`, um por ambiente). Antes de ligar em produção: rate limit na borda
 (nginx/Cloudflare) e IP de saída fixo cadastrado no Salesforce. O limitador da rota é por
-processo e só segura uso repetido.
+processo (20/h por visitante, 60/h por IP) e só segura uso repetido; ele responde 429
+com `Retry-After`. Na borda, o CRM sugere ~20/h por visitante, ~60/h por IP, ~120/min
+por artigo e ~1.000/min no total, os dois últimos só em observação no começo.
+
+**Credencial:** a rotação troca a consumer key **e** o secret, e o par antigo para de
+funcionar na hora do rotate. O CRM primeiro cria o par novo (os dois autenticam), manda
+por canal seguro, o portal troca no Infisical e promove os pods, e só então o CRM
+desliga o par antigo. Credencial errada ou vencida aparece como 503 `unavailable` na rota
+e `Salesforce token request failed` no log do servidor.
 
 ---
 

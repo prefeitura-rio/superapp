@@ -15,15 +15,20 @@ const MAX_TRACKED_KEYS = 10_000
 
 const hits = new Map<string, number[]>()
 
-function allow(
+export type RatingRateLimitResult =
+  | { allowed: true }
+  | { allowed: false; retryAfterSeconds: number }
+
+/** Devolve `null` se liberou ou, se bloqueou, em quantos ms o voto mais antigo sai da janela. */
+function hit(
   key: string,
   { max, windowMs }: { max: number; windowMs: number },
   now: number
-): boolean {
+): number | null {
   const recent = (hits.get(key) ?? []).filter(at => now - at < windowMs)
   if (recent.length >= max) {
     hits.set(key, recent)
-    return false
+    return recent[0] + windowMs - now
   }
 
   if (!hits.has(key) && hits.size >= MAX_TRACKED_KEYS) {
@@ -33,17 +38,22 @@ function allow(
 
   recent.push(now)
   hits.set(key, recent)
-  return true
+  return null
 }
 
 export function allowRatingRequest(
   { voterToken, ip }: { voterToken: string; ip: string },
   now = Date.now()
-): boolean {
-  return (
-    allow(`voter:${voterToken}`, RATING_LIMITS.perVoter, now) &&
-    allow(`ip:${ip}`, RATING_LIMITS.perIp, now)
-  )
+): RatingRateLimitResult {
+  const waitMs =
+    hit(`voter:${voterToken}`, RATING_LIMITS.perVoter, now) ??
+    hit(`ip:${ip}`, RATING_LIMITS.perIp, now)
+
+  if (waitMs === null) return { allowed: true }
+  return {
+    allowed: false,
+    retryAfterSeconds: Math.max(1, Math.ceil(waitMs / 1000)),
+  }
 }
 
 /** Só para testes. */
