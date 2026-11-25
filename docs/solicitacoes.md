@@ -39,7 +39,7 @@ Valores por ambiente: [`agents/07-feature-flags-runtime.md`](agents/07-feature-f
 |---|---|---|---|---|
 | `false` | qualquer | `/not-found` (middleware) | `/not-found` | Visível (produção hoje) |
 | `true` | ausente/`false` | Só Salesforce, sem seletor, com as abas | Só protocolo Salesforce; SGRC → "não encontrado" | Visível |
-| `true` | `true` | Seletor, SGRC padrão + Salesforce | Os dois formatos | Oculto |
+| `true` | `true` | Seletor; acesso direto abre no Salesforce se há chamados, senão SGRC | Os dois formatos | Oculto |
 
 O histórico do 1746 aparece em **um** lugar só: a carteira ou Minhas Solicitações. Ele
 só sai da carteira quando as duas flags estão ligadas (`shouldShowCaretakerCard`, em
@@ -59,7 +59,7 @@ antigos.
 
 | Superfície | `false` (ou ausente) | `true` |
 |---|---|---|
-| `/minhas-solicitacoes` | Só Salesforce, sem seletor (`page.tsx` renderiza `RequestsList` direto) | `OrigemChamados`: seletor "Data de abertura", SGRC como padrão |
+| `/minhas-solicitacoes` | Só Salesforce, sem seletor (`page.tsx` renderiza `RequestsList` direto) | `OrigemChamados`: seletor "Data de abertura"; acesso direto: Salesforce se há chamados, senão SGRC |
 | `GET /api/chamados?origem=sgrc` | 404, sem olhar sessão nem chamar o RMI | Lista do RMI |
 | `GET /api/chamados/{RIO-12345678-9}` e `/api/chamados-publico/{RIO-12345678-9}` | 404, sem RMI nem Mule | Detalhe/consulta no RMI |
 | Protocolo do Salesforce e `/api/chamados` sem `origem` | Inalterados | Inalterados |
@@ -147,8 +147,10 @@ serem dados pessoais. O BFF continua com `Cache-Control: private, no-store`.
 - **SSR:** `minhas-solicitacoes/page.tsx` faz o *prefetch* da lista do Salesforce no
   servidor (`getServerQueryClient`, um client por requisição) e a entrega por
   `HydrationBoundary`. O servidor não renderiza o dado: só o client o lê. Sem
-  `FEATURE_SGRC_HISTORICO` o prefetch é aguardado (a lista vem no HTML); com a flag, ele
-  segue por streaming, porque a origem padrão é o SGRC.
+  `FEATURE_SGRC_HISTORICO` o prefetch é aguardado (a lista vem no HTML). Com a flag, ele
+  também é aguardado no acesso direto (a página precisa saber se há chamados no
+  Salesforce para escolher a origem) e quando `?o=1` ou o cookie pedem o Salesforce; só
+  com `?o=0` ele segue por streaming.
 - **Erros:** 4xx não é repetido; 5xx e erro de rede são repetidos uma vez.
 - **Logout:** `useLogout` chama `queryClient.clear()`. Sem isso, o próximo usuário do
   navegador veria o cache do anterior.
@@ -193,7 +195,10 @@ prioridade:
    para o formulário do 1746 e volta a `/minhas-solicitacoes` abre nos chamados do
    Salesforce. O servidor lê o cookie, então a página já sai na origem certa, sem piscar o
    SGRC nem chamar o RMI.
-3. **SGRC** (padrão): acesso direto a `/minhas-solicitacoes`.
+3. **Acesso direto** (sem `?o=` nem cookie): Salesforce se o cidadão tem pelo menos um
+   chamado nele; senão (ou se a consulta falhar), SGRC. O botão "Limpar" do seletor volta
+   a essa origem padrão (com `?o=0`, em que o servidor não consulta o Salesforce, volta
+   ao SGRC).
 
 Trocar a aba de filtro (`?filtro=`) preserva os demais params, `?o=` incluído.
 
@@ -321,8 +326,8 @@ os mesmos da carteira (`src/lib/maintenance-requests-utils.ts`):
   abas; o `?filtro=` do menu abre direto na aba pedida. O resto desta seção vale com
   a flag ligada.
 - O seletor **"Data de abertura"** fica sempre visível:
-  - "abertas até 26/11/2026": histórico SGRC, **padrão**.
-  - "abertas a partir de 27/11/2026": Salesforce.
+  - "abertas até 26/11/2026": histórico SGRC, padrão se não há chamados no Salesforce.
+  - "abertas a partir de 27/11/2026": Salesforce, padrão se há ao menos um chamado.
 - **SGRC:** carrega no navegador, página a página (10 por vez). Só tem a aba "Todos".
   - Primeira carga: o mesmo skeleton da rota (`RequestsListSkeleton`, também usado
     em `loading.tsx`), para a troca de um pelo outro não piscar.

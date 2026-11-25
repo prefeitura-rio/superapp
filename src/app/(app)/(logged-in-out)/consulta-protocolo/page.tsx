@@ -189,7 +189,7 @@ export default function ConsultaProtocoloPage() {
               className="w-full bg-transparent text-foreground text-sm font-normal leading-5 tracking-normal placeholder:text-foreground-light placeholder:text-sm placeholder:font-normal placeholder:leading-5 placeholder:tracking-normal h-16 rounded-xl px-5 border-[1.4px] border-border outline-none focus:border-primary transition-colors"
             />
             <p className="text-sm font-normal text-muted-foreground leading-5 tracking-normal">
-              Escreva no formato: RIO-12345678-9
+              Escreva no formato: RIO-2026-12345678
             </p>
             {pageState === 'error' && (
               <p className="text-xs text-red-500">{errorMsg}</p>

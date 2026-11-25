@@ -106,7 +106,7 @@ completo em [`../solicitacoes.md`](../solicitacoes.md).
 | `/api/chamados?origem=sgrc&page=N` | 404, sem sessão nem RMI | `GET /citizen/{cpf}/maintenance-request` (CPF da sessão, 10 por página) |
 | `/api/chamados/[protocolo]` e `/api/chamados-publico/[protocolo]` com `RIO-12345678-9` | 404, sem RMI nem Mule | `GET /maintenance-request/{protocolo}` |
 | Os mesmos, com protocolo do Salesforce (`RIO-2026-00000001`) | MuleSoft/Salesforce | MuleSoft/Salesforce |
-| Minhas Solicitações | Só Salesforce, sem seletor, com as abas | Seletor "Data de abertura": "abertas até 26/11/2026" (SGRC, padrão) e "abertas a partir de 27/11/2026" (Salesforce) |
+| Minhas Solicitações | Só Salesforce, sem seletor, com as abas | Seletor "Data de abertura": "abertas até 26/11/2026" (SGRC) e "abertas a partir de 27/11/2026" (Salesforce). Acesso direto abre no Salesforce se o cidadão tem pelo menos um chamado nele, senão no SGRC |
 | Carteira — card "Cuidados com a Cidade" | Visível | Oculto (com `FEATURE_SALESFORCE=true`) |
 
 > **Por que a carteira acompanha:** o card mostra o mesmo histórico do RMI. Ele

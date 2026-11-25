@@ -26,8 +26,17 @@ describe('origemFromParam', () => {
 })
 
 describe('resolveOrigemInicial', () => {
-  it('acesso direto abre o histórico legado (SGRC)', () => {
+  it('acesso direto sem chamados no novo 1746 abre o histórico legado (SGRC)', () => {
     expect(resolveOrigemInicial(undefined, undefined)).toBe('sgrc')
+    expect(resolveOrigemInicial(undefined, undefined, false)).toBe('sgrc')
+  })
+
+  it('acesso direto com ao menos um chamado no novo 1746 abre o Salesforce', () => {
+    expect(resolveOrigemInicial(undefined, undefined, true)).toBe('salesforce')
+  })
+
+  it('?o=0 explícito vence a regra de ter chamados no Salesforce', () => {
+    expect(resolveOrigemInicial('0', undefined, true)).toBe('sgrc')
   })
 
   it('?o=1 (banner da home) abre o novo 1746', () => {

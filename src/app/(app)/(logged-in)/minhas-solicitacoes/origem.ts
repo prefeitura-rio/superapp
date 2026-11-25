@@ -3,7 +3,10 @@ import { isFormularioMarkerValid } from '@/lib/chamados/formulario-marker'
 /** Origem dos chamados: 1746 legado (RMI) ou novo 1746 (Mulesoft/Salesforce). */
 export type Origem = 'sgrc' | 'salesforce'
 
-/** Quem acessa `/minhas-solicitacoes` direto vê primeiro o histórico legado. */
+/**
+ * Quem acessa `/minhas-solicitacoes` direto vê primeiro o histórico legado,
+ * a não ser que já tenha chamados no novo 1746 (ver `resolveOrigemInicial`).
+ */
 export const DEFAULT_ORIGEM: Origem = 'sgrc'
 
 /** Rótulo do período de cada origem (seletor "Data de abertura" e mensagens). */
@@ -57,18 +60,38 @@ export function origemFromParam(
 }
 
 /**
- * Origem aberta ao entrar em Minhas Solicitações, por prioridade:
- * 1. `?o=` explícito (banner da home, link compartilhado, recarga);
+ * Origem pedida explicitamente, por prioridade:
+ * 1. `?o=` (banner da home, link compartilhado, recarga);
  * 2. cidadão que acabou de ir ao formulário do 1746 (cookie de retorno): o
- *    chamado novo está no Salesforce;
- * 3. o histórico legado.
+ *    chamado novo está no Salesforce.
+ * `undefined` quando nenhum dos dois vale (acesso direto).
+ */
+export function origemExplicita(
+  param: string | string[] | undefined,
+  cookieFormulario: string | undefined
+): Origem | undefined {
+  return (
+    origemFromParam(param) ??
+    (isFormularioMarkerValid(cookieFormulario) ? 'salesforce' : undefined)
+  )
+}
+
+/** Origem padrão do acesso direto: Salesforce se há chamados nele, senão SGRC. */
+export function origemPadrao(temChamadosSalesforce: boolean): Origem {
+  return temChamadosSalesforce ? 'salesforce' : DEFAULT_ORIGEM
+}
+
+/**
+ * Origem aberta ao entrar em Minhas Solicitações: a explícita (`?o=` ou cookie
+ * de retorno) e, sem ela, o padrão conforme o cidadão ter chamados no novo 1746.
  */
 export function resolveOrigemInicial(
   param: string | string[] | undefined,
-  cookieFormulario: string | undefined
+  cookieFormulario: string | undefined,
+  temChamadosSalesforce = false
 ): Origem {
   return (
-    origemFromParam(param) ??
-    (isFormularioMarkerValid(cookieFormulario) ? 'salesforce' : DEFAULT_ORIGEM)
+    origemExplicita(param, cookieFormulario) ??
+    origemPadrao(temChamadosSalesforce)
   )
 }

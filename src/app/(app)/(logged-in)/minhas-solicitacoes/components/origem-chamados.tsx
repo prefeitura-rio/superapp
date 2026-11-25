@@ -33,6 +33,8 @@ interface OrigemChamadosProps {
   filtroInicial?: string
   /** Origem aberta ao entrar (ver `resolveOrigemInicial`). Padrão: SGRC. */
   origemInicial?: Origem
+  /** Origem do botão "Limpar" (padrão do acesso direto). Padrão: SGRC. */
+  origemPadrao?: Origem
 }
 
 /**
@@ -50,6 +52,7 @@ function sincronizarOrigemNaUrl(origem: Origem) {
 export function OrigemChamados({
   filtroInicial,
   origemInicial = DEFAULT_ORIGEM,
+  origemPadrao = DEFAULT_ORIGEM,
 }: OrigemChamadosProps) {
   const [selectedOrigem, setSelectedOrigem] = useState<Origem>(origemInicial)
   const [draft, setDraft] = useState<Origem>(selectedOrigem)
@@ -71,7 +74,7 @@ export function OrigemChamados({
   }
 
   function handleClear() {
-    setDraft(DEFAULT_ORIGEM)
+    setDraft(origemPadrao)
   }
 
   function renderSgrc() {

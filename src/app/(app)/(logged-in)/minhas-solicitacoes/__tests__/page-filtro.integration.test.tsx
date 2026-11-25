@@ -217,7 +217,7 @@ describe('/minhas-solicitacoes?filtro= (destino do menu global)', () => {
 
 describe('/minhas-solicitacoes?filtro= no histórico SGRC (origem padrão)', () => {
   it('o seletor de data aparece e a lista SGRC abre em Todos', async () => {
-    await renderPage('ouvidoria')
+    await renderPage('ouvidoria', '0')
 
     expect(
       screen.getByRole('button', { name: 'Data de abertura' })
@@ -238,6 +238,10 @@ describe('/minhas-solicitacoes: origem aberta por padrão', () => {
 
   async function origemSelecionada() {
     fireEvent.click(screen.getByRole('button', { name: 'Data de abertura' }))
+    return origemMarcadaNoDrawer()
+  }
+
+  async function origemMarcadaNoDrawer() {
     const marcado = [rotuloSgrc, rotuloSalesforce].filter(
       nome =>
         screen
@@ -249,10 +253,38 @@ describe('/minhas-solicitacoes: origem aberta por padrão', () => {
     return marcado[0]
   }
 
-  it('acesso direto abre o histórico legado (SGRC)', async () => {
+  it('acesso direto sem chamados no novo 1746 abre o histórico legado (SGRC)', async () => {
+    listChamados.mockResolvedValue({ status: 200, data: { protocolos: [] } })
     await renderPage()
     expect(await origemSelecionada()).toBe(rotuloSgrc)
     await waitFor(() => expect(fetch).toHaveBeenCalled())
+  })
+
+  it('acesso direto com ao menos um chamado no novo 1746 abre o Salesforce', async () => {
+    await renderPage()
+    expect(screen.getByText('Remoção de entulho')).toBeInTheDocument()
+    expect(await origemSelecionada()).toBe(rotuloSalesforce)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('acesso direto com falha no novo 1746 cai no histórico legado (SGRC)', async () => {
+    listChamados.mockResolvedValue({ status: 500, data: {} })
+    await renderPage()
+    expect(await origemSelecionada()).toBe(rotuloSgrc)
+  })
+
+  it('?o=0 explícito abre o SGRC mesmo com chamados no novo 1746', async () => {
+    await renderPage(undefined, '0')
+    expect(await origemSelecionada()).toBe(rotuloSgrc)
+  })
+
+  it('"Limpar" volta para a origem padrão do acesso direto', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Data de abertura' }))
+    fireEvent.click(screen.getByRole('radio', { name: rotuloSgrc }))
+    expect(await origemMarcadaNoDrawer()).toBe(rotuloSgrc)
+    fireEvent.click(screen.getByRole('button', { name: 'Limpar' }))
+    expect(await origemMarcadaNoDrawer()).toBe(rotuloSalesforce)
   })
 
   it('?o=1 (banner da home) abre o novo 1746, sem buscar o SGRC', async () => {
@@ -277,7 +309,7 @@ describe('/minhas-solicitacoes: origem aberta por padrão', () => {
   })
 
   it('escolher a origem no seletor atualiza ?o= na URL, sem navegar', async () => {
-    await renderPage()
+    await renderPage(undefined, '0')
     await abrirSalesforce()
     expect(new URL(window.location.href).searchParams.get('o')).toBe('1')
   })
