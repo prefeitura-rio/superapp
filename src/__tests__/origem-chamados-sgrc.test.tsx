@@ -215,4 +215,38 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
       screen.queryByPlaceholderText('Encontre sua solicitação')
     ).not.toBeInTheDocument()
   })
+
+  describe('origem sem nenhum chamado', () => {
+    const SEM_SGRC =
+      'Você não possui solicitações abertas até 26/11/2026. Para ver as abertas a partir de 27/11/2026, selecione "Data de abertura" e escolha essa opção.'
+    const SEM_SALESFORCE =
+      'Você não possui solicitações abertas a partir de 27/11/2026. Para ver as abertas até 26/11/2026, selecione "Data de abertura" e escolha essa opção.'
+
+    beforeEach(() => {
+      fetchMock.mockImplementation(async (url: string) => {
+        const { searchParams } = new URL(url, 'http://localhost')
+        if (searchParams.get('origem') === 'sgrc') {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              protocolos: [],
+              pagination: { page: 1, perPage: 10, total: 0, totalPages: 1 },
+            }),
+          }
+        }
+        return { ok: true, status: 200, json: async () => ({ protocolos: [] }) }
+      })
+    })
+
+    test('SGRC vazio diz que não há solicitações até 26/11 e sugere a outra data', async () => {
+      renderWithQuery(<OrigemChamados />)
+      expect(await screen.findByText(SEM_SGRC)).toBeInTheDocument()
+    })
+
+    test('Salesforce vazio diz que não há solicitações a partir de 27/11 e sugere a outra data', async () => {
+      renderWithQuery(<OrigemChamados origemInicial="salesforce" />)
+      expect(await screen.findByText(SEM_SALESFORCE)).toBeInTheDocument()
+    })
+  })
 })

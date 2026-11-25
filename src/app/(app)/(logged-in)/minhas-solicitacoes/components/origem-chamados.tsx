@@ -14,8 +14,10 @@ import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import {
   DEFAULT_ORIGEM,
+  ORIGEM_LABEL,
   ORIGEM_PARAM,
   type Origem,
+  mensagemSemChamados,
   origemToParam,
 } from '../origem'
 import { RequestsList } from './requests-list'
@@ -23,8 +25,8 @@ import { RequestsListSkeleton } from './requests-list-skeleton'
 import { SalesforceLista } from './salesforce-lista'
 
 const OPCOES: { label: string; value: Origem }[] = [
-  { label: 'abertas até 26/11/2026', value: 'sgrc' },
-  { label: 'abertas a partir de 27/11/2026', value: 'salesforce' },
+  { label: ORIGEM_LABEL.sgrc, value: 'sgrc' },
+  { label: ORIGEM_LABEL.salesforce, value: 'salesforce' },
 ]
 
 interface OrigemChamadosProps {
@@ -112,6 +114,7 @@ export function OrigemChamados({
           items={historico.itens}
           filtros={['Todos']}
           filtroInicial={filtroInicial}
+          mensagemVazia={mensagemSemChamados('sgrc')}
           pagination={{
             page: pagina,
             totalPages: historico.totalPages,
@@ -143,7 +146,11 @@ export function OrigemChamados({
       {selectedOrigem === 'sgrc' ? (
         renderSgrc()
       ) : (
-        <SalesforceLista key="salesforce" filtroInicial={filtroInicial} />
+        <SalesforceLista
+          key="salesforce"
+          filtroInicial={filtroInicial}
+          mensagemVazia={mensagemSemChamados('salesforce')}
+        />
       )}
 
       <Drawer

@@ -281,4 +281,14 @@ describe('/minhas-solicitacoes: origem aberta por padrão', () => {
     await abrirSalesforce()
     expect(new URL(window.location.href).searchParams.get('o')).toBe('1')
   })
+
+  it('sem o histórico SGRC, lista vazia mantém o texto antigo, sem citar "Data de abertura"', async () => {
+    vi.stubEnv('FEATURE_SGRC_HISTORICO', 'false')
+    listChamados.mockResolvedValue({ status: 200, data: { protocolos: [] } })
+    await renderPage()
+    expect(
+      screen.getByText('Você ainda não possui solicitações para acompanhar.')
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/Data de abertura/)).not.toBeInTheDocument()
+  })
 })

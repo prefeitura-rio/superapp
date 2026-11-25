@@ -7,6 +7,8 @@ import { RequestsListSkeleton } from './requests-list-skeleton'
 
 interface SalesforceListaProps {
   filtroInicial?: string
+  /** Texto da lista vazia (ver `RequestsList`). */
+  mensagemVazia?: string
 }
 
 /**
@@ -14,7 +16,10 @@ interface SalesforceListaProps {
  * TanStack Query, hidratado pelo servidor em `page.tsx` e compartilhado com o
  * banner da home.
  */
-export function SalesforceLista({ filtroInicial }: SalesforceListaProps) {
+export function SalesforceLista({
+  filtroInicial,
+  mensagemVazia,
+}: SalesforceListaProps) {
   const { data: itens, isPending, isError, refetch } = useChamadosSalesforce()
 
   if (isError) {
@@ -35,5 +40,11 @@ export function SalesforceLista({ filtroInicial }: SalesforceListaProps) {
 
   if (isPending) return <RequestsListSkeleton />
 
-  return <RequestsList items={itens} filtroInicial={filtroInicial} />
+  return (
+    <RequestsList
+      items={itens}
+      filtroInicial={filtroInicial}
+      mensagemVazia={mensagemVazia}
+    />
+  )
 }

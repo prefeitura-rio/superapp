@@ -331,6 +331,10 @@ os mesmos da carteira (`src/lib/maintenance-requests-utils.ts`):
   - Erro: aviso com "Tentar novamente".
 - **Salesforce:** vem pronto do servidor, sem paginação, com as abas Todos, Serviços,
   Ouvidoria e Acesso à informação.
+- **Origem sem nenhum chamado:** a lista diz que não há solicitações naquele período e
+  sugere trocar em "Data de abertura" (`mensagemSemChamados` em `origem.ts`; rótulos em
+  `ORIGEM_LABEL`). Aba de filtro vazia mantém "Nenhuma solicitação encontrada para esse
+  filtro." Sem `FEATURE_SGRC_HISTORICO` (sem seletor), vale o texto genérico.
 - **Busca "Encontre sua solicitação":** desligada nas duas origens (prop `searchable`,
   padrão `false`, em `requests-list.tsx:86`).
 - **Links do menu com `?filtro=`** (Ouvidoria, LAI): a página abre no SGRC, que ignora o

@@ -6,6 +6,25 @@ export type Origem = 'sgrc' | 'salesforce'
 /** Quem acessa `/minhas-solicitacoes` direto vê primeiro o histórico legado. */
 export const DEFAULT_ORIGEM: Origem = 'sgrc'
 
+/** Rótulo do período de cada origem (seletor "Data de abertura" e mensagens). */
+export const ORIGEM_LABEL: Record<Origem, string> = {
+  sgrc: 'abertas até 26/11/2026',
+  salesforce: 'abertas a partir de 27/11/2026',
+}
+
+const OUTRA_ORIGEM: Record<Origem, Origem> = {
+  sgrc: 'salesforce',
+  salesforce: 'sgrc',
+}
+
+/**
+ * Mensagem de quando a origem selecionada não tem nenhum chamado: diz que não
+ * há solicitações naquele período e sugere trocar em "Data de abertura".
+ */
+export function mensagemSemChamados(origem: Origem): string {
+  return `Você não possui solicitações ${ORIGEM_LABEL[origem]}. Para ver as ${ORIGEM_LABEL[OUTRA_ORIGEM[origem]]}, selecione "Data de abertura" e escolha essa opção.`
+}
+
 /**
  * Param da URL que escolhe a origem. Curto e opaco de propósito (`?o=1`): a
  * escolha não precisa ser legível para o cidadão.

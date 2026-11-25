@@ -57,13 +57,19 @@ function RequestCard({ item }: { item: RequestItem }) {
   )
 }
 
-function EmptyState({ filtered }: { filtered: boolean }) {
+const MENSAGEM_VAZIA_PADRAO =
+  'Você ainda não possui solicitações para acompanhar.'
+
+function EmptyState({
+  filtered,
+  mensagemVazia = MENSAGEM_VAZIA_PADRAO,
+}: { filtered: boolean; mensagemVazia?: string }) {
   return (
     <div className="flex justify-center items-center gap-2.5 self-stretch rounded-2xl bg-card p-4">
       <p className="text-foreground-light text-sm font-normal leading-5 tracking-normal">
         {filtered
           ? 'Nenhuma solicitação encontrada para esse filtro.'
-          : 'Você ainda não possui solicitações para acompanhar.'}
+          : mensagemVazia}
       </p>
     </div>
   )
@@ -74,12 +80,18 @@ export function RequestsList({
   filtros = FILTER_TABS,
   filtroInicial,
   pagination,
+  mensagemVazia,
   searchable = false,
 }: {
   items: RequestItem[]
   filtros?: readonly string[]
   filtroInicial?: string
   pagination?: RequestsPagination
+  /**
+   * Texto da lista sem nenhum item (sem filtro de aba nem busca). Com filtro, a
+   * mensagem continua sendo a do filtro.
+   */
+  mensagemVazia?: string
   /**
    * Campo "Encontre sua solicitação". Desligado em todas as origens até o RMI
    * ter um query param de busca para o histórico SGRC. O filtro abaixo é local
@@ -161,7 +173,10 @@ export function RequestsList({
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState filtered={activeFilter !== 'Todos' || termo.length >= 2} />
+        <EmptyState
+          filtered={activeFilter !== 'Todos' || termo.length >= 2}
+          mensagemVazia={mensagemVazia}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {filtered.map(item => (
