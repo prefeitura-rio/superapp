@@ -1,5 +1,6 @@
 import ConsultaProtocoloPage from '@/app/(app)/(logged-in-out)/consulta-protocolo/page'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { renderWithQuery } from '@/test/render-with-query'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -61,7 +62,7 @@ describe('DEV-789 — breadcrumb de /consulta-protocolo', () => {
   })
 
   it('estado inicial (formulário) não mostra Ouvidoria na trilha', () => {
-    render(<ConsultaProtocoloPage />)
+    renderWithQuery(<ConsultaProtocoloPage />)
     expectTrailWithoutOuvidoria()
   })
 
@@ -70,7 +71,7 @@ describe('DEV-789 — breadcrumb de /consulta-protocolo', () => {
       'fetch',
       vi.fn(async () => new Response(null, { status: 404 }))
     )
-    const { container } = render(<ConsultaProtocoloPage />)
+    const { container } = renderWithQuery(<ConsultaProtocoloPage />)
     submitProtocolo(container)
 
     await waitFor(() =>
@@ -108,7 +109,7 @@ describe('DEV-789 — breadcrumb de /consulta-protocolo', () => {
         })
       )
     )
-    const { container } = render(<ConsultaProtocoloPage />)
+    const { container } = renderWithQuery(<ConsultaProtocoloPage />)
     submitProtocolo(container)
 
     await waitFor(() => expect(container).toHaveTextContent('2 solicitações'))

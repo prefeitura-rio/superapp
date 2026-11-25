@@ -14,7 +14,8 @@ interface NavItem {
   external?: boolean
 }
 
-const WHATSAPP_URL = 'https://wa.me/5521991952121'
+const WHATSAPP_MESSAGE = 'Olá, eu gostaria de falar com a Prefeitura!'
+const WHATSAPP_URL = `https://wa.me/5521991952121?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
 interface FloatNavigationClientProps {
   walletUrl: string
