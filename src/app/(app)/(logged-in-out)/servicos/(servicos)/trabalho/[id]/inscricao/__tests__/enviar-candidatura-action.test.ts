@@ -97,6 +97,27 @@ describe('enviarCandidatura', () => {
       })
     })
 
+    test('mostra a mensagem do backend em status 400 com error (vaga expirada)', async () => {
+      server.use(
+        http.post(
+          `${COURSES_BASE_URL}/api/v1/empregabilidade/candidaturas`,
+          () => {
+            return HttpResponse.json(
+              { error: 'vaga expirada, não aceita mais candidaturas' },
+              { status: 400 }
+            )
+          }
+        )
+      )
+
+      const result = await enviarCandidatura(VAGA_ID)
+
+      expect(result).toEqual({
+        success: false,
+        error: 'vaga expirada, não aceita mais candidaturas',
+      })
+    })
+
     test('retorna error genérico em status 400 sem message', async () => {
       server.use(
         http.post(

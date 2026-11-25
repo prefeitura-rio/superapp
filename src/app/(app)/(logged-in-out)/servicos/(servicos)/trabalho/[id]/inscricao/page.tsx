@@ -6,6 +6,7 @@ import { getApiV1EmpregabilidadeCandidaturasUsuarioCpf } from '@/http-courses/em
 import { getApiV1EmpregabilidadeOnboardingCpf } from '@/http-courses/empregabilidade-onboarding/empregabilidade-onboarding'
 import { getApiPublicEmpregabilidadeVagasId } from '@/http-courses/empregabilidade-vagas-public/empregabilidade-vagas-public'
 import type { EmpregabilidadeInformacaoComplementar } from '@/http-courses/models/empregabilidadeInformacaoComplementar'
+import { EmpregabilidadeStatusVaga } from '@/http-courses/models/empregabilidadeStatusVaga'
 import type {
   ModelsEmailPrincipal,
   ModelsTelefonePrincipal,
@@ -102,6 +103,16 @@ export default async function InscricaoPage({
 
   if (vagaResponse.status !== 200 || !vagaResponse.data) {
     notFound()
+  }
+
+  // Mesma regra da página de detalhe: só vaga ativa aceita inscrição. Vaga
+  // expirada, congelada ou descontinuada volta ao detalhe, que mostra
+  // "Inscrições encerradas", em vez de percorrer o fluxo até o backend recusar.
+  if (
+    vagaResponse.data.status !==
+    EmpregabilidadeStatusVaga.StatusVagaPublicadoAtivo
+  ) {
+    redirect(`/servicos/trabalho/${vagaId}`)
   }
 
   if (userInfoResponse.status !== 200 || !userInfoResponse.data) {

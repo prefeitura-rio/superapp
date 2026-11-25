@@ -168,10 +168,12 @@ export async function enviarCandidatura(
     }
 
     if (response.status === 400 && response.data) {
-      const data = response.data as { message?: string }
+      // O backend devolve a mensagem em `error` (ex.: vaga expirada); `message`
+      // fica como fallback para respostas no formato antigo.
+      const data = response.data as { error?: string; message?: string }
       return {
         success: false,
-        error: data.message ?? 'Oops! Algo deu errado.',
+        error: data.error || data.message || 'Oops! Algo deu errado.',
       }
     }
 
