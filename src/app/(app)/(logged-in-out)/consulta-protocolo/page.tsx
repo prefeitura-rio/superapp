@@ -9,6 +9,8 @@ import {
 import { Breadcrumb } from '@/app/components/breadcrumb'
 import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
+import { chamadoPublicoQueryOptions } from '@/hooks/chamados/chamados-query-options'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -26,6 +28,7 @@ type PageState = 'form' | 'loading' | 'results' | 'error'
 
 export default function ConsultaProtocoloPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [protocolo, setProtocolo] = useState('')
   const [pageState, setPageState] = useState<PageState>('form')
   const [errorMsg, setErrorMsg] = useState('')
@@ -42,25 +45,11 @@ export default function ConsultaProtocoloPage() {
     setSearchedProtocolo(trimmed)
 
     try {
-      const res = await fetch(
-        `/api/chamados-publico/${encodeURIComponent(trimmed)}`
+      // Cache por protocolo (1 min): repetir a consulta não refaz a requisição.
+      // `null` = protocolo inexistente (404/204), resultado esperado.
+      const data = await queryClient.fetchQuery(
+        chamadoPublicoQueryOptions(trimmed)
       )
-
-      if (res.status === 404 || res.status === 204) {
-        setErrorMsg('Nenhuma solicitação encontrada para este protocolo.')
-        setPageState('error')
-        return
-      }
-
-      if (!res.ok) {
-        setErrorMsg(
-          'Ocorreu um erro ao consultar o protocolo. Tente novamente.'
-        )
-        setPageState('error')
-        return
-      }
-
-      const data = await res.json()
       const ordens: any[] = data?.ordens_de_servico ?? []
 
       if (ordens.length === 0) {
@@ -83,7 +72,7 @@ export default function ConsultaProtocoloPage() {
         servico: os.servico ?? os.subtema ?? os.tema ?? '—',
         categoria: mapCategoria(os.categoria),
         status: os.status ?? '',
-        dataAbertura: os.dataAbertura ?? data.dataAbertura ?? '',
+        dataAbertura: os.dataAbertura ?? data?.dataAbertura ?? '',
         protocolo: trimmed,
         isAcessoInformacao: os.isAcessoInformacao ?? false,
       }))

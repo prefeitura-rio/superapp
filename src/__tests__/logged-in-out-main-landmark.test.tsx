@@ -7,6 +7,7 @@ import ReclamacaoPage from '@/app/(app)/(logged-in-out)/ouvidoria/reclamacao/pag
 import CookiesPolicy from '@/app/(app)/(logged-in-out)/politicas-de-uso-de-cookies/page'
 import SolicitacaoOuvidoriaPage from '@/app/(app)/(logged-in-out)/solicitacoes/[id]/ouvidoria/page'
 import RequestDetailPage from '@/app/(app)/(logged-in-out)/solicitacoes/[id]/page'
+import { renderWithQuery } from '@/test/render-with-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -98,7 +99,7 @@ describe('DEV-234 — um único <main> nas páginas de (logged-in-out)', () => {
   })
 
   it('/consulta-protocolo (formulário) tem um único main', () => {
-    const { container } = render(<ConsultaProtocoloPage />)
+    const { container } = renderWithQuery(<ConsultaProtocoloPage />)
     expectSingleMain(container)
     expect(container.querySelector('main h1')).toHaveTextContent(
       'Consulte seu protocolo'
@@ -111,7 +112,7 @@ describe('DEV-234 — um único <main> nas páginas de (logged-in-out)', () => {
       'fetch',
       vi.fn(async () => jsonResponse(chamadoPublico))
     )
-    const { container } = render(<ConsultaProtocoloPage />)
+    const { container } = renderWithQuery(<ConsultaProtocoloPage />)
 
     fireEvent.change(screen.getByLabelText('Número de protocolo'), {
       target: { value: 'RIO-2026-00000001' },
@@ -175,13 +176,14 @@ describe('DEV-234 — um único <main> nas páginas de (logged-in-out)', () => {
           })
       )
     )
-    const { container } = render(<RequestDetailPage />)
+    const { container } = renderWithQuery(<RequestDetailPage />)
     // Carregando (skeleton).
     expectSingleMain(container)
 
     await waitFor(() =>
       expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-        '/api/chamados-publico/RIO-2026-00000001'
+        '/api/chamados-publico/RIO-2026-00000001',
+        expect.anything()
       )
     )
     resolveFetch(jsonResponse(chamadoPublico))
@@ -200,7 +202,7 @@ describe('DEV-234 — um único <main> nas páginas de (logged-in-out)', () => {
       'fetch',
       vi.fn(async () => jsonResponse({}, 404))
     )
-    const { container } = render(<RequestDetailPage />)
+    const { container } = renderWithQuery(<RequestDetailPage />)
 
     await waitFor(() =>
       expect(container).toHaveTextContent(

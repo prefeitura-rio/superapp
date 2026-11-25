@@ -122,9 +122,80 @@ Arquivos principais:
 | `src/app/api/chamados-publico/[protocolo]/route.ts` | Consulta pública (SGRC ou Salesforce) |
 | `src/lib/dal.ts:170` | `getDalCitizenCpfMaintenanceRequest`, a mesma função da carteira |
 | `src/http/` | Clients Orval do RMI (`npx orval --project rmi`) |
-| `minhas-solicitacoes/components/origem-chamados.tsx` | Seletor de origem e carregamento paginado do SGRC |
+| `minhas-solicitacoes/components/origem-chamados.tsx` | Seletor de origem; o SGRC é lido por `useChamadosSgrc` |
+| `minhas-solicitacoes/components/salesforce-lista.tsx` | Lista do Salesforce (`useChamadosSalesforce`) |
+| `src/lib/chamados/query-keys.ts` | Factory de query keys e `staleTime` (ver [Cache no client](#cache-no-client-tanstack-query)) |
+| `src/lib/chamados/fetchers.ts` | Fetchers do BFF, `ChamadosHttpError` e `chamadosRetry` |
+| `src/hooks/chamados/` | `queryOptions` compartilhados, hooks de leitura e `useInvalidateChamados` |
+| `src/providers/chamados-cache-sync.tsx` | Invalida o cache ao voltar do formulário do 1746 |
 | `minhas-solicitacoes/components/requests-list.tsx` | Abas, cards, paginação e busca (desligada) |
 | `minhas-solicitacoes/helpers.ts` | `normalizeStatus`, `mapCategoria`, `formatDate` |
+
+## Cache no client (TanStack Query)
+
+Todas as leituras de chamados passam pelo TanStack Query (provider em
+`src/app/(app)/layout.tsx`). O cache é só em memória: nada de `persistQueryClient`, por
+serem dados pessoais. O BFF continua com `Cache-Control: private, no-store`.
+
+| Tela | Query key | staleTime | Observação |
+|---|---|---|---|
+| Lista do Salesforce e banner da home | `['chamados','list','salesforce']` | 2 min | **Mesma key**: uma requisição só atende lista e banner (o banner usa `select`) |
+| Histórico SGRC | `['chamados','list','sgrc',{page}]` | 10 min | Alinhado ao `revalidate: 600` da DAL; `keepPreviousData` na troca de página |
+| Detalhe | `['chamados','detail',protocolo]` | 2 min | Titular com fallback para o público; `?os=` não entra na key |
+| Consulta pública | `['chamados','publico',protocolo]` | 1 min | `fetchQuery` no submit; 404/204 viram `null` |
+
+- **SSR:** `minhas-solicitacoes/page.tsx` faz o *prefetch* da lista do Salesforce no
+  servidor (`getServerQueryClient`, um client por requisição) e a entrega por
+  `HydrationBoundary`. O servidor não renderiza o dado: só o client o lê. Sem
+  `FEATURE_SGRC_HISTORICO` o prefetch é aguardado (a lista vem no HTML); com a flag, ele
+  segue por streaming, porque a origem padrão é o SGRC.
+- **Erros:** 4xx não é repetido; 5xx e erro de rede são repetidos uma vez.
+- **Logout:** `useLogout` chama `queryClient.clear()`. Sem isso, o próximo usuário do
+  navegador veria o cache do anterior.
+- **Keys sem CPF:** o client nunca vê o CPF (o BFF o lê do token); o isolamento entre
+  usuários vem do `clear()` no logout.
+
+### Invalidação ao abrir um chamado
+
+O superapp **não cria chamados**: o cidadão vai ao formulário externo do 1746
+(`TICKET_FORM_BASE_URL`), na mesma aba, e volta. O `ChamadosCacheSync` (montado em
+`(app)/layout.tsx`, só com `FEATURE_SALESFORCE`) cobre isso:
+
+1. Um listener de `click`/`auxclick` delegado no `document` marca num cookie de curta
+   duração (`chamados_formulario_aberto`, só um timestamp, 1 h, `SameSite=Lax`) qualquer clique em link para a origem do formulário. Os
+   links espalhados pelo app não precisam mudar, e novos já entram.
+2. Ao voltar (`visibilitychange`, `focus` ou `pageshow` com bfcache), se há marcador de
+   até 1 h, invalida lista do Salesforce, detalhes e consultas públicas. Marcador expirado
+   é descartado.
+3. Numa carga completa (voltar na mesma aba sem bfcache) o cache já nasce vazio e o
+   servidor traz dados novos; o cookie é só apagado.
+
+O marcador é um cookie (e não `sessionStorage`) para o servidor também lê-lo: ver
+[Origem aberta em Minhas Solicitações](#origem-aberta-em-minhas-solicitações).
+
+O histórico SGRC **não** é invalidado: o 1746 legado não recebe chamados novos. Se o
+superapp passar a ter `POST /chamados`, o `onSuccess` do `useMutation` chama
+`useInvalidateChamados().invalidateSalesforce()`.
+
+### Origem aberta em Minhas Solicitações
+
+Com `FEATURE_SGRC_HISTORICO` ligada, a tela tem duas origens: "abertas até 26/11/2026"
+(SGRC, legado) e "abertas a partir de 27/11/2026" (Salesforce, novo 1746).
+`resolveOrigemInicial` (`minhas-solicitacoes/origem.ts`) escolhe a que abre, por
+prioridade:
+
+1. **`?o=1`** (Salesforce) ou **`?o=0`** (SGRC) explícito. O param é curto e opaco de
+   propósito, sem texto legível na URL (`ORIGEM_PARAM` em `origem.ts`). O banner da home aponta para
+   `/minhas-solicitacoes?o=1`, porque a contagem dele é só do Salesforce.
+   Escolher a origem no seletor atualiza `?o=` na URL (`history.replaceState`, sem
+   nova renderização no servidor) e remove `?filtro=`, que é da aba do Salesforce.
+2. **Cookie de retorno do formulário** (`chamados_formulario_aberto`, ver acima): quem sai
+   para o formulário do 1746 e volta a `/minhas-solicitacoes` abre nos chamados do
+   Salesforce. O servidor lê o cookie, então a página já sai na origem certa, sem piscar o
+   SGRC nem chamar o RMI.
+3. **SGRC** (padrão): acesso direto a `/minhas-solicitacoes`.
+
+Trocar a aba de filtro (`?filtro=`) preserva os demais params, `?o=` incluído.
 
 ## Contrato das rotas BFF (parte SGRC)
 
@@ -217,7 +288,7 @@ mudaram.
 | `dataAbertura` | `data_inicio` | Data que não faz parse é descartada (tela mostra `—`) |
 | "Prazo limite" | `data_alvo_finalizacao` | |
 | "Órgão" | `nome_unidade_organizacional` | |
-| Timeline | `andamentos[]` (`tipo` → evento, `data`, `descricao`) | Titular: todos, em ordem crescente. Público: só o último |
+| Timeline | `andamentos[]` (`tipo` → evento, `data`, `descricao`) | Titular: todos, em ordem crescente. Público: só o último. Sem `tipo` (o caso do 1746), a `descricao` vira o título visível |
 | "Dados atualizados em" | `loaded_at` | A carga mais antiga entre os chamados do protocolo |
 | Descrição e endereço (rua + bairro) | `descricao`, `logradouro`, `bairro` | Só titular. Público vê só o bairro |
 | "Origem do chamado", Ouvidoria, Recurso LAI | — | Não existem no SGRC: os cards não aparecem |
@@ -312,8 +383,8 @@ Logado, abra `/minhas-solicitacoes` com um CPF que tenha chamados no 1746 legado
   em `/api/*`.
 - **Banner da home** conta só chamados do Salesforce (chama `/api/chamados` sem
   `origem`).
-- **Cache da lista SGRC:** até 10 min de atraso no cache de dados do Next (DAL). O
-  detalhe é sempre `no-store`.
+- **Cache da lista SGRC:** até 10 min de atraso no cache de dados do Next (DAL), e o
+  `staleTime` do client é igual a isso. O detalhe é sempre `no-store` no servidor.
 - **Dica de formato** em `/consulta-protocolo` ("RIO-12345678-9") descreve só o SGRC.
   Com `FEATURE_SGRC_HISTORICO` desligada, esse formato não é consultável. Dá para
   condicionar a dica pela flag (já disponível no client via `useServerFeatureFlags`).

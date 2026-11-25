@@ -12,10 +12,12 @@ import { FloatNavigationWrapper } from '@/app/components/float-navigation-wrappe
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
+import { useChamadoDetalhe } from '@/hooks/chamados/use-chamados'
+import type { ChamadoJson } from '@/lib/chamados/fetchers'
 import { decodeHtmlEntities } from '@/lib/html-entities'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
@@ -44,6 +46,108 @@ function SectionCard({
   )
 }
 
+const captionStyle: React.CSSProperties = {
+  color: 'var(--foreground-light, #71717B)',
+  fontFamily: 'var(--font-family-sans, "DM Sans")',
+  fontSize: 'var(--font-size-xs, 12px)',
+  fontWeight: 'var(--font-weight-normal, 400)',
+  lineHeight: 'var(--font-leading-4, 16px)',
+  letterSpacing: 'var(--font-tracking-normal, 0)',
+}
+
+const dottedLineStyle: React.CSSProperties = {
+  width: '1.5px',
+  backgroundImage:
+    'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 3px, transparent 3px, transparent 6px)',
+  opacity: 0.4,
+}
+
+function titleStyle(active: boolean): React.CSSProperties {
+  return {
+    color: active
+      ? 'var(--card-foreground, #020618)'
+      : 'var(--foreground-light, #71717B)',
+    fontFamily: 'var(--font-family-sans, "DM Sans")',
+    fontSize: 'var(--font-size-sm, 14px)',
+    fontWeight: 'var(--font-weight-medium, 500)',
+    lineHeight: 'var(--font-leading-5, 20px)',
+    letterSpacing: 'var(--font-tracking-normal, 0)',
+  }
+}
+
+function AndamentoChevron({ open }: { open: boolean }) {
+  return (
+    <div className="w-9 h-9 shrink-0 rounded-full bg-secondary flex items-center justify-center">
+      <svg
+        className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+        style={{ color: 'var(--foreground, #020618)' }}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+        aria-hidden
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  )
+}
+
+function AndamentoDisclosure({
+  label,
+  date,
+  description,
+  active = true,
+  className,
+}: {
+  label: string
+  date: string
+  description?: string
+  active?: boolean
+  className?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const hasDescription = !!description
+  const header = (
+    <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+      <span style={titleStyle(active)}>{label}</span>
+      <span style={captionStyle}>{date}</span>
+    </div>
+  )
+
+  return (
+    <div className={`flex flex-col gap-0.5 flex-1 min-w-0 ${className ?? ''}`}>
+      {hasDescription ? (
+        <button
+          type="button"
+          className="flex items-center justify-between w-full text-left gap-2 cursor-pointer"
+          aria-expanded={open}
+          onClick={() => setOpen(current => !current)}
+        >
+          {header}
+          <AndamentoChevron open={open} />
+        </button>
+      ) : (
+        header
+      )}
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: open && hasDescription ? '200px' : '0px',
+          opacity: open && hasDescription ? 1 : 0,
+        }}
+      >
+        <p
+          style={{ ...captionStyle, whiteSpace: 'pre-wrap' }}
+          className="pt-0.5 pr-4"
+        >
+          {decodeHtmlEntities(description ?? '')}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 interface TimelineItemProps {
   label: string
   date: string
@@ -63,106 +167,47 @@ function TimelineItem({
   showTrailingLine = false,
   description,
 }: TimelineItemProps) {
-  const [open, setOpen] = useState(false)
-
-  const captionStyle: React.CSSProperties = {
-    color: 'var(--foreground-light, #71717B)',
-    fontFamily: 'var(--font-family-sans, "DM Sans")',
-    fontSize: 'var(--font-size-xs, 12px)',
-    fontWeight: 'var(--font-weight-normal, 400)',
-    lineHeight: 'var(--font-leading-4, 16px)',
-    letterSpacing: 'var(--font-tracking-normal, 0)',
-  }
-
-  const titleStyle: React.CSSProperties = {
-    color: active
-      ? 'var(--card-foreground, #020618)'
-      : 'var(--foreground-light, #71717B)',
-    fontFamily: 'var(--font-family-sans, "DM Sans")',
-    fontSize: 'var(--font-size-sm, 14px)',
-    fontWeight: 'var(--font-weight-medium, 500)',
-    lineHeight: 'var(--font-leading-4, 16px)',
-    letterSpacing: 'var(--font-tracking-normal, 0)',
-  }
+  const showLine = !isLast || showTrailingLine
 
   return (
-    <div className="flex gap-3 relative">
-      {/* Coluna esquerda: bolinha + linha até o próximo item */}
-      <div className="flex flex-col items-center" style={{ width: '12px' }}>
-        <div
-          className="w-3 h-3 rounded-full shrink-0 z-10 relative"
+    <div className="flex items-start gap-3">
+      <div className="flex w-3 shrink-0 flex-col items-center self-stretch">
+        <span
+          aria-hidden
+          className="mt-1 block shrink-0 rounded-full"
           style={{
-            marginTop: '2px',
+            width: 12,
+            height: 12,
+            minWidth: 12,
+            minHeight: 12,
             background: active
               ? 'var(--foreground-light, #71717B)'
               : 'var(--terciary, #D4D4D8)',
           }}
         />
-        {(!isLast || showTrailingLine) && (
+        {showLine && (
           <div
-            className="flex-1"
-            style={{
-              width: '1.5px',
-              marginBottom: '-2px',
-              ...(isPast
+            aria-hidden
+            className="mt-1 min-h-2 flex-1"
+            style={
+              isPast
                 ? {
+                    width: '1.5px',
                     background: 'var(--foreground-light, #71717B)',
                     opacity: 0.4,
                   }
-                : {
-                    backgroundImage:
-                      'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 3px, transparent 3px, transparent 6px)',
-                    opacity: 0.4,
-                  }),
-            }}
+                : dottedLineStyle
+            }
           />
         )}
       </div>
-      <div className="flex flex-col gap-0.5 flex-1 min-w-0 pb-4">
-        <button
-          type="button"
-          className="flex items-center justify-between w-full text-left gap-2 cursor-pointer"
-          aria-expanded={open}
-          onClick={() => setOpen(o => !o)}
-        >
-          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-            <span style={titleStyle}>{label}</span>
-            <span style={captionStyle}>{date}</span>
-          </div>
-          {description && (
-            <div className="w-9 h-9 shrink-0 rounded-full bg-secondary flex items-center justify-center">
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-                style={{ color: 'var(--foreground, #020618)' }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          )}
-        </button>
-        <div
-          className="overflow-hidden transition-all duration-300 ease-in-out"
-          style={{
-            maxHeight: open && description ? '200px' : '0px',
-            opacity: open && description ? 1 : 0,
-          }}
-        >
-          <p
-            style={{ ...captionStyle, whiteSpace: 'pre-wrap' }}
-            className="pt-0.5 pr-4"
-          >
-            {decodeHtmlEntities(description ?? '')}
-          </p>
-        </div>
-      </div>
+      <AndamentoDisclosure
+        className="pb-4"
+        label={label}
+        date={date}
+        description={description}
+        active={active}
+      />
     </div>
   )
 }
@@ -280,98 +325,24 @@ function StatusTimeline({ data }: { data: DetailData }) {
   )
 }
 
-const dottedLineStyle: React.CSSProperties = {
-  width: '1.5px',
-  backgroundImage:
-    'repeating-linear-gradient(to bottom, var(--foreground-light) 0px, var(--foreground-light) 3px, transparent 3px, transparent 6px)',
-  opacity: 0.4,
-}
-
 function PublicAndamento({ data }: { data: DetailData }) {
-  const [open, setOpen] = useState(false)
   const isFinal =
     data.macroStatus === 'Concluído' || data.macroStatus === 'Cancelado'
-  const hasDescription = !!data.ultimoAndamento?.descricao
-
-  const captionStyle: React.CSSProperties = {
-    color: 'var(--foreground-light, #71717B)',
-    fontFamily: 'var(--font-family-sans, "DM Sans")',
-    fontSize: 'var(--font-size-xs, 12px)',
-    fontWeight: 'var(--font-weight-normal, 400)',
-    lineHeight: 'var(--font-leading-4, 16px)',
-  }
 
   return (
-    <div className="flex gap-3">
-      <div className="flex flex-col items-center" style={{ width: '12px' }}>
-        {isFinal && <div className="flex-1" style={dottedLineStyle} />}
-        <div
-          className="w-3 h-3 rounded-full shrink-0"
-          style={{
-            marginTop: '2px',
-            background: 'var(--foreground-light, #71717B)',
-          }}
-        />
-        {!isFinal && <div className="flex-1" style={dottedLineStyle} />}
-      </div>
-      <div className="flex flex-col gap-0.5 flex-1 min-w-0 pb-1">
-        <button
-          type="button"
-          className="flex items-center justify-between w-full text-left gap-2 cursor-pointer"
-          aria-expanded={open}
-          onClick={() => hasDescription && setOpen(o => !o)}
-        >
-          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-            <span
-              style={{
-                color: 'var(--card-foreground, #020618)',
-                fontFamily: 'var(--font-family-sans, "DM Sans")',
-                fontSize: 'var(--font-size-sm, 14px)',
-                fontWeight: 'var(--font-weight-medium, 500)',
-                lineHeight: 'var(--font-leading-4, 16px)',
-              }}
-            >
-              {data.ultimoAndamento?.evento ?? data.macroStatus}
-            </span>
-            <span style={captionStyle}>
-              {data.ultimoAndamento?.dataInsercao
-                ? formatDateTime(data.ultimoAndamento.dataInsercao)
-                : data.dataAbertura}
-            </span>
-          </div>
-          {hasDescription && (
-            <svg
-              className={`w-4 h-4 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--foreground-light, #71717B)' }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          )}
-        </button>
-        <div
-          className="overflow-hidden transition-all duration-300 ease-in-out"
-          style={{
-            maxHeight: open && hasDescription ? '200px' : '0px',
-            opacity: open && hasDescription ? 1 : 0,
-          }}
-        >
-          <p
-            style={{ ...captionStyle, whiteSpace: 'pre-wrap' }}
-            className="pt-0.5 pr-4"
-          >
-            {decodeHtmlEntities(data.ultimoAndamento?.descricao ?? '')}
-          </p>
-        </div>
-      </div>
-    </div>
+    <TimelineItem
+      label={data.ultimoAndamento?.evento ?? data.macroStatus}
+      date={
+        data.ultimoAndamento?.dataInsercao
+          ? formatDateTime(data.ultimoAndamento.dataInsercao)
+          : data.dataAbertura
+      }
+      active
+      isLast
+      isPast={false}
+      showTrailingLine={!isFinal}
+      description={data.ultimoAndamento?.descricao || undefined}
+    />
   )
 }
 
@@ -748,172 +719,130 @@ function ErrorState({ protocolo }: { protocolo: string }) {
   )
 }
 
+type Ordem = Record<string, any>
+
+/** Escolhe a OS pedida em `?os=`; sem ela (ou sem achar), a primeira. */
+function escolherOrdem(ordens: Ordem[], codigoOs: string | null): Ordem {
+  if (codigoOs) {
+    return ordens.find(o => o.codigoOs === codigoOs) ?? ordens[0]
+  }
+  return ordens[0]
+}
+
+function mapearOpcaoOuvidoria(
+  opcao: { available?: boolean; categoryId?: string | null } | null | undefined
+) {
+  if (!opcao) return null
+  return {
+    available: opcao.available ?? false,
+    categoryId: opcao.categoryId ?? null,
+  }
+}
+
+function mapearTitular(json: ChamadoJson, codigoOs: string | null): DetailData {
+  const os = escolherOrdem(json.ordens_de_servico ?? [], codigoOs)
+  const andamentos = (os?.andamentos ?? [])
+    .filter((a: { tipoEvento?: string }) => a.tipoEvento !== 'Transfer_WO')
+    .map(
+      (a: { evento?: string; dataInsercao?: string; descricao?: string }) => ({
+        evento: a.evento ?? '—',
+        dataInsercao: a.dataInsercao ?? '',
+        descricao: decodeHtmlEntities(a.descricao ?? ''),
+      })
+    )
+
+  return {
+    protocolo: json.protocolo,
+    servico: os?.servico ?? os?.subtema ?? '—',
+    macroStatus: normalizeStatus(os?.status ?? json.status),
+    dataAbertura: os?.dataAbertura
+      ? formatDate(os.dataAbertura)
+      : json.dataAbertura
+        ? formatDate(json.dataAbertura)
+        : '',
+    dataUltimaAtualizacao: json.dataUltimaAtualizacao
+      ? formatDateTime(json.dataUltimaAtualizacao)
+      : '',
+    previsaoSLA: os?.previsaoSLA ? formatDate(os.previsaoSLA) : '',
+    motivoFechamento: os?.motivoFechamento ?? '',
+    descricao: os?.descricao ?? '',
+    endereco: os?.endereco ?? null,
+    orgao: os?.orgaoResponsavel?.nome ?? os?.orgaoResponsavelPai?.nome ?? '',
+    categoria: os?.subtema ?? os?.categoria ?? 'Serviço',
+    subcategoria: os?.servico ?? '',
+    origem: json.origem ?? '',
+    andamentos,
+    isLoggedIn: true,
+    osId: os?.id ?? '',
+    isAcessoInformacao: os?.isAcessoInformacao ?? false,
+    canOpenRecurso: os?.canOpen?.recurso ?? null,
+    loadedAt: json.loaded_at ? formatDateTime(json.loaded_at) : undefined,
+    canOpenOuvidoria: os?.canOpen
+      ? {
+          elogio: mapearOpcaoOuvidoria(os.canOpen.elogio),
+          sugestao: mapearOpcaoOuvidoria(os.canOpen.sugestao),
+          reclamacao: mapearOpcaoOuvidoria(os.canOpen.reclamacao),
+        }
+      : null,
+  }
+}
+
+function mapearPublico(json: ChamadoJson, codigoOs: string | null): DetailData {
+  const os = escolherOrdem(json.ordens_de_servico ?? [], codigoOs)
+  const ultimo = os?.ultimoAndamento
+    ? {
+        evento: os.ultimoAndamento.evento ?? '',
+        dataInsercao: os.ultimoAndamento.dataInsercao ?? '',
+        descricao: decodeHtmlEntities(os.ultimoAndamento.descricao ?? ''),
+      }
+    : null
+
+  return {
+    protocolo: json.protocolo,
+    servico: os?.servico ?? '—',
+    macroStatus: normalizeStatus(os?.status ?? json.status),
+    dataAbertura: os?.dataAbertura
+      ? formatDate(os.dataAbertura)
+      : json.dataAbertura
+        ? formatDate(json.dataAbertura)
+        : '',
+    dataUltimaAtualizacao: '',
+    previsaoSLA: '',
+    motivoFechamento: '',
+    descricao: '',
+    endereco: os?.endereco ?? null,
+    orgao: os?.orgaoResponsavel?.nome ?? '',
+    categoria: os?.subtema ?? '',
+    subcategoria: os?.servico ?? '',
+    origem: '',
+    andamentos: [],
+    isLoggedIn: false,
+    osId: '',
+    isAcessoInformacao: false,
+    canOpenRecurso: null,
+    canOpenOuvidoria: null,
+    loadedAt: json.loaded_at ? formatDateTime(json.loaded_at) : undefined,
+    ultimoAndamento: ultimo,
+  }
+}
+
 export default function RequestDetailPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const protocolo = params.id as string
   const codigoOs = searchParams.get('os')
 
-  const [data, setData] = useState<DetailData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  // O cache guarda o payload do BFF por protocolo; a OS de `?os=` só escolhe
+  // qual ordem mostrar, então trocar de OS não refaz a requisição.
+  const { data: detalhe, isPending } = useChamadoDetalhe(protocolo)
+  const data = useMemo(() => {
+    if (!detalhe) return null
+    return detalhe.visao === 'titular'
+      ? mapearTitular(detalhe.data, codigoOs)
+      : mapearPublico(detalhe.data, codigoOs)
+  }, [detalhe, codigoOs])
 
-  useEffect(() => {
-    async function load() {
-      // Tenta autenticado primeiro
-      try {
-        const res = await fetch(`/api/chamados/${protocolo}`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json.protocolo) {
-            const ordens = json.ordens_de_servico ?? []
-            const os = codigoOs
-              ? (ordens.find(
-                  (o: { codigoOs?: string }) => o.codigoOs === codigoOs
-                ) ?? ordens[0])
-              : ordens[0]
-            const andamentos = (os?.andamentos ?? [])
-              .filter(
-                (a: { tipoEvento?: string }) => a.tipoEvento !== 'Transfer_WO'
-              )
-              .map(
-                (a: {
-                  evento?: string
-                  dataInsercao?: string
-                  descricao?: string
-                }) => ({
-                  evento: a.evento ?? '—',
-                  dataInsercao: a.dataInsercao ?? '',
-                  descricao: decodeHtmlEntities(a.descricao ?? ''),
-                })
-              )
-
-            setData({
-              protocolo: json.protocolo,
-              servico: os?.servico ?? os?.subtema ?? '—',
-              macroStatus: normalizeStatus(os?.status ?? json.status),
-              dataAbertura: os?.dataAbertura
-                ? formatDate(os.dataAbertura)
-                : json.dataAbertura
-                  ? formatDate(json.dataAbertura)
-                  : '',
-              dataUltimaAtualizacao: json.dataUltimaAtualizacao
-                ? formatDateTime(json.dataUltimaAtualizacao)
-                : '',
-              previsaoSLA: os?.previsaoSLA ? formatDate(os.previsaoSLA) : '',
-              motivoFechamento: os?.motivoFechamento ?? '',
-              descricao: os?.descricao ?? '',
-              endereco: os?.endereco ?? null,
-              orgao:
-                os?.orgaoResponsavel?.nome ??
-                os?.orgaoResponsavelPai?.nome ??
-                '',
-              categoria: os?.subtema ?? os?.categoria ?? 'Serviço',
-              subcategoria: os?.servico ?? '',
-              origem: json.origem ?? '',
-              andamentos,
-              isLoggedIn: true,
-              osId: os?.id ?? '',
-              isAcessoInformacao: os?.isAcessoInformacao ?? false,
-              canOpenRecurso: os?.canOpen?.recurso ?? null,
-              loadedAt: json.loaded_at
-                ? formatDateTime(json.loaded_at)
-                : undefined,
-              canOpenOuvidoria: os?.canOpen
-                ? {
-                    elogio: os.canOpen.elogio
-                      ? {
-                          available: os.canOpen.elogio.available ?? false,
-                          categoryId: os.canOpen.elogio.categoryId ?? null,
-                        }
-                      : null,
-                    sugestao: os.canOpen.sugestao
-                      ? {
-                          available: os.canOpen.sugestao.available ?? false,
-                          categoryId: os.canOpen.sugestao.categoryId ?? null,
-                        }
-                      : null,
-                    reclamacao: os.canOpen.reclamacao
-                      ? {
-                          available: os.canOpen.reclamacao.available ?? false,
-                          categoryId: os.canOpen.reclamacao.categoryId ?? null,
-                        }
-                      : null,
-                  }
-                : null,
-            })
-            setLoading(false)
-            return
-          }
-        }
-      } catch {
-        // erro de rede — tenta público
-      }
-
-      // Fallback: consulta pública
-      try {
-        const res = await fetch(`/api/chamados-publico/${protocolo}`)
-        if (res.ok) {
-          const json = await res.json()
-          const ordens = json.ordens_de_servico ?? []
-          const os = codigoOs
-            ? (ordens.find(
-                (o: { codigoOs?: string }) => o.codigoOs === codigoOs
-              ) ?? ordens[0])
-            : ordens[0]
-          const ultimo = os?.ultimoAndamento
-            ? {
-                evento: os.ultimoAndamento.evento ?? '',
-                dataInsercao: os.ultimoAndamento.dataInsercao ?? '',
-                descricao: decodeHtmlEntities(
-                  os.ultimoAndamento.descricao ?? ''
-                ),
-              }
-            : null
-
-          setData({
-            protocolo: json.protocolo,
-            servico: os?.servico ?? '—',
-            macroStatus: normalizeStatus(os?.status ?? json.status),
-            dataAbertura: os?.dataAbertura
-              ? formatDate(os.dataAbertura)
-              : json.dataAbertura
-                ? formatDate(json.dataAbertura)
-                : '',
-            dataUltimaAtualizacao: '',
-            previsaoSLA: '',
-            motivoFechamento: '',
-            descricao: '',
-            endereco: os?.endereco ?? null,
-            orgao: os?.orgaoResponsavel?.nome ?? '',
-            categoria: os?.subtema ?? '',
-            subcategoria: os?.servico ?? '',
-            origem: '',
-            andamentos: [],
-            isLoggedIn: false,
-            osId: '',
-            isAcessoInformacao: false,
-            canOpenRecurso: null,
-            canOpenOuvidoria: null,
-            loadedAt: json.loaded_at
-              ? formatDateTime(json.loaded_at)
-              : undefined,
-            ultimoAndamento: ultimo,
-          })
-        } else {
-          setNotFound(true)
-        }
-      } catch {
-        setNotFound(true)
-      }
-
-      setLoading(false)
-    }
-
-    load()
-  }, [protocolo, codigoOs])
-
-  if (loading) return <LoadingState />
-  if (notFound || !data) return <ErrorState protocolo={protocolo} />
+  if (isPending) return <LoadingState />
+  if (!data) return <ErrorState protocolo={protocolo} />
   return <RequestDetail data={data} />
 }

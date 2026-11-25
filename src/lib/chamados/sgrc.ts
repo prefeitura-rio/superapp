@@ -204,15 +204,29 @@ export interface DetalheSgrc {
   ordens_de_servico: OrdemDetalheSgrc[]
 }
 
+/**
+ * O contrato do 1746 traz `data` e `descricao`. `tipo` é opcional e, na carga
+ * atual, não vem. A timeline usa `evento` como título visível e esconde
+ * `descricao` no chevron — sem tipo, o passo ficava só com "—".
+ * Nesse caso a descrição é o próprio passo e aparece direto no título.
+ */
+function andamentoDe(
+  andamento: ModelsPublicMaintenanceRequestAndamento
+): AndamentoSgrc {
+  const tipo = texto(andamento.tipo)
+  const descricao = texto(andamento.descricao) ?? ''
+  return {
+    evento: tipo ?? (descricao || 'Atualização'),
+    dataInsercao: data(andamento.data) ?? '',
+    descricao: tipo ? descricao : '',
+  }
+}
+
 function andamentosEmOrdem(
   chamado: ModelsPublicMaintenanceRequest
 ): AndamentoSgrc[] {
   return lista<ModelsPublicMaintenanceRequestAndamento>(chamado.andamentos)
-    .map(andamento => ({
-      evento: texto(andamento.tipo) ?? '—',
-      dataInsercao: data(andamento.data) ?? '',
-      descricao: texto(andamento.descricao) ?? '',
-    }))
+    .map(andamentoDe)
     .sort((a, b) => instante(a.dataInsercao) - instante(b.dataInsercao))
 }
 

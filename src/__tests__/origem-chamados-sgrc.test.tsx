@@ -1,6 +1,6 @@
 import { OrigemChamados } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/origem-chamados'
-import type { RequestItem } from '@/app/(app)/(logged-in)/minhas-solicitacoes/components/requests-list'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { renderWithQuery } from '@/test/render-with-query'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
@@ -9,21 +9,28 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }))
 
-const SALESFORCE: RequestItem[] = [
-  {
-    protocolo: 'RIO-2026-00000001',
-    codigoOs: '00000001',
-    servico: 'Reparo de iluminação pública',
-    categoria: 'Serviços',
-    status: 'Aberto',
-    dataAbertura: '01/06/2026',
-    isAcessoInformacao: false,
-  },
-]
+const SALESFORCE = {
+  protocolos: [
+    {
+      protocolo: 'RIO-2026-00000001',
+      status: 'Aberto',
+      ordens_de_servico: [
+        {
+          codigoOs: '00000001',
+          servico: 'Reparo de iluminação pública',
+          categoria: 'Solicitação',
+          status: 'Aberto',
+          dataAbertura: '2026-06-01T12:00:00Z',
+        },
+      ],
+    },
+  ],
+}
 
 function paginaSgrc(pagina: number, totalPages = 2) {
   return {
     ok: true,
+    status: 200,
     json: async () => ({
       protocolos: [
         {
@@ -50,11 +57,13 @@ const fetchMock = vi.fn()
 
 beforeEach(() => {
   fetchMock.mockReset()
-  fetchMock.mockImplementation(async (url: string) =>
-    paginaSgrc(
-      Number(new URL(url, 'http://localhost').searchParams.get('page'))
-    )
-  )
+  fetchMock.mockImplementation(async (url: string) => {
+    const { searchParams } = new URL(url, 'http://localhost')
+    if (searchParams.get('origem') !== 'sgrc') {
+      return { ok: true, status: 200, json: async () => SALESFORCE }
+    }
+    return paginaSgrc(Number(searchParams.get('page')))
+  })
   vi.stubGlobal('fetch', fetchMock)
 })
 
@@ -64,7 +73,7 @@ afterEach(() => {
 
 describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   test('abre no histórico SGRC, buscando a página 1 no RMI', async () => {
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
 
     expect(
       screen.getByRole('button', { name: 'Data de abertura' })
@@ -81,7 +90,7 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   })
 
   test('o campo de busca não aparece', async () => {
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
     await screen.findByText('Chamado histórico 1')
 
     expect(
@@ -90,7 +99,7 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   })
 
   test('a paginação pede a página seguinte ao RMI', async () => {
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
     await screen.findByText('Chamado histórico 1')
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Página 2' })[0])
@@ -103,8 +112,10 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   })
 
   test('erro do histórico mostra aviso e tenta de novo a mesma página', async () => {
+    // 5xx é repetido uma vez antes de virar erro.
     fetchMock.mockResolvedValueOnce({ ok: false, status: 502 })
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    fetchMock.mockResolvedValueOnce({ ok: false, status: 502 })
+    renderWithQuery(<OrigemChamados />)
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível carregar o histórico de solicitações.'
@@ -116,12 +127,12 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
 
     expect(await screen.findByText('Chamado histórico 1')).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(3)
   })
 
   test('a primeira carga mostra o skeleton da lista, sem texto de carregamento', () => {
     fetchMock.mockImplementation(() => new Promise(() => {}))
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
 
     expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true')
     expect(screen.queryByText('Carregando histórico…')).not.toBeInTheDocument()
@@ -141,7 +152,7 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
         liberarPagina2 = () => resolve(paginaSgrc(2))
       })
     })
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
     await screen.findByText('Chamado histórico 1')
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Página 2' })[0])
@@ -161,7 +172,7 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   })
 
   test('ao voltar do Salesforce, a lista SGRC já carregada aparece na hora', async () => {
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
     await screen.findByText('Chamado histórico 1')
 
     function escolher(opcao: string) {
@@ -181,7 +192,7 @@ describe('DEV-568: histórico SGRC em Minhas Solicitações', () => {
   })
 
   test('o seletor troca para os chamados do Salesforce', async () => {
-    render(<OrigemChamados salesforce={SALESFORCE} />)
+    renderWithQuery(<OrigemChamados />)
     await screen.findByText('Chamado histórico 1')
 
     fireEvent.click(screen.getByRole('button', { name: 'Data de abertura' }))

@@ -223,6 +223,62 @@ describe('mapearDetalheSgrc', () => {
     expect(json).not.toContain('Poste apagado')
   })
 
+  test('andamento do 1746 sem tipo usa a descrição como título', () => {
+    const detalhe = mapearDetalheSgrc(
+      'RIO-31555943-2',
+      {
+        protocolo: 'RIO-31555943-2',
+        chamados: [
+          {
+            id_chamado: '22597893',
+            protocolos: ['RIO-31555943-2'],
+            subtipo: 'Remoção de entulho',
+            status: 'Fechado com solução',
+            data_inicio: '2025-11-04T18:29:19Z',
+            titular: true,
+            andamentos: [
+              {
+                data: '2025-11-06T12:09:10Z',
+                descricao: 'EM ANDAMENTO',
+              },
+              {
+                data: '2025-11-04T18:29:24Z',
+                descricao:
+                  'Chamado aberto na COMLURB em 2025-11-04 18:29:24. Na Central 1746  em 2025-11-04 18:29:19',
+              },
+              {
+                data: '2025-11-28T19:50:11Z',
+                descricao:
+                  'Prezado (a), a remoção foi realizada. A Comlurb agradece seu contato. PROPRIO',
+              },
+            ],
+          },
+        ],
+      },
+      'dono'
+    )
+
+    expect(detalhe?.ordens_de_servico[0]?.andamentos).toEqual([
+      {
+        evento:
+          'Chamado aberto na COMLURB em 2025-11-04 18:29:24. Na Central 1746  em 2025-11-04 18:29:19',
+        dataInsercao: '2025-11-04T18:29:24Z',
+        descricao: '',
+      },
+      {
+        evento: 'EM ANDAMENTO',
+        dataInsercao: '2025-11-06T12:09:10Z',
+        descricao: '',
+      },
+      {
+        evento:
+          'Prezado (a), a remoção foi realizada. A Comlurb agradece seu contato. PROPRIO',
+        dataInsercao: '2025-11-28T19:50:11Z',
+        descricao: '',
+      },
+    ])
+  })
+
   test('resposta sem chamados não monta detalhe', () => {
     expect(
       mapearDetalheSgrc(PROTOCOLO, { chamados: undefined }, 'publico')

@@ -8,110 +8,54 @@ import {
   DrawerFooter,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { useChamadosSgrc } from '@/hooks/chamados/use-chamados'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { formatDate, mapCategoria, normalizeStatus } from '../helpers'
-import { type RequestItem, RequestsList } from './requests-list'
+import { useState } from 'react'
+import {
+  DEFAULT_ORIGEM,
+  ORIGEM_PARAM,
+  type Origem,
+  origemToParam,
+} from '../origem'
+import { RequestsList } from './requests-list'
 import { RequestsListSkeleton } from './requests-list-skeleton'
-
-type Origem = 'sgrc' | 'salesforce'
-
-const DEFAULT_ORIGEM: Origem = 'sgrc'
+import { SalesforceLista } from './salesforce-lista'
 
 const OPCOES: { label: string; value: Origem }[] = [
   { label: 'abertas até 26/11/2026', value: 'sgrc' },
   { label: 'abertas a partir de 27/11/2026', value: 'salesforce' },
 ]
 
-interface ProtocoloLista {
-  protocolo?: string
-  status?: string
-  dataAbertura?: string
-  ordens_de_servico?: {
-    codigoOs?: string
-    servico?: string
-    subtema?: string
-    categoria?: string
-    status?: string
-    dataAbertura?: string
-    isAcessoInformacao?: boolean
-  }[]
-}
-
-function itensDe(protocolos: ProtocoloLista[]): RequestItem[] {
-  return protocolos.flatMap(protocolo =>
-    (protocolo.ordens_de_servico ?? []).map(os => ({
-      protocolo: protocolo.protocolo ?? '',
-      codigoOs: os.codigoOs ?? '',
-      servico: os.servico ?? os.subtema ?? '—',
-      categoria: mapCategoria(os.categoria),
-      status: normalizeStatus(os.status ?? protocolo.status),
-      dataAbertura: formatDate(os.dataAbertura ?? protocolo.dataAbertura),
-      isAcessoInformacao: os.isAcessoInformacao ?? false,
-    }))
-  )
-}
-
-interface PaginaSgrc {
-  itens: RequestItem[]
-  totalPages: number
-}
-
-type StatusSgrc = 'carregando' | 'erro' | 'pronto'
-
 interface OrigemChamadosProps {
-  salesforce: RequestItem[]
   filtroInicial?: string
+  /** Origem aberta ao entrar (ver `resolveOrigemInicial`). Padrão: SGRC. */
+  origemInicial?: Origem
+}
+
+/**
+ * Mantém `?o=` na URL sem navegar (sem nova renderização no servidor):
+ * recarregar ou compartilhar o link preserva a escolha. O `?filtro=` é da aba
+ * do Salesforce e não vale para o outro lado.
+ */
+function sincronizarOrigemNaUrl(origem: Origem) {
+  const url = new URL(window.location.href)
+  url.searchParams.set(ORIGEM_PARAM, origemToParam(origem))
+  url.searchParams.delete('filtro')
+  window.history.replaceState(null, '', url)
 }
 
 export function OrigemChamados({
-  salesforce,
   filtroInicial,
+  origemInicial = DEFAULT_ORIGEM,
 }: OrigemChamadosProps) {
-  const [selectedOrigem, setSelectedOrigem] = useState<Origem>(DEFAULT_ORIGEM)
+  const [selectedOrigem, setSelectedOrigem] = useState<Origem>(origemInicial)
   const [draft, setDraft] = useState<Origem>(selectedOrigem)
   const [open, setOpen] = useState(false)
-  // Objeto novo a cada pedido: "tentar novamente" refaz a mesma página.
-  const [consulta, setConsulta] = useState({ pagina: 1 })
-  // A última página recebida fica na tela enquanto a próxima carrega (troca de
-  // página, volta do Salesforce): a lista não some nem pisca.
-  const [historico, setHistorico] = useState<PaginaSgrc | null>(null)
-  const [status, setStatus] = useState<StatusSgrc>('carregando')
-
-  useEffect(() => {
-    if (selectedOrigem !== 'sgrc') return
-
-    let ativo = true
-    const controller = new AbortController()
-    setStatus('carregando')
-
-    fetch(`/api/chamados?origem=sgrc&page=${consulta.pagina}`, {
-      signal: controller.signal,
-    })
-      .then(async resposta => {
-        if (!resposta.ok) {
-          throw new Error(
-            `Falha ao carregar histórico SGRC: ${resposta.status}`
-          )
-        }
-        const json = await resposta.json()
-        if (!ativo) return
-        setHistorico({
-          itens: itensDe(json?.protocolos ?? []),
-          totalPages: json?.pagination?.totalPages ?? 1,
-        })
-        setStatus('pronto')
-      })
-      .catch(() => {
-        if (ativo) setStatus('erro')
-      })
-
-    return () => {
-      ativo = false
-      controller.abort()
-    }
-  }, [selectedOrigem, consulta])
+  const [pagina, setPagina] = useState(1)
+  // Cache por página no TanStack Query: voltar a uma página já vista é
+  // instantâneo. Na troca, a anterior fica na tela (`isPlaceholderData`).
+  const sgrc = useChamadosSgrc(pagina, { enabled: selectedOrigem === 'sgrc' })
 
   function openSheet() {
     setDraft(selectedOrigem)
@@ -120,6 +64,7 @@ export function OrigemChamados({
 
   function handleApply() {
     setSelectedOrigem(draft)
+    if (draft !== selectedOrigem) sincronizarOrigemNaUrl(draft)
     setOpen(false)
   }
 
@@ -128,7 +73,7 @@ export function OrigemChamados({
   }
 
   function renderSgrc() {
-    if (status === 'erro') {
+    if (sgrc.isError) {
       return (
         <div
           role="alert"
@@ -140,7 +85,7 @@ export function OrigemChamados({
           <CustomButton
             variant="secondary"
             size="lg"
-            onClick={() => setConsulta(atual => ({ ...atual }))}
+            onClick={() => sgrc.refetch()}
           >
             Tentar novamente
           </CustomButton>
@@ -149,9 +94,10 @@ export function OrigemChamados({
     }
 
     // Primeira carga: o mesmo skeleton da rota, sem texto piscando.
+    const historico = sgrc.data
     if (!historico) return <RequestsListSkeleton />
 
-    const atualizando = status === 'carregando'
+    const atualizando = sgrc.isPlaceholderData
     return (
       <div
         aria-busy={atualizando}
@@ -167,9 +113,9 @@ export function OrigemChamados({
           filtros={['Todos']}
           filtroInicial={filtroInicial}
           pagination={{
-            page: consulta.pagina,
+            page: pagina,
             totalPages: historico.totalPages,
-            onPageChange: pagina => setConsulta({ pagina }),
+            onPageChange: setPagina,
           }}
         />
       </div>
@@ -197,11 +143,7 @@ export function OrigemChamados({
       {selectedOrigem === 'sgrc' ? (
         renderSgrc()
       ) : (
-        <RequestsList
-          key="salesforce"
-          items={salesforce}
-          filtroInicial={filtroInicial}
-        />
+        <SalesforceLista key="salesforce" filtroInicial={filtroInicial} />
       )}
 
       <Drawer

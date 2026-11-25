@@ -2,6 +2,7 @@ import { CookieConsent } from '@/components/cookie-consent'
 import { Footer } from '@/components/footer'
 import { FooterWrapper } from '@/components/footer-wrapper'
 import { RouteTracker } from '@/components/route-tracker'
+import { ChamadosCacheSync } from '@/providers/chamados-cache-sync'
 import { ReactQueryProvider } from '@/providers/query-client-provider'
 import { OnboardingWrapperClient } from '../components/onboarding-wrapper-client'
 import { SessionExpiredHandler } from '../components/session-expired-handler'
@@ -17,6 +18,7 @@ export default async function AppLayout({
         <div className="min-h-screen flex flex-col">
           <RouteTracker />
           <SessionExpiredHandler />
+          <ChamadosCacheSync />
           <CookieConsent variant="mini" />
           <div className="flex-1 w-full">{children}</div>
           <FooterWrapper>

@@ -1,15 +1,10 @@
 'use client'
 
+import { minhasSolicitacoesHref } from '@/app/(app)/(logged-in)/minhas-solicitacoes/origem'
 import { ChevronRightIcon } from '@/assets/icons'
+import { useChamadosParaAcompanhar } from '@/hooks/chamados/use-chamados'
+import { useAuthStatus } from '@/providers/auth-status-provider'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-
-const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000
-
-function isRecent(dateStr: string | null | undefined): boolean {
-  if (!dateStr) return false
-  return Date.now() - new Date(dateStr).getTime() <= FIFTEEN_DAYS_MS
-}
 
 const CARD_CLASS = 'mx-4 mt-2 h-14.5 shrink-0 rounded-2xl'
 
@@ -18,50 +13,17 @@ export function RequestsInProgressBannerSkeleton() {
 }
 
 export default function RequestsInProgressBanner() {
-  const [count, setCount] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { isLoggedIn, isLoading: authLoading } = useAuthStatus()
+  // Mesma query da lista de Minhas Solicitações: o cache é um só.
+  const { data: count, isPending } = useChamadosParaAcompanhar({
+    enabled: isLoggedIn === true,
+  })
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const authRes = await fetch('/api/user/auth-status')
-        const { isLoggedIn } = await authRes.json()
-        if (!isLoggedIn) {
-          setLoading(false)
-          return
-        }
-
-        const res = await fetch('/api/chamados')
-        if (!res.ok) {
-          setLoading(false)
-          return
-        }
-
-        const data = await res.json()
-        const protocolos: any[] = data?.protocolos ?? []
-
-        let total = 0
-        for (const protocolo of protocolos) {
-          for (const os of protocolo.ordens_de_servico ?? []) {
-            const isOpen = os.status === 'Aberto'
-            const recentlyUpdated = isRecent(protocolo.dataUltimaAtualizacao)
-            if (isOpen || recentlyUpdated) total++
-          }
-        }
-
-        if (total > 0) setCount(total)
-      } catch {
-        // silently ignore — banner is optional
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [])
-
-  if (loading) return <RequestsInProgressBannerSkeleton />
-  if (count === null) return null
+  if (authLoading || (isLoggedIn === true && isPending)) {
+    return <RequestsInProgressBannerSkeleton />
+  }
+  // Banner opcional: deslogado, sem nada para acompanhar ou com erro, some.
+  if (!isLoggedIn || !count) return null
 
   const label =
     count === 1
@@ -71,7 +33,8 @@ export default function RequestsInProgressBanner() {
   const [before, bold, after] = label.split('**')
 
   return (
-    <Link href="/minhas-solicitacoes">
+    // A contagem é só do novo 1746 (Salesforce): abre nessa origem.
+    <Link href={minhasSolicitacoesHref('salesforce')}>
       <div
         className={`${CARD_CLASS} flex items-center justify-between gap-3 bg-card px-4 cursor-pointer hover:bg-secondary transition-colors`}
       >

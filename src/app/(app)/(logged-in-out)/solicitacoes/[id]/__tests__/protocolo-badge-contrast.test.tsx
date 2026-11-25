@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { render, screen } from '@testing-library/react'
+import { renderWithQuery } from '@/test/render-with-query'
+import { screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import RequestDetailPage from '../page'
 
@@ -100,7 +101,7 @@ function publicResponse() {
 }
 
 async function renderProtocoloBadge(): Promise<HTMLElement> {
-  render(<RequestDetailPage />)
+  renderWithQuery(<RequestDetailPage />)
   return screen.findByRole('button', { name: PROTOCOLO })
 }
 

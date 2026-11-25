@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { renderWithQuery } from '@/test/render-with-query'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -12,6 +13,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { listChamados } = vi.hoisted(() => ({ listChamados: vi.fn() }))
 
+const { cookieStore } = vi.hoisted(() => ({
+  cookieStore: new Map<string, string>(),
+}))
+
+vi.mock('next/headers', () => ({
+  cookies: async () => ({
+    get: (nome: string) =>
+      cookieStore.has(nome) ? { value: cookieStore.get(nome) } : undefined,
+  }),
+}))
 vi.mock('@/http-pref-rio-cidadao/default/default', () => ({ listChamados }))
 vi.mock('@/app/components/profile-header-wrapper', () => ({
   ProfileHeaderWrapper: () => null,
@@ -64,10 +75,13 @@ const PROTOCOLOS = [
   },
 ]
 
-async function renderPage(filtro?: string) {
-  render(
+async function renderPage(filtro?: string, o?: string) {
+  renderWithQuery(
     await MyRequestsPage({
-      searchParams: Promise.resolve(filtro ? { filtro } : {}),
+      searchParams: Promise.resolve({
+        ...(filtro ? { filtro } : {}),
+        ...(o ? { o } : {}),
+      }),
     })
   )
 }
@@ -96,6 +110,7 @@ function activeTab() {
 }
 
 beforeEach(() => {
+  cookieStore.clear()
   vi.stubEnv('FEATURE_SGRC_HISTORICO', 'true')
   listChamados.mockResolvedValue({
     status: 200,
@@ -105,6 +120,7 @@ beforeEach(() => {
     'fetch',
     vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => ({
         protocolos: [
           {
@@ -213,5 +229,56 @@ describe('/minhas-solicitacoes?filtro= no histórico SGRC (origem padrão)', () 
     expect(
       screen.queryByRole('button', { name: 'Ouvidoria' })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('/minhas-solicitacoes: origem aberta por padrão', () => {
+  const rotuloSalesforce = 'abertas a partir de 27/11/2026'
+  const rotuloSgrc = 'abertas até 26/11/2026'
+
+  async function origemSelecionada() {
+    fireEvent.click(screen.getByRole('button', { name: 'Data de abertura' }))
+    const marcado = [rotuloSgrc, rotuloSalesforce].filter(
+      nome =>
+        screen
+          .getByRole('radio', { name: nome })
+          .getAttribute('aria-checked') === 'true' ||
+        (screen.getByRole('radio', { name: nome }) as HTMLInputElement).checked
+    )
+    expect(marcado).toHaveLength(1)
+    return marcado[0]
+  }
+
+  it('acesso direto abre o histórico legado (SGRC)', async () => {
+    await renderPage()
+    expect(await origemSelecionada()).toBe(rotuloSgrc)
+    await waitFor(() => expect(fetch).toHaveBeenCalled())
+  })
+
+  it('?o=1 (banner da home) abre o novo 1746, sem buscar o SGRC', async () => {
+    await renderPage(undefined, '1')
+    expect(screen.getByText('Remoção de entulho')).toBeInTheDocument()
+    expect(await origemSelecionada()).toBe(rotuloSalesforce)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('voltando do formulário do 1746 (cookie de retorno), abre o novo 1746', async () => {
+    cookieStore.set('chamados_formulario_aberto', String(Date.now()))
+    await renderPage()
+    expect(screen.getByText('Remoção de entulho')).toBeInTheDocument()
+    expect(await origemSelecionada()).toBe(rotuloSalesforce)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('?o=0 explícito vence o cookie de retorno', async () => {
+    cookieStore.set('chamados_formulario_aberto', String(Date.now()))
+    await renderPage(undefined, '0')
+    expect(await origemSelecionada()).toBe(rotuloSgrc)
+  })
+
+  it('escolher a origem no seletor atualiza ?o= na URL, sem navegar', async () => {
+    await renderPage()
+    await abrirSalesforce()
+    expect(new URL(window.location.href).searchParams.get('o')).toBe('1')
   })
 })

@@ -3,6 +3,7 @@
 import { build1746LogoutUrl } from '@/lib/1746-logout'
 import { buildGovbrLogoutUrl } from '@/lib/govbr-logout'
 import { isGoogleChrome } from '@/lib/is-google-chrome'
+import { getQueryClient } from '@/lib/query/query-client'
 import { useCallback, useState } from 'react'
 
 /** Tempo máximo esperando o logout em segundo plano (1746 e Gov.br). */
@@ -106,6 +107,10 @@ export function useLogout() {
       setIsLoading(false)
       return
     }
+
+    // Sessão encerrada: nada do cidadão (chamados, carteira…) pode ficar em
+    // memória para o próximo usuário deste navegador.
+    getQueryClient().clear()
 
     if (isGoogleChrome()) {
       await Promise.all([logoutFrom1746(), logoutFromGovbr()])

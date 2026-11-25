@@ -3,22 +3,13 @@
 import { SearchIcon20 } from '@/assets/icons/search-icon'
 import { Pagination } from '@/components/ui/pagination'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { TAB_TO_FILTRO_PARAM } from '../helpers'
-import type { RequestStatus } from '../types'
+import type { RequestItem, RequestStatus } from '../types'
 import { StatusBadge } from './status-badge'
 
-export interface RequestItem {
-  /** Vazio quando o chamado não tem protocolo consultável (card sem link). */
-  protocolo: string
-  codigoOs: string
-  servico: string
-  categoria: string
-  status: RequestStatus
-  dataAbertura: string
-  isAcessoInformacao: boolean
-}
+export type { RequestItem }
 
 /** Paginação feita pelo backend: a lista recebe só os itens da página. */
 export interface RequestsPagination {
@@ -97,6 +88,7 @@ export function RequestsList({
   searchable?: boolean
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeFilter, setActiveFilter] = useState(
     filtroInicial && filtros.includes(filtroInicial) ? filtroInicial : 'Todos'
   )
@@ -105,10 +97,15 @@ export function RequestsList({
   function handleFilterChange(tab: string) {
     setActiveFilter(tab)
     const param = TAB_TO_FILTRO_PARAM[tab]
-    const url = param
-      ? `/minhas-solicitacoes?filtro=${param}`
-      : '/minhas-solicitacoes'
-    router.replace(url, { scroll: false })
+    // Preserva os demais params (ex.: `?o=`): só `filtro` muda.
+    const next = new URLSearchParams(searchParams.toString())
+    if (param) next.set('filtro', param)
+    else next.delete('filtro')
+    const query = next.toString()
+    router.replace(
+      query ? `/minhas-solicitacoes?${query}` : '/minhas-solicitacoes',
+      { scroll: false }
+    )
   }
 
   const termo = searchable ? search : ''
