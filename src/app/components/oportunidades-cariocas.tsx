@@ -9,12 +9,12 @@ function BannerCursos() {
   return (
     <Link
       href="/servicos/cursos"
-      className="relative flex h-60 sm:h-40 flex-1 flex-col items-start gap-6 overflow-hidden rounded-2xl p-4"
+      className="relative flex h-60 min-[577px]:h-40 flex-1 flex-col items-start gap-6 overflow-hidden rounded-2xl p-4"
       style={{ background: 'hsl(214.2857deg 43.75% 87.451%)' }}
     >
       {/* Grupo mobile: quadrados + imagem centralizados horizontalmente como unidade */}
       <div
-        className="pointer-events-none absolute sm:hidden"
+        className="pointer-events-none absolute min-[577px]:hidden"
         style={{ inset: 0 }}
       >
         {/* Quadrado maior (atrás) */}
@@ -61,7 +61,7 @@ function BannerCursos() {
 
       {/* Grupo desktop: quadrados + imagem ancorados à direita como unidade */}
       <div
-        className="pointer-events-none absolute hidden sm:block"
+        className="pointer-events-none absolute hidden min-[577px]:block"
         style={{
           position: 'absolute',
           right: '0',
@@ -114,17 +114,17 @@ function BannerCursos() {
 
       {/* Conteúdo */}
       <div className="relative z-10 flex flex-col">
-        <p className="text-sm sm:text-base font-medium text-foreground leading-4 sm:leading-5 tracking-normal">
+        <p className="text-sm min-[577px]:text-base font-medium text-foreground leading-4 min-[577px]:leading-5 tracking-normal">
           Cursos Gratuitos
         </p>
         <p
-          className="text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal"
+          className="text-xs min-[577px]:text-sm font-normal leading-4 min-[577px]:leading-5 tracking-normal"
           style={{ color: '#45556C' }}
         >
           Aulas presenciais e online
         </p>
         <span
-          className="inline-flex items-center rounded-full bg-white self-start text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal mt-4.25"
+          className="inline-flex items-center rounded-full bg-white self-start text-xs min-[577px]:text-sm font-normal leading-4 min-[577px]:leading-5 tracking-normal mt-4.25"
           style={{ padding: '2px 12px', color: '#1D293D' }}
         >
           Ver cursos
@@ -138,12 +138,12 @@ function BannerTrabalho() {
   return (
     <Link
       href="/servicos/trabalho"
-      className="relative flex h-60 sm:h-40 flex-1 flex-col items-start gap-6 overflow-hidden rounded-2xl p-4"
+      className="relative flex h-60 min-[577px]:h-40 flex-1 flex-col items-start gap-6 overflow-hidden rounded-2xl p-4"
       style={{ background: 'hsl(214.0909deg 37.2881% 53.7255%)' }}
     >
       {/* Bolas + imagem — grupo desktop ancorado à direita */}
       <div
-        className="pointer-events-none absolute hidden sm:block"
+        className="pointer-events-none absolute hidden min-[577px]:block"
         style={{ inset: 0 }}
       >
         {/* Bola maior — mesmo centro da bola menor */}
@@ -192,7 +192,7 @@ function BannerTrabalho() {
 
       {/* Bola menor — mobile */}
       <div
-        className="pointer-events-none absolute sm:hidden"
+        className="pointer-events-none absolute min-[577px]:hidden"
         style={{
           width: '127.761px',
           height: '125.231px',
@@ -207,7 +207,7 @@ function BannerTrabalho() {
       />
       {/* Bola maior — mobile */}
       <div
-        className="pointer-events-none absolute sm:hidden"
+        className="pointer-events-none absolute min-[577px]:hidden"
         style={{
           width: '179.174px',
           height: '175.626px',
@@ -226,20 +226,20 @@ function BannerTrabalho() {
         alt=""
         width={119}
         height={216}
-        className="pointer-events-none absolute object-cover sm:hidden"
+        className="pointer-events-none absolute object-cover min-[577px]:hidden"
         style={{ left: '50%', bottom: '-96px', transform: 'translateX(-50%)' }}
       />
 
       {/* Conteúdo */}
       <div className="relative z-10 flex flex-col">
-        <p className="text-sm sm:text-base font-medium text-white leading-4 sm:leading-5 tracking-normal">
+        <p className="text-sm min-[577px]:text-base font-medium text-white leading-4 min-[577px]:leading-5 tracking-normal">
           Vagas de Trabalho
         </p>
-        <p className="text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal text-white/80">
+        <p className="text-xs min-[577px]:text-sm font-normal leading-4 min-[577px]:leading-5 tracking-normal text-white/80">
           Cadastre o seu currículo
         </p>
         <span
-          className="inline-flex items-center rounded-full bg-white self-start text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal mt-4.25"
+          className="inline-flex items-center rounded-full bg-white self-start text-xs min-[577px]:text-sm font-normal leading-4 min-[577px]:leading-5 tracking-normal mt-4.25"
           style={{ padding: '2px 12px', color: '#1D293D' }}
         >
           Ver vagas
