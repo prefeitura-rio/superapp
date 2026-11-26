@@ -3,6 +3,7 @@ import HeaderWrapperClient from '@/app/components/header-wrapper-client'
 import { HomeBannerCarousel } from '@/app/components/home-banners/home-banner-carousel'
 import HomeCategoriesGrid from '@/app/components/home-categories-grid'
 import MostAccessedServiceCards from '@/app/components/most-accessed-services-cards'
+import { OportunidadesCariocas } from '@/app/components/oportunidades-cariocas'
 import { PendingInviteSection } from '@/app/components/pending-invite-section'
 import RequestsInProgressBanner from '@/app/components/requests-in-progress-banner'
 import RequestsSectionCards from '@/app/components/requests-section-cards'
@@ -66,6 +67,9 @@ export default async function Home() {
 
         {/* Most Accessed Service Cards*/}
         <MostAccessedServiceCards services={mostAccessed} />
+
+        {/* Oportunidades Cariocas */}
+        <OportunidadesCariocas />
 
         {/* Carteira section - fetched client-side to avoid cache issues */}
         <WalletSectionClient isSalesforceEnabled={isSalesforceEnabled} />
