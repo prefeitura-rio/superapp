@@ -1,6 +1,9 @@
+import {
+  bannerCursosIcon,
+  bannerTrabalhoIcon,
+} from '@/constants/bucket/banners'
 import Image from 'next/image'
 import Link from 'next/link'
-import { bannerCursosIcon, bannerTrabalhoIcon } from '@/constants/bucket/banners'
 
 function BannerCursos() {
   return (
@@ -59,7 +62,13 @@ function BannerCursos() {
       {/* Grupo desktop: quadrados + imagem ancorados à direita como unidade */}
       <div
         className="pointer-events-none absolute hidden sm:block"
-        style={{ position: 'absolute', right: '0', top: '0', bottom: '0', left: '0' }}
+        style={{
+          position: 'absolute',
+          right: '0',
+          top: '0',
+          bottom: '0',
+          left: '0',
+        }}
       >
         {/* Quadrado maior (atrás) */}
         <div
@@ -108,7 +117,10 @@ function BannerCursos() {
         <p className="text-sm sm:text-base font-medium text-foreground leading-4 sm:leading-5 tracking-normal">
           Cursos Gratuitos
         </p>
-        <p className="text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal" style={{ color: '#45556C' }}>
+        <p
+          className="text-xs sm:text-sm font-normal leading-4 sm:leading-5 tracking-normal"
+          style={{ color: '#45556C' }}
+        >
           Aulas presenciais e online
         </p>
         <span
@@ -144,7 +156,8 @@ function BannerTrabalho() {
             top: '31.47px',
             borderRadius: '1242.403px',
             background: 'rgba(255,255,255,0.15)',
-            boxShadow: '1.244px 1.244px 9.079px 0 rgba(255,255,255,0.13) inset, 0 4.975px 41.04px 0 rgba(255,255,255,0.25)',
+            boxShadow:
+              '1.244px 1.244px 9.079px 0 rgba(255,255,255,0.13) inset, 0 4.975px 41.04px 0 rgba(255,255,255,0.25)',
             transform: 'rotate(45deg)',
           }}
         />
@@ -158,7 +171,8 @@ function BannerTrabalho() {
             top: '62.81px',
             borderRadius: '1242.403px',
             background: 'rgba(255,255,255,0.15)',
-            boxShadow: '1.244px 1.244px 9.079px 0 rgba(255,255,255,0.13) inset, 0 4.975px 41.04px 0 rgba(255,255,255,0.25)',
+            boxShadow:
+              '1.244px 1.244px 9.079px 0 rgba(255,255,255,0.13) inset, 0 4.975px 41.04px 0 rgba(255,255,255,0.25)',
             transform: 'rotate(45deg)',
           }}
         />
@@ -186,7 +200,8 @@ function BannerTrabalho() {
           top: '146.82px',
           borderRadius: '999px',
           background: 'rgba(255,255,255,0.15)',
-          boxShadow: '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
+          boxShadow:
+            '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
           transform: 'translateX(-50%) rotate(45deg)',
         }}
       />
@@ -200,7 +215,8 @@ function BannerTrabalho() {
           top: '121.63px',
           borderRadius: '999px',
           background: 'rgba(255,255,255,0.15)',
-          boxShadow: '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
+          boxShadow:
+            '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
           transform: 'translateX(-50%) rotate(45deg)',
         }}
       />
