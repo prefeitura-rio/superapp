@@ -9,34 +9,52 @@ function BannerCursos() {
       className="relative flex h-60 sm:h-40 flex-1 flex-col items-start gap-6 overflow-hidden rounded-2xl p-4"
       style={{ background: 'hsl(214.2857deg 43.75% 87.451%)' }}
     >
-      {/* Quadrado maior (atrás) — mobile */}
+      {/* Grupo mobile: quadrados + imagem centralizados horizontalmente como unidade */}
       <div
         className="pointer-events-none absolute sm:hidden"
-        style={{
-          width: '142.833px',
-          height: '142.833px',
-          right: '-28.4px',
-          bottom: '-49.75px',
-          borderRadius: '16px',
-          background: 'hsl(214.0541deg 38.9474% 81.3725%)',
-          boxShadow: '2px -2px 6px 0 rgba(0,0,0,0.15)',
-          transform: 'rotate(-135deg)',
-        }}
-      />
-      {/* Quadrado menor (frente) — mobile */}
-      <div
-        className="pointer-events-none absolute sm:hidden"
-        style={{
-          width: '102.295px',
-          height: '102.295px',
-          right: '-8.14px',
-          bottom: '-29.48px',
-          borderRadius: '16px',
-          background: 'hsl(214.6667deg 32.3741% 72.7451%)',
-          boxShadow: '2px -2px 6px 0 rgba(0,0,0,0.15)',
-          transform: 'rotate(-135deg)',
-        }}
-      />
+        style={{ inset: 0 }}
+      >
+        {/* Quadrado maior (atrás) */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '142.833px',
+            height: '142.833px',
+            right: 'calc(50% - 117.42px)',
+            bottom: '-49.75px',
+            borderRadius: '16px',
+            background: 'hsl(214.0541deg 38.9474% 81.3725%)',
+            boxShadow: '2px -2px 6px 0 rgba(0,0,0,0.15)',
+            transform: 'rotate(-135deg)',
+          }}
+        />
+        {/* Quadrado menor (frente) */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '102.295px',
+            height: '102.295px',
+            right: 'calc(50% - 97.3px)',
+            bottom: '-29.48px',
+            borderRadius: '16px',
+            background: 'hsl(214.6667deg 32.3741% 72.7451%)',
+            boxShadow: '2px -2px 6px 0 rgba(0,0,0,0.15)',
+            transform: 'rotate(-135deg)',
+          }}
+        />
+        {/* Imagem */}
+        <Image
+          src={bannerCursosIcon}
+          alt=""
+          width={92}
+          height={166}
+          style={{
+            position: 'absolute',
+            right: 'calc(50% - 46px)',
+            bottom: '-49px',
+          }}
+        />
+      </div>
 
       {/* Grupo desktop: quadrados + imagem ancorados à direita como unidade */}
       <div
@@ -85,16 +103,6 @@ function BannerCursos() {
         />
       </div>
 
-      {/* Imagem do personagem — mobile */}
-      <Image
-        src={bannerCursosIcon}
-        alt=""
-        width={92}
-        height={166}
-        className="pointer-events-none absolute object-cover sm:hidden"
-        style={{ left: '34px', bottom: '-49px' }}
-      />
-
       {/* Conteúdo */}
       <div className="relative z-10 flex flex-col">
         <p className="text-sm sm:text-base font-medium text-foreground leading-4 sm:leading-5 tracking-normal">
@@ -132,7 +140,7 @@ function BannerTrabalho() {
             position: 'absolute',
             width: '222.829px',
             height: '218.417px',
-            left: '179.59px',
+            right: '25.1px',
             top: '31.47px',
             borderRadius: '1242.403px',
             background: 'rgba(255,255,255,0.15)',
@@ -146,7 +154,7 @@ function BannerTrabalho() {
             position: 'absolute',
             width: '158.889px',
             height: '155.743px',
-            left: '211.57px',
+            right: '57.07px',
             top: '62.81px',
             borderRadius: '1242.403px',
             background: 'rgba(255,255,255,0.15)',
@@ -174,12 +182,12 @@ function BannerTrabalho() {
         style={{
           width: '127.761px',
           height: '125.231px',
-          right: '6.67px',
-          bottom: '-31.84px',
+          left: '50%',
+          top: '146.82px',
           borderRadius: '999px',
           background: 'rgba(255,255,255,0.15)',
           boxShadow: '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
-          transform: 'rotate(45deg)',
+          transform: 'translateX(-50%) rotate(45deg)',
         }}
       />
       {/* Bola maior — mobile */}
@@ -188,12 +196,12 @@ function BannerTrabalho() {
         style={{
           width: '179.174px',
           height: '175.626px',
-          right: '-18.62px',
-          bottom: '-57.25px',
+          left: '50%',
+          top: '121.63px',
           borderRadius: '999px',
           background: 'rgba(255,255,255,0.15)',
           boxShadow: '1px 1px 7.3px 0 rgba(255,255,255,0.13) inset, 0 4px 33px 0 rgba(255,255,255,0.25)',
-          transform: 'rotate(45deg)',
+          transform: 'translateX(-50%) rotate(45deg)',
         }}
       />
       {/* Imagem da personagem — mobile */}
@@ -203,7 +211,7 @@ function BannerTrabalho() {
         width={119}
         height={216}
         className="pointer-events-none absolute object-cover sm:hidden"
-        style={{ left: '20px', bottom: '-96px' }}
+        style={{ left: '50%', bottom: '-96px', transform: 'translateX(-50%)' }}
       />
 
       {/* Conteúdo */}
