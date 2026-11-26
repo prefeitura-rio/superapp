@@ -2,7 +2,6 @@
 
 import { PageClientWrapper } from '@/app/(app)/(logged-in-out)/servicos/categoria/[category-slug]/[...service-params]/(service-detail)/page-client-wrapper'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
-import { OfficialBanner } from '@/app/components/service'
 import {
   PREVIEW_READY_RETRY_MS,
   PREVIEW_READY_TIMEOUT_MS,
@@ -235,7 +234,6 @@ function messageFor(phase: PreviewPhase): string {
 function PreviewShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <OfficialBanner />
       <div className="max-w-4xl mx-auto">
         <HeaderWrapperClient />
         <main className="pb-20 px-4">{children}</main>

@@ -2,6 +2,7 @@ import { ThemeAwareVideo } from '@/components/ui/custom/theme-aware-video'
 import { MOST_ACCESSED_SERVICES } from '@/constants/most-accessed-services'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { MostAccessedCard } from '@/lib/carta-servicos/home-featured'
+import { MostAccessedScrollContainer } from './most-accessed-scroll-container'
 import { MostAccessedServiceLink } from './most-accessed-service-link'
 
 interface MostAccessedServiceCardsProps {
@@ -43,9 +44,8 @@ export default function MostAccessedServiceCards({
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-md font-medium text-foreground">Mais acessados</h2>
       </div>
-      {/* Cards: expand to fill width, same size, with horizontal scroll when needed */}
-      <div className="relative w-full overflow-x-auto pb-2 no-scrollbar">
-        <div className="flex gap-2 min-w-full">
+      <MostAccessedScrollContainer>
+        <div className="flex gap-2 w-max min-w-full">
           {services.map((service, index) => (
             <MostAccessedServiceLink
               key={`${service.id}-${index}`}
@@ -66,17 +66,13 @@ export default function MostAccessedServiceCards({
                   <h3 className="text-sm font-normal break-words text-foreground leading-4.5 line-clamp-3">
                     {service.title}
                   </h3>
-                  {/* <p className="text-foreground-light text-xs leading-4 break-words">
-                    {service.description}
-                  </p> */}
                 </div>
               </div>
             </MostAccessedServiceLink>
           ))}
-          {/* Spacer to ensure padding at the end */}
           <div className="flex-shrink-0 sm:hidden w-2" />
         </div>
-      </div>
+      </MostAccessedScrollContainer>
     </div>
   )
 }
