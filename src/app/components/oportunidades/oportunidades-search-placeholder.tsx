@@ -1,7 +1,7 @@
 'use client'
 
 import { SearchIcon } from '@/assets/icons'
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import Link from 'next/link'
 
 interface OportunidadesSearchPlaceholderProps {

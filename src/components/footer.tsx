@@ -17,6 +17,7 @@ import {
 } from '@/lib/feature-flags'
 import Image from 'next/image'
 import Link from 'next/link'
+import { CookiePreferencesButton } from './cookie-preferences-button'
 import { FooterPhoneButton } from './footer-phone-button'
 
 const PREFEITURA_RIO_URL = 'https://prefeitura.rio'
@@ -46,10 +47,14 @@ function buildQuickLinks(salesforce: boolean, homeSolicitacoes: boolean) {
         ]
       : []),
     { label: 'Mapa do site', href: '/mapa-do-site' },
+    // Termos de uso e Política de Privacidade são um documento só (PREF-653):
+    // um link, com o mesmo rótulo do menu global e do mapa do site.
     ...(salesforce
       ? [
-          { label: 'Termos de uso', href: TERMOS_DE_USO_ROUTE },
-          { label: 'Política de privacidade', href: TERMOS_DE_USO_ROUTE },
+          {
+            label: 'Termos de uso e política de privacidade',
+            href: TERMOS_DE_USO_ROUTE,
+          },
         ]
       : []),
   ]
@@ -172,6 +177,9 @@ function QuickLinksSection({
               </Link>
             </li>
           ))}
+          <li>
+            <CookiePreferencesButton className={linkCls} />
+          </li>
         </ul>
       </div>
 

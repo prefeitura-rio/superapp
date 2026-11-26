@@ -259,6 +259,19 @@ describe('middleware — CSP do VLibras', () => {
     expect(response?.headers.get('Cross-Origin-Opener-Policy')).toBeNull()
   })
 
+  test('não libera ferramentas de terceiros removidas (Hotjar, iframe do GTM)', async () => {
+    const response = await middleware(requestFor('/'))
+    const csp = response?.headers.get('Content-Security-Policy') ?? ''
+    const frameSrc = csp
+      .split(';')
+      .find(directive => directive.includes('frame-src'))
+
+    expect(csp).not.toMatch(/hotjar/i)
+    expect(frameSrc).not.toContain('googletagmanager.com')
+    // O gtag.js do Google Analytics continua vindo do googletagmanager.com.
+    expect(csp).toMatch(/connect-src[^;]*https:\/\/www\.googletagmanager\.com/)
+  })
+
   test('libera a origem do logout do 1746 em connect-src quando configurada', async () => {
     vi.stubEnv(
       'NEXT_PUBLIC_1746_LOGOUT_URL',

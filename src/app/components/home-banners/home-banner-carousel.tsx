@@ -1,8 +1,8 @@
 'use client'
 
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { cn } from '@/lib/utils'
 import { useAuthStatus } from '@/providers/auth-status-provider'
-import { sendGAEvent } from '@next/third-parties/google'
 import {
   type PointerEvent,
   useCallback,

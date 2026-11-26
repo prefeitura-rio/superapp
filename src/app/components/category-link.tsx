@@ -1,6 +1,6 @@
 'use client'
 
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import Link from 'next/link'
 import type React from 'react'
 

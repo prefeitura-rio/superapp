@@ -1,6 +1,12 @@
+/** Trecho de um parágrafo que vira link. `label` precisa aparecer no texto. */
+export interface TermosDeUsoParagraphLink {
+  label: string
+  href: string
+}
+
 /** Parágrafo corrido ou lista de itens (alíneas "a)", subitens "9.2.1." etc.). */
 export type TermosDeUsoBlock =
-  | { type: 'paragraph'; text: string }
+  | { type: 'paragraph'; text: string; link?: TermosDeUsoParagraphLink }
   | { type: 'list'; items: string[] }
 
 export interface TermosDeUsoSection {

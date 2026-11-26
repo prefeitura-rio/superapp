@@ -2,7 +2,7 @@ import { handleCatalogItemClick } from '@/app/(app)/(logged-in-out)/busca/utils/
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@next/third-parties/google', () => ({
+vi.mock('@/lib/analytics/send-ga-event', () => ({
   sendGAEvent: vi.fn(),
 }))
 

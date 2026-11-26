@@ -1,5 +1,5 @@
 import type { ModelsCitizenWallet } from '@/http/models'
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 
 /**
  * Helper function to get card position based on available cards

@@ -72,7 +72,6 @@ export type {
   NavigationContext,
   ServiceButtonClickParams,
   UserContext,
-  UserLoginParams,
 } from './types'
 
 /**

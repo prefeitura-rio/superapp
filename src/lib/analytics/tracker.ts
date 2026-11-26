@@ -9,13 +9,10 @@
  * safety checks, error handling, and debug logging.
  */
 
+import { hasAnalyticsConsent } from '@/lib/cookie-consent/browser'
 import { ANALYTICS_CONFIG, isAnalyticsEnabled, isDebugMode } from './config'
 import { getTimestamp, sanitizeParam } from './context-collector'
-import type {
-  AnalyticsEvent,
-  ServiceButtonClickParams,
-  UserLoginParams,
-} from './types'
+import type { AnalyticsEvent, ServiceButtonClickParams } from './types'
 import { AnalyticsEventType } from './types'
 
 /**
@@ -57,8 +54,10 @@ declare global {
  *
  * 1. Verifies code is running client-side (not SSR)
  * 2. Checks if analytics is enabled via configuration
- * 3. Validates that gtag is available on window object
- * 4. Wraps the gtag call in try-catch for error handling
+ * 3. Checks the citizen's cookie consent for analytics (silently drops the
+ *    event otherwise: without consent the GA script is not even loaded)
+ * 4. Validates that gtag is available on window object
+ * 5. Wraps the gtag call in try-catch for error handling
  *
  * **Important**: Use specific tracking functions like `trackServiceButtonClick`
  * instead of calling this directly, unless you're implementing a new event type.
@@ -91,6 +90,9 @@ export function sendEvent(event: AnalyticsEvent): boolean {
     }
     return false
   }
+
+  // Guard: sem consentimento de análise o evento é descartado em silêncio
+  if (!hasAnalyticsConsent()) return false
 
   // Guard: Check if gtag is available
   if (!window.gtag) {
@@ -192,31 +194,24 @@ export function trackServiceButtonClick(
 /**
  * Track a user login event
  *
- * @param params - User login parameters (user_id, user_name, login_method)
  * @param pagePath - Current page path
  * @returns True if event was tracked successfully
  *
  * @remarks
  * Fired once per authentication flow, right after the Keycloak/GovBR
- * callback sets the `just_logged_in` cookie. The cookie is consumed
- * and deleted immediately so the event is never sent twice.
+ * callback sets the `just_logged_in` marker cookie (only with analytics
+ * consent). The cookie is consumed and deleted immediately so the event is
+ * never sent twice.
+ *
+ * O evento conta logins e mais nada: não leva nome, CPF, e-mail ou qualquer
+ * outro identificador do cidadão.
  */
-export function trackUserLogin(
-  params: UserLoginParams,
-  pagePath: string
-): boolean {
-  const sanitizedParams: UserLoginParams = {
-    name: sanitizeParam(params.name),
-    preferred_username: sanitizeParam(params.preferred_username, 50),
-    email: sanitizeParam(params.email),
-  }
-
+export function trackUserLogin(pagePath: string): boolean {
   const event: AnalyticsEvent = {
     event_name: AnalyticsEventType.USER_LOGIN,
     user_authenticated: true,
     page_path: pagePath,
     timestamp: getTimestamp(),
-    event_params: sanitizedParams,
   }
 
   return sendEvent(event)

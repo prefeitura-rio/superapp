@@ -115,7 +115,7 @@ markdown, e o preview, quando ligado, já é HTML.
 
 - Origem na allowlist `SALESFORCE_PREVIEW_ORIGINS` (domínio exato, sem wildcard e sem path) e nonce igual ao hash.
 - `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex, nofollow`, `Cache-Control: private, no-store` na rota.
-- Google Analytics e Google Tag Manager (por onde o Hotjar entra) não carregam em `/servicos/preview`. O clique de serviço também não dispara analytics.
+- O Google Analytics não carrega em `/servicos/preview`, nem com consentimento de cookies. O clique de serviço também não dispara analytics.
 - `POST /api/preview/servicos`: 30 pedidos por minuto por IP, nesta instância. Sem Redis no superapp, outro pod não vê o contador. A resposta de limite é `429` / `rate_limited`.
 - O body não entra em log nem em span. O erro Zod não devolve o payload.
 

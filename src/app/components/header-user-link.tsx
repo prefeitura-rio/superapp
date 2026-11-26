@@ -3,7 +3,7 @@
 import { UserIcon } from '@/assets/icons'
 import { Skeleton } from '@/components/ui/skeleton'
 import { buildAuthUrl } from '@/constants/url'
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import Image from 'next/image'
 import Link from 'next/link'
 import { GlobalMenuTrigger } from './global-menu/global-menu-trigger'

@@ -21,7 +21,7 @@ vi.mock('next/navigation', () => ({
     throw new Error('NEXT_NOT_FOUND')
   },
 }))
-vi.mock('@next/third-parties/google', () => ({ sendGAEvent: vi.fn() }))
+vi.mock('@/lib/analytics/send-ga-event', () => ({ sendGAEvent: vi.fn() }))
 
 import TermosDeUsoPage from '../(main)/page'
 import TermosDeUsoPlataformaPage from '../[plataforma]/page'

@@ -140,6 +140,12 @@ export const MOCK_GUIA_PARCELADA_DIVIDA_ATIVA = {
 }
 
 export const handlers = [
+  // Registro da escolha de cookies (disparado ao salvar o consentimento)
+  http.post(
+    '*/api/cookies/consent',
+    () => new HttpResponse(null, { status: 204 })
+  ),
+
   // RMI - Citizen profile
   http.get(`${RMI_BASE_URL}/v1/citizen/:cpf`, () => {
     return HttpResponse.json(

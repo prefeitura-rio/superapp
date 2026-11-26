@@ -1,39 +1,47 @@
+import { LEGACY_COOKIE_CONSENT_COOKIE } from '@/lib/cookie-consent/consent'
 import { addSpanEvent, withSpan } from '@/lib/telemetry'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+
+/**
+ * Registro da escolha de cookies, sem dados pessoais.
+ *
+ * A escolha em si é gravada pelo navegador no cookie `prefrio_cookie_consent`
+ * (ver `src/lib/cookie-consent`). Esta rota só:
+ * - registra na telemetria quais categorias foram aceitas, por versão da
+ *   política (estatística agregada, sem identificar o cidadão);
+ * - apaga o cookie httpOnly do banner antigo (`cookieConsent`), que o
+ *   JavaScript não consegue apagar.
+ */
+const consentSchema = z.object({
+  version: z.number().int().positive(),
+  analytics: z.boolean(),
+})
 
 export async function POST(request: NextRequest) {
   return withSpan('api.cookies.consent', async span => {
+    let body: unknown
     try {
-      const { consent } = await request.json()
-
-      span.setAttribute('consent.value', consent || 'unknown')
-
-      if (consent === 'accepted') {
-        addSpanEvent('consent.accepted')
-        const response = NextResponse.json({ success: true })
-
-        // Set httpOnly cookie
-        response.cookies.set('cookieConsent', 'true', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 365, // 1 year
-          path: '/',
-        })
-
-        return response
-      }
-
-      addSpanEvent('consent.rejected')
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.error('Error setting cookie consent:', error)
-      span.recordException(error as Error)
-      return NextResponse.json(
-        { error: 'Failed to set cookie consent' },
-        { status: 500 }
-      )
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
+
+    const parsed = consentSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid consent' }, { status: 400 })
+    }
+
+    const { version, analytics } = parsed.data
+    span.setAttribute('consent.version', version)
+    span.setAttribute('consent.analytics', analytics)
+    addSpanEvent('consent.updated', { version, analytics })
+
+    const response = new NextResponse(null, { status: 204 })
+    if (request.cookies.has(LEGACY_COOKIE_CONSENT_COOKIE)) {
+      response.cookies.delete(LEGACY_COOKIE_CONSENT_COOKIE)
+    }
+    return response
   })
 }

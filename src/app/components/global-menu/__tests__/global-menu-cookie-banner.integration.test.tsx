@@ -28,7 +28,7 @@ function renderPage() {
       }
     >
       <GlobalMenuTrigger />
-      <CookieConsent variant="mini" demo />
+      <CookieConsent />
     </QueryClientProvider>
   )
   return userEvent.setup()
@@ -37,7 +37,16 @@ function renderPage() {
 const banner = () =>
   screen.getByRole('region', { name: 'Consentimento de cookies', hidden: true })
 
+function clearCookies() {
+  for (const row of document.cookie.split(';')) {
+    const name = row.split('=')[0]?.trim()
+    if (name) document.cookie = `${name}=; Path=/; Max-Age=0`
+  }
+}
+
 beforeEach(() => {
+  // Visitante que ainda não escolheu: o banner aparece.
+  clearCookies()
   vi.stubEnv(
     'NEXT_PUBLIC_IDENTIDADE_CARIOCA_BASE_URL',
     'https://auth.example.gov.br/realms/idrio/protocol/openid-connect'
@@ -96,7 +105,7 @@ describe('Menu global × banner de cookies', () => {
     const page = (comHeader: boolean) => (
       <QueryClientProvider client={client}>
         {comHeader && <GlobalMenuTrigger />}
-        <CookieConsent variant="mini" demo />
+        <CookieConsent />
       </QueryClientProvider>
     )
     const { rerender } = render(page(true))
@@ -129,12 +138,13 @@ describe('Menu global × banner de cookies', () => {
     const menu = await screen.findByRole('dialog', { name: 'Menu' })
     await user.click(within(menu).getByRole('button', { name: 'Fechar menu' }))
 
-    // Recusado, o banner sai de cena (opacity-0) e é desmontado depois da
-    // animação; abrir e fechar o menu não o traz de volta.
-    const depois = screen.queryByRole('region', {
-      name: 'Consentimento de cookies',
-      hidden: true,
-    })
-    expect(depois === null || depois.classList.contains('opacity-0')).toBe(true)
+    // Recusado, o banner é desmontado; abrir e fechar o menu não o traz de
+    // volta.
+    expect(
+      screen.queryByRole('region', {
+        name: 'Consentimento de cookies',
+        hidden: true,
+      })
+    ).not.toBeInTheDocument()
   })
 })

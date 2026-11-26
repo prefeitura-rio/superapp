@@ -19,7 +19,7 @@ export default async function AppLayout({
           <RouteTracker />
           <SessionExpiredHandler />
           <ChamadosCacheSync />
-          <CookieConsent variant="mini" />
+          <CookieConsent />
           <div className="flex-1 w-full">{children}</div>
           <FooterWrapper>
             <Footer />

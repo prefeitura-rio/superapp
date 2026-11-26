@@ -33,6 +33,50 @@ Este módulo implementa rastreamento de eventos do Google Analytics de forma **t
 4. Estabelecer arquitetura escalável para futuros eventos
 5. Garantir privacidade (sem rastreamento de PII)
 
+### Consentimento de cookies (obrigatório)
+
+O Google Analytics é o **único** terceiro de medição do Pref.Rio e **só carrega depois do consentimento** do cidadão no banner de cookies (LGPD art. 7º, I; Guia de Cookies da ANPD). O site não usa Google Tag Manager, Hotjar, gravação de sessão nem publicidade (removidos em novembro de 2026).
+
+| Peça | Arquivo | O que faz |
+|------|---------|-----------|
+| Estado do consentimento | `src/lib/cookie-consent/` | Cookie `prefrio_cookie_consent` (versão, data, `analytics`), leitura no cliente, revogação e limpeza |
+| Banner e preferências | `src/components/cookie-consent.tsx` | Banner com "Rejeitar não necessários" / "Aceitar todos"; painel (aberto por "Preferências de cookies" no rodapé e na política) com a chave de Análise |
+| Carregamento do GA | `src/components/consent-gated-analytics.tsx` | GA (`gtag.js`) e evento de login só com `analytics`; Consent Mode v2 negado por padrão; na carga, `cleanUpTrackingData()` |
+| Eventos | `src/lib/analytics/send-ga-event.ts` e `sendEvent()` | Descartam o evento em silêncio sem consentimento de análise |
+
+Limpeza de cookies (`cleanUpTrackingData` e `saveCookieConsent`):
+
+- Na carga do app e a cada escolha, apaga `_ga*`, `_gid`, `_gat` e `just_logged_in` de quem **não** consentiu com análise. Antes do banner atual o GA rodava para todos, então quem nunca aceitou pode ter cookies antigos.
+- Na carga, apaga `_hj*` (cookies e local/sessionStorage) de **todo** visitante: sobra do Hotjar. Remover esse trecho (`REMOVED_TOOLS_PREFIXES`) a partir de dezembro de 2027, quando os cookies antigos já terão expirado.
+- Revogar a análise recarrega a página: o GA já carregado só sai assim.
+
+O que cada botão faz:
+
+| Onde | Botão | Efeito |
+|------|-------|--------|
+| Banner | Rejeitar não necessários | Grava `analytics:false`, apaga `_ga*` e o banner some. O GA nunca carrega e os eventos são descartados. Sem recarregar a página |
+| Banner | Aceitar todos | Grava `analytics:true` e carrega o GA na hora, sem recarregar. O GA grava `_ga` e `_ga_<ID>` |
+| Painel | Salvar preferências | Grava o estado da chave "Análise". Se desligou uma análise antes aceita, apaga `_ga*` e recarrega |
+| Painel | Rejeitar não necessários | Igual a desligar a chave e salvar |
+| Painel | Aceitar todos | Igual a ligar a chave e salvar |
+| Painel | X / fora do painel | Fecha sem salvar nada |
+
+Toda escolha também: vale 12 meses (depois o banner volta), atualiza o Consent Mode, faz um `POST /api/cookies/consent` só com `{ version, analytics }` (telemetria agregada, sem dado pessoal) e apaga o cookie `cookieConsent` do banner antigo. Com análise aceita, o login gera o marcador `just_logged_in=1` (1 minuto, sem dado pessoal) para o evento `user_login`; sem análise, nem o marcador existe.
+
+Configuração do GA que a Política de cookies pressupõe (nas propriedades de prod `G-6FY8VVMJ5T` e staging `G-0970HR3V20`). Se mudar algo aqui, a política precisa mudar junto:
+
+- **Google signals desligado** e personalização de anúncios desligada: sustenta "o Pref.Rio não usa cookies de publicidade".
+- **Retenção de dados de eventos de 14 meses**: é o prazo escrito na política.
+- **Redação de dados** ligada (e-mail e parâmetros de URL com dado pessoal) e medição aprimorada sem "Interações com formulários" e "Pesquisa no site".
+- Sem dimensões personalizadas com dado pessoal. As antigas `name`, `preferred_username` e `email` (evento `user_login`, de 18/03/2026 até o deploy da correção) precisam ser arquivadas e ter os dados excluídos no painel. Ver [LOGIN_TRACKING.md](./LOGIN_TRACKING.md#configuração-no-google-analytics).
+
+Regras:
+
+- **Use `sendGAEvent` de `@/lib/analytics/send-ga-event`**, nunca de `@next/third-parties/google` (o Biome bloqueia o import direto).
+- **Não renderize `<GoogleAnalytics>` fora do `ConsentGatedAnalytics`**, e não volte a usar `<GoogleTagManager>`: um container de tags permite carregar terceiros por fora do código e do consentimento.
+- A decisão é no cliente: o HTML das páginas públicas tem cache público no CDN.
+- Novo terceiro, nova finalidade ou novo cookie: atualize a página `/politicas-de-uso-de-cookies` e a CSP (`src/middleware.ts`). Se for nova categoria opcional, acrescente em `COOKIE_CONSENT_CATEGORIES`, volte o botão "Personalizar" ao banner e incremente `COOKIE_CONSENT_VERSION` (o banner volta a perguntar).
+
 ---
 
 ## Arquitetura
@@ -611,9 +655,9 @@ window.gtag
 // Deve retornar: ƒ () { ... }
 // Se undefined, gtag não carregou
 
-# 4. Verificar src/app/layout.tsx
-# Deve ter:
-// <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''} />
+# 4. Verificar o consentimento: sem "Análise" aceito no banner,
+#    o GA não é carregado e os eventos são descartados (esperado).
+#    Cookie: prefrio_cookie_consent → analytics: true
 ```
 
 ---
@@ -728,28 +772,15 @@ service_category: serviceData.tema_geral || 'sem_categoria',
 
 **Possíveis Causas:**
 
-1. GoogleAnalytics component não está em `layout.tsx`
+1. Sem consentimento de análise: nesse caso `sendEvent()` descarta o evento em silêncio, sem esse erro. Se o erro aparece, o consentimento existe mas o GA ainda não carregou
 2. Script do GA bloqueado
 3. GA ID inválido ou vazio
 
 **Soluções:**
 
 ```tsx
-// 1. Verificar src/app/layout.tsx
-import { GoogleAnalytics } from '@next/third-parties/google'
-
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <head>
-        <GoogleAnalytics
-          gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''}
-        />
-      </head>
-      <body>{children}</body>
-    </html>
-  )
-}
+// 1. O GA é montado por src/components/consent-gated-analytics.tsx
+//    (renderizado no layout raiz), só com consentimento de análise.
 
 // 2. Verificar .env.local
 NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX  // Formato correto

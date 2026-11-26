@@ -1,10 +1,10 @@
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HomeBannerCarousel } from '../home-banner-carousel'
 import { HOME_BANNER_AUTOPLAY_MS } from '../home-banners'
 
-vi.mock('@next/third-parties/google', () => ({ sendGAEvent: vi.fn() }))
+vi.mock('@/lib/analytics/send-ga-event', () => ({ sendGAEvent: vi.fn() }))
 vi.mock('@/providers/auth-status-provider', () => ({
   useAuthStatus: () => ({ isLoggedIn: false, isLoading: false }),
 }))

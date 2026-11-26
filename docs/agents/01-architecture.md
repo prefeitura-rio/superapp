@@ -18,7 +18,8 @@ A lista canônica de rotas públicas está em `src/middleware.ts` (`publicRoutes
 |-------|-----|
 | `src/app/(app)/...` | Páginas e layouts (RSC por padrão) |
 | `src/app/components/` | UI de domínio (cursos, empregos, MEI, carteira, banners…) |
-| `src/components/` | Shared: `ui/` (shadcn), cookie consent, queue gate, providers de UI |
+| `src/components/` | Shared: `ui/` (shadcn), cookie consent (banner + `ConsentGatedAnalytics`), queue gate, providers de UI |
+| `src/lib/cookie-consent/` | Estado do consentimento de cookies (cookie `prefrio_cookie_consent`, Consent Mode, revogação) — ver [`../ANALYTICS.md`](../ANALYTICS.md#consentimento-de-cookies-obrigatório) |
 | `src/app/api/` | Route Handlers / BFF (auth, proxies, health) |
 | `src/actions/` | Server Actions (perfil, cursos, MEI, pets…) |
 | `src/http*` | Clientes Orval gerados — **não** editar à mão salvo regeneração |

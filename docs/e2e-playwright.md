@@ -123,14 +123,14 @@ Injeta os cookies no `BrowserContext` antes da navegação:
 | --------------- | ------------------------------ | ---------------------------------- |
 | `access_token`  | `E2E_ACCESS_TOKEN`             | `httpOnly: false`, `sameSite: Lax` |
 | `refresh_token` | `E2E_REFRESH_TOKEN` (opcional) | `httpOnly: false`, `sameSite: Lax` |
-| `cookieConsent` | `true`                         | `httpOnly: true`, `sameSite: Lax`  |
+| `prefrio_cookie_consent` | escolha já feita, análise recusada | `httpOnly: false`, `sameSite: Lax` |
 
 
 O domínio e o atributo `secure` são derivados da `baseURL` configurada (localhost → domínio sem `secure`; HTTPS → `secure: true`).
 
 ### `applyE2ECookieConsent(context)`
 
-Injeta apenas o cookie `cookieConsent=true`, suprimindo o banner de consentimento nos testes públicos sem autenticação.
+Injeta apenas o cookie `prefrio_cookie_consent` com uma escolha já feita (análise **recusada**), suprimindo o banner de consentimento nos testes públicos sem autenticação. Assim os testes não carregam o Google Analytics. O valor é gerado por `serializeCookieConsent` (`src/lib/cookie-consent/consent.ts`), então acompanha a `COOKIE_CONSENT_VERSION`.
 
 ### Padrão de uso nos specs
 

@@ -87,9 +87,7 @@ NEXT_PUBLIC_GOVBR_BASE_URL=
 NEXT_PUBLIC_1746_LOGOUT_URL=
 
 # Analytics e Tracking
-NEXT_PUBLIC_HOTJAR_ID=
 NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=
-NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=G
 
 # Google Maps
 GOOGLE_MAPS_API_KEY=
@@ -458,9 +456,7 @@ docker run -p 3000:3000 superapp
 
 ### Analytics e Monitoramento
 
-- **Google Analytics**: Tracking de usuários
-- **Google Tag Manager**: Gerenciamento de tags
-- **Hotjar**: Análise de comportamento
+- **Google Analytics**: Métricas de uso, carregado só com consentimento de cookies (ver `docs/ANALYTICS.md`)
 
 ### Outras
 

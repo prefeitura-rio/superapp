@@ -1,42 +1,35 @@
 'use client'
 
 import { trackUserLogin } from '@/lib/analytics'
-import type { UserLoginParams } from '@/lib/analytics'
+import { LOGIN_MARKER_COOKIE } from '@/lib/analytics/login-marker'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
-function getAndClearLoginCookie(): UserLoginParams | null {
-  const match = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('just_logged_in='))
-
-  if (!match) return null
-
-  // Delete the cookie immediately to prevent duplicate events
-  document.cookie = 'just_logged_in=; path=/; max-age=0'
-
-  try {
-    const encoded = match.split('=')[1]
-    const decoded = JSON.parse(atob(decodeURIComponent(encoded)))
-    return {
-      name: decoded.name ?? '',
-      preferred_username: decoded.preferred_username ?? '',
-      email: decoded.email ?? '',
-    }
-  } catch {
-    return null
-  }
-}
-
+/**
+ * Conta o login no Google Analytics uma única vez por autenticação.
+ *
+ * Só é montado por `ConsentGatedAnalytics`, depois do GA, quando há
+ * consentimento de análise. O marcador `just_logged_in` não tem dados
+ * pessoais: só indica que o login acabou de acontecer.
+ */
 export function LoginEventTracker() {
   const pathname = usePathname()
 
   useEffect(() => {
-    const loginData = getAndClearLoginCookie()
-    if (loginData) {
-      trackUserLogin(loginData, pathname)
-    }
+    if (consumeLoginMarker()) trackUserLogin(pathname)
   }, [pathname])
 
   return null
+}
+
+function consumeLoginMarker(): boolean {
+  const hasMarker = document.cookie
+    .split('; ')
+    .some(row => row.startsWith(`${LOGIN_MARKER_COOKIE}=`))
+
+  if (!hasMarker) return false
+
+  // Apaga na hora para o evento não ser enviado duas vezes.
+  document.cookie = `${LOGIN_MARKER_COOKIE}=; path=/; max-age=0`
+  return true
 }

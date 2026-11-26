@@ -13,7 +13,7 @@ import {
 } from '@/constants/most-accessed-services'
 import { VIDEO_SOURCES } from '@/constants/videos-sources'
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { CatalogSearchContext } from './hooks/use-catalog-search'

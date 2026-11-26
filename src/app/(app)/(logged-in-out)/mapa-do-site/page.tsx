@@ -9,6 +9,7 @@ import {
   CarIcon,
   CitizenshipIcon,
   CoinIcon,
+  CookieIcon,
   EyeOpenIcon,
   FileSearchIcon,
   FileTextIcon,
@@ -34,6 +35,7 @@ import {
 } from '@/assets/icons'
 import { TICKET_FORM_BASE_URL } from '@/constants/url'
 import { fetchCategories, normalizeCategoryName } from '@/lib/categories'
+import { COOKIE_POLICY_ROUTE } from '@/lib/cookie-consent/consent'
 import { isSalesforceServicesEnabled } from '@/lib/feature-flags'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -187,6 +189,11 @@ export default async function MapaDoSitePage() {
           },
         ]
       : []),
+    {
+      label: 'Política de cookies',
+      href: COOKIE_POLICY_ROUTE,
+      icon: <CookieIcon />,
+    },
   ]
 
   const atendimento: SitemapItem[] = [

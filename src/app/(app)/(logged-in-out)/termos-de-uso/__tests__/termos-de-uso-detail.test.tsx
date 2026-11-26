@@ -114,6 +114,50 @@ describe('TermosDeUsoDetail com outro texto', () => {
     expect(screen.queryByText(/Abril de 2026/)).not.toBeInTheDocument()
   })
 
+  it('transforma o trecho indicado do parágrafo em link e mantém o texto ao redor', () => {
+    render(
+      <TermosDeUsoDetail
+        platform={{ slug: 'teste', name: 'Plataforma Teste' }}
+        document={{
+          updatedAt: 'Maio de 2027',
+          version: '2.0',
+          parts: [
+            {
+              sections: [
+                {
+                  title: '12. Cookies',
+                  blocks: [
+                    {
+                      type: 'paragraph',
+                      text: 'Antes Política de Cookies depois.',
+                      link: {
+                        label: 'Política de Cookies',
+                        href: '/politicas-de-uso-de-cookies',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }}
+      />
+    )
+
+    const link = screen.getByRole('link', { name: 'Política de Cookies' })
+    expect(link).toHaveAttribute('href', '/politicas-de-uso-de-cookies')
+    expect(link.tagName).toBe('A')
+    expect(link).toHaveClass(
+      'text-primary',
+      'underline',
+      'underline-offset-4',
+      'hover:no-underline'
+    )
+    expect(link.closest('p')).toHaveTextContent(
+      'Antes Política de Cookies depois.'
+    )
+  })
+
   it('trocar o texto de uma plataforma não afeta as outras', async () => {
     const cursos = render(await TermosDeUsoPlataformaPage(pageProps('cursos')))
     expect(

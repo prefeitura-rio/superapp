@@ -322,6 +322,23 @@ test.describe('Termos de uso — detalhe (público)', () => {
     })
   }
 
+  test('o item 12.6 leva à Política de Cookies', async ({ page }) => {
+    await page.goto('/termos-de-uso/prefrio-site')
+    const item = page.getByRole('article').getByText(/^12\.6\./)
+    const link = item.getByRole('link', { name: 'Política de Cookies' })
+
+    await expect(link).toHaveAttribute('href', '/politicas-de-uso-de-cookies')
+    await expect(
+      page.getByText(/^12\.5\. A Plataforma Pref\.Rio possui/)
+    ).toBeVisible()
+
+    await link.click()
+    await page.waitForURL('**/politicas-de-uso-de-cookies')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Política de cookies' })
+    ).toBeVisible()
+  })
+
   test('mostra o texto completo: Termo de Uso e Aviso de Privacidade até o Foro', async ({
     page,
   }) => {
@@ -1014,19 +1031,19 @@ test.describe('Termos de uso — pelo menu global (autenticado)', () => {
 })
 
 /**
- * Footer (redesign do #803): em "Links rápidos", "Termos de uso" e "Política
- * de privacidade" são links separados, e os dois levam à lista de Termos de
- * uso (o Termo de Uso e o Aviso de Privacidade são um documento só).
+ * Footer: em "Links rápidos", um único link "Termos de uso e política de
+ * privacidade" leva à lista de Termos de uso (o Termo de Uso e o Aviso de
+ * Privacidade são um documento só, PREF-653), com o mesmo rótulo do menu
+ * global e do mapa do site. Logo abaixo, "Preferências de cookies".
  */
-const FOOTER_LINK = 'Termos de uso'
-const FOOTER_PRIVACY_LINK = 'Política de privacidade'
+const FOOTER_LINK = 'Termos de uso e política de privacidade'
 
 function footerTermsLinks(page: Page) {
   const footer = page.getByRole('contentinfo')
   return {
     terms: footer.getByRole('link', { name: FOOTER_LINK, exact: true }),
-    privacy: footer.getByRole('link', {
-      name: FOOTER_PRIVACY_LINK,
+    cookiePreferences: footer.getByRole('button', {
+      name: 'Preferências de cookies',
       exact: true,
     }),
   }
@@ -1043,24 +1060,33 @@ for (const viewport of [
       await applyE2ECookieConsent(context)
     })
 
-    test('Termos de uso e Política de privacidade em Links rápidos, os dois levando à lista', async ({
+    test('Termos de uso e política de privacidade em Links rápidos, levando à lista', async ({
       page,
     }) => {
       await page.goto('/')
-      const { terms, privacy } = footerTermsLinks(page)
+      const footer = page.getByRole('contentinfo')
+      const { terms, cookiePreferences } = footerTermsLinks(page)
       await expect(terms).toHaveCount(1)
       await expect(terms).toHaveAttribute('href', '/termos-de-uso')
-      await expect(privacy).toHaveCount(1)
-      await expect(privacy).toHaveAttribute('href', '/termos-de-uso')
+      // Sem links separados de privacidade ou de cookies.
+      await expect(
+        footer.getByRole('link', {
+          name: 'Política de privacidade',
+          exact: true,
+        })
+      ).toHaveCount(0)
+      await expect(
+        footer.getByRole('link', { name: /pol[ií]tica de cookies/i })
+      ).toHaveCount(0)
 
-      // Vizinhos na lista de Links rápidos: Política logo abaixo de Termos,
-      // alinhados à esquerda.
+      // Vizinhos na lista de Links rápidos: Preferências de cookies logo
+      // abaixo de Termos, alinhados à esquerda.
       await terms.scrollIntoViewIfNeeded()
       const t = await terms.boundingBox()
-      const p = await privacy.boundingBox()
-      if (!t || !p) throw new Error('links do footer sem bounding box')
-      expect(p.x).toBe(t.x)
-      expect(p.y).toBeGreaterThanOrEqual(t.y + t.height)
+      const c = await cookiePreferences.boundingBox()
+      if (!t || !c) throw new Error('itens do footer sem bounding box')
+      expect(c.x).toBe(t.x)
+      expect(c.y).toBeGreaterThanOrEqual(t.y + t.height)
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth)
       ).toBeLessThanOrEqual(viewport.width)
@@ -1146,16 +1172,14 @@ test.describe('Footer — link de Termos de uso em outras páginas', () => {
     '/termos-de-uso',
     '/termos-de-uso/cursos',
   ]) {
-    test(`${path}: footer com os links de Termos de uso e Política de privacidade`, async ({
+    test(`${path}: footer com o link de Termos de uso e política de privacidade`, async ({
       page,
     }) => {
       await page.goto(path)
-      const { terms, privacy } = footerTermsLinks(page)
+      const { terms } = footerTermsLinks(page)
 
       await expect(terms).toHaveCount(1)
       await expect(terms).toHaveAttribute('href', '/termos-de-uso')
-      await expect(privacy).toHaveCount(1)
-      await expect(privacy).toHaveAttribute('href', '/termos-de-uso')
     })
   }
 

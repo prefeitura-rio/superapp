@@ -31,6 +31,16 @@
         "noNonNullAssertion": "off",
         "noUnusedTemplateLiteral": "off"
       },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@next/third-parties/google": "Use sendGAEvent de '@/lib/analytics/send-ga-event' e o ConsentGatedAnalytics: o GA só pode rodar com consentimento de cookies (LGPD). Não use GoogleTagManager."
+            }
+          }
+        }
+      },
       "suspicious": {
         "noArrayIndexKey": "off",
         "noImplicitAnyLet": "off",
@@ -61,6 +71,20 @@
     ]
   },
   "overrides": [
+    {
+      "include": [
+        "src/lib/analytics/send-ga-event.ts",
+        "src/lib/analytics/__tests__/send-ga-event.test.ts",
+        "src/components/consent-gated-analytics.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
     {
       "include": [
         "src/http/**",

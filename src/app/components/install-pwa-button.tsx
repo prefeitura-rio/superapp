@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { usePWA } from '@/providers/pwa-provider'
-import { sendGAEvent } from '@next/third-parties/google'
 import { Download } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'

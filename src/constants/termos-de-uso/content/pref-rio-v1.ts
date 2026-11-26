@@ -1,4 +1,13 @@
+import { COOKIE_POLICY_ROUTE } from '@/lib/cookie-consent/consent'
 import type { TermosDeUsoPart } from '../types'
+
+/**
+ * Item proposto para o jurídico, depois do 12.5. Não altera 12.1–12.5 nem a
+ * versão do documento. Não menciona transferência internacional: isso fica só
+ * na Política de Cookies, para não contradizer o §10.
+ */
+const COOKIES_ITEM_12_6 =
+  '12.6. Além dos cookies necessários, a Plataforma Pref.Rio usa cookies de análise (Google Analytics) somente se o usuário permitir. Essa escolha pode ser mudada ou revogada a qualquer momento em "Preferências de cookies", no rodapé do site. A lista de cookies, suas finalidades, os prazos, os terceiros envolvidos e os direitos do titular estão na Política de Cookies.'
 
 /**
  * Texto do Termo de Uso e Aviso de Privacidade da Plataforma Pref.Rio,
@@ -493,6 +502,14 @@ export const PREF_RIO_V1_PARTS: TermosDeUsoPart[] = [
           {
             type: 'paragraph',
             text: '12.5. A Plataforma Pref.Rio possui alguns cookies necessários que coletam dados, com base em seu legítimo interesse, tendo em vista a limitação da coleta ao estritamente necessário para a finalidade específica e exclusiva de manter o funcionamento da aplicação. Somente a própria aplicação tem acesso a estes cookies, sendo que as informações e dados coletados não são compartilhados com terceiros e nem cruzadas com outros bancos de dados visando alcançar outras finalidades.',
+          },
+          {
+            type: 'paragraph',
+            text: COOKIES_ITEM_12_6,
+            link: {
+              label: 'Política de Cookies',
+              href: COOKIE_POLICY_ROUTE,
+            },
           },
         ],
       },

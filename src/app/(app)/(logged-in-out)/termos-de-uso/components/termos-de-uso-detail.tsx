@@ -3,9 +3,16 @@ import type { TermosDeUsoPlatform } from '@/constants/termos-de-uso/platforms'
 import type {
   TermosDeUsoBlock,
   TermosDeUsoDocument,
+  TermosDeUsoParagraphLink,
   TermosDeUsoSection,
 } from '@/constants/termos-de-uso/types'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { BackToOrigin } from './back-to-origin'
+
+/** Igual ao link da Política de Cookies. */
+const PARAGRAPH_LINK_CLASS =
+  'text-primary underline underline-offset-4 hover:no-underline'
 
 interface TermosDeUsoDetailProps {
   platform: TermosDeUsoPlatform
@@ -86,12 +93,35 @@ function Section({
   )
 }
 
+function ParagraphText({
+  text,
+  link,
+}: {
+  text: string
+  link?: TermosDeUsoParagraphLink
+}): ReactNode {
+  if (!link) return text
+  const index = text.indexOf(link.label)
+  if (index === -1) return text
+  return (
+    <>
+      {text.slice(0, index)}
+      <Link href={link.href} className={PARAGRAPH_LINK_CLASS}>
+        {link.label}
+      </Link>
+      {text.slice(index + link.label.length)}
+    </>
+  )
+}
+
 function Blocks({ blocks }: { blocks: TermosDeUsoBlock[] }) {
   return (
     <div className="flex flex-col gap-5 text-sm leading-5 text-foreground-light">
       {blocks.map(block =>
         block.type === 'paragraph' ? (
-          <p key={block.text}>{block.text}</p>
+          <p key={block.text}>
+            <ParagraphText text={block.text} link={block.link} />
+          </p>
         ) : (
           <ul key={block.items[0]}>
             {block.items.map(item => (

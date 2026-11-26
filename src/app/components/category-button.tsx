@@ -1,7 +1,7 @@
 'use client'
 
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { getCategoryDisplayName } from '@/lib/category-display-name'
-import { sendGAEvent } from '@next/third-parties/google'
 import type React from 'react'
 
 interface Category {

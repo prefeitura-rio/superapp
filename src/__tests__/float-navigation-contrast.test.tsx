@@ -17,7 +17,7 @@ const pathname = { current: '/servicos/cursos' }
 vi.mock('next/navigation', () => ({
   usePathname: () => pathname.current,
 }))
-vi.mock('@next/third-parties/google', () => ({
+vi.mock('@/lib/analytics/send-ga-event', () => ({
   sendGAEvent: vi.fn(),
 }))
 

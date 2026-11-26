@@ -96,10 +96,10 @@ describe('DEV-508 — H1 e hierarquia de headings em páginas institucionais', (
   it('/politicas-de-uso-de-cookies não pula de H2 para H4', () => {
     const { container } = render(<CookiesPolicy />)
 
-    expectSequentialOutline(container, 'Política de Cookies')
-    expect(levelOf(container, 'Cookies Essenciais')).toBe(3)
-    expect(levelOf(container, 'Cookies de Análise')).toBe(3)
-    expect(levelOf(container, 'Cookies Funcionais')).toBe(3)
-    expect(levelOf(container, 'Configurações do Navegador')).toBe(3)
+    expectSequentialOutline(container, 'Política de cookies')
+    expect(levelOf(container, 'Como usamos cookies')).toBe(2)
+    expect(levelOf(container, 'Cookies necessários')).toBe(3)
+    expect(levelOf(container, 'Cookies de análise (Google Analytics)')).toBe(3)
+    expect(levelOf(container, 'Configurações do navegador')).toBe(3)
   })
 })

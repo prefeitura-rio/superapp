@@ -1,3 +1,4 @@
+import { COOKIE_POLICY_ROUTE } from '@/lib/cookie-consent/consent'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import {
   TERMOS_DE_USO_CONTENT,
@@ -85,6 +86,39 @@ describe('termos de uso: conteúdo por plataforma', () => {
       }
     }
   })
+
+  const ITEM_12_5 =
+    '12.5. A Plataforma Pref.Rio possui alguns cookies necessários que coletam dados, com base em seu legítimo interesse, tendo em vista a limitação da coleta ao estritamente necessário para a finalidade específica e exclusiva de manter o funcionamento da aplicação. Somente a própria aplicação tem acesso a estes cookies, sendo que as informações e dados coletados não são compartilhados com terceiros e nem cruzadas com outros bancos de dados visando alcançar outras finalidades.'
+
+  const ITEM_12_6 =
+    '12.6. Além dos cookies necessários, a Plataforma Pref.Rio usa cookies de análise (Google Analytics) somente se o usuário permitir. Essa escolha pode ser mudada ou revogada a qualquer momento em "Preferências de cookies", no rodapé do site. A lista de cookies, suas finalidades, os prazos, os terceiros envolvidos e os direitos do titular estão na Política de Cookies.'
+
+  it.each(
+    TERMOS_DE_USO_PLATFORMS.map(platform => [platform.name, platform.slug])
+  )(
+    '%s: o item 12.6 aponta para a Política de Cookies e o 12.5 segue igual',
+    (_name, slug) => {
+      const cookies = getTermosDeUsoDocument(slug)
+        ?.parts.flatMap(part => part.sections)
+        .find(section => section.title === '12. Cookies')
+      const paragraphs =
+        cookies?.blocks.filter(block => block.type === 'paragraph') ?? []
+      const item125 = paragraphs.at(-2)
+      const item126 = paragraphs.at(-1)
+
+      expect(item125).toEqual({ type: 'paragraph', text: ITEM_12_5 })
+      expect(item126).toEqual({
+        type: 'paragraph',
+        text: ITEM_12_6,
+        link: {
+          label: 'Política de Cookies',
+          href: COOKIE_POLICY_ROUTE,
+        },
+      })
+      expect(ITEM_12_6).toContain('Política de Cookies')
+      expect(ITEM_12_6).not.toMatch(/EUA|Estados Unidos/)
+    }
+  )
 
   it('nenhuma seção ou lista fica vazia', () => {
     for (const { slug } of TERMOS_DE_USO_PLATFORMS) {

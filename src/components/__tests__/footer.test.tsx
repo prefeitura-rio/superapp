@@ -54,6 +54,26 @@ describe('Footer — conteúdo estático (independente de flags)', () => {
     const link = screen.getByRole('link', { name: 'Mapa do site' })
     expect(link).toHaveAttribute('href', '/mapa-do-site')
   })
+
+  it('tem "Preferências de cookies" mesmo sem as flags do Salesforce', async () => {
+    vi.stubEnv('FEATURE_SALESFORCE', 'false')
+    await renderFooter()
+
+    // Revogar o consentimento tem que ser tão fácil quanto dá-lo (LGPD art. 8º, § 5º).
+    expect(
+      screen.getByRole('button', { name: 'Preferências de cookies' })
+    ).toBeInTheDocument()
+  })
+
+  it('não tem link próprio para a Política de cookies (ela é aberta pelo painel de preferências)', async () => {
+    vi.stubEnv('FEATURE_SALESFORCE', 'true')
+    vi.stubEnv('FEATURE_HOME_SOLICITACOES', 'true')
+    await renderFooter()
+
+    expect(
+      screen.queryByRole('link', { name: /pol[ií]tica de cookies/i })
+    ).toBeNull()
+  })
 })
 
 describe('Footer — links controlados por FEATURE_SALESFORCE + FEATURE_HOME_SOLICITACOES', () => {
@@ -113,31 +133,27 @@ describe('Footer — links controlados por FEATURE_SALESFORCE + FEATURE_HOME_SOL
 })
 
 describe('Footer — links controlados apenas por FEATURE_SALESFORCE', () => {
-  it('com FEATURE_SALESFORCE=true: exibe Termos de uso e Política de privacidade', async () => {
+  it('com FEATURE_SALESFORCE=true: exibe um único link de Termos de uso e política de privacidade', async () => {
     vi.stubEnv('FEATURE_SALESFORCE', 'true')
     await renderFooter()
 
-    const termosLinks = screen.getAllByRole('link', { name: 'Termos de uso' })
-    expect(termosLinks.length).toBeGreaterThan(0)
-    for (const link of termosLinks) {
-      expect(link).toHaveAttribute('href', TERMOS_DE_USO_ROUTE)
-    }
-    const privacidadeLinks = screen.getAllByRole('link', {
-      name: 'Política de privacidade',
+    // Termo de Uso e Aviso de Privacidade são um documento só (PREF-653).
+    const link = screen.getByRole('link', {
+      name: 'Termos de uso e política de privacidade',
     })
-    expect(privacidadeLinks.length).toBeGreaterThan(0)
-    for (const link of privacidadeLinks) {
-      expect(link).toHaveAttribute('href', TERMOS_DE_USO_ROUTE)
-    }
+    expect(link).toHaveAttribute('href', TERMOS_DE_USO_ROUTE)
+    expect(
+      screen.queryByRole('link', { name: 'Política de privacidade' })
+    ).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Termos de uso' })).toBeNull()
   })
 
-  it('com FEATURE_SALESFORCE=false: oculta Termos de uso e Política de privacidade', async () => {
+  it('com FEATURE_SALESFORCE=false: oculta Termos de uso e política de privacidade', async () => {
     vi.stubEnv('FEATURE_SALESFORCE', 'false')
     await renderFooter()
 
-    expect(screen.queryByRole('link', { name: 'Termos de uso' })).toBeNull()
     expect(
-      screen.queryByRole('link', { name: 'Política de privacidade' })
+      screen.queryByRole('link', { name: /termos de uso|privacidade/i })
     ).toBeNull()
   })
 })
@@ -191,7 +207,10 @@ describe('Footer — contraste dos links secundários (WCAG AA)', () => {
       screen.getByRole('button', { name: '1746' }),
       screen.getByRole('button', { name: '(21) 3460-1746' }),
     ]
-    return [...quickLinks, ...phoneButtons]
+    const cookiePreferences = screen.getByRole('button', {
+      name: 'Preferências de cookies',
+    })
+    return [...quickLinks, ...phoneButtons, cookiePreferences]
   }
 
   it('links rápidos e telefones não usam a variável inexistente --theme-color-card-2', async () => {

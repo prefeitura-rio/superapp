@@ -1,4 +1,9 @@
 import type { BrowserContext } from '@playwright/test'
+import {
+  COOKIE_CONSENT_COOKIE,
+  COOKIE_CONSENT_VERSION,
+  serializeCookieConsent,
+} from '../../src/lib/cookie-consent/consent'
 
 function getBaseUrl(): URL {
   const port = process.env.PORT ?? '3000'
@@ -12,9 +17,11 @@ export function hasE2EAuth(): boolean {
 }
 
 /**
- * Injeta o cookie de consentimento de cookies para suprimir o banner
+ * Injeta uma escolha de cookies já feita para suprimir o banner
  * CookieConsent durante os testes. Pode ser chamada independentemente
  * para contextos não autenticados.
+ *
+ * A escolha é recusar a análise: os testes não carregam o Google Analytics.
  */
 export async function applyE2ECookieConsent(
   context: BrowserContext
@@ -24,11 +31,15 @@ export async function applyE2ECookieConsent(
 
   await context.addCookies([
     {
-      name: 'cookieConsent',
-      value: 'true',
+      name: COOKIE_CONSENT_COOKIE,
+      value: serializeCookieConsent({
+        version: COOKIE_CONSENT_VERSION,
+        updatedAt: new Date().toISOString(),
+        analytics: false,
+      }),
       domain,
       path: '/',
-      httpOnly: true,
+      httpOnly: false,
       secure: protocol === 'https:',
       sameSite: 'Lax',
     },

@@ -38,4 +38,20 @@ describe('TermosDeUsoContent (trabalho)', () => {
       '5.5.',
     ])
   })
+
+  it('o item 12.6 aponta para a Política de Cookies e o 12.5 segue igual', () => {
+    render(<TermosDeUsoContent />)
+
+    expect(
+      screen.getByText(/^12\.5\. A Plataforma Pref\.Rio possui alguns cookies/)
+    ).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: 'Política de Cookies' })
+    expect(link).toHaveAttribute('href', '/politicas-de-uso-de-cookies')
+    expect(link.closest('p')).toHaveTextContent(
+      /^12\.6\. Além dos cookies necessários/
+    )
+    expect(link.closest('p')).toHaveTextContent(
+      /estão na Política de Cookies\.$/
+    )
+  })
 })

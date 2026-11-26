@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import HeaderUserLink from '../header-user-link'
 
-vi.mock('@next/third-parties/google', () => ({ sendGAEvent: vi.fn() }))
+vi.mock('@/lib/analytics/send-ga-event', () => ({ sendGAEvent: vi.fn() }))
 
 /**
  * Perfil e Menu do Header Global seguem o estado do handoff: default `bg-card`,

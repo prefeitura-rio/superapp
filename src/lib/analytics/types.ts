@@ -140,20 +140,6 @@ export interface ServiceButtonClickParams {
 }
 
 /**
- * Parameters for user login event tracking
- */
-export interface UserLoginParams {
-  /** Full name from Keycloak JWT */
-  name: string
-
-  /** CPF or username from Keycloak JWT */
-  preferred_username: string
-
-  /** Email from Keycloak JWT */
-  email: string
-}
-
-/**
  * Complete event payload sent to Google Analytics
  *
  * @remarks
@@ -175,8 +161,11 @@ export interface AnalyticsEvent extends BaseEventParams {
    *
    * @remarks
    * Optional object containing additional parameters specific to the event type.
+   *
+   * **Nunca** inclua dados pessoais (nome, CPF, e-mail, telefone, endereço):
+   * os termos do Google Analytics proíbem e a LGPD exige minimização.
    */
-  event_params?: ServiceButtonClickParams | UserLoginParams
+  event_params?: ServiceButtonClickParams
 }
 
 /**

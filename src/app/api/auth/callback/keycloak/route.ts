@@ -1,23 +1,20 @@
 // src/app/api/auth/callback/keycloak/route.ts
 import { REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE } from '@/constants/url'
 import {
+  LOGIN_MARKER_COOKIE,
+  LOGIN_MARKER_MAX_AGE,
+  LOGIN_MARKER_VALUE,
+} from '@/lib/analytics/login-marker'
+import {
   getAccessTokenCookieConfig,
   getRefreshTokenCookieConfig,
 } from '@/lib/auth-cookie-config'
-import { jwtDecode } from 'jwt-decode'
+import {
+  COOKIE_CONSENT_COOKIE,
+  hasConsentFor,
+  parseCookieConsent,
+} from '@/lib/cookie-consent/consent'
 import { type NextRequest, NextResponse } from 'next/server'
-
-interface KeycloakJwtPayload {
-  sub?: string
-  name?: string
-  preferred_username?: string
-  email?: string
-}
-
-function formatCpf(raw: string): string {
-  const digits = raw.replace(/\D/g, '').padStart(11, '0')
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -79,26 +76,21 @@ export async function GET(req: NextRequest) {
       getRefreshTokenCookieConfig()
     )
 
-    // Short-lived, non-httpOnly cookie so client JS can detect a fresh login
-    // and fire a one-time GA event. Decoded server-side to avoid exposing the
-    // full JWT to client code.
-    try {
-      const decoded = jwtDecode<KeycloakJwtPayload>(data.access_token)
-      const cpf = decoded.preferred_username ?? ''
-      const loginInfo = JSON.stringify({
-        name: decoded.name ?? '',
-        preferred_username: cpf ? formatCpf(cpf) : '',
-        email: decoded.email ?? '',
-      })
-      res.cookies.set('just_logged_in', btoa(loginInfo), {
+    // Marcador curto, legível pelo cliente, para o LoginEventTracker contar o
+    // login no GA uma vez. Só existe com consentimento de análise e não leva
+    // dados pessoais (nada de nome, CPF ou e-mail: o GA proíbe e a LGPD exige
+    // minimização).
+    const consent = parseCookieConsent(
+      req.cookies.get(COOKIE_CONSENT_COOKIE)?.value
+    )
+    if (hasConsentFor(consent, 'analytics')) {
+      res.cookies.set(LOGIN_MARKER_COOKIE, LOGIN_MARKER_VALUE, {
         path: '/',
         httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60,
+        maxAge: LOGIN_MARKER_MAX_AGE,
       })
-    } catch {
-      // Non-critical: if JWT decode fails, skip the analytics cookie
     }
 
     return res

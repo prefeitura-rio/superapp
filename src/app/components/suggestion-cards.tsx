@@ -2,8 +2,8 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { resolveBannerRoute, suggestedBanners } from '@/constants/banners'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { useAuthStatus } from '@/providers/auth-status-provider'
-import { sendGAEvent } from '@next/third-parties/google'
 
 export default function SuggestionCards() {
   const { isLoggedIn, isLoading } = useAuthStatus()

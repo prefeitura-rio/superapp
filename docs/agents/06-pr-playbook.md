@@ -25,6 +25,7 @@ Checklist para transformar um pedido de alto nível (ex.: Jira) em um PR seguro 
 
 - [ ] RSC por padrão; `'use client'` só se necessário.
 - [ ] Auth: cookies Keycloak existentes — sem next-auth, sem Heimdall.
+- [ ] Analytics/terceiros: nada de rastreamento sem consentimento de cookies. O GA é o único terceiro de medição (sem GTM, Hotjar ou gravação de sessão); novo terceiro de rastreamento precisa de aval do encarregado de dados. Eventos GA via `@/lib/analytics/send-ga-event` (nunca `@next/third-parties/google` direto), scripts de terceiros só pelo `ConsentGatedAnalytics`, **nunca** dados pessoais (nome, CPF, e-mail) em eventos. Cookie, terceiro ou finalidade nova → atualizar `/politicas-de-uso-de-cookies` (e `COOKIE_CONSENT_VERSION` se mudar finalidade/terceiro). Ver [`../ANALYTICS.md`](../ANALYTICS.md#consentimento-de-cookies-obrigatório).
 - [ ] Feature flag: se a superfície for gateada, seguir padrão `NEXT_PUBLIC_FEATURE_FLAG`.
 - [ ] Forms: RHF + Zod; listagens interativas: TanStack Query.
 - [ ] UI: componentes shadcn em `src/components/ui/`; só Tailwind em `className` (sem inline style); escala (`p-3`) > `p-[12px]`; cores via tokens de `src/app/globals.css`.

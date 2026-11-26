@@ -899,3 +899,96 @@ test.describe('Menu global × banner de cookies (visitante sem consentimento)', 
     expect(new URL(page.url()).pathname).toBe('/')
   })
 })
+
+// ---------------------------------------------------------------------------
+// CONSENTIMENTO DE COOKIES (LGPD)
+// ---------------------------------------------------------------------------
+
+/**
+ * O Google Analytics só pode carregar depois do consentimento, e o site não
+ * carrega mais GTM nem Hotjar. Antes da escolha e depois da recusa, nenhuma
+ * requisição vai para eles e nenhum cookie `_ga*`/`_hj*` fica no navegador.
+ */
+test.describe('Consentimento de cookies (visitante sem escolha)', () => {
+  const TRACKERS =
+    /googletagmanager\.com|google-analytics\.com|analytics\.google\.com|hotjar\.(com|io)/
+
+  test('nenhum terceiro de medição carrega antes da escolha nem depois da recusa', async ({
+    page,
+    context,
+  }) => {
+    const trackerRequests: string[] = []
+    page.on('request', request => {
+      if (TRACKERS.test(request.url())) trackerRequests.push(request.url())
+    })
+
+    await page.goto('/')
+    const banner = page.getByRole('region', {
+      name: 'Consentimento de cookies',
+    })
+    // O banner só aparece depois da hidratação, quando o GA já teria carregado.
+    await expect(banner).toBeVisible()
+    expect(trackerRequests).toEqual([])
+
+    await banner
+      .getByRole('button', { name: 'Rejeitar não necessários' })
+      .click()
+    await expect(banner).toBeHidden()
+
+    await page.reload()
+    await page.waitForLoadState('networkidle')
+    await expect(banner).toBeHidden()
+
+    expect(trackerRequests).toEqual([])
+    const trackerCookies = (await context.cookies())
+      .map(cookie => cookie.name)
+      .filter(name => name.startsWith('_ga') || name.startsWith('_hj'))
+    expect(trackerCookies).toEqual([])
+  })
+
+  test('cookies do Hotjar e do GA de antes do banner são apagados na carga', async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    const domain = new URL(baseURL ?? 'http://localhost:3000').hostname
+    await context.addCookies([
+      { name: '_hjSessionUser_6494379', value: 'antigo', domain, path: '/' },
+      { name: '_ga', value: 'GA1.1.antigo', domain, path: '/' },
+    ])
+
+    await page.goto('/')
+    await expect(
+      page.getByRole('region', { name: 'Consentimento de cookies' })
+    ).toBeVisible()
+
+    const trackerCookies = (await context.cookies())
+      .map(cookie => cookie.name)
+      .filter(name => name.startsWith('_ga') || name.startsWith('_hj'))
+    expect(trackerCookies).toEqual([])
+  })
+
+  test('"Preferências de cookies" no rodapé reabre a escolha', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const banner = page.getByRole('region', {
+      name: 'Consentimento de cookies',
+    })
+    await banner
+      .getByRole('button', { name: 'Rejeitar não necessários' })
+      .click()
+    await expect(banner).toBeHidden()
+
+    await page
+      .locator('footer')
+      .getByRole('button', { name: 'Preferências de cookies' })
+      .click()
+    const dialog = page.getByRole('dialog', { name: 'Preferências de cookies' })
+    await expect(dialog).toBeVisible()
+    await expect(
+      dialog.getByRole('switch', { name: 'Análise (Google Analytics)' })
+    ).not.toBeChecked()
+    await expect(dialog.getByRole('switch')).toHaveCount(1)
+  })
+})

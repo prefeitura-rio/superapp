@@ -15,6 +15,7 @@ import { ChevronRightIcon } from './chevron-right-icon'
 import { CitizenshipIcon } from './citizenship-icon'
 import { CltIcon } from './clt-icon'
 import { CoinIcon } from './coin-icon'
+import { CookieIcon } from './cookie-icon'
 import { DoctorIcon } from './doctor-icon'
 import { DownloadIcon } from './download-icon'
 import { EditIcon } from './edit-icon'
@@ -86,6 +87,7 @@ export {
   CarIcon,
   CitizenshipIcon,
   CoinIcon,
+  CookieIcon,
   EyeOpenIcon,
   FileSearchIcon,
   FileTextIcon,

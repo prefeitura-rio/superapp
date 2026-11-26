@@ -1,7 +1,7 @@
 import type { SearchResultItem } from '@/helpers/search-helpers'
 import { normalizeCategorySlug } from '@/helpers/search-helpers'
 import type { ModelsSearchItem } from '@/http-app-catalogo/models'
-import { sendGAEvent } from '@next/third-parties/google'
+import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 /**

@@ -1,7 +1,15 @@
 'use client'
 
 import { OportunidadesSubHeader } from '@/app/components/oportunidades/oportunidades-sub-header'
+import { COOKIE_POLICY_ROUTE } from '@/lib/cookie-consent/consent'
 import Link from 'next/link'
+
+/** Mesmo texto do 12.6 em `pref-rio-v1.ts`. O link não depende da flag do Salesforce. */
+const COOKIES_ITEM_12_6 =
+  '12.6. Além dos cookies necessários, a Plataforma Pref.Rio usa cookies de análise (Google Analytics) somente se o usuário permitir. Essa escolha pode ser mudada ou revogada a qualquer momento em "Preferências de cookies", no rodapé do site. A lista de cookies, suas finalidades, os prazos, os terceiros envolvidos e os direitos do titular estão na Política de Cookies.'
+const COOKIES_POLICY_LABEL = 'Política de Cookies'
+const COOKIES_POLICY_LINK_CLASS =
+  'text-primary underline underline-offset-4 hover:no-underline'
 
 const titleCn =
   "text-[color:var(--theme-color-card-foreground,#020618)] font-[family-name:var(--font-family-sans,'DM_Sans')] text-[length:var(--font-size-lg,18px)] font-[var(--font-weight-medium,500)] leading-[var(--font-leading-5,20px)] tracking-[var(--font-tracking-normal,0)]"
@@ -705,6 +713,22 @@ export function TermosDeUsoContent() {
                 {text}
               </p>
             ))}
+            <p className={bodyCn}>
+              {COOKIES_ITEM_12_6.slice(
+                0,
+                COOKIES_ITEM_12_6.indexOf(COOKIES_POLICY_LABEL)
+              )}
+              <Link
+                href={COOKIE_POLICY_ROUTE}
+                className={COOKIES_POLICY_LINK_CLASS}
+              >
+                {COOKIES_POLICY_LABEL}
+              </Link>
+              {COOKIES_ITEM_12_6.slice(
+                COOKIES_ITEM_12_6.indexOf(COOKIES_POLICY_LABEL) +
+                  COOKIES_POLICY_LABEL.length
+              )}
+            </p>
           </div>
 
           <Divider />

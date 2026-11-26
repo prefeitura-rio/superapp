@@ -157,7 +157,7 @@ describe('DEV-234 — um único <main> nas páginas de (logged-in-out)', () => {
     const { container } = render(<CookiesPolicy />)
     expectSingleMain(container)
     expect(container.querySelector('main h1')).toHaveTextContent(
-      'Política de Cookies'
+      'Política de cookies'
     )
   })
 
