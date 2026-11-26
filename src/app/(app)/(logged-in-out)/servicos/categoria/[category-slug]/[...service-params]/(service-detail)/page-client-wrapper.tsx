@@ -2,7 +2,6 @@
 
 import { Breadcrumb } from '@/app/components/breadcrumb'
 import HeaderWrapperClient from '@/app/components/header-wrapper-client'
-import { OfficialBanner } from '@/app/components/service'
 import type { ModelsPrefRioService } from '@/http-busca-search/models/modelsPrefRioService'
 import type {
   ServiceContentFormat,
@@ -38,8 +37,6 @@ export function PageClientWrapper({
 
   return (
     <>
-      <OfficialBanner />
-
       <div className="max-w-4xl mx-auto">
         <HeaderWrapperClient />
         <Breadcrumb
