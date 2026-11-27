@@ -52,7 +52,16 @@ export const metadata: Metadata = {
     'format-detection': 'telephone=no, email=no, address=no',
   },
   // Só pref.rio é indexável; staging e dev saem com noindex.
-  ...(isIndexingAllowed() ? {} : { robots: { index: false, follow: false } }),
+  // O token do Search Console é da propriedade `staging.app.dados.rio`, por
+  // isso também fica fora de produção. Não remover: o Google reverifica.
+  ...(isIndexingAllowed()
+    ? {}
+    : {
+        robots: { index: false, follow: false },
+        verification: {
+          google: 'bQEnrfcQnAJSgB_V6JKU6T7tGmTG8G-Qx49EhhZACh4',
+        },
+      }),
 }
 
 export default async function RootLayout({
