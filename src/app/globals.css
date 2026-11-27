@@ -116,6 +116,26 @@ html::-webkit-scrollbar {
   height: 19px;
 }
 
+/* Interruptor só do modal de preferências de cookies (Figma: 35×20, bolinha 16px).
+   O thumb global usa a propriedade `translate` do Tailwind; um `transform` extra
+   somava os dois deslocamentos e jogava a bolinha para fora da trilha. */
+.cookie-preferences-switch {
+  height: 20px;
+  width: 35px;
+  padding: 2px;
+}
+
+.cookie-preferences-switch [data-slot="switch-thumb"] {
+  width: 15px;
+  height: 15px;
+  transform: none;
+  translate: 0 0;
+}
+
+.cookie-preferences-switch[data-state="checked"] [data-slot="switch-thumb"] {
+  translate: 15px 0;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

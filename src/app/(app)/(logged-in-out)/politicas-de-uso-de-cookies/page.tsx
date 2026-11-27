@@ -4,10 +4,7 @@ import { CookiePreferencesButton } from '@/components/cookie-preferences-button'
 import { LOGIN_MARKER_COOKIE } from '@/lib/analytics/login-marker'
 import { VOTER_TOKEN_COOKIE } from '@/lib/carta-servicos/avaliacao/voter-token'
 import { FORMULARIO_MARKER_COOKIE } from '@/lib/chamados/formulario-marker'
-import {
-  COOKIE_CONSENT_COOKIE,
-  COOKIE_CONSENT_VERSION,
-} from '@/lib/cookie-consent/consent'
+import { COOKIE_CONSENT_COOKIE } from '@/lib/cookie-consent/consent'
 import {
   isSalesforceServicesEnabled,
   isServiceRatingEnabled,
@@ -43,21 +40,24 @@ export default function CookiesPolicy() {
     <div className="w-full bg-background text-foreground">
       <HeaderWrapperClient />
       <Breadcrumb
+        className="mx-auto w-full max-w-4xl px-4 pt-2"
         items={[
           { label: 'Página inicial', href: '/' },
           { label: 'Política de cookies' },
         ]}
       />
-      <main className="mx-auto w-full max-w-4xl px-4 pb-20">
-        <h1 className="mt-6 text-3xl font-medium leading-9 tracking-tight text-foreground">
-          Política de cookies
-        </h1>
-        <p className="text-sm leading-5 text-foreground-light">
-          Última atualização: {POLICY_UPDATED_AT}
-        </p>
+      <main className="mx-auto w-full max-w-4xl px-4 pb-8">
+        <div className="mt-4">
+          <h1 className="text-2xl font-medium leading-8 text-foreground">
+            Política de cookies
+          </h1>
+          <p className="text-xs font-normal leading-4 text-primary">
+            Última atualização: {POLICY_UPDATED_AT}
+          </p>
+        </div>
 
-        <article className="mt-5 flex flex-col gap-8">
-          <Section title="O que são cookies">
+        <div className="mt-6 flex flex-col gap-6">
+          <ProseSection title="O que são cookies">
             <p>
               Cookies são pequenos arquivos de texto que um site grava no seu
               dispositivo (computador, celular ou tablet) quando você o visita.
@@ -71,64 +71,74 @@ export default function CookiesPolicy() {
               próprios). Outros, por serviços de outras empresas que usamos no
               site (cookies de terceiros).
             </p>
-          </Section>
+          </ProseSection>
 
-          <Section title="Como usamos cookies">
-            <p>
-              Separamos os cookies em duas categorias. Os{' '}
-              <strong className="font-medium text-foreground">
-                necessários
-              </strong>{' '}
-              funcionam sem a sua escolha. Os de{' '}
-              <strong className="font-medium text-foreground">análise</strong>{' '}
-              ficam desligados até você permitir, e o script do Google Analytics
-              não é carregado antes disso.
-            </p>
-            <p>
-              Recusar os cookies de análise não impede o uso de nenhum serviço
-              do Pref.Rio.
-            </p>
-            <p>
-              O Pref.Rio{' '}
-              <strong className="font-medium text-foreground">
-                não usa cookies de publicidade
-              </strong>{' '}
-              e não usa os dados de navegação para exibir anúncios.
-            </p>
+          <section className="flex flex-col gap-6">
+            <ProseSection title="Como usamos cookies">
+              <p>
+                Separamos os cookies em duas categorias. Os{' '}
+                <strong className="font-normal text-foreground">
+                  necessários
+                </strong>{' '}
+                funcionam sem a sua escolha. Os de{' '}
+                <strong className="font-normal text-foreground">análise</strong>{' '}
+                ficam desligados até você permitir, e o script do Google
+                Analytics não é carregado antes disso.
+              </p>
+              <p>
+                Recusar os cookies de análise não impede o uso de nenhum serviço
+                do Pref.Rio.
+              </p>
+              <p>
+                O Pref.Rio{' '}
+                <strong className="font-normal text-foreground">
+                  não usa cookies de publicidade
+                </strong>{' '}
+                e não usa os dados de navegação para exibir anúncios.
+              </p>
+            </ProseSection>
 
             <Category
               title="Cookies necessários"
-              status="Sempre ativos"
+              status="Sempre Ativos"
               purpose="Fazem o site funcionar: mantêm você conectado depois do login, guardam a sua escolha de cookies e lembram etapas de serviços que você está usando. Sem eles, áreas como a Carteira e Minhas solicitações não funcionam."
               legalBasis="Legítimo interesse (art. 7º, IX, da LGPD), limitado ao estritamente necessário para o funcionamento do site."
-              sharing="Usados só pelo Pref.Rio. Não são compartilhados com terceiros."
+              sharing={
+                <>
+                  <p>
+                    Usados só pelo Pref.Rio. Não são compartilhados com
+                    terceiros.
+                  </p>
+                  <p>
+                    Ao entrar com a sua conta, o login acontece no Identidade
+                    Carioca e, se você escolher, no gov.br. Esses serviços
+                    gravam cookies próprios nos domínios deles, conforme as
+                    políticas deles.
+                  </p>
+                </>
+              }
+              listTitle="Lista de cookies necessários"
               cookies={necessaryCookies}
-            >
-              <p>
-                Ao entrar com a sua conta, o login acontece no Identidade
-                Carioca e, se você escolher, no gov.br. Esses serviços gravam
-                cookies próprios nos domínios deles, conforme as políticas
-                deles.
-              </p>
-            </Category>
+            />
 
             <Category
               title="Cookies de análise (Google Analytics)"
-              status="Só com a sua permissão"
+              status="Apenas com permissão"
               purpose="Medem, de forma estatística, quais páginas e serviços são mais acessados, por onde as pessoas chegam ao site e onde há erros, para melhorarmos o Pref.Rio. Também contamos quantos logins são feitos, sem enviar nome, CPF, e-mail ou outro dado que identifique você."
               legalBasis="Consentimento (art. 7º, I, da LGPD)."
               sharing="Google LLC, que trata os dados também nos Estados Unidos. Os dados de eventos ligados ao identificador do cookie ficam guardados pelo prazo de retenção configurado no Google Analytics (até 14 meses); relatórios estatísticos agregados podem ser mantidos por mais tempo."
+              listTitle="Lista de cookies de análise"
               cookies={ANALYTICS_COOKIES}
             />
-          </Section>
+          </section>
 
-          <Section title="Armazenamento no seu navegador">
+          <ProseSection title="Armazenamento no seu navegador">
             <p>
               Algumas funcionalidades guardam informações só no seu navegador, e
               não em cookies. Esses dados ficam no seu dispositivo e não são
               enviados à Prefeitura nem a terceiros:
             </p>
-            <ul className="flex list-disc flex-col gap-2 pl-5">
+            <ul className="list-disc pl-5">
               {LOCAL_STORAGE_ITEMS.map(item => (
                 <li key={item}>{item}</li>
               ))}
@@ -137,60 +147,85 @@ export default function CookiesPolicy() {
               Você pode apagar esses dados a qualquer momento limpando os dados
               do site nas configurações do navegador.
             </p>
-          </Section>
+          </ProseSection>
 
-          <Section title="Como mudar ou revogar sua escolha">
-            <p>
-              Você pode rever ou revogar o seu consentimento quando quiser, de
-              graça e com a mesma facilidade com que o deu, pelo botão abaixo ou
-              pelo link “Preferências de cookies” no rodapé de todas as páginas.
-              Ao desligar uma categoria, apagamos do seu navegador os cookies
-              das ferramentas dela.
-            </p>
-            <div>
-              <CookiePreferencesButton appearance="button" />
+          <section className="flex flex-col items-start gap-4 rounded-2xl bg-card p-4">
+            <div className="flex w-full flex-col gap-2">
+              <h2 className="text-base font-medium leading-5 text-foreground">
+                Como mudar ou revogar sua escolha
+              </h2>
+              <p className="text-sm leading-5 text-foreground-light">
+                Você pode rever ou revogar o seu consentimento quando quiser, de
+                graça e com a mesma facilidade com que o deu, pelo botão abaixo
+                ou pelo link “Preferências de cookies” no rodapé de todas as
+                páginas. Ao desligar uma categoria, apagamos do seu navegador os
+                cookies das ferramentas dela.
+              </p>
             </div>
+            <CookiePreferencesButton
+              appearance="button"
+              className="h-8 px-4 py-1.5"
+            />
+          </section>
 
-            <h3 className="text-base font-medium leading-6 text-foreground">
-              Configurações do navegador
-            </h3>
-            <p>
-              Você também pode bloquear ou apagar cookies pelo navegador.
-              Bloquear todos os cookies, inclusive os necessários, pode impedir
-              o login e o uso de alguns serviços.
-            </p>
-            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+          <section className="flex flex-col items-start gap-4 rounded-2xl bg-card p-4">
+            <div className="flex w-full flex-col gap-2">
+              <h3 className="text-base font-medium leading-5 text-foreground">
+                Configurações do navegador
+              </h3>
+              <p className="text-sm leading-5 text-foreground-light">
+                Você também pode bloquear ou apagar cookies pelo navegador.
+                Bloquear todos os cookies, inclusive os necessários, pode
+                impedir o login e o uso de alguns serviços.
+              </p>
+            </div>
+            <ul className="flex flex-wrap gap-1">
               {BROWSER_HELP_LINKS.map(link => (
                 <li key={link.label}>
-                  <ExternalLink href={link.href}>{link.label}</ExternalLink>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={pillLinkCls}
+                  >
+                    {link.label}
+                    <span className="sr-only"> (abre em nova aba)</span>
+                  </a>
                 </li>
               ))}
             </ul>
-          </Section>
+          </section>
 
-          <Section title="Seus direitos">
+          <ProseSection title="Seus direitos">
             <p>
               Pela Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você
               pode, entre outros direitos:
             </p>
-            <ul className="flex list-disc flex-col gap-2 pl-5">
+            <ul className="list-disc pl-5">
               {RIGHTS.map(right => (
                 <li key={right}>{right}</li>
               ))}
             </ul>
-          </Section>
-        </article>
+          </ProseSection>
+        </div>
       </main>
     </div>
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function ProseSection({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
   return (
-    // Mesmo espaçamento título → conteúdo dos Termos de uso (mt-1).
-    <section>
-      <h2 className="text-xl font-medium leading-7 text-foreground">{title}</h2>
-      <div className="mt-1 flex flex-col gap-4 text-sm leading-5 text-foreground-light">
+    <section className="flex flex-col gap-2">
+      <h2 className="text-base font-medium leading-5 text-foreground">
+        {title}
+      </h2>
+      <div className="flex flex-col gap-5 text-sm leading-5 text-foreground-light">
         {children}
       </div>
     </section>
@@ -202,9 +237,9 @@ interface CategoryProps {
   status: string
   purpose: string
   legalBasis: string
-  sharing: string
+  sharing: ReactNode
+  listTitle: string
   cookies: CookieInfo[]
-  children?: ReactNode
 }
 
 function Category({
@@ -213,89 +248,60 @@ function Category({
   purpose,
   legalBasis,
   sharing,
+  listTitle,
   cookies,
-  children,
 }: CategoryProps) {
   return (
-    <section className="rounded-md border p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-base font-medium leading-6 text-foreground">
+    <section className="flex flex-col gap-2">
+      <div>
+        <h3 className="text-base font-medium leading-5 text-foreground">
           {title}
         </h3>
-        <span className="text-xs font-medium text-foreground">{status}</span>
+        <p className="text-xs font-normal leading-4 text-primary">{status}</p>
       </div>
-      {/* Mesmo espaçamento título → conteúdo das seções (mt-1). */}
-      <div className="mt-1 flex flex-col gap-3">
-        <dl className="flex flex-col gap-2">
-          <div>
-            <dt className="font-medium text-foreground">Para que servem</dt>
-            <dd>{purpose}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-foreground">Base legal</dt>
-            <dd>{legalBasis}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-foreground">Quem tem acesso</dt>
-            <dd>{sharing}</dd>
-          </div>
-        </dl>
-        {children}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <caption className="sr-only">{title}: lista de cookies</caption>
-            <thead>
-              <tr className="border-b text-foreground">
-                <th scope="col" className="py-2 pr-3 font-medium">
-                  Cookie
-                </th>
-                <th scope="col" className="py-2 pr-3 font-medium">
-                  Para que serve
-                </th>
-                <th scope="col" className="py-2 pr-3 font-medium">
-                  Duração
-                </th>
-                <th scope="col" className="py-2 font-medium whitespace-nowrap">
-                  Quem grava
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {cookies.map(cookie => (
-                <tr
-                  key={cookie.name}
-                  className="border-b align-top last:border-b-0"
-                >
-                  <td className="py-2 pr-3 font-mono">{cookie.name}</td>
-                  <td className="py-2 pr-3">{cookie.purpose}</td>
-                  <td className="py-2 pr-3 whitespace-nowrap">
-                    {cookie.duration}
-                  </td>
-                  <td className="py-2 whitespace-nowrap">{cookie.owner}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="flex flex-col gap-2">
+        <InfoCard label="Para que servem">{purpose}</InfoCard>
+        <InfoCard label="Base legal">{legalBasis}</InfoCard>
+        <InfoCard label="Quem tem acesso">{sharing}</InfoCard>
+        <div className="flex flex-col gap-2 rounded-2xl bg-card p-4">
+          <p className="text-sm leading-5 text-foreground">{listTitle}</p>
+          <ul className="flex flex-col gap-2">
+            {cookies.map(cookie => (
+              <li
+                key={cookie.name}
+                className="flex flex-col gap-2 rounded-2xl bg-background p-4"
+              >
+                <div>
+                  <p className="text-sm leading-5 text-foreground">
+                    {cookie.name}
+                  </p>
+                  <p className="text-sm leading-5 text-foreground-light">
+                    {cookie.purpose}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <span className={badgeCls}>Duração: {cookie.duration}</span>
+                  <span className={badgeCls}>
+                    Gravado pelo {cookie.recordedBy}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
   )
 }
 
-function ExternalLink({
-  href,
-  children,
-}: { href: string; children: ReactNode }) {
+function InfoCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={linkCls}
-    >
-      {children}
-      <span className="sr-only"> (abre em nova aba)</span>
-    </a>
+    <div className="flex flex-col gap-1 rounded-2xl bg-card px-4 py-4 text-sm leading-5">
+      <p className="text-foreground">{label}</p>
+      <div className="flex flex-col gap-5 text-foreground-light">
+        {children}
+      </div>
+    </div>
   )
 }
 
@@ -307,21 +313,21 @@ function getNecessaryCookies(flags: {
     {
       name: 'access_token',
       purpose: 'Mantém você conectado depois do login.',
-      duration: '10 horas',
-      owner: 'Pref.Rio',
+      duration: '10h',
+      recordedBy: 'Pref.Rio',
     },
     {
       name: 'refresh_token',
       purpose: 'Renova o login sem pedir a senha de novo.',
-      duration: '30 minutos',
-      owner: 'Pref.Rio',
+      duration: '30 min',
+      recordedBy: 'Pref.Rio',
     },
     {
       name: COOKIE_CONSENT_COOKIE,
       purpose:
         'Guarda a sua escolha de cookies, a data e a versão desta política.',
       duration: '12 meses',
-      owner: 'Pref.Rio',
+      recordedBy: 'Pref.Rio',
     },
     ...(flags.serviceRating
       ? [
@@ -330,7 +336,7 @@ function getNecessaryCookies(flags: {
             purpose:
               'Código aleatório, criado só quando você avalia um conteúdo (“Este conteúdo foi útil?”), para evitar votos repetidos. Não contém nome, CPF ou e-mail.',
             duration: '12 meses',
-            owner: 'Pref.Rio',
+            recordedBy: 'Pref.Rio',
           },
         ]
       : []),
@@ -340,8 +346,8 @@ function getNecessaryCookies(flags: {
             name: FORMULARIO_MARKER_COOKIE,
             purpose:
               'Lembra que você abriu um formulário de solicitação, para atualizar a lista de solicitações quando você voltar.',
-            duration: '1 hora',
-            owner: 'Pref.Rio',
+            duration: '1h',
+            recordedBy: 'Pref.Rio',
           },
         ]
       : []),
@@ -354,20 +360,20 @@ const ANALYTICS_COOKIES: CookieInfo[] = [
     purpose:
       'Distingue visitantes por um código aleatório, para contar acessos sem identificar a pessoa.',
     duration: '2 anos',
-    owner: 'Google Analytics',
+    recordedBy: 'Google',
   },
   {
     name: '_ga_<ID>',
     purpose: 'Mantém o estado da visita (sessão) para as estatísticas.',
     duration: '2 anos',
-    owner: 'Google Analytics',
+    recordedBy: 'Google',
   },
   {
     name: LOGIN_MARKER_COOKIE,
     purpose:
       'Indica que um login acabou de ser feito, para contá-lo nas estatísticas. Não contém dados pessoais.',
-    duration: '1 minuto',
-    owner: 'Pref.Rio',
+    duration: '1min',
+    recordedBy: 'Pref.Rio',
   },
 ]
 
@@ -412,18 +418,15 @@ const BROWSER_HELP_LINKS = [
   },
 ]
 
-/** Encarregado de Dados Geral do Município do Rio de Janeiro (SMIT). */
-const DATA_PROTECTION_OFFICER = {
-  role: 'Encarregado de Dados Geral do Município do Rio de Janeiro',
-  name: 'Leonardo Costa Farias',
-  email: 'lgpd.smit@prefeitura.rio',
-}
+const badgeCls =
+  'inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs font-normal leading-4 text-foreground'
 
-const linkCls = 'text-primary underline underline-offset-4 hover:no-underline'
+const pillLinkCls =
+  'inline-flex h-8 items-center justify-center rounded-full bg-secondary px-4 py-1.5 text-sm font-normal leading-5 text-foreground transition-colors hover:bg-secondary/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
 
 interface CookieInfo {
   name: string
   purpose: string
   duration: string
-  owner: string
+  recordedBy: string
 }

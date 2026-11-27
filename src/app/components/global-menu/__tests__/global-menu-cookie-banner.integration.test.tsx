@@ -94,7 +94,8 @@ describe('Menu global × banner de cookies', () => {
     await user.click(within(menu).getByRole('button', { name: 'Fechar menu' }))
     expect(banner()).not.toHaveClass('hidden')
     expect(
-      within(banner()).getAllByRole('button', { name: /Rejeitar/ }).length
+      within(banner()).getAllByRole('button', { name: 'Apenas essenciais' })
+        .length
     ).toBeGreaterThan(0)
   })
 
@@ -132,7 +133,7 @@ describe('Menu global × banner de cookies', () => {
     })
 
     await user.click(
-      within(region).getAllByRole('button', { name: /Rejeitar/ })[0]
+      within(region).getAllByRole('button', { name: 'Apenas essenciais' })[0]
     )
     await user.click(screen.getByRole('button', { name: 'Menu' }))
     const menu = await screen.findByRole('dialog', { name: 'Menu' })

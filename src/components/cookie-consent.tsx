@@ -8,8 +8,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -45,8 +43,10 @@ interface CookieConsentProps {
  * Banner de cookies (primeiro nível) e painel de preferências (segundo nível),
  * seguindo o Guia de Cookies da ANPD:
  * - nada além dos cookies necessários roda antes da escolha;
- * - "Rejeitar não necessários" fica sempre visível no primeiro nível, ao lado
- *   de "Aceitar todos" (cinza, por decisão de design);
+ * - "Apenas essenciais" fica sempre visível no primeiro nível, ao lado
+ *   de "Aceitar todos", no mesmo estilo dos botões secundários do painel;
+ * - no painel, "Apenas essenciais" e "Aceitar todos" ficam lado a lado;
+ *   "Salvar preferências" confirma a escolha do interruptor;
  * - com uma única categoria opcional (Análise), o banner não tem
  *   "Personalizar": o painel é aberto por "Preferências de cookies" no rodapé
  *   e na Política de cookies. Se surgir outra categoria, volte o botão;
@@ -132,9 +132,9 @@ function CookieBanner({
                 variant="secondary"
                 size="md"
                 onClick={onRejectAll}
-                className={PILL_BUTTON_CLASS}
+                className={cn(PILL_BUTTON_CLASS)}
               >
-                Rejeitar não necessários
+                Apenas essenciais
               </CustomButton>
               <CustomButton
                 variant="primary"
@@ -172,7 +172,7 @@ function CookiePreferencesDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="max-h-[90dvh] gap-5 overflow-y-auto sm:max-w-[min(42rem,calc(100%-2rem))]"
+        className="max-h-[90dvh] max-w-[calc(100%-2rem)] gap-4 overflow-y-auto rounded-2xl border-0 p-4 shadow-lg sm:max-w-[576px]"
       >
         {/* Desmonta ao fechar: as chaves voltam à escolha salva a cada abertura. */}
         <CookiePreferencesForm consent={consent} onSave={onSave} />
@@ -193,43 +193,52 @@ function CookiePreferencesForm({
     setChoices(current => ({ ...current, [category]: checked }))
 
   return (
-    <>
-      <DialogHeader className="text-left">
-        <DialogTitle className="pr-8">Preferências de cookies</DialogTitle>
-        <DialogDescription>
-          Escolha quais cookies o Pref.Rio pode usar. Os necessários ficam
-          sempre ativos, porque sem eles o site não funciona. Os demais só são
-          ativados com a sua permissão, e você pode mudar a escolha quando
-          quiser.
-        </DialogDescription>
-      </DialogHeader>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <DialogTitle className="text-base font-medium leading-5">
+          Preferências de cookies
+        </DialogTitle>
+        <DialogClose className="flex size-5 shrink-0 cursor-pointer items-center justify-center text-foreground">
+          <XIcon className="size-5" />
+          <span className="sr-only">Fechar</span>
+        </DialogClose>
+      </div>
 
-      <DialogClose className="absolute top-4 right-4 flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-        <XIcon className="size-5" />
-        <span className="sr-only">Fechar</span>
-      </DialogClose>
+      <DialogDescription className="text-sm leading-5 text-foreground-light">
+        Escolha quais cookies o Pref.Rio pode usar. Os necessários ficam sempre
+        ativos, porque sem eles o site não funciona. Os demais só são ativados
+        com a sua permissão, e você pode mudar a escolha quando quiser. Detalhes
+        sobre cada cookie, prazos e seus direitos na{' '}
+        <Link
+          href={COOKIE_POLICY_ROUTE}
+          onClick={closeCookiePreferences}
+          className="text-primary underline underline-offset-4 hover:no-underline"
+        >
+          Política de cookies.
+        </Link>
+      </DialogDescription>
 
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-1.5">
         {CATEGORIES.map(category => (
           <li
             key={category.id}
-            className="flex flex-col gap-1 rounded-md border p-3"
+            className="flex flex-col gap-2 rounded-2xl bg-card p-4"
           >
             <div className="flex items-center justify-between gap-4">
               {category.alwaysActive ? (
-                <p className="min-w-0 flex-1 text-sm font-medium text-foreground">
+                <p className="min-w-0 flex-1 text-sm font-normal leading-5 text-foreground">
                   {category.title}
                 </p>
               ) : (
                 <Label
                   htmlFor={`cookie-consent-${category.id}`}
-                  className="block min-w-0 flex-1 cursor-pointer text-sm font-medium leading-5 text-foreground"
+                  className="block min-w-0 flex-1 cursor-pointer text-sm font-normal leading-5 text-foreground"
                 >
                   {category.title}
                 </Label>
               )}
               {category.alwaysActive ? (
-                <span className="shrink-0 whitespace-nowrap text-xs font-medium text-muted-foreground">
+                <span className="inline-flex shrink-0 items-center rounded-full bg-secondary px-2 py-1 text-xs font-normal leading-4 text-foreground">
                   Sempre ativos
                 </span>
               ) : (
@@ -238,15 +247,13 @@ function CookiePreferencesForm({
                   aria-describedby={`cookie-consent-${category.id}-description`}
                   checked={choices[category.id]}
                   onCheckedChange={toggle(category.id)}
-                  // Mesmo tamanho do switch "Tema claro" do Menu global: no
-                  // tamanho padrão a bolinha (19px) não cabe na pílula.
-                  className="large-switch shrink-0"
+                  className="cookie-preferences-switch shrink-0"
                 />
               )}
             </div>
             <p
               id={`cookie-consent-${category.id}-description`}
-              className="text-xs text-muted-foreground"
+              className="text-sm leading-5 text-foreground-light"
             >
               {category.description}
             </p>
@@ -254,75 +261,52 @@ function CookiePreferencesForm({
         ))}
       </ul>
 
-      <p className="text-xs text-muted-foreground">
-        Detalhes sobre cada cookie, prazos e seus direitos na{' '}
-        <Link
-          href={COOKIE_POLICY_ROUTE}
-          onClick={closeCookiePreferences}
-          className="text-primary underline underline-offset-4 hover:no-underline"
-        >
-          Política de cookies
-        </Link>
-        .
-      </p>
-
-      {/* Mesma ordem e estilo do banner: Salvar e Rejeitar (cinza), Aceitar. */}
-      <div className="@container">
-        <DialogFooter className={DIALOG_ACTIONS_GRID_CLASS}>
-          <CustomButton
-            variant="secondary"
-            size="md"
-            onClick={() => onSave(choices)}
-            className={PILL_BUTTON_CLASS}
-          >
-            Salvar preferências
-          </CustomButton>
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-1">
           <CustomButton
             variant="secondary"
             size="md"
             onClick={() => onSave(ALL_REJECTED)}
-            className={PILL_BUTTON_CLASS}
+            className={cn(PREFERENCES_BUTTON_CLASS, 'min-w-0 flex-1')}
           >
-            Rejeitar não necessários
+            Apenas essenciais
           </CustomButton>
           <CustomButton
-            variant="primary"
+            variant="secondary"
             size="md"
             onClick={() => onSave(ALL_ACCEPTED)}
-            className={cn(PILL_BUTTON_CLASS, LAST_ACTION_CLASS)}
+            className={cn(PREFERENCES_BUTTON_CLASS, 'min-w-0 flex-1')}
           >
             Aceitar todos
           </CustomButton>
-        </DialogFooter>
+        </div>
+        <CustomButton
+          variant="primary"
+          size="md"
+          onClick={() => onSave(choices)}
+          className={cn(PREFERENCES_BUTTON_CLASS, 'w-full')}
+        >
+          Salvar preferências
+        </CustomButton>
       </div>
-    </>
+    </div>
   )
 }
 
 /**
  * Raio do botão "Faça seu login" do Menu global (pílula). O `CustomButton`
  * `md` já tem a mesma altura (40px) e texto, mas vem com `rounded-2xl`.
- * Usado em todos os botões de cookies (banner, painel e Política de cookies).
+ * "Aceitar todos" do banner usa essa altura. "Apenas essenciais" do banner
+ * e os botões do painel usam `PREFERENCES_BUTTON_CLASS` (44px).
  */
 export const PILL_BUTTON_CLASS = 'rounded-full'
 
-/**
- * Grades dos botões, pela largura do próprio container (container query, não
- * da tela): os botões esticam para ocupar a largura. Cada coluna precisa
- * caber "Rejeitar não necessários" (~194px), então 2 colunas a partir de
- * 25rem e 3 a partir de 37.5rem. Em rem para acompanhar zoom e tamanho de
- * fonte. O elemento pai precisa da classe `@container`.
- */
+/** Botões do painel: 44px de altura, como no Figma. */
+const PREFERENCES_BUTTON_CLASS = cn(PILL_BUTTON_CLASS, 'h-11 px-5 py-3')
+
 /** Banner (2 botões): empilhados ou lado a lado. */
 const BANNER_ACTIONS_GRID_CLASS =
   'grid grid-cols-1 gap-2 @min-[25rem]:grid-cols-2'
-
-/** Painel (3 botões): empilhados, 2 + 1 embaixo ou 3 lado a lado. */
-const DIALOG_ACTIONS_GRID_CLASS =
-  'grid grid-cols-1 gap-2 @min-[25rem]:grid-cols-2 @min-[37.5rem]:grid-cols-3'
-
-/** Último botão ("Aceitar todos"): ocupa a linha inteira no layout 2 + 1. */
-const LAST_ACTION_CLASS = '@min-[25rem]:col-span-2 @min-[37.5rem]:col-span-1'
 
 type CategoryInfo =
   | {

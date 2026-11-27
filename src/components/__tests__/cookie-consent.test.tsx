@@ -45,7 +45,7 @@ describe('CookieConsent — banner (primeiro nível)', () => {
       within(banner)
         .getAllByRole('button')
         .map(button => button.textContent)
-    ).toEqual(['Rejeitar não necessários', 'Aceitar todos'])
+    ).toEqual(['Apenas essenciais', 'Aceitar todos'])
     expect(
       within(banner).getByRole('link', { name: 'Política de Cookies' })
     ).toHaveAttribute('href', '/politicas-de-uso-de-cookies')
@@ -72,14 +72,12 @@ describe('CookieConsent — banner (primeiro nível)', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('"Rejeitar não necessários" grava a recusa e o banner some', async () => {
+  it('"Apenas essenciais" grava a recusa e o banner some', async () => {
     const user = userEvent.setup()
     render(<CookieConsent />)
     await screen.findByRole('region', { name: 'Consentimento de cookies' })
 
-    await user.click(
-      screen.getByRole('button', { name: 'Rejeitar não necessários' })
-    )
+    await user.click(screen.getByRole('button', { name: 'Apenas essenciais' }))
 
     expect(getCookieConsent()).toMatchObject({ analytics: false })
     expect(
@@ -181,7 +179,7 @@ describe('CookieConsent — preferências (segundo nível)', () => {
       name: 'Preferências de cookies',
     })
     await user.click(
-      within(dialog).getByRole('button', { name: 'Rejeitar não necessários' })
+      within(dialog).getByRole('button', { name: 'Apenas essenciais' })
     )
 
     expect(getCookieConsent()).toMatchObject({ analytics: false })

@@ -872,7 +872,9 @@ test.describe('Menu global × banner de cookies (visitante sem consentimento)', 
     const banner = page.getByRole('region', {
       name: 'Consentimento de cookies',
     })
-    const rejeitar = banner.getByRole('button', { name: /Rejeitar/ }).first()
+    const rejeitar = banner
+      .getByRole('button', { name: 'Apenas essenciais' })
+      .first()
     await expect(rejeitar).toBeVisible()
 
     await page
@@ -930,9 +932,7 @@ test.describe('Consentimento de cookies (visitante sem escolha)', () => {
     await expect(banner).toBeVisible()
     expect(trackerRequests).toEqual([])
 
-    await banner
-      .getByRole('button', { name: 'Rejeitar não necessários' })
-      .click()
+    await banner.getByRole('button', { name: 'Apenas essenciais' }).click()
     await expect(banner).toBeHidden()
 
     await page.reload()
@@ -975,9 +975,7 @@ test.describe('Consentimento de cookies (visitante sem escolha)', () => {
     const banner = page.getByRole('region', {
       name: 'Consentimento de cookies',
     })
-    await banner
-      .getByRole('button', { name: 'Rejeitar não necessários' })
-      .click()
+    await banner.getByRole('button', { name: 'Apenas essenciais' }).click()
     await expect(banner).toBeHidden()
 
     await page
