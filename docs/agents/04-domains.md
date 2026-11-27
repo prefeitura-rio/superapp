@@ -44,6 +44,10 @@ Controladas principalmente em `src/middleware.ts` e banners (`src/constants/bann
 
 Ao adicionar feature gateada: espelhar o padrão existente no middleware e nos banners.
 
+## Indexação por buscadores
+
+Só `pref.rio` é indexável. `isIndexingAllowed()` (`src/lib/indexing.ts`) compara o hostname de `NEXT_PUBLIC_HOME_URL` (definido no build) com `pref.rio`. Em qualquer outro caso (staging, localhost, variável ausente) o app envia `X-Robots-Tag: noindex, nofollow` (`next.config.ts`) e `<meta name="robots" content="noindex, nofollow">` (`src/app/layout.tsx`). Não há `robots.txt` com `Disallow` de propósito: bloqueado, o crawler não leria o `noindex` das URLs já indexadas. O build de produção precisa manter `NEXT_PUBLIC_HOME_URL=https://pref.rio/`.
+
 ## Docs de domínio
 
 - Solicitações (SGRC + Salesforce): [`../solicitacoes.md`](../solicitacoes.md)

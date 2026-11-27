@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { isIndexingAllowed } from './src/lib/indexing'
 
 const oportunidadesCariocasLegacyPaths = [
   '/oportunidadescariocas',
@@ -60,6 +61,20 @@ export const staticAssetHeaders = [
   },
 ]
 
+/**
+ * Fora de produção (`pref.rio`) nada deve ser indexado. O header cobre HTML,
+ * APIs, PDFs e imagens; o middleware não serve para isso porque o matcher dele
+ * ignora assets. Ver `src/lib/indexing.ts`.
+ */
+const indexingAllowed = isIndexingAllowed()
+
+export const noIndexHeaders = [
+  {
+    source: '/:path*',
+    headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+  },
+]
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   // allowedDevOrigins: ['*.ngrok-free.app', '*.share.zrok.io'],
@@ -109,7 +124,9 @@ const nextConfig: NextConfig = {
     ]
   },
   async headers() {
-    return staticAssetHeaders
+    return indexingAllowed
+      ? staticAssetHeaders
+      : [...staticAssetHeaders, ...noIndexHeaders]
   },
   images: {
     /**

@@ -9,6 +9,7 @@ import {
   isSgrcHistoricoEnabled,
   isVLibrasEnabled,
 } from '@/lib/feature-flags'
+import { isIndexingAllowed } from '@/lib/indexing'
 import { PWAProvider } from '@/providers/pwa-provider'
 import { ServerFeatureFlagsProvider } from '@/providers/server-feature-flags-provider'
 import { ThemeColorMeta } from '@/providers/theme-color-meta'
@@ -50,6 +51,8 @@ export const metadata: Metadata = {
   other: {
     'format-detection': 'telephone=no, email=no, address=no',
   },
+  // Só pref.rio é indexável; staging e dev saem com noindex.
+  ...(isIndexingAllowed() ? {} : { robots: { index: false, follow: false } }),
 }
 
 export default async function RootLayout({
