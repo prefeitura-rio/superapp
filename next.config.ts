@@ -61,6 +61,21 @@ const nextConfig: NextConfig = {
       ]),
     ]
   },
+  async headers() {
+    /**
+     * Ícones com cache de 1 dia. O padrão do Next (`max-age=0`) faz o Cloud CDN
+     * revalidar cada pedido na origem, e cada revalidação conta no rate limit
+     * de 300 req/min por IP do Cloud Armor (regra 5000). Navegadores internos
+     * do Instagram e do WhatsApp pedem esses ícones em loop e esgotam o limite
+     * do usuário. Servidos do cache do CDN, não passam pelo Cloud Armor
+     * (PREF-718).
+     */
+    const iconCache = [{ key: 'Cache-Control', value: 'public, max-age=86400' }]
+    return [
+      { source: '/favicon.ico', headers: iconCache },
+      { source: '/icons/:path*', headers: iconCache },
+    ]
+  },
   images: {
     /**
      * Somente os buckets GCS que servem imagens do app passam pelo otimizador
