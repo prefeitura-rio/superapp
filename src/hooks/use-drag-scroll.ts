@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 export function useDragScroll<T extends HTMLElement>() {
   const ref = useRef<T>(null)
@@ -30,5 +30,25 @@ export function useDragScroll<T extends HTMLElement>() {
     if (ref.current) ref.current.style.cursor = ''
   }, [])
 
-  return { ref, onMouseDown, onMouseMove, onMouseUp, onMouseLeave: onMouseUp }
+  // Imagens e links são arrastáveis por padrão: o drag nativo do navegador
+  // engoliria o mouseup e deixaria o cursor preso em "grabbing".
+  const onDragStart = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+  }, [])
+
+  // O botão pode ser solto sem que o mouseup chegue ao contêiner; a window
+  // sempre o recebe, então o arraste termina ali também.
+  useEffect(() => {
+    window.addEventListener('mouseup', onMouseUp)
+    return () => window.removeEventListener('mouseup', onMouseUp)
+  }, [onMouseUp])
+
+  return {
+    ref,
+    onMouseDown,
+    onMouseMove,
+    onMouseUp,
+    onMouseLeave: onMouseUp,
+    onDragStart,
+  }
 }

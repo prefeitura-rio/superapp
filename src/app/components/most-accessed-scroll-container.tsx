@@ -5,8 +5,14 @@ import { useDragScroll } from '@/hooks/use-drag-scroll'
 export function MostAccessedScrollContainer({
   children,
 }: { children: React.ReactNode }) {
-  const { ref, onMouseDown, onMouseMove, onMouseUp, onMouseLeave } =
-    useDragScroll<HTMLDivElement>()
+  const {
+    ref,
+    onMouseDown,
+    onMouseMove,
+    onMouseUp,
+    onMouseLeave,
+    onDragStart,
+  } = useDragScroll<HTMLDivElement>()
 
   return (
     <div
@@ -16,6 +22,7 @@ export function MostAccessedScrollContainer({
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
+      onDragStart={onDragStart}
     >
       {children}
     </div>
