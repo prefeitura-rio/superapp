@@ -14,6 +14,16 @@ describe('MostAccessedServiceCards', () => {
     }
   })
 
+  it('impede o drag nativo do ícone, que prenderia o cursor no arraste da faixa', () => {
+    const { container } = render(<MostAccessedServiceCards />)
+
+    const images = container.querySelectorAll('img')
+    expect(images.length).toBeGreaterThan(0)
+    for (const image of images) {
+      expect(image).toHaveAttribute('draggable', 'false')
+    }
+  })
+
   it('nomeia cada link só pelo título visível, sem anunciá-lo duas vezes', () => {
     render(<MostAccessedServiceCards limit={4} />)
 
