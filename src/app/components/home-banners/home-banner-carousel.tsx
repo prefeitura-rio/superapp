@@ -35,6 +35,32 @@ function usePrefersReducedMotion() {
   )
 }
 
+type InputModality = 'keyboard' | 'pointer'
+
+/**
+ * Última forma de interação na página (teclado ou mouse/toque). O foco que um
+ * clique ou toque deixa num indicador não deve pausar a troca automática; o
+ * foco de teclado (Tab), sim. Antes de qualquer interação, conta como teclado.
+ */
+function useInputModality() {
+  const modality = useRef<InputModality>('keyboard')
+  useEffect(() => {
+    const onKeyDown = () => {
+      modality.current = 'keyboard'
+    }
+    const onPointerDown = () => {
+      modality.current = 'pointer'
+    }
+    document.addEventListener('keydown', onKeyDown, true)
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown, true)
+      document.removeEventListener('pointerdown', onPointerDown, true)
+    }
+  }, [])
+  return modality
+}
+
 /** Distância de um slide até o ativo, no intervalo (-n/2, n/2]. */
 function offsetFrom(index: number, active: number, total: number) {
   const raw = (index - active + total) % total
@@ -56,6 +82,7 @@ export function HomeBannerCarousel({
   const [previous, setPrevious] = useState<number | null>(null)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
+  const inputModality = useInputModality()
 
   const pointerStartX = useRef<number | null>(null)
   const swiped = useRef(false)
@@ -116,9 +143,13 @@ export function HomeBannerCarousel({
       aria-roledescription="carrossel"
       aria-label="Destaques"
       className="px-4 pt-2 pb-6"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
+      // Só o mouse tem "em cima": no toque, o navegador emula mouseenter e
+      // nunca o mouseleave, o que travaria a troca depois de tocar.
+      onPointerEnter={event => {
+        if (event.pointerType === 'mouse') setHovered(true)
+      }}
+      onPointerLeave={() => setHovered(false)}
+      onFocus={() => setFocused(inputModality.current === 'keyboard')}
       onBlur={event => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
           setFocused(false)

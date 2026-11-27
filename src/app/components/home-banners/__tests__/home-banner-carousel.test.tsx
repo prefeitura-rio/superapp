@@ -1,5 +1,6 @@
 import { sendGAEvent } from '@/lib/analytics/send-ga-event'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HomeBannerCarousel } from '../home-banner-carousel'
 import { HOME_BANNER_AUTOPLAY_MS } from '../home-banners'
@@ -22,6 +23,13 @@ function dot(position: number) {
   return screen.getByRole('button', {
     name: `Mostrar banner ${position} de 3`,
   })
+}
+
+// O user-event espera timers do próprio navegador simulado: com o relógio falso
+// parado, as interações nunca terminariam.
+function setupUser() {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  return userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
 }
 
 describe('HomeBannerCarousel', () => {
@@ -116,13 +124,57 @@ describe('HomeBannerCarousel', () => {
     render(<HomeBannerCarousel />)
     const carousel = screen.getByRole('region', { name: 'Destaques' })
 
-    fireEvent.mouseEnter(carousel)
+    fireEvent.pointerEnter(carousel, { pointerType: 'mouse' })
     act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS * 2))
     expect(activeLink()).toHaveAttribute('href', '/servicos')
 
-    fireEvent.mouseLeave(carousel)
+    fireEvent.pointerLeave(carousel, { pointerType: 'mouse' })
     act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS))
     expect(activeLink()).toHaveAttribute('href', '/servicos/trabalho')
+  })
+
+  it('clicar num indicador com o mouse não trava a troca automática', async () => {
+    const user = setupUser()
+    render(<HomeBannerCarousel />)
+    const carousel = screen.getByRole('region', { name: 'Destaques' })
+
+    // O clique deixa o foco no indicador, mas não é foco de teclado.
+    await user.click(dot(3))
+    expect(dot(3)).toHaveFocus()
+    expect(activeLink()).toHaveAttribute('href', '/servicos/cursos')
+
+    await user.unhover(carousel)
+    act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS))
+    expect(activeLink()).toHaveAttribute('href', '/servicos')
+
+    act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS))
+    expect(activeLink()).toHaveAttribute('href', '/servicos/trabalho')
+  })
+
+  it('tocar num indicador (toque) troca o banner e a troca automática continua', async () => {
+    const user = setupUser()
+    render(<HomeBannerCarousel />)
+
+    await user.pointer({ keys: '[TouchA]', target: dot(3) })
+    expect(activeLink()).toHaveAttribute('href', '/servicos/cursos')
+
+    // Toque não tem "mouse em cima": nada fica pausando depois de soltar.
+    act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS))
+    expect(activeLink()).toHaveAttribute('href', '/servicos')
+  })
+
+  it('depois de um clique, navegar com Tab pelos indicadores pausa', async () => {
+    const user = setupUser()
+    render(<HomeBannerCarousel />)
+    const carousel = screen.getByRole('region', { name: 'Destaques' })
+
+    await user.click(dot(1))
+    await user.unhover(carousel)
+    await user.tab()
+    expect(dot(2)).toHaveFocus()
+
+    act(() => vi.advanceTimersByTime(HOME_BANNER_AUTOPLAY_MS * 2))
+    expect(activeLink()).toHaveAttribute('href', '/servicos')
   })
 
   it('tem subtítulo curto até 767px e longo a partir de 768px', () => {
