@@ -472,12 +472,17 @@ export const config: MiddlewareConfig = {
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     * - static assets (images, fonts, etc.)
+     * - favicon.ico, manifest.json, sitemap.xml, robots.txt (metadata files)
+     * - static assets (images, fonts, pdf worker etc.)
+     *
+     * Asset estático não pode passar pelo middleware: ele redirecionaria
+     * visitantes sem login para a página de auth (307) e sobrescreveria o
+     * `Cache-Control` definido em `next.config.ts` (PREF-718). Ao incluir uma
+     * nova extensão em `staticAssetExtensions`, incluir aqui também.
      */
     {
       source:
-        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp)).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|avif|ico|ttf|otf|woff|woff2|mjs)).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

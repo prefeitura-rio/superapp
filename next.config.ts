@@ -13,6 +13,53 @@ export const allowedImageBuckets = [
   'portal-do-cidadao',
 ] as const
 
+/**
+ * Assets estáticos servidos sem hash no nome (`public/` e arquivos de metadata
+ * como `favicon.ico`) saem do Next com `max-age=0`. Com o Cloud CDN em
+ * `USE_ORIGIN_HEADERS`, isso faz o CDN revalidar cada pedido na origem, e cada
+ * revalidação passa pelo Cloud Armor e conta no rate limit de 300 req/min por
+ * IP (regra 5000 da `istio-security-policy-web`). Navegadores internos do
+ * Instagram e do WhatsApp pedem os ícones em loop e esgotam o limite do
+ * usuário, que passa a receber 429 também nas páginas e APIs (PREF-718).
+ *
+ * Todo asset estático novo precisa cair em uma destas regras. Servido do cache
+ * do CDN, o pedido não chega ao Cloud Armor.
+ *
+ * `/_next/static/*` já recebe `immutable` do Next e não pode ser sobrescrito,
+ * então fica de fora.
+ */
+export const staticAssetCacheControl = 'public, max-age=86400'
+
+export const staticAssetExtensions = [
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'svg',
+  'webp',
+  'avif',
+  'ico',
+  'ttf',
+  'otf',
+  'woff',
+  'woff2',
+  'mjs',
+] as const
+
+const staticAssetCacheHeaders = [
+  { key: 'Cache-Control', value: staticAssetCacheControl },
+]
+
+export const staticAssetHeaders = [
+  { source: '/favicon.ico', headers: staticAssetCacheHeaders },
+  { source: '/manifest.json', headers: staticAssetCacheHeaders },
+  { source: '/icons/:path*', headers: staticAssetCacheHeaders },
+  {
+    source: `/:path((?!_next/|api/).+\\.(?:${staticAssetExtensions.join('|')}))`,
+    headers: staticAssetCacheHeaders,
+  },
+]
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   // allowedDevOrigins: ['*.ngrok-free.app', '*.share.zrok.io'],
@@ -62,19 +109,7 @@ const nextConfig: NextConfig = {
     ]
   },
   async headers() {
-    /**
-     * Ícones com cache de 1 dia. O padrão do Next (`max-age=0`) faz o Cloud CDN
-     * revalidar cada pedido na origem, e cada revalidação conta no rate limit
-     * de 300 req/min por IP do Cloud Armor (regra 5000). Navegadores internos
-     * do Instagram e do WhatsApp pedem esses ícones em loop e esgotam o limite
-     * do usuário. Servidos do cache do CDN, não passam pelo Cloud Armor
-     * (PREF-718).
-     */
-    const iconCache = [{ key: 'Cache-Control', value: 'public, max-age=86400' }]
-    return [
-      { source: '/favicon.ico', headers: iconCache },
-      { source: '/icons/:path*', headers: iconCache },
-    ]
+    return staticAssetHeaders
   },
   images: {
     /**
