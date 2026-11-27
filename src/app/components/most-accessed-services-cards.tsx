@@ -59,7 +59,12 @@ export default function MostAccessedServiceCards({
                 {service.icon ? (
                   <div className="mb-0">
                     {/* Decorativo: o título visível no <h3> já nomeia o link. */}
-                    <img src={service.icon} alt="" className="w-10 h-10" />
+                    <img
+                      src={service.icon}
+                      alt=""
+                      draggable={false}
+                      className="w-10 h-10"
+                    />
                   </div>
                 ) : null}
                 <div className="w-full">
